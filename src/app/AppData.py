@@ -169,6 +169,7 @@ class AppData(Observable):
 
     @property
     def ref_index(self):
+        """Index into reference chemistry database"""
         return self._ref_index
     
     @ref_index.setter
@@ -201,6 +202,7 @@ class AppData(Observable):
 
         # notify observers to update widgets
         self.notify_observers("sample_list", new_sample_list)
+        self.notify_observers("sample_id", self._sample_id)
 
     @property
     def sample_id(self):
@@ -242,8 +244,7 @@ class AppData(Observable):
         self.notify_observers("hist_field_type", new_field_type)
 
         # update hist_field
-        field_list = self.get_field_list(set_name=self._hist_field_type)
-        self.hist_field = field_list[0]
+        self.hist_field = self.field_dict[new_field_type.lower()][0]
 
 
     @property

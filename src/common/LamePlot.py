@@ -1181,3 +1181,465 @@ def plot_ternary_map(parent, data, app_data, plot_style):
     }
 
     return canvas, plot_info
+
+# -------------------------------------
+# TEC and Radar plots
+# -------------------------------------
+
+def plot_ndim(self):
+    """Produces trace element compatibility (TEC) and Radar plots
+    
+    Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider diagrams, which display a set of elements
+    arranged by compatibility.  Radar plots show data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
+    or spider web.
+    
+    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``mplc.MplCanvas`` for display in the centralWidget views.
+    """
+    if not self.ndim_list:
+        return
+
+    df_filtered, _  = self.data[self.app_data.sample_id].get_processed_data()
+
+    # match self.comboBoxNorm.currentText():
+    #     case 'log':
+    #         df_filtered.loc[:,:] = 10**df_filtered.values
+    #     case 'mixed':
+    #         pass
+    #     case 'linear':
+    #         # do nothing
+    #         pass
+    df_filtered = df_filtered[self.data[self.app_data.sample_id].mask]
+
+    ref_i = self.comboBoxNDimRefMaterial.currentIndex()
+
+    plot_type = self.plot_style.plot_type
+    plot_data = None
+
+    # Get quantile for plotting TEC & radar plots
+    match self.comboBoxNDimQuantiles.currentIndex():
+        case 0:
+            quantiles = [0.5]
+        case 1:
+            quantiles = [0.25, 0.75]
+        case 2:
+            quantiles = [0.25, 0.5, 0.75]
+        case 3:
+            quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+
+    # remove mass from labels
+    if self.checkBoxShowMass.isChecked():
+        angle = 45
+    else:
+        angle = 0
+    labels = self.plot_style.toggle_mass(self.ndim_list)
+        
+    if self.field_type == 'cluster' and self.field != '':
+        method = self.field
+        cluster_dict = self.app_data.cluster_dict[method]
+        cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(cluster_dict, alpha=self.plot_style.marker_alpha)
+
+        clusters = cluster_dict['selected_clusters']
+        if 0 in list(cluster_dict.keys()):
+            cluster_flag = True
+        else:
+            cluster_dict = None
+            cluster_flag = False
+            print(f'No cluster data found for {method}, recompute?')
+    else:
+        cluster_dict = None
+        cluster_flag = False
+
+    
+    match plot_type:
+        case 'Radar':
+            canvas = mplc.MplCanvas(parent=self, proj='radar')
+
+            axes_interval = 5
+            if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
+                # Get the cluster labels for the data
+                cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
+
+                df_filtered['clusters'] = cluster_group
+                df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
+                radar = Radar( 
+                    canvas.axes,
+                    df_filtered,
+                    fields=self.ndim_list,
+                    fieldlabels=labels,
+                    quantiles=quantiles,
+                    axes_interval=axes_interval,
+                    group_field='clusters',
+                    groups=clusters)
+
+                canvas.fig, canvas.axes = radar.plot(cmap = cmap)
+                canvas.axes.legend(loc='upper right', frameon='False')
+            else:
+                radar = Radar(canvas.axes, df_filtered, fields=self.ndim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
+                    
+                radar.plot()
+                
+                plot_data = radar.vals
+                
+        case 'TEC':
+            canvas = mplc.MplCanvas(parent=self)
+
+            yl = [np.inf, -np.inf]
+            if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
+                # Get the cluster labels for the data
+                cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
+
+                df_filtered['clusters'] = cluster_group
+
+                # Plot tec for all clusters
+                for i in clusters:
+                    # Create RGBA color
+                    #print(f'Cluster {i}')
+                    canvas.axes, yl_tmp, _ = plot_spider_norm(
+                            data=df_filtered.loc[df_filtered['clusters']==i,:],
+                            ref_data=self.app_data.ref_data, norm_ref_data=self.app_data.ref_data['model'][ref_i],
+                            layer=self.app_data.ref_data['layer'][ref_i], el_list=self.ndim_list ,
+                            style='Quanta', quantiles=quantiles, ax=canvas.axes, c=cluster_color[i], label=cluster_label[i]
+                        )
+                    #store max y limit to convert the set y limit of axis
+                    yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]
+
+                # Put a legend below current axis
+                box = canvas.axes.get_position()
+                canvas.axes.set_position((box.x0, box.y0 - box.height * 0.1, box.width, box.height * 0.9))
+
+                self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+                #canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
+
+                self.logax(canvas.axes, yl, 'y')
+                canvas.axes.set_ylim(yl)
+
+                canvas.axes.set_xticklabels(labels, rotation=angle)
+            else:
+                canvas.axes, yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.app_data.ref_data, norm_ref_data=self.app_data.ref_data['model'][ref_i], layer=self.app_data.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
+
+                canvas.axes.set_xticklabels(labels, rotation=angle)
+            canvas.axes.set_ylabel(f"Abundance / [{self.app_data.ref_data['model'][ref_i]}, {self.app_data.ref_data['layer'][ref_i]}]")
+            canvas.fig.tight_layout()
+
+    if cluster_flag:
+        plot_name = f"{plot_type}_"
+    else:
+        plot_name = f"{plot_type}_all"
+
+    self.plot_style.update_figure_font(canvas, self.plot_style.font)
+
+    self.plot_info = {
+        'tree': 'Geochemistry',
+        'sample_id': self.app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': plot_type,
+        'field_type': 'analyte',
+        'field': self.ndim_list,
+        'figure': canvas,
+        'style': self.plot_style.style_dict[self.plot_style.plot_type],
+        'cluster_groups': cluster_dict,
+        'view': [True,False],
+        'position': [],
+        'data': plot_data
+    }
+
+    self.clear_layout(self.widgetSingleView.layout())
+    self.widgetSingleView.layout().addWidget(canvas)
+
+# -------------------------------------
+# PCA functions and plotting
+# -------------------------------------
+def plot_score_map(self):
+    """Plots score maps
+
+    Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.
+    """
+    canvas = mplc.MplCanvas(parent=self)
+
+    plot_type = self.plot_style.plot_type
+
+    # data frame for plotting
+    match plot_type:
+        case 'PCA score':
+            idx = int(self.comboBoxColorField.currentIndex()) + 1
+            field = f'PC{idx}'
+        case 'cluster score':
+            #idx = int(self.comboBoxColorField.currentIndex())
+            #field = f'{idx}'
+            field = self.field
+        case _:
+            print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
+            return canvas
+
+    reshaped_array = np.reshape(self.data[self.app_data.sample_id].processed_data[field].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
+
+    cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
+    canvas.array = reshaped_array
+
+        # Add a colorbar
+    self.add_colorbar(canvas, cax, field)
+
+    canvas.axes.set_title(f'{plot_type}')
+    canvas.axes.tick_params(direction=None,
+        labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+        bottom=False, top=False, left=False, right=False)
+    #canvas.axes.set_axis_off()
+
+    # add scalebar
+    self.add_scalebar(canvas.axes)
+
+    return canvas, self.data[self.app_data.sample_id].processed_data[field]
+
+
+def plot_pca(self):
+    """Plot principal component analysis (PCA)
+    
+    Wrapper for one of four types of PCA plots:
+    * ``plot_pca_variance()`` a plot of explained variances
+    * ``plot_pca_vectors()`` a plot of PCA vector components as a heatmap
+    * uses ``plot_scatter()`` and ``plot_pca_components`` to produce both scatter and heatmaps of PCA scores with vector components.
+    * ``plot_score_map()`` produces a plot of PCA scores for a single component as a map
+
+    .. seealso::
+        ``MainWindow.plot_scatter``
+    """
+    #'plot_pca')
+    if self.app_data.sample_id == '':
+        return
+
+    if self.update_pca_flag or not self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
+        self.compute_pca()
+
+    # Determine which PCA plot to create based on the combobox selection
+    plot_type = self.plot_style.plot_type
+
+    match plot_type.lower():
+        # make a plot of explained variance
+        case 'variance':
+            canvas, plot_data = self.plot_pca_variance()
+            plot_name = plot_type
+
+        # make an image of the PC vectors and their components
+        case 'vectors':
+            canvas, plot_data = self.plot_pca_vectors()
+            plot_name = plot_type
+
+        # make a scatter plot or heatmap of the data... add PC component vectors
+        case 'pca scatter'| 'pca heatmap':
+            pc_x = int(self.spinBoxPCX.value())
+            pc_y = int(self.spinBoxPCY.value())
+
+            if pc_x == pc_y:
+                return
+
+            plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
+            # Assuming pca_df contains scores for the principal components
+            # uncomment to use plot scatter instead of ax.scatter
+            canvas = mplc.MplCanvas(parent=self)
+            plot_scatter(self, self.data, self.app_data, self.plot_style, canvas=canvas)
+
+            plot_data= self.plot_pca_components(canvas)
+
+        # make a map of a principal component score
+        case 'pca score':
+            if self.field_type.lower() == 'none' or self.field == '':
+                return
+
+            # Assuming pca_df contains scores for the principal components
+            canvas, plot_data = self.plot_score_map()
+            plot_name = plot_type+f'_{self.field}'
+        case _:
+            print(f'Unknown PCA plot type: {plot_type}')
+            return
+
+    self.plot_style.update_figure_font(canvas, self.plot_style.font)
+
+    self.plot_info = {
+        'tree': 'Multidimensional Analysis',
+        'sample_id': self.app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': self.plot_style.plot_type,
+        'field_type':self.field_type,
+        'field':  self.field,
+        'figure': canvas,
+        'style': self.plot_style.style_dict[self.plot_style.plot_type],
+        'cluster_groups': [],
+        'view': [True,False],
+        'position': [],
+        'data': plot_data
+    }
+
+    self.update_canvas(canvas)
+    #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
+
+def plot_pca_variance(self):
+    """Creates a plot of explained variance, individual and cumulative, for PCA
+
+    Returns
+    -------
+    mplc.MplCanvas
+        
+    """        
+    canvas = mplc.MplCanvas(parent=self)
+
+    # pca_dict contains variance ratios for the principal components
+    variances = self.pca_results.explained_variance_ratio_
+    n_components = range(1, len(variances)+1)
+    cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
+
+    # Plotting the explained variance
+    canvas.axes.plot(n_components, variances, linestyle='-', linewidth=self.plot_style.line_width,
+        marker=self.plot_style.marker_dict[self.plot_style.marker], markeredgecolor=self.plot_style.marker_color, markerfacecolor='none', markersize=self.plot_style.marker_size,
+        color=self.plot_style.marker_color, label='Explained Variance')
+
+    # Plotting the cumulative explained variance
+    canvas.axes.plot(n_components, cumulative_variances, linestyle='-', linewidth=self.plot_style.line_width,
+        marker=self.plot_style.marker_dict[self.plot_style.marker], markersize=self.plot_style.marker_size,
+        color=self.plot_style.marker_color, label='Cumulative Variance')
+
+    # Adding labels, title, and legend
+    xlbl = 'Principal Component'
+    ylbl = 'Variance Ratio'
+
+    canvas.axes.legend(fontsize=self.plot_style.font_size)
+
+    # Adjust the y-axis limit to make sure the plot includes all markers and lines
+    canvas.axes.set_ylim([0, 1.0])  # Assuming variance ratios are between 0 and 1
+
+    # labels
+    font = {'size':self.plot_style.font_size}
+    canvas.axes.set_xlabel(xlbl, fontdict=font)
+    canvas.axes.set_ylabel(ylbl, fontdict=font)
+
+    # tick marks
+    canvas.axes.tick_params(direction=self.plot_style.tick_dir,
+        labelsize=self.plot_style.font_size,
+        labelbottom=True, labeltop=False, labelleft=True, labelright=False,
+        bottom=True, top=True, left=True, right=True)
+
+    canvas.axes.set_xticks(range(1, len(n_components) + 1, 5))
+    canvas.axes.set_xticks(n_components, minor=True)
+
+    # aspect ratio
+    canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
+    
+    plot_data = pd.DataFrame(np.vstack((n_components, variances, cumulative_variances)).T, columns = ['Components','Variance','Cumulative Variance'])
+    return canvas, plot_data
+
+def plot_pca_vectors(self):
+    """Displays a heat map of PCA vector components
+
+    Returns
+    -------
+    mplc.MplCanvas
+        Creates figure on mplc.MplCanvas
+    """        
+    canvas = mplc.MplCanvas(parent=self)
+
+    # pca_dict contains 'components_' from PCA analysis with columns for each variable
+    # No need to transpose for heatmap representation
+    analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+
+    components = self.pca_results.components_
+    # Number of components and variables
+    n_components = components.shape[0]
+    n_variables = components.shape[1]
+
+    norm = self.plot_style.color_norm()
+    cax = canvas.axes.imshow(components, cmap=self.plot_style.get_colormap(), aspect=1.0, norm=norm)
+    canvas.array = components
+
+    # Add a colorbar
+    self.add_colorbar(canvas, cax)
+    # if self.plot_style.cbar_dir == 'vertical':
+    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='right', shrink=0.62, fraction=0.1)
+    #     cbar.set_label('PCA score', size=self.plot_style.font_size)
+    #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+    # elif self.plot_style.cbar_dir == 'horizontal':
+    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
+    #     cbar.set_label('PCA score', size=self.plot_style.font_size)
+    #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+    # else:
+    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
+
+
+    xlbl = 'Principal Components'
+
+    # Optional: Rotate x-axis labels for better readability
+    # plt.xticks(rotation=45)
+
+    # labels
+    font = {'size':self.plot_style.font_size}
+    canvas.axes.set_xlabel(xlbl, fontdict=font)
+
+    # tickmarks and labels
+    canvas.axes.tick_params(labelsize=self.plot_style.font_size)
+    canvas.axes.tick_params(axis='x', direction=self.plot_style.tick_dir,
+                    labelsize=self.plot_style.font_size,
+                    labelbottom=False, labeltop=True,
+                    bottom=True, top=True)
+
+    canvas.axes.tick_params(axis='y', length=0, direction=self.plot_style.tick_dir,
+                    labelsize=self.plot_style.font_size,
+                    labelleft=True, labelright=False,
+                    left=True, right=True)
+
+    canvas.axes.set_xticks(range(0, n_components, 5))
+    canvas.axes.set_xticks(range(0, n_components, 1), minor=True)
+    canvas.axes.set_xticklabels(np.arange(1, n_components+1, 5))
+
+    #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
+    canvas.axes.set_yticks(range(0, n_variables,1), minor=False)
+    canvas.axes.set_yticklabels(self.plot_style.toggle_mass(analytes), ha='right', va='center')
+
+    canvas.fig.tight_layout()
+    plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
+    return canvas, plot_data
+
+def plot_pca_components(self, canvas):
+    """Adds vector components to PCA scatter and heatmaps
+
+    Parameters
+    ----------
+    canvas : mplc.MplCanvas
+        Canvas object for plotting
+
+    .. seealso::
+        ``MainWindow.plot_pca_vectors``
+    """
+    #print('plot_pca_components')
+    if self.plot_style.line_width == 0:
+        return
+
+    # field labels
+    analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+    nfields = len(analytes)
+
+    # components
+    pc_x = int(self.spinBoxPCX.value())-1
+    pc_y = int(self.spinBoxPCY.value())-1
+
+    x = self.pca_results.components_[:,pc_x]
+    y = self.pca_results.components_[:,pc_y]
+
+    # mulitiplier for scale
+    m = self.plot_style.line_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
+
+    # arrows
+    canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=self.plot_style.line_color,
+        angles='xy', scale_units='xy', scale=1, # arrow angle and scale set relative to the data
+        linewidth=self.plot_style.line_width, headlength=2, headaxislength=2) # arrow properties
+
+    # labels
+    for i, analyte in enumerate(analytes):
+        if x[i] > 0 and y[i] > 0:
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=self.plot_style.line_color)
+        elif x[i] < 0 and y[i] > 0:
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=self.plot_style.line_color)
+        elif x[i] > 0 and y[i] < 0:
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=self.plot_style.line_color)
+        elif x[i] < 0 and y[i] < 0:
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=self.plot_style.line_color)
+
+    plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
+    return plot_data

@@ -1163,6 +1163,7 @@
     <addaction name="actionSpotTools"/>
     <addaction name="actionProfiles"/>
     <addaction name="actionSpecialTools"/>
+    <addaction name="actionRegression"/>
     <addaction name="separator"/>
     <addaction name="actionInfo"/>
     <addaction name="actionLogger"/>
@@ -1268,7 +1269,7 @@
         <string/>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -2114,16 +2115,9 @@
                  <property name="toolTip">
                   <string>Select field for x-axis or top vertex of ternary</string>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Analyte</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Ratio</string>
-                  </property>
-                 </item>
+                 <property name="placeholderText">
+                  <string>Field type</string>
+                 </property>
                 </widget>
                </item>
                <item>
@@ -2146,11 +2140,9 @@
                    <property name="toolTip">
                     <string>Select field for x-axis or top ternary vertex</string>
                    </property>
-                   <item>
-                    <property name="text">
-                     <string>New Item</string>
-                    </property>
-                   </item>
+                   <property name="placeholderText">
+                    <string>Field</string>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -2880,7 +2872,7 @@
                      <string>Select field for right ternary vertex</string>
                     </property>
                     <property name="placeholderText">
-                     <string>None</string>
+                     <string>Field</string>
                     </property>
                    </widget>
                   </item>
@@ -2941,7 +2933,7 @@
                      <string/>
                     </property>
                     <property name="placeholderText">
-                     <string>None</string>
+                     <string>Field</string>
                     </property>
                    </widget>
                   </item>
@@ -2995,7 +2987,7 @@
                      <string/>
                     </property>
                     <property name="placeholderText">
-                     <string>None</string>
+                     <string>Field</string>
                     </property>
                    </widget>
                   </item>
@@ -3017,16 +3009,9 @@
                     <property name="toolTip">
                      <string>Select field for y-axis or left vertex of ternary</string>
                     </property>
-                    <item>
-                     <property name="text">
-                      <string>Analyte</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Ratio</string>
-                     </property>
-                    </item>
+                    <property name="placeholderText">
+                     <string>Field type</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="0" column="1">
@@ -3047,16 +3032,9 @@
                     <property name="toolTip">
                      <string>Select field for x-axis or top vertex of ternary</string>
                     </property>
-                    <item>
-                     <property name="text">
-                      <string>Analyte</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Ratio</string>
-                     </property>
-                    </item>
+                    <property name="placeholderText">
+                     <string>Field type</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="2" column="1">
@@ -3077,16 +3055,9 @@
                     <property name="toolTip">
                      <string>Select field for right vertex of ternary</string>
                     </property>
-                    <item>
-                     <property name="text">
-                      <string>Analyte</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Ratio</string>
-                     </property>
-                    </item>
+                    <property name="placeholderText">
+                     <string>Field type</string>
+                    </property>
                    </widget>
                   </item>
                   <item row="3" column="2">
@@ -3654,7 +3625,7 @@
                        <string>Select analyte to add</string>
                       </property>
                       <property name="placeholderText">
-                       <string>None</string>
+                       <string>Field</string>
                       </property>
                      </widget>
                     </item>
@@ -4142,7 +4113,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>301</width>
+              <width>300</width>
               <height>767</height>
              </rect>
             </property>
@@ -4187,7 +4158,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Technique</string>
+                   <string>Method</string>
                   </property>
                  </widget>
                 </item>
@@ -4212,11 +4183,6 @@
                     <stylestrategy>PreferDefault</stylestrategy>
                    </font>
                   </property>
-                  <item>
-                   <property name="text">
-                    <string>Principal component analysis (PCA)</string>
-                   </property>
-                  </item>
                  </widget>
                 </item>
                 <item row="1" column="0">
@@ -4402,6 +4368,35 @@
                </property>
                <layout class="QFormLayout" name="formLayout_7">
                 <item row="1" column="0">
+                 <widget class="QLabel" name="labelClusterMax">
+                  <property name="text">
+                   <string>Max. clusters</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QSpinBox" name="spinBoxClusterMax">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                  <property name="minimum">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <number>98</number>
+                  </property>
+                  <property name="value">
+                   <number>10</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
                  <widget class="QLabel" name="labelNClusters">
                   <property name="font">
                    <font>
@@ -4413,85 +4408,6 @@
                   <property name="text">
                    <string>No. clusters</string>
                   </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QSpinBox" name="spinBoxNClusters">
-                  <property name="maximumSize">
-                   <size>
-                    <width>150</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>.AppleSystemUIFont</family>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="toolTip">
-                   <string>Change the number of clusters</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                  <property name="keyboardTracking">
-                   <bool>false</bool>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>98</number>
-                  </property>
-                  <property name="value">
-                   <number>5</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="labelClusterMethod">
-                  <property name="font">
-                   <font>
-                    <family>.AppleSystemUIFont</family>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Method</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QComboBox" name="comboBoxClusterMethod">
-                  <property name="maximumSize">
-                   <size>
-                    <width>150</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>.AppleSystemUIFont</family>
-                    <pointsize>11</pointsize>
-                    <stylestrategy>PreferDefault</stylestrategy>
-                   </font>
-                  </property>
-                  <property name="toolTip">
-                   <string>Select clustering method</string>
-                  </property>
-                  <item>
-                   <property name="text">
-                    <string>k-means</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>fuzzy c-means</string>
-                   </property>
-                  </item>
                  </widget>
                 </item>
                 <item row="3" column="0">
@@ -4743,33 +4659,83 @@
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="labelClusterMax">
-                  <property name="text">
-                   <string>Max. clusters</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QSpinBox" name="spinBoxClusterMax">
+                <item row="2" column="1">
+                 <widget class="QSpinBox" name="spinBoxNClusters">
                   <property name="maximumSize">
                    <size>
                     <width>150</width>
                     <height>16777215</height>
                    </size>
                   </property>
+                  <property name="font">
+                   <font>
+                    <family>.AppleSystemUIFont</family>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Change the number of clusters</string>
+                  </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
+                  <property name="keyboardTracking">
+                   <bool>false</bool>
+                  </property>
                   <property name="minimum">
-                   <number>3</number>
+                   <number>1</number>
                   </property>
                   <property name="maximum">
                    <number>98</number>
                   </property>
                   <property name="value">
-                   <number>10</number>
+                   <number>5</number>
                   </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelClusterMethod">
+                  <property name="font">
+                   <font>
+                    <family>.AppleSystemUIFont</family>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Method</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="comboBoxClusterMethod">
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>.AppleSystemUIFont</family>
+                    <pointsize>11</pointsize>
+                    <stylestrategy>PreferDefault</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>Select clustering method</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>k-means</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>fuzzy c-means</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                </layout>
@@ -5221,7 +5187,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -5231,8 +5197,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>264</width>
-          <height>248</height>
+          <width>292</width>
+          <height>381</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5271,7 +5237,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>264</width>
+              <width>292</width>
               <height>411</height>
              </rect>
             </property>
@@ -5739,8 +5705,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>264</width>
-          <height>248</height>
+          <width>292</width>
+          <height>381</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5779,8 +5745,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>264</width>
-              <height>374</height>
+              <width>292</width>
+              <height>381</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_34">
@@ -6137,8 +6103,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>264</width>
-          <height>248</height>
+          <width>254</width>
+          <height>381</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6177,8 +6143,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>264</width>
-              <height>251</height>
+              <width>254</width>
+              <height>381</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_70">
@@ -6495,8 +6461,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>264</width>
-          <height>248</height>
+          <width>292</width>
+          <height>381</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6535,8 +6501,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>264</width>
-              <height>318</height>
+              <width>292</width>
+              <height>378</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -6578,56 +6544,12 @@
                  <property name="toolTip">
                   <string>Color markers using the selected field type</string>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>None</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Analyte</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Analyte (normalized)</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Ratio</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Ratio (normalized)</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Computed</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>PCA Score</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Cluster</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Cluster Score</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Special</string>
-                  </property>
-                 </item>
+                 <property name="currentText">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Field type</string>
+                 </property>
                 </widget>
                </item>
                <item row="1" column="0">
@@ -6884,6 +6806,12 @@
                    <property name="toolTip">
                     <string>Select field to color points</string>
                    </property>
+                   <property name="currentText">
+                    <string/>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Field</string>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -6921,8 +6849,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>264</width>
-          <height>248</height>
+          <width>254</width>
+          <height>381</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6955,8 +6883,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>262</width>
-              <height>246</height>
+              <width>252</width>
+              <height>379</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_78">
@@ -7911,6 +7839,24 @@ Plot</string>
    </property>
    <property name="toolTip">
     <string>Run the selected plot function</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionRegression">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/icons/icon-regression-64.svg</normaloff>:/resources/icons/icon-regression-64.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Regression Tools</string>
+   </property>
+   <property name="toolTip">
+    <string>Fit lines/curves to data</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

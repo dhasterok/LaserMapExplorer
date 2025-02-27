@@ -365,6 +365,7 @@ class SampleObj(Observable):
     # Define properties and setter functions
     # --------------------------------------
     # note properties are based on the cropped X and Y values
+    
     @property
     def ref_chem(self):
         """dict: Reference chemistry"""

@@ -1,6 +1,6 @@
 import os, pickle
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import ( QMessageBox, QTableWidgetItem, QGraphicsPolygonItem, QCheckBox )
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtWidgets import ( QMessageBox, QTableWidgetItem, QGraphicsPolygonItem, QCheckBox )
 from pyqtgraph import ( ScatterPlotItem, PlotDataItem )
 
 
@@ -355,8 +355,11 @@ class PolygonManager:
     show_polygon_lines:
     update_table_widget:
     """
-    def __init__(self, main_window):
+    def __init__(self, main_window, debug=False):
+
         self.main_window = main_window
+        self.debug = debug
+
         self.polygons = {}  # Dict to store polygons for each sample
         self.p_id = None  # Current polygon ID
         self.p_id_gen = 0  # Polygon ID generator

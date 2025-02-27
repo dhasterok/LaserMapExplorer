@@ -14,6 +14,8 @@ self.lineEditYUB
 self.lineEditYLB
 self.lineEditXUB
 self.lineEditXLB
+self.lineEditZUB
+self.lineEditZLB
 self.lineEditScaleLength
 self.lineEditYThresh
 self.lineEditPointRadius

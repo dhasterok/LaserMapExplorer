@@ -1,7 +1,7 @@
 import re, darkdetect
-from PyQt5.QtCore import ( Qt )
-from PyQt5.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
-from PyQt5.QtWidgets import ( QMenu ) 
+from PyQt6.QtCore import ( Qt )
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
+from PyQt6.QtWidgets import ( QMenu ) 
 import src.common.CustomMplCanvas as mplc
 from src.common.CustomWidgets import StandardItem, CustomTreeView
 from src.common.SortAnalytes import sort_analytes
@@ -160,25 +160,11 @@ class PlotTree():
 
         if method is None:
             method = action.text()
-            self.sort_method = method
+            self.parent.app_data.sort_method = method
 
-        data = self.parent.app_data.data[self.parent.app_data.sample_id]
         treeView = self.parent.treeView
 
-        # retrieve analyte_list
-        analyte_list = data.processed_data.match_attribute('data_type','analyte')
-       
-        # sort analyte sort based on method chosen by user
-        sorted_analyte_list = sort_analytes(method, analyte_list)
-        
-        # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
-        # Does this ever happen?
-        # This step filters out any items in self.analyte_list that are not columns in the DataFrame
-        #columns_to_order = [analyte for analyte in analyte_list if analyte in data.raw_data.columns]
-        
-        # Reorder the columns of the DataFrame based on self.analyte_list
-        data.raw_data.sort_columns(sorted_analyte_list)
-        data.processed_data.sort_columns(sorted_analyte_list)
+        analyte_list, sorted_analyte_list = self.parent.data[self.parent.app_data.sample_id].sort_data(method)
          
         # Reorder tree items according to the new analyte list
         # Sort the tree branches associated with analytes
@@ -340,7 +326,7 @@ class PlotTree():
             hexcolor = self.parent.theme.highlight_color_light
 
         data = self.parent.app_data.data[sample_id]
-        ref_chem = self.parent.ref_chem
+        ref_chem = self.parent.app_data.ref_chem
 
         # Un-highlight all leaf in the trees
         self.unhighlight_tree(self.tree['Ratio'])

@@ -1,4 +1,4 @@
-ui.IsotopeSelectionDialog
+﻿ui.IsotopeSelectionDialog
 =========================
 
 .. automodule:: ui.IsotopeSelectionDialog
@@ -12,12 +12,6 @@ ui.IsotopeSelectionDialog
    
 
    
-   
-   .. rubric:: Classes
-
-   .. autosummary::
-   
-      Ui_Dialog
    
    
 

@@ -35,6 +35,7 @@
       Scheduler
       StyleObj
       Styling
+      StylingDock
    
    
 

@@ -1,9 +1,11 @@
-from PyQt5.QtCore import QRect, QSize
-from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtWidgets import ( 
+from PyQt6.QtCore import QRect, QSize
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtWidgets import ( 
         QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QScrollArea, QToolButton,
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView
     )
+from src.app.UITheme import default_font
+import resources_rc
 
 class SpotPage(QWidget):
     def __init__(self, page_index, parent=None):
@@ -17,37 +19,28 @@ class SpotPage(QWidget):
         self.setGeometry(QRect(0, 0, 300, 321))
         self.setObjectName("SpotDataPage")
 
-        self.verticalLayout_46 = QVBoxLayout(self)
-        self.verticalLayout_46.setContentsMargins(3, 3, 3, 3)
-        self.verticalLayout_46.setObjectName("verticalLayout_46")
+        page_layout = QVBoxLayout(self)
+        page_layout.setContentsMargins(3, 3, 3, 3)
 
         self.scrollAreaSpots = QScrollArea(self)
-        self.scrollAreaSpots.setFrameShape(QFrame.NoFrame)
-        self.scrollAreaSpots.setFrameShadow(QFrame.Plain)
+        self.scrollAreaSpots.setFrameShape(QFrame.Shape.NoFrame)
+        self.scrollAreaSpots.setFrameShadow(QFrame.Shadow.Plain)
         self.scrollAreaSpots.setWidgetResizable(True)
-        self.scrollAreaSpots.setObjectName("scrollAreaSpots")
 
         self.scrollAreaWidgetContentsSpots = QWidget()
         self.scrollAreaWidgetContentsSpots.setGeometry(QRect(0, 0, 294, 315))
-        self.scrollAreaWidgetContentsSpots.setObjectName("scrollAreaWidgetContentsSpots")
 
         self.verticalLayout_45 = QVBoxLayout(self.scrollAreaWidgetContentsSpots)
         self.verticalLayout_45.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_45.setObjectName("verticalLayout_45")
 
         self.groupBox = QGroupBox(self.scrollAreaWidgetContentsSpots)
         self.groupBox.setTitle("")
-        self.groupBox.setObjectName("groupBox")
 
         self.verticalLayout_44 = QVBoxLayout(self.groupBox)
         self.verticalLayout_44.setContentsMargins(3, 3, 3, 3)
-        self.verticalLayout_44.setObjectName("verticalLayout_44")
 
         self.tableWidgetSpots = QTableWidget(self.groupBox)
-        font = QFont()
-        font.setPointSize(11)
-        font.setStyleStrategy(QFont.PreferDefault)
-        self.tableWidgetSpots.setFont(font)
+        self.tableWidgetSpots.setFont(default_font())
         self.tableWidgetSpots.setObjectName("tableWidgetSpots")
         self.tableWidgetSpots.setColumnCount(5)
         self.tableWidgetSpots.setRowCount(0)
@@ -67,11 +60,11 @@ class SpotPage(QWidget):
 
         # spot table
         header = self.tableWidgetSpots.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.Stretch)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4,QHeaderView.ResizeMode.Stretch)
 
         self.toolbar = QHBoxLayout()
 
@@ -79,7 +72,7 @@ class SpotPage(QWidget):
         self.toolButtonSpotLocate = QToolButton(self.groupBox)
         self.toolButtonSpotLocate.setMinimumSize(QSize(32, 32))
         self.toolButtonSpotLocate.setMaximumSize(QSize(32, 32))
-        locate_icon = QIcon(":/resources/icons/icon-spot-locate-64.svg")
+        locate_icon = QIcon(":resources/icons/icon-spot-locate-64.svg")
         self.toolButtonSpotLocate.setIcon(locate_icon)
         self.toolButtonSpotLocate.setIconSize(QSize(24, 24))
         self.toolButtonSpotLocate.setCheckable(True)
@@ -89,7 +82,7 @@ class SpotPage(QWidget):
         self.toolButtonSpotMove = QToolButton(self.groupBox)
         self.toolButtonSpotMove.setMinimumSize(QSize(32, 32))
         self.toolButtonSpotMove.setMaximumSize(QSize(32, 32))
-        move_icon = QIcon(":/resources/icons/icon-move-point-64.svg")
+        move_icon = QIcon(":resources/icons/icon-move-point-64.svg")
         self.toolButtonSpotMove.setIcon(move_icon)
         self.toolButtonSpotMove.setIconSize(QSize(24, 24))
         self.toolButtonSpotMove.setCheckable(True)
@@ -99,7 +92,7 @@ class SpotPage(QWidget):
         self.toolButtonSpotToggle = QToolButton(self.groupBox)
         self.toolButtonSpotToggle.setMinimumSize(QSize(32, 32))
         self.toolButtonSpotToggle.setMaximumSize(QSize(32, 32))
-        show_hide_icon = QIcon(":/resources/icons/icon-show-hide-64.svg")
+        show_hide_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
         self.toolButtonSpotToggle.setIcon(show_hide_icon)
         self.toolButtonSpotToggle.setIconSize(QSize(24, 24))
         self.toolButtonSpotToggle.setCheckable(True)
@@ -109,7 +102,7 @@ class SpotPage(QWidget):
         self.toolButtonSpotSelectAll = QToolButton(self.groupBox)
         self.toolButtonSpotSelectAll.setMinimumSize(QSize(32, 32))
         self.toolButtonSpotSelectAll.setMaximumSize(QSize(32, 32))
-        select_all_icon = QIcon(":/resources/icons/icon-select-all-64.svg")
+        select_all_icon = QIcon(":resources/icons/icon-select-all-64.svg")
         self.toolButtonSpotSelectAll.setIcon(select_all_icon)
         self.toolButtonSpotSelectAll.setIconSize(QSize(24, 24))
         self.toolButtonSpotSelectAll.setObjectName("toolButtonSpotSelectAll")
@@ -124,7 +117,7 @@ class SpotPage(QWidget):
         self.toolButtonSpotAnalysis.setObjectName("toolButtonSpotAnalysis")
         self.toolbar.addWidget(self.toolButtonSpotAnalysis)
 
-        spacerItem4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        spacerItem4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.toolbar.addItem(spacerItem4)
 
         self.toolButtonSpotRemove = QToolButton(self.groupBox)
@@ -139,7 +132,8 @@ class SpotPage(QWidget):
         self.verticalLayout_44.addLayout(self.toolbar)
         self.verticalLayout_45.addWidget(self.groupBox)
         self.scrollAreaSpots.setWidget(self.scrollAreaWidgetContentsSpots)
-        self.verticalLayout_46.addWidget(self.scrollAreaSpots)
+
+        page_layout.addWidget(self.scrollAreaSpots)
         page_icon = QIcon(":/resources/icons/icon-spot-64.svg")
 
         self.parent.toolBox.insertItem(page_index+1, self, page_icon, "Spot Data")

@@ -1,6 +1,6 @@
 import os, pickle
-from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem, QMessageBox
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QMessageBox
+from PyQt6.QtGui import QIcon, QPixmap
 import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
 from src.app.config import BASEDIR
@@ -47,15 +47,15 @@ class LameIO():
         parent = self.parent
         if path is None:
             dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.ExistingFiles)
+            dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
             dialog.setNameFilter("LaME CSV (*.csv)")
-            if dialog.exec_():
+            if dialog.exec():
                 file_list = dialog.selectedFiles()
-                parent.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
+                parent.app_data.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
             else:
                 return
         else:
-            parent.selected_directory = os.path.dirname(os.path.abspath(path))
+            parent.app_data.selected_directory = os.path.dirname(os.path.abspath(path))
         parent.app_data.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog
@@ -90,19 +90,19 @@ class LameIO():
 
         if path is None:
             dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.Directory)
+            dialog.setFileMode(QFileDialog.FileMode.Directory)
             # Set the default directory to the current working directory
             # dialog.setDirectory(os.getcwd())
             dialog.setDirectory(BASEDIR)
-            if dialog.exec_():
-                parent.selected_directory = dialog.selectedFiles()[0]
+            if dialog.exec():
+                parent.app_data.selected_directory = dialog.selectedFiles()[0]
             else:
                 parent.statusBar.showMessage("Open directory canceled.")
                 return
         else:
-            parent.selected_directory = path
+            parent.app_data.selected_directory = path
 
-        file_list = os.listdir(parent.selected_directory)
+        file_list = os.listdir(parent.app_data.selected_directory)
         parent.app_data.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog
@@ -169,11 +169,11 @@ class LameIO():
         
         # Open QFileDialog to enter a new project name
         file_dialog = QFileDialog(parent, "Save Project", projects_dir)
-        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
-        file_dialog.setFileMode(QFileDialog.AnyFile)
-        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
         
-        if file_dialog.exec_() == QFileDialog.Accepted:
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
             selected_dir = file_dialog.selectedFiles()[0]
             
             # Ensure a valid directory name is selected
@@ -226,22 +226,20 @@ class LameIO():
 
         if parent.data:
             # Create and configure the QMessageBox
-            messageBoxChangeSample = QMessageBox()
-            iconWarning = QIcon()
-            iconWarning.addPixmap(QPixmap(":/resources/icons/icon-warning-64.svg"), QIcon.Normal, QIcon.Off) # type: ignore
-
-            messageBoxChangeSample.setWindowIcon(iconWarning)  # Set custom icon
-            messageBoxChangeSample.setText("Do you want to save current analysis?")
-            messageBoxChangeSample.setWindowTitle("Save analysis")
-            messageBoxChangeSample.setStandardButtons(QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save)
+            msgBox = QMessageBox.warning(
+                parent,
+                "Save analysis",
+                "Do you want to save the current analysis?",
+                QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save
+            )
 
             # Display the dialog and wait for user action
-            response = messageBoxChangeSample.exec_()
+            response = msgBox.exec()
 
-            if response == QMessageBox.Save:
+            if response == QMessageBox.StandardButton.Save:
                 self.save_project()
                 parent.reset_analysis('full')
-            elif response == QMessageBox.Discard:
+            elif response == QMessageBox.StandardButton.Discard:
                 parent.reset_analysis('full')
             else:  # user pressed cancel
                 parent.comboBoxSampleId.setCurrentText(parent.sample_id)
@@ -251,10 +249,10 @@ class LameIO():
         
         # Open QFileDialog to select the project folder
         file_dialog = QFileDialog(parent, "Open Project", projects_dir)
-        file_dialog.setFileMode(QFileDialog.Directory)
-        file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        file_dialog.setFileMode(QFileDialog.FileMode.Directory)
+        file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
         
-        if file_dialog.exec_() == QFileDialog.Accepted:
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
             selected_dir = file_dialog.selectedFiles()[0]
             
             # Ensure a valid directory is selected

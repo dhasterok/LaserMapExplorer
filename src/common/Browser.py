@@ -1,8 +1,12 @@
 import os
-from PyQt5.QtCore import ( Qt, QUrl, QEvent, pyqtSlot, QSize )
-from PyQt5.QtWidgets import ( QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDockWidget, QGroupBox, QToolButton, QLabel, QLineEdit )
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-from PyQt5.QtGui import QIcon, QMouseEvent
+from PyQt6.QtCore import ( Qt, QUrl, QEvent, pyqtSlot, QSize )
+from PyQt6.QtWidgets import ( 
+    QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDockWidget, QGroupBox,
+    QToolButton, QLabel, QLineEdit
+)
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEnginePage
+from PyQt6.QtGui import QIcon, QMouseEvent
     
 # WebEngineView - Web engine for viewing userguide help pages
 # -------------------------------

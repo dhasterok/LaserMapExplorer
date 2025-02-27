@@ -1,22 +1,33 @@
-import copy
+import os, copy
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
+from src.app.config import BASEDIR
 
 from src.common.Observable import Observable
 
 class AppData(Observable):
-    def __init__(self):
+    def __init__(self, data):
         super().__init__()
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
+        self.selected_directory = ''
+
+        self._sort_method = 'mass'
+
+        # reference chemistry
+        self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
+        self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
+        self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
+        self._ref_index = 0
 
         self._sample_list = []
         self.csv_files = []
 
         # a dictionary of sample_id containing SampleObj data class
-        self.data = {}
+        self.data = data
+
         # a dictionary of the field_types in self.data[sample_id].processed_data.  "coord" is excluded.
         self._field_dict = {}
 
@@ -61,12 +72,10 @@ class AppData(Observable):
         self._x_field_type = ""
         self._y_field_type = ""
         self._z_field_type = ""
-        self._c_field_type = ""
 
         self._x_field = ""
         self._y_field = ""
         self._z_field = ""
-        self._c_field = ""
 
         self._scatter_preset = ""
         self._heatmap_style = "counts"
@@ -74,6 +83,7 @@ class AppData(Observable):
         self._ternary_color_x = ""
         self._ternary_color_y = ""
         self._ternary_color_z = ""
+        self._ternary_color_m = ""
 
         self._norm_reference = ""
 
@@ -91,7 +101,7 @@ class AppData(Observable):
         if 'REE' in self.ndim_list_dict.keys():
             self._ndim_analyte_set = 'REE'
         else:
-            self._ndim_analyte_set = self.ndim_list_dict.keys(0)
+            self._ndim_analyte_set = list(self.ndim_list_dict.keys())[0]
 
         self.ndim_analyte_df = pd.DataFrame(columns=['use', 'analyte'])
 
@@ -145,6 +155,36 @@ class AppData(Observable):
     #         return true
     #     else:
     #         valueerror("field not found.")
+    @property
+    def sort_method(self):
+        return self._sort_method
+    
+    @sort_method.setter
+    def sort_method(self, new_method):
+        if new_method == self._sort_method:
+            return
+
+        self._sort_method = new_method
+        self.notify_observers("sort_method", new_method)
+
+    @property
+    def ref_index(self):
+        return self._ref_index
+    
+    @ref_index.setter
+    def ref_index(self, new_index):
+        if new_index == self._ref_index:
+            return
+
+        self._ref_index = new_index
+        self.notify_observers("ref_index", new_index)
+
+    @property
+    def ref_chem(self):
+        chem = self.ref_data.iloc[self._ref_index]
+        chem.index = [col.replace('_ppm', '') for col in chem.index]
+
+        return chem
 
     @property
     def sample_list(self):
@@ -255,7 +295,7 @@ class AppData(Observable):
     
     @hist_num_bins.setter
     def hist_num_bins(self, new_num_bins):
-        if new_num_bins == self._new_num_bins:
+        if new_num_bins == self._hist_num_bins:
             return
         
         self._hist_num_bins = new_num_bins
@@ -406,18 +446,6 @@ class AppData(Observable):
             self.notify_observers("z_field_type", new_field_type)
 
     @property
-    def c_field_type(self):
-        """str: Plot type used to determine plot method and associated style settings."""
-        return self._c_field_type
-
-    @c_field_type.setter
-    def c_field_type(self, new_field_type):
-        if new_field_type != self._c_field_type:
-            self.validate_field_type(new_field_type)
-            self._c_field_type = new_field_type
-            self.notify_observers("c_field_type", new_field_type)
-
-    @property
     def x_field(self):
         return self._x_field
     
@@ -452,18 +480,6 @@ class AppData(Observable):
     
         self._z_field = new_z_field
         self.notify_observers("z_field", new_z_field)
-
-    @property
-    def c_field(self):
-        return self._c_field
-    
-    @c_field.setter
-    def c_field(self, new_c_field):
-        if new_c_field == self._c_field:
-            return
-    
-        self._c_field = new_c_field
-        self.notify_observers("c_field", new_c_field)
 
     @property
     def scatter_preset(self):
@@ -540,6 +556,18 @@ class AppData(Observable):
         self._ternary_color_z = new_ternary_color_z
         self.notify_observers("ternary_color_z", new_ternary_color_z)
 
+    @property
+    def ternary_color_m(self):
+        return self._ternary_color_m
+    
+    @ternary_color_m.setter
+    def ternary_color_m(self, new_ternary_color_m):
+        if new_ternary_color_m == self._ternary_color_m:
+            return
+    
+        self._ternary_color_m = new_ternary_color_m
+        self.notify_observers("ternary_color_m", new_ternary_color_m)
+
     ### Multidimensional Properties ###
     @property
     def norm_reference(self):
@@ -562,7 +590,7 @@ class AppData(Observable):
         if new_ndim_analyte_set == self._ndim_analyte_set:
             return
         elif new_ndim_analyte_set not in self.ndim_list_dict.keys():
-            ValueError(f"N Dim list ({new_dim_analyte_set}) is not a defined option.")
+            ValueError(f"N Dim list ({new_ndim_analyte_set}) is not a defined option.")
     
         self._ndim_analyte_set = new_ndim_analyte_set
         self.notify_observers("ndim_analyte_set", new_ndim_analyte_set) 
@@ -738,6 +766,14 @@ class AppData(Observable):
         if 'coordinate' in self._field_dict:
             self._field_dict.pop("coordinate")
         return self._field_dict
+
+    @property
+    def selected_analytes(self):
+        """Gets the list of selected analytes for use in analyses."""
+        if self.data and self.sample_id != '':
+            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+
+        return None
 
     def get_field_list(self, set_name='Analyte', filter='all'):
         """Gets the fields associated with a defined set

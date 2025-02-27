@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 
 class SampleObj(Observable):
     """Creates a sample object to store and manipulate geochemical data in map form
@@ -186,7 +186,7 @@ class SampleObj(Observable):
         | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
         | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
-    def __init__(self, sample_id, file_path, outlier_method, negative_method, ref_chem=None, debug=False):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, debug=False):
         super().__init__()
         self.debug = debug
 
@@ -195,8 +195,10 @@ class SampleObj(Observable):
 
         self.sample_id = sample_id
         self.file_path = file_path
+        self._current_field = None
         self._outlier_method = outlier_method
         self._negative_method = negative_method
+        self._smoothhing_method = smoothing_method
         self._updating = False
 
         self._default_lower_bound = 0.005
@@ -204,6 +206,11 @@ class SampleObj(Observable):
 
         self._default_difference_lower_bound= 0.005
         self._default_difference_upper_bound= 0.995
+
+        self._data_min_quantile = 0.005
+        self._data_max_quantile = 0.005
+        self._data_min_diff_quantile = 0.005
+        self._data_max_diff_quantile = 0.005
 
         self._ref_chem = ref_chem
 
@@ -631,6 +638,42 @@ class SampleObj(Observable):
 
         self.prep_data()
 
+    @property
+    def current_field(self):
+        return self._current_field
+    
+    @current_field.setter
+    def current_field(self, new_field):
+        if new_field == self._current_field:
+            return
+
+        self._current_field = new_field
+        if not hasattr(self,"processed_data"):
+            return
+
+        if new_field is None:
+            # if new_field is None, use first analyte field
+            field = self.processed_data.match_attribute('data_type','analyte')[0]
+
+            self.negative_method = self.processed_data.get_attribute(field, 'negative_method')
+            self.outlier_method = self.processed_data.get_attribute(field, 'outlier_method')
+            self.smoothing_method = self.processed_data.get_attribute(field, 'smoothing_method')
+            self.data_min_quantile = self.processed_data.get_attribute(field,'lower_bound')
+            self.data_max_quantile = self.processed_data.get_attribute(field,'upper_bound')
+            self.data_min_diff_quantile = self.processed_data.get_attribute(field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed_data.get_attribute(field,'diff_upper_bound')
+        else:
+            # use new_field
+            self.negative_method = self.processed_data.get_attribute(new_field, 'negative_method')
+            self.outlier_method = self.processed_data.get_attribute(new_field, 'outlier_method')
+            self.smoothing_method = self.processed_data.get_attribute(new_field, 'smoothing_method')
+            self.data_min_quantile = self.processed_data.get_attribute(new_field,'lower_bound')
+            self.data_max_quantile = self.processed_data.get_attribute(new_field,'upper_bound')
+            self.data_min_diff_quantile = self.processed_data.get_attribute(new_field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed_data.get_attribute(new_field,'diff_upper_bound')
+
+        self.notify_observers("apply_process_to_all_data", self._current_field)
+
     # validation functions
     def _is_valid_oulier_method(self, text):
         """Validates if a the method is a valid string."""
@@ -777,23 +820,6 @@ class SampleObj(Observable):
         if column_name in self.processed_data.column_attributes:
             del self.processed_data.column_attributes[column_name]
 
-    def get_attribute_dict(self, attribute_name):
-        """
-        Creates a dictionary from an attribute where the unique values of the attribute becomes the
-        keys and the items are lists with the column names that match each attribute_name.
-
-        Parameters
-        ----------
-        attribute_name : str
-            Name of attribute within the `processed_data.column_attributes` dictionary.
-
-        Returns
-        -------
-        dict
-            A dictionary with attribute_values and columns that match.
-        """
-        return self.processed_data.get_attribute_dict(attribute_name)
-
     def reset_resolution(self):
         """Resets dx and dy to initial values
         """        
@@ -861,19 +887,6 @@ class SampleObj(Observable):
         elif axis == 'y':
             self.dy = value
             dy = self.dy
-
-        #self.update_aspect_ratio_controls()
-
-    def update_aspect_ratio_controls(self):
-        """Updates aspect ratio controls when user updates/swaps pixel resolution.
-
-        Executes setter functions for dx, dy, nx and ny and updates corresponding UI components s if observers exist.
-        """ 
-       
-        dy = self.dy
-        dx = self.dx
-        nx = self.nx
-        ny = self.ny
 
     def swap_resolution(self):
         """Swaps DX and DY for a dataframe, updates X and Y
@@ -1661,19 +1674,17 @@ class SampleObj(Observable):
             ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
         """        
         # Create a message box
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Warning)
-        msg_box.setWindowTitle("Confirm Reset")
-        msg_box.setText("Resetting to the full map will delete all analyses, computed fields, and reset filters.")
-        msg_box.setInformativeText("Do you wish to proceed?")
-        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        msg_box.setDefaultButton(QMessageBox.No)
+        msgBox = QMessageBox.warning(self.parent,
+            "Confirm Reset", 
+            "Resetting to the full map will delete all analyses, computed fields, and reset filters.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.No
+        )
 
         # Show the message box and get the user's response
-        response = msg_box.exec()
+        response = msgBox.exec()
 
         # Check the user's response
-        if response == QMessageBox.No:
+        if response == QMessageBox.StandardButton.No:
             return False  # User chose not to proceed
         return True  # User chose to proceed
     
@@ -1771,3 +1782,4 @@ class SampleObj(Observable):
                                             & (self.processed_data['ratio_info']['analyte_2']==analyte_2),
                                             ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
                 self.prep_data(sample_id, analyte_1,analyte_2)
+        return True  # User chose to proceed

@@ -1805,3 +1805,9 @@ class SampleObj(Observable):
                                             ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
                 self.prep_data(sample_id, analyte_1,analyte_2)
         return True  # User chose to proceed
+
+    def sort_data(self, method):
+        # retrieve analyte_list
+        analyte_list = self.processed_data.match_attribute('data_type','analyte')
+        sorted_analyte_list = sort_analytes(method, analyte_list)
+        return analyte_list, sorted_analyte_list

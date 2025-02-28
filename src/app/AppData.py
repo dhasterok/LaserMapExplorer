@@ -3,12 +3,15 @@ import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
 from src.app.config import BASEDIR
+from src.common.Logger import LogCounter
 
 from src.common.Observable import Observable
 
 class AppData(Observable):
-    def __init__(self, data):
+    def __init__(self, data, debug=False):
         super().__init__()
+        self.debug = debug
+        self.logger = LogCounter()
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
@@ -161,6 +164,8 @@ class AppData(Observable):
     
     @sort_method.setter
     def sort_method(self, new_method):
+        if self.debug:
+            self.logger.print(f"@sort_method\n  old_value={self._sort_method}\n  new_value={new_method}")
         if new_method == self._sort_method:
             return
 
@@ -174,6 +179,8 @@ class AppData(Observable):
     
     @ref_index.setter
     def ref_index(self, new_index):
+        if self.debug:
+            self.logger.print(f"@ref_index\n  old_value={self._ref_index}\n  new_value={new_index}")
         if new_index == self._ref_index:
             return
 
@@ -182,6 +189,8 @@ class AppData(Observable):
 
     @property
     def ref_chem(self):
+        if self.debug:
+            self.logger.print(f"@ref_chem")
         chem = self.ref_data.iloc[self._ref_index]
         chem.index = [col.replace('_ppm', '') for col in chem.index]
 
@@ -192,16 +201,18 @@ class AppData(Observable):
         return self._sample_list
 
     @sample_list.setter
-    def sample_list(self, new_sample_list):
-        if new_sample_list == self._sample_list:
+    def sample_list(self, new_list):
+        if self.debug:
+            self.logger.print(f"@sample_list\n  old_value={self._sample_list}\n  new_value={new_list}")
+        if new_list == self._sample_list:
             return
         
         # update sample list and id of current sample
-        self._sample_list = new_sample_list
-        self._sample_id = new_sample_list[0]
+        self._sample_list = new_list
+        self._sample_id = new_list[0]
 
         # notify observers to update widgets
-        self.notify_observers("sample_list", new_sample_list)
+        self.notify_observers("sample_list", new_list)
         self.notify_observers("sample_id", self._sample_id)
 
     @property
@@ -209,12 +220,14 @@ class AppData(Observable):
         return self._sample_id
     
     @sample_id.setter
-    def sample_id(self, new_sample_id):
-        if new_sample_id == self._sample_id:
+    def sample_id(self, new_id):
+        if self.debug:
+            self.logger.print(f"@sample_id\n  old_value={self._sample_id}\n  new_value={new_id}")
+        if new_id == self._sample_id:
             return
 
-        self._sample_id = new_sample_id
-        self.notify_observers("sample_id", new_sample_id)
+        self._sample_id = new_id
+        self.notify_observers("sample_id", new_id)
 
     ### Histogram Properties ###
     @property
@@ -222,12 +235,14 @@ class AppData(Observable):
         return self._equalize_color_scale
     
     @equalize_color_scale.setter
-    def equalize_color_scale(self, new_equalize_color_scale):
-        if new_equalize_color_scale == self._equalize_color_scale:
+    def equalize_color_scale(self, flag):
+        if self.debug:
+            self.logger.print(f"@equalize_color_scale:n  old_value={self._equalize_color_scale}\n  new_value={flag}")
+        if flag == self._equalize_color_scale:
             return
     
-        self._equalize_color_scale = new_equalize_color_scale
-        self.notify_observers("equalize_color_scale", new_equalize_color_scale)
+        self._equalize_color_scale = flag
+        self.notify_observers("equalize_color_scale", flag)
 
     @property
     def hist_field_type(self):
@@ -235,6 +250,8 @@ class AppData(Observable):
     
     @hist_field_type.setter
     def hist_field_type(self, new_field_type):
+        if self.debug:
+            self.logger.print(f"@hist_field_type\n  old_value={self._hist_field_type}\n  new_value={new_field_type}")
         if new_field_type == self._hist_field_type:
             return
 
@@ -253,6 +270,8 @@ class AppData(Observable):
 
     @hist_field.setter
     def hist_field(self, new_field):
+        if self.debug:
+            self.logger.print(f"@hist_field\n  old_value={self._hist_field}\n  new_value={new_field}")
         if new_field == self._hist_field:
             return
 
@@ -276,12 +295,14 @@ class AppData(Observable):
         return self._hist_bin_width
     
     @hist_bin_width.setter
-    def hist_bin_width(self, new_bin_width):
-        if new_bin_width == self._hist_bin_width:
+    def hist_bin_width(self, width):
+        if self.debug:
+            self.logger.print(f"@hist_bin_width\n  old_value={self._hist_bin_width}\n  new_value={width}")
+        if width == self._hist_bin_width:
             return
 
-        self._hist_bin_width = new_bin_width
-        self.notify_observers("hist_bin_width", new_bin_width)
+        self._hist_bin_width = width
+        self.notify_observers("hist_bin_width", width)
 
         # update hist_num_bins
         if self.update_num_bins:
@@ -295,12 +316,14 @@ class AppData(Observable):
         return self._hist_num_bins
     
     @hist_num_bins.setter
-    def hist_num_bins(self, new_num_bins):
-        if new_num_bins == self._hist_num_bins:
+    def hist_num_bins(self, num_bins):
+        if self.debug:
+            self.logger.print(f"@hist_num_bins\n  old_value={self._hist_num_bins}\n  new_value={num_bins}")
+        if num_bins == self._hist_num_bins:
             return
         
-        self._hist_num_bins = new_num_bins
-        self.notify_observers("hist_num_bins", new_num_bins)
+        self._hist_num_bins = num_bins
+        self.notify_observers("hist_num_bins", num_bins)
 
         # update hist_bin_width
         if self.update_bin_width:
@@ -314,100 +337,116 @@ class AppData(Observable):
         return self._hist_plot_style
     
     @hist_plot_style.setter
-    def hist_plot_style(self, new_plot_style):
-        if new_plot_style == self._hist_plot_style:
+    def hist_plot_style(self, hist_style):
+        if self.debug:
+            self.logger.print(f"@hist_plot_style\n  old_value={self._hist_plot_style}\n  new_value={hist_style}")
+        if hist_style == self._hist_plot_style:
             return
-        elif new_plot_style not in ['PDF','CDF','log-scaling']:
+        elif hist_style not in ['PDF','CDF','log-scaling']:
             ValueError("Unknown histogram plot style")
 
-        self._hist_plot_style = new_plot_style
-        self.notify_observers("hist_plot_style", new_plot_style)
+        self._hist_plot_style = hist_style
+        self.notify_observers("hist_plot_style", hist_style)
 
     @property
     def corr_method(self):
         return self._corr_method
     
     @corr_method.setter
-    def corr_method(self, new_corr_method):
-        if new_corr_method == self._corr_method:
+    def corr_method(self, method):
+        if self.debug:
+            self.logger.print(f"@corr_method\n  old_value={self._corr_method}\n  new_value={method}")
+        if method == self._corr_method:
             return
-        elif new_corr_method not in ['none', 'Pearson', 'Spearman', 'Kendall']:
+        elif method not in ['none', 'Pearson', 'Spearman', 'Kendall']:
             ValueError("Unknow correlation plot type")
     
-        self._corr_method = new_corr_method
-        self.notify_observers("corr_method", new_corr_method)
+        self._corr_method = method
+        self.notify_observers("corr_method", method)
 
     @property
     def corr_squared(self):
         return self._corr_squared
     
     @corr_squared.setter
-    def corr_squared(self, new_corr_squared):
-        if new_corr_squared == self._corr_squared:
+    def corr_squared(self, flag):
+        if self.debug:
+            self.logger.print(f"@corr_squared\n  old_value={self._corr_squared}\n  new_value={flag}")
+        if flag == self._corr_squared:
             return
     
-        self._corr_squared = new_corr_squared
-        self.notify_observers("corr_squared", new_corr_squared)
+        self._corr_squared = flag
+        self.notify_observers("@corr_squared", flag)
 
     @property
     def noise_red_method(self):
         return self._noise_red_method
     
     @noise_red_method.setter
-    def noise_red_method(self, new_noise_red_method):
-        if new_noise_red_method == self._noise_red_method:
+    def noise_red_method(self, method):
+        if self.debug:
+            self.logger.print(f"@noise_red_method\n  old_value={self._noise_red_method}\n  new_value={method}")
+        if method == self._noise_red_method:
             return
     
-        self._noise_red_method = new_noise_red_method
-        self.notify_observers("noise_red_method", new_noise_red_method)
+        self._noise_red_method = method
+        self.notify_observers("noise_red_method", method)
 
     @property
     def noise_red_option1(self):
         return self._noise_red_option1
     
     @noise_red_option1.setter
-    def noise_red_option1(self, new_noise_red_option1):
-        if new_noise_red_option1 == self._noise_red_option1:
+    def noise_red_option1(self, value):
+        if self.debug:
+            self.logger.print(f"@noise_red_option1\n  old_value={self._noise_red_option1}\n  new_value={value}")
+        if value == self._noise_red_option1:
             return
     
-        self._noise_red_option1 = new_noise_red_option1
-        self.notify_observers("noise_red_option1", new_noise_red_option1)
+        self._noise_red_option1 = value
+        self.notify_observers("noise_red_option1", value)
 
     @property
     def noise_red_option2(self):
         return self._noise_red_option2
     
     @noise_red_option2.setter
-    def noise_red_option2(self, new_noise_red_option2):
-        if new_noise_red_option2 == self._noise_red_option2:
+    def noise_red_option2(self, value):
+        if self.debug:
+            self.logger.print(f"@noise_red_option2\n  old_value={self._noise_red_option2}\n  new_value={value}")
+        if value == self._noise_red_option2:
             return
     
-        self._noise_red_option2 = new_noise_red_option2
-        self.notify_observers("noise_red_option2", new_noise_red_option2)
+        self._noise_red_option2 = value
+        self.notify_observers("noise_red_option2", value)
 
     @property
     def apply_noise_red(self):
         return self._apply_noise_red
     
     @apply_noise_red.setter
-    def apply_noise_red(self, new_apply_noise_red):
-        if new_apply_noise_red == self._apply_noise_red:
+    def apply_noise_red(self, flag):
+        if self.debug:
+            self.logger.print(f"@apply_noise_red\n  old_value={self._apply_noise_red}\n  new_id={flag}")
+        if flag == self._apply_noise_red:
             return
     
-        self._apply_noise_red = new_apply_noise_red
-        self.notify_observers("apply_noise_red", new_apply_noise_red)
+        self._apply_noise_red = flag
+        self.notify_observers("apply_noise_red", flag)
     
     @property
     def gradient_flag(self):
         return self._gradient_flag
     
     @gradient_flag.setter
-    def gradient_flag(self, new_gradient_flag):
-        if new_gradient_flag == self._gradient_flag:
+    def gradient_flag(self, flag):
+        if self.debug:
+            self.logger.print(f"@gradient_flag\n  old_value={self._gradient_flag}\n  new_value={flag}")
+        if flag == self._gradient_flag:
             return
     
-        self._gradient_flag = new_gradient_flag
-        self.notify_observers("gradient_flag", new_gradient_flag)
+        self._gradient_flag = flag
+        self.notify_observers("gradient_flag", flag)
     
     ### Scatter Properties ###
     @property
@@ -417,6 +456,8 @@ class AppData(Observable):
 
     @x_field_type.setter
     def x_field_type(self, new_field_type):
+        if self.debug:
+            self.logger.print(f"@x_field_type\n  old_value={self._x_field_type}\n  new_value={new_field_type}")
         if new_field_type != self._x_field_type:
             self.validate_field_type(new_field_type)
             self._x_field_type = new_field_type
@@ -429,6 +470,8 @@ class AppData(Observable):
 
     @y_field_type.setter
     def y_field_type(self, new_field_type):
+        if self.debug:
+            self.logger.print(f"@y_field_type\n  old_value={self._y_field_type}\n  new_value={new_field_type}")
         if new_field_type != self._y_field_type:
             self.validate_field_type(new_field_type)
             self._y_field_type = new_field_type
@@ -441,6 +484,8 @@ class AppData(Observable):
 
     @z_field_type.setter
     def z_field_type(self, new_field_type):
+        if self.debug:
+            self.logger.print(f"@z_field_type\n  old_value={self._z_field_type}\n  new_value={new_field_type}")
         if new_field_type != self._z_field_type:
             self.validate_field_type(new_field_type)
             self._z_field_type = new_field_type
@@ -451,36 +496,42 @@ class AppData(Observable):
         return self._x_field
     
     @x_field.setter
-    def x_field(self, new_x_field):
-        if new_x_field == self._x_field:
+    def x_field(self, new_field):
+        if self.debug:
+            self.logger.print(f"@x_field\n  old_value={self._x_field}\n  new_value={new_field}")
+        if new_field == self._x_field:
             return
     
-        self._x_field = new_x_field
-        self.notify_observers("x_field", new_x_field)
+        self._x_field = new_field
+        self.notify_observers("x_field", new_field)
     
     @property
     def y_field(self):
         return self._y_field
     
     @y_field.setter
-    def y_field(self, new_y_field):
-        if new_y_field == self._y_field:
+    def y_field(self, new_field):
+        if self.debug:
+            self.logger.print(f"@y_field\n  old_value={self._y_field}\n  new_value={new_field}")
+        if new_field == self._y_field:
             return
     
-        self._y_field = new_y_field
-        self.notify_observers("y_field", new_y_field)
+        self._y_field = new_field
+        self.notify_observers("y_field", new_field)
     
     @property
     def z_field(self):
         return self._z_field
     
     @z_field.setter
-    def z_field(self, new_z_field):
-        if new_z_field == self._z_field:
+    def z_field(self, new_field):
+        if self.debug:
+            self.logger.print(f"@z_field\n  old_value={self._z_field}\n  new_value={new_field}")
+        if new_field == self._z_field:
             return
     
-        self._z_field = new_z_field
-        self.notify_observers("z_field", new_z_field)
+        self._z_field = new_field
+        self.notify_observers("z_field", new_field)
 
     @property
     def scatter_preset(self):
@@ -488,6 +539,8 @@ class AppData(Observable):
     
     @scatter_preset.setter
     def scatter_preset(self, new_scatter_preset):
+        if self.debug:
+            self.logger.print(f"@scatter_preset\n  old_value={self._scatter_preset}\n  new_value={new_scatter_preset}")
         if new_scatter_preset == self._scatter_preset:
             return
     
@@ -500,12 +553,14 @@ class AppData(Observable):
         return self._heatmap_style
     
     @heatmap_style.setter
-    def heatmap_style(self, new_heatmap_style):
-        if new_heatmap_style == self._heatmap_style:
+    def heatmap_style(self, new_style):
+        if self.debug:
+            self.logger.print(f"@heatmap_style\n  old_value={self._heatmap_style}\n  new_value={new_style}")
+        if new_style == self._heatmap_style:
             return
     
-        self._heatmap_style = new_heatmap_style
-        self.notify_observers("heatmap_style", new_heatmap_style)
+        self._heatmap_style = new_style
+        self.notify_observers("heatmap_style", new_style)
 
     ### Ternary Map ###
     @property
@@ -513,12 +568,14 @@ class AppData(Observable):
         return self._ternary_colormap
     
     @ternary_colormap.setter
-    def ternary_colormap(self, new_ternary_colormap):
-        if new_ternary_colormap == self._ternary_colormap:
+    def ternary_colormap(self, new_cmap):
+        if self.debug:
+            self.logger.print(f"@ternary_colormap\n  old_value={self._ternary_colormap}\n  new_value={new_cmap}")
+        if new_cmap == self._ternary_colormap:
             return
     
-        self._ternary_colormap = new_ternary_colormap
-        self.notify_observers("ternary_colormap", new_ternary_colormap)
+        self._ternary_colormap = new_cmap
+        self.notify_observers("ternary_colormap", new_cmap)
 
 
     @property
@@ -526,48 +583,56 @@ class AppData(Observable):
         return self._ternary_color_x
     
     @ternary_color_x.setter
-    def ternary_color_x(self, new_ternary_color_x):
-        if new_ternary_color_x == self._ternary_color_x:
+    def ternary_color_x(self, new_color):
+        if self.debug:
+            self.logger.print(f"@ternary_color_x\n  old_value={self._ternary_color_x}\n  new_value={new_color}")
+        if new_color == self._ternary_color_x:
             return
     
-        self._ternary_color_x = new_ternary_color_x
-        self.notify_observers("ternary_color_x", new_ternary_color_x)
+        self._ternary_color_x = new_color
+        self.notify_observers("ternary_color_x", new_color)
 
     @property
     def ternary_color_y(self):
         return self._ternary_color_y
     
     @ternary_color_y.setter
-    def ternary_color_y(self, new_ternary_color_y):
-        if new_ternary_color_y == self._ternary_color_y:
+    def ternary_color_y(self, new_color):
+        if self.debug:
+            self.logger.print(f"@ternary_color_y\n  old_value={self._ternary_color_y}\n  new_value={new_color}")
+        if new_color == self._ternary_color_y:
             return
     
-        self._ternary_color_y = new_ternary_color_y
-        self.notify_observers("ternary_color_y", new_ternary_color_y)
+        self._ternary_color_y = new_color
+        self.notify_observers("ternary_color_y", new_color)
 
     @property
     def ternary_color_z(self):
         return self._ternary_color_z
     
     @ternary_color_z.setter
-    def ternary_color_z(self, new_ternary_color_z):
-        if new_ternary_color_z == self._ternary_color_z:
+    def ternary_color_z(self, new_color):
+        if self.debug:
+            self.logger.print(f"@ternary_color_z\n  old_value={self._ternary_color_z}\n  new_value={new_color}")
+        if new_color == self._ternary_color_z:
             return
     
-        self._ternary_color_z = new_ternary_color_z
-        self.notify_observers("ternary_color_z", new_ternary_color_z)
+        self._ternary_color_z = new_color
+        self.notify_observers("ternary_color_z", new_color)
 
     @property
     def ternary_color_m(self):
         return self._ternary_color_m
     
     @ternary_color_m.setter
-    def ternary_color_m(self, new_ternary_color_m):
-        if new_ternary_color_m == self._ternary_color_m:
+    def ternary_color_m(self, new_color):
+        if self.debug:
+            self.logger.print(f"@ternary_color_m\n  old_value={self._ternary_color_m}\n  new_value={new_color}")
+        if new_color == self._ternary_color_m:
             return
     
-        self._ternary_color_m = new_ternary_color_m
-        self.notify_observers("ternary_color_m", new_ternary_color_m)
+        self._ternary_color_m = new_color
+        self.notify_observers("ternary_color_m", new_color)
 
     ### Multidimensional Properties ###
     @property
@@ -575,38 +640,44 @@ class AppData(Observable):
         return self._norm_reference
     
     @norm_reference.setter
-    def norm_reference(self, new_norm_reference):
-        if new_norm_reference == self._norm_reference:
+    def norm_reference(self, new_ref):
+        if self.debug:
+            self.logger.print(f"@norm_reference\n  old_value={self._norm_reference}\n  new_value={new_ref}")
+        if new_ref == self._norm_reference:
             return
     
-        self._norm_reference = new_norm_reference
-        self.notify_observers("norm_reference", new_norm_reference)
+        self._norm_reference = new_ref
+        self.notify_observers("norm_reference", new_ref)
 
     @property
     def ndim_analyte_set(self):
         return self._ndim_analyte_set
     
     @ndim_analyte_set.setter
-    def ndim_analyte_set(self, new_ndim_analyte_set):
-        if new_ndim_analyte_set == self._ndim_analyte_set:
+    def ndim_analyte_set(self, new_list):
+        if self.debug:
+            self.logger.print(f"@ndim_analyte_set\n  old_value={self._ndim_analyte_set}\n  new_value={new_list}")
+        if new_list == self._ndim_analyte_set:
             return
-        elif new_ndim_analyte_set not in self.ndim_list_dict.keys():
-            ValueError(f"N Dim list ({new_ndim_analyte_set}) is not a defined option.")
+        elif new_list not in self.ndim_list_dict.keys():
+            ValueError(f"N Dim list ({new_list}) is not a defined option.")
     
-        self._ndim_analyte_set = new_ndim_analyte_set
-        self.notify_observers("ndim_analyte_set", new_ndim_analyte_set) 
+        self._ndim_analyte_set = new_list
+        self.notify_observers("ndim_analyte_set", new_list) 
 
     @property
     def ndim_quantile_index(self):
         return self._ndim_quantile_index
     
     @ndim_quantile_index.setter
-    def ndim_quantile_index(self, new_ndim_quantile_index):
-        if new_ndim_quantile_index == self._ndim_quantile_index:
+    def ndim_quantile_index(self, new_index):
+        if self.debug:
+            self.logger.print(f"@ndim_quantile_index\n  old_value={self._ndim_quantile_index}\n  new_value={new_index}")
+        if new_index == self._ndim_quantile_index:
             return
     
-        self._ndim_quantile_index = new_ndim_quantile_index
-        self.notify_observers("ndim_quantile_index", new_ndim_quantile_index)
+        self._ndim_quantile_index = new_index
+        self.notify_observers("ndim_quantile_index", new_index)
 
 
 
@@ -616,12 +687,14 @@ class AppData(Observable):
         return self._dim_red_method
     
     @dim_red_method.setter
-    def dim_red_method(self, new_dim_red_method):
-        if new_dim_red_method == self._dim_red_method:
+    def dim_red_method(self, method):
+        if self.debug:
+            self.logger.print(f"@dim_red_method\n  old_value={self._dim_red_method}\n  new_value={method}")
+        if method == self._dim_red_method:
             return
     
-        self._dim_red_method = new_dim_red_method
-        self.notify_observers("dim_red_method", new_dim_red_method)
+        self._dim_red_method = method
+        self.notify_observers("dim_red_method", method)
 
     @property
     def dim_red_x(self):
@@ -629,6 +702,8 @@ class AppData(Observable):
     
     @dim_red_x.setter
     def dim_red_x(self, new_dim_red_x):
+        if self.debug:
+            self.logger.print(f"@dim_red_x\n  old_value={self._dim_red_x}\n  new_value={new_dim_red_x}")
         if new_dim_red_x == self._dim_red_x:
             return
     
@@ -641,6 +716,8 @@ class AppData(Observable):
     
     @dim_red_y.setter
     def dim_red_y(self, new_dim_red_y):
+        if self.debug:
+            self.logger.print(f"@dim_red_y\n  old_value={self._dim_red_y}\n  new_value={new_dim_red_y}")
         if new_dim_red_y == self._dim_red_y:
             return
     
@@ -653,14 +730,16 @@ class AppData(Observable):
         return self._cluster_method
     
     @cluster_method.setter
-    def cluster_method(self, new_cluster_method):
-        if new_cluster_method == self._cluster_method:
+    def cluster_method(self, method):
+        if self.debug:
+            self.logger.print(f"@cluster_method\n  old_value={self._cluster_method}\n  new_value={method}")
+        if method == self._cluster_method:
             return
-        elif new_cluster_method not in list(self.cluster_dict.keys()):
-            ValueError(f"Unknown cluster type ({new_cluster_method})")
+        elif method not in list(self.cluster_dict.keys()):
+            ValueError(f"Unknown cluster type ({method})")
 
-        self._cluster_method = new_cluster_method
-        self.notify_observers("cluster_method", new_cluster_method)
+        self._cluster_method = method
+        self.notify_observers("cluster_method", method)
 
     @property
     def max_clusters(self):
@@ -668,12 +747,14 @@ class AppData(Observable):
         return self._max_clusters
     
     @max_clusters.setter
-    def max_clusters(self, new_max_clusters):
-        if new_max_clusters == self._max_clusters:
+    def max_clusters(self, new_value):
+        if self.debug:
+            self.logger.print(f"@max_clusters\n  old_value={self._max_clusters}\n  new_value={new_value}")
+        if new_value == self._max_clusters:
             return
     
-        self._max_clusters = new_max_clusters
-        self.notify_observers("max_clusters", new_max_clusters)
+        self._max_clusters = new_value
+        self.notify_observers("max_clusters", new_value)
 
     @property
     def num_clusters(self):
@@ -681,84 +762,98 @@ class AppData(Observable):
         return self._num_clusters
     
     @num_clusters.setter
-    def num_clusters(self, new_num_clusters):
-        if new_num_clusters == self._num_clusters:
+    def num_clusters(self, new_value):
+        if self.debug:
+            self.logger.print(f"@num_clusters\n  old_value={self._num_clusters}\n  new_value={new_value}")
+        if new_value == self._num_clusters:
             return
     
-        self._num_clusters = new_num_clusters
-        self.notify_observers("num_clusters", new_num_clusters)
+        self._num_clusters = new_value
+        self.notify_observers("num_clusters", new_value)
 
     @property
     def cluster_seed(self):
         return self._cluster_seed
     
     @cluster_seed.setter
-    def cluster_seed(self, new_cluster_seed):
-        if new_cluster_seed == self._cluster_seed:
+    def cluster_seed(self, new_value):
+        if self.debug:
+            self.logger.print(f"@cluster_seed\n  old_value={self._cluster_seed}\n  new_value={new_value}")
+        if new_value == self._cluster_seed:
             return
     
-        self._cluster_seed = new_cluster_seed
-        self.notify_observers("cluster_seed", new_cluster_seed)
+        self._cluster_seed = new_value
+        self.notify_observers("cluster_seed", new_value)
 
     @property
     def cluster_exponent(self):
         return self._cluster_exponent
     
     @cluster_exponent.setter
-    def cluster_exponent(self, new_cluster_exponent):
-        if new_cluster_exponent == self._cluster_exponent:
+    def cluster_exponent(self, new_value):
+        if self.debug:
+            self.logger.print(f"@cluster_exponent\n  old_value={self._cluster_exponent}\n  new_value={new_value}")
+        if new_value == self._cluster_exponent:
             return
     
-        self._cluster_exponent = new_cluster_exponent
-        self.notify_observers("cluster_exponent", new_cluster_exponent)
+        self._cluster_exponent = new_value
+        self.notify_observers("cluster_exponent", new_value)
 
     @property
     def cluster_distance(self):
         return self._cluster_distance
     
     @cluster_distance.setter
-    def cluster_distance(self, new_cluster_distance):
-        if new_cluster_distance == self._cluster_distance:
+    def cluster_distance(self, new_value):
+        if self.debug:
+            self.logger.print(f"@cluster_distance\n  old_value={self._cluster_distance}\n  new_value={new_value}")
+        if new_value == self._cluster_distance:
             return
     
-        self._cluster_distance = new_cluster_distance
-        self.notify_observers("cluster_distance", new_cluster_distance)
+        self._cluster_distance = new_value
+        self.notify_observers("cluster_distance", new_value)
 
     @property
     def selected_clusters(self):
         return self._selected_clusters
     
     @selected_clusters.setter
-    def selected_clusters(self, new_selected_clusters):
-        if new_selected_clusters == self._selected_clusters:
+    def selected_clusters(self, new_list):
+        if self.debug:
+            self.logger.print(f"@selected_clusters\n  old_value={self._selected_clusters}\n  new_value={new_list}")
+        if new_list == self._selected_clusters:
             return
     
-        self._selected_clusters = new_selected_clusters
-        self.notify_observers("selected_clusters", new_selected_clusters)
+        self._selected_clusters = new_list
+        self.notify_observers("selected_clusters", new_list)
 
     @property
     def dim_red_precondition(self):
         return self._dim_red_precondition
     
     @dim_red_precondition.setter
-    def dim_red_precondition(self, new_dim_red_precondition):
-        if new_dim_red_precondition == self._dim_red_precondition:
+    def dim_red_precondition(self, flag):
+        if self.debug:
+            self.logger.print(f"@dim_red_precondition\n  old_value={self._dim_red_precondition}\n  new_value={flag}")
+        if flag == self._dim_red_precondition:
             return
     
-        self._dim_red_precondition = new_dim_red_precondition
-        self.notify_observers("dim_red_precondition", new_dim_red_precondition)
+        self._dim_red_precondition = flag
+        self.notify_observers("dim_red_precondition", flag)
 
     @property
     def num_basis_for_precondition(self):
         return self._num_basis_for_precondition
     
     @num_basis_for_precondition.setter
-    def num_basis_for_precondition(self, new_num_basis_for_precondition):
-        if new_num_basis_for_precondition == self._num_basis_for_precondition:
+    def num_basis_for_precondition(self, new_value):
+        if self.debug:
+            self.logger.print(f"@num_basis_for_precondition\n  old_value={self._num_basis_for_precondition}\n  new_value={new_value}")
+        if new_value == self._num_basis_for_precondition:
             return
     
-        self._num_basis_for_precondition = new_num_basis_for_precondition
-        self.notify_observers("num_basis_for_precondition", new_num_basis_for_precondition)
+        self._num_basis_for_precondition = new_value
+        self.notify_observers("num_basis_for_precondition", new_value)
 
     @property
     def field_dict(self):
@@ -797,6 +892,8 @@ class AppData(Observable):
         """
         if self.sample_id == '':
             return ['']
+        if self.debug:
+            self.logger.print(f"get_field_list:\n  set_name={set_name}\n  filter={filter}")
 
         data = self.data[self.sample_id].processed_data
 
@@ -829,6 +926,8 @@ class AppData(Observable):
         """
         if (self.hist_field_type == '') or (self.hist_field == ''):
             return
+        if self.debug:
+            self.logger.print(f"update_hist_bin_width")
 
         # get currently selected data
         map_df = self.data[self.sample_id].get_map_data(self._hist_field, self._hist_field_type)
@@ -844,6 +943,8 @@ class AppData(Observable):
         """
         if (self.hist_field_type == '') or (self.hist_field == ''):
             return
+        if self.debug:
+            self.logger.print(f"update_hist_num_bins")
 
         # get currently selected data
         map_df = self.data[self.sample_id].get_map_data(self._hist_field, self._hist_field_type)
@@ -854,6 +955,8 @@ class AppData(Observable):
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to default"""
+        if self.debug:
+            self.logger.print(f"histogram_reset_bins")
         self.hist_num_bins = self.default_hist_num_bins
 
 

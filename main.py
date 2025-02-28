@@ -2459,7 +2459,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if self.logger_options['UI']:
             self.logger.print(f"open_calculator")
-        if not hasattr(self, 'logger'):
+
+        if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
             self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
 
@@ -2502,13 +2503,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens Logger Dock, creates on first instance.  The Logger Dock prints information that can be used to recreate
         changes to data and functions that are called.
         """            
-        if not hasattr(self, 'logger'):
+        if not hasattr(self, 'logger_dock'):
             logfile = os.path.join(BASEDIR,f'resources/log/lame.log')
-            self.logger = LoggerDock(logfile, self)
+            self.logger_dock = LoggerDock(logfile, self)
         else:
-            self.logger.show()
+            self.logger_dock.show()
 
-        self.help_mapping[self.logger] = 'logger'
+        self.help_mapping[self.logger_dock] = 'logger'
 
         #self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 

@@ -12,7 +12,6 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR
 from src.common.Observable import Observable
 from src.common.ScheduleTimer import Scheduler
-from src.common.Logger import LogCounter
 
 class StyleObj():
     pass
@@ -160,7 +159,6 @@ class Styling(Observable):
         super().__init__()
         self.parent = parent
         self.debug = debug
-        self.logger = LogCounter()
         
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
@@ -205,7 +203,7 @@ class Styling(Observable):
     @plot_type.setter
     def plot_type(self, plot_type):
         if self.debug:
-            self.logger.print(f"@plot_type:\n  old value: {self._plot_type}\n  new value: {plot_type}")
+            print(f"@plot_type:\n  old value: {self._plot_type}\n  new value: {plot_type}")
         if plot_type == self._plot_type:
             return
         self._plot_type = plot_type
@@ -220,7 +218,7 @@ class Styling(Observable):
     @xlim.setter
     def xlim(self, value):
         if self.debug:
-            self.logger.print(f"@xlim:\n  old value: {self.style_dict[self._plot_type]['XLim']}\n  new value: {value}")
+            print(f"@xlim:\n  old value: {self.style_dict[self._plot_type]['XLim']}\n  new value: {value}")
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['XLim'] = value
             self.notify_observers("xlim", value)
@@ -235,7 +233,7 @@ class Styling(Observable):
     @xlabel.setter
     def xlabel(self, label):
         if self.debug:
-            self.logger.print(f"@xlabel:\n  old value: {self.style_dict[self._plot_type]['XLabel']}\n  new value: {label}")
+            print(f"@xlabel:\n  old value: {self.style_dict[self._plot_type]['XLabel']}\n  new value: {label}")
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['XLabel'] = label
             self.notify_observers("xlabel", label)
@@ -250,7 +248,7 @@ class Styling(Observable):
     @xscale.setter
     def xscale(self, scale):
         if self.debug:
-            self.logger.print(f"@xscale:\n  old value: {self.style_dict[self._plot_type]['XScale']}\n  new value: {scale}")
+            print(f"@xscale:\n  old value: {self.style_dict[self._plot_type]['XScale']}\n  new value: {scale}")
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['XScale'] = scale
             self.notify_observers("xscale", scale)
@@ -265,7 +263,7 @@ class Styling(Observable):
     @ylim.setter
     def ylim(self, value):
         if self.debug:
-            self.logger.print(f"@ylim:\n  old value: {self.style_dict[self._plot_type]['YLim']}\n  new value: {value}")
+            print(f"@ylim:\n  old value: {self.style_dict[self._plot_type]['YLim']}\n  new value: {value}")
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['YLim'] = value
             self.notify_observers("ylim", value)
@@ -280,7 +278,7 @@ class Styling(Observable):
     @ylabel.setter
     def ylabel(self, label):
         if self.debug:
-            self.logger.print(f"@ylabel:\n  old value: {self.style_dict[self._plot_type]['YLabel']}\n  new value: {label}")
+            print(f"@ylabel:\n  old value: {self.style_dict[self._plot_type]['YLabel']}\n  new value: {label}")
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['YLabel'] = label
             self.notify_observers("ylabel", label)
@@ -295,7 +293,7 @@ class Styling(Observable):
     @yscale.setter
     def yscale(self, scale):
         if self.debug:
-            self.logger.print(f"@yscale:\n  old value: {self.style_dict[self._plot_type]['YScale']}\n  new value: {scale}")
+            print(f"@yscale:\n  old value: {self.style_dict[self._plot_type]['YScale']}\n  new value: {scale}")
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['YScale'] = scale
             self.notify_observers("yscale", scale)
@@ -310,7 +308,7 @@ class Styling(Observable):
     @zlim.setter
     def zlim(self, value):
         if self.debug:
-            self.logger.print(f"@zlim:\n  old value: {self.style_dict[self._plot_type]['ZLim']}\n  new value: {value}")
+            print(f"@zlim:\n  old value: {self.style_dict[self._plot_type]['ZLim']}\n  new value: {value}")
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['ZLim'] = value
             self.notify_observers("zscale", value)
@@ -325,7 +323,7 @@ class Styling(Observable):
     @zlabel.setter
     def zlabel(self, label):
         if self.debug:
-            self.logger.print(f"@zlabel:\n  old value: {self.style_dict[self._plot_type]['ZLabel']}\n  new value: {label}")
+            print(f"@zlabel:\n  old value: {self.style_dict[self._plot_type]['ZLabel']}\n  new value: {label}")
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['ZLabel'] = label
             self.notify_observers("zlabel", label)
@@ -340,7 +338,7 @@ class Styling(Observable):
     @zscale.setter
     def zscale(self, scale):
         if self.debug:
-            self.logger.print(f"@zscale:\n  old value: {self.style_dict[self._plot_type]['ZScale']}\n  new value: {scale}")
+            print(f"@zscale:\n  old value: {self.style_dict[self._plot_type]['ZScale']}\n  new value: {scale}")
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['ZScale'] = scale
             self.notify_observers("zscale", scale)
@@ -355,7 +353,7 @@ class Styling(Observable):
     @aspect_ratio.setter
     def aspect_ratio(self, value):
         if self.debug:
-            self.logger.print(f"@aspect_ratio:\n  old value: {self.style_dict[self._plot_type]['AspectRatio']}\n  new value: {value}")
+            print(f"@aspect_ratio:\n  old value: {self.style_dict[self._plot_type]['AspectRatio']}\n  new value: {value}")
         if value is None or isinstance(aspect_ratio, float):
             self.style_dict[self._plot_type]['AspectRatio'] = value
             self.notify_observers("aspect_ratio", value)
@@ -368,7 +366,7 @@ class Styling(Observable):
     @tick_dir.setter
     def tick_dir(self, new_dir):
         if self.debug:
-            self.logger.print(f"@tick_dir:\n  old value: {self.style_dict[self._plot_type]['TickDir']}\n  new value: {new_dir}")
+            print(f"@tick_dir:\n  old value: {self.style_dict[self._plot_type]['TickDir']}\n  new value: {new_dir}")
         if isinstance(new_dir, str):
             self.style_dict[self._plot_type]['TickDir'] = new_dir
             self.notify_observers("tick_dir", new_dir)
@@ -383,7 +381,7 @@ class Styling(Observable):
     @font.setter
     def font(self, font_family):
         if self.debug:
-            self.logger.print(f"@font:\n  old value: {self.style_dict[self._plot_type]['Font']}\n  new value: {font_family}")
+            print(f"@font:\n  old value: {self.style_dict[self._plot_type]['Font']}\n  new value: {font_family}")
         if isinstance(font_family, str):
             self.style_dict[self._plot_type]['Font'] = font_family
             self.notify_observers("font_family", font_family)
@@ -398,7 +396,7 @@ class Styling(Observable):
     @font_size.setter
     def font_size(self, value):
         if self.debug:
-            self.logger.print(f"@font_size:\n  old value: {self.style_dict[self._plot_type]['FontSize']}\n  new value: {value}")
+            print(f"@font_size:\n  old value: {self.style_dict[self._plot_type]['FontSize']}\n  new value: {value}")
         if isinstance(value, float):
             self.style_dict[self._plot_type]['FontSize'] = value
             self.notify_observers("font_size", value)
@@ -413,7 +411,7 @@ class Styling(Observable):
     @scale_dir.setter
     def scale_dir(self, new_dir):
         if self.debug:
-            self.logger.print(f"@scale_dir:\n  old value: {self.style_dict[self._plot_type]['ScaleDir']}\n  new value: {new_dir}")
+            print(f"@scale_dir:\n  old value: {self.style_dict[self._plot_type]['ScaleDir']}\n  new value: {new_dir}")
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
             if new_dir != self.style_dict[self._plot_type]['ScaleDir']:
                 self.style_dict[self._plot_type]['ScaleDir'] = new_dir
@@ -429,7 +427,7 @@ class Styling(Observable):
     @scale_location.setter
     def scale_location(self, location):
         if self.debug:
-            self.logger.print(f"@scale_location:\n  old value: {self.style_dict[self._plot_type]['ScaleLocation']}\n  new value: {location}")
+            print(f"@scale_location:\n  old value: {self.style_dict[self._plot_type]['ScaleLocation']}\n  new value: {location}")
         if (location is not None) and isinstance(location, str) and (location in ['northeast', 'northwest', 'southwest', 'southeast']):
             self.style_dict[self._plot_type]['ScaleLocation'] = location
         else:
@@ -443,7 +441,7 @@ class Styling(Observable):
     @scale_length.setter
     def scale_length(self, length):
         if self.debug:
-            self.logger.print(f"@scale_length:\n  old value: {self.style_dict[self._plot_type]['ScaleLength']}\n  new value: {length}")
+            print(f"@scale_length:\n  old value: {self.style_dict[self._plot_type]['ScaleLength']}\n  new value: {length}")
         if length is None or isinstance(length, float):
             # check constraints on length
             x_range = self.xlim[1] - self.xlim[0]
@@ -466,7 +464,7 @@ class Styling(Observable):
     @overlay_color.setter
     def overlay_color(self, hexstr):
         if self.debug:
-            self.logger.print(f"@overlay_color:\n  old value: {self.style_dict[self._plot_type]['OverlayColor']}\n  new value: {hexstr}")
+            print(f"@overlay_color:\n  old value: {self.style_dict[self._plot_type]['OverlayColor']}\n  new value: {hexstr}")
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['OverlayColor'] = hexstr
         else:
@@ -479,7 +477,7 @@ class Styling(Observable):
     @show_mass.setter
     def show_mass(self, flag):
         if self.debug:
-            self.logger.print(f"@show_mass:\n  old state: {self._show_mass}\n  new state: {flag}")
+            print(f"@show_mass:\n  old state: {self._show_mass}\n  new state: {flag}")
         if flag == self._show_mass:
             return
     
@@ -494,7 +492,7 @@ class Styling(Observable):
     @marker.setter
     def marker(self, symbol):
         if self.debug:
-            self.logger.print(f"@marker:\n  old value: {self.style_dict[self._plot_type]['Marker']}\n  new value: {symbol}")
+            print(f"@marker:\n  old value: {self.style_dict[self._plot_type]['Marker']}\n  new value: {symbol}")
         if isinstance(symbol, float):
             self.style_dict[self._plot_type]['Marker'] = symbol
         else:
@@ -508,7 +506,7 @@ class Styling(Observable):
     @marker_size.setter
     def marker_size(self, size):
         if self.debug:
-            self.logger.print(f"@marker_size:\n  old value: {self.style_dict[self._plot_type]['MarkerSize']}\n  new value: {size}")
+            print(f"@marker_size:\n  old value: {self.style_dict[self._plot_type]['MarkerSize']}\n  new value: {size}")
         if isinstance(size, float):
             self.style_dict[self._plot_type]['MarkerSize'] = size
         else:
@@ -522,7 +520,7 @@ class Styling(Observable):
     @marker_color.setter
     def marker_color(self, hexstr):
         if self.debug:
-            self.logger.print(f"@marker_color:\n  old value: {self.style_dict[self._plot_type]['MarkerColor']}\n  new value: {hexstr}")
+            print(f"@marker_color:\n  old value: {self.style_dict[self._plot_type]['MarkerColor']}\n  new value: {hexstr}")
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['MarkerColor'] = hexstr
         else:
@@ -536,7 +534,7 @@ class Styling(Observable):
     @marker_alpha.setter
     def marker_alpha(self, alpha):
         if self.debug:
-            self.logger.print(f"@marker_alpha:\n  old value: {self.style_dict[self._plot_type]['MarkerAlpha']}\n  new value: {alpha}")
+            print(f"@marker_alpha:\n  old value: {self.style_dict[self._plot_type]['MarkerAlpha']}\n  new value: {alpha}")
         if isinstance(alpha, float) and 0 <= alpha and alpha <= 1:
             self.style_dict[self._plot_type]['MarkerAlpha'] = alpha
         else:
@@ -550,7 +548,7 @@ class Styling(Observable):
     @line_width.setter
     def line_width(self, width):
         if self.debug:
-            self.logger.print(f"@line_width:\n  old value: {self.style_dict[self._plot_type]['LineWidth']}\n  new value: {width}")
+            print(f"@line_width:\n  old value: {self.style_dict[self._plot_type]['LineWidth']}\n  new value: {width}")
         if isinstance(width, float):
             self.style_dict[self._plot_type]['LineWidth'] = width
         else:
@@ -564,7 +562,7 @@ class Styling(Observable):
     @line_multiplier.setter
     def line_multiplier(self, value):
         if self.debug:
-            self.logger.print(f"@line_multiplier:\n  old value: {self.style_dict[self._plot_type]['LineMultiplier']}\n  new value: {value}")
+            print(f"@line_multiplier:\n  old value: {self.style_dict[self._plot_type]['LineMultiplier']}\n  new value: {value}")
         if value is None or isinstance(value, float):
             self.style_dict[self._plot_type]['LineMultiplier'] = value
         else:
@@ -578,7 +576,7 @@ class Styling(Observable):
     @line_color.setter
     def line_color(self, hexstr):
         if self.debug:
-            self.logger.print(f"@line_color:\n  old value: {self.style_dict[self._plot_type]['LineColor']}\n  new value: {hexstr}")
+            print(f"@line_color:\n  old value: {self.style_dict[self._plot_type]['LineColor']}\n  new value: {hexstr}")
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['LineColor'] = hexstr
         else:
@@ -592,7 +590,7 @@ class Styling(Observable):
     @color_field_type.setter
     def color_field_type(self, field_type):
         if self.debug:
-            self.logger.print(f"@color_field_type:\n  old value: {self.style_dict[self._plot_type]['ColorFieldType']}\n  new value: {field_type}")
+            print(f"@color_field_type:\n  old value: {self.style_dict[self._plot_type]['ColorFieldType']}\n  new value: {field_type}")
         if (field_type is None) or isinstance(field_type, str):
             if field_type == self.style_dict[self._plot_type]['ColorFieldType']:
                 return
@@ -610,7 +608,7 @@ class Styling(Observable):
     @color_field.setter
     def color_field(self, field):
         if self.debug:
-            self.logger.print(f"@color_field:\n  old value: {self.style_dict[self._plot_type]['ColorField']}\n  new value: {field}")
+            print(f"@color_field:\n  old value: {self.style_dict[self._plot_type]['ColorField']}\n  new value: {field}")
         if (field is None) or isinstance(field, str):
             # update color field and associated style widgets
             if field == self.style_dict[self._plot_type]['ColorField']:
@@ -629,7 +627,7 @@ class Styling(Observable):
     @cmap.setter
     def cmap(self, name):
         if self.debug:
-            self.logger.print(f"@cmap:\n  old value: {self.style_dict[self._plot_type]['Colormap']}\n  new value: {name}")
+            print(f"@cmap:\n  old value: {self.style_dict[self._plot_type]['Colormap']}\n  new value: {name}")
         if (name is None) or isinstance(name, str):
             self.style_dict[self._plot_type]['Colormap'] = name
         else:
@@ -643,7 +641,7 @@ class Styling(Observable):
     @cbar_reverse.setter
     def cbar_reverse(self, flag):
         if self.debug:
-            self.logger.print(f"@cbar_reverse:\n  old value: {self.style_dict[self._plot_type]['CbarReverse']}\n  new value: {flag}")
+            print(f"@cbar_reverse:\n  old value: {self.style_dict[self._plot_type]['CbarReverse']}\n  new value: {flag}")
         if (flag is None) or isinstance(flag, str):
             self.style_dict[self._plot_type]['CbarReverse'] = flag
         else:
@@ -657,7 +655,7 @@ class Styling(Observable):
     @cbar_dir.setter
     def cbar_dir(self, new_dir):
         if self.debug:
-            self.logger.print(f"@cbar_dir:\n  old value: {self.style_dict[self._plot_type]['CbarDir']}\n  new value: {new_dir}")
+            print(f"@cbar_dir:\n  old value: {self.style_dict[self._plot_type]['CbarDir']}\n  new value: {new_dir}")
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
             self.style_dict[self._plot_type]['CbarDir'] = new_dir
         else:
@@ -671,7 +669,7 @@ class Styling(Observable):
     @clim.setter
     def clim(self, value):
         if self.debug:
-            self.logger.print(f"@clim:\n  old value: {self.style_dict[self._plot_type]['CLim']}\n  new value: {value}")
+            print(f"@clim:\n  old value: {self.style_dict[self._plot_type]['CLim']}\n  new value: {value}")
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['CLim'] = value
             self.notify_observers("clim", value)
@@ -686,7 +684,7 @@ class Styling(Observable):
     @clabel.setter
     def clabel(self, label):
         if self.debug:
-            self.logger.print(f"@clabel:\n  old value: {self.style_dict[self._plot_type]['CLabel']}\n  new value: {label}")
+            print(f"@clabel:\n  old value: {self.style_dict[self._plot_type]['CLabel']}\n  new value: {label}")
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['CLabel'] = label
             self.notify_observers("clabel", label)
@@ -701,7 +699,7 @@ class Styling(Observable):
     @cscale.setter
     def cscale(self, scale):
         if self.debug:
-            self.logger.print(f"@cscale:\n  old value: {self.style_dict[self._plot_type]['CScale']}\n  new value: {scale}")
+            print(f"@cscale:\n  old value: {self.style_dict[self._plot_type]['CScale']}\n  new value: {scale}")
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['CScale'] = scale
             self.notify_observers("cscale", scale)
@@ -716,7 +714,7 @@ class Styling(Observable):
     @resolution.setter
     def resolution(self, value):
         if self.debug:
-            self.logger.print(f"@resolution:\n  old value: {self.style_dict[self._plot_type]['Resolution']}\n  new value: {value}")
+            print(f"@resolution:\n  old value: {self.style_dict[self._plot_type]['Resolution']}\n  new value: {value}")
         if value is None or isinstance(value, int):
             self.style_dict[self._plot_type]['Resolution'] = value
         else:
@@ -731,7 +729,7 @@ class Styling(Observable):
             Length of scalebar dependent on direction of scalebar.
         """        
         if self.debug:
-            self.logger.print("default_scale_length")
+            print("default_scale_length")
 
         if (self._plot_type not in self.map_plot_types) or (self.scale_dir == 'none'):
             return None
@@ -772,15 +770,13 @@ class Styling(Observable):
     # -------------------------------------
     def print_properties(self):
         for attr, value in vars(self).items():
-            self.logger.print(f"{attr}: {value}")
+            print(f"{attr}: {value}")
 
 
 class StyleTheme():
     def __init__(self, parent=None, debug=False):
         self.parent = parent
         self.debug = debug
-
-        self.logger = LogCounter()
 
     # Themes
     # -------------------------------------
@@ -795,7 +791,7 @@ class StyleTheme():
             List of style themes
         """
         if self.debug:
-            self.logger.print("load_theme_names")
+            print("load_theme_names")
 
         # read filenames with *.sty
         file_list = os.listdir(os.path.join(BASEDIR,'resources/styles/'))
@@ -820,7 +816,7 @@ class StyleTheme():
             Style dictionary for all plot types.
         """
         if self.debug:
-            self.logger.print(f"read_theme: {name}")
+            print(f"read_theme: {name}")
 
         if name == 'default':
             return self.default_style_dict()
@@ -851,7 +847,7 @@ class StyleTheme():
             Name of style theme.
         """
         if self.debug:
-            self.logger.print("input_theme_name_dlg")
+            print("input_theme_name_dlg")
         
         name, ok = QInputDialog.getText(None, 'Save custom theme', 'Enter theme name:')
         if ok:
@@ -876,7 +872,7 @@ class StyleTheme():
         """
 
         if self.debug:
-            self.logger.print("default_style_dict")
+            print("default_style_dict")
 
         styles = {}
 
@@ -980,7 +976,6 @@ class StylingDock(Styling):
 
         self.ui = parent
         self.app_data = parent.app_data
-        self.logger = LogCounter()
 
         self.debug = debug
         
@@ -1184,7 +1179,7 @@ class StylingDock(Styling):
         """Toggles signals from all style widgets.  Useful when updating many widgets."""        
 
         if self.debug:
-            self.logger.print(f"toggle_signals, _signal_state: {self._signal_state}")
+            print(f"toggle_signals, _signal_state: {self._signal_state}")
 
         ui = self.ui
 
@@ -1252,7 +1247,7 @@ class StylingDock(Styling):
     def disable_style_widgets(self):
         """Disables all style related widgets."""        
         if self.debug:
-            self.logger.print("disable_style_widgets")
+            print("disable_style_widgets")
         ui = self.ui
 
         # x-axis widgets
@@ -1317,7 +1312,7 @@ class StylingDock(Styling):
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
         selected in ``MainWindow.comboBoxPlotType."""
         if self.debug:
-            self.logger.print("toggle_style_widgets")
+            print("toggle_style_widgets")
 
         ui = self.ui
 
@@ -1642,7 +1637,7 @@ class StylingDock(Styling):
     def toggle_style_labels(self):
         """Toggles style labels based on enabled/disabled style widgets."""        
         if self.debug:
-            self.logger.print("toggle_style_labels")
+            print("toggle_style_labels")
         ui = self.ui
 
         # axes properties
@@ -1765,7 +1760,7 @@ class StylingDock(Styling):
             Style dictionary for the current plot type. Defaults to ``None``
         """
         if self.debug:
-            self.logger.print("set_style_widgets")
+            print("set_style_widgets")
 
         if self.app_data.sample_id == '':
             return
@@ -1946,7 +1941,7 @@ class StylingDock(Styling):
     # def update_style_dict(self):
     #     """Get style properties"""        
     #     if self.debug:
-    #         self.logger.print("update_style_dict")
+    #         print("update_style_dict")
     #     self.ui = self.self.ui
 
     #     parent.plot_types[parent.toolBox.currentIndex()][0] = parent.comboBoxPlotType.currentIndex()
@@ -2003,7 +1998,7 @@ class StylingDock(Styling):
         combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
         if self.debug:
-            self.logger.print(f"plot_type_callback:\n  new_plot_type={new_plot_type}\n  force={force}")
+            print(f"plot_type_callback:\n  new_plot_type={new_plot_type}\n  force={force}")
 
         #if not force:
         #    if self._plot_type == self.ui.comboBoxPlotType.currentText()
@@ -2061,7 +2056,7 @@ class StylingDock(Styling):
             axis for plotting, by default "None"
         """
         if self.debug:
-            self.logger.print(f"axis_variable_changed:\n  fieldtype={fieldtype}\n  field={field}\n  ax={ax}")
+            print(f"axis_variable_changed:\n  fieldtype={fieldtype}\n  field={field}\n  ax={ax}")
 
         ui = self.ui
 
@@ -2158,7 +2153,7 @@ class StylingDock(Styling):
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
         if self.debug:
-            self.logger.print(f"get_axis_field: ax={ax}")
+            print(f"get_axis_field: ax={ax}")
 
         plot_type = self.ui.comboBoxPlotType.currentText()
         if ax == 'c':
@@ -2196,7 +2191,7 @@ class StylingDock(Styling):
             New label for bound set by user.
         """
         if self.debug:
-            self.logger.print("axis_label_edit_callback")
+            print("axis_label_edit_callback")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2233,7 +2228,7 @@ class StylingDock(Styling):
             New value for bound set by user.
         """
         if self.debug:
-            self.logger.print("axis_limit_edit_callback")
+            print("axis_limit_edit_callback")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2293,7 +2288,7 @@ class StylingDock(Styling):
             Axis whos scale been set from comboBox, options include ``x``, ``y``, ``z``, and ``c``.
         """        
         if self.debug:
-            self.logger.print("axis_scale_callback")
+            print("axis_scale_callback")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2322,7 +2317,7 @@ class StylingDock(Styling):
     def set_color_axis_widgets(self):
         """Sets the color axis limits and label widgets."""
         if self.debug:
-            self.logger.print("set_color_axis_widgets")
+            print("set_color_axis_widgets")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2347,7 +2342,7 @@ class StylingDock(Styling):
             Field plotted on axis, used as key to ``MainWindow.axis_dict``
         """
         if self.debug:
-            self.logger.print("set_axis_widgets")
+            print("set_axis_widgets")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2402,7 +2397,7 @@ class StylingDock(Styling):
             :ref: `initialize_axis_values` for initializing the axis dictionary
         """
         if self.debug:
-            self.logger.print(f"axis_reset_callback, axis: {ax}")
+            print(f"axis_reset_callback, axis: {ax}")
 
         #print('axis_reset_callback')
         if ax == 'c':
@@ -2484,7 +2479,7 @@ class StylingDock(Styling):
             Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
         """ 
         if self.debug:
-            self.logger.print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
+            print(f"get_axis_values\n  field_type: {field_type}\n  field: {field}\n  axis: {ax}")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2519,7 +2514,7 @@ class StylingDock(Styling):
             Field, generally determined by a field combobox.
         """        
         if self.debug:
-            self.logger.print(f"initialize_axis_values\n  field_type: {field_type}\n  field: {field}")
+            print(f"initialize_axis_values\n  field_type: {field_type}\n  field: {field}")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2596,7 +2591,7 @@ class StylingDock(Styling):
             Returns the element symbol and mass.
         """
         if self.debug:
-            self.logger.print(f"parse_field, field: {field}")
+            print(f"parse_field, field: {field}")
 
         match = re.match(r"([A-Za-z]+)(\d*)", field)
         symbol = match.group(1) if match else field
@@ -2610,7 +2605,7 @@ class StylingDock(Styling):
         Updates ``MainWindow.style`` dictionary after user change
         """
         if self.debug:
-            self.logger.print(f"aspect_ratio_callback")
+            print(f"aspect_ratio_callback")
 
         if self.aspect_ratio == self.ui.lineEditAspectRatio.value:
             return
@@ -2621,7 +2616,7 @@ class StylingDock(Styling):
     def tickdir_callback(self):
         """Updates tick directions in style dictionary from change of ``MainWindow.comboBoxTickDirection``."""        
         if self.debug:
-            self.logger.print("tickdir_callback")
+            print("tickdir_callback")
 
         if self.tick_dir == self.ui.comboBoxTickDirection.currentText():
             return
@@ -2634,7 +2629,7 @@ class StylingDock(Styling):
     def font_callback(self):
         """Updates figure fonts"""        
         if self.debug:
-            self.logger.print("font_callback")
+            print("font_callback")
 
         if self.font == self.ui.fontComboBox.currentFont().family():
             return
@@ -2645,7 +2640,7 @@ class StylingDock(Styling):
     def font_size_callback(self):
         """Updates figure font sizes"""        
         if self.debug:
-            self.logger.print("font_size_callback")
+            print("font_size_callback")
 
         if self.font_size == self.ui.doubleSpinBoxFontSize.value():
             return
@@ -2664,7 +2659,7 @@ class StylingDock(Styling):
             Font used on plot.
         """        
         if self.debug:
-            self.logger.print("update_figure_font")
+            print("update_figure_font")
 
         if font_name == '':
             return
@@ -2674,7 +2669,7 @@ class StylingDock(Styling):
             for text_obj in canvas.fig.findobj(match=plt.Text):
                 text_obj.set_fontname(font_name)
         except:
-            self.logger.print('Unable to update figure font.')
+            print('Unable to update figure font.')
 
     def toggle_mass(self, labels):
         """Removes mass from labels
@@ -2692,7 +2687,7 @@ class StylingDock(Styling):
             Output labels with or without mass
         """
         if self.debug:
-            self.logger.print("toggle_mass")
+            print("toggle_mass")
     
         if not self.show_mass:
             labels = [re.sub(r'\d', '', col) for col in labels]
@@ -2704,7 +2699,7 @@ class StylingDock(Styling):
     def update_scale_direction_combobox(self, new_dir):
         """Sets scale direction on figure"""        
         if self.debug:
-            self.logger.print("update_scale_direction")
+            print("update_scale_direction")
             
         self.ui.comboBoxScaleDirection.setCurrentText(new_dir)
         self.toggle_scale_widgets()
@@ -2742,7 +2737,7 @@ class StylingDock(Styling):
     def scale_location_callback(self):
         """Sets scalebar location on map from ``MainWindow.comboBoxScaleLocation``"""        
         if self.debug:
-            self.logger.print("scale_location_callback")
+            print("scale_location_callback")
 
         if self.scale_location == self.ui.comboBoxScaleLocation.currentText():
             return
@@ -2756,7 +2751,7 @@ class StylingDock(Styling):
         Executes on change of ``MainWindow.lineEditScaleLength``, updates length if within bounds set by plot dimensions, then updates plot.
         """ 
         if self.debug:
-            self.logger.print("scale_length_callback")
+            print("scale_length_callback")
 
         if self._plot_type in self.map_plot_types:
             # make sure user input is within bounds, do not change
@@ -2782,7 +2777,7 @@ class StylingDock(Styling):
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonOverlayColor`` color.
         """
         if self.debug:
-            self.logger.print("overlay_color_callback")
+            print("overlay_color_callback")
 
         plot_type = self.ui.comboBoxPlotType.currentText()
         # change color
@@ -2805,7 +2800,7 @@ class StylingDock(Styling):
         Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
         """
         if self.debug:
-            self.logger.print("marker_symbol_callback")
+            print("marker_symbol_callback")
 
         if self.marker == self.ui.comboBoxMarker.currentText():
             return
@@ -2819,7 +2814,7 @@ class StylingDock(Styling):
         Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
         """
         if self.debug:
-            self.logger.print("marker_size_callback")
+            print("marker_size_callback")
 
         if self.marker_size == self.ui.doubleSpinBoxMarkerSize.value():
             return
@@ -2833,7 +2828,7 @@ class StylingDock(Styling):
         Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
         """
         if self.debug:
-            self.logger.print("slider_alpha_changed")
+            print("slider_alpha_changed")
 
         self.ui.labelMarkerAlpha.setText(str(self.ui.horizontalSliderMarkerAlpha.value()))
 
@@ -2849,7 +2844,7 @@ class StylingDock(Styling):
         Updates line width on current plot on change of ``MainWindow.doubleSpinBoxLineWidth.value().
         """
         if self.debug:
-            self.logger.print("line_width_callback")
+            print("line_width_callback")
 
         if self.line_width == float(self.ui.doubleSpinBoxLineWidth.value()):
             return
@@ -2863,7 +2858,7 @@ class StylingDock(Styling):
         Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
         """
         if self.debug:
-            self.logger.print("length_multiplier_callback")
+            print("length_multiplier_callback")
 
         if not float(self.ui.lineEditLengthMultiplier.text()):
             self.ui.lineEditLengthMultiplier.values = self.line_multiplier
@@ -2884,7 +2879,7 @@ class StylingDock(Styling):
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonLineColor`` color.
         """
         if self.debug:
-            self.logger.print("line_color_callback")
+            print("line_color_callback")
 
         # change color
         self.button_color_select(self.ui.toolButtonLineColor)
@@ -2906,7 +2901,7 @@ class StylingDock(Styling):
         Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonMarkerColor`` color.
         """
         if self.debug:
-            self.logger.print("marker_color_callback")
+            print("marker_color_callback")
 
         # change color
         self.button_color_select(self.ui.toolButtonMarkerColor)
@@ -2926,7 +2921,7 @@ class StylingDock(Styling):
         Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
         """
         if self.debug:
-            self.logger.print("resolution_callback")
+            print("resolution_callback")
 
         self.resolution = self.ui.spinBoxHeatmapResolution.value()
 
@@ -2939,7 +2934,7 @@ class StylingDock(Styling):
         Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
         ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
         if self.debug:
-            self.logger.print("color_by_field_callback")
+            print("color_by_field_callback")
 
         self.color_field_type = self.ui.comboBoxColorByFieldType.currentText()
 
@@ -2970,7 +2965,7 @@ class StylingDock(Styling):
         Executes on change of ``MainWindow.comboBoxColorField``
         """
         if self.debug:
-            self.logger.print("color_field_callback")
+            print("color_field_callback")
 
         data = self.ui.data[self.app_data.sample_id]
 
@@ -3005,7 +3000,7 @@ class StylingDock(Styling):
     def color_field_update(self):
         """Updates ``MainWindow.comboBoxColorField``"""        
         if self.debug:
-            self.logger.print("color_field_update")
+            print("color_field_update")
 
         self.ui.spinBoxColorField.blockSignals(True)
         self.ui.comboBoxColorField.setCurrentIndex(self.ui.spinBoxColorField.value())
@@ -3018,7 +3013,7 @@ class StylingDock(Styling):
         Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
         """
         if self.debug:
-            self.logger.print("field_colormap_callback")
+            print("field_colormap_callback")
 
         if self.cmap == self.ui.comboBoxFieldColormap.currentText():
             return
@@ -3031,7 +3026,7 @@ class StylingDock(Styling):
     def update_color_field_spinbox(self):
         """Updates ``spinBoxColorField`` using the index of ``comboBoxColorField``"""        
         if self.debug:
-            self.logger.print("update_color_field_spinbox")
+            print("update_color_field_spinbox")
 
         self.ui.spinBoxColorField.setValue(self.ui.comboBoxColorField.currentIndex())
 
@@ -3040,7 +3035,7 @@ class StylingDock(Styling):
 
         Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
         if self.debug:
-            self.logger.print("colormap_direction_callback")
+            print("colormap_direction_callback")
 
         if self.cbar_reverse == self.ui.checkBoxReverseColormap.isChecked():
             return
@@ -3067,7 +3062,7 @@ class StylingDock(Styling):
             A discrete (colors.ListedColormap) colormap
         """
         if self.debug:
-            self.logger.print("get_cluster_colormap")
+            print("get_cluster_colormap")
 
         n = cluster_dict['n_clusters']
         cluster_color = [None]*n
@@ -3104,7 +3099,7 @@ class StylingDock(Styling):
                 Color norm for plotting.
         """
         if self.debug:
-            self.logger.print("color_norm")
+            print("color_norm")
 
         norm = None
         match self.cscale:
@@ -3138,7 +3133,7 @@ class StylingDock(Styling):
         matplotlib.colormap.ListedColormap : colormap
         """
         if self.debug:
-            self.logger.print("get_colormap")
+            print("get_colormap")
 
         if hasattr(self.ui,'canvas_tab') and hasattr(self.ui,'canvasWindow'):
             if self.ui.canvasWindow.currentIndex() == self.ui.canvas_tab['qv']:
@@ -3176,7 +3171,7 @@ class StylingDock(Styling):
             Colormap
         """
         if self.debug:
-            self.logger.print("create_custom_colormap")
+            print("create_custom_colormap")
 
         if N is None:
             N = 256
@@ -3192,7 +3187,7 @@ class StylingDock(Styling):
         Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
         """
         if self.debug:
-            self.logger.print("cbar_direction_callback")
+            print("cbar_direction_callback")
 
         if self.cbar_dir == self.ui.comboBoxCbarDirection.currentText():
             return
@@ -3206,7 +3201,7 @@ class StylingDock(Styling):
         Sets the color label in ``MainWindow.styles`` for the current plot type.
         """
         if self.debug:
-            self.logger.print("cbar_label_callback")
+            print("cbar_label_callback")
 
         if self.clabel == self.ui.lineEditCbarLabel.text():
             return
@@ -3230,7 +3225,7 @@ class StylingDock(Styling):
             str : hexcolor
         """
         if self.debug:
-            self.logger.print("set_default_cluster_colors")
+            print("set_default_cluster_colors")
 
         #print('set_default_cluster_colors')
         cluster_tab = self.parent.mask_dock.cluster_tab
@@ -3262,7 +3257,7 @@ class StylingDock(Styling):
         Map from Ternary groupbox.  The ternary colored chemical map is updated.
         """
         if self.debug:
-            self.logger.print("ternary_colormap_changed")
+            print("ternary_colormap_changed")
 
         for cmap in self.ternary_colormaps:
             if cmap['scheme'] == self.ui.comboBoxTernaryColormap.currentText():
@@ -3280,7 +3275,7 @@ class StylingDock(Styling):
             Button object that was clicked
         """
         if self.debug:
-            self.logger.print("button_color_select")
+            print("button_color_select")
 
         old_color = button.palette().color(button.backgroundRole())
         color_dlg = QColorDialog(self.ui)

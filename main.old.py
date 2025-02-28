@@ -497,7 +497,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionBiPlot.triggered.connect(lambda: self.open_tab('scatter'))
         self.actionTernary.triggered.connect(self.open_ternary)
         self.actionTEC.triggered.connect(lambda: self.open_tab('ndim'))
-        self.actionProfiles.triggered.connect(self.open_profile)
         self.actionCluster.triggered.connect(lambda: self.open_tab('clustering'))
         self.actionReset.triggered.connect(lambda: self.reset_analysis())
         self.actionSwapAxes.triggered.connect(self.swap_xy)
@@ -4468,7 +4467,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.plot_style.clabel = method + "'s $\\tau" + power + "$"
 
         if self.plot_style.plot_type != 'correlation':
-            self.plot_style.set_style_widgets('correlation')
+            self.plot_style.plot_type = 'correlation'
 
         # trigger update to plot
         self.plot_style.schedule_update()
@@ -4476,7 +4475,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def correlation_squared_callback(self):
         """Produces a plot of the squared correlation."""        
         # update color limits and colorbar
-        if self.checkBoxCorrelationSquared.isChecked():
+        if self.app_data.corr_squared:
             self.plot_style.clim = [0,1]
             self.plot_style.cmap = 'cmc.oslo'
         else:
@@ -4484,12 +4483,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.cmap = 'RdBu'
 
         # update label
-        if self.plot_flag:
-            self.plot_flag = False
-            self.correlation_method_callback()
-            self.plot_flag = True
-        else:
-            self.correlation_method_callback()
+        self.correlation_method_callback()
 
         # trigger update to plot
         self.plot_style.schedule_update()
@@ -4817,40 +4811,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             return
 
-    def logax(self,ax, lim, axis='y', label='', tick_label_rotation=0):
-        """
-        Produces log-axes limits and labels.
-
-        Parameters:
-        ax (matplotlib.axes.Axes): The axes to modify.
-        lim (list): The log10 values of the axes limits.
-        axis (str): 'x' or 'y' to add ticks to x- or y-axis, default is 'y'.
-        label (str): Label for the axis.
-        tick_label_rotation (float): Angle of text rotation, default is 0.
-        """
-        # Create tick marks and labels
-        mt = np.log10(np.arange(1, 10))
-        ticks = []
-        tick_labels = []
-        for i in range(int(lim[0]), int(lim[1]) + 1):
-            ticks.extend([i + m for m in mt])
-            tick_labels.extend([f'$10^{{{i}}}$'] + [''] * (len(mt) - 1))
-
-        # Apply settings based on the axis
-        if axis.lower() == 'x':
-            ax.set_xticks(ticks)
-            ax.set_xticklabels(tick_labels, rotation=tick_label_rotation)
-            ax.set_xlim([10**lim[0], 10**lim[1]])
-            if label:
-                ax.set_xlabel(label)
-        elif axis.lower() == 'y':
-            ax.set_yticks(ticks)
-            ax.set_yticklabels(tick_labels, rotation=tick_label_rotation)
-            ax.set_ylim([10**lim[0], 10**lim[1]])
-            if label:
-                ax.set_ylabel(label)
-        else:
-            print('Incorrect axis argument. Please use "x" or "y".')
 
     def group_changed(self):
         if self.app_data.sample_id == '':

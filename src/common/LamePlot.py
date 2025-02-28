@@ -12,6 +12,8 @@ from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToo
 import src.common.CustomMplCanvas as mplc
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
+from src.common.plot_spider import plot_spider_norm
+from src.common.radar import Radar
 from src.common.scalebar import scalebar
 from src.common.ternary_plot import ternary
 
@@ -419,6 +421,41 @@ def plot_histogram(parent, data, app_data, plot_style):
 
     return canvas, plot_info
 
+def logax(ax, lim, axis='y', label='', tick_label_rotation=0):
+    """
+    Produces log-axes limits and labels.
+
+    Parameters:
+    ax (matplotlib.axes.Axes): The axes to modify.
+    lim (list): The log10 values of the axes limits.
+    axis (str): 'x' or 'y' to add ticks to x- or y-axis, default is 'y'.
+    label (str): Label for the axis.
+    tick_label_rotation (float): Angle of text rotation, default is 0.
+    """
+    # Create tick marks and labels
+    mt = np.log10(np.arange(1, 10))
+    ticks = []
+    tick_labels = []
+    for i in range(int(lim[0]), int(lim[1]) + 1):
+        ticks.extend([i + m for m in mt])
+        tick_labels.extend([f'$10^{{{i}}}$'] + [''] * (len(mt) - 1))
+
+    # Apply settings based on the axis
+    if axis.lower() == 'x':
+        ax.set_xticks(ticks)
+        ax.set_xticklabels(tick_labels, rotation=tick_label_rotation)
+        ax.set_xlim([10**lim[0], 10**lim[1]])
+        if label:
+            ax.set_xlabel(label)
+    elif axis.lower() == 'y':
+        ax.set_yticks(ticks)
+        ax.set_yticklabels(tick_labels, rotation=tick_label_rotation)
+        ax.set_ylim([10**lim[0], 10**lim[1]])
+        if label:
+            ax.set_ylabel(label)
+    else:
+        print('Incorrect axis argument. Please use "x" or "y".')
+
 def add_colorbar(plot_style, canvas, cax, cbartype='continuous', grouplabels=None, groupcolors=None, alpha=1):
     """Adds a colorbar to a MPL figure
 
@@ -639,6 +676,8 @@ def plot_correlation(parent, data, app_data, plot_style):
     }
 
     return canvas, plot_info
+
+ 
 
 def get_scatter_data(data, app_data, plot_style, processed=True):
 
@@ -1186,7 +1225,7 @@ def plot_ternary_map(parent, data, app_data, plot_style):
 # TEC and Radar plots
 # -------------------------------------
 
-def plot_ndim(self):
+def plot_ndim(parent, data, app_data, plot_style):
     """Produces trace element compatibility (TEC) and Radar plots
     
     Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider diagrams, which display a set of elements
@@ -1195,10 +1234,10 @@ def plot_ndim(self):
     
     The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``mplc.MplCanvas`` for display in the centralWidget views.
     """
-    if not self.ndim_list:
+    if not app_data.ndim_list:
         return
 
-    df_filtered, _  = self.data[self.app_data.sample_id].get_processed_data()
+    df_filtered, _  = data[app_data.sample_id].get_processed_data()
 
     # match self.comboBoxNorm.currentText():
     #     case 'log':
@@ -1208,35 +1247,39 @@ def plot_ndim(self):
     #     case 'linear':
     #         # do nothing
     #         pass
-    df_filtered = df_filtered[self.data[self.app_data.sample_id].mask]
+    df_filtered = df_filtered[data.mask]
 
-    ref_i = self.comboBoxNDimRefMaterial.currentIndex()
+    ref_i = app_data.ref_index
 
-    plot_type = self.plot_style.plot_type
+    plot_type = plot_style.plot_type
     plot_data = None
 
     # Get quantile for plotting TEC & radar plots
-    match self.comboBoxNDimQuantiles.currentIndex():
-        case 0:
-            quantiles = [0.5]
-        case 1:
-            quantiles = [0.25, 0.75]
-        case 2:
-            quantiles = [0.25, 0.5, 0.75]
-        case 3:
-            quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+    quantiles = app_data.ndim_quantiles(app_data.ndim_quantile_index)
+    # match app_data.ndim_quantile_index:
+    #     case 0:
+    #         quantiles = [0.5]
+    #     case 1:
+    #         quantiles = [0.25, 0.75]
+    #     case 2:
+    #         quantiles = [0.25, 0.5, 0.75]
+    #     case 3:
+    #         quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
 
     # remove mass from labels
-    if self.checkBoxShowMass.isChecked():
+    if plot_style.show_mass:
         angle = 45
     else:
         angle = 0
-    labels = self.plot_style.toggle_mass(self.ndim_list)
+    labels = plot_style.toggle_mass(app_data.ndim_list)
         
-    if self.field_type == 'cluster' and self.field != '':
-        method = self.field
-        cluster_dict = self.app_data.cluster_dict[method]
-        cluster_color, cluster_label, cmap = self.plot_style.get_cluster_colormap(cluster_dict, alpha=self.plot_style.marker_alpha)
+    clusters = []
+    cluster_color = []
+    cluster_label = []
+    if plot_style.color_field_type == 'cluster' and plot_style.color_field != '':
+        method = plot_style.color_field
+        cluster_dict = app_data.cluster_dict[method]
+        cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(cluster_dict, alpha=plot_style.marker_alpha)
 
         clusters = cluster_dict['selected_clusters']
         if 0 in list(cluster_dict.keys()):
@@ -1250,21 +1293,21 @@ def plot_ndim(self):
         cluster_flag = False
 
     
+    canvas = mplc.MplCanvas(parent=parent, proj='radar')
+
     match plot_type:
         case 'Radar':
-            canvas = mplc.MplCanvas(parent=self, proj='radar')
-
             axes_interval = 5
-            if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
+            if cluster_flag and method in data.processed_data.columns:
                 # Get the cluster labels for the data
-                cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
+                cluster_group = data.processed_data[method][data.mask]
 
                 df_filtered['clusters'] = cluster_group
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
                 radar = Radar( 
                     canvas.axes,
                     df_filtered,
-                    fields=self.ndim_list,
+                    fields=app_data.ndim_list,
                     fieldlabels=labels,
                     quantiles=quantiles,
                     axes_interval=axes_interval,
@@ -1274,19 +1317,17 @@ def plot_ndim(self):
                 canvas.fig, canvas.axes = radar.plot(cmap = cmap)
                 canvas.axes.legend(loc='upper right', frameon='False')
             else:
-                radar = Radar(canvas.axes, df_filtered, fields=self.ndim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
+                radar = Radar(canvas.axes, df_filtered, fields=app_data.ndim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
                     
                 radar.plot()
                 
                 plot_data = radar.vals
                 
         case 'TEC':
-            canvas = mplc.MplCanvas(parent=self)
-
             yl = [np.inf, -np.inf]
-            if cluster_flag and method in self.data[self.app_data.sample_id].processed_data.columns:
+            if cluster_flag and method in data.processed_data.columns:
                 # Get the cluster labels for the data
-                cluster_group = self.data[self.app_data.sample_id].processed_data[method][self.data[self.app_data.sample_id].mask]
+                cluster_group = data.processed_data[method][data.mask]
 
                 df_filtered['clusters'] = cluster_group
 
@@ -1296,8 +1337,8 @@ def plot_ndim(self):
                     #print(f'Cluster {i}')
                     canvas.axes, yl_tmp, _ = plot_spider_norm(
                             data=df_filtered.loc[df_filtered['clusters']==i,:],
-                            ref_data=self.app_data.ref_data, norm_ref_data=self.app_data.ref_data['model'][ref_i],
-                            layer=self.app_data.ref_data['layer'][ref_i], el_list=self.ndim_list ,
+                            ref_data=app_data.ref_data, norm_ref_data=app_data.ref_data['model'][ref_i],
+                            layer=app_data.ref_data['layer'][ref_i], el_list=app_data.ndim_list ,
                             style='Quanta', quantiles=quantiles, ax=canvas.axes, c=cluster_color[i], label=cluster_label[i]
                         )
                     #store max y limit to convert the set y limit of axis
@@ -1307,18 +1348,18 @@ def plot_ndim(self):
                 box = canvas.axes.get_position()
                 canvas.axes.set_position((box.x0, box.y0 - box.height * 0.1, box.width, box.height * 0.9))
 
-                self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+                add_colorbar(plot_style, canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
                 #canvas.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, handlelength=1)
 
-                self.logax(canvas.axes, yl, 'y')
+                logax(canvas.axes, yl, 'y')
                 canvas.axes.set_ylim(yl)
 
                 canvas.axes.set_xticklabels(labels, rotation=angle)
             else:
-                canvas.axes, yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=self.app_data.ref_data, norm_ref_data=self.app_data.ref_data['model'][ref_i], layer=self.app_data.ref_data['layer'][ref_i], el_list=self.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
+                canvas.axes, yl, plot_data = plot_spider_norm(data=df_filtered, ref_data=app_data.ref_data, norm_ref_data=app_data.ref_data['model'][ref_i], layer=app_data.ref_data['layer'][ref_i], el_list=app_data.ndim_list, style='Quanta', quantiles=quantiles, ax=canvas.axes)
 
                 canvas.axes.set_xticklabels(labels, rotation=angle)
-            canvas.axes.set_ylabel(f"Abundance / [{self.app_data.ref_data['model'][ref_i]}, {self.app_data.ref_data['layer'][ref_i]}]")
+            canvas.axes.set_ylabel(f"Abundance / [{app_data.ref_data['model'][ref_i]}, {app_data.ref_data['layer'][ref_i]}]")
             canvas.fig.tight_layout()
 
     if cluster_flag:
@@ -1326,25 +1367,24 @@ def plot_ndim(self):
     else:
         plot_name = f"{plot_type}_all"
 
-    self.plot_style.update_figure_font(canvas, self.plot_style.font)
+    plot_style.update_figure_font(canvas, plot_style.font)
 
-    self.plot_info = {
+    plot_info = {
         'tree': 'Geochemistry',
-        'sample_id': self.app_data.sample_id,
+        'sample_id': app_data.sample_id,
         'plot_name': plot_name,
         'plot_type': plot_type,
         'field_type': 'analyte',
-        'field': self.ndim_list,
+        'field': app_data.ndim_list,
         'figure': canvas,
-        'style': self.plot_style.style_dict[self.plot_style.plot_type],
+        'style': plot_style.style_dict[plot_style.plot_type],
         'cluster_groups': cluster_dict,
         'view': [True,False],
         'position': [],
         'data': plot_data
     }
 
-    self.clear_layout(self.widgetSingleView.layout())
-    self.widgetSingleView.layout().addWidget(canvas)
+    return canvas, plot_info
 
 # -------------------------------------
 # PCA functions and plotting

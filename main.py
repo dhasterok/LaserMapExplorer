@@ -114,6 +114,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # The data dictionary will hold the data with a key for each sample
         self.data = {}
 
+        self.plot_info = {}
         # until there is actually some data to store, disable certain widgets
         self.toggle_data_widgets()
 
@@ -325,6 +326,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
+
+
+        self.comboBoxOutlierMethod.addItems(['none', 'quantile critera','quantile and distance critera', 'Chauvenet criterion', 'log(n>x) inflection'])
+        self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
+        self.comboBoxOutlierMethod.activated.connect(lambda: self.update_outlier_removal(self.comboBoxOutlierMethod.currentText()
+))
+
+        self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
+        self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
+
+
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, global_list=False):
         """Updates a field type comobobox list.
@@ -827,6 +839,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.display_QV()
 
+    def update_labels(self):
+        """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
+
+        data = self.data[self.app_data.sample_id].processed_data
+
+        columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
+        negative_count = any(data[columns] <= 0)
+        nan_count = any(np.isnan(data[columns]))
+        
+        self.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
+
+
     def connect_app_data_observers(self, app_data):
         app_data.add_observer("sort_method", self.update_sort_method)
         app_data.add_observer("ref_chem", self.update_ref_index_combobox)
@@ -916,6 +940,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data.add_observer("ny", self.update_ny_lineedit)
         data.add_observer("dx", self.update_dx_lineedit)
         data.add_observer("dy", self.update_dy_lineedit)
+        data.add_observer("data_min_quantile", self.update_data_min_quantile)
+        data.add_observer("data_max_quantile", self.update_data_max_quantile)
+        data.add_observer("data_min_diff_quantile", self.update_data_min_diff_quantile)
+        data.add_observer("data_max_diff_quantile", self.update_data_min_diff_quantile)
+        data.add_observer("data_auto_scale_value", self.update_auto_scale_value)
+        data.add_observer("apply_outlier_to_all", self.update_apply_outlier_to_all)
+        data.add_observer("outlier_method", self.update_outlier_method)
+        data.add_observer("outlier_method", self.update_negative_handling_method)
+
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
@@ -1286,84 +1319,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.plot_style.plot_type == 'analyte map':
             self.plot_style.schedule_update()
 
-    def update_dx_lineedit(self,value):
-        """Updates ``MainWindow.lineEditDX.value``
-        Called as an update to ``app_data.d_x``.  Updates Dx and  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            x dimension.
-        """
-        self.lineEditDX.value = value
-        if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
-            field = "X"
-            # update x axis limits in style_dict 
-            self.plot_style.initialize_axis_values(self.field_type, field)
-            # update limits in styling tabs
-            self.plot_style.set_axis_widgets("x",field)
-
-    def update_dy_lineedit(self,value):
-        """Updates ``MainWindow.lineEditDY.value``
-        Called as an update to ``app_data.d_y``.  Updates Dy and  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            x dimension.
-        """
-        self.lineEditDY.value = value
-        if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
-            field = "Y"
-            # update y axis limits in style_dict 
-            self.plot_style.initialize_axis_values(self.field_type, field)
-            # update limits in styling tabs
-            self.plot_style.set_axis_widgets("y",field)
-
-    def update_nx_lineedit(self,value):
-        """Updates ``MainWindow.lineEditResolutionNx.value``
-        Called as an update to ``app_data.n_x``.  Updates Nx and  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            x dimension.
-        """
-        self.lineEditResolutionNx.value = value
-        if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
-
-    def update_ny_lineedit(self,value):
-        """Updates ``MainWindow.lineEditResolutionNx.value``
-        Called as an update to ``app_data.N_y``.  Updates Nx and  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            x dimension.
-        """
-        self.lineEditResolutionNy.value = value
-        if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
-
-
-    def update_data_min_quantile(self,value):
-        """Updates ``MainWindow.lineEditLowerQuantile.value``
-        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
-
-        Parameters
-        ----------
-        value : float
-            lower quantile value.
-        """
-        self.lineEditLowerQuantile.value = value
-        self.update_labels()
-        if hasattr(self,"mask_dock"):
-            self.mask_dock.filter_tab.update_filter_values()
-        if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
+    
 
     def update_hist_field_type_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
@@ -1842,6 +1798,259 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.plot_style.plot_type == "heatmap":
             self.plot_style.schedule_update()
 
+    def update_dx_lineedit(self,value):
+        """Updates ``MainWindow.lineEditDX.value``
+        Called as an update to ``app_data.d_x``.  Updates Dx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditDX.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+            field = "X"
+            if isinstance(self.plot_info, dict) \
+                and 'field_type' in self.plot_info \
+                and 'field' in self.plot_info:
+                # update x axis limits in style_dict 
+                self.plot_style.initialize_axis_values(self.plot_info['field_type'], self.plot_info['field'])
+                # update limits in styling tabs
+                self.plot_style.set_axis_widgets("x",field)
+
+    def update_dy_lineedit(self,value):
+        """Updates ``MainWindow.lineEditDY.value``
+        Called as an update to ``app_data.d_y``.  Updates Dy and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditDY.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+            field = "Y"
+            if isinstance(self.plot_info, dict) \
+                and 'field_type' in self.plot_info \
+                and 'field' in self.plot_info:
+                # update x axis limits in style_dict 
+                self.plot_style.initialize_axis_values(self.plot_info['field_type'], self.plot_info['field'])
+                # update limits in styling tabs
+                self.plot_style.set_axis_widgets("y",field)
+
+    def update_nx_lineedit(self,value):
+        """Updates ``MainWindow.lineEditResolutionNx.value``
+        Called as an update to ``app_data.n_x``.  Updates Nx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditResolutionNx.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+
+    def update_ny_lineedit(self,value):
+        """Updates ``MainWindow.lineEditResolutionNx.value``
+        Called as an update to ``app_data.N_y``.  Updates Nx and  Schedules a plot update.
+
+        Parameters
+        ----------
+        value : str
+            x dimension.
+        """
+        self.lineEditResolutionNy.value = value
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.schedule_update()
+
+    def update_data_min_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+
+    def update_data_max_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditUpperQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_data_min_diff_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditDifferenceLowerQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_data_max_diff_quantile(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.lineEditDifferenceUpperQuantile.value = value
+        self.update_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+
+    def update_auto_scale_value(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.toolButtonAutoScale.setChecked(value)
+        if value:
+            self.lineEditDifferenceLowerQuantile.setEnabled(True)
+            self.lineEditDifferenceUpperQuantile.setEnabled(True)
+        else:
+            self.lineEditDifferenceLowerQuantile.setEnabled(False)
+            self.lineEditDifferenceUpperQuantile.setEnabled(False)
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+        if self.toolBox.currentIndex() == self.left_tab['process']:
+            self.plot_style.scheduler.schedule_update()
+
+    def update_apply_outlier_to_all(self,value):
+        """Updates ``MainWindow.lineEditLowerQuantile.value``
+        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
+        
+        Parameters
+        ----------
+        value : float
+            lower quantile value.
+        """
+        self.checkBoxApplyAll.setChecked(value)
+        ratio = ('/' in self.app_data.plot_info['field'])
+        if value and not ratio: 
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree)
+        elif value and not ratio:
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in [ 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree) 
+        
+
+    def update_outlier_method(self,method):
+        """Updates ``MainWindow.comboBoxOutlierMethod.currentText()``
+
+        Called as an update to ``DataHandling.outlier_method``.  Resets data bound widgets visibility upon change.
+
+        Parameters
+        ----------
+        method : str
+             Method used to remove outliers.
+        """
+        if self.data[self.app_data.sample_id].outlier_method == method:
+            return
+
+        self.data[self.app_data.sample_id].outlier_method = method
+
+        match method.lower():
+            case 'none':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'quantile criteria':
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'quantile and distance criteria':
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(True)
+                self.lineEditDifferenceUpperQuantile.setEnabled(True)
+            case 'chauvenet criterion':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'log(n>x) inflection':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+
+    def update_negative_handling_method(self,method):
+        """Auto-scales pixel values in map
+
+        Executes when the value ``MainWindow.comboBoxNegativeMethod`` is changed.
+
+        Changes how negative values are handled for each analyte, the following options are available:
+            Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
+
+        Parameters
+        ----------
+        method : str
+            Method for dealing with negatives
+        """
+        if self.plot_info:
+            sample_id = self.plot_info['sample_id']
+            field = self.plot_info['field']
+            
+        if self.checkBoxApplyAll.isChecked():
+            # Apply to all iolties
+            analyte_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'analyte') + self.data[self.app_data.sample_id].processed_data.match_attribute('data_type', 'ratio')
+            self.data[sample_id].negative_method = method
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree)
+            self.data[sample_id].prep_data()
+        else:
+            self.data[sample_id].negative_method = method
+            self.data[sample_id].prep_data(field)
+        
+        self.update_invalid_data_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+
+        # trigger update to plot
+        self.plot_style.schedule_update()
 
     def update_autoscale_checkbox(self, value):
         """Updates the ``MainWindow.checkBoxApplyAll`` which controls the data processing methods."""
@@ -1942,6 +2151,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # trigger update to plot
             self.plot_style.schedule_update()
         #self.update_all_plots()
+
+    def update_invalid_data_labels(self):
+        """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
+
+        data = self.data[self.app_data.sample_id].processed_data
+
+        columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
+        negative_count = any(data[columns] <= 0)
+        nan_count = any(np.isnan(data[columns]))
+        
+        self.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
 
     def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
         """Updates field type combobox
@@ -2084,6 +2304,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def reset_pixel_resolution(self):
         self.data[self.app_data.sample_id].reset_resolution
         self.plot_style.schedule_update()
+
+
+    
 
     # -------------------------------------
     # General plot functions

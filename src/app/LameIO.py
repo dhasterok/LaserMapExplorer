@@ -59,7 +59,7 @@ class LameIO():
         parent.app_data.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog
-            parent.statusBar.showMessage("No valid csv file found.")
+            parent.statusBar().showMessage("No valid csv file found.")
             return
         
         self.initialize_samples_and_tabs()
@@ -97,7 +97,7 @@ class LameIO():
             if dialog.exec():
                 parent.app_data.selected_directory = dialog.selectedFiles()[0]
             else:
-                parent.statusBar.showMessage("Open directory canceled.")
+                parent.statusBar().showMessage("Open directory canceled.")
                 return
         else:
             parent.app_data.selected_directory = path
@@ -107,7 +107,7 @@ class LameIO():
         if parent.app_data.csv_files == []:
             # warning dialog
             if hasattr(parent,'statusBar'):
-                parent.statusBar.showMessage("No valid csv files found.")
+                parent.statusBar().showMessage("No valid csv files found.")
             return
                 #clear the current analysis
 
@@ -212,7 +212,7 @@ class LameIO():
                     parent.profiling.save_profiles(project_dir, sample_id)
                     parent.polygon.save_polygons(project_dir, sample_id)
                 
-                parent.statusBar.showMessage("Analysis saved successfully")
+                parent.statusBar().showMessage("Analysis saved successfully")
 
     def open_project(self):
         """Open a project session.
@@ -329,7 +329,7 @@ class LameIO():
                         parent.plot_flag = True
                         parent.update_SV()
 
-                        parent.statusBar.showMessage("Project loaded successfully")
+                        parent.statusBar().showMessage("Project loaded successfully")
 
     def initialize_samples_and_tabs(self):
         """

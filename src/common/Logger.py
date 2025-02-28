@@ -1,12 +1,37 @@
-import sys
+import sys, threading, inspect
+
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout,
         QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox
     )
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QFont
 
 from src.common.CustomWidgets import CustomDockWidget
+
+class LogCounter():
+    """Indent logger messages."""
+    log_counter = 1
+
+    @staticmethod
+    def get_stack_depth():
+        """Return the call stack depth"""
+        return len(inspect.stack()) - 3 # adjust based on call stack
+
+    @staticmethod
+    def print(msg):
+        """Log message with dynamic indent"""
+        depth = LogCounter.get_stack_depth()
+        if depth == 1:
+            LogCounter.log_counter += 1
+        prefix = f"{LogCounter.log_counter}.{depth}"
+        print(f"{prefix}  {msg}")
+
+    @staticmethod
+    def reset_counter():
+        """Reset the counter"""
+        LogCounter.log_counter = 1
+
 
 class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.
@@ -24,6 +49,7 @@ class LoggerDock(CustomDockWidget):
 
         super().__init__(parent)
         self.parent = parent
+        self.logger = LogCounter()
 
         # Create container
         container = QWidget()
@@ -73,6 +99,7 @@ class LoggerDock(CustomDockWidget):
         # Create QTextEdit for logging
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
+        self.text_edit.setFont(QFont("Monaco",10))
 
         logger_layout.addWidget(self.text_edit)
 
@@ -92,6 +119,9 @@ class LoggerDock(CustomDockWidget):
 
         parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
+        self.visibilityChanged.connect(self.logger_visibility_change)
+        self.logger_visibility_change()
+
         # Example print statements
         self.log_file = file 
 
@@ -105,6 +135,7 @@ class LoggerDock(CustomDockWidget):
         """        
         # Restore sys.stdout to its original state when the application closes
         sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
         super().closeEvent(event)
 
     def write(self, message):
@@ -142,8 +173,19 @@ class LoggerDock(CustomDockWidget):
     def set_logger_options(self):
         """ Opens a dialog to edit logger options."""
         dialog = LoggerOptionsDialog(self.parent.logger_options, self)
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             self.parent.logger_options = dialog.get_updated_options()
+
+    def logger_visibility_change(self):
+        """Redirect stdout based on the visibility of the logger dock."""
+        if self.isVisible():
+            sys.stdout = self   # Redirect stdout to logger
+            sys.stderr = self   # Redirect stderr to logger
+            self.logger.reset_counter()
+        else:
+            sys.stdout = sys.__stdout__  # Restore to default stdout    
+            sys.stderr = sys.__stderr__  # Restore to default stderr    
+            self.logger.reset_counter()
 
 class LoggerOptionsDialog(QDialog):
     """Allows the user to set logger options.
@@ -192,4 +234,3 @@ class LoggerOptionsDialog(QDialog):
         for key, checkbox in self.checkboxes.items():
             self.options_dict[key] = checkbox.isChecked()
         return self.options_dict
-

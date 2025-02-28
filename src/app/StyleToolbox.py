@@ -201,12 +201,14 @@ class Styling(Observable):
         return self._plot_type
 
     @plot_type.setter
-    def plot_type(self, new_plot_type):
-        if new_plot_type == self._plot_type:
+    def plot_type(self, plot_type):
+        if self.debug:
+            print(f"@plot_type:\n  old value: {self._plot_type}\n  new value: {plot_type}")
+        if plot_type == self._plot_type:
             return
-        self._plot_type = new_plot_type
+        self._plot_type = plot_type
 
-        self.notify_observers("plot_type", new_plot_type)
+        self.notify_observers("plot_type", plot_type)
 
     # xlim
     @property
@@ -214,10 +216,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['XLim']
 
     @xlim.setter
-    def xlim(self, new_value):
-        if new_value is None or self._is_valid_bounds(new_value):
-            self.style_dict[self._plot_type]['XLim'] = new_value
-            self.notify_observers("xlim", new_value)
+    def xlim(self, value):
+        if self.debug:
+            print(f"@xlim:\n  old value: {self.style_dict[self._plot_type]['XLim']}\n  new value: {value}")
+        if value is None or self._is_valid_bounds(value):
+            self.style_dict[self._plot_type]['XLim'] = value
+            self.notify_observers("xlim", value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 
@@ -227,10 +231,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['XLabel']
 
     @xlabel.setter
-    def xlabel(self, new_label):
-        if new_label is None or isinstance(new_label, str):
-            self.style_dict[self._plot_type]['XLabel'] = new_label
-            self.notify_observers("xlabel", new_label)
+    def xlabel(self, label):
+        if self.debug:
+            print(f"@xlabel:\n  old value: {self.style_dict[self._plot_type]['XLabel']}\n  new value: {label}")
+        if label is None or isinstance(label, str):
+            self.style_dict[self._plot_type]['XLabel'] = label
+            self.notify_observers("xlabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -240,10 +246,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['XScale']
 
     @xscale.setter
-    def xscale(self, new_scale):
-        if self._is_valid_scale(new_scale):
-            self.style_dict[self._plot_type]['XScale'] = new_scale
-            self.notify_observers("xscale", new_scale)
+    def xscale(self, scale):
+        if self.debug:
+            print(f"@xscale:\n  old value: {self.style_dict[self._plot_type]['XScale']}\n  new value: {scale}")
+        if self._is_valid_scale(scale):
+            self.style_dict[self._plot_type]['XScale'] = scale
+            self.notify_observers("xscale", scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
@@ -253,10 +261,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['YLim']
 
     @ylim.setter
-    def ylim(self, new_value):
-        if new_value is None or self._is_valid_bounds(new_value):
-            self.style_dict[self._plot_type]['YLim'] = new_value
-            self.notify_observers("ylim", new_value)
+    def ylim(self, value):
+        if self.debug:
+            print(f"@ylim:\n  old value: {self.style_dict[self._plot_type]['YLim']}\n  new value: {value}")
+        if value is None or self._is_valid_bounds(value):
+            self.style_dict[self._plot_type]['YLim'] = value
+            self.notify_observers("ylim", value)
         else:
             raise ValueError("ylim must be a list of two floats or None.")
 
@@ -266,10 +276,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['YLabel']
 
     @ylabel.setter
-    def ylabel(self, new_label):
-        if new_label is None or isinstance(new_label, str):
-            self.style_dict[self._plot_type]['YLabel'] = new_label
-            self.notify_observers("ylabel", new_label)
+    def ylabel(self, label):
+        if self.debug:
+            print(f"@ylabel:\n  old value: {self.style_dict[self._plot_type]['YLabel']}\n  new value: {label}")
+        if label is None or isinstance(label, str):
+            self.style_dict[self._plot_type]['YLabel'] = label
+            self.notify_observers("ylabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -279,10 +291,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['YScale']
 
     @yscale.setter
-    def yscale(self, new_scale):
-        if self._is_valid_scale(new_scale):
-            self.style_dict[self._plot_type]['YScale'] = new_scale
-            self.notify_observers("yscale", new_scale)
+    def yscale(self, scale):
+        if self.debug:
+            print(f"@yscale:\n  old value: {self.style_dict[self._plot_type]['YScale']}\n  new value: {scale}")
+        if self._is_valid_scale(scale):
+            self.style_dict[self._plot_type]['YScale'] = scale
+            self.notify_observers("yscale", scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
@@ -292,10 +306,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['ZLim']
 
     @zlim.setter
-    def zlim(self, new_value):
-        if new_value is None or self._is_valid_bounds(new_value):
-            self.style_dict[self._plot_type]['ZLim'] = new_value
-            self.notify_observers("zscale", new_value)
+    def zlim(self, value):
+        if self.debug:
+            print(f"@zlim:\n  old value: {self.style_dict[self._plot_type]['ZLim']}\n  new value: {value}")
+        if value is None or self._is_valid_bounds(value):
+            self.style_dict[self._plot_type]['ZLim'] = value
+            self.notify_observers("zscale", value)
         else:
             raise ValueError("zlim must be a list of two floats or None.")
 
@@ -305,10 +321,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['ZLabel']
 
     @zlabel.setter
-    def zlabel(self, new_label):
-        if new_label is None or isinstance(new_label, str):
-            self.style_dict[self._plot_type]['ZLabel'] = new_label
-            self.notify_observers("zlabel", new_label)
+    def zlabel(self, label):
+        if self.debug:
+            print(f"@zlabel:\n  old value: {self.style_dict[self._plot_type]['ZLabel']}\n  new value: {label}")
+        if label is None or isinstance(label, str):
+            self.style_dict[self._plot_type]['ZLabel'] = label
+            self.notify_observers("zlabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -318,10 +336,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['ZScale']
 
     @zscale.setter
-    def zscale(self, new_scale):
-        if self._is_valid_scale(new_scale):
-            self.style_dict[self._plot_type]['ZScale'] = new_scale
-            self.notify_observers("zscale", new_scale)
+    def zscale(self, scale):
+        if self.debug:
+            print(f"@zscale:\n  old value: {self.style_dict[self._plot_type]['ZScale']}\n  new value: {scale}")
+        if self._is_valid_scale(scale):
+            self.style_dict[self._plot_type]['ZScale'] = scale
+            self.notify_observers("zscale", scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
@@ -331,10 +351,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['AspectRatio']
     
     @aspect_ratio.setter
-    def aspect_ratio(self, new_aspect_ratio):
-        if new_aspect_ratio is None or isinstance(new_aspect_ratio, float):
-            self.style_dict[self._plot_type]['AspectRatio'] = new_aspect_ratio
-            self.notify_observers("aspect_ratio", new_aspect_ratio)
+    def aspect_ratio(self, value):
+        if self.debug:
+            print(f"@aspect_ratio:\n  old value: {self.style_dict[self._plot_type]['AspectRatio']}\n  new value: {value}")
+        if value is None or isinstance(aspect_ratio, float):
+            self.style_dict[self._plot_type]['AspectRatio'] = value
+            self.notify_observers("aspect_ratio", value)
 
     # tick_dir 
     @property
@@ -342,10 +364,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['TickDir']
 
     @tick_dir.setter
-    def tick_dir(self, new_tickdir):
-        if isinstance(new_tickdir, str):
-            self.style_dict[self._plot_type]['TickDir'] = new_tickdir
-            self.notify_observers("tick_dir", new_tickdir)
+    def tick_dir(self, new_dir):
+        if self.debug:
+            print(f"@tick_dir:\n  old value: {self.style_dict[self._plot_type]['TickDir']}\n  new value: {new_dir}")
+        if isinstance(new_dir, str):
+            self.style_dict[self._plot_type]['TickDir'] = new_dir
+            self.notify_observers("tick_dir", new_dir)
         else:
             raise TypeError("tickdir must be of type str.")
 
@@ -355,10 +379,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['Font']
 
     @font.setter
-    def font(self, new_font_family):
-        if isinstance(new_font_family, str):
-            self.style_dict[self._plot_type]['Font'] = new_font_family
-            self.notify_observers("font_family", new_font_family)
+    def font(self, font_family):
+        if self.debug:
+            print(f"@font:\n  old value: {self.style_dict[self._plot_type]['Font']}\n  new value: {font_family}")
+        if isinstance(font_family, str):
+            self.style_dict[self._plot_type]['Font'] = font_family
+            self.notify_observers("font_family", font_family)
         else:
             raise TypeError("font_family must be of type str.")
 
@@ -368,10 +394,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['FontSize']
 
     @font_size.setter
-    def font_size(self, new_font_size):
-        if isinstance(new_font_size, float):
-            self.style_dict[self._plot_type]['FontSize'] = new_font_size
-            self.notify_observers("font_size", new_font_size)
+    def font_size(self, value):
+        if self.debug:
+            print(f"@font_size:\n  old value: {self.style_dict[self._plot_type]['FontSize']}\n  new value: {value}")
+        if isinstance(value, float):
+            self.style_dict[self._plot_type]['FontSize'] = value
+            self.notify_observers("font_size", value)
         else:
             raise TypeError("font_size must be of type float.")
 
@@ -382,6 +410,8 @@ class Styling(Observable):
 
     @scale_dir.setter
     def scale_dir(self, new_dir):
+        if self.debug:
+            print(f"@scale_dir:\n  old value: {self.style_dict[self._plot_type]['ScaleDir']}\n  new value: {new_dir}")
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
             if new_dir != self.style_dict[self._plot_type]['ScaleDir']:
                 self.style_dict[self._plot_type]['ScaleDir'] = new_dir
@@ -396,6 +426,8 @@ class Styling(Observable):
 
     @scale_location.setter
     def scale_location(self, location):
+        if self.debug:
+            print(f"@scale_location:\n  old value: {self.style_dict[self._plot_type]['ScaleLocation']}\n  new value: {location}")
         if (location is not None) and isinstance(location, str) and (location in ['northeast', 'northwest', 'southwest', 'southeast']):
             self.style_dict[self._plot_type]['ScaleLocation'] = location
         else:
@@ -408,6 +440,8 @@ class Styling(Observable):
 
     @scale_length.setter
     def scale_length(self, length):
+        if self.debug:
+            print(f"@scale_length:\n  old value: {self.style_dict[self._plot_type]['ScaleLength']}\n  new value: {length}")
         if length is None or isinstance(length, float):
             # check constraints on length
             x_range = self.xlim[1] - self.xlim[0]
@@ -428,9 +462,11 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['OverlayColor']
 
     @overlay_color.setter
-    def overlay_color(self, color):
-        if color is None or self._is_valid_hex_color(color):
-            self.style_dict[self._plot_type]['OverlayColor'] = color
+    def overlay_color(self, hexstr):
+        if self.debug:
+            print(f"@overlay_color:\n  old value: {self.style_dict[self._plot_type]['OverlayColor']}\n  new value: {hexstr}")
+        if hexstr is None or self._is_valid_hex_color(hexstr):
+            self.style_dict[self._plot_type]['OverlayColor'] = hexstr
         else:
             raise TypeError("color must be a hex string, #rrggbb")
 
@@ -439,12 +475,14 @@ class Styling(Observable):
         return self._show_mass
     
     @show_mass.setter
-    def show_mass(self, new_value):
-        if new_value == self._show_mass:
+    def show_mass(self, flag):
+        if self.debug:
+            print(f"@show_mass:\n  old state: {self._show_mass}\n  new state: {flag}")
+        if flag == self._show_mass:
             return
     
-        self._show_mass = new_value
-        self.notify_observers("show_mass", new_value)
+        self._show_mass = flag
+        self.notify_observers("show_mass", flag)
 
     # marker
     @property
@@ -452,9 +490,11 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['Marker']
 
     @marker.setter
-    def marker(self, marker_symbol):
-        if isinstance(marker_symbol, float):
-            self.style_dict[self._plot_type]['Marker'] = marker_symbol
+    def marker(self, symbol):
+        if self.debug:
+            print(f"@marker:\n  old value: {self.style_dict[self._plot_type]['Marker']}\n  new value: {symbol}")
+        if isinstance(symbol, float):
+            self.style_dict[self._plot_type]['Marker'] = symbol
         else:
             raise TypeError("marker_symbol must be of type float.")
 
@@ -465,6 +505,8 @@ class Styling(Observable):
 
     @marker_size.setter
     def marker_size(self, size):
+        if self.debug:
+            print(f"@marker_size:\n  old value: {self.style_dict[self._plot_type]['MarkerSize']}\n  new value: {size}")
         if isinstance(size, float):
             self.style_dict[self._plot_type]['MarkerSize'] = size
         else:
@@ -477,6 +519,8 @@ class Styling(Observable):
 
     @marker_color.setter
     def marker_color(self, hexstr):
+        if self.debug:
+            print(f"@marker_color:\n  old value: {self.style_dict[self._plot_type]['MarkerColor']}\n  new value: {hexstr}")
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['MarkerColor'] = hexstr
         else:
@@ -489,6 +533,8 @@ class Styling(Observable):
 
     @marker_alpha.setter
     def marker_alpha(self, alpha):
+        if self.debug:
+            print(f"@marker_alpha:\n  old value: {self.style_dict[self._plot_type]['MarkerAlpha']}\n  new value: {alpha}")
         if isinstance(alpha, float) and 0 <= alpha and alpha <= 1:
             self.style_dict[self._plot_type]['MarkerAlpha'] = alpha
         else:
@@ -501,6 +547,8 @@ class Styling(Observable):
 
     @line_width.setter
     def line_width(self, width):
+        if self.debug:
+            print(f"@line_width:\n  old value: {self.style_dict[self._plot_type]['LineWidth']}\n  new value: {width}")
         if isinstance(width, float):
             self.style_dict[self._plot_type]['LineWidth'] = width
         else:
@@ -513,6 +561,8 @@ class Styling(Observable):
 
     @line_multiplier.setter
     def line_multiplier(self, value):
+        if self.debug:
+            print(f"@line_multiplier:\n  old value: {self.style_dict[self._plot_type]['LineMultiplier']}\n  new value: {value}")
         if value is None or isinstance(value, float):
             self.style_dict[self._plot_type]['LineMultiplier'] = value
         else:
@@ -525,6 +575,8 @@ class Styling(Observable):
 
     @line_color.setter
     def line_color(self, hexstr):
+        if self.debug:
+            print(f"@line_color:\n  old value: {self.style_dict[self._plot_type]['LineColor']}\n  new value: {hexstr}")
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['LineColor'] = hexstr
         else:
@@ -536,13 +588,15 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['ColorFieldType']
 
     @color_field_type.setter
-    def color_field_type(self, new_field_type):
-        if (new_field_type is None) or isinstance(new_field_type, str):
-            if new_field_type == self.style_dict[self._plot_type]['ColorFieldType']:
+    def color_field_type(self, field_type):
+        if self.debug:
+            print(f"@color_field_type:\n  old value: {self.style_dict[self._plot_type]['ColorFieldType']}\n  new value: {field_type}")
+        if (field_type is None) or isinstance(field_type, str):
+            if field_type == self.style_dict[self._plot_type]['ColorFieldType']:
                 return
-            self.style_dict[self._plot_type]['ColorFieldType'] = new_field_type
+            self.style_dict[self._plot_type]['ColorFieldType'] = field_type
                 
-            self.notify_observers("c_field_type", new_field_type)
+            self.notify_observers("c_field_type", field_type)
         else:
             raise TypeError("field_type must be of type str.")
 
@@ -552,14 +606,16 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['ColorField']
 
     @color_field.setter
-    def color_field(self, new_field):
-        if (new_field is None) or isinstance(new_field, str):
+    def color_field(self, field):
+        if self.debug:
+            print(f"@color_field:\n  old value: {self.style_dict[self._plot_type]['ColorField']}\n  new value: {field}")
+        if (field is None) or isinstance(field, str):
             # update color field and associated style widgets
-            if new_field == self.style_dict[self._plot_type]['ColorField']:
+            if field == self.style_dict[self._plot_type]['ColorField']:
                 return
-            self.style_dict[self._plot_type]['ColorField'] = new_field
+            self.style_dict[self._plot_type]['ColorField'] = field
 
-            self.notify_observers("c_field", new_field)
+            self.notify_observers("c_field", field)
         else:
             raise TypeError("field must be of type str or None.")
 
@@ -570,6 +626,8 @@ class Styling(Observable):
 
     @cmap.setter
     def cmap(self, name):
+        if self.debug:
+            print(f"@cmap:\n  old value: {self.style_dict[self._plot_type]['Colormap']}\n  new value: {name}")
         if (name is None) or isinstance(name, str):
             self.style_dict[self._plot_type]['Colormap'] = name
         else:
@@ -582,6 +640,8 @@ class Styling(Observable):
 
     @cbar_reverse.setter
     def cbar_reverse(self, flag):
+        if self.debug:
+            print(f"@cbar_reverse:\n  old value: {self.style_dict[self._plot_type]['CbarReverse']}\n  new value: {flag}")
         if (flag is None) or isinstance(flag, str):
             self.style_dict[self._plot_type]['CbarReverse'] = flag
         else:
@@ -593,11 +653,13 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['CbarDir']
 
     @cbar_dir.setter
-    def cbar_dir(self, direction):
-        if (direction is not None) and isinstance(direction, str) and (direction in ['none', 'horizontal', 'vertical']):
-            self.style_dict[self._plot_type]['CbarDir'] = direction
+    def cbar_dir(self, new_dir):
+        if self.debug:
+            print(f"@cbar_dir:\n  old value: {self.style_dict[self._plot_type]['CbarDir']}\n  new value: {new_dir}")
+        if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
+            self.style_dict[self._plot_type]['CbarDir'] = new_dir
         else:
-            raise TypeError("direction must be of type str.")
+            raise TypeError("new_dir must be of type str.")
 
     # clim
     @property
@@ -605,10 +667,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['CLim']
 
     @clim.setter
-    def clim(self, new_value):
-        if new_value is None or self._is_valid_bounds(new_value):
-            self.style_dict[self._plot_type]['CLim'] = new_value
-            self.notify_observers("clim", new_value)
+    def clim(self, value):
+        if self.debug:
+            print(f"@clim:\n  old value: {self.style_dict[self._plot_type]['CLim']}\n  new value: {value}")
+        if value is None or self._is_valid_bounds(value):
+            self.style_dict[self._plot_type]['CLim'] = value
+            self.notify_observers("clim", value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 
@@ -618,10 +682,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['CLabel']
 
     @clabel.setter
-    def clabel(self, new_label):
-        if new_label is None or isinstance(new_label, str):
-            self.style_dict[self._plot_type]['CLabel'] = new_label
-            self.notify_observers("clabel", new_label)
+    def clabel(self, label):
+        if self.debug:
+            print(f"@clabel:\n  old value: {self.style_dict[self._plot_type]['CLabel']}\n  new value: {label}")
+        if label is None or isinstance(label, str):
+            self.style_dict[self._plot_type]['CLabel'] = label
+            self.notify_observers("clabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -631,10 +697,12 @@ class Styling(Observable):
         return self.style_dict[self._plot_type]['CScale']
 
     @cscale.setter
-    def cscale(self, new_scale):
-        if self._is_valid_scale(new_scale):
-            self.style_dict[self._plot_type]['CScale'] = new_scale
-            self.notify_observers("cscale", new_scale)
+    def cscale(self, scale):
+        if self.debug:
+            print(f"@cscale:\n  old value: {self.style_dict[self._plot_type]['CScale']}\n  new value: {scale}")
+        if self._is_valid_scale(scale):
+            self.style_dict[self._plot_type]['CScale'] = scale
+            self.notify_observers("cscale", scale)
         else:
             raise TypeError("scale must be linear, log or logit.")
 
@@ -645,6 +713,8 @@ class Styling(Observable):
 
     @resolution.setter
     def resolution(self, value):
+        if self.debug:
+            print(f"@resolution:\n  old value: {self.style_dict[self._plot_type]['Resolution']}\n  new value: {value}")
         if value is None or isinstance(value, int):
             self.style_dict[self._plot_type]['Resolution'] = value
         else:
@@ -1928,7 +1998,7 @@ class StylingDock(Styling):
         combobox, then updates the style widgets to match the dictionary entries and updates the plot.
         """
         if self.debug:
-            print("plot_type_callback")
+            print(f"plot_type_callback:\n  new_plot_type={new_plot_type}\n  force={force}")
 
         #if not force:
         #    if self._plot_type == self.ui.comboBoxPlotType.currentText()
@@ -1986,7 +2056,7 @@ class StylingDock(Styling):
             axis for plotting, by default "None"
         """
         if self.debug:
-            print("axis_variable_changed")
+            print(f"axis_variable_changed:\n  fieldtype={fieldtype}\n  field={field}\n  ax={ax}")
 
         ui = self.ui
 
@@ -2083,7 +2153,7 @@ class StylingDock(Styling):
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
         if self.debug:
-            print("get_axis_field")
+            print(f"get_axis_field: ax={ax}")
 
         plot_type = self.ui.comboBoxPlotType.currentText()
         if ax == 'c':

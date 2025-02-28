@@ -459,7 +459,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_list = self.app_data.field_dict['analyte']
 
         # if parent combobox has no field type selected, clear childbox and return
-        elif parentbox.currentText() == '':
+        elif parentbox.currentText() in ['', 'None']:
             childbox.clear()
             return
 

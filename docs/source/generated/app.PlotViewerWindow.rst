@@ -1,4 +1,4 @@
-﻿app.PlotViewerWindow
+app.PlotViewerWindow
 ====================
 
 .. automodule:: app.PlotViewerWindow

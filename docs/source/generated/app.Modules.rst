@@ -30,7 +30,6 @@ app.Modules
 
    .. autosummary::
    
-      Actions
       AnalyteDialog
       AttributeDataFrame
       Browser

@@ -27,7 +27,6 @@
    :toctree:
    :recursive:
 
-   app.Actions
    app.AnalyteSelectionWindow
    app.AppData
    app.CropImage

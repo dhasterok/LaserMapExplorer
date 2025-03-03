@@ -18,6 +18,7 @@ app.AppData
    .. autosummary::
    
       AppData
+      LogCounter
       Observable
    
    

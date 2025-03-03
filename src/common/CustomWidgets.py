@@ -420,24 +420,24 @@ class CustomActionMenu(QAction):
             self._add_menu_items(submenu, new_items)
 
 class CustomComboBox(QComboBox):
-    def __init__(self, update_callback=None, *args, **kwargs):
+    def __init__(self, popup_callback=None, *args, **kwargs):
         """Initialize the CustomComboBox with an option update callback that executes at popup before the items are displayed.
         
         Parameters
         ----------
-        update_callback : callback, optional
+        popup_callback : callback, optional
             Executes on showPopup(), by default None
         """
         super().__init__(*args, **kwargs)
-        self.update_callback = update_callback
+        self.popup_callback = popup_callback
 
         setattr(self, "allItems", lambda: [self.itemText(i) for i in range(self.count())])
 
     def showPopup(self):
         """Update combobox items using callback before displaying items."""
 
-        if self.update_callback:
-            self.update_callback()
+        if self.popup_callback:
+            self.popup_callback()
         super().showPopup()
 
 class CustomDockWidget(QDockWidget):

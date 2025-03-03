@@ -18,6 +18,7 @@ common.Observable
    .. autosummary::
    
       Observable
+      defaultdict
    
    
 

@@ -29,11 +29,12 @@
 
    common.Browser
    common.Calculator
-   common.ChemPlot
    common.CustomMplCanvas
    common.CustomWidgets
+   common.DataAnalysis
    common.DataHandling
    common.ExtendedDF
+   common.LamePlot
    common.Logger
    common.Masking
    common.MolecularWeightCalculator

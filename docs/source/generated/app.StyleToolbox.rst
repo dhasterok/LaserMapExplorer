@@ -1,4 +1,4 @@
-﻿app.StyleToolbox
+app.StyleToolbox
 ================
 
 .. automodule:: app.StyleToolbox
@@ -24,6 +24,7 @@
 
    .. autosummary::
    
+      LogCounter
       Observable
       QColorDialog
       QDoubleValidator
@@ -34,6 +35,7 @@
       QTableWidgetItem
       Scheduler
       StyleObj
+      StyleTheme
       Styling
       StylingDock
    

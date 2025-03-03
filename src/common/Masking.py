@@ -191,10 +191,10 @@ class FilterTab():
 
         # field type and field comboboxes
         self.comboBoxFilterFieldType = CustomComboBox(filter_tools_groupbox)
-        self.comboBoxFilterFieldType.update_callback = lambda: self.main_window.update_field_type_combobox_options(self.comboBoxFilterFieldType, self.comboBoxFilterField, global_list=True)
+        self.comboBoxFilterFieldType.popup_callback = lambda: self.main_window.update_field_type_combobox_options(self.comboBoxFilterFieldType, self.comboBoxFilterField, global_list=True)
 
         self.comboBoxFilterField = CustomComboBox(filter_tools_groupbox)
-        self.comboBoxFilterField.update_callback = lambda: self.main_window.update_field_combobox_options(self.comboBoxFilterField, self.comboBoxFilterFieldType, add_none=False)
+        self.comboBoxFilterField.popup_callback = lambda: self.main_window.update_field_combobox_options(self.comboBoxFilterField, self.comboBoxFilterFieldType, add_none=False)
         filter_tools_layout.addRow(self.comboBoxFilterFieldType, self.comboBoxFilterField)
 
         # minimum value for filter

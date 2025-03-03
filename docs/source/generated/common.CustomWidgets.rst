@@ -24,11 +24,14 @@ common.CustomWidgets
    .. autosummary::
    
       CustomActionMenu
+      CustomCheckButton
       CustomComboBox
       CustomDockWidget
       CustomLineEdit
+      CustomSlider
       CustomTableWidget
       CustomTreeView
+      DoubleSlider
       QAction
       QCheckBox
       QColor
@@ -45,9 +48,12 @@ common.CustomWidgets
       QPropertyAnimation
       QPushButton
       QRect
+      QSize
+      QSlider
       QStandardItem
       QStandardItemModel
       QTableWidget
+      QToolButton
       QTreeView
       QWidget
       Qt

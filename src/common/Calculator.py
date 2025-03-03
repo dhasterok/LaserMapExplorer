@@ -168,13 +168,13 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
 
         # Field Control
-        self.comboBoxFieldType = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.comboBoxFieldType))
+        self.comboBoxFieldType = CustomComboBox()
         self.comboBoxFieldType.setToolTip("Select field type")
         self.comboBoxFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
         calculator_layout.addWidget(self.comboBoxFieldType)
 
         field_layout = QHBoxLayout()
-        self.comboBoxField = QComboBox()
+        self.comboBoxField = CustomComboBox(popup_callback=lambda: self.update_field_combobox(self.comboBoxField))
         self.comboBoxField.setToolTip("Select field")
 
         self.toolButtonAddFormula = QToolButton()

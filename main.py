@@ -100,13 +100,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Data': False,
                 'Analyte selector': False,
                 'Plot selector': False,
-                'Plotting': True,
+                'Plotting': False,
                 'Polygon': False,
                 'Profile': False,
-                'Masking': True,
-                'Tree': True,
-                'Styles': True,
-                'Calculator': True,
+                'Masking': False,
+                'Tree': False,
+                'Styles': False,
+                'Calculator': False,
                 'Browser': False,
                 'UI': False
             }
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #       critical UI properties
         #       notifiers when properties change
         #       data structure and properties (DataHandling), data
-        self.app_data = AppData(self.data)
+        self.app_data = AppData(self.data, debug=self.logger_options['Data'])
         self.connect_app_data_observers(self.app_data)
 
         # initialize the styling data and dock
@@ -134,18 +134,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.init_ui()
         self.connect_actions()
         self.connect_widgets()
-
-        # create dictionaries for default plot styles
-        self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation'],
-            self.left_tab['process']: [0, 'analyte map', 'gradient map'],
-            self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
-            # self.mask_tab['polygon']: [0, 'analyte map'],
-            self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
-            self.left_tab['ndim']: [0, 'TEC', 'Radar'],
-            self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
-            self.left_tab['cluster']: [0, 'cluster', 'cluster score', 'cluster performance'],
-            self.left_tab['special']: [0,'analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile'],
-            -1: [0, 'analyte map']}
 
         # holds the custom field names and formulas set by the user in the calculator
         self.calc_dict = {}
@@ -308,47 +296,56 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pass
 
     def connect_widgets(self):
-        self.comboBoxHistFieldType.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxHistFieldType, self.comboBoxHistField)
+        setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
+        setattr(self.comboBoxPlotType, "allItems", lambda: [self.comboBoxPlotType.itemText(i) for i in range(self.comboBoxPlotType.count())])
+        setattr(self.comboBoxHistFieldType, "allItems", lambda: [self.comboBoxHistFieldType.itemText(i) for i in range(self.comboBoxHistFieldType.count())])
+        setattr(self.comboBoxHistField, "allItems", lambda: [self.comboBoxHistField.itemText(i) for i in range(self.comboBoxHistField.count())])
+        setattr(self.comboBoxFieldTypeX, "allItems", lambda: [self.comboBoxFieldTypeX.itemText(i) for i in range(self.comboBoxFieldTypeX.count())])
+        setattr(self.comboBoxFieldTypeY, "allItems", lambda: [self.comboBoxFieldTypeY.itemText(i) for i in range(self.comboBoxFieldTypeY.count())])
+        setattr(self.comboBoxFieldTypeZ, "allItems", lambda: [self.comboBoxFieldTypeZ.itemText(i) for i in range(self.comboBoxFieldTypeZ.count())])
+        setattr(self.comboBoxFieldX, "allItems", lambda: [self.comboBoxFieldX.itemText(i) for i in range(self.comboBoxFieldX.count())])
+        setattr(self.comboBoxFieldY, "allItems", lambda: [self.comboBoxFieldY.itemText(i) for i in range(self.comboBoxFieldY.count())])
+        setattr(self.comboBoxFieldZ, "allItems", lambda: [self.comboBoxFieldZ.itemText(i) for i in range(self.comboBoxFieldZ.count())])
+
+        self.comboBoxHistFieldType.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxHistFieldType, self.comboBoxHistField)
         self.comboBoxHistFieldType.currentTextChanged.connect(lambda: setattr(self.app_data, "hist_field_type", self.comboBoxHistFieldType.currentText()))
-        self.comboBoxHistField.update_callback = lambda: self.update_field_combobox_options(self.comboBoxHistField, self.comboBoxHistFieldType)
+        self.comboBoxHistField.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxHistField, self.comboBoxHistFieldType)
         self.comboBoxHistField.currentTextChanged.connect(lambda: setattr(self.app_data, "hist_field", self.comboBoxHistField.currentText()))
 
-        self.comboBoxColorByField.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxColorByField, self.comboBoxColorField, add_none=True, global_list=True)
+        self.comboBoxColorByField.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxColorByField, self.comboBoxColorField, add_none=True, global_list=True)
         self.comboBoxColorByField.currentTextChanged.connect(lambda: setattr(self.plot_style, "color_field_type", self.comboBoxColorByField.currentText()))
-        self.comboBoxColorField.update_callback = lambda: self.update_field_combobox_options(self.comboBoxColorField, self.comboBoxColorByField, add_none=True)
+        self.comboBoxColorField.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxColorField, self.comboBoxColorByField, add_none=True)
         self.comboBoxColorField.currentTextChanged.connect(lambda: setattr(self.plot_style, "color_field", self.comboBoxColorField.currentText()))
 
-        self.comboBoxFieldTypeX.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX)
+        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX)
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field_type", self.comboBoxFieldTypeX.currentText()))
-        self.comboBoxFieldX.update_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=False)
+        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=False)
         self.comboBoxFieldX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field", self.comboBoxFieldX.currentText()))
 
-        self.comboBoxFieldTypeY.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY)
+        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY)
         self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field_type", self.comboBoxFieldTypeY.currentText()))
-        self.comboBoxFieldY.update_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=False)
+        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=False)
         self.comboBoxFieldY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field", self.comboBoxFieldY.currentText()))
 
-        self.comboBoxFieldTypeZ.update_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ)
+        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ)
         self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field_type", self.comboBoxFieldTypeZ.currentText()))
-        self.comboBoxFieldZ.update_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=True)
+        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=True)
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field", self.comboBoxFieldZ.currentText()))
 
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
 
-
         self.comboBoxOutlierMethod.addItems(['none', 'quantile critera','quantile and distance critera', 'Chauvenet criterion', 'log(n>x) inflection'])
         self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
-        self.comboBoxOutlierMethod.activated.connect(lambda: self.update_outlier_removal(self.comboBoxOutlierMethod.currentText()
-))
+        self.comboBoxOutlierMethod.activated.connect(lambda: self.update_outlier_removal(self.comboBoxOutlierMethod.currentText()))
 
         self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
         self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
 
 
 
-    def update_field_type_combobox_options(self, parentbox, childbox=None, global_list=False):
+    def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False):
         """Updates a field type comobobox list.
 
         This method can be used on popup or by forcing an update.
@@ -993,31 +990,46 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.reindex_style_tab()
 
     def reindex_left_tab(self):
+        """Resets the dictionaries for the Control Toolbox and plot types.
+        
+        The dictionary ``self.left_tab retains the index for each of the Control Toolbox pages.  This way they
+        can be easily referenced by name.  At the same time, the dictionary ``self.plot_types retains the plot
+        types available to each page of the control toolbox and the override options when polygons or profiles
+        are active."""
+        # create diciontary for left tabs
         self.left_tab = {}
         self.left_tab.update({'spot': None})
         self.left_tab.update({'special': None})
+
+        # create dictionaries for default plot styles
+        self.plot_types = {-1: [0, 'analyte map']} # -1 is for digitizing polygons and profiles
+
         for tid in range(0,self.toolBox.count()):
             match self.toolBox.itemText(tid).lower():
                 case 'preprocess':
                     self.left_tab.update({'process': tid})
+                    self.plot_types.update({self.left_tab['process']: [0, 'analyte map', 'gradient map']})
                 case 'field viewer':
                     self.left_tab.update({'sample': tid})
+                    self.plot_types.update({self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation']})
                 case 'spot data':
                     self.left_tab.update({'spot': tid})
-                case 'polygons':
-                    self.left_tab.update({'polygons': tid})
-                case 'profiling':
-                    self.left_tab.update({'profile': tid})
+                    self.plot_types.update({self.left_tab['spot']: [0, 'analyte map', 'gradient map']})
                 case 'scatter and heatmaps':
                     self.left_tab.update({'scatter': tid})
+                    self.plot_types.update({self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map']})
                 case 'n-dim':
                     self.left_tab.update({'ndim': tid})
+                    self.plot_types.update({self.left_tab['ndim']: [0, 'TEC', 'Radar']})
                 case 'dimensional reduction':
                     self.left_tab.update({'multidim': tid})
+                    self.plot_types.update({self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score']})
                 case 'clustering':
                     self.left_tab.update({'cluster': tid})
+                    self.plot_types.update({self.left_tab['cluster']: [0, 'cluster', 'cluster score', 'cluster performance']})
                 case 'p-t-t functions':
                     self.left_tab.update({'special': tid})
+                    self.plot_types.update({self.left_tab['special']: [0,'analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile']})
 
 
     def reindex_style_tab(self):
@@ -1159,6 +1171,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.schedule_update()
 
     def update_ui_on_sample_change(self):
+        if self.logger_options['UI']:
+            self.logger.print(f"update_ui_on_sample_change\n")
         # reset all plot types on change of tab to the first option
         for key in self.plot_types.keys():
             self.plot_types[key][0] = 0
@@ -1201,6 +1215,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def update_widget_data_on_sample_change(self):
+        if self.logger_options['UI']:
+            self.logger.print(f"update_widget_data_on_sample_change\n")
         # update dx, dy, nx, ny
         self.update_dx_lineedit(self.data[self.app_data.sample_id].dx)
         self.update_dy_lineedit(self.data[self.app_data.sample_id].dy)
@@ -1231,6 +1247,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ???
 
     def update_mask_and_profile_widgets(self):
+        if self.logger_options['Data']:
+            self.logger.print(f"update_mask_and_profile_widgets\n")
         #update filters, polygon, profiles with existing data
         self.actionClearFilters.setEnabled(False)
         if np.all(self.data[self.app_data.sample_id].filter_mask):
@@ -1290,6 +1308,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score',
             'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
         """
+        if self.logger_options['Data']:
+            self.logger.print(f"update_autoscale_widgets\n  field={field}")
         # get Auto scale parameters and neg handling from analyte info
         data = self.data[self.app_data.sample_id]
         parameters = data.processed_data.column_attributes[field]
@@ -1314,6 +1334,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
     def update_mask_dock(self):
+        if self.logger_options['Data']:
+            self.logger.print(f"update_mask_dock\n")
         # Update filter UI 
         if hasattr(self, "mask_dock"):
             data = self.data[self.app_data.sample_id].processed_data
@@ -1330,7 +1352,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     
 
-    def update_hist_field_type_combobox(self, value):
+    def update_hist_field_type_combobox(self, field_type):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
 
         Called as an update to ``app_data.hist_field_type``.  Updates the histogram field type (also controls analyte maps).  Schedules a plot update.
@@ -1340,14 +1362,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         value : str
             New field type.
         """
-        self.comboBoxHistFieldType.setCurrentText(value)
+        if self.logger_options['UI']:
+            self.logger.print(f"update_hist_field_type_combobox\n  field_type={field_type}")
+        self.comboBoxHistFieldType.setCurrentText(field_type)
 
-        self.plot_style.color_field_type = value
+        self.plot_style.color_field_type = field_type
 
         if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.schedule_update()
 
-    def update_hist_field_combobox(self, value):
+    def update_hist_field_combobox(self, field):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
 
         Called as an update to ``app_data.hist_field``.  Updates the histogram field.  Schedules a plot update.
@@ -1357,8 +1381,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         value : str
             New field type.
         """
-        self.comboBoxHistField.setCurrentText(value)
-        self.plot_style.color_field = value
+        if self.logger_options['UI']:
+            self.logger.print(f"update_hist_field_combobox\n  field={field}")
+        self.comboBoxHistField.setCurrentText(field)
+        self.plot_style.color_field = field
 
         # update 
         self.spinBoxFieldIndex.setMinimum(0)
@@ -1593,14 +1619,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
-        self.comboBoxPlotType.clear()
+        if self.logger_options['UI']:
+            self.logger.print("update_plot_top_combobox_options")
+
+
         if self.profile_state == True or self.polygon_state == True:
             plot_idx = -1
         else:
             plot_idx = self.toolBox.currentIndex()
 
-        self.comboBoxPlotType.addItems(self.plot_types[plot_idx][1:])
-        self.comboBoxPlotType.setCurrentIndex(self.plot_types[plot_idx][0])
+        plot_types = self.plot_types[plot_idx][1:]
+        
+        if plot_types == self.comboBoxPlotType.allItems():
+            return
+
+        self.comboBoxPlotType.clear()
+        self.comboBoxPlotType.addItems(plot_types)
 
         self.plot_style.plot_type = self.comboBoxPlotType.currentText()
 
@@ -2726,6 +2760,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'logger_dock'):
             logfile = os.path.join(BASEDIR,f'resources/log/lame.log')
             self.logger_dock = LoggerDock(logfile, self)
+            for key in self.logger_options.keys():
+                self.logger_options[key] = True
         else:
             self.logger_dock.show()
 

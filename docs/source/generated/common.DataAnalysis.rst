@@ -1,7 +1,7 @@
-common.DataHandling
+common.DataAnalysis
 ===================
 
-.. automodule:: common.DataHandling
+.. automodule:: common.DataAnalysis
 
    
    
@@ -13,9 +13,8 @@ common.DataHandling
 
    .. autosummary::
    
-      chauvenet_criterion
-      quantile_and_difference
-      sort_analytes
+      percentileofscore
+      silhouette_score
       yeojohnson
    
    
@@ -26,12 +25,10 @@ common.DataHandling
 
    .. autosummary::
    
-      AttributeDataFrame
+      Clustering
+      DimensionalReduction
       KMeans
-      LogCounter
-      Observable
-      QMessageBox
-      SampleObj
+      PCA
       StandardScaler
    
    

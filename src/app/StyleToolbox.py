@@ -1099,6 +1099,8 @@ class StylingDock(Styling):
 
         self._signal_state = True
 
+        self.set_style_widgets()
+
 
     @property
     def signal_state(self):
@@ -1703,7 +1705,7 @@ class StylingDock(Styling):
         else:
             style['CScale'] = 'linear'
 
-    def set_style_widgets(self, plot_type=None, style=None):
+    def set_style_widgets(self):
         """Sets values in right toolbox style page
 
         Parameters
@@ -1738,7 +1740,7 @@ class StylingDock(Styling):
         style = self.style_dict[self.plot_type]
 
         # toggle actionSwapAxes
-        match plot_type:
+        match self.plot_type:
             case 'analyte map' | 'gradient map':
                 ui.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
@@ -1811,7 +1813,7 @@ class StylingDock(Styling):
         # scalebar properties
         ui.comboBoxScaleLocation.setCurrentText(style['ScaleLocation'])
         ui.comboBoxScaleDirection.setCurrentText(style['ScaleDir'])
-        if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
+        if (style['ScaleLength'] is None) and (self.plot_type in self.map_plot_types):
             style['ScaleLength'] = self.default_scale_length()
 
             ui.lineEditScaleLength.value = style['ScaleLength']
@@ -1837,8 +1839,15 @@ class StylingDock(Styling):
 
         # color properties
         ui.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['MarkerColor'])
-        ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, add_none=True)
-        ui.comboBoxFieldTypeC.setCurrentText(self.app_data.c_field_type)
+        add_none = True
+        if self.plot_type in self.map_plot_types:
+            add_none = False
+        ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, add_none=add_none)
+        if self.app_data.c_field_type is None or self.app_data.c_field_type == '':
+            ui.comboBoxFieldTypeC.setCurrentIndex(1)
+            self.app_data.c_field_type = ui.comboBoxFieldTypeC.currentText()
+        else:
+            ui.comboBoxFieldTypeC.setCurrentText(self.app_data.c_field_type)
 
         if self.app_data.c_field_type == '':
             ui.comboBoxFieldC.clear()
@@ -1958,10 +1967,12 @@ class StylingDock(Styling):
         #        return
 
         # set plot flag to false
-        if new_plot_type is not None:
+        if new_plot_type is not None and new_plot_type != '':
             if new_plot_type != self.ui.comboBoxPlotType.currentText():
                 self.ui.comboBoxPlotType.setCurrentText(new_plot_type)
                 self.ui.plot_types[self.ui.toolBox.currentIndex()][0] = self.ui.comboBoxPlotType.currentIndex()
+        else:
+            self.plot_type = self.ui.comboBoxPlotType.currentText()
 
         # update ui
         match self.plot_type.lower():
@@ -2349,6 +2360,8 @@ class StylingDock(Styling):
         """
         if self.debug:
             self.logger.print(f"axis_reset_callback, axis: {ax}")
+
+        data = self.ui.data[self.app_data.sample_id]
 
         if ax == 'c':
             if self.ui.comboBoxPlotType.currentText() == 'vectors':

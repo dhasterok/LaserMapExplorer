@@ -939,8 +939,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         plot_style.add_observer("line_width", self.update_line_width_combobox)
         plot_style.add_observer("line_multiplier", self.update_line_multiplier_lineedit)
         plot_style.add_observer("line_color", self.update_line_color_toolbutton)
-        plot_style.add_observer("c_field_type", self.update_color_field_type_combobox)
-        plot_style.add_observer("c_field", self.update_color_field_combobox)
         plot_style.add_observer("cmap", self.update_cmap_combobox)
         plot_style.add_observer("cbar_reverse", self.update_cbar_reverse_checkbox)
         plot_style.add_observer("cbar_direction", self.update_cbar_direction_combobox)
@@ -1205,13 +1203,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.canvas_changed()
         
-        # update combobox to reflect list of available field types and fields
-        self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC)
-
         # set toolbox tab indexes
         self.toolBoxStyle.setCurrentIndex(0)
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
         self.toolbox_changed()
+
+        # update combobox to reflect list of available field types and fields
+        self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC)
+
 
 
     def update_widget_data_on_sample_change(self):
@@ -2539,7 +2538,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
 
                     self.add_plotwidget_to_canvas(self.plot_info)
-                    #self.plot_tree.add_tree_item(self.plot_info)
+                    self.plot_tree.add_tree_item(self.plot_info)
                 
                 
             case 'gradient map':

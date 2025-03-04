@@ -1,11 +1,11 @@
 import re, os
-from PyQt5.QtCore import ( Qt, QTimer, QSize, QUrl )
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import ( Qt, QTimer, QSize, QUrl )
+from PyQt6.QtWidgets import (
         QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QTextEdit, QSizePolicy,
-        QLabel, QDialog, QDialogButtonBox, QToolBar, QAction , QHBoxLayout
+        QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout
     )
-from PyQt5.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator)
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator, QAction )
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 from datetime import datetime
 import numpy as np
 import pandas as pd   

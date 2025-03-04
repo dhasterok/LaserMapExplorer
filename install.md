@@ -29,10 +29,11 @@ conda activate pyqt
 
 conda create --name pyqt python=3.11
 conda activate pyqt
-conda install python=3.11 pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn yopencv openpyxl numexpr
+conda install python=3.11 pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn openpyxl numexpr
 conda install conda-forge/label/cf201901::scikit-fuzzy
 pip install darkdetect cmcrameri rst2pdf
 pip install -U scikit-fuzzy
+pip install opencv-python-headless
 # Step 6: Run main.py on spyder or on terminal 
 
 python3 main.py

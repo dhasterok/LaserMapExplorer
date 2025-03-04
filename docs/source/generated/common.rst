@@ -31,12 +31,15 @@
    common.Calculator
    common.CustomMplCanvas
    common.CustomWidgets
+   common.DataAnalysis
    common.DataHandling
    common.ExtendedDF
+   common.LamePlot
    common.Logger
    common.Masking
    common.MolecularWeightCalculator
    common.NoteTaking
+   common.Observable
    common.Polygon
    common.Regression
    common.ScheduleTimer
@@ -50,9 +53,7 @@
    common.plot_spider
    common.radar
    common.radar_factory
-   common.rotated
    common.scalebar
-   common.ternary_colormap
    common.ternary_plot
    common.varfunc
 

@@ -41,7 +41,6 @@ app.PlotViewerWindow
       QVBoxLayout
       QWidget
       Qt
-      RotatedHeaderView
       Ui_widgetPlotViewer
       ViewBox
       pyqtSignal

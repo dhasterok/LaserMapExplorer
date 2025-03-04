@@ -24,6 +24,7 @@ app.PlotTree
    .. autosummary::
    
       CustomTreeView
+      LogCounter
       PlotTree
       QBrush
       QColor

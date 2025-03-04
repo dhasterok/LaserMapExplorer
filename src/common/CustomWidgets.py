@@ -1,9 +1,12 @@
-from PyQt5.QtWidgets import ( 
-        QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView, QAction, QMenu,
-        QDockWidget
+from PyQt6.QtWidgets import ( 
+        QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
+        QMenu, QDockWidget, QHeaderView, QToolButton, QSlider
     )
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter, QColor
-from PyQt5.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
+from PyQt6.QtGui import (
+    QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
+    QColor, QAction, QIcon
+)
+from PyQt6.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal, QSize
 import src.common.format as fmt
 import pandas as pd
 
@@ -216,6 +219,39 @@ class CustomTableWidget(QTableWidget):
                 column_data.append('')  # Handle empty cells if needed
         
         return column_data
+
+
+class RotatedHeaderView(QHeaderView):
+    """Rotates the column header of a table by 90 degrees
+
+    Parameters
+    ----------
+    parent : obj, optional
+        Parent table object
+    """    
+    def __init__(self, parent=None):
+        super(RotatedHeaderView, self).__init__(Qt.Orientation.Horizontal, parent)
+        self.setMinimumSectionSize(20)
+
+    def paintSection(self, painter, rect, logicalIndex ):
+        painter.save()
+        # translate the painter to the appropriate position
+        painter.translate(rect.x(), rect.y() + rect.height())
+        painter.rotate(-90)  # rotate by -90 degrees
+        # and have parent code paint at this location
+        newrect = QRect(0,0,rect.height(),rect.width())
+        super(RotatedHeaderView, self).paintSection(painter, newrect, logicalIndex)
+        painter.restore()
+
+    def minimumSizeHint(self):
+        size = super(RotatedHeaderView, self).minimumSizeHint()
+        size.transpose()
+        return size
+
+    def sectionSizeFromContents(self, logicalIndex):
+        size = super(RotatedHeaderView, self).sectionSizeFromContents(logicalIndex)
+        size.transpose()
+        return size
     
 class StandardItem(QStandardItem):
     def __init__(self, txt='', font_size=10, set_bold=False, data=None):
@@ -384,24 +420,24 @@ class CustomActionMenu(QAction):
             self._add_menu_items(submenu, new_items)
 
 class CustomComboBox(QComboBox):
-    def __init__(self, update_callback=None, *args, **kwargs):
+    def __init__(self, popup_callback=None, *args, **kwargs):
         """Initialize the CustomComboBox with an option update callback that executes at popup before the items are displayed.
         
         Parameters
         ----------
-        update_callback : callback, optional
+        popup_callback : callback, optional
             Executes on showPopup(), by default None
         """
         super().__init__(*args, **kwargs)
-        self.update_callback = update_callback
+        self.popup_callback = popup_callback
 
         setattr(self, "allItems", lambda: [self.itemText(i) for i in range(self.count())])
 
     def showPopup(self):
         """Update combobox items using callback before displaying items."""
 
-        if self.update_callback:
-            self.update_callback()
+        if self.popup_callback:
+            self.popup_callback()
         super().showPopup()
 
 class CustomDockWidget(QDockWidget):
@@ -470,18 +506,18 @@ class ToggleSwitch(QWidget):
 
     def mousePressEvent(self, event):
         """Toggle switch on click"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.toggle()
 
     def paintEvent(self, event):
         """Draw switch"""
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Draw background
         bg_color = QColor(self.bg_right_color) if self._checked else QColor(self.bg_left_color)
         painter.setBrush(bg_color)
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
         painter.drawRoundedRect(0, 0, self.width, self.height, self.height // 2, self.height // 2)
 
         # Draw sliding thumb
@@ -496,4 +532,226 @@ class ToggleSwitch(QWidget):
         self._thumb_pos = pos
         self.update()  # Redraw switch
 
-    thumb_pos = pyqtProperty(int, get_thumb_pos, set_thumb_pos)
+    thumb_pos = property(get_thumb_pos, set_thumb_pos)
+
+class CustomCheckButton(QToolButton):
+    """A button that changes icons when checked
+    
+    Properties
+    ----------
+    """
+    def __init__(self, icon_unchecked: QIcon, icon_checked: QIcon, parent=None):
+        super().__init__(parent)
+
+        # icons for checked and unchecked states
+        self.icon_checked = icon_checked
+        self.icon_unchecked = icon_checked
+
+        # button properties
+        self.setFixedSize(24, 24)
+        self.setIconSize(QSize(18, 18))
+
+        # initialize checked state and icon
+        self.setCheckable(True)
+        self.setChecked(False)
+        self.update_icon()
+    
+    def update_icon(self):
+        """Update the icon based on the button's checked state."""
+        if self.isChecked():
+            self.setIcon(self.icon_checked)
+        else:
+            self.setIcon(self.icon_unchecked)
+
+class CustomSlider(QWidget):
+    """A custom slider with a label.
+
+    The slider range, step and position can be initialized using the paramters below, or be set/changed using
+    QSlider equivalent methods.
+    
+    Parameters
+    ----------
+    min_value : float (optional)
+        Minimum value of slider range
+    max_value : float (optional)
+        Maximum value of slider range
+    step: float (optional)
+        Step size for slider position
+    initial_value : float (optional)
+        Initial position of slider handle
+    parent : (optional)
+        Parent object"""
+    valueChanged = pyqtSignal(int)
+    sliderMoved = pyqtSignal(int)
+    sliderReleased = pyqtSignal(int)
+    sliderPressed = pyqtSignal(int)
+
+    def __init__(self, min_value=0, max_value=100, step=1, initial_value=50, parent=None):
+        super().__init__(parent)
+        
+        self.layout = QVBoxLayout()
+        
+        # Create label to display slider value
+        self.label = QLabel(f"Value: {initial_value}")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Create slider
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setMinimum(min_value)
+        self.slider.setMaximum(max_value)
+        self.slider.setSingleStep(step)
+        self.slider.setValue(initial_value)
+        
+        # Connect slider movement to label update
+        self.slider.valueChanged.connect(self.update_label)
+        self.slider.valueChanged.connect(self.valueChanged.emit)  # Emit custom signal
+        self.slider.sliderMoved.connect(self.update_label)
+        self.slider.sliderMoved.connect(self.sliderMoved.emit)
+        self.slider.sliderReleased.connect(self.update_label)
+        self.slider.sliderReleased.connect(self.sliderReleased.emit)
+        self.slider.sliderPressed.connect(self.sliderPressed.emit)
+        
+        # Add widgets to layout
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.slider)
+        
+        self.setLayout(self.layout)
+    
+    def update_label(self, value):
+        self.label.setText(f"{value}")
+    
+    def setMinimum(self, value):
+        self.slider.setMinimum(value)
+    
+    def setMaximum(self, value):
+        self.slider.setMaximum(value)
+    
+    def setStep(self, value):
+        self.slider.setSingleStep(value)
+    
+    def setValue(self, value):
+        self.slider.setValue(value)
+    
+    def value(self):
+        return self.slider.value()
+
+    def slider(self):
+        return self.slider
+
+
+class DoubleSlider(QWidget):
+    valueChanged = pyqtSignal(int, int)  # Signal emitting both slider values
+    sliderMoved = pyqtSignal(int, int)  # Signal emitting both slider values
+    sliderReleased = pyqtSignal(int, int)  # Signal emitting both slider values
+    sliderPressed = pyqtSignal(int, int)  # Signal emitting both slider values
+
+    def __init__(self, min_value=0, max_value=100, step=1, initial_left=25, initial_right=75, parent=None):
+        super().__init__(parent)
+        
+        self.layout = QVBoxLayout()
+        
+        # Create horizontal layout for sliders
+        self.slider_layout = QHBoxLayout()
+        
+        # Create left slider
+        self.left_slider = QSlider(Qt.Orientation.Horizontal)
+        self.left_slider.setMinimum(min_value)
+        self.left_slider.setMaximum(max_value)
+        self.left_slider.setSingleStep(step)
+        self.left_slider.setValue(initial_left)
+        
+        # Create right slider
+        self.right_slider = QSlider(Qt.Orientation.Horizontal)
+        self.right_slider.setMinimum(min_value)
+        self.right_slider.setMaximum(max_value)
+        self.right_slider.setSingleStep(step)
+        self.right_slider.setValue(initial_right)
+        
+        # Connect slider changes
+        self.left_slider.valueChanged.connect(self.update_values)
+        self.right_slider.valueChanged.connect(self.update_values)
+        self.left_slider.valueChanged.connect(self.valueChanged.emit)
+        self.right_slider.valueChanged.connect(self.valueChanged.emit)
+
+        self.left_slider.sliderMoved.connect(self.update_label)
+        self.right_slider.sliderMoved.connect(self.update_label)
+        self.left_slider.sliderMoved.connect(self.sliderMoved.emit)
+        self.right_slider.sliderMoved.connect(self.sliderMoved.emit)
+
+        self.left_slider.sliderReleased.connect(self.update_label)
+        self.right_slider.sliderReleased.connect(self.update_label)
+        self.left_slider.sliderReleased.connect(self.sliderReleased.emit)
+        self.right_slider.sliderReleased.connect(self.sliderReleased.emit)
+
+        self.left_slider.sliderPressed.connect(self.sliderPressed.emit)
+        self.right_slider.sliderPressed.connect(self.sliderPressed.emit)
+        
+        self.slider_layout.addWidget(self.left_slider)
+        self.slider_layout.addWidget(self.right_slider)
+        
+        # Create horizontal layout for line edits
+        self.input_layout = QHBoxLayout()
+        
+        self.left_input = QLineEdit(str(initial_left))
+        self.right_input = QLineEdit(str(initial_right))
+        
+        self.left_input.setFixedWidth(50)
+        self.right_input.setFixedWidth(50)
+        
+        self.left_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.right_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.left_input.editingFinished.connect(self.update_sliders)
+        self.right_input.editingFinished.connect(self.update_sliders)
+        
+        self.input_layout.addWidget(self.left_input)
+        self.input_layout.addStretch()
+        self.input_layout.addWidget(self.right_input)
+        
+        self.layout.addLayout(self.slider_layout)
+        self.layout.addLayout(self.input_layout)
+        
+        self.setLayout(self.layout)
+    
+    def update_values(self):
+        left_value = self.left_slider.value()
+        right_value = self.right_slider.value()
+        
+        self.left_input.setText(str(left_value))
+        self.right_input.setText(str(right_value))
+        
+        self.valueChanged.emit(left_value, right_value)
+    
+    def update_sliders(self):
+        try:
+            left_value = int(self.left_input.text())
+            right_value = int(self.right_input.text())
+            self.left_slider.setValue(left_value)
+            self.right_slider.setValue(right_value)
+        except ValueError:
+            pass
+    
+    def setMinimum(self, value):
+        self.left_slider.setMinimum(value)
+        self.right_slider.setMinimum(value)
+    
+    def setMaximum(self, value):
+        self.left_slider.setMaximum(value)
+        self.right_slider.setMaximum(value)
+    
+    def setStep(self, value):
+        self.left_slider.setSingleStep(value)
+        self.right_slider.setSingleStep(value)
+
+    def setLeftValue(self, value):
+        self.left_slider.setValue(value)
+
+    def setRightValue(self, value):
+        self.right_slider.setValue(value)
+
+    def setValues(self, values):
+        self.left_slider.setValue(values[0])
+        self.right_slider.setValue(values[1])
+    
+    def values(self):
+        return self.left_slider.value(), self.right_slider.value()

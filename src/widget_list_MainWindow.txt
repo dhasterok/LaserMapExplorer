@@ -14,6 +14,8 @@ self.lineEditYUB
 self.lineEditYLB
 self.lineEditXUB
 self.lineEditXLB
+self.lineEditZUB
+self.lineEditZLB
 self.lineEditScaleLength
 self.lineEditYThresh
 self.lineEditPointRadius
@@ -29,3 +31,15 @@ self.dockWidgetLeftToolbox
 self.dockWidgetRightToolbox
 self.dockWidgetMaskToolbox
 self.dockWidgetInfoToolbox
+self.comboBoxPlotType
+self.comboBoxMVPlots
+self.comboBoxFieldTypeX
+self.comboBoxFieldX
+self.comboBoxFieldTypeY
+self.comboBoxFieldY
+self.comboBoxFieldTypeZ
+self.comboBoxFieldZ
+self.comboBoxFieldTypeC
+self.comboBoxFieldC
+self.comboBoxFieldColormap
+self.comboBoxMarker

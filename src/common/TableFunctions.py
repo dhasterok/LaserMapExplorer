@@ -52,7 +52,7 @@ class TableFcn:
                     # update filters
                     # update plots
 
-    def move_row_down(self,table):
+    def move_row_down(self, table):
         """Moves a row down one position in a table
 
         Moves the selected row in a table down one position. If multiple are selected only the top row is moved.
@@ -85,7 +85,7 @@ class TableFcn:
                         self.parent.profiling.clear_interpolation()
                         self.parent.profiling.interpolate_points(interpolation_distance=int(self.parent.lineEditIntDist.text()), radius= int(self.parent.lineEditPointRadius.text()))
 
-    def delete_row(self,table):
+    def delete_row(self, table):
         """Deletes selected rows in a table
 
         Parameters

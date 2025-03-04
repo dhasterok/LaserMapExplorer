@@ -45,6 +45,8 @@ class ImageProcessing():
             'edge-preserving':{'label1':'Sigma S', 'value1':5, 'label2':'Sigma R', 'value2': 0.2},
             'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
 
+        self.noise_red_array = None
+
         # noise reduction
         self.parent.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
         self.update_noise1_flag = False
@@ -62,16 +64,10 @@ class ImageProcessing():
         self.edge_img = None
 
     def gradient_checked_state_changed(self):
-        field_type = self.parent.plot_style.field_type
-        field = self.parent.plot_style.field
         if self.parent.checkBoxGradient.isChecked():
-            self.parent.plot_style.style_dict['gradient map']['ColorFieldType'] = field_type
-            self.parent.plot_style.style_dict['gradient map']['ColorField'] = field
             self.parent.plot_style.plot_type = 'gradient map'
         else:
             if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.plot_style.style_dict['analyte map']['ColorFieldType'] = field_type
-                self.parent.plot_style.style_dict['analyte map']['ColorField'] = field
                 self.parent.plot_style.plot_type = 'analyte map'
 
 

@@ -1,12 +1,12 @@
 import os, darkdetect
-from PyQt5.QtGui import QIcon, QFont
+from PyQt6.QtGui import QIcon, QFont
 from src.app.config import ICONPATH, load_stylesheet
 
 def default_font():
     # set default font for application
     font = QFont()
     font.setPointSize(11)
-    font.setStyleStrategy(QFont.PreferDefault)
+    font.setStyleStrategy(QFont.StyleStrategy.PreferDefault)
 
     return font
 
@@ -141,8 +141,8 @@ class UIThemes():
         # Calculator
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
         if hasattr(parent,'calculator'):
-            parent.calculate_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-            parent.delete_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+            parent.actionCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
+            parent.toolButtonFormulaDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Style Toolbox
         parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(os.path.join(ICONPATH,'icon-axes-dark-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
@@ -258,8 +258,8 @@ class UIThemes():
         # Calculator
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
         if hasattr(parent,'calculator'):
-            parent.calculator.calculate_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
-            parent.calculator.delete_button.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+            parent.calculator.actionCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
+            parent.calculator.toolButtonFormulaDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Style Toolbox
         parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(os.path.join(ICONPATH,'icon-axes-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-64.svg')))

@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import ( QDialog, QHeaderView, QTableWidget, QTableWidgetItem, QCheckBox, QMenu, QMessageBox )
-from PyQt5.QtGui import ( QIcon )
+import os, darkdetect
+from PyQt6.QtWidgets import ( QDialog, QHeaderView, QTableWidget, QTableWidgetItem, QCheckBox, QMenu, QMessageBox )
+from PyQt6.QtGui import ( QIcon )
 from src.ui.QuickViewDialog import Ui_QuickViewDialog
 import src.app.CustomTableWidget as TW
-import os, darkdetect
 import src.common.csvdict as csvdict
 import src.app.config as lamepath
 from src.common.SortAnalytes import sort_analytes

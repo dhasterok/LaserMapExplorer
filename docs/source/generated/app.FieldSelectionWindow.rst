@@ -1,4 +1,4 @@
-﻿app.FieldSelectionWindow
+app.FieldSelectionWindow
 ========================
 
 .. automodule:: app.FieldSelectionWindow
@@ -37,7 +37,6 @@
       QTableWidget
       QTableWidgetItem
       Qt
-      RotatedHeaderView
       Ui_FieldDialog
       pyqtSignal
    

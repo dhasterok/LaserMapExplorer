@@ -1,4 +1,4 @@
-﻿common.CustomWidgets
+common.CustomWidgets
 ====================
 
 .. automodule:: common.CustomWidgets
@@ -24,11 +24,14 @@
    .. autosummary::
    
       CustomActionMenu
+      CustomCheckButton
       CustomComboBox
       CustomDockWidget
       CustomLineEdit
+      CustomSlider
       CustomTableWidget
       CustomTreeView
+      DoubleSlider
       QAction
       QCheckBox
       QColor
@@ -37,6 +40,7 @@
       QDockWidget
       QDoubleValidator
       QFont
+      QHeaderView
       QIcon
       QLineEdit
       QMenu
@@ -44,12 +48,16 @@
       QPropertyAnimation
       QPushButton
       QRect
+      QSize
+      QSlider
       QStandardItem
       QStandardItemModel
       QTableWidget
+      QToolButton
       QTreeView
       QWidget
       Qt
+      RotatedHeaderView
       StandardItem
       ToggleSwitch
       pyqtProperty

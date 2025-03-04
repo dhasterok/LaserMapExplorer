@@ -28,6 +28,8 @@ common.DataHandling
    
       AttributeDataFrame
       KMeans
+      LogCounter
+      Observable
       QMessageBox
       SampleObj
       StandardScaler

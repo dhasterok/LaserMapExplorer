@@ -10,8 +10,6 @@ SSPATH = os.path.join(BASEDIR, 'resources', 'styles')
 
 DEBUG = False
 DEBUG_PLOT = False
-DEBUG_IO = False
-DEBUG_TREE = True
 
 def load_stylesheet(filename):
     replacements = {

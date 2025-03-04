@@ -40,7 +40,6 @@ app.Workflow
       QUrl
       QVBoxLayout
       QWebChannel
-      QWebEngineSettings
       QWebEngineView
       QWidget
       Qt

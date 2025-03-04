@@ -138,14 +138,12 @@ class Styling(Observable):
         'Multiplier' : (hex str) -- color of markers, set by ``toolButtonLineColor``
 
         * associated with widgets in the toolBoxTreeView > Styling > Colors tab
-        'ColorFieldType' : (str) -- field type used to set colors in a figure, set by ``comboBoxColorByField``
-        'ColorField' : (str) -- field used to set colors in a figure, set by ``comboBoxColorField``
-        'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
-        'CbarReverse' : (bool) -- inverts colormap, set by ``checkBoxReverseColormap``
+        'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
         'CLim' : (list of float) -- color bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
         'CScale' : (str) -- c-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
+        'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
+        'CbarReverse' : (bool) -- inverts colormap, set by ``checkBoxReverseColormap``
         'CbarDir' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
-        'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
         'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
 
         Parameters
@@ -584,43 +582,6 @@ class Styling(Observable):
         else:
             raise TypeError("hexstr must be a hex string, #rrggbb")
 
-    # color_field_type
-    @property
-    def color_field_type(self):
-        return self.style_dict[self._plot_type]['ColorFieldType']
-
-    @color_field_type.setter
-    def color_field_type(self, field_type):
-        if self.debug:
-            self.logger.print(f"@color_field_type:\n  old value: {self.style_dict[self._plot_type]['ColorFieldType']}\n  new value: {field_type}")
-        if (field_type is None) or isinstance(field_type, str):
-            if field_type == self.style_dict[self._plot_type]['ColorFieldType']:
-                return
-            self.style_dict[self._plot_type]['ColorFieldType'] = field_type
-                
-            self.notify_observers("c_field_type", field_type)
-        else:
-            raise TypeError("field_type must be of type str.")
-
-    # color_field
-    @property
-    def color_field(self):
-        return self.style_dict[self._plot_type]['ColorField']
-
-    @color_field.setter
-    def color_field(self, field):
-        if self.debug:
-            self.logger.print(f"@color_field:\n  old value: {self.style_dict[self._plot_type]['ColorField']}\n  new value: {field}")
-        if (field is None) or isinstance(field, str):
-            # update color field and associated style widgets
-            if field == self.style_dict[self._plot_type]['ColorField']:
-                return
-            self.style_dict[self._plot_type]['ColorField'] = field
-
-            self.notify_observers("c_field", field)
-        else:
-            raise TypeError("field must be of type str or None.")
-
     # cmap - colormap
     @property
     def cmap(self):
@@ -885,7 +846,7 @@ class StyleTheme():
                 'ScaleDir': 'none', 'ScaleLocation': 'northeast', 'ScaleLength': None, 'OverlayColor': '#ffffff',
                 'Marker': 'circle', 'MarkerSize': 6, 'MarkerColor': '#1c75bc', 'MarkerAlpha': 30,
                 'LineWidth': 1.5, 'LineMultiplier': 1, 'LineColor': '#1c75bc',
-                'ColorFieldType': 'None', 'ColorField': '', 'Colormap': 'viridis', 'CbarReverse': False, 'CLim':[0,1], 'CScale':'linear', 'CbarDir': 'vertical', 'CLabel': '', 'Resolution': 10 }
+                'CLim': [0,1], 'CScale': 'linear', 'CLabel': '', 'Colormap': 'viridis', 'CbarReverse': False, 'CbarDir': 'vertical', 'Resolution': 10 }
 
         # try to load one of the preferred fonts
         default_font = ['Avenir','Candara','Myriad Pro','Myriad','Aptos','Calibri','Helvetica','Arial','Verdana']
@@ -917,7 +878,6 @@ class StyleTheme():
                 'profile': copy.deepcopy(self.default_plot_style)}
 
         styles['analyte map']['Colormap'] = 'plasma'
-        styles['analyte map']['ColorFieldType'] = 'Analyte'
 
         styles['correlation']['AspectRatio'] = 1.0
         styles['correlation']['FontSize'] = 8
@@ -932,8 +892,6 @@ class StyleTheme():
 
         styles['cluster score']['Colormap'] = 'plasma'
         styles['cluster score']['CbarDir'] = 'vertical'
-        styles['cluster score']['ColorFieldType'] = 'cluster score'
-        styles['cluster score']['ColorField'] = 'cluster0'
         styles['cluster score']['CScale'] = 'linear'
 
         styles['cluster']['CScale'] = 'discrete'
@@ -942,8 +900,6 @@ class StyleTheme():
         styles['cluster performance']['AspectRatio'] = 0.62
 
         styles['PCA score']['CScale'] = 'linear'
-        styles['PCA score']['ColorFieldType'] = 'PCA score'
-        styles['PCA score']['ColorField'] = 'PC1'
 
         styles['scatter']['AspectRatio'] = 1
 
@@ -1031,11 +987,6 @@ class StylingDock(Styling):
         #self.ui.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
         #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
 
-        setattr(self.ui.comboBoxMarker, "allItems", lambda: [self.ui.comboBoxMarker.itemText(i) for i in range(self.ui.comboBoxMarker.count())])
-        setattr(self.ui.comboBoxColorByField, "allItems", lambda: [self.ui.comboBoxColorByField.itemText(i) for i in range(self.ui.comboBoxColorByField.count())])
-        setattr(self.ui.comboBoxColorField, "allItems", lambda: [self.ui.comboBoxColorField.itemText(i) for i in range(self.ui.comboBoxColorField.count())])
-        setattr(self.ui.comboBoxFieldColormap, "allItems", lambda: [self.ui.comboBoxFieldColormap.itemText(i) for i in range(self.ui.comboBoxFieldColormap.count())])
-
         # add list of colormaps to comboBoxFieldColormap and set callbacks
         self.ui.comboBoxFieldColormap.clear()
         self.ui.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
@@ -1120,9 +1071,9 @@ class StylingDock(Styling):
         #self.ui.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
         # colors
         # marker color
-        #self.ui.comboBoxColorByField.activated.connect(self.update_color_field_type)
-        #self.ui.comboBoxColorField.activated.connect(self.color_field_callback)
-        #self.ui.spinBoxColorField.valueChanged.connect(self.color_field_update)
+        #self.ui.comboBoxFieldTypeC.activated.connect(self.update_color_field_type)
+        #self.ui.comboBoxFieldC.activated.connect(self.color_field_callback)
+        #self.ui.spinBoxFieldIndex.valueChanged.connect(self.color_field_update)
         #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         #self.ui.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
@@ -1232,8 +1183,8 @@ class StylingDock(Styling):
         ui.lineEditLengthMultiplier.blockSignals(self._signal_state)
 
         # coloring
-        ui.comboBoxColorByField.blockSignals(self._signal_state)
-        ui.comboBoxColorField.blockSignals(self._signal_state)
+        ui.comboBoxFieldTypeC.blockSignals(self._signal_state)
+        ui.comboBoxFieldC.blockSignals(self._signal_state)
         ui.spinBoxHeatmapResolution.blockSignals(self._signal_state)
         ui.comboBoxFieldColormap.blockSignals(self._signal_state)
         ui.checkBoxReverseColormap.blockSignals(self._signal_state)
@@ -1297,8 +1248,8 @@ class StylingDock(Styling):
         ui.lineEditLengthMultiplier.setEnabled(False)
 
         # coloring
-        ui.comboBoxColorByField.setEnabled(False)
-        ui.comboBoxColorField.setEnabled(False)
+        ui.comboBoxFieldTypeC.setEnabled(False)
+        ui.comboBoxFieldC.setEnabled(False)
         ui.spinBoxHeatmapResolution.setEnabled(False)
         ui.comboBoxFieldColormap.setEnabled(False)
         ui.checkBoxReverseColormap.setEnabled(False)
@@ -1357,8 +1308,8 @@ class StylingDock(Styling):
                 ui.toolButtonLineColor.setEnabled(True)
 
                 # color properties
-                ui.comboBoxColorByField.setEnabled(True)
-                ui.comboBoxColorField.setEnabled(True)
+                ui.comboBoxFieldTypeC.setEnabled(True)
+                ui.comboBoxFieldC.setEnabled(True)
                 ui.comboBoxFieldColormap.setEnabled(True)
                 ui.lineEditColorLB.setEnabled(True)
                 ui.lineEditColorUB.setEnabled(True)
@@ -1376,9 +1327,9 @@ class StylingDock(Styling):
                 ui.lineEditColorUB.setEnabled(True)
                 ui.comboBoxCbarDirection.setEnabled(True)
                 if plot_type.lower() == 'correlation':
-                    ui.comboBoxColorByField.setEnabled(True)
-                    if ui.comboBoxColorByField.currentText() == 'cluster':
-                        ui.comboBoxColorField.setEnabled(True)
+                    ui.comboBoxFieldTypeC.setEnabled(True)
+                    if ui.comboBoxFieldTypeC.currentText() == 'cluster':
+                        ui.comboBoxFieldC.setEnabled(True)
 
             case 'histogram':
                 # axes properties
@@ -1401,13 +1352,13 @@ class StylingDock(Styling):
                 ui.toolButtonLineColor.setEnabled(True)
 
                 # color properties
-                ui.comboBoxColorByField.setEnabled(True)
+                ui.comboBoxFieldTypeC.setEnabled(True)
                 # if color by field is set to clusters, then colormap fields are on,
                 # field is set by cluster table
-                if ui.comboBoxColorByField.currentText().lower() == 'none':
+                if ui.comboBoxFieldTypeC.currentText().lower() == 'none':
                     ui.toolButtonMarkerColor.setEnabled(True)
                 else:
-                    ui.comboBoxColorField.setEnabled(True)
+                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
 
             case 'scatter' | 'PCA scatter':
@@ -1445,18 +1396,18 @@ class StylingDock(Styling):
                     ui.lineEditLengthMultiplier.setEnabled(True)
 
                 # color properties
-                ui.comboBoxColorByField.setEnabled(True)
+                ui.comboBoxFieldTypeC.setEnabled(True)
                 # if color by field is none, then use marker color,
                 # otherwise turn off marker color and turn all field and colormap properties to on
-                if ui.comboBoxColorByField.currentText().lower() == 'none':
+                if ui.comboBoxFieldTypeC.currentText().lower() == 'none':
                     ui.toolButtonMarkerColor.setEnabled(True)
 
-                elif ui.comboBoxColorByField.currentText() == 'cluster':
+                elif ui.comboBoxFieldTypeC.currentText() == 'cluster':
 
-                    ui.comboBoxColorField.setEnabled(True)
+                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
 
-                    ui.comboBoxColorField.setEnabled(True)
+                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxFieldColormap.setEnabled(True)
                     ui.lineEditColorLB.setEnabled(True)
                     ui.lineEditColorUB.setEnabled(True)
@@ -1551,11 +1502,11 @@ class StylingDock(Styling):
                 ui.toolButtonLineColor.setEnabled(True)
 
                 # color properties
-                ui.comboBoxColorByField.setEnabled(True)
-                if ui.comboBoxColorByField.currentText().lower() == 'none':
+                ui.comboBoxFieldTypeC.setEnabled(True)
+                if ui.comboBoxFieldTypeC.currentText().lower() == 'none':
                     ui.toolButtonMarkerColor.setEnabled(True)
-                elif ui.comboBoxColorByField.currentText().lower() == 'cluster':
-                    ui.comboBoxColorField.setEnabled(True)
+                elif ui.comboBoxFieldTypeC.currentText().lower() == 'cluster':
+                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
 
             case 'variance' | 'cluster performance':
@@ -1605,8 +1556,8 @@ class StylingDock(Styling):
 
                 # color properties
                 if plot_type != 'clusters':
-                    ui.comboBoxColorByField.setEnabled(True)
-                    ui.comboBoxColorField.setEnabled(True)
+                    ui.comboBoxFieldTypeC.setEnabled(True)
+                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxFieldColormap.setEnabled(True)
                     ui.lineEditColorLB.setEnabled(True)
                     ui.lineEditColorUB.setEnabled(True)
@@ -1694,8 +1645,6 @@ class StylingDock(Styling):
         else:
             ui.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
             ui.labelMarkerColor.setEnabled(False)
-        ui.labelColorByField.setEnabled(ui.comboBoxColorByField.isEnabled())
-        ui.labelColorField.setEnabled(ui.comboBoxColorField.isEnabled())
         ui.checkBoxReverseColormap.setEnabled(ui.comboBoxFieldColormap.isEnabled())
         ui.labelReverseColormap.setEnabled(ui.checkBoxReverseColormap.isEnabled())
         ui.labelFieldColormap.setEnabled(ui.comboBoxFieldColormap.isEnabled())
@@ -1744,11 +1693,12 @@ class StylingDock(Styling):
         if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
             style['ScaleLength'] = self.default_scale_length()
 
-        if style['ColorField'] in list(data.axis_dict.keys()):
-            style['CLim'] = [data.axis_dict[style['ColorField']]['min'], data.axis_dict[style['ColorField']]['max']]
-            style['CLabel'] = data.axis_dict[style['ColorField']]['label']
+        if self.app_data.c_field in list(data.axis_dict.keys()):
+            field = self.app_data.c_field
+            style['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
+            style['CLabel'] = data.axis_dict[field]['label']
 
-        if style['ColorFieldType'] == 'cluster':
+        if self.app_data.color_field_type == 'cluster':
             style['CScale'] = 'discrete'
         else:
             style['CScale'] = 'linear'
@@ -1887,34 +1837,35 @@ class StylingDock(Styling):
 
         # color properties
         ui.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['MarkerColor'])
-        ui.update_field_type_combobox_options(ui.comboBoxColorByField, ui.comboBoxColorField, add_none=True)
-        ui.comboBoxColorByField.setCurrentText(style['ColorFieldType'])
+        ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, add_none=True)
+        ui.comboBoxFieldTypeC.setCurrentText(self.app_data.c_field_type)
 
-        if style['ColorFieldType'] == '':
-            ui.comboBoxColorField.clear()
+        if self.app_data.c_field_type == '':
+            ui.comboBoxFieldC.clear()
         else:
-            ui.update_field_combobox_options(ui.comboBoxColorField, ui.comboBoxColorByField)
-            ui.spinBoxColorField.setMinimum(0)
-            ui.spinBoxColorField.setMaximum(ui.comboBoxColorField.count() - 1)
+            ui.update_field_combobox_options(ui.comboBoxFieldC, ui.comboBoxFieldTypeC)
+            ui.spinBoxFieldIndex.setMinimum(0)
+            ui.spinBoxFieldIndex.setMaximum(ui.comboBoxFieldC.count() - 1)
 
-        if style['ColorField'] in ui.comboBoxColorField.allItems():
-            ui.comboBoxColorField.setCurrentText(style['ColorField'])
+        if self.app_data.c_field in ui.comboBoxFieldC.allItems():
+            ui.comboBoxFieldC.setCurrentText(self.app_data.c_field)
             self.update_color_field_spinbox()
         else:
-            style['ColorField'] = ui.comboBoxColorField.currentText()
+            self.app_data.c_field = ui.comboBoxFieldC.currentText()
 
         ui.comboBoxFieldColormap.setCurrentText(style['Colormap'])
         ui.checkBoxReverseColormap.blockSignals(True)
         ui.checkBoxReverseColormap.setChecked(style['CbarReverse'])
         ui.checkBoxReverseColormap.blockSignals(False)
-        if style['ColorField'] in list(data.axis_dict.keys()):
-            style['CLim'] = [data.axis_dict[style['ColorField']]['min'], data.axis_dict[style['ColorField']]['max']]
-            style['CLabel'] = data.axis_dict[style['ColorField']]['label']
+        field = self.app_data.c_field
+        if field in list(data.axis_dict.keys()):
+            style['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
+            style['CLabel'] = data.axis_dict[field]['label']
         ui.lineEditColorLB.value = style['CLim'][0]
         ui.lineEditColorUB.value = style['CLim'][1]
-        if style['ColorFieldType'] == 'cluster':
-            # set ColorField to active cluster method
-            ui.comboBoxColorField.setCurrentText(ui.cluster_dict['active method'])
+        if self.app_data.c_field_type == 'cluster':
+            # set color field to active cluster method
+            ui.comboBoxFieldC.setCurrentText(ui.cluster_dict['active method'])
 
             # set color scale to discrete
             ui.comboBoxColorScale.clear()
@@ -1983,14 +1934,12 @@ class StylingDock(Styling):
     #             'LineColor': get_hex_color(parent.toolButtonLineColor.palette().button().color()),
 
     #             # update color properties
-    #             'ColorFieldType': parent.comboBoxColorByField.currentText(),
-    #             'ColorField': parent.comboBoxColorField.currentText(),
-    #             'Colormap': parent.comboBoxFieldColormap.currentText(),
-    #             'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
+    #             'CLabel': parent.lineEditCbarLabel.text(),
     #             'CLim': [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())],
     #             'CScale': parent.comboBoxColorScale.currentText(),
+    #             'Colormap': parent.comboBoxFieldColormap.currentText(),
+    #             'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
     #             'CbarDir': parent.comboBoxCbarDirection.currentText(),
-    #             'CLabel': parent.lineEditCbarLabel.text(),
     #             'Resolution': parent.spinBoxHeatmapResolution.value()}
 
     # style widget callbacks
@@ -2161,12 +2110,12 @@ class StylingDock(Styling):
 
         plot_type = self.ui.comboBoxPlotType.currentText()
         if ax == 'c':
-            return self.ui.comboBoxColorField.currentText()
+            return self.ui.comboBoxFieldC.currentText()
 
         match plot_type:
             case 'histogram':
                 if ax in ['x', 'y']:
-                    return self.ui.comboBoxHistField.currentText()
+                    return self.ui.comboBoxFieldC.currentText()
             case 'scatter' | 'heatmap':
                 match ax:
                     case 'x':
@@ -2325,7 +2274,7 @@ class StylingDock(Styling):
 
         data = self.ui.data[self.app_data.sample_id]
 
-        field = self.ui.comboBoxColorField.currentText()
+        field = self.ui.comboBoxFieldC.currentText()
         if field == '':
             return
         self.ui.lineEditColorLB.value = data.axis_dict[field]['min']
@@ -2404,9 +2353,9 @@ class StylingDock(Styling):
         if ax == 'c':
             if self.ui.comboBoxPlotType.currentText() == 'vectors':
                 self.style_dict['vectors']['CLim'] = [np.amin(self.ui.pca_results.components_), np.amax(self.ui.pca_results.components_)]
-            elif not (self.ui.comboBoxColorByField.currentText() in ['None','cluster']):
-                field_type = self.ui.comboBoxColorByField.currentText()
-                field = self.ui.comboBoxColorField.currentText()
+            elif not (self.ui.comboBoxFieldTypeC.currentText() in ['None','cluster']):
+                field_type = self.ui.comboBoxFieldTypeC.currentText()
+                field = self.ui.comboBoxFieldC.currentText()
                 if field == '':
                     return
                 self.initialize_axis_values(field_type, field)
@@ -2419,9 +2368,9 @@ class StylingDock(Styling):
                     self.initialize_axis_values('Analyte', field)
                     self.set_axis_widgets(ax, field)
                 case 'histogram':
-                    field = self.ui.comboBoxHistField.currentText()
+                    field = self.ui.comboBoxFieldC.currentText()
                     if ax == 'x':
-                        field_type = self.ui.comboBoxHistFieldType.currentText()
+                        field_type = self.ui.comboBoxFieldTypeC.currentText()
                         self.initialize_axis_values(field_type, field)
                         self.set_axis_widgets(ax, field)
                     else:
@@ -2930,38 +2879,38 @@ class StylingDock(Styling):
     def update_color_field_type(self):
         """Executes on change to *ColorByField* combobox
         
-        Updates style associated with ``MainWindow.comboBoxColorByField``.  Also updates
-        ``MainWindow.comboBoxColorField`` and ``MainWindow.comboBoxColorScale``."""
+        Updates style associated with ``MainWindow.comboBoxFieldTypeC``.  Also updates
+        ``MainWindow.comboBoxFieldC`` and ``MainWindow.comboBoxColorScale``."""
         if self.debug:
             self.logger.print("color_by_field_callback")
 
-        self.color_field_type = self.ui.comboBoxColorByFieldType.currentText()
+        self.color_field_type = self.ui.comboBoxFieldTypeCType.currentText()
 
         # need this line to update field comboboxes when colorby field is updated
-        self.ui.update_field_combobox(self.ui.comboBoxColorByField, self.ui.comboBoxColorField)
+        self.ui.update_field_combobox(self.ui.comboBoxFieldTypeC, self.ui.comboBoxFieldC)
         self.update_color_field_spinbox()
         if self.plot_type == '':
             return
 
         style = self.style_dict[self.plot_type]
-        if style['ColorFieldType'] == self.ui.comboBoxColorByField.currentText():
+        if self.app_data.c_field_type == self.ui.comboBoxFieldTypeC.currentText():
             return
 
-        style['ColorFieldType'] = self.ui.comboBoxColorByField.currentText()
-        if self.ui.comboBoxColorByField.currentText() != '':
+        self.app_data.c_field_type = self.ui.comboBoxFieldTypeC.currentText()
+        if self.ui.comboBoxFieldTypeC.currentText() != '':
             self.set_style_widgets(self.plot_type)
 
-        if self.ui.comboBoxPlotType.isEnabled() == False | self.ui.comboBoxColorByField.isEnabled() == False:
+        if self.ui.comboBoxPlotType.isEnabled() == False | self.ui.comboBoxFieldTypeC.isEnabled() == False:
             return
 
         # only run update current plot if color field is selected or the color by field is clusters
-        if self.ui.comboBoxColorByField.currentText() != 'None' or self.ui.comboBoxColorField.currentText() != '' or self.ui.comboBoxColorByField.currentText() in ['cluster']:
+        if self.ui.comboBoxFieldTypeC.currentText() != 'None' or self.ui.comboBoxFieldC.currentText() != '' or self.ui.comboBoxFieldTypeC.currentText() in ['cluster']:
             self.schedule_update()
 
     def color_field_callback(self, plot=True):
         """Updates color field and plot
 
-        Executes on change of ``MainWindow.comboBoxColorField``
+        Executes on change of ``MainWindow.comboBoxFieldC``
         """
         if self.debug:
             self.logger.print("color_field_callback")
@@ -2970,7 +2919,7 @@ class StylingDock(Styling):
 
         #print('color_field_callback')
 
-        field = self.ui.comboBoxColorField.currentText()
+        field = self.ui.comboBoxFieldC.currentText()
         self.update_color_field_spinbox()
         
         if self.color_field == field:
@@ -2980,7 +2929,7 @@ class StylingDock(Styling):
 
         if field != '' and field is not None:
             if field not in data.axis_dict.keys():
-                self.initialize_axis_values(self.ui.comboBoxColorByField.currentText(), field)
+                self.initialize_axis_values(self.ui.comboBoxFieldTypeC.currentText(), field)
 
             self.set_color_axis_widgets()
             if self._plot_type not in ['correlation']:
@@ -2997,14 +2946,14 @@ class StylingDock(Styling):
             self.schedule_update()
 
     def color_field_update(self):
-        """Updates ``MainWindow.comboBoxColorField``"""        
+        """Updates ``MainWindow.comboBoxFieldC``"""        
         if self.debug:
             self.logger.print("color_field_update")
 
-        self.ui.spinBoxColorField.blockSignals(True)
-        self.ui.comboBoxColorField.setCurrentIndex(self.ui.spinBoxColorField.value())
+        self.ui.spinBoxFieldIndex.blockSignals(True)
+        self.ui.comboBoxFieldC.setCurrentIndex(self.ui.spinBoxFieldIndex.value())
         self.color_field_callback(plot=True)
-        self.ui.spinBoxColorField.blockSignals(False)
+        self.ui.spinBoxFieldIndex.blockSignals(False)
 
     def field_colormap_callback(self):
         """Sets the color map
@@ -3023,11 +2972,11 @@ class StylingDock(Styling):
         self.schedule_update()
     
     def update_color_field_spinbox(self):
-        """Updates ``spinBoxColorField`` using the index of ``comboBoxColorField``"""        
+        """Updates ``spinBoxFieldIndex`` using the index of ``comboBoxFieldC``"""        
         if self.debug:
             self.logger.print("update_color_field_spinbox")
 
-        self.ui.spinBoxColorField.setValue(self.ui.comboBoxColorField.currentIndex())
+        self.ui.spinBoxFieldIndex.setValue(self.ui.comboBoxFieldC.currentIndex())
 
     def colormap_direction_callback(self):
         """Set colormap direction (normal/reverse)
@@ -3217,7 +3166,7 @@ class StylingDock(Styling):
 
         Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
         ``MainWindow.styles['cluster']['Colormap'].  Change the default colormap
-        by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxColorByField.currentText()`` is ``Cluster``.
+        by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
 
         Returns
         -------

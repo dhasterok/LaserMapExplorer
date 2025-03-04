@@ -42,8 +42,8 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         # profile toggle
         self.profile_toggle = ToggleSwitch(toolbar, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
         self.profile_toggle.setChecked(False)
-        self.action_profile_toggle = QWidgetAction(toolbar)
-        self.action_profile_toggle.setDefaultWidget(self.profile_toggle)
+        self.actionProfileToggle = QWidgetAction(toolbar)
+        self.actionProfileToggle.setDefaultWidget(self.profile_toggle)
         self.profile_toggle.stateChanged.connect(self.profile_state_changed)
 
         # open profiles
@@ -118,7 +118,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.actionExport.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
         self.actionExport.setToolTip("Export profile image or data")
 
-        toolbar.addAction(self.action_profile_toggle)
+        toolbar.addAction(self.actionProfileToggle)
         toolbar.addSeparator()
         toolbar.addAction(self.actionOpenProfile)
         toolbar.addWidget(self.profile_label)

@@ -226,7 +226,7 @@ def plot_histogram(parent, data, app_data, plot_style):
     #    analyte_1 = field.split(' / ')[0]
     #    analyte_2 = field.split(' / ')[1]
 
-    if app_data.hist_plot_style == 'log-scaling' and app_data.hist_field_type == 'Analyte':
+    if app_data.hist_plot_style == 'log-scaling' and app_data.c_field_type == 'Analyte':
         print('raw_data for log-scaling')
         x = get_scatter_data(data, app_data, plot_style, processed=False)['x']
     else:
@@ -268,8 +268,8 @@ def plot_histogram(parent, data, app_data, plot_style):
             cumflag = False
 
     # Check if the algorithm is in the current group and if results are available
-    if app_data.hist_field_type == 'cluster' and app_data.hist_field != '':
-        method = app_data.hist_field
+    if app_data.c_field_type == 'cluster' and app_data.c_field != '':
+        method = app_data.c_field
 
         # Get the cluster labels for the data
         cluster_color, cluster_label, _ = plot_style.get_cluster_colormap(app_data.cluster_dict[method],alpha=plot_style.marker_alpha)
@@ -392,8 +392,8 @@ def plot_histogram(parent, data, app_data, plot_style):
         canvas.axes.set_xscale('log',base=10)
         canvas.axes.set_yscale('log',base=10)
 
-        canvas.axes.set_xlabel(r"$\log_{10}($" + f"{app_data.hist_field}" + r"$)$", fontdict=font)
-        canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{app_data.hist_field}" + r"$)$", fontdict=font)
+        canvas.axes.set_xlabel(r"$\log_{10}($" + f"{app_data.c_field}" + r"$)$", fontdict=font)
+        canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{app_data.c_field}" + r"$)$", fontdict=font)
 
     canvas.axes.tick_params(labelsize=plot_style.font_size,direction=plot_style.tick_dir)
     canvas.axes.set_box_aspect(plot_style.aspect_ratio)
@@ -405,9 +405,9 @@ def plot_histogram(parent, data, app_data, plot_style):
     plot_info = {
         'tree': 'Histogram',
         'sample_id': app_data.sample_id,
-        'plot_name': app_data.hist_field_type+'_'+app_data.hist_field,
-        'field_type': app_data.hist_field_type,
-        'field': app_data.hist_field,
+        'plot_name': app_data.c_field_type+'_'+app_data.c_field,
+        'field_type': app_data.c_field_type,
+        'field': app_data.c_field,
         'plot_type': plot_style.plot_type,
         'type': app_data.hist_plot_style,
         'nbins': nbins,
@@ -688,22 +688,22 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
 
     match plot_style.plot_type:
         case 'histogram':
-            if processed or app_data.hist_field_type != 'Analyte':
-                scatter_dict['x'] = data.get_vector(app_data.hist_field_type, app_data.hist_field, norm=plot_style.xscale)
+            if processed or app_data.c_field_type != 'Analyte':
+                scatter_dict['x'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.xscale)
             else:
-                scatter_dict['x'] = data.get_vector(app_data.hist_field_type, app_data.hist_field, norm=plot_style.xscale, processed=False)
+                scatter_dict['x'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.xscale, processed=False)
         case 'PCA scatter' | 'PCA heatmap':
             scatter_dict['x'] = data.get_vector('PCA score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
             scatter_dict['y'] = data.get_vector('PCA score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
-            if (plot_style.color_field_type is None) or (plot_style.color_field != ''):
-                scatter_dict['c'] = data.get_vector(plot_style.color_field_type, plot_style.color_field)
+            if (app_data.c_field_type is None) or (app_data.c_field != ''):
+                scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field)
         case _:
             scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale)
             scatter_dict['y'] = data.get_vector(app_data.y_field_type, app_data.y_field, norm=plot_style.yscale)
-            if (plot_style.color_field_type is not None) and (plot_style.color_field != ''):
+            if (app_data.c_field_type is not None) and (app_data.c_field != ''):
                 scatter_dict['z'] = data.get_vector(app_data.z_field_type, app_data.z_field, norm=plot_style.zscale)
             elif (app_data.z_field_type is not None) and (app_data.z_field != ''):
-                scatter_dict['c'] = data.get_vector(plot_style.color_field_type, plot_style.color_field, norm=plot_style.cscale)
+                scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.cscale)
 
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
@@ -749,11 +749,10 @@ def plot_scatter(parent, data, app_data, plot_style, canvas=None):
     if (scatter_dict['x']['field'] == '') or (scatter_dict['y']['field'] == ''):
         return
 
+    plot_flag = False
     if canvas is None:
         plot_flag = True
         canvas = mplc.MplCanvas(parent=parent)
-    else:
-        plot_flag = False
 
     match plot_type.split()[-1]:
         # scatter
@@ -810,9 +809,9 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
         
         plot_data = pd.DataFrame(np.vstack((x['array'], y['array'])).T, columns = ['x','y'])
         
-    elif plot_style.color_field_type == 'cluster':
+    elif app_data.c_field_type == 'cluster':
         # color by cluster
-        method = plot_style.color_field
+        method = app_data.c_field
         if method not in list(app_data.cluster_dict.keys()):
             return
         else:
@@ -935,9 +934,9 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
         cb = None
         plot_data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
         
-    elif plot_style.color_field_type == 'cluster':
+    elif app_data.c_field_type == 'cluster':
         # color by cluster
-        method = plot_style.color_field
+        method = app_data.c_field
         if method not in list(app_data.cluster_dict.keys()):
             return
         else:
@@ -1276,8 +1275,8 @@ def plot_ndim(parent, data, app_data, plot_style):
     clusters = []
     cluster_color = []
     cluster_label = []
-    if plot_style.color_field_type == 'cluster' and plot_style.color_field != '':
-        method = plot_style.color_field
+    if app_data.c_field_type == 'cluster' and app_data.c_field != '':
+        method = app_data.c_field
         cluster_dict = app_data.cluster_dict[method]
         cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(cluster_dict, alpha=plot_style.marker_alpha)
 

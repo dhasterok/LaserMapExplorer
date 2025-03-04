@@ -36,12 +36,21 @@ class AppData(Observable):
 
         self._sample_id = ""
 
+        self._x_field_type = ""
+        self._y_field_type = ""
+        self._z_field_type = ""
+        self._c_field_type = ""
+
+        self._x_field = ""
+        self._y_field = ""
+        self._z_field = ""
+        self._c_field = ""
+
         self.plot_info = {}
 
         # histogram related data and methods
         self._equalize_color_scale = False
-        self._hist_field_type = ""
-        self._hist_field = ""
+
         self._default_hist_num_bins = 100
         self._hist_bin_width = 0
         self._hist_num_bins = 100
@@ -71,14 +80,6 @@ class AppData(Observable):
 
         self._apply_noise_red = "No"
         self._gradient_flag = False
-
-        self._x_field_type = ""
-        self._y_field_type = ""
-        self._z_field_type = ""
-
-        self._x_field = ""
-        self._y_field = ""
-        self._z_field = ""
 
         self._scatter_preset = ""
         self._heatmap_style = "counts"
@@ -245,39 +246,42 @@ class AppData(Observable):
         self.notify_observers("equalize_color_scale", flag)
 
     @property
-    def hist_field_type(self):
-        return self._hist_field_type
+    def c_field_type(self):
+        return self._c_field_type
     
-    @hist_field_type.setter
-    def hist_field_type(self, new_field_type):
+    @c_field_type.setter
+    def c_field_type(self, new_field_type):
         if self.debug:
-            self.logger.print(f"@hist_field_type\n  old_value={self._hist_field_type}\n  new_value={new_field_type}")
-        if new_field_type == self._hist_field_type:
+            self.logger.print(f"@c_field_type\n  old_value={self._c_field_type}\n  new_value={new_field_type}")
+        if new_field_type == self._c_field_type:
             return
 
-        # update hist_field_type
+        # update c_field_type
         #self.validate_field_type(new_field_type)
-        self._hist_field_type = new_field_type
-        self.notify_observers("hist_field_type", new_field_type)
+        self._c_field_type = new_field_type
+        self.notify_observers("c_field_type", new_field_type)
 
-        # update hist_field
-        self.hist_field = self.field_dict[new_field_type.lower()][0]
+        # update c_field
+        if new_field_type in ['', 'none', 'None']:
+            self.c_field = ''
+        else:
+            self.c_field = self.field_dict[new_field_type.lower()][0]
 
 
     @property
-    def hist_field(self):
-        return self._hist_field
+    def c_field(self):
+        return self._c_field
 
-    @hist_field.setter
-    def hist_field(self, new_field):
+    @c_field.setter
+    def c_field(self, new_field):
         if self.debug:
-            self.logger.print(f"@hist_field\n  old_value={self._hist_field}\n  new_value={new_field}")
-        if new_field == self._hist_field:
+            self.logger.print(f"@c_field\n  old_value={self._c_field}\n  new_value={new_field}")
+        if new_field == self._c_field:
             return
 
-        #self.validate_field(self._hist_field_type, new_field)
-        self._hist_field = new_field
-        self.notify_observers("hist_field", new_field)
+        #self.validate_field(self._c_field_type, new_field)
+        self._c_field = new_field
+        self.notify_observers("c_field", new_field)
 
         # update hist_bin_width
         self.update_num_bins = False
@@ -924,13 +928,13 @@ class AppData(Observable):
 
         Generally called when the number of bins is changed by the user.  Updates the plot.
         """
-        if (self.hist_field_type == '') or (self.hist_field == ''):
+        if (self.c_field_type == '') or (self.c_field == ''):
             return
         if self.debug:
             self.logger.print(f"update_hist_bin_width")
 
         # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self._hist_field, self._hist_field_type)
+        map_df = self.data[self.sample_id].get_map_data(self._c_field, self._c_field_type)
 
         # update bin width
         range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
@@ -941,13 +945,13 @@ class AppData(Observable):
 
         Generally called when the bin width is changed by the user.  Updates the plot.
         """
-        if (self.hist_field_type == '') or (self.hist_field == ''):
+        if (self.c_field_type == '') or (self.c_field == ''):
             return
         if self.debug:
             self.logger.print(f"update_hist_num_bins")
 
         # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self._hist_field, self._hist_field_type)
+        map_df = self.data[self.sample_id].get_map_data(self._c_field, self._c_field_type)
 
         # update n bins
         range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])

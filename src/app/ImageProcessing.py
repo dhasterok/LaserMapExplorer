@@ -64,16 +64,10 @@ class ImageProcessing():
         self.edge_img = None
 
     def gradient_checked_state_changed(self):
-        field_type = self.parent.plot_style.field_type
-        field = self.parent.plot_style.field
         if self.parent.checkBoxGradient.isChecked():
-            self.parent.plot_style.style_dict['gradient map']['ColorFieldType'] = field_type
-            self.parent.plot_style.style_dict['gradient map']['ColorField'] = field
             self.parent.plot_style.plot_type = 'gradient map'
         else:
             if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.plot_style.style_dict['analyte map']['ColorFieldType'] = field_type
-                self.parent.plot_style.style_dict['analyte map']['ColorField'] = field
                 self.parent.plot_style.plot_type = 'analyte map'
 
 

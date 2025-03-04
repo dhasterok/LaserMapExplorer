@@ -2403,6 +2403,90 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.schedule_update()
 
 
+    def update_outlier_removal(self, method):
+        """Removes outliers from one or all analytes.
+        
+        Parameters
+        ----------
+        method : str
+            Method used to remove outliers."""        
+        if self.logger_options['UI']:
+            self.logger.print(f"update_outlier_removal: method={method}")
+
+        data = self.data[self.app_data.sample_id]
+
+        if data.outlier_method == method:
+            return
+
+        data.outlier_method = method
+
+        match method.lower():
+            case 'none':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'quantile criteria':
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'quantile and distance criteria':
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(True)
+                self.lineEditDifferenceUpperQuantile.setEnabled(True)
+            case 'chauvenet criterion':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+            case 'log(n>x) inflection':
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
+
+
+    def update_neg_handling(self, method):
+        """Auto-scales pixel values in map
+
+        Executes when the value ``MainWindow.comboBoxNegativeMethod`` is changed.
+
+        Changes how negative values are handled for each analyte, the following options are available:
+            Ignore negative values, Minimum positive value, Gradual shift, Yeo-Johnson transformation
+
+        Parameters
+        ----------
+        method : str
+            Method for dealing with negatives
+        """
+        if self.logger_options['UI']:
+            self.logger.print(f"update_neg_handling: method={method}")
+
+        data = self.data[self.app_data.sample_id]
+
+        if self.checkBoxApplyAll.isChecked():
+            # Apply to all iolties
+            analyte_list = data.processed_data.match_attribute('data_type', 'analyte') + data.processed_data.match_attribute('data_type', 'ratio')
+            data.negative_method = method
+            # clear existing plot info from tree to ensure saved plots using most recent data
+            for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                self.plot_tree.clear_tree_data(tree)
+            data.prep_data()
+        else:
+            data.negative_method = method
+
+            assert self.app_data.c_field == self.comboBoxFieldC.currentText(), f"AppData.c_field {self.app_data.c_field} and MainWindow.comboBoxFieldC.currentText() {self.comboBoxFieldC.currentText()} do not match"
+            data.prep_data(self.app_data.c_field)
+        
+        self.update_invalid_data_labels()
+        if hasattr(self,"mask_dock"):
+            self.mask_dock.filter_tab.update_filter_values()
+
+        # trigger update to plot
+        self.plot_style.schedule_update()
+
     
 
     # -------------------------------------

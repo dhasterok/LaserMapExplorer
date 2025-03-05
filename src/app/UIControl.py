@@ -43,7 +43,7 @@ class UIFieldLogic():
         plot_type : str
             The plot type helps to define the set of field types available, by default ``''`` (no change)
         """
-        data_type_dict = self.data.get_attribute_dict('data_type')
+        data_type_dict = self.data.processed_data.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
@@ -165,17 +165,17 @@ class UIFieldLogic():
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 if filter == 'used':
-                    set_fields = self.data.match_attributes({'data_type': 'analyte', 'use': True})
+                    set_fields = self.data.processed_data.match_attributes({'data_type': 'analyte', 'use': True})
                 else:
-                    set_fields = self.data.match_attribute('data_type', 'analyte')
+                    set_fields = self.data.processed_data.match_attribute('data_type', 'analyte')
             case 'Ratio' | 'Ratio (normalized)':
                 if filter == 'used':
-                    set_fields = self.data.match_attributes({'data_type': 'ratio', 'use': True})
+                    set_fields = self.data.processed_data.match_attributes({'data_type': 'ratio', 'use': True})
                 else:
-                    set_fields = self.data.match_attribute('data_type', 'ratio')
+                    set_fields = self.data.processed_data.match_attribute('data_type', 'ratio')
             case 'None':
                 return []
             case _:
-                set_fields = self.data.match_attribute('data_type', set_name.lower())
+                set_fields = self.data.processed_data.match_attribute('data_type', set_name.lower())
 
         return set_fields    

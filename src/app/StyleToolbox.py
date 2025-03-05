@@ -1073,7 +1073,6 @@ class StylingDock(Styling):
         # marker color
         #self.ui.comboBoxFieldTypeC.activated.connect(self.update_color_field_type)
         #self.ui.comboBoxFieldC.activated.connect(self.color_field_callback)
-        #self.ui.spinBoxFieldIndex.valueChanged.connect(self.color_field_update)
         #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         #self.ui.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
@@ -2920,27 +2919,30 @@ class StylingDock(Styling):
         if self.ui.comboBoxFieldTypeC.currentText() != 'None' or self.ui.comboBoxFieldC.currentText() != '' or self.ui.comboBoxFieldTypeC.currentText() in ['cluster']:
             self.schedule_update()
 
-    def color_field_callback(self, plot=True):
+    def update_c_field_combobox(self, field=None):
         """Updates color field and plot
 
         Executes on change of ``MainWindow.comboBoxFieldC``
         """
         if self.debug:
-            self.logger.print("color_field_callback")
+            self.logger.print(f"update_c_field_combobox: field={field}")
 
-        data = self.ui.data[self.app_data.sample_id]
+        if field is None:
+            # set field property to combobox
+            self.app_data.c_field = self.ui.comboBoxFieldC.currentText()
+        else:
+            if field == self.ui.comboBoxFieldC.currentText():
+                return
+            # set combobox to field
+            self.ui.comboBoxFieldC.setCurrentText(field)
+            self.app_data.c_field = field
 
-        #print('color_field_callback')
+        # update autoscale widgets
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
+            self.ui.update_autoscale_widgets(self.app_data.c_field, self.app_data.c_field_type)
 
-        field = self.ui.comboBoxFieldC.currentText()
-        self.update_color_field_spinbox()
-        
-        if self.color_field == field:
-            return
-
-        self.color_field = field
-
-        if field != '' and field is not None:
+        if field not in [None, '','none','None']:
+            data = self.ui.data[self.app_data.sample_id]
             if field not in data.axis_dict.keys():
                 self.initialize_axis_values(self.ui.comboBoxFieldTypeC.currentText(), field)
 
@@ -2955,18 +2957,9 @@ class StylingDock(Styling):
             self.clabel = ''
 
         # update plot
-        if plot:
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.plot_type in ['analyte map','histogram','correlation']:
             self.schedule_update()
 
-    def color_field_update(self):
-        """Updates ``MainWindow.comboBoxFieldC``"""        
-        if self.debug:
-            self.logger.print("color_field_update")
-
-        self.ui.spinBoxFieldIndex.blockSignals(True)
-        self.ui.comboBoxFieldC.setCurrentIndex(self.ui.spinBoxFieldIndex.value())
-        self.color_field_callback(plot=True)
-        self.ui.spinBoxFieldIndex.blockSignals(False)
 
     def field_colormap_callback(self):
         """Sets the color map

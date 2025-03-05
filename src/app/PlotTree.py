@@ -265,7 +265,7 @@ class PlotTree():
 
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
             self.parent.plot_style.initialize_axis_values(tree, leaf)
-            self.parent.plot_style.set_style_widgets('analyte map')
+            self.parent.plot_style.set_style_widgets()
             if self.plot_info:
                 if self.debug:
                     self.logger.print(f"  plot_info exists, adding to canvas")

@@ -1,3 +1,5 @@
+import pandas as pd
+import numpy as np
 from scipy.stats import yeojohnson, percentileofscore
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
@@ -397,15 +399,12 @@ class DimensionalReduction():
     def __init__(self, parent):
         self.parent = parent
 
-        parent.comboBoxDimRedMethod.clear()
-        parent.comboBoxDimRedMethod.addItems(['PCA: Principal component analysis', 'MDS: Multidimensional scaling', 'LDA: Linear discriminant analysis', 'FA: Factor analysis'])
-        parent.comboBoxDimRedMethod.activated.connect()
+        self.dim_red_methods = ['PCA: Principal component analysis', 'MDS: Multidimensional scaling', 'LDA: Linear discriminant analysis', 'FA: Factor analysis']
 
         self.pca_results = []
-        parent.spinBoxPCX.valueChanged.connect(self.plot_pca)
-        parent.spinBoxPCY.valueChanged.connect(self.plot_pca)
 
-    def compute_pca(self, update_ui=True):
+
+    def compute_pca(self,plot_style, app_data):
         #print('compute_pca')
         self.pca_results = {}
 
@@ -422,23 +421,21 @@ class DimensionalReduction():
 
         # compute pca scores
         pca_scores = pd.DataFrame(self.pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(self.pca_results.n_components_)])
-        self.plot_style.clim = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
+        plot_style.clim = [np.amin(self.pca_results.components_), np.amax(self.pca_results.components_)]
 
         # Add PCA scores to DataFrame for easier plotting
         data.add_columns('pca score',pca_scores.columns,pca_scores.values,data.mask)
 
-        if update_ui:
-                #update min and max of PCA spinboxes
-            if self.pca_results.n_components_ > 0:
-                self.spinBoxPCX.setMinimum(1)
-                self.spinBoxPCY.setMinimum(1)
-                self.spinBoxPCX.setMaximum(self.pca_results.n_components_+1)
-                self.spinBoxPCY.setMaximum(self.pca_results.n_components_+1)
-                if self.spinBoxPCY.value() == 1:
-                    self.spinBoxPCY.setValue(int(2))
+            #update min and max of PCA spinboxes
+        if self.pca_results.n_components_ > 0:
+            self.spinBoxPCX.setMinimum(1)
+            self.spinBoxPCY.setMinimum(1)
+            self.spinBoxPCX.setMaximum(self.pca_results.n_components_+1)
+            self.spinBoxPCY.setMaximum(self.pca_results.n_components_+1)
+            if self.spinBoxPCY.value() == 1:
+                self.spinBoxPCY.setValue(int(2))
 
-            self.update_all_field_comboboxes()
-        else:
-            self.update_blockly_field_types()
+        self.update_all_field_comboboxes()
+        self.update_blockly_field_types()
 
         self.update_pca_flag = False

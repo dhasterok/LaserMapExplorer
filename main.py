@@ -126,10 +126,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #       notifiers when properties change
         #       data structure and properties (DataHandling), data
         self.app_data = AppData(self.data, debug=self.logger_options['Data'])
-        self.connect_app_data_observers(self.app_data)
 
         # initialize the styling data and dock
         self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
+
+        self.connect_app_data_observers(self.app_data)
         self.connect_plot_style_observers(self.plot_style)
 
         self.init_ui()
@@ -301,9 +302,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=True, global_list=True)
-        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.plot_style, "c_field_type", self.comboBoxFieldTypeC.currentText()))
-        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, add_none=True)
-        self.comboBoxFieldC.currentTextChanged.connect(lambda: setattr(self.plot_style, "c_field", self.comboBoxFieldC.currentText()))
+        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
+        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldIndex, add_none=True)
+        self.comboBoxFieldC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field", self.comboBoxFieldC.currentText()))
+        # update spinbox associated with map/color field
+        self.comboBoxFieldC.currentIndexChanged.connect(lambda: self.spinBoxFieldIndex.setValue(self.comboBoxFieldC.currentIndex()))
+        self.comboBoxFieldC.activated.connect(self.plot_style.update_c_field_combobox)
+        self.spinBoxFieldIndex.valueChanged.connect(self.c_field_spinbox_changed)
 
         self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX)
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field_type", self.comboBoxFieldTypeX.currentText()))
@@ -447,7 +452,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             childbox.addItems(field_dict[old_field_type.lower()])
             childbox.setCurrentIndex(0)
             
-    def update_field_combobox_options(self, childbox, parentbox=None, add_none=False):
+    def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, add_none=False):
         """Updates a field comobobox list.
 
         This method can be used on popup or by forcing an update.
@@ -496,6 +501,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             childbox.setCurrentIndex(field_list.index(old_field))
         else:
             childbox.setCurrentIndex(0)
+
+        if spinbox is not None:
+            spinbox.blockSignals(True)
+            spinbox.setMinimum(0)
+            spinbox.setMaximum(childbox.count() - 1)
+            spinbox.setValue(childbox.currentIndex())
+            spinbox.blockSignals(False)
 
 
     def init_tabs(self, enable=False):
@@ -879,7 +891,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("x_field", self.update_x_field_combobox)
         app_data.add_observer("y_field", self.update_y_field_combobox)
         app_data.add_observer("z_field", self.update_z_field_combobox)
-        app_data.add_observer("c_field", self.update_c_field_combobox)
+        app_data.add_observer("c_field", self.plot_style.update_c_field_combobox)
         app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
         app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
         app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
@@ -1372,34 +1384,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.schedule_update()
 
-    def update_c_field_combobox(self, field):
-        """Updates ``MainWindow.comboBoxFieldTypeC.currentText()``
-
-        Called as an update to ``app_data.c_field``.  Updates the histogram field.  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            New field type.
-        """
+    def c_field_spinbox_changed(self):
+        """Updates ``MainWindow.comboBoxFieldC``"""        
         if self.logger_options['UI']:
-            self.logger.print(f"update_c_field_combobox\n  field={field}")
-        self.comboBoxFieldC.setCurrentText(field)
-        self.app_data.c_field = field
+            self.logger.print("c_field_spinbox_changed")
 
-        # update 
-        self.spinBoxFieldIndex.setMinimum(0)
-        self.spinBoxFieldIndex.setMaximum(self.comboBoxFieldC.count() - 1)
-        self.spinBoxFieldIndex.setValue(self.comboBoxFieldC.currentIndex())
-
-        # update autoscale widgets
-        self.update_autoscale_widgets(self.app_data.c_field, self.app_data.c_field_type)
-
-        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type in ['analyte map','histogram','correlation']:
-            self.app_data.c_field_type = self.comboBoxFieldTypeC.currentText()
-            self.app_data.c_field = self.comboBoxFieldC.currentText()
-
-            self.plot_style.schedule_update()
+        self.spinBoxFieldIndex.blockSignals(True)
+        if self.spinBoxFieldIndex.value() != self.comboBoxFieldC.currentIndex():
+            self.comboBoxFieldC.setCurrentIndex(self.spinBoxFieldIndex.value())
+            self.plot_style.update_c_field_combobox()
+        self.spinBoxFieldIndex.blockSignals(False)
 
     def update_hist_bin_width_spinbox(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
@@ -1845,25 +1839,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.doubleSpinBoxFontSize.setValue(new_font_size)
         self.plot_style.schedule_update()
 
-    def update_color_field_type_combobox(self, new_field_type):
+    def update_c_field_type_combobox(self, new_field_type):
         self.comboBoxFieldTypeC.setCurrentText(new_field_type)
 
-        self.update_field_combobox(self.comboBoxFieldTypeC, self.comboBoxFieldC)
+        self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC)
         self.app_data.c_field = self.comboBoxFieldC.currentText()
         if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.app_data.c_field_type = new_field_type
 
         self.plot_style.schedule_update()
 
-    def update_color_field_combobox(self, new_field):
-        if new_field == self.comboBoxFieldC.currentText():
-            return
-        self.comboBoxFieldC.setCurrentText(new_field)
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.app_data.c_field = new_field
-        self.app_data.c_field_callback() 
-
-        self.plot_style.schedule_update()
 
     def update_cmap_combobox(self, new_colormap):
         self.comboBoxFieldColormap.setCurrentText(new_colormap)
@@ -2538,9 +2523,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
 
                     self.add_plotwidget_to_canvas(self.plot_info)
-                    self.plot_tree.add_tree_item(self.plot_info)
-                
-                
+                    # I think add_tree_item is done in add_plotwidget_to_canvas, so it doesn't need to be repeated here
+                    #self.plot_tree.add_tree_item(self.plot_info)
+
+                if hasattr(self,"info_dock"):
+                    self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
+
+                return
+
             case 'gradient map':
                 if self.comboBoxNoiseReductionMethod.currentText() == 'none':
                     QMessageBox.warning(self,'Warning','Noise reduction must be performed before computing a gradient.')
@@ -2590,7 +2580,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         current_plot_df : dict, optional
             Defaults to None
         """
-        #print('add_plotwidget_to_canvas')
+        if self.logger_options['Plotting']:
+            self.logger.print(f"add_plotwidget_to_canvas\n  plot_info={plot_info}\n  position={position}")
 
         sample_id = plot_info['sample_id']
         tree = plot_info['plot_type']
@@ -2734,6 +2725,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if self.logger_options['UI']:
             self.logger.print(f"open_workflow")
+
         if not hasattr(self, 'workflow'):
             self.workflow = Workflow(self)
 

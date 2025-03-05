@@ -78,52 +78,15 @@ def update_numpy_array(array, table_widget):
     for row_idx, row in enumerate(array):
         for col_idx, value in enumerate(row):
             item = QTableWidgetItem(f"{value:.{PRECISION}g}")
-            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             table_widget.setItem(row_idx, col_idx, item)
 
-class InfoWindow(QWidget):
-    """Creates a window with a various tools to view plot and data information
-
-    Very similar to InfoDock, only in window form.  This version is useful for the workflow
-    tool.
-
-    Parameters
-    ----------
-    parent : QMainWindow or QWidget, optional
-        The parent window, by default None
-    title : str, optional
-        Window title, by default "Info Tools"
-    """        
-    def __init__(self, parent=None, title="Info Tools"):
-        super().__init__(parent)
-
-        self.parent = parent
-
-        self.plot_info = self.parent.plot_info
-        self.data = self.parent.data
-
-        self.font = default_font()
-
-        self.info_window = QWidget()
-        self.info_window.setObjectName("info_window")
-        window_layout = QVBoxLayout(self.info_window)
-
-        self.tabWidgetInfo = QTabWidget(self.info_window)
-        self.tabWidgetInfo.setObjectName("tabWidgetInfo")
-
-        self.metadata_tab = self.MetadataTab(self)
-        self.dataframe_tab = self.DataFrameTab(self)
-        self.field_tab = self.FieldTab(self)
-        self.plot_info_tab = self.PlotInfoTab(self)
-
-        window_layout.addWidget(self.tabWidgetInfo)
-        self.setWidget(self.info_window)
-
-
 class InfoDock(CustomDockWidget, UIFieldLogic):
-    """Creates a dock widget with a various tools to view plot and data information
+    """Creates a dock widget with a various tools to view the data, metadata, and plot information
 
-    Very similar to InfoWindow, only in dock form.  This version is useful for the main window.
+    Creates a tab widget within a dock widget with tabs for metadata, the full dataframe,
+    selected fields (in map form), and plot information.  Each tab and the methods for it are
+    contained within their own class.
 
     Parameters
     ----------
@@ -131,8 +94,14 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         The parent window, by default None
     title : str, optional
         Window title, by default "Info Tools"
+
+    :see also:
+        metadata_tab : A tab displaying metadata for each column of the dataframe
+        dataframe_tab : A tab that displays the entire dataframe
+        field_tab : A tab that displays each field in map form (as displayed in a map plot)
+        plot_info_tab : A tab that displays information about the current plot
     """        
-    def __init__(self, parent=None, title="Info Tools"):
+    def __init__(self, parent, title="Info Tools"):
         super().__init__(parent)
 
         self.parent = parent
@@ -142,16 +111,16 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         else:
             self.plot_info = None
 
-        if self.parent.data or self.parent.sample_id == '':
-            self.sample_id = self.parent.sample_id
-            self.data = self.parent.data
+        if self.parent.data or self.parent.app_data.sample_id == '':
+            self.sample_id = self.parent.app_data.sample_id
+            self.data = self.parent.data[self.sample_id]
         else:
             self.sample_id = ''
             self.data = None
 
         self.font = default_font()
 
-        self.setAllowedAreas(Qt.BottomDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
         self.setObjectName("dockWidgetInfoToolbox")
         self.dockWidgetInfo = QWidget()
         self.dockWidgetInfo.setObjectName("dockWidgetInfo")
@@ -170,9 +139,9 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
 
         self.setFloating(True)
         self.setWindowTitle(title)
-        self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.BottomDockWidgetArea, self)
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         self.visibilityChanged.connect(self.update_tab_widget)
         self.tabWidgetInfo.currentChanged.connect(self.update_tab_widget)
@@ -181,13 +150,13 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         idx = self.tabWidgetInfo.currentIndex()
         match self.tabWidgetInfo.tabText(idx).lower():
             case "metadata":
-                self.metadata_tab.update_metadata(self.parent.data[self.parent.sample_id].processed_data.column_attributes)
+                self.metadata_tab.update_metadata(self.data.processed_data.column_attributes)
             case "data":
-                update_dataframe(self.parent.data[self.parent.sample_id].processed_data, self.dataframe_tab.data_table)
+                update_dataframe(self.data.processed_data, self.dataframe_tab.data_table)
             case "field":
                 field = self.field_tab.field_combobox.currentText()
                 if not (field == ''):
-                    update_numpy_array(self.parent.data[self.parent.sample_id].get_map_data(field), self.field_tab.field_table)
+                    update_numpy_array(self.data.get_map_data(field), self.field_tab.field_table)
             case "plot info":
                 self.plot_info_tab.update_plot_info_tab(self.parent.plot_info)
 
@@ -263,7 +232,7 @@ class PlotInfoTab():
 
         self.annotations_table = QTableWidget(0, 3, self.plot_info_tab)
         self.annotations_table.setHorizontalHeaderLabels(["Type", "Value", "Visible"])
-        self.annotations_table.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.annotations_table.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
 
         self.annotations_layout.addWidget(self.annotations_label)
         self.annotations_layout.addWidget(self.annotations_table)
@@ -340,7 +309,7 @@ class PlotInfoTab():
         for row, (annotation, data) in enumerate(annotations.items()):
             # Type
             type_item = QTableWidgetItem(data["type"])
-            type_item.setFlags(type_item.flags() & ~Qt.ItemIsEditable)
+            type_item.setFlags(type_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.annotations_table.setItem(row, 0, type_item)
 
             # Value
@@ -386,6 +355,8 @@ class MetadataTab():
     """
     def __init__(self, parent):
         self.parent = parent
+
+        self.data = self.parent.data
 
         self.rows_flag = True
         self.columns_flag = True
@@ -442,15 +413,15 @@ class MetadataTab():
         self.norm_combobox.setToolTip("Set the norm for all analytes")
 
         # view/hide
-        self.action_toggle_view = QAction("Show/hide columns and rows", toolbar)
-        self.action_toggle_view.setCheckable(True)
-        self.action_toggle_view.setChecked(True)
-        self.action_toggle_view.toggled.connect(self.toggle_view)
+        self.actionToggleView = QAction("Show/hide columns and rows", toolbar)
+        self.actionToggleView.setCheckable(True)
+        self.actionToggleView.setChecked(True)
+        self.actionToggleView.toggled.connect(self.toggle_view)
         self.toggle_view_icon = QIcon()
-        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-hide-64.svg"), QIcon.Normal, QIcon.Off)
-        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-64.svg"), QIcon.Normal, QIcon.On)
-        self.action_toggle_view.setIcon(self.toggle_view_icon)
-        self.action_toggle_view.setToolTip("Click to toggle visibility of unselected columns/rows")
+        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-hide-64.svg"), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-64.svg"), QIcon.Mode.Normal, QIcon.State.On)
+        self.actionToggleView.setIcon(self.toggle_view_icon)
+        self.actionToggleView.setToolTip("Click to toggle visibility of unselected columns/rows")
 
         # export metadata table
         self.action_export_metadata = QAction("Export Metadata", toolbar)
@@ -464,7 +435,7 @@ class MetadataTab():
         toolbar.addWidget(self.field_combobox)
         toolbar.addAction(self.action_select_all_columns)
         toolbar.addAction(self.action_select_all_rows)
-        toolbar.addAction(self.action_toggle_view)
+        toolbar.addAction(self.actionToggleView)
         toolbar.addSeparator()
         toolbar.addWidget(scaling_label)
         toolbar.addWidget(self.norm_combobox)
@@ -485,7 +456,7 @@ class MetadataTab():
 
         self.field_combobox.currentIndexChanged.connect(self.update_table)
 
-        data = self.parent.data[self.parent.sample_id].processed_data.column_attributes
+        data = self.data.processed_data.column_attributes
         self.update_metadata(data)
 
     def toggle_view(self):
@@ -511,7 +482,7 @@ class MetadataTab():
         self.update_table()
 
     def update_table(self):
-        data = self.parent.data[self.parent.sample_id].processed_data.column_attributes
+        data = self.data.processed_data.column_attributes
 
         # Determine the selected display option
         selected_option = self.field_combobox.currentText()
@@ -559,16 +530,16 @@ class MetadataTab():
             for col_idx, col_key in enumerate(columns_to_display, start=1):
                 value = data.get(col_key, {}).get(row_key, "")
                 item = QTableWidgetItem(str(value))
-                item.setFlags(item.flags() & ~Qt.ItemIsEditable)  # Make it read-only
+                item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)  # Make it read-only
                 self.metadata_table.setItem(row_idx, col_idx, item)
 
         # Adjust metadata table appearance
-        self.metadata_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.metadata_table.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.metadata_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.metadata_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
     def toggle_row_selection(self, state, row):
         """Toggle selection of rows based on checkbox state."""
-        if state == Qt.Checked:
+        if state == Qt.CheckState.Checked:
             self.selected_rows.add(row)
         else:
             self.selected_rows.discard(row)
@@ -577,7 +548,7 @@ class MetadataTab():
 
     def toggle_column_selection(self, state, column):
         """Toggle selection of columns based on checkbox state."""
-        if state == Qt.Checked:
+        if state == Qt.CheckState.Checked:
             self.selected_columns.add(column)
         else:
             self.selected_columns.discard(column)
@@ -629,6 +600,8 @@ class DataFrameTab():
     def __init__(self, parent):
         self.parent = parent
 
+        self.data = self.parent.data
+
         self.data_tab = QWidget()
         self.data_tab.setObjectName("Data Tab")
         layout = QVBoxLayout(self.data_tab)
@@ -644,14 +617,14 @@ class DataFrameTab():
         sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
         self.action_sigfigs_more.setIcon(sigfigs_more_icon)
         self.action_sigfigs_more.triggered.connect(increase_precision)
-        self.action_sigfigs_more.triggered.connect(lambda: update_dataframe(self.data, self.data_table))
+        self.action_sigfigs_more.triggered.connect(lambda: update_dataframe(self.data.processed_data, self.data_table))
         self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
 
         self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
         sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
         self.action_sigfigs_less.setIcon(sigfigs_less_icon)
         self.action_sigfigs_less.triggered.connect(decrease_precision)
-        self.action_sigfigs_less.triggered.connect(lambda: update_dataframe(self.data, self.data_table))
+        self.action_sigfigs_less.triggered.connect(lambda: update_dataframe(self.data.processed_data, self.data_table))
         self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
 
         toolbar.addAction(self.action_sigfigs_more)
@@ -661,7 +634,7 @@ class DataFrameTab():
         self.data_table.setObjectName("data_table")
         self.data_table.setColumnCount(0)
         self.data_table.setRowCount(0)
-        self.data_table.setEditTriggers(self.data_table.NoEditTriggers)
+        self.data_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         layout.addWidget(self.data_table)
 
         self.parent.tabWidgetInfo.addTab(self.data_tab, "Data")
@@ -669,8 +642,7 @@ class DataFrameTab():
         if not self.parent.data:
             return
 
-        self.data = self.parent.data[self.parent.sample_id].processed_data
-        update_dataframe(self.data, self.data_table)
+        update_dataframe(self.data.processed_data, self.data_table)
 
 
 # -------------------------------
@@ -689,7 +661,7 @@ class FieldTab(UIFieldLogic):
 
         if not parent.data:
             return
-        self.data = parent.parent.data[parent.parent.sample_id]
+        self.data = parent.data
 
         self.field_tab = QWidget()
         self.field_tab.setObjectName("Field Tab")
@@ -705,7 +677,7 @@ class FieldTab(UIFieldLogic):
         field_type_label = QLabel(self.field_tab)
         field_type_label.setText("Field type")
 
-        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
+        self.field_type_combobox = CustomComboBox(popup_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
         self.field_type_combobox.setObjectName("field_type_combobox")
 
         field_label = QLabel(self.field_tab)
@@ -739,7 +711,7 @@ class FieldTab(UIFieldLogic):
         self.field_table.setObjectName("field_table")
         self.field_table.setColumnCount(0)
         self.field_table.setRowCount(0)
-        self.field_table.setEditTriggers(self.field_table.NoEditTriggers)
+        self.field_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         tab_layout.addWidget(self.field_table)
 

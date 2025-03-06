@@ -26,7 +26,7 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import cmcrameri as cmc
-from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim
+from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
 #import src.radar_factory
@@ -132,6 +132,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.connect_app_data_observers(self.app_data)
         self.connect_plot_style_observers(self.plot_style)
+
+        # Initialise dimentionality reduction class 
+        self.dimensional_reduction = DimensionalReduction(self)
 
         self.init_ui()
         self.connect_actions()
@@ -337,6 +340,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
         self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
 
+        self.ComboBoxDimRedTechnique.clear()
+        self.ComboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
+        #parent.comboBoxDimRedMethod.activated.connect()
+        self.spinBoxPCX.valueChanged.connect(lambda: plot_pca(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
+        self.spinBoxPCY.valueChanged.connect(lambda: plot_pca(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
 
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False, user_activated=False):
@@ -975,7 +983,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data.add_observer("data_min_quantile", self.update_data_min_quantile)
         data.add_observer("data_max_quantile", self.update_data_max_quantile)
         data.add_observer("data_min_diff_quantile", self.update_data_min_diff_quantile)
-        data.add_observer("data_max_diff_quantile", self.update_data_min_diff_quantile)
+        data.add_observer("data_max_diff_quantile", self.update_data_max_diff_quantile)
         data.add_observer("data_auto_scale_value", self.update_auto_scale_value)
         data.add_observer("apply_outlier_to_all", self.update_apply_outlier_to_all)
         data.add_observer("outlier_method", self.update_outlier_method)

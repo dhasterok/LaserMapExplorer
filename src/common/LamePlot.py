@@ -1430,7 +1430,7 @@ def plot_score_map(self):
     return canvas, self.data[self.app_data.sample_id].processed_data[field]
 
 
-def plot_pca(self):
+def plot_pca(parent, data, app_data, plot_style, canvas=None):
     """Plot principal component analysis (PCA)
     
     Wrapper for one of four types of PCA plots:
@@ -1443,24 +1443,24 @@ def plot_pca(self):
         ``MainWindow.plot_scatter``
     """
     #'plot_pca')
-    if self.app_data.sample_id == '':
+    if app_data == '':
         return
 
-    if self.update_pca_flag or not self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
-        self.compute_pca()
+    if parent.update_pca_flag or not data[app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
+        parent.dimensional_reduction.compute_pca(plot_style, app_data)
 
     # Determine which PCA plot to create based on the combobox selection
-    plot_type = self.plot_style.plot_type
+    plot_type = plot_style.plot_type
 
     match plot_type.lower():
         # make a plot of explained variance
         case 'variance':
-            canvas, plot_data = self.plot_pca_variance()
+            canvas, plot_data = plot_pca_variance(parent, plot_style)
             plot_name = plot_type
 
         # make an image of the PC vectors and their components
         case 'vectors':
-            canvas, plot_data = self.plot_pca_vectors()
+            canvas, plot_data = plot_pca_vectors(parent, data, app_data, plot_style, canvas)
             plot_name = plot_type
 
         # make a scatter plot or heatmap of the data... add PC component vectors
@@ -1511,7 +1511,7 @@ def plot_pca(self):
     self.update_canvas(canvas)
     #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
-def plot_pca_variance(self):
+def plot_pca_variance(parent, plot_style):
     """Creates a plot of explained variance, individual and cumulative, for PCA
 
     Returns
@@ -1519,40 +1519,40 @@ def plot_pca_variance(self):
     mplc.MplCanvas
         
     """        
-    canvas = mplc.MplCanvas(parent=self)
+    canvas = mplc.MplCanvas(parent=parent)
 
     # pca_dict contains variance ratios for the principal components
-    variances = self.pca_results.explained_variance_ratio_
+    variances = parent.dimention_reduction.pca_results.explained_variance_ratio_
     n_components = range(1, len(variances)+1)
     cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
 
     # Plotting the explained variance
-    canvas.axes.plot(n_components, variances, linestyle='-', linewidth=self.plot_style.line_width,
-        marker=self.plot_style.marker_dict[self.plot_style.marker], markeredgecolor=self.plot_style.marker_color, markerfacecolor='none', markersize=self.plot_style.marker_size,
-        color=self.plot_style.marker_color, label='Explained Variance')
+    canvas.axes.plot(n_components, variances, linestyle='-', linewidth=plot_style.line_width,
+        marker=plot_style.marker_dict[plot_style.marker], markeredgecolor=plot_style.marker_color, markerfacecolor='none', markersize=plot_style.marker_size,
+        color=plot_style.marker_color, label='Explained Variance')
 
     # Plotting the cumulative explained variance
-    canvas.axes.plot(n_components, cumulative_variances, linestyle='-', linewidth=self.plot_style.line_width,
-        marker=self.plot_style.marker_dict[self.plot_style.marker], markersize=self.plot_style.marker_size,
-        color=self.plot_style.marker_color, label='Cumulative Variance')
+    canvas.axes.plot(n_components, cumulative_variances, linestyle='-', linewidth=plot_style.line_width,
+        marker=plot_style.marker_dict[plot_style.marker], markersize=plot_style.marker_size,
+        color=plot_style.marker_color, label='Cumulative Variance')
 
     # Adding labels, title, and legend
     xlbl = 'Principal Component'
     ylbl = 'Variance Ratio'
 
-    canvas.axes.legend(fontsize=self.plot_style.font_size)
+    canvas.axes.legend(fontsize=plot_style.font_size)
 
     # Adjust the y-axis limit to make sure the plot includes all markers and lines
     canvas.axes.set_ylim([0, 1.0])  # Assuming variance ratios are between 0 and 1
 
     # labels
-    font = {'size':self.plot_style.font_size}
+    font = {'size':plot_style.font_size}
     canvas.axes.set_xlabel(xlbl, fontdict=font)
     canvas.axes.set_ylabel(ylbl, fontdict=font)
 
     # tick marks
-    canvas.axes.tick_params(direction=self.plot_style.tick_dir,
-        labelsize=self.plot_style.font_size,
+    canvas.axes.tick_params(direction=plot_style.tick_dir,
+        labelsize=plot_style.font_size,
         labelbottom=True, labeltop=False, labelleft=True, labelright=False,
         bottom=True, top=True, left=True, right=True)
 
@@ -1560,12 +1560,12 @@ def plot_pca_variance(self):
     canvas.axes.set_xticks(n_components, minor=True)
 
     # aspect ratio
-    canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
+    canvas.axes.set_box_aspect(plot_style.aspect_ratio)
     
     plot_data = pd.DataFrame(np.vstack((n_components, variances, cumulative_variances)).T, columns = ['Components','Variance','Cumulative Variance'])
     return canvas, plot_data
 
-def plot_pca_vectors(self):
+def plot_pca_vectors(parent, data, app_data, plot_style):
     """Displays a heat map of PCA vector components
 
     Returns
@@ -1573,19 +1573,19 @@ def plot_pca_vectors(self):
     mplc.MplCanvas
         Creates figure on mplc.MplCanvas
     """        
-    canvas = mplc.MplCanvas(parent=self)
+    canvas = mplc.MplCanvas(parent=parent)
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+    analytes = data[app_data.sample_id].processed_data.match_attribute('data_type','analyte')
 
-    components = self.pca_results.components_
+    components = parent.dimentional_reduction.pca_results.components_
     # Number of components and variables
     n_components = components.shape[0]
     n_variables = components.shape[1]
 
-    norm = self.plot_style.color_norm()
-    cax = canvas.axes.imshow(components, cmap=self.plot_style.get_colormap(), aspect=1.0, norm=norm)
+    norm = plot_style.color_norm()
+    cax = canvas.axes.imshow(components, cmap=plot_style.get_colormap(), aspect=1.0, norm=norm)
     canvas.array = components
 
     # Add a colorbar

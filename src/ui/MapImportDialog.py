@@ -13,7 +13,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MapImportDialog(object):
     def setupUi(self, MapImportDialog):
         MapImportDialog.setObjectName("MapImportDialog")
-        MapImportDialog.resize(1300, 637)
+        MapImportDialog.resize(1300, 691)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -23,7 +23,7 @@ class Ui_MapImportDialog(object):
         font.setPointSize(11)
         MapImportDialog.setFont(font)
         self.statusBar = QtWidgets.QStatusBar(parent=MapImportDialog)
-        self.statusBar.setGeometry(QtCore.QRect(0, 610, 1301, 27))
+        self.statusBar.setGeometry(QtCore.QRect(0, 660, 1301, 31))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -31,7 +31,7 @@ class Ui_MapImportDialog(object):
         self.statusBar.setSizePolicy(sizePolicy)
         self.statusBar.setObjectName("statusBar")
         self.layoutWidget = QtWidgets.QWidget(parent=MapImportDialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(12, 12, 1281, 597))
+        self.layoutWidget.setGeometry(QtCore.QRect(12, 12, 1281, 644))
         self.layoutWidget.setObjectName("layoutWidget")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.layoutWidget)
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -249,15 +249,15 @@ class Ui_MapImportDialog(object):
         self.pushButtonSave = QtWidgets.QPushButton(parent=self.layoutWidget)
         self.pushButtonSave.setObjectName("pushButtonSave")
         self.horizontalLayout.addWidget(self.pushButtonSave)
-        self.pushButtonCancel = QtWidgets.QPushButton(parent=self.layoutWidget)
-        self.pushButtonCancel.setObjectName("pushButtonCancel")
-        self.horizontalLayout.addWidget(self.pushButtonCancel)
         self.pushButtonImport = QtWidgets.QPushButton(parent=self.layoutWidget)
         font = QtGui.QFont()
         font.setPointSize(11)
         self.pushButtonImport.setFont(font)
         self.pushButtonImport.setObjectName("pushButtonImport")
         self.horizontalLayout.addWidget(self.pushButtonImport)
+        self.pushButtonCancel = QtWidgets.QPushButton(parent=self.layoutWidget)
+        self.pushButtonCancel.setObjectName("pushButtonCancel")
+        self.horizontalLayout.addWidget(self.pushButtonCancel)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
         self.retranslateUi(MapImportDialog)
@@ -331,10 +331,10 @@ class Ui_MapImportDialog(object):
         self.pushButtonLoad.setText(_translate("MapImportDialog", "Load"))
         self.pushButtonSave.setToolTip(_translate("MapImportDialog", "Save metadata"))
         self.pushButtonSave.setText(_translate("MapImportDialog", "Save"))
-        self.pushButtonCancel.setToolTip(_translate("MapImportDialog", "Cancel/Close window"))
-        self.pushButtonCancel.setText(_translate("MapImportDialog", "Cancel"))
         self.pushButtonImport.setToolTip(_translate("MapImportDialog", "Import selected data"))
         self.pushButtonImport.setText(_translate("MapImportDialog", "Import"))
+        self.pushButtonCancel.setToolTip(_translate("MapImportDialog", "Cancel/Close window"))
+        self.pushButtonCancel.setText(_translate("MapImportDialog", "Cancel"))
 
 
 if __name__ == "__main__":

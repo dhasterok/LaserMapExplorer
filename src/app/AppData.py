@@ -252,6 +252,7 @@ class AppData(Observable):
 
     @property
     def c_field_type(self):
+        """(str) Field type associated with colors or a histrogram"""
         return self._c_field_type
     
     @c_field_type.setter
@@ -275,6 +276,7 @@ class AppData(Observable):
 
     @property
     def c_field(self):
+        """(str) Field associated with colors or a histrogram"""
         return self._c_field
 
     @c_field.setter

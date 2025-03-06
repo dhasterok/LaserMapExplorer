@@ -332,18 +332,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
 
-        self.comboBoxOutlierMethod.addItems(['none', 'quantile critera','quantile and distance critera', 'Chauvenet criterion', 'log(n>x) inflection'])
-        self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
+        self.comboBoxOutlierMethod.addItems(self.app_data.outlier_methods)
+        if 'Chauvenet criterion' in self.app_data.outlier_methods:
+            self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
         self.comboBoxOutlierMethod.activated.connect(lambda: self.update_outlier_removal(self.comboBoxOutlierMethod.currentText()))
 
-        self.comboBoxNegativeMethod.addItems(['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform'])
+        self.comboBoxNegativeMethod.addItems(self.app_data.negative_methods)
         self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
 
         self.ComboBoxDimRedTechnique.clear()
         self.ComboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
         #parent.comboBoxDimRedMethod.activated.connect()
-        self.spinBoxPCX.valueChanged.connect(lambda: plot_pca(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
-        self.spinBoxPCY.valueChanged.connect(lambda: plot_pca(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
+        self.spinBoxPCX.valueChanged.connect(lambda: plot_pca(self,self.dimensional_reduction, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
+        self.spinBoxPCY.valueChanged.connect(lambda: plot_pca(self,self.dimensional_reduction, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
 
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False):
@@ -922,6 +923,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("dim_red_method", self.update_dim_red_method_combobox)
         app_data.add_observer("dim_red_x", self.update_dim_red_x_spinbox)
         app_data.add_observer("dim_red_y", self.update_dim_red_y_spinbox)
+        app_data.add_observer("dim_red_x_min", self.update_dim_red_x_min_spinbox)
+        app_data.add_observer("dim_red_y_min", self.update_dim_red_y_min_spinbox)
+        app_data.add_observer("dim_red_x_max", self.update_dim_red_x_max_spinbox)
+        app_data.add_observer("dim_red_y_max", self.update_dim_red_y_max_spinbox)
         app_data.add_observer("cluster_method", self.update_cluster_method_combobox)
         app_data.add_observer("max_clusters", self.update_max_clusters_spinbox)
         app_data.add_observer("num_clusters", self.update_num_clusters_spinbox)
@@ -1143,11 +1148,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # load sample's *.lame file
             file_path = os.path.join(self.app_data.selected_directory, self.app_data.csv_files[index])
             self.data[self.app_data.sample_id] = SampleObj(
-                self.app_data.sample_id,
-                file_path,
-                self.comboBoxOutlierMethod.currentText(),
-                self.comboBoxNegativeMethod.currentText(),
-                self.app_data.ref_chem,
+                sample_id = self.app_data.sample_id,
+                file_path = file_path,
+                outlier_method = self.comboBoxOutlierMethod.currentText(),
+                negative_method =self.comboBoxNegativeMethod.currentText(),
+                ref_chem = self.app_data.ref_chem,
                 debug=self.logger_options['Data']
             )
             self.connect_data_observers(self.data[self.app_data.sample_id])
@@ -1173,8 +1178,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.calculator.calculate_new_field(save=False)
 
         # reset flags
-        self.update_cluster_flag = True
-        self.update_pca_flag = True
+        self.app_data.update_cluster_flag = True
+        self.app_data.update_pca_flag = True
 
         # update ui
         self.update_ui_on_sample_change()
@@ -1527,7 +1532,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.schedule_update()
 
     def update_dim_red_method_combobox(self, new_dim_red_method):
-        self.comboBoxNoiseReductionMethod.setCurrentText(new_dim_red_method)
+        self.ComboBoxDimRedTechnique.setCurrentText(new_dim_red_method)
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.schedule_update()
 
@@ -1538,6 +1543,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_dim_red_y_spinbox(self, new_dim_red_y):
         self.spinBoxPCY.setValue(int(new_dim_red_y))
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_x_min_spinbox(self, new_dim_red_y):
+        self.spinBoxPCY.setMinimum(int(new_dim_red_y))
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_x_max_spinbox(self, new_dim_red_y):
+        self.spinBoxPCY.setMaximum(int(new_dim_red_y))
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_y_min_spinbox(self, new_dim_red_y):
+        self.spinBoxPCY.setMinimum(int(new_dim_red_y))
+        if self.toolBox.currentIndex() == self.left_tab['multidim']:
+            self.plot_style.schedule_update()
+
+    def update_dim_red_y_max_spinbox(self, new_dim_red_y):
+        self.spinBoxPCY.setMaximum(int(new_dim_red_y))
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.schedule_update()
 
@@ -2564,7 +2589,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
             case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
-                canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_pca(self,self.dimensional_reduction, data, self.app_data, self.plot_style)
 
             case 'cluster' | 'cluster score':
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)

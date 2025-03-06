@@ -1699,7 +1699,7 @@ class StylingDock(Styling):
             style['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
             style['CLabel'] = data.axis_dict[field]['label']
 
-        if self.app_data.color_field_type == 'cluster':
+        if self.app_data.c_field_type == 'cluster':
             style['CScale'] = 'discrete'
         else:
             style['CScale'] = 'linear'

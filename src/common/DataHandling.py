@@ -199,7 +199,9 @@ class SampleObj(Observable):
         self.sample_id = sample_id
         self.file_path = file_path
         self._current_field = None
+        
         self._outlier_method = outlier_method
+        
         self._negative_method = negative_method
         self._smoothhing_method = smoothing_method
         self._updating = False

@@ -426,16 +426,15 @@ class DimensionalReduction():
         # Add PCA scores to DataFrame for easier plotting
         data.add_columns('pca score',pca_scores.columns,pca_scores.values,data.mask)
 
-            #update min and max of PCA spinboxes
+        #update min and max of PCA spinboxes
         if self.pca_results.n_components_ > 0:
-            self.spinBoxPCX.setMinimum(1)
-            self.spinBoxPCY.setMinimum(1)
-            self.spinBoxPCX.setMaximum(self.pca_results.n_components_+1)
-            self.spinBoxPCY.setMaximum(self.pca_results.n_components_+1)
-            if self.spinBoxPCY.value() == 1:
-                self.spinBoxPCY.setValue(int(2))
-
-        self.update_all_field_comboboxes()
-        self.update_blockly_field_types()
+            app_data.dim_red_x_min = 1
+            app_data.dim_red_y_min = 1
+            app_data.dim_red_x_max =  self.pca_results.n_components_+1
+            app_data.dim_red_y_max =  self.pca_results.n_components_+1
+            if app_data.dim_red_y == 1:
+                app_data.dim_red_y = int(2)
 
         self.update_pca_flag = False
+
+        return self.pca_results

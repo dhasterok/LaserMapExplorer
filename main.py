@@ -106,7 +106,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Profile': False,
                 'Masking': False,
                 'Tree': False,
-                'Styles': False,
+                'Styles': True,
                 'Calculator': False,
                 'Browser': False,
                 'UI': False
@@ -307,10 +307,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=False, global_list=True, user_activated=True)
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldIndex, add_none=False, user_activated=True)
-        self.comboBoxFieldC.activated.connect(lambda index: print(f"Activated: {index}"))
-        self.comboBoxFieldC.currentTextChanged.connect(lambda text: print(f"Text changed: {text}"))
+        #self.comboBoxFieldC.activated.connect(lambda index: print(f"Activated: {index}"))
+        #self.comboBoxFieldC.currentTextChanged.connect(lambda text: print(f"Text changed: {text}"))
+        #self.comboBoxFieldC.activated.connect(lambda: print(f"{self.app_data.c_field}"))
         #self.comboBoxFieldC.activated.connect(self.plot_style.update_c_field_combobox)
-        #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
+        self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         # update spinbox associated with map/color field
         self.spinBoxFieldIndex.valueChanged.connect(self.c_field_spinbox_changed)
 
@@ -485,7 +486,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_list = self.app_data.field_dict['analyte']
 
         # if parent combobox has no field type selected, clear childbox and return
-        elif parentbox.currentText() in ['', 'None']:
+        elif parentbox.currentText() in ['', 'none', 'None']:
             childbox.clear()
             return
 
@@ -510,6 +511,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         childbox.addItems(field_list)
 
         # update the current index if old field is in the new list, otherwise set to first item
+        print(f"{childbox.currentText()}")
         if user_activated:
             return
 

@@ -1,4 +1,4 @@
-import os, re, copy, pickle
+import os, re, copy, pickle, inspect
 from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
 from pyqtgraph import colormap
@@ -952,7 +952,7 @@ class StylingDock(Styling):
         self.style_dict = self.style_themes.default_style_dict()
 
 
-        self._signal_state = False
+        self._signal_state = True
 
         self.scheduler = Scheduler(callback=self.ui.update_SV)
 
@@ -1095,7 +1095,7 @@ class StylingDock(Styling):
         #self.ui.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
         self.ternary_colormap_changed()
 
-        self._signal_state = True
+        self._signal_state = False
 
         self.set_style_widgets()
 
@@ -1733,7 +1733,7 @@ class StylingDock(Styling):
         # elif plot_type == '':
         #     return
 
-        self.signal_state = False
+        self.signal_state = True
 
         style = self.style_dict[self.plot_type]
 
@@ -1898,7 +1898,7 @@ class StylingDock(Styling):
         # turn properties on/off based on plot type and style settings
         self.toggle_style_widgets()
 
-        self.signal_state = True
+        self.signal_state = False
 
     # def update_style_dict(self):
     #     """Get style properties"""        
@@ -1996,9 +1996,7 @@ class StylingDock(Styling):
                 self.ui.actionSwapAxes.setEnabled(False)
 
         # update all plot widgets
-        self.signal_state = False
         self.set_style_widgets()
-        self.signal_state = True
 
         if self.plot_type != '':
             self.schedule_update()
@@ -2926,15 +2924,25 @@ class StylingDock(Styling):
         if self.debug:
             self.logger.print(f"update_c_field_combobox: field={field}")
 
+        #import traceback
+        #print(f"update_c_field_combobox called with field={field}")
+        #traceback.print_stack(limit=10)
+
         if field is None:   # user interaction, or direct setting of combobox
             # set field property to combobox
             self.app_data.c_field = self.ui.comboBoxFieldC.currentText()
         else:   # direct setting of property
-            if field == self.ui.comboBoxFieldC.currentText():
+            if field == self.ui.comboBoxFieldC.currentText() and field == self.app_data.c_field:
                 return
+
             # set combobox to field
+            self.ui.comboBoxFieldC.blockSignals(True)
             self.ui.comboBoxFieldC.setCurrentText(field)
-            self.app_data.c_field = field
+            self.ui.comboBoxFieldC.blockSignals(False)
+
+            # check if c_field property needs to be updated too
+            if self.app_data.c_field != field:
+                self.app_data.c_field = field
 
         if self.ui.spinBoxFieldIndex.value() != self.ui.comboBoxFieldC.currentIndex():
             self.ui.spinBoxFieldIndex.setValue(self.ui.comboBoxFieldC.currentIndex())

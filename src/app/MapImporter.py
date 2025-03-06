@@ -688,10 +688,10 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             if analyte2 is not None:
                 analyte1 = analyte1.capitalize()
                 analyte2 = analyte2.capitalize()
-                fieldtype = 'Ratio'
+                fieldtype = 'ratio'
             elif analyte1 is not None:
                 analyte1 = analyte1.capitalize()
-                fieldtype = 'Analyte'
+                fieldtype = 'analyte'
 
             # Final validity check
             if filetype is None:

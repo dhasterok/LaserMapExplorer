@@ -301,28 +301,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
-        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=True, global_list=True)
+        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=False, global_list=True, user_activated=True)
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
-        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldIndex, add_none=True)
-        self.comboBoxFieldC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field", self.comboBoxFieldC.currentText()))
+        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldIndex, add_none=False, user_activated=True)
+        self.comboBoxFieldC.activated.connect(lambda index: print(f"Activated: {index}"))
+        self.comboBoxFieldC.currentTextChanged.connect(lambda text: print(f"Text changed: {text}"))
+        #self.comboBoxFieldC.activated.connect(self.plot_style.update_c_field_combobox)
+        #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         # update spinbox associated with map/color field
-        self.comboBoxFieldC.currentIndexChanged.connect(lambda: self.spinBoxFieldIndex.setValue(self.comboBoxFieldC.currentIndex()))
-        self.comboBoxFieldC.activated.connect(self.plot_style.update_c_field_combobox)
         self.spinBoxFieldIndex.valueChanged.connect(self.c_field_spinbox_changed)
 
-        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX)
+        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, user_activated=True)
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field_type", self.comboBoxFieldTypeX.currentText()))
-        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=False)
+        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=False, user_activated=True)
         self.comboBoxFieldX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field", self.comboBoxFieldX.currentText()))
 
-        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY)
+        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, user_activated=True)
         self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field_type", self.comboBoxFieldTypeY.currentText()))
-        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=False)
+        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=False, user_activated=True)
         self.comboBoxFieldY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field", self.comboBoxFieldY.currentText()))
 
-        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ)
+        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, user_activated=True)
         self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field_type", self.comboBoxFieldTypeZ.currentText()))
-        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=True)
+        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=True, user_activated=True)
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field", self.comboBoxFieldZ.currentText()))
 
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
@@ -338,7 +339,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
 
-    def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False):
+    def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False, user_activated=False):
         """Updates a field type comobobox list.
 
         This method can be used on popup or by forcing an update.
@@ -426,7 +427,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update the parent box list of field types
         parentbox.clear()
         parentbox.addItems(new_list)
+
         # if previous field type is in the new list, then keep it as the current choice until selected
+        if user_activated:
+            return
+
         if old_field_type in new_list:
             parentbox.setCurrentIndex(new_list.index(old_field_type))
         else:
@@ -452,7 +457,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             childbox.addItems(field_dict[old_field_type.lower()])
             childbox.setCurrentIndex(0)
             
-    def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, add_none=False):
+    def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, add_none=False, user_activated=False):
         """Updates a field comobobox list.
 
         This method can be used on popup or by forcing an update.
@@ -497,6 +502,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         childbox.addItems(field_list)
 
         # update the current index if old field is in the new list, otherwise set to first item
+        if user_activated:
+            return
+
         if old_field in field_list:
             childbox.setCurrentIndex(field_list.index(old_field))
         else:
@@ -1675,7 +1683,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             add_none = False
             if axis_id in [2,3] and self.plot_style.plot_type not in ['scatter']:
-                add_none = True
+                add_none = False
             self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=True, global_list=True)
 
         if plot_dict['saved_field'][axis_id] is not None:

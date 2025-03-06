@@ -1,4 +1,4 @@
-app.InfoViewer
+﻿app.InfoViewer
 ==============
 
 .. automodule:: app.InfoViewer
@@ -34,7 +34,6 @@ app.InfoViewer
       DataFrameTab
       FieldTab
       InfoDock
-      InfoWindow
       MetadataTab
       MplCanvas
       PlotInfoTab

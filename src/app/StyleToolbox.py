@@ -1072,7 +1072,6 @@ class StylingDock(Styling):
         # colors
         # marker color
         #self.ui.comboBoxFieldTypeC.activated.connect(self.update_color_field_type)
-        #self.ui.comboBoxFieldC.activated.connect(self.color_field_callback)
         #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         #self.ui.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
@@ -1857,7 +1856,7 @@ class StylingDock(Styling):
 
         if self.app_data.c_field in ui.comboBoxFieldC.allItems():
             ui.comboBoxFieldC.setCurrentText(self.app_data.c_field)
-            self.update_color_field_spinbox()
+            #self.ui.c_field_spinbox_changed()
         else:
             self.app_data.c_field = ui.comboBoxFieldC.currentText()
 
@@ -2927,15 +2926,18 @@ class StylingDock(Styling):
         if self.debug:
             self.logger.print(f"update_c_field_combobox: field={field}")
 
-        if field is None:
+        if field is None:   # user interaction, or direct setting of combobox
             # set field property to combobox
             self.app_data.c_field = self.ui.comboBoxFieldC.currentText()
-        else:
+        else:   # direct setting of property
             if field == self.ui.comboBoxFieldC.currentText():
                 return
             # set combobox to field
             self.ui.comboBoxFieldC.setCurrentText(field)
             self.app_data.c_field = field
+
+        if self.ui.spinBoxFieldIndex.value() != self.ui.comboBoxFieldC.currentIndex():
+            self.ui.spinBoxFieldIndex.setValue(self.ui.comboBoxFieldC.currentIndex())
 
         # update autoscale widgets
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
@@ -2977,13 +2979,6 @@ class StylingDock(Styling):
 
         self.schedule_update()
     
-    def update_color_field_spinbox(self):
-        """Updates ``spinBoxFieldIndex`` using the index of ``comboBoxFieldC``"""        
-        if self.debug:
-            self.logger.print("update_color_field_spinbox")
-
-        self.ui.spinBoxFieldIndex.setValue(self.ui.comboBoxFieldC.currentIndex())
-
     def colormap_direction_callback(self):
         """Set colormap direction (normal/reverse)
 

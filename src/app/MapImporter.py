@@ -3,10 +3,10 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 from PyQt6.QtWidgets import (
-    QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox,
+    QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox, QToolBar,
     QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout
 )
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt, QUrl
 import src.common.csvdict as csvdict
 from src.ui.MapImportDialog import Ui_MapImportDialog
@@ -59,7 +59,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.metadata = {'directory_data': pd.DataFrame()}
         
         # Set a message that will be displayed in the status bar
-        self.statusBar().showMessage('Ready')
+        self.statusBar.showMessage('Ready')
         
         # Adding a progress bar to the status bar
         self.progressBar = QProgressBar()
@@ -83,6 +83,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.pushButtonSave.clicked.connect(self.save_metadata)
         self.pushButtonSave.setEnabled(False)
         self.pushButtonCancel.clicked.connect(self.reject)
+        self.pushButtonCancel.setEnabled(True)
 
         self.tableWidgetMetadata.currentItemChanged.connect(self.on_item_changed)
 
@@ -189,7 +190,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         if col is None:
             return
         else:
-            self.statusBar().showMessage("Failed to add new standard, no 'Standard' column")
+            self.statusBar.showMessage("Failed to add new standard, no 'Standard' column")
 
         # update standard comboboxes
         for row in range(n_rows):
@@ -197,7 +198,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             if isinstance(widget, QComboBox):
                 widget.addItem(standard_name)
             else:
-                self.statusBar().showMessage("Failed to add new standard, wrong column or missing comboBox?")
+                self.statusBar.showMessage("Failed to add new standard, wrong column or missing comboBox?")
 
     def data_type_changed(self):
         data_type = self.comboBoxDataType.currentText()
@@ -251,9 +252,9 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     status = False
               
             if status:
-                self.statusBar().showMessage("Metadata loaded successfully")
+                self.statusBar.showMessage("Metadata loaded successfully")
             else:
-                self.statusBar().showMessage("Some metadata sample IDs do not match sample IDs in directory")
+                self.statusBar.showMessage("Some metadata sample IDs do not match sample IDs in directory")
     
     def update_table_row(self, row_pos, row_data):
         # Ensure the table has enough rows
@@ -268,11 +269,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             cell_widget = self.tableWidgetMetadata.cellWidget(row_pos, col_index)
             if isinstance(cell_widget, QComboBox):
                 # Set the current index for combo box if the value exists in its options
-                index = cell_widget.findText(str(value), Qt.MatchFixedString)
+                index = cell_widget.findText(str(value), Qt.MatchFlag.MatchFixedString)
                 if index >= 0:
                     cell_widget.setCurrentIndex(index)
                 else:
-                    self.statusBar().showMessage(f"Value {value} not found in ComboBox options at column {col_index}")
+                    self.statusBar.showMessage(f"Value {value} not found in ComboBox options at column {col_index}")
             else:
                 # For QTableWidgetItem, just set the text
                 item = QTableWidgetItem(str(value))
@@ -292,7 +293,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             # save DataFrame to CSV
             try:
                 self.metadata['directory_data'].to_csv(file_name, index=False)  # Save DataFrame to CSV without the index
-                self.statusBar().showMessage("Metadata saved successfully")
+                self.statusBar.showMessage("Metadata saved successfully")
             except Exception as e:
                 QMessageBox.warning(self,'Error',f"Could not save metadata table.\n{e}")
 
@@ -302,7 +303,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         Assumes directories within selected directory are sample available for opening.
         """        
-        root_path = QFileDialog.getExistingDirectory(None, "Select a folder", options=QFileDialog.ShowDirsOnly)
+        root_path = QFileDialog.getExistingDirectory(None, "Select a folder", options=QFileDialog.Option.ShowDirsOnly)
         if not root_path:
             return
         
@@ -411,7 +412,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         self.add_checkbox(row, col, False)
                     case 'Sample ID':
                         item = QTableWidgetItem(sample_id)
-                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
                     case 'Select files':
                         self.add_pushbutton(row, col)
@@ -512,7 +513,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     else:
                         self.tableWidgetMetadata.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
             elif sweep_time_item and sweep_speed_item:
-                self.statusBar().showMessage('Sweep time and sweep speed should be postive')
+                self.statusBar.showMessage('Sweep time and sweep speed should be postive')
 
     def on_combobox_changed(self, row, column):
         if self.checkBoxApplyAll.isChecked():
@@ -539,7 +540,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         self.add_checkbox(row, col, False)
                     case 'Sample ID':
                         item = QTableWidgetItem(self.sample_ids[row])
-                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                         self.tableWidgetMetadata.setItem(row, col, item)
                     case 'Line Dir.':
                         item = QTableWidgetItem(self.line_dir[row])
@@ -718,7 +719,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.metadata['directory_data'] = self.get_metadata()
 
         if not self.checkBoxSaveToRoot.isChecked():
-            save_path = QFileDialog.getExistingDirectory(None, "Select a folder to Save imports", options=QFileDialog.ShowDirsOnly)
+            save_path = QFileDialog.getExistingDirectory(None, "Select a folder to Save imports", options=QFileDialog.Option.ShowDirsOnly)
             if not save_path:
                 return
         else:
@@ -747,7 +748,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 pass
 
         if self.ok:
-            self.parent.open_directory(dir_name=self.root_path)
+            self.parent.io.open_directory(path=self.root_path)
         
     def import_la_icp_ms_data(self, save_path):
         """Reads LA-ICP-MS data into a DataFrame
@@ -819,7 +820,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             is_numeric = all(numeric_check.notna())
 
             try:
-                csvdict.export_filtered_dict_to_csv(self.metadata[sample_id], sample_id+".lmdf.csv",'Import',True)
+                file_name = os.path.join(save_path, sample_id+'.lmdf.csv')
+                self.metadata[sample_id].to_csv(file_name,index=False)
             except Exception as e:
                 QMessageBox.warning(self,'Error',f"Could not save LaME metadata file associated with sample {sample_id}.\n{e}")
 
@@ -856,13 +858,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
                 current_progress += 1
                 self.progressBar.setValue(current_progress)
-                self.statusBar().showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
+                self.statusBar.showMessage(f"{sample_id}: {current_progress}/{total_files} files imported.")
                 QApplication.processEvents()  # Process GUI events to update the progress bar
 
             if not data_frames:
                 continue
 
-            self.statusBar().showMessage(f'Formatting {sample_id}...')
+            self.statusBar.showMessage(f'Formatting {sample_id}...')
             QApplication.processEvents()  # Process GUI events to update the progress bar
             if is_numeric:
                 final_data = pd.concat(data_frames, ignore_index=True)
@@ -882,7 +884,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             if not data_frames:
                 continue
 
-            self.statusBar().showMessage(f'Formatting {sample_id}...')
+            self.statusBar.showMessage(f'Formatting {sample_id}...')
             QApplication.processEvents()
             if is_numeric:
                 final_data = pd.concat(data_frames, ignore_index=True)
@@ -892,17 +894,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 final_data = pd.concat(data_frames, axis=1)
 
             file_name = os.path.join(save_path, sample_id+'.lame.csv')
-            self.statusBar().showMessage(f'Saving {sample_id}.lame.csv...')
+            self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
             QApplication.processEvents()  # Process GUI events to update the progress bar
             final_data.to_csv(file_name, index= False)
             num_imported += 1
 
         # except Exception as e:
-        #     self.statusBar().showMessage(f"Error during import: {str(e)}")
+        #     self.statusBar.showMessage(f"Error during import: {str(e)}")
         #     return
-        # self.statusBar().showMessage("Import completed successfully!")
+        # self.statusBar.showMessage("Import completed successfully!")
 
-        self.statusBar().showMessage(f'Successfully imported {num_imported} samples.')
+        self.statusBar.showMessage(f'Successfully imported {num_imported} samples.')
         self.pushButtonCancel.setText('Close')
         self.pushButtonCancel.setDefault(True)
         self.progressBar.setValue(total_files)  # Ensure the progress bar reaches full upon completion
@@ -970,7 +972,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         #     # Create the variable combining name and number
         #     analyte_name = f"{name}{number}"
         # else:
-        #     self.statusBar().showMessage('Analyte name not part of filename')
+        #     self.statusBar.showMessage('Analyte name not part of filename')
         #     return []
 
         # if analyte has isotope mass first and symbol second, swap order
@@ -1037,7 +1039,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         if match:
             analyte_name =  match.group(1)  # Returns the captured group, which is the text of interest
         else:
-            self.statusBar().showMessage('Iolite name not part of filename')
+            self.statusBar.showMessage('Iolite name not part of filename')
             return []
         data = pd.read_csv(file_path)
         
@@ -1098,7 +1100,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         # Show the dialog to confirm or edit the file import details
         dialog = FileSelectData(sample_id, file_list, parsed_results, parent=self)
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             # Retrieve the updated data from the dialog
             self.metadata[sample_id] = dialog.get_data()
         else:
@@ -1164,6 +1166,32 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
 
         self.parent = parent
 
+        if not self.layout():
+            layout = QVBoxLayout(self)
+            self.setLayout(layout)
+        else:
+            layout = self.layout()
+
+        toolbar = QToolBar(self)
+
+        self.actionSelectAll = QAction(toolbar)
+        select_all_icon = QIcon(":resources/icons/icon-select-all-64.svg")
+        self.actionSelectAll.setIcon(select_all_icon)
+        self.actionSelectAll.setToolTip("Select all files")
+
+        self.actionSelectNone = QAction(toolbar)
+        select_none_icon = QIcon(":resources/icons/icon-select-none-64.svg")
+        self.actionSelectNone.setIcon(select_none_icon)
+        self.actionSelectNone.setToolTip("Select all files")
+
+        toolbar.addAction(self.actionSelectAll)
+        toolbar.addAction(self.actionSelectNone)
+
+        layout.insertWidget(0, toolbar)
+
+        self.actionSelectAll.triggered.connect(self.select_all)
+        self.actionSelectNone.triggered.connect(self.select_all)
+
         self.lineEditDirectory.setText(self.parent.root_path+"/"+sample_id)
 
         valid_extensions = ['csv', 'xlsx', 'xls']
@@ -1193,7 +1221,7 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
 
             # Filename (non-editable)
             filename_item = QTableWidgetItem(filename)
-            filename_item.setFlags(filename_item.flags() & ~Qt.ItemIsEditable)
+            filename_item.setFlags(filename_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.tableWidgetFileMetadata.setItem(row, 1, filename_item)
 
             # Analyte Type ComboBox (editable)
@@ -1228,6 +1256,24 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         # Connect buttons to actions
         self.buttonBox.ok_button.clicked.connect(self.accept)
         self.buttonBox.cancel_button.clicked.connect(self.reject)
+
+    def select_all(self):
+        for row in range(self.tableWidgetFileMetadata.rowCount()):
+            # Checkbox for import
+            widget = self.tableWidgetFileMetadata.cellWidget(row, 0)
+
+            # Check if the widget exists and is a checkbox
+            if isinstance(widget, QCheckBox):
+                widget.setChecked(True)
+
+    def select_none(self):
+        for row in range(self.tableWidgetFileMetadata.rowCount()):
+            # Checkbox for import
+            widget = self.tableWidgetFileMetadata.cellWidget(row, 0)
+
+            # Check if the widget exists and is a checkbox
+            if isinstance(widget, QCheckBox):
+                widget.setChecked(False)
 
     def get_data(self):
         """Returns the updated information from ``tableWidgetFileMetadata``."""

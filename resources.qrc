@@ -185,5 +185,6 @@
         <file>resources/icons/icon-show-64.svg</file>
         <file>resources/icons/icon-sigfigs-add-64.svg</file>
         <file>resources/icons/icon-sigfigs-remove-64.svg</file>
+        <file>resources/icons/icon-select-none-64.svg</file>
     </qresource>
 </RCC>

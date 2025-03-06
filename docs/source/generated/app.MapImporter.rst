@@ -1,4 +1,4 @@
-app.MapImporter
+﻿app.MapImporter
 ===============
 
 .. automodule:: app.MapImporter
@@ -19,6 +19,7 @@ app.MapImporter
    
       FileSelectData
       MapImporter
+      QAction
       QApplication
       QCheckBox
       QComboBox
@@ -34,6 +35,7 @@ app.MapImporter
       QPushButton
       QTableWidget
       QTableWidgetItem
+      QToolBar
       QUrl
       QVBoxLayout
       QWidget

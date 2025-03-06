@@ -185,25 +185,25 @@ class PlotInfoTab():
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
         tab_layout.addWidget(toolbar)
 
-        self.action_select_all = QAction(toolbar)
+        self.actionSelectAll = QAction(toolbar)
         select_all_icon = QIcon(":resources/icons/icon-select-all-64.svg")
-        self.action_select_all.setIcon(select_all_icon)
-        self.action_select_all.setToolTip("Select all annotations")
+        self.actionSelectAll.setIcon(select_all_icon)
+        self.actionSelectAll.setToolTip("Select all annotations")
 
-        self.action_show_hide = QAction(toolbar)
+        self.actionShowHide = QAction(toolbar)
         show_hide_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
-        self.action_show_hide.setIcon(show_hide_icon)
-        self.action_show_hide.setCheckable(True)
-        self.action_show_hide.setToolTip("Toggle show/hide annotations")
+        self.actionShowHide.setIcon(show_hide_icon)
+        self.actionShowHide.setCheckable(True)
+        self.actionShowHide.setToolTip("Toggle show/hide annotations")
 
-        self.action_remove = QAction(toolbar)
+        self.actionRemove = QAction(toolbar)
         remove_icon = QIcon(":resources/icons/icon-delete-64.svg")
-        self.action_remove.setIcon(remove_icon)
-        self.action_remove.setToolTip("Remove selected annotation(s)")
+        self.actionRemove.setIcon(remove_icon)
+        self.actionRemove.setToolTip("Remove selected annotation(s)")
 
-        toolbar.addAction(self.action_select_all)
-        toolbar.addAction(self.action_show_hide)
-        toolbar.addAction(self.action_remove)
+        toolbar.addAction(self.actionSelectAll)
+        toolbar.addAction(self.actionShowHide)
+        toolbar.addAction(self.actionRemove)
 
 
         tab_widgets_layout = QHBoxLayout()
@@ -383,20 +383,20 @@ class MetadataTab():
         self.field_combobox.setObjectName("field_combobox")
 
         # select all columns
-        self.action_select_all_columns = QAction("Select All Columns", toolbar)
+        self.actionSelectAll_columns = QAction("Select All Columns", toolbar)
         select_columns_icon = QIcon(":resources/icons/icon-top_toolbar_show-64.svg")
-        self.action_select_all_columns.setIcon(select_columns_icon)
-        self.action_select_all_columns.setCheckable(True)
-        self.action_select_all_columns.toggled.connect(self.toggle_all_columns)
-        self.action_select_all_columns.setToolTip("Select/deselect all columns")
+        self.actionSelectAll_columns.setIcon(select_columns_icon)
+        self.actionSelectAll_columns.setCheckable(True)
+        self.actionSelectAll_columns.toggled.connect(self.toggle_all_columns)
+        self.actionSelectAll_columns.setToolTip("Select/deselect all columns")
 
         # select all rows
-        self.action_select_all_rows = QAction("Select All Rows", toolbar)
+        self.actionSelectAll_rows = QAction("Select All Rows", toolbar)
         select_rows_icon = QIcon(":resources/icons/icon-left_toolbar_show-64.svg")
-        self.action_select_all_rows.setIcon(select_rows_icon)
-        self.action_select_all_rows.setCheckable(True)
-        self.action_select_all_rows.toggled.connect(self.toggle_all_rows)
-        self.action_select_all_rows.setToolTip("Select/deselect all rows")
+        self.actionSelectAll_rows.setIcon(select_rows_icon)
+        self.actionSelectAll_rows.setCheckable(True)
+        self.actionSelectAll_rows.toggled.connect(self.toggle_all_rows)
+        self.actionSelectAll_rows.setToolTip("Select/deselect all rows")
 
         # set the norm method for all samples
         scaling_label = QLabel(self.metadata_tab)
@@ -433,8 +433,8 @@ class MetadataTab():
         # add actions and widgets to toolbar
         toolbar.addWidget(field_label)
         toolbar.addWidget(self.field_combobox)
-        toolbar.addAction(self.action_select_all_columns)
-        toolbar.addAction(self.action_select_all_rows)
+        toolbar.addAction(self.actionSelectAll_columns)
+        toolbar.addAction(self.actionSelectAll_rows)
         toolbar.addAction(self.actionToggleView)
         toolbar.addSeparator()
         toolbar.addWidget(scaling_label)

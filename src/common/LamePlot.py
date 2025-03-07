@@ -1411,9 +1411,9 @@ def plot_score_map(parent,data, app_data, plot_style):
             print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
             return canvas
 
-    reshaped_array = np.reshape(data[app_data.sample_id].processed_data[field].values, data[app_data.sample_id].array_size, order=data[app_data.sample_id].order)
+    reshaped_array = np.reshape(data.processed_data[field].values, data.array_size, order=data.order)
 
-    cax = canvas.axes.imshow(reshaped_array, cmap=plot_style.cmap, aspect=data[app_data.sample_id].aspect_ratio, interpolation='none')
+    cax = canvas.axes.imshow(reshaped_array, cmap=plot_style.cmap, aspect=data.aspect_ratio, interpolation='none')
     canvas.array = reshaped_array
 
         # Add a colorbar
@@ -1426,9 +1426,9 @@ def plot_score_map(parent,data, app_data, plot_style):
     #canvas.axes.set_axis_off()
 
     # add scalebar
-    add_scalebar(plot_style, canvas,canvas.axes)
+    add_scalebar(app_data, plot_style, canvas.axes)
 
-    return canvas, data[app_data.sample_id].processed_data[field]
+    return canvas, data.processed_data[field]
 
 
 def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=None):
@@ -1447,8 +1447,10 @@ def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=N
     if app_data == '':
         return
 
-    if app_data.update_pca_flag or not data[app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
+    if app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
         pca_results = dimensional_reduction.compute_pca(plot_style, app_data)
+    else:
+        pca_results = dimensional_reduction.pca_results
 
     # Determine which PCA plot to create based on the combobox selection
     plot_type = plot_style.plot_type
@@ -1467,7 +1469,7 @@ def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=N
         # make a scatter plot or heatmap of the data... add PC component vectors
         case 'pca scatter'| 'pca heatmap':
             pc_x = int(app_data.dim_red_x)
-            pc_y = int(app_data.dim_red_x)
+            pc_y = int(app_data.dim_red_y)
 
             if pc_x == pc_y:
                 return
@@ -1482,11 +1484,11 @@ def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=N
 
         # make a map of a principal component score
         case 'pca score':
-            if app_data.field_type.lower() == 'none' or app_data.c_field == '':
+            if app_data.c_field_type.lower() == 'none' or app_data.c_field == '':
                 return
 
             # Assuming pca_df contains scores for the principal components
-            canvas, plot_data = plot_score_map(parent,pca_results, data, app_data, plot_style)
+            canvas, plot_data = plot_score_map(parent, data, app_data, plot_style)
             plot_name = plot_type+f'_{app_data.c_field}'
         case _:
             print(f'Unknown PCA plot type: {plot_type}')
@@ -1508,7 +1510,7 @@ def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=N
         'position': [],
         'data': plot_data
     }
-    return plot_info, canvas
+    return canvas, plot_info
     #update_canvas(canvas)
     #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
@@ -1578,7 +1580,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, plot_style):
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = data[app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+    analytes = data.processed_data.match_attribute('data_type','analyte')
 
     components = pca_results.components_
     # Number of components and variables
@@ -1652,7 +1654,7 @@ def plot_pca_components(parent, pca_results,data, app_data, plot_style,canvas):
         return
 
     # field labels
-    analytes = data[app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+    analytes = data.processed_data.match_attribute('data_type','analyte')
     nfields = len(analytes)
 
     # components

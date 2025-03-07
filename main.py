@@ -345,8 +345,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ComboBoxDimRedTechnique.clear()
         self.ComboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
         #parent.comboBoxDimRedMethod.activated.connect()
-        self.spinBoxPCX.valueChanged.connect(lambda: plot_pca(self,self.dimensional_reduction, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
-        self.spinBoxPCY.valueChanged.connect(lambda: plot_pca(self,self.dimensional_reduction, self.data[self.app_data.sample_id], self.app_data, self.plot_style))
+        self.spinBoxPCX.valueChanged.connect(lambda: self.update_dim_red_components(self.spinBoxPCX.value(),self.spinBoxPCY.value()))
+        self.spinBoxPCY.valueChanged.connect(lambda: self.update_dim_red_components(self.spinBoxPCX.value(),self.spinBoxPCY.value()))
 
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False, user_activated=False):
@@ -1543,8 +1543,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_dim_red_method_combobox(self, new_dim_red_method):
         self.ComboBoxDimRedTechnique.setCurrentText(new_dim_red_method)
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
+        # if self.toolBox.currentIndex() == self.left_tab['multidim']:
+        #     self.plot_style.schedule_update()
 
     def update_dim_red_x_spinbox(self, new_dim_red_x):
         self.spinBoxPCX.setValue(int(new_dim_red_x))
@@ -1556,25 +1556,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['multidim']:
             self.plot_style.schedule_update()
 
-    def update_dim_red_x_min_spinbox(self, new_dim_red_y):
-        self.spinBoxPCY.setMinimum(int(new_dim_red_y))
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
+    def update_dim_red_x_min_spinbox(self, new_dim_red_x_min):
+        self.spinBoxPCX.setMinimum(int(new_dim_red_x_min))
 
-    def update_dim_red_x_max_spinbox(self, new_dim_red_y):
-        self.spinBoxPCY.setMaximum(int(new_dim_red_y))
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
 
-    def update_dim_red_y_min_spinbox(self, new_dim_red_y):
-        self.spinBoxPCY.setMinimum(int(new_dim_red_y))
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
+    def update_dim_red_x_max_spinbox(self, new_dim_red_x_max):
+        self.spinBoxPCX.setMaximum(int(new_dim_red_x_max))
+
+
+    def update_dim_red_y_min_spinbox(self, new_dim_red_y_min):
+        self.spinBoxPCY.setMinimum(int(new_dim_red_y_min))
+
 
     def update_dim_red_y_max_spinbox(self, new_dim_red_y):
         self.spinBoxPCY.setMaximum(int(new_dim_red_y))
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
 
     def update_cluster_method_combobox(self, new_cluster_method):
         self.comboBoxClusterMethod.setCurrentText(new_cluster_method)
@@ -2474,6 +2469,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditDifferenceLowerQuantile.setEnabled(False)
                 self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
+    def update_dim_red_components(self,pc_x, pc_y):
+        """Updates the dimensional reduction components
+
+        Executes when the user changes the value of ``spinBoxPCX`` or ``spinBoxPCY``.
+
+        Sets the x and y principal components for dimensional reduction by updating
+        ``self.app_data.dim_red_x`` and ``self.app_data.dim_red_y``.
+
+        Parameters
+        ----------
+        pc_x : int
+            The principal component index for the x-axis.
+        pc_y : int
+            The principal component index for the y-axis.
+        """
+        self.app_data.dim_red_x = pc_x
+        self.app_data.dim_red_y = pc_y
+
 
     def update_neg_handling(self, method):
         """Auto-scales pixel values in map
@@ -2590,7 +2603,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             case 'histogram':
                 canvas, self.plot_info = plot_histogram(self, data, self.app_data, self.plot_style)
-
 
             case 'scatter' | 'heatmap':
                 if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText():

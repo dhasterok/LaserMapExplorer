@@ -169,6 +169,8 @@ class Styling(Observable):
         # keep track of the plot type.
         self._plot_type = ''
 
+        self._show_mass = False
+
         # colormaps
         # matplotlib colormaps
         self.mpl_colormaps = colormap.listMaps('matplotlib')

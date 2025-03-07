@@ -425,7 +425,9 @@ class DimensionalReduction():
 
         # Add PCA scores to DataFrame for easier plotting
         data.add_columns('pca score',pca_scores.columns,pca_scores.values,data.mask)
-
+        
+        # update_pca_flag to prevent PCA running during when app_data.dim_red_y is being set
+        app_data.update_pca_flag = False
         #update min and max of PCA spinboxes
         if self.pca_results.n_components_ > 0:
             app_data.dim_red_x_min = 1
@@ -434,7 +436,5 @@ class DimensionalReduction():
             app_data.dim_red_y_max =  self.pca_results.n_components_+1
             if app_data.dim_red_y == 1:
                 app_data.dim_red_y = int(2)
-
-        self.update_pca_flag = False
 
         return self.pca_results

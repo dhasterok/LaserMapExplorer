@@ -304,6 +304,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
+
+        self.lineEditDX.editingFinished.connect(self.update_dx)
+        self.lineEditDY.editingFinished.connect(self.update_dy)
+        self.actionFullMap.triggered.connect(self.reset_crop)
+
+        self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
+        self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
+
+
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=False, global_list=True, user_activated=True)
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldIndex, add_none=False, user_activated=True)

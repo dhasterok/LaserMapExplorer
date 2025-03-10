@@ -118,7 +118,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
         'tree': field_type,
         'sample_id': app_data.sample_id,
         'plot_name': field,
-        'plot_type': 'analyte map',
+        'plot_type': 'field map',
         'field_type': field_type,
         'field': field,
         'figure': canvas,
@@ -688,13 +688,13 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
 
     match plot_style.plot_type:
         case 'histogram':
-            if processed or app_data.c_field_type != 'Analyte':
-                scatter_dict['x'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.xscale)
+            if processed or app_data.x_field_type != 'Analyte':
+                scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale)
             else:
-                scatter_dict['x'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.xscale, processed=False)
-        case 'PCA scatter' | 'PCA heatmap':
-            scatter_dict['x'] = data.get_vector('PCA score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
-            scatter_dict['y'] = data.get_vector('PCA score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
+                scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale, processed=False)
+        case 'pca scatter' | 'pca heatmap':
+            scatter_dict['x'] = data.get_vector('pca score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
+            scatter_dict['y'] = data.get_vector('pca score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
             if (app_data.c_field_type is None) or (app_data.c_field != ''):
                 scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field)
         case _:
@@ -1373,7 +1373,7 @@ def plot_ndim(parent, data, app_data, plot_style):
         'sample_id': app_data.sample_id,
         'plot_name': plot_name,
         'plot_type': plot_type,
-        'field_type': 'analyte',
+        'field_type': 'Analyte',
         'field': app_data.ndim_list,
         'figure': canvas,
         'style': plot_style.style_dict[plot_style.plot_type],
@@ -1399,7 +1399,7 @@ def plot_score_map(self):
 
     # data frame for plotting
     match plot_type:
-        case 'PCA score':
+        case 'pca score':
             idx = int(self.comboBoxColorField.currentIndex()) + 1
             field = f'PC{idx}'
         case 'cluster score':
@@ -1577,7 +1577,7 @@ def plot_pca_vectors(parent, data, app_data, plot_style):
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = data[app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+    analytes = data[app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
 
     components = parent.dimentional_reduction.pca_results.components_
     # Number of components and variables
@@ -1592,11 +1592,11 @@ def plot_pca_vectors(parent, data, app_data, plot_style):
     self.add_colorbar(canvas, cax)
     # if self.plot_style.cbar_dir == 'vertical':
     #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='right', shrink=0.62, fraction=0.1)
-    #     cbar.set_label('PCA score', size=self.plot_style.font_size)
+    #     cbar.set_label('pca score', size=self.plot_style.font_size)
     #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
     # elif self.plot_style.cbar_dir == 'horizontal':
     #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
-    #     cbar.set_label('PCA score', size=self.plot_style.font_size)
+    #     cbar.set_label('pca score', size=self.plot_style.font_size)
     #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
     # else:
     #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
@@ -1651,7 +1651,7 @@ def plot_pca_components(self, canvas):
         return
 
     # field labels
-    analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+    analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
     nfields = len(analytes)
 
     # components

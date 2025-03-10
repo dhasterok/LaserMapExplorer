@@ -324,7 +324,7 @@ class SpecialFunctions():
             case "Lu-Hf":
                 if self.parent.checkBoxComputeRatios.isChecked():
                     # get list of analytes
-                    analyte_list = data.get_attribute('data_type','analyte')
+                    analyte_list = data.get_attribute('data_type','Analyte')
 
                     self.parent.labelIsotope1.setText("Lu175")
                     self.parent.comboBoxIsotopeAgeFieldType1.setCurrentText("Analyte")
@@ -449,7 +449,7 @@ class SpecialFunctions():
         self.parent.color_by_field_callback()
         self.parent.comboBoxColorField.setCurrentText(method)
         self.parent.color_field_callback()
-        #self.set_style_widgets(plot_type='analyte map')
+        #self.set_style_widgets(plot_type='field map')
 
         #self.update_SV()
 

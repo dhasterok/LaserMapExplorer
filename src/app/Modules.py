@@ -77,7 +77,7 @@ class Main():
         self.laser_map_dict = {}
         self.persistent_filters = pd.DataFrame()
         self.persistent_filters = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
-        self.plot_type = 'analyte map'
+        self.plot_type = 'field map'
         self.field_type_list = ['Analyte', 'Analyte (normalized)']
 
         self.app_data = AppData(self.data)
@@ -366,7 +366,7 @@ class Main():
             'tree': field_type,
             'sample_id': sample_id,
             'plot_name': field,
-            'plot_type': 'analyte map',
+            'plot_type': 'field map',
             'field_type': field_type,
             'field': field,
             'figure': canvas,

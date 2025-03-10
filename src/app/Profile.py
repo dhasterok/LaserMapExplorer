@@ -959,7 +959,7 @@ class Profiling:
     #     None
     #     """
     #     # Obtain field data of all fields that will be used for profiling
-    #     fields = self.data.processed_data.match_attribute('data_type', 'analyte') + self.data.processed_data.match_attribute('data_type', 'ratio')
+    #     fields = self.data.processed_data.match_attribute('data_type', 'Analyte') + self.data.processed_data.match_attribute('data_type', 'Ratio')
     #     field_data = self.data.processed_data[fields]
 
     #     # If updating an existing point, remove it first
@@ -1033,8 +1033,8 @@ class Profiling:
         """
         # Obtain field data of all fields that will be used for profiling
         fields = (
-            self.data.processed_data.match_attribute('data_type', 'analyte') +
-            self.data.processed_data.match_attribute('data_type', 'ratio')
+            self.data.processed_data.match_attribute('data_type', 'Analyte') +
+            self.data.processed_data.match_attribute('data_type', 'Ratio')
         )
         field_data = self.data.processed_data[fields]
 

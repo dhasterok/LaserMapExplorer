@@ -313,7 +313,7 @@ export function updateStylingChain(plotBlock) {
     const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
     const plotType = plotBlock.plotType
     // If you want to explicitly set the plotType:
-    // this.plotType = 'analyte map';
+    // this.plotType = 'field map';
   
     // 2) Call the style widgets function with the current plotType.
     window.blocklyBridge.invokeSetStyleWidgets(plotType, (styleStr) => {
@@ -654,7 +654,7 @@ block.render();
 // Function to update fields based on plot type in style blocks
 function updateFieldsBasedOnPlotType(plotType, block) {
     switch (plotType) {
-        case 'analyte map' | 'gradient map':
+        case 'field map' | 'gradient map':
                 // Reset all fields to default visibility and enabled state
             switch (block.type){
                 case 'axisAndLabels':

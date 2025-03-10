@@ -85,7 +85,7 @@ class Styling(Observable):
     resolution : int
         Resolution for heat maps
     map_plot_types : list
-        A list of plots that result in a map, i.e., ['analyte map', 'ternary map', 'PCA score', 'cluster', 'cluster score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
+        A list of plots that result in a map, i.e., ['field map', 'ternary map', 'PCA score', 'cluster', 'cluster score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
     marker_dict : dict
         Dictionary of marker names used to translate ``comboBoxMarker`` to a subset of matplotlib makers symbol, though not all matplotlib markers
         are used.
@@ -162,7 +162,7 @@ class Styling(Observable):
         
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
-        self.map_plot_types = ['analyte map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
+        self.map_plot_types = ['field map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
 
         self.marker_dict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
 
@@ -354,7 +354,7 @@ class Styling(Observable):
     def aspect_ratio(self, value):
         if self.debug:
             self.logger.print(f"@aspect_ratio:\n  old value: {self.style_dict[self._plot_type]['AspectRatio']}\n  new value: {value}")
-        if value is None or isinstance(aspect_ratio, float):
+        if value is None or isinstance(value, float):
             self.style_dict[self._plot_type]['AspectRatio'] = value
             self.notify_observers("aspect_ratio", value)
 
@@ -858,7 +858,7 @@ class StyleTheme():
                 break
 
 
-        styles = {'analyte map': copy.deepcopy(self.default_plot_style),
+        styles = {'field map': copy.deepcopy(self.default_plot_style),
                 'correlation': copy.deepcopy(self.default_plot_style),
                 'histogram': copy.deepcopy(self.default_plot_style),
                 'gradient map': copy.deepcopy(self.default_plot_style),
@@ -877,7 +877,7 @@ class StyleTheme():
                 'cluster performance': copy.deepcopy(self.default_plot_style),
                 'profile': copy.deepcopy(self.default_plot_style)}
 
-        styles['analyte map']['Colormap'] = 'plasma'
+        styles['field map']['Colormap'] = 'plasma'
 
         styles['correlation']['AspectRatio'] = 1.0
         styles['correlation']['FontSize'] = 8
@@ -1280,7 +1280,7 @@ class StylingDock(Styling):
         ui.fontComboBox.setEnabled(True)
         ui.doubleSpinBoxFontSize.setEnabled(True)
         match plot_type.lower():
-            case 'analyte map' | 'gradient map':
+            case 'field map' | 'gradient map':
                 # axes properties
                 ui.lineEditXLB.setEnabled(True)
                 ui.lineEditXUB.setEnabled(True)
@@ -1739,7 +1739,7 @@ class StylingDock(Styling):
 
         # toggle actionSwapAxes
         match self.plot_type:
-            case 'analyte map' | 'gradient map':
+            case 'field map' | 'gradient map':
                 ui.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
                 ui.actionSwapAxes.setEnabled(True)
@@ -1851,8 +1851,8 @@ class StylingDock(Styling):
             ui.comboBoxFieldC.clear()
         else:
             ui.update_field_combobox_options(ui.comboBoxFieldC, ui.comboBoxFieldTypeC)
-            ui.spinBoxFieldIndex.setMinimum(0)
-            ui.spinBoxFieldIndex.setMaximum(ui.comboBoxFieldC.count() - 1)
+            ui.spinBoxFieldC.setMinimum(0)
+            ui.spinBoxFieldC.setMaximum(ui.comboBoxFieldC.count() - 1)
 
         if self.app_data.c_field in ui.comboBoxFieldC.allItems():
             ui.comboBoxFieldC.setCurrentText(self.app_data.c_field)
@@ -1974,7 +1974,7 @@ class StylingDock(Styling):
 
         # update ui
         match self.plot_type.lower():
-            case 'analyte map' | 'gradient map':
+            case 'field map' | 'gradient map':
                 self.ui.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
                 self.ui.actionSwapAxes.setEnabled(True)
@@ -2137,7 +2137,7 @@ class StylingDock(Styling):
                         return f'PC{self.ui.spinBoxPCX.value()}'
                     case 'y':
                         return f'PC{self.ui.spinBoxPCY.value()}'
-            case 'analyte map' | 'ternary map' | 'PCA score' | 'cluster' | 'cluster score':
+            case 'field map' | 'ternary map' | 'PCA score' | 'cluster' | 'cluster score':
                 return ax.upper()
 
     def axis_label_edit_callback(self, ax, new_label):
@@ -2372,7 +2372,7 @@ class StylingDock(Styling):
             self.set_color_axis_widgets()
         else:
             match self.ui.comboBoxPlotType.currentText().lower():
-                case 'analyte map' | 'cluster' | 'cluster score' | 'pca score':
+                case 'field map' | 'cluster' | 'cluster score' | 'pca score':
                     field = ax.upper()
                     self.initialize_axis_values('Analyte', field)
                     self.set_axis_widgets(ax, field)
@@ -2941,11 +2941,11 @@ class StylingDock(Styling):
             self.ui.comboBoxFieldC.blockSignals(False)
 
             # check if c_field property needs to be updated too
-            if self.app_data.c_field != field:
-                self.app_data.c_field = field
+            if self.app_data.c_field != self.ui.comboBoxFieldC.currentText():
+                self.app_data.c_field = self.ui.comboBoxFieldC.currentText()
 
-        if self.ui.spinBoxFieldIndex.value() != self.ui.comboBoxFieldC.currentIndex():
-            self.ui.spinBoxFieldIndex.setValue(self.ui.comboBoxFieldC.currentIndex())
+        if self.ui.spinBoxFieldC.value() != self.ui.comboBoxFieldC.currentIndex():
+            self.ui.spinBoxFieldC.setValue(self.ui.comboBoxFieldC.currentIndex())
 
         # update autoscale widgets
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
@@ -2967,7 +2967,7 @@ class StylingDock(Styling):
             self.clabel = ''
 
         # update plot
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.plot_type in ['analyte map','histogram','correlation']:
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.plot_type in ['field map','histogram','correlation']:
             self.schedule_update()
 
 
@@ -3094,7 +3094,7 @@ class StylingDock(Styling):
 
         if hasattr(self.ui,'canvas_tab') and hasattr(self.ui,'canvasWindow'):
             if self.ui.canvasWindow.currentIndex() == self.ui.canvas_tab['qv']:
-                plot_type = 'analyte map'
+                plot_type = 'field map'
 
 
         if self.cmap in self.mpl_colormaps:

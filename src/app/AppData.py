@@ -17,6 +17,27 @@ class AppData(Observable):
         self.preferences = copy.deepcopy(self.default_preferences)
         self.selected_directory = ''
 
+        self.plot_type_dict = {
+            'field map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'gradient map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'ternary map': {'ax': [True, True, True, False], 'add_none': [False, False, False, False]},
+            'correlation': {'ax': [True, False, False, True], 'add_none': [False, False, False, True]},
+            'histogram': {'ax': [True, False, False, True], 'add_none': [False, False, False, True]},
+            'scatter': {'ax': [True, True, True, True], 'add_none': [False, False, True, True]},
+            'heatmap': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'TEC': {'ax': [False, False, False, True], 'add_none': [False, False, False, True]},
+            'radar': {'ax': [False, False, False, True], 'add_none': [False, False, False, True]},
+            'variance': {'ax': [False, False, False, False], 'add_none': [False, False, False, False]},
+            'basis vectors': {'ax': [False, False, False, False], 'add_none': [False, False, False, False]},
+            'score map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'scatter score': {'ax': [True, True, False, True], 'add_none': [False, False, False, True]}, 
+            'heatmap score': {'ax': [True, True, False, False], 'add_none': [False, False, False, False]},
+            'cluster': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'performance': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'profile': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
+            'polygon': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]}
+        }
+
         self._sort_method = 'mass'
 
         # reference chemistry
@@ -107,7 +128,7 @@ class AppData(Observable):
         else:
             self._ndim_analyte_set = list(self.ndim_list_dict.keys())[0]
 
-        self.ndim_analyte_df = pd.DataFrame(columns=['use', 'analyte'])
+        self.ndim_analyte_df = pd.DataFrame(columns=['use', 'Analyte'])
 
         self._ndim_analyte_set = self.ndim_list_dict[next(iter(self.ndim_list_dict))]
         self.ndim_quantiles = {
@@ -266,7 +287,7 @@ class AppData(Observable):
         if new_field_type in ['', 'none', 'None']:
             self.c_field = ''
         else:
-            self.c_field = self.field_dict[new_field_type.lower()][0]
+            self.c_field = self.field_dict[new_field_type][0]
 
 
     @property
@@ -873,7 +894,7 @@ class AppData(Observable):
     def selected_analytes(self):
         """Gets the list of selected analytes for use in analyses."""
         if self.data and self.sample_id != '':
-            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
 
         return None
 
@@ -910,18 +931,18 @@ class AppData(Observable):
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
+                    set_fields = data.match_attributes({'data_type': 'Analyte', 'use': True})
                 else:
-                    set_fields = data.match_attribute('data_type', 'analyte')
+                    set_fields = data.match_attribute('data_type', 'Analyte')
             case 'Ratio' | 'Ratio (normalized)':
                 if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
+                    set_fields = data.match_attributes({'data_type': 'Ratio', 'use': True})
                 else:
-                    set_fields = data.match_attribute('data_type', 'ratio')
+                    set_fields = data.match_attribute('data_type', 'Ratio')
             case 'None':
                 return []
             case _:
-                set_fields = data.match_attribute('data_type', set_name.lower())
+                set_fields = data.match_attribute('data_type', set_name)
 
         return set_fields
 

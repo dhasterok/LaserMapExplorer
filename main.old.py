@@ -444,16 +444,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # create dictionaries for default plot styles
         #-------------------------
-        self.plot_types = {self.left_tab['sample']: [0, 'analyte map', 'histogram', 'correlation'],
-            self.left_tab['process']: [0, 'analyte map', 'gradient map'],
-            self.left_tab['spot']: [0, 'analyte map', 'gradient map'],
-            # self.mask_tab['polygon']: [0, 'analyte map'],
+        self.plot_types = {self.left_tab['sample']: [0, 'field map', 'histogram', 'correlation'],
+            self.left_tab['process']: [0, 'field map', 'gradient map'],
+            self.left_tab['spot']: [0, 'field map', 'gradient map'],
+            # self.mask_tab['polygon']: [0, 'field map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
             self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
             self.left_tab['cluster']: [0, 'cluster', 'cluster score', 'cluster performance'],
-            self.left_tab['special']: [0,'analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile'],
-            -1: [0, 'analyte map']}
+            self.left_tab['special']: [0,'field map', 'gradient map', 'cluster score', 'PCA score', 'profile'],
+            -1: [0, 'field map']}
 
 
 
@@ -741,7 +741,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxPlotType.currentIndexChanged.connect(self.update_plot_type)
 
         # Initialize a variable to store the current plot type
-        self.plot_style.plot_type = 'analyte map'
+        self.plot_style.plot_type = 'field map'
 
 
         setattr(self.comboBoxMVPlots, "allItems", lambda: [self.comboBoxMVPlots.itemText(i) for i in range(self.comboBoxMVPlots.count())])
@@ -989,7 +989,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_equalize_color_scale_toolbutton(self, value):
         self.toolButtonScaleEqualize.setChecked(value)
 
-        if self.plot_style.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'field map':
             self.plot_style.schedule_update()
 
     def update_dx_lineedit(self,value):
@@ -1085,7 +1085,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count() - 1)
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
 
-        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type in ['analyte map','histogram','correlation']:
+        if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type in ['field map','histogram','correlation']:
             self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
             self.plot_style.color_field = self.comboBoxHistField.currentText()
 
@@ -1830,8 +1830,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.color_field_type = 'Analyte'
         self.plot_style.color_field = analyte_list[0]
 
-        if self.plot_style.plot_type != 'analyte map':
-            self.plot_style.plot_type = 'analyte map'
+        if self.plot_style.plot_type != 'field map':
+            self.plot_style.plot_type = 'field map'
 
         # allow plots to be updated again
         self.plot_flag = True
@@ -1856,7 +1856,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.hist_field_type = 'Analyte'
         field = ''
         if self.app_data.selected_analytes is None:
-            field = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')[0]
+            field = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')[0]
         else:
             field = self.app_data.selected_analytes[0]
         self.app_data.hist_field = field
@@ -2429,7 +2429,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_types[self.toolBox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
 
         match self.plot_style.plot_type.lower():
-            case 'analyte map' | 'gradient map':
+            case 'field map' | 'gradient map':
                 self.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
                 self.actionSwapAxes.setEnabled(True)
@@ -2558,7 +2558,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Executes on ``MainWindow.toolButtonSwapXY.clicked``.  Updates data dictionary and other map related derived results.
         """
         match self.plot_style.plot_type:
-            case 'analyte map':
+            case 'field map':
                 # swap x and y
                 self.data[self.app_data.sample_id].swap_xy()
 
@@ -2699,7 +2699,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             tree = 'Ratio (normalized)'
             branch = self.app_data.sample_id
-            for ratio in self.data[branch].processed_data.match_attribute('data_type','ratio'):
+            for ratio in self.data[branch].processed_data.match_attribute('data_type','Ratio'):
                 item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
                 if item is None:
                     raise TypeError(f"Missing item ({ratio}) in plot_tree.")
@@ -2736,7 +2736,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         data = self.data[self.app_data.sample_id].processed_data
 
-        columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
+        columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
         nan_count = any(np.isnan(data[columns]))
         
@@ -3373,24 +3373,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
-                if 'cluster' in self.app_data.field_dict:
+                if 'Cluster' in self.app_data.field_dict:
                     field_list = ['Cluster']
                 else:
                     field_list = []
             case 'cluster score':
-                if 'cluster score' in self.app_data.field_dict:
+                if 'Cluster score' in self.app_data.field_dict:
                     field_list = ['Cluster score']
                 else:
                     field_list = []
             case 'cluster':
-                if 'cluster' in self.app_data.field_dict:
+                if 'Cluster' in self.app_data.field_dict:
                     field_list = ['Cluster']
                 else:
                     field_list = ['Cluster score']
             case 'cluster performance':
                 field_list = []
             case 'pca score':
-                if 'pca score' in self.app_data.field_dict:
+                if 'PCA score' in self.app_data.field_dict:
                     field_list = ['PCA score']
                 else:
                     field_list = []
@@ -3401,17 +3401,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_list = ['Analyte', 'Analyte (normalized)']
 
                 # add check for ratios
-                if 'ratio' in self.app_data.field_dict:
+                if 'Ratio' in self.app_data.field_dict:
                     field_list.append('Ratio')
                     field_list.append('Ratio (normalized)')
 
-                if 'pca score' in self.app_data.field_dict:
+                if 'PCA score' in self.app_data.field_dict:
                     field_list.append('PCA score')
 
-                if 'cluster' in self.app_data.field_dict:
+                if 'Cluster' in self.app_data.field_dict:
                     field_list.append('Cluster')
 
-                if 'cluster score' in self.app_data.field_dict:
+                if 'Cluster score' in self.app_data.field_dict:
                     field_list.append('Cluster score')
 
         self.plot_style.toggle_style_widgets()
@@ -3446,7 +3446,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
 
         if parentBox is None:
-            fields = self.app_data.field_dict['analyte']
+            fields = self.app_data.field_dict['Analyte']
         else:
             if parentBox.currentText() == 'None':
                 childBox.clear()
@@ -3492,7 +3492,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             plot_type = self.plot_style.plot_type
         
         match plot_type:
-            case 'analyte map':
+            case 'field map':
                 sample_id = self.app_data.sample_id
                 if not field_type:
                     field_type = self.field_type
@@ -3617,7 +3617,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
 
-            if (self.plot_style.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
+            if (self.plot_style.plot_type == 'field map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
                 current_map_df = self.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
                 plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, current_map_df)
         # add figure to MultiView canvas
@@ -3838,7 +3838,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
 
         # fields in current sample
-        fields = self.app_data.field_dict['analyte']
+        fields = self.app_data.field_dict['Analyte']
 
         # clear the quickView layout
         self.clear_layout(self.widgetQuickView.layout())
@@ -4028,7 +4028,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 plot_type = self.plot_info['plot_type']
                 
                 match plot_type:
-                    case 'analyte map':
+                    case 'field map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
                         save_data = self.data[self.app_data.sample_id].get_map_data(field, field_type)
@@ -4347,7 +4347,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'tree': 'Analyte',
             'sample_id': sample_id,
             'plot_name': field,
-            'plot_type': 'analyte map',
+            'plot_type': 'field map',
             'field_type': field_type,
             'field': field,
             'figure': graphicWidget,
@@ -4424,7 +4424,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
         #if self.plot_style.plot_type != 'histogram':
         #    self.comboBoxPlotType.setCurrentText('histogram')
-        if self.plot_style.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'field map':
             self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
 
         self.histogram_update_bin_width()
@@ -4439,13 +4439,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #    self.comboBoxPlotType.setCurrentText('histogram')
         self.app_data.hist_field = self.comboBoxHistField.currentText()
 
-        if self.plot_style.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'field map':
             self.plot_style.color_field = self.app_data.hist_field
         self.spinBoxFieldIndex.setValue(self.comboBoxHistField.currentIndex())
 
         self.update_histogram_bin_width()
 
-        if self.plot_style.plot_type in ['analyte map', 'histogram']:
+        if self.plot_style.plot_type in ['field map', 'histogram']:
             self.plot_style.schedule_update()
 
     def update_histogram_num_bins(self):
@@ -4699,7 +4699,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif calling_widget == 'analytesetAdd':
             el_list = self.ndim_list_dict[self.comboBoxNDimAnalyteSet.currentText()]
 
-        analytes_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','analyte')
+        analytes_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
 
         analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 
@@ -4928,7 +4928,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # colors
         addNone = True
-        if self.plot_style.plot_type in ['analyte map','PCA score','cluster','cluster score']:
+        if self.plot_style.plot_type in ['field map','PCA score','cluster','cluster score']:
             addNone = False
         self.update_field_type_combobox(self.comboBoxColorByField, addNone=addNone, plot_type=self.plot_style.plot_type)
         self.update_field_combobox(self.comboBoxColorByField, self.comboBoxColorField)
@@ -5090,7 +5090,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data_type_dict = self.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
 
         # add check for ratios
-        if 'ratio' in data_type_dict:
+        if 'Ratio' in data_type_dict:
             field_type_list.append('Ratio')
             field_type_list.append('Ratio (normalized)')
 

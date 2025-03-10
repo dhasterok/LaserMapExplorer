@@ -67,8 +67,8 @@ class ImageProcessing():
         if self.parent.checkBoxGradient.isChecked():
             self.parent.plot_style.plot_type = 'gradient map'
         else:
-            if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.plot_style.plot_type = 'analyte map'
+            if self.parent.comboBoxPlotType.currentText != 'field map':
+                self.parent.plot_style.plot_type = 'field map'
 
 
     def add_edge_detection(self):
@@ -447,8 +447,8 @@ class ImageProcessing():
             self.plot_gradient()
             return
         else:
-            if self.parent.comboBoxPlotType.currentText != 'analyte map':
-                self.parent.plot_style.plot_type = 'analyte map'
+            if self.parent.comboBoxPlotType.currentText != 'field map':
+                self.parent.plot_style.plot_type = 'field map'
 
 
         canvas = mplc.MplCanvas(parent=self.parent)
@@ -483,7 +483,7 @@ class ImageProcessing():
             'tree': 'Analyte',
             'sample_id': self.parent.sample_id,
             'plot_name': field,
-            'plot_type': 'analyte map',
+            'plot_type': 'field map',
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
@@ -562,7 +562,7 @@ class ImageProcessing():
             'tree': 'Analyte',
             'sample_id': self.parent.sample_id,
             'plot_name': field,
-            'plot_type': 'analyte map',
+            'plot_type': 'field map',
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,

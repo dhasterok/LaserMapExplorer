@@ -689,10 +689,10 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             if analyte2 is not None:
                 analyte1 = analyte1.capitalize()
                 analyte2 = analyte2.capitalize()
-                fieldtype = 'ratio'
+                fieldtype = 'Ratio'
             elif analyte1 is not None:
                 analyte1 = analyte1.capitalize()
-                fieldtype = 'analyte'
+                fieldtype = 'Analyte'
 
             # Final validity check
             if filetype is None:
@@ -1226,7 +1226,7 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
 
             # Analyte Type ComboBox (editable)
             analyte_type_combo = QComboBox()
-            analyte_type_combo.addItems(['Analyte', 'Ratio', 'Computed'])
+            analyte_type_combo.addItems(['Analyte', 'Ratio', 'computed'])
             analyte_type_combo.setCurrentText(result[3])
             self.tableWidgetFileMetadata.setCellWidget(row, 2, analyte_type_combo)
 

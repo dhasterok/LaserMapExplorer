@@ -69,6 +69,8 @@ class AppData(Observable):
 
         self.plot_info = {}
 
+        self.outlier_methods = ['none', 'quantile critera','quantile and distance critera', 'Chauvenet criterion', 'log(n>x) inflection']
+        self.negative_methods = ['ignore negatives', 'minimum positive', 'gradual shift', 'Yeo-Johnson transform']
         # histogram related data and methods
         self._equalize_color_scale = False
 
@@ -139,9 +141,13 @@ class AppData(Observable):
         }
         self._ndim_quantile_index = 0
         
-        self._dim_red_method = "Principal component analysis (PCA)"
+        self._dim_red_method = "PCA: Principal component analysis (PCA)"
         self._dim_red_x = 0
-        self._dim_red_y = 1
+        self._dim_red_y = 0
+        self._dim_red_x_min = 0
+        self._dim_red_x_max = 0
+        self._dim_red_y_min = 0
+        self._dim_red_y_max = 1
 
         self._cluster_method = "k-means"
         self.cluster_dict = {
@@ -162,6 +168,9 @@ class AppData(Observable):
         self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
         self._dim_red_precondition = False
         self._num_basis_for_precondition = 0
+
+        self.update_cluster_flag = False
+        self.update_pca_flag = False
 
 
     def validate_field_type(self, new_field_type):
@@ -738,6 +747,28 @@ class AppData(Observable):
         self.notify_observers("dim_red_x", new_dim_red_x)
 
     @property
+    def dim_red_x_min(self):
+        return self._dim_red_x_min
+
+    @dim_red_x_min.setter
+    def dim_red_x_min(self, new_min):
+        if new_min == self._dim_red_x_min:
+            return
+        self._dim_red_x_min = new_min
+        self.notify_observers("dim_red_x_min", new_min)
+
+    @property
+    def dim_red_x_max(self):
+        return self._dim_red_x_max
+
+    @dim_red_x_max.setter
+    def dim_red_x_max(self, new_max):
+        if new_max == self._dim_red_x_max:
+            return
+        self._dim_red_x_max = new_max
+        self.notify_observers("dim_red_x_max", new_max)
+
+    @property
     def dim_red_y(self):
         return self._dim_red_y
     
@@ -750,6 +781,30 @@ class AppData(Observable):
     
         self._dim_red_y = new_dim_red_y
         self.notify_observers("dim_red_y", new_dim_red_y)
+    
+    @property
+    def dim_red_y_min(self):
+        return self._dim_red_y_min
+
+    @dim_red_y_min.setter
+    def dim_red_y_min(self, new_min):
+        if new_min == self._dim_red_y_min:
+            return
+        self._dim_red_y_min = new_min
+        self.notify_observers("dim_red_y_min", new_min)
+
+    @property
+    def dim_red_y_max(self):
+        return self._dim_red_x_max
+
+    @dim_red_y_max.setter
+    def dim_red_y_max(self, new_max):
+        if new_max == self._dim_red_x_max:
+            return
+        self._dim_red_x_max = new_max
+        self.notify_observers("dim_red_y_max", new_max)
+
+
 
     ### Cluster Properties ###
     @property

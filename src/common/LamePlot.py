@@ -847,7 +847,7 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
             alpha=plot_style.marker_alpha/100,
             norm=norm)
 
-        self.add_colorbar(canvas, cb)
+        add_colorbar(plot_style,canvas, cb)
         plot_data = pd.DataFrame(np.vstack((x['array'], y['array'], c['array'])).T, columns = ['x','y','c'])
         
 
@@ -1388,35 +1388,36 @@ def plot_ndim(parent, data, app_data, plot_style):
 # -------------------------------------
 # PCA functions and plotting
 # -------------------------------------
-def plot_score_map(self):
+def plot_score_map(parent,data, app_data, plot_style):
     """Plots score maps
 
     Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.
     """
-    canvas = mplc.MplCanvas(parent=self)
+    canvas = mplc.MplCanvas(parent=parent)
 
-    plot_type = self.plot_style.plot_type
+    plot_type = plot_style.plot_type
 
     # data frame for plotting
     match plot_type:
-        case 'pca score':
-            idx = int(self.comboBoxColorField.currentIndex()) + 1
-            field = f'PC{idx}'
+        case 'PCA score':
+            #idx = int(self.comboBoxColorField.currentIndex()) + 1
+            #field = f'PC{idx}'
+            field = app_data.c_field
         case 'cluster score':
             #idx = int(self.comboBoxColorField.currentIndex())
             #field = f'{idx}'
-            field = self.field
+            field = app_data.field
         case _:
             print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
             return canvas
 
-    reshaped_array = np.reshape(self.data[self.app_data.sample_id].processed_data[field].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
+    reshaped_array = np.reshape(data.processed_data[field].values, data.array_size, order=data.order)
 
-    cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.cmap, aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
+    cax = canvas.axes.imshow(reshaped_array, cmap=plot_style.cmap, aspect=data.aspect_ratio, interpolation='none')
     canvas.array = reshaped_array
 
         # Add a colorbar
-    self.add_colorbar(canvas, cax, field)
+    add_colorbar(plot_style, canvas, cax, field)
 
     canvas.axes.set_title(f'{plot_type}')
     canvas.axes.tick_params(direction=None,
@@ -1425,12 +1426,12 @@ def plot_score_map(self):
     #canvas.axes.set_axis_off()
 
     # add scalebar
-    self.add_scalebar(canvas.axes)
+    add_scalebar(app_data, plot_style, canvas.axes)
 
-    return canvas, self.data[self.app_data.sample_id].processed_data[field]
+    return canvas, data.processed_data[field]
 
 
-def plot_pca(parent, data, app_data, plot_style, canvas=None):
+def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=None):
     """Plot principal component analysis (PCA)
     
     Wrapper for one of four types of PCA plots:
@@ -1446,27 +1447,29 @@ def plot_pca(parent, data, app_data, plot_style, canvas=None):
     if app_data == '':
         return
 
-    if parent.update_pca_flag or not data[app_data.sample_id].processed_data.match_attribute('data_type','pca score'):
-        parent.dimensional_reduction.compute_pca(plot_style, app_data)
+    if app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+        pca_results = dimensional_reduction.compute_pca(plot_style, app_data)
+    else:
+        pca_results = dimensional_reduction.pca_results
 
     # Determine which PCA plot to create based on the combobox selection
     plot_type = plot_style.plot_type
-
+    
     match plot_type.lower():
         # make a plot of explained variance
         case 'variance':
-            canvas, plot_data = plot_pca_variance(parent, plot_style)
+            canvas, plot_data = plot_pca_variance(parent,pca_results, plot_style)
             plot_name = plot_type
 
         # make an image of the PC vectors and their components
         case 'vectors':
-            canvas, plot_data = plot_pca_vectors(parent, data, app_data, plot_style, canvas)
+            canvas, plot_data = plot_pca_vectors(parent,pca_results, data, app_data, plot_style)
             plot_name = plot_type
 
         # make a scatter plot or heatmap of the data... add PC component vectors
         case 'pca scatter'| 'pca heatmap':
-            pc_x = int(self.spinBoxPCX.value())
-            pc_y = int(self.spinBoxPCY.value())
+            pc_x = int(app_data.dim_red_x)
+            pc_y = int(app_data.dim_red_y)
 
             if pc_x == pc_y:
                 return
@@ -1474,44 +1477,44 @@ def plot_pca(parent, data, app_data, plot_style, canvas=None):
             plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
             # Assuming pca_df contains scores for the principal components
             # uncomment to use plot scatter instead of ax.scatter
-            canvas = mplc.MplCanvas(parent=self)
-            plot_scatter(self, self.data, self.app_data, self.plot_style, canvas=canvas)
+            canvas = mplc.MplCanvas(parent=parent)
+            plot_scatter(parent, data, app_data, plot_style, canvas=canvas)
 
-            plot_data= self.plot_pca_components(canvas)
+            plot_data= plot_pca_components(parent,pca_results, data, app_data, plot_style, canvas)
 
         # make a map of a principal component score
         case 'pca score':
-            if self.field_type.lower() == 'none' or self.field == '':
+            if app_data.c_field_type.lower() == 'none' or app_data.c_field == '':
                 return
 
             # Assuming pca_df contains scores for the principal components
-            canvas, plot_data = self.plot_score_map()
-            plot_name = plot_type+f'_{self.field}'
+            canvas, plot_data = plot_score_map(parent, data, app_data, plot_style)
+            plot_name = plot_type+f'_{app_data.c_field}'
         case _:
             print(f'Unknown PCA plot type: {plot_type}')
             return
 
-    self.plot_style.update_figure_font(canvas, self.plot_style.font)
+    plot_style.update_figure_font(canvas, plot_style.font)
 
-    self.plot_info = {
+    plot_info = {
         'tree': 'Multidimensional Analysis',
-        'sample_id': self.app_data.sample_id,
+        'sample_id': app_data.sample_id,
         'plot_name': plot_name,
-        'plot_type': self.plot_style.plot_type,
-        'field_type':self.field_type,
-        'field':  self.field,
+        'plot_type': plot_style.plot_type,
+        'field_type':app_data.c_field_type,
+        'field':  app_data.c_field,
         'figure': canvas,
-        'style': self.plot_style.style_dict[self.plot_style.plot_type],
+        'style': plot_style.style_dict[plot_style.plot_type],
         'cluster_groups': [],
         'view': [True,False],
         'position': [],
         'data': plot_data
     }
-
-    self.update_canvas(canvas)
+    return canvas, plot_info
+    #update_canvas(canvas)
     #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
-def plot_pca_variance(parent, plot_style):
+def plot_pca_variance(parent,pca_results, plot_style):
     """Creates a plot of explained variance, individual and cumulative, for PCA
 
     Returns
@@ -1522,7 +1525,7 @@ def plot_pca_variance(parent, plot_style):
     canvas = mplc.MplCanvas(parent=parent)
 
     # pca_dict contains variance ratios for the principal components
-    variances = parent.dimention_reduction.pca_results.explained_variance_ratio_
+    variances = pca_results.explained_variance_ratio_
     n_components = range(1, len(variances)+1)
     cumulative_variances = variances.cumsum()  # Calculate cumulative explained variance
 
@@ -1565,7 +1568,7 @@ def plot_pca_variance(parent, plot_style):
     plot_data = pd.DataFrame(np.vstack((n_components, variances, cumulative_variances)).T, columns = ['Components','Variance','Cumulative Variance'])
     return canvas, plot_data
 
-def plot_pca_vectors(parent, data, app_data, plot_style):
+def plot_pca_vectors(parent,pca_results, data, app_data, plot_style):
     """Displays a heat map of PCA vector components
 
     Returns
@@ -1577,9 +1580,9 @@ def plot_pca_vectors(parent, data, app_data, plot_style):
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = data[app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
+    analytes = data.processed_data.match_attribute('data_type','analyte')
 
-    components = parent.dimentional_reduction.pca_results.components_
+    components = pca_results.components_
     # Number of components and variables
     n_components = components.shape[0]
     n_variables = components.shape[1]
@@ -1589,17 +1592,17 @@ def plot_pca_vectors(parent, data, app_data, plot_style):
     canvas.array = components
 
     # Add a colorbar
-    self.add_colorbar(canvas, cax)
-    # if self.plot_style.cbar_dir == 'vertical':
-    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='right', shrink=0.62, fraction=0.1)
-    #     cbar.set_label('pca score', size=self.plot_style.font_size)
-    #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
-    # elif self.plot_style.cbar_dir == 'horizontal':
-    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
-    #     cbar.set_label('pca score', size=self.plot_style.font_size)
-    #     cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+    add_colorbar(plot_style,canvas, cax)
+        # if plot_style.cbar_dir == 'vertical':
+    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=plot_style.cbar_dir, location='right', shrink=0.62, fraction=0.1)
+    #     cbar.set_label('PCA score', size=plot_style.font_size)
+    #     cbar.ax.tick_params(labelsize=plot_style.font_size)
+    # elif plot_style.cbar_dir == 'horizontal':
+    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
+    #     cbar.set_label('PCA score', size=plot_style.font_size)
+    #     cbar.ax.tick_params(labelsize=plot_style.font_size)
     # else:
-    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=self.plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
+    #     cbar = canvas.fig.colorbar(cax, ax=canvas.axes, orientation=plot_style.cbar_dir, location='bottom', shrink=0.62, fraction=0.1)
 
 
     xlbl = 'Principal Components'
@@ -1608,18 +1611,18 @@ def plot_pca_vectors(parent, data, app_data, plot_style):
     # plt.xticks(rotation=45)
 
     # labels
-    font = {'size':self.plot_style.font_size}
+    font = {'size':plot_style.font_size}
     canvas.axes.set_xlabel(xlbl, fontdict=font)
 
     # tickmarks and labels
-    canvas.axes.tick_params(labelsize=self.plot_style.font_size)
-    canvas.axes.tick_params(axis='x', direction=self.plot_style.tick_dir,
-                    labelsize=self.plot_style.font_size,
+    canvas.axes.tick_params(labelsize=plot_style.font_size)
+    canvas.axes.tick_params(axis='x', direction=plot_style.tick_dir,
+                    labelsize=plot_style.font_size,
                     labelbottom=False, labeltop=True,
                     bottom=True, top=True)
 
-    canvas.axes.tick_params(axis='y', length=0, direction=self.plot_style.tick_dir,
-                    labelsize=self.plot_style.font_size,
+    canvas.axes.tick_params(axis='y', length=0, direction=plot_style.tick_dir,
+                    labelsize=plot_style.font_size,
                     labelleft=True, labelright=False,
                     left=True, right=True)
 
@@ -1629,13 +1632,13 @@ def plot_pca_vectors(parent, data, app_data, plot_style):
 
     #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
     canvas.axes.set_yticks(range(0, n_variables,1), minor=False)
-    canvas.axes.set_yticklabels(self.plot_style.toggle_mass(analytes), ha='right', va='center')
+    canvas.axes.set_yticklabels(plot_style.toggle_mass(analytes), ha='right', va='center')
 
     canvas.fig.tight_layout()
     plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
     return canvas, plot_data
 
-def plot_pca_components(self, canvas):
+def plot_pca_components(parent, pca_results,data, app_data, plot_style,canvas):
     """Adds vector components to PCA scatter and heatmaps
 
     Parameters
@@ -1647,38 +1650,38 @@ def plot_pca_components(self, canvas):
         ``MainWindow.plot_pca_vectors``
     """
     #print('plot_pca_components')
-    if self.plot_style.line_width == 0:
+    if plot_style.line_width == 0:
         return
 
     # field labels
-    analytes = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
+    analytes = data.processed_data.match_attribute('data_type','analyte')
     nfields = len(analytes)
 
     # components
-    pc_x = int(self.spinBoxPCX.value())-1
-    pc_y = int(self.spinBoxPCY.value())-1
+    pc_x = int(app_data.dim_red_x)-1
+    pc_y = int(app_data.dim_red_y)-1
 
-    x = self.pca_results.components_[:,pc_x]
-    y = self.pca_results.components_[:,pc_y]
+    x = pca_results.components_[:,pc_x]
+    y = pca_results.components_[:,pc_y]
 
     # mulitiplier for scale
-    m = self.plot_style.line_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
+    m = plot_style.line_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
 
     # arrows
-    canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=self.plot_style.line_color,
+    canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=plot_style.line_color,
         angles='xy', scale_units='xy', scale=1, # arrow angle and scale set relative to the data
-        linewidth=self.plot_style.line_width, headlength=2, headaxislength=2) # arrow properties
+        linewidth=plot_style.line_width, headlength=2, headaxislength=2) # arrow properties
 
     # labels
     for i, analyte in enumerate(analytes):
         if x[i] > 0 and y[i] > 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=self.plot_style.line_color)
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=plot_style.line_color)
         elif x[i] < 0 and y[i] > 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=self.plot_style.line_color)
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=plot_style.line_color)
         elif x[i] > 0 and y[i] < 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=self.plot_style.line_color)
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=plot_style.line_color)
         elif x[i] < 0 and y[i] < 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=self.plot_style.line_color)
+            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=plot_style.line_color)
 
     plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
     return plot_data

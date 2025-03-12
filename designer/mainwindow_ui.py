@@ -826,6 +826,7 @@ class Ui_MainWindow(object):
         self.spinBoxFieldC = QSpinBox(self.groupBox)
         self.spinBoxFieldC.setObjectName(u"spinBoxFieldC")
         self.spinBoxFieldC.setFont(font8)
+        self.spinBoxFieldC.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxFieldC.setReadOnly(False)
 
         self.gridLayout_2.addWidget(self.spinBoxFieldC, 3, 3, 1, 1)
@@ -904,11 +905,13 @@ class Ui_MainWindow(object):
 
         self.spinBoxFieldX = QSpinBox(self.groupBox)
         self.spinBoxFieldX.setObjectName(u"spinBoxFieldX")
+        self.spinBoxFieldX.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout_2.addWidget(self.spinBoxFieldX, 0, 3, 1, 1)
 
         self.spinBoxFieldY = QSpinBox(self.groupBox)
         self.spinBoxFieldY.setObjectName(u"spinBoxFieldY")
+        self.spinBoxFieldY.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout_2.addWidget(self.spinBoxFieldY, 1, 3, 1, 1)
 

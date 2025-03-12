@@ -1291,6 +1291,9 @@
                  <stylestrategy>PreferDefault</stylestrategy>
                 </font>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
                <property name="readOnly">
                 <bool>false</bool>
                </property>
@@ -1502,10 +1505,18 @@
               </widget>
              </item>
              <item row="0" column="3">
-              <widget class="QSpinBox" name="spinBoxFieldX"/>
+              <widget class="QSpinBox" name="spinBoxFieldX">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
              </item>
              <item row="1" column="3">
-              <widget class="QSpinBox" name="spinBoxFieldY"/>
+              <widget class="QSpinBox" name="spinBoxFieldY">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>

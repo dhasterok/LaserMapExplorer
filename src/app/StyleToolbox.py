@@ -154,9 +154,8 @@ class Styling(Observable):
             Prints debugging messages to stdout, by default ``False``
 
     """    
-    def __init__(self, parent, debug=False):
+    def __init__(self, debug=False):
         super().__init__()
-        self.parent = parent
         self.debug = debug
         self.logger = LogCounter()
         
@@ -192,6 +191,8 @@ class Styling(Observable):
         self.color_schemes = []
         for cmap in self.ternary_colormaps:
             self.color_schemes.append(cmap['scheme'])
+
+        self.axis = ['x','y','z','c']
 
 
     # -------------------------------------
@@ -685,6 +686,24 @@ class Styling(Observable):
         else:
             raise TypeError("value must be an integer or None.")
 
+    def get_axis_label(self, ax):
+        return getattr(self, f"{self.axis[ax]}label")
+
+    def set_axis_label(self, ax, new_label):
+        setattr(self, f"{self.axis[ax]}label", new_label)
+
+    def get_axis_lim(self, ax):
+        return getattr(self, f"{self.axis[ax]}lim")
+
+    def set_axis_lim(self, ax, new_lim):
+        setattr(self, f"{self.axis[ax]}lim", new_lim)
+
+    def get_axis_scale(self, ax):
+        return getattr(self, f"{self.axis[ax]}scale")
+
+    def set_axis_scale(self, ax, new_scale):
+        setattr(self, f"{self.axis[ax]}scale", new_scale)
+
     def default_scale_length(self):
         """Sets default length of a scale bar for map-type plots
 
@@ -933,33 +952,37 @@ class StyleTheme():
 
 class StylingDock(Styling):
     def __init__(self, parent, debug=False):
-        super().__init__(self, debug)
+        super().__init__(debug)
 
-        self.plot_widget_dict = {
+        self.axis_widget_dict = {
             'label': [parent.labelX, parent.labelY, parent.labelZ, parent.labelC],
             'parentbox': [parent.comboBoxFieldTypeX, parent.comboBoxFieldTypeY, parent.comboBoxFieldTypeZ, parent.comboBoxFieldTypeC],
             'childbox': [parent.comboBoxFieldX, parent.comboBoxFieldY, parent.comboBoxFieldZ, parent.comboBoxFieldC],
             'spinbox': [parent.spinBoxFieldX, parent.spinBoxFieldY, None, parent.spinBoxFieldC],
+            'scalebox': [parent.comboBoxXScale, parent.comboBoxYScale, parent.comboBoxZScale, parent.comboBoxColorScale],
+            'axis_label': [parent.lineEditXLabel, parent.lineEditYLabel, parent.lineEditZLabel, parent.lineEditCbarLabel],
+            'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditColorLB],
+            'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditColorUB],
             'plot type': {
-                '': {'ax': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'field map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'gradient map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'ternary map': {'ax': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'correlation': {'ax': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
-                'histogram': {'ax': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
-                'scatter': {'ax': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
-                'heatmap': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'TEC': {'ax': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
-                'radar': {'ax': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
-                'variance': {'ax': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'basis vectors': {'ax': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'score map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'scatter score': {'ax': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
-                'heatmap score': {'ax': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'cluster': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'performance': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'profile': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'polygon': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
+                '': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'field map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'gradient map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'ternary map': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'correlation': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
+                'histogram': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
+                'scatter': {'axis': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
+                'heatmap': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'TEC': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
+                'radar': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
+                'variance': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'basis vectors': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'scatter score': {'axis': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
+                'heatmap score': {'axis': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'cluster': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'performance': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'profile': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'polygon': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
             }
         }
 
@@ -1974,7 +1997,7 @@ class StylingDock(Styling):
         widget_dict : dict
             Dictionary with field associated widgets and properties
         
-        :see also: self.plot_widget_dict
+        :see also: self.axis_widget_dict
         """
         if self.debug:
             self.ui.logger.print(f"init_field_widgets: plot_type={plot_type}")
@@ -1984,14 +2007,14 @@ class StylingDock(Styling):
             setting = widget_dict['plot type']['none']
 
         for ax in range(3):
-            widget_dict['label'][ax].setEnabled(setting['ax'][ax])
-            widget_dict['label'][ax].setVisible(setting['ax'][ax])
+            widget_dict['label'][ax].setEnabled(setting['axis'][ax])
+            widget_dict['label'][ax].setVisible(setting['axis'][ax])
 
-            widget_dict['parentbox'][ax].setEnabled(setting['ax'][ax])
-            widget_dict['parentbox'][ax].setVisible(setting['ax'][ax])
+            widget_dict['parentbox'][ax].setEnabled(setting['axis'][ax])
+            widget_dict['parentbox'][ax].setVisible(setting['axis'][ax])
 
-            widget_dict['childbox'][ax].setEnabled(setting['ax'][ax])
-            widget_dict['childbox'][ax].setVisible(setting['ax'][ax])
+            widget_dict['childbox'][ax].setEnabled(setting['axis'][ax])
+            widget_dict['childbox'][ax].setVisible(setting['axis'][ax])
             if widget_dict['childbox'][ax] is not None:
                 widget_dict['childbox'][ax].setEnabled(setting['spinbox'][ax])
                 widget_dict['childbox'][ax].setVisible(setting['spinbox'][ax])
@@ -2021,7 +2044,7 @@ class StylingDock(Styling):
         ui = self.ui
 
         print(f"PLOT TYPE = {self.plot_type}")
-        self.init_field_widgets(self.plot_widget_dict)
+        self.init_field_widgets(self.axis_widget_dict)
 
         # update ui
         match self.plot_type.lower():
@@ -2942,7 +2965,7 @@ class StylingDock(Styling):
         Updates style associated with ``MainWindow.comboBoxFieldTypeC``.  Also updates
         ``MainWindow.comboBoxFieldC`` and ``MainWindow.comboBoxColorScale``."""
         if self.debug:
-            self.logger.print("color_by_field_callback")
+            self.logger.print("update_color_field_type")
 
         self.color_field_type = self.ui.comboBoxFieldTypeCType.currentText()
 
@@ -2958,7 +2981,7 @@ class StylingDock(Styling):
 
         self.app_data.c_field_type = self.ui.comboBoxFieldTypeC.currentText()
         if self.ui.comboBoxFieldTypeC.currentText() != '':
-            self.set_style_widgets(self.plot_type)
+            self.set_style_widgets()
 
         if self.ui.comboBoxPlotType.isEnabled() == False | self.ui.comboBoxFieldTypeC.isEnabled() == False:
             return
@@ -2967,61 +2990,116 @@ class StylingDock(Styling):
         if self.ui.comboBoxFieldTypeC.currentText() != 'None' or self.ui.comboBoxFieldC.currentText() != '' or self.ui.comboBoxFieldTypeC.currentText() in ['cluster']:
             self.schedule_update()
 
-    def update_c_field_combobox(self, field=None):
-        """Updates color field and plot
-
-        Executes on change of ``MainWindow.comboBoxFieldC``
-        """
+    def update_field_type(self, ax, field_type=None):
         if self.debug:
-            self.logger.print(f"update_c_field_combobox: field={field}")
+            self.logger.print(f"update_field_type:\n  ax={ax}\n  field_type={field_type}")
 
-        #import traceback
-        #print(f"update_c_field_combobox called with field={field}")
-        #traceback.print_stack(limit=10)
+        # only update field if the axis is enabled 
+        if not self.axis_widget_dict['plot type'][self.plot_type]['axis'][ax]:
+            return
+            #self.set_axis_lim(ax, [data.axis_dict[field]['min'], data.axis_dict[field]['max']])
+            #self.set_axis_label(ax, data.axis_dict[field]['label'])
+            #self.set_axis_scale(ax, data.axis_dict[field]['scale'])
 
-        if field is None:   # user interaction, or direct setting of combobox
+        parentbox = self.axis_widget_dict['parentbox'][ax]
+
+        if field_type is None:   # user interaction, or direct setting of combobox
             # set field property to combobox
-            self.app_data.c_field = self.ui.comboBoxFieldC.currentText()
+            self.app_data.set_field(ax, parentbox.currentText())
         else:   # direct setting of property
-            if field == self.ui.comboBoxFieldC.currentText() and field == self.app_data.c_field:
+            if field_type == parentbox.currentText() and field_type == self.app_data.get_field_type(ax):
                 return
 
             # set combobox to field
-            self.ui.comboBoxFieldC.blockSignals(True)
-            self.ui.comboBoxFieldC.setCurrentText(field)
-            self.ui.comboBoxFieldC.blockSignals(False)
+            parentbox.setCurrentText(field_type)
+
+        # update plot
+        self.schedule_update()
+
+
+    def update_field(self, ax, field=None):
+        """Used to update widgets associaed with an axis after a field change to either the combobox or underlying data.
+
+        Used to update, x, y, z, and c axes related widgets including fields, spinboxes, labels, limits and scale.  
+
+        Parameters
+        ----------
+        ax : int
+            Axis to update, [x,y,z,c] should be supplied as an integer, [0,1,2,3], respectively
+        field : str, optional
+            New field value for axis to update ``app_data`` or combobox, by default None
+        """
+        if self.debug:
+            self.logger.print(f"update_field:\n  ax={ax}\n  field={field}")
+
+        # only update field if the axis is enabled 
+        if not self.axis_widget_dict['plot type'][self.plot_type]['axis'][ax]:
+            return
+            #self.set_axis_lim(ax, [data.axis_dict[field]['min'], data.axis_dict[field]['max']])
+            #self.set_axis_label(ax, data.axis_dict[field]['label'])
+            #self.set_axis_scale(ax, data.axis_dict[field]['scale'])
+
+        parentbox = self.axis_widget_dict['parentbox'][ax]
+        childbox = self.axis_widget_dict['childbox'][ax]
+        spinbox = self.axis_widget_dict['spinbox'][ax]
+
+        if field is None:   # user interaction, or direct setting of combobox
+            # set field property to combobox
+            self.app_data.set_field(ax, childbox.currentText())
+        else:   # direct setting of property
+            if field == childbox.currentText() and field == self.app_data.get_field(ax):
+                return
+
+            # set combobox to field
+            childbox.blockSignals(True)
+            childbox.setCurrentText(field)
+            childbox.blockSignals(False)
 
             # check if c_field property needs to be updated too
-            if self.app_data.c_field != self.ui.comboBoxFieldC.currentText():
-                self.app_data.c_field = self.ui.comboBoxFieldC.currentText()
+            if self.app_data.get_field(ax) != childbox.currentText():
+                self.app_data.set_field(ax, childbox.currentText())
 
-        if self.ui.spinBoxFieldC.value() != self.ui.comboBoxFieldC.currentIndex():
-            self.ui.spinBoxFieldC.setValue(self.ui.comboBoxFieldC.currentIndex())
+        if spinbox is not None and spinbox.value() != childbox.currentIndex():
+            spinbox.setValue(childbox.currentIndex())
 
         # update autoscale widgets
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.update_autoscale_widgets(self.app_data.c_field, self.app_data.c_field_type)
+        if ax == 3 and self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
+            self.ui.update_autoscale_widgets(self.app_data.get_field(ax), self.app_data.get_field_type(ax))
 
         if field not in [None, '','none','None']:
             data = self.ui.data[self.app_data.sample_id]
+
+            # update bin width for histograms
+            if ax == 1 and self.plot_type == 'histogram':
+                # update hist_bin_width
+                self.app_data.update_num_bins = False
+                self.app_data.update_hist_bin_width()
+                self.app_data.update_num_bins = True
+
+            # initialize axis values for plotting
             if field not in data.axis_dict.keys():
-                self.initialize_axis_values(self.ui.comboBoxFieldTypeC.currentText(), field)
+                self.initialize_axis_values(parentbox.currentText(), field)
 
-            self.set_color_axis_widgets()
-            if self._plot_type not in ['correlation']:
+            # initialize color widgets
+            if ax == 3:
+                self.set_color_axis_widgets()
+
+            # update axes properties
+            if ax == 3 and self._plot_type not in ['correlation']:
                 self.clim = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
                 self.clabel = data.axis_dict[field]['label']
+                self.cscale = data.axis_dict[field]['scale']
+            elif self._plot_type not in []:
+                self.set_axis_lim(ax, [data.axis_dict[field]['min'], data.axis_dict[field]['max']])
+                self.set_axis_label(ax, data.axis_dict[field]['label'])
+                self.set_axis_scale(ax, data.axis_dict[field]['scale'])
 
-                self.clim = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
-                self.clabel = data.axis_dict[field]['label']
         else:
             self.clabel = ''
 
         # update plot
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.plot_type in ['field map','histogram','correlation']:
-            self.schedule_update()
-
-
+        self.schedule_update()
+        
     def field_colormap_callback(self):
         """Sets the color map
 

@@ -268,51 +268,6 @@ class AppData(Observable):
         self.notify_observers("equalize_color_scale", flag)
 
     @property
-    def c_field_type(self):
-        """(str) Field type associated with colors or a histrogram"""
-        return self._c_field_type
-    
-    @c_field_type.setter
-    def c_field_type(self, new_field_type):
-        if self.debug:
-            self.logger.print(f"@c_field_type\n  old_value={self._c_field_type}\n  new_value={new_field_type}")
-        if new_field_type == self._c_field_type:
-            return
-
-        # update c_field_type
-        #self.validate_field_type(new_field_type)
-        self._c_field_type = new_field_type
-        self.notify_observers("c_field_type", new_field_type)
-
-        # update c_field
-        if new_field_type in ['', 'none', 'None']:
-            self.c_field = ''
-        else:
-            self.c_field = self.field_dict[new_field_type][0]
-
-
-    @property
-    def c_field(self):
-        """(str) Field associated with colors or a histrogram"""
-        return self._c_field
-
-    @c_field.setter
-    def c_field(self, new_field):
-        if self.debug:
-            self.logger.print(f"@c_field\n  old_value={self._c_field}\n  new_value={new_field}")
-        if new_field == self._c_field:
-            return
-
-        #self.validate_field(self._c_field_type, new_field)
-        self._c_field = new_field
-        self.notify_observers("c_field", new_field)
-
-        # update hist_bin_width
-        self.update_num_bins = False
-        self.update_hist_bin_width()
-        self.update_num_bins = True
-
-    @property
     def default_hist_num_bins(self):
         """Default bin width for histograms."""
         return self._default_hist_num_bins
@@ -489,7 +444,7 @@ class AppData(Observable):
         if new_field_type != self._x_field_type:
             self.validate_field_type(new_field_type)
             self._x_field_type = new_field_type
-            self.notify_observers("x_field_type", new_field_type)
+            self.notify_observers("x_field_type", 0, new_field_type)
 
     @property
     def y_field_type(self):
@@ -503,7 +458,7 @@ class AppData(Observable):
         if new_field_type != self._y_field_type:
             self.validate_field_type(new_field_type)
             self._y_field_type = new_field_type
-            self.notify_observers("y_field_type", new_field_type)
+            self.notify_observers("y_field_type", 1, new_field_type)
 
     @property
     def z_field_type(self):
@@ -517,7 +472,31 @@ class AppData(Observable):
         if new_field_type != self._z_field_type:
             self.validate_field_type(new_field_type)
             self._z_field_type = new_field_type
-            self.notify_observers("z_field_type", new_field_type)
+            self.notify_observers("z_field_type", 2, new_field_type)
+
+    @property
+    def c_field_type(self):
+        """(str) Field type associated with colors or a histrogram"""
+        return self._c_field_type
+    
+    @c_field_type.setter
+    def c_field_type(self, new_field_type):
+        if self.debug:
+            self.logger.print(f"@c_field_type\n  old_value={self._c_field_type}\n  new_value={new_field_type}")
+        if new_field_type == self._c_field_type:
+            return
+
+        # update c_field_type
+        #self.validate_field_type(new_field_type)
+        self._c_field_type = new_field_type
+        self.notify_observers("c_field_type", 3, new_field_type)
+
+        # update c_field
+        if new_field_type in ['', 'none', 'None']:
+            self.c_field = ''
+        else:
+            self.c_field = self.field_dict[new_field_type][0]
+
 
     @property
     def x_field(self):
@@ -531,7 +510,7 @@ class AppData(Observable):
             return
     
         self._x_field = new_field
-        self.notify_observers("x_field", new_field)
+        self.notify_observers("x_field", 0, new_field)
     
     @property
     def y_field(self):
@@ -545,7 +524,7 @@ class AppData(Observable):
             return
     
         self._y_field = new_field
-        self.notify_observers("y_field", new_field)
+        self.notify_observers("y_field", 1, new_field)
     
     @property
     def z_field(self):
@@ -559,7 +538,23 @@ class AppData(Observable):
             return
     
         self._z_field = new_field
-        self.notify_observers("z_field", new_field)
+        self.notify_observers("z_field", 2, new_field)
+
+    @property
+    def c_field(self):
+        """(str) Field associated with colors or a histrogram"""
+        return self._c_field
+
+    @c_field.setter
+    def c_field(self, new_field):
+        if self.debug:
+            self.logger.print(f"@c_field\n  old_value={self._c_field}\n  new_value={new_field}")
+        if new_field == self._c_field:
+            return
+
+        #self.validate_field(self._c_field_type, new_field)
+        self._c_field = new_field
+        self.notify_observers("c_field", 3, new_field)
 
     @property
     def scatter_preset(self):

@@ -313,32 +313,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
 
 
-        pt_dict = self.plot_style.plot_widget_dict['plot type'][self.plot_style.plot_type]
+        pt_dict = self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=pt_dict['add_none'][3], global_list=True, user_activated=True)
-        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
+        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=3))
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldC, add_none=pt_dict['add_none'][3], user_activated=True)
-        self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
+        #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
+        self.comboBoxFieldC.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=3))
         # update spinbox associated with map/color field
-        self.spinBoxFieldC.valueChanged.connect(self.c_field_spinbox_changed)
+        self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))
 
         self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, add_none=pt_dict['add_none'][0], user_activated=True)
-        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field_type", self.comboBoxFieldTypeX.currentText()))
+        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=0))
         self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=pt_dict['add_none'][0], user_activated=True)
-        self.comboBoxFieldX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field", self.comboBoxFieldX.currentText()))
+        self.comboBoxFieldX.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=0))
         # update spinbox associated with map/color field
-        self.spinBoxFieldX.valueChanged.connect(self.c_field_spinbox_changed)
+        self.spinBoxFieldX.valueChanged.connect(lambda: self.field_spinbox_changed(ax=0))
 
         self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, add_none=pt_dict['add_none'][1], user_activated=True)
-        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field_type", self.comboBoxFieldTypeY.currentText()))
+        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=1))
         self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=pt_dict['add_none'][1], user_activated=True)
-        self.comboBoxFieldY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field", self.comboBoxFieldY.currentText()))
+        self.comboBoxFieldY.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=1))
         # update spinbox associated with map/color field
-        self.spinBoxFieldY.valueChanged.connect(self.c_field_spinbox_changed)
+        self.spinBoxFieldY.valueChanged.connect(lambda: self.field_spinbox_changed(ax=1))
 
         self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, add_none=pt_dict['add_none'][2], user_activated=True)
-        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field_type", self.comboBoxFieldTypeZ.currentText()))
+        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=2))
         self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=pt_dict['add_none'][2], user_activated=True)
-        self.comboBoxFieldZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field", self.comboBoxFieldZ.currentText()))
+        self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
 
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
 
@@ -543,7 +544,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
 
         if not enable:
-            self.plot_style.init_field_widgets(self.plot_style.plot_widget_dict)
+            self.plot_style.init_field_widgets(self.plot_style.axis_widget_dict)
 
             self.PreprocessPage.setEnabled(False)
             self.SelectAnalytePage.setEnabled(False)
@@ -898,14 +899,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("sample_id", self.update_sample_id_combobox)
         app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
         app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
-        app_data.add_observer("x_field_type", self.update_x_field_type_combobox)
-        app_data.add_observer("y_field_type", self.update_y_field_type_combobox)
-        app_data.add_observer("z_field_type", self.update_z_field_type_combobox)
-        app_data.add_observer("c_field_type", self.update_c_field_type_combobox)
-        app_data.add_observer("x_field", self.update_x_field_combobox)
-        app_data.add_observer("y_field", self.update_y_field_combobox)
-        app_data.add_observer("z_field", self.update_z_field_combobox)
-        app_data.add_observer("c_field", self.plot_style.update_c_field_combobox)
+        app_data.add_observer("x_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("y_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("z_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("c_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("x_field", self.plot_style.update_field)
+        app_data.add_observer("y_field", self.plot_style.update_field)
+        app_data.add_observer("z_field", self.plot_style.update_field)
+        app_data.add_observer("c_field", self.plot_style.update_field)
         app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
         app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
         app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
@@ -1383,37 +1384,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     
 
-    def update_c_field_type_combobox(self, field_type):
-        """Updates ``MainWindow.comboBoxFieldTypeC.currentText()``
-
-        Called as an update to ``app_data.c_field_type``.  Updates the histogram field type (also controls field maps).  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            New field type.
-        """
-        if self.logger_options['UI']:
-            self.logger.print(f"update_c_field_type_combobox\n  field_type={field_type}")
-        self.comboBoxFieldTypeC.setCurrentText(field_type)
-
-        self.app_data.c_field_type = field_type
-
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
-
-    def field_spinbox_changed(self, axis):
+    def field_spinbox_changed(self, ax):
         """Updates ``MainWindow.comboBoxFieldC``"""        
         if self.logger_options['UI']:
-            self.logger.print(f"field_spinbox_changed: axis={axis}")
+            self.logger.print(f"field_spinbox_changed: ax={ax}")
 
-        widget = self.plot_style.plot_widget_dict
+        widget = self.plot_style.axis_widget_dict
 
-        widget['spinbox'][axis].blockSignals(True)
-        if widget['spinbox'][axis].value() != widget['childbox'][axis].currentIndex():
-            widget['childbox'][axis].setCurrentIndex(widget['childbox'][axis].value())
-            self.plot_style.update_c_field_combobox()
-        widget['spinbox'][axis].blockSignals(False)
+        widget['spinbox'][ax].blockSignals(True)
+        if widget['spinbox'][ax].value() != widget['childbox'][ax].currentIndex():
+            widget['childbox'][ax].setCurrentIndex(widget['childbox'][ax].value())
+            self.plot_style.update_field(ax)
+        widget['spinbox'][ax].blockSignals(False)
 
     def update_hist_bin_width_spinbox(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
@@ -1472,21 +1454,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_z_field_type_combobox(self, new_field_type):
         self.comboBoxFieldTypeZ.setCurrentText(new_field_type)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_x_field_combobox(self, new_field):
-        self.comboBoxFieldX.setCurrentText(new_field)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_y_field_combobox(self, new_field):
-        self.comboBoxFieldY.setCurrentText(new_field)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_z_field_combobox(self, new_field):
-        self.comboBoxFieldZ.setCurrentText(new_field)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.schedule_update()
 
@@ -1885,17 +1852,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_font_size_spinbox(self, new_font_size):
         self.doubleSpinBoxFontSize.setValue(new_font_size)
         self.plot_style.schedule_update()
-
-    def update_c_field_type_combobox(self, new_field_type):
-        self.comboBoxFieldTypeC.setCurrentText(new_field_type)
-
-        self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC)
-        self.app_data.c_field = self.comboBoxFieldC.currentText()
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.app_data.c_field_type = new_field_type
-
-        self.plot_style.schedule_update()
-
 
     def update_cmap_combobox(self, new_colormap):
         self.comboBoxFieldColormap.setCurrentText(new_colormap)
@@ -2649,7 +2605,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         sample_id = plot_info['sample_id']
         tree = plot_info['plot_type']
-        # widget_dict = self.plot_widget_dict[tree][sample_id][plot_name]
+        # widget_dict = self.axis_widget_dict[tree][sample_id][plot_name]
 
         # if on QuickView canvas, then set to SingleView canvas
         if self.canvasWindow.currentIndex() == self.canvas_tab['qv']:
@@ -3127,7 +3083,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             widget.deleteLater()
         del self.multiview_info_label[selected_plot_name+'1']
         del self.lasermaps[selected_plot_name+'1']
-        #self.plot_widget_dict[selected_plot_name] = widget
+        #self.axis_widget_dict[selected_plot_name] = widget
         #self.add_remove(selected_plot_name)
         self.comboBoxMVPlots.clear()
         self.comboBoxMVPlots.addItems(self.multi_view_index)

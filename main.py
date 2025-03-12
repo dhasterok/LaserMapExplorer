@@ -313,30 +313,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
 
 
-        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=False, global_list=True, user_activated=True)
+        pt_dict = self.plot_style.plot_widget_dict['plot type'][self.plot_style.plot_type]
+        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=pt_dict['add_none'][3], global_list=True, user_activated=True)
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
-        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldC, add_none=False, user_activated=True)
-        #self.comboBoxFieldC.activated.connect(lambda index: print(f"Activated: {index}"))
-        #self.comboBoxFieldC.currentTextChanged.connect(lambda text: print(f"Text changed: {text}"))
-        #self.comboBoxFieldC.activated.connect(lambda: print(f"{self.app_data.c_field}"))
-        #self.comboBoxFieldC.activated.connect(self.plot_style.update_c_field_combobox)
+        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldC, add_none=pt_dict['add_none'][3], user_activated=True)
         self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         # update spinbox associated with map/color field
         self.spinBoxFieldC.valueChanged.connect(self.c_field_spinbox_changed)
 
-        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, user_activated=True)
+        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, add_none=pt_dict['add_none'][0], user_activated=True)
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field_type", self.comboBoxFieldTypeX.currentText()))
-        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=False, user_activated=True)
+        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=pt_dict['add_none'][0], user_activated=True)
         self.comboBoxFieldX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field", self.comboBoxFieldX.currentText()))
+        # update spinbox associated with map/color field
+        self.spinBoxFieldX.valueChanged.connect(self.c_field_spinbox_changed)
 
-        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, user_activated=True)
+        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, add_none=pt_dict['add_none'][1], user_activated=True)
         self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field_type", self.comboBoxFieldTypeY.currentText()))
-        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=False, user_activated=True)
+        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=pt_dict['add_none'][1], user_activated=True)
         self.comboBoxFieldY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field", self.comboBoxFieldY.currentText()))
+        # update spinbox associated with map/color field
+        self.spinBoxFieldY.valueChanged.connect(self.c_field_spinbox_changed)
 
-        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, user_activated=True)
+        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, add_none=pt_dict['add_none'][2], user_activated=True)
         self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field_type", self.comboBoxFieldTypeZ.currentText()))
-        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=True, user_activated=True)
+        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=pt_dict['add_none'][2], user_activated=True)
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field", self.comboBoxFieldZ.currentText()))
 
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
@@ -426,8 +427,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         new_list.append('Ratio')
                         new_list.append('Ratio (normalized)')
 
-                    if 'pca score' in field_dict.keys():
-                        new_list.append('pca score')
+                    if 'PCA score' in field_dict.keys():
+                        new_list.append('PCA score')
 
                     if 'Cluster' in field_dict.keys():
                         new_list.append('Cluster')
@@ -542,22 +543,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
 
         if not enable:
-            self.labelX.setVisible(False)
-            self.comboBoxFieldTypeX.setVisible(False)
-            self.comboBoxFieldX.setVisible(False)
-
-            self.labelY.setVisible(False)
-            self.comboBoxFieldTypeY.setVisible(False)
-            self.comboBoxFieldY.setVisible(False)
-
-            self.labelZ.setVisible(False)
-            self.comboBoxFieldTypeZ.setVisible(False)
-            self.comboBoxFieldZ.setVisible(False)
-
-            self.labelC.setVisible(False)
-            self.comboBoxFieldTypeC.setVisible(False)
-            self.comboBoxFieldC.setVisible(False)
-            self.spinBoxFieldC.setVisible(False)
+            self.plot_style.init_field_widgets(self.plot_style.plot_widget_dict)
 
             self.PreprocessPage.setEnabled(False)
             self.SelectAnalytePage.setEnabled(False)
@@ -1416,16 +1402,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['sample']:
             self.plot_style.schedule_update()
 
-    def c_field_spinbox_changed(self):
+    def field_spinbox_changed(self, axis):
         """Updates ``MainWindow.comboBoxFieldC``"""        
         if self.logger_options['UI']:
-            self.logger.print("c_field_spinbox_changed")
+            self.logger.print(f"field_spinbox_changed: axis={axis}")
 
-        self.spinBoxFieldC.blockSignals(True)
-        if self.spinBoxFieldC.value() != self.comboBoxFieldC.currentIndex():
-            self.comboBoxFieldC.setCurrentIndex(self.spinBoxFieldC.value())
+        widget = self.plot_style.plot_widget_dict
+
+        widget['spinbox'][axis].blockSignals(True)
+        if widget['spinbox'][axis].value() != widget['childbox'][axis].currentIndex():
+            widget['childbox'][axis].setCurrentIndex(widget['childbox'][axis].value())
             self.plot_style.update_c_field_combobox()
-        self.spinBoxFieldC.blockSignals(False)
+        widget['spinbox'][axis].blockSignals(False)
 
     def update_hist_bin_width_spinbox(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
@@ -1706,15 +1694,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_flag = True
 
     def update_field(self, control_settings, axis_id, label, parentbox, childbox, field_type, field):
+        """Updates field realted widgets 
 
-        flag = control_settings['axes'][axis_id]
+        _extended_summary_
 
-        label.setVisible(flag)
-        parentbox.setVisible(flag)
-        childbox.setVisible(flag)
-        if axis_id == 3:
-            self.spinBoxFieldC.setVisible(flag)
-
+        Parameters
+        ----------
+        control_settings : _type_
+            _description_
+        axis_id : _type_
+            _description_
+        label : _type_
+            _description_
+        parentbox : _type_
+            _description_
+        childbox : _type_
+            _description_
+        field_type : _type_
+            _description_
+        field : _type_
+            _description_
+        """
         label.setText(control_settings['label'][axis_id])
 
         if control_settings['saved_field_type'][axis_id] is not None:

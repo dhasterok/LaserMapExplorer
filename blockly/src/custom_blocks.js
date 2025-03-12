@@ -1888,7 +1888,7 @@ const specify_plot_type = {
         this.appendDummyInput()
             .appendField('Plot Type')
             .appendField(new Blockly.FieldDropdown([
-                ['Analyte Map', 'field_map'],
+                ['Field Map', 'field_map'],
                 ['Histogram', 'histogram'],
                 // ... other plot types
             ]), 'PLOT_TYPE');

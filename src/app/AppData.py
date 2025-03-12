@@ -17,27 +17,6 @@ class AppData(Observable):
         self.preferences = copy.deepcopy(self.default_preferences)
         self.selected_directory = ''
 
-        self.plot_type_dict = {
-            'field map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'gradient map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'ternary map': {'ax': [True, True, True, False], 'add_none': [False, False, False, False]},
-            'correlation': {'ax': [True, False, False, True], 'add_none': [False, False, False, True]},
-            'histogram': {'ax': [True, False, False, True], 'add_none': [False, False, False, True]},
-            'scatter': {'ax': [True, True, True, True], 'add_none': [False, False, True, True]},
-            'heatmap': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'TEC': {'ax': [False, False, False, True], 'add_none': [False, False, False, True]},
-            'radar': {'ax': [False, False, False, True], 'add_none': [False, False, False, True]},
-            'variance': {'ax': [False, False, False, False], 'add_none': [False, False, False, False]},
-            'basis vectors': {'ax': [False, False, False, False], 'add_none': [False, False, False, False]},
-            'score map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'scatter score': {'ax': [True, True, False, True], 'add_none': [False, False, False, True]}, 
-            'heatmap score': {'ax': [True, True, False, False], 'add_none': [False, False, False, False]},
-            'cluster': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'performance': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'profile': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]},
-            'polygon': {'ax': [False, False, False, True], 'add_none': [False, False, False, False]}
-        }
-
         self._sort_method = 'mass'
 
         # reference chemistry
@@ -171,7 +150,20 @@ class AppData(Observable):
 
         self.update_cluster_flag = False
         self.update_pca_flag = False
+        
+        self.axis = ['x','y','z','c']
 
+    def get_field(self, ax):
+        return getattr(self, f"{self.axis[ax]}_field")
+
+    def set_field(self, ax, value):
+        setattr(self, f"{self.axis[ax]}_field", value)
+
+    def get_field_type(self, ax):
+        return getattr(self, f"{self.axis[ax]}_field_type")
+
+    def set_field_type(self, ax, value):
+        setattr(self, f"{self.axis[ax]}_field_type", value)
 
     def validate_field_type(self, new_field_type):
         if self.sample_id == "":

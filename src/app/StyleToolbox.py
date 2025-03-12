@@ -102,7 +102,7 @@ class Styling(Observable):
         for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
         plot type.  While data related to plot and color axes may be stored in *style_dict*, *axis_dict* stores labels, bounds and scale for most plot fields.
 
-        style_dict[plot_type] -- plot types include ``analyte map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
+        style_dict[plot_type] -- plot types include ``field map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
         ``TEC``, ``radar``, ``variance``, ``vectors``, ``pca scatter``, ``pca heatmap``, ``PCA Score``, ``Clusters``, ``Cluster Score``, ``profile``
 
         * associated with widgets in the toolBoxTreeView > Styling > Axes tab
@@ -935,6 +935,34 @@ class StylingDock(Styling):
     def __init__(self, parent, debug=False):
         super().__init__(self, debug)
 
+        self.plot_widget_dict = {
+            'label': [parent.labelX, parent.labelY, parent.labelZ, parent.labelC],
+            'parentbox': [parent.comboBoxFieldTypeX, parent.comboBoxFieldTypeY, parent.comboBoxFieldTypeZ, parent.comboBoxFieldTypeC],
+            'childbox': [parent.comboBoxFieldX, parent.comboBoxFieldY, parent.comboBoxFieldZ, parent.comboBoxFieldC],
+            'spinbox': [parent.spinBoxFieldX, parent.spinBoxFieldY, None, parent.spinBoxFieldC],
+            'plot type': {
+                '': {'ax': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'field map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'gradient map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'ternary map': {'ax': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'correlation': {'ax': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
+                'histogram': {'ax': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
+                'scatter': {'ax': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
+                'heatmap': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'TEC': {'ax': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
+                'radar': {'ax': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
+                'variance': {'ax': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'basis vectors': {'ax': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'score map': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'scatter score': {'ax': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
+                'heatmap score': {'ax': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'cluster': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'performance': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'profile': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'polygon': {'ax': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
+            }
+        }
+
         self.ui = parent
         self.app_data = parent.app_data
 
@@ -971,7 +999,7 @@ class StylingDock(Styling):
         self.ui.comboBoxMarker.clear()
         self.ui.comboBoxMarker.addItems(self.marker_dict.keys())
 
-        self._plot_type = "analyte map"
+        self._plot_type = "field map"
 
 
         self.ui.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeX.currentText(), self.ui.comboBoxFieldX.currentText(), 'x'))
@@ -1250,8 +1278,6 @@ class StylingDock(Styling):
         ui.lineEditLengthMultiplier.setEnabled(False)
 
         # coloring
-        ui.comboBoxFieldTypeC.setEnabled(False)
-        ui.comboBoxFieldC.setEnabled(False)
         ui.spinBoxHeatmapResolution.setEnabled(False)
         ui.comboBoxFieldColormap.setEnabled(False)
         ui.checkBoxReverseColormap.setEnabled(False)
@@ -1310,8 +1336,6 @@ class StylingDock(Styling):
                 ui.toolButtonLineColor.setEnabled(True)
 
                 # color properties
-                ui.comboBoxFieldTypeC.setEnabled(True)
-                ui.comboBoxFieldC.setEnabled(True)
                 ui.comboBoxFieldColormap.setEnabled(True)
                 ui.lineEditColorLB.setEnabled(True)
                 ui.lineEditColorUB.setEnabled(True)
@@ -1328,10 +1352,6 @@ class StylingDock(Styling):
                 ui.lineEditColorLB.setEnabled(True)
                 ui.lineEditColorUB.setEnabled(True)
                 ui.comboBoxCbarDirection.setEnabled(True)
-                if plot_type.lower() == 'correlation':
-                    ui.comboBoxFieldTypeC.setEnabled(True)
-                    if ui.comboBoxFieldTypeC.currentText() == 'cluster':
-                        ui.comboBoxFieldC.setEnabled(True)
 
             case 'histogram':
                 # axes properties
@@ -1354,13 +1374,11 @@ class StylingDock(Styling):
                 ui.toolButtonLineColor.setEnabled(True)
 
                 # color properties
-                ui.comboBoxFieldTypeC.setEnabled(True)
                 # if color by field is set to clusters, then colormap fields are on,
                 # field is set by cluster table
                 if ui.comboBoxFieldTypeC.currentText().lower() == 'none':
                     ui.toolButtonMarkerColor.setEnabled(True)
                 else:
-                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
 
             case 'scatter' | 'PCA scatter':
@@ -1398,7 +1416,6 @@ class StylingDock(Styling):
                     ui.lineEditLengthMultiplier.setEnabled(True)
 
                 # color properties
-                ui.comboBoxFieldTypeC.setEnabled(True)
                 # if color by field is none, then use marker color,
                 # otherwise turn off marker color and turn all field and colormap properties to on
                 if ui.comboBoxFieldTypeC.currentText().lower() == 'none':
@@ -1406,10 +1423,8 @@ class StylingDock(Styling):
 
                 elif ui.comboBoxFieldTypeC.currentText() == 'cluster':
 
-                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
 
-                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxFieldColormap.setEnabled(True)
                     ui.lineEditColorLB.setEnabled(True)
                     ui.lineEditColorUB.setEnabled(True)
@@ -1504,11 +1519,9 @@ class StylingDock(Styling):
                 ui.toolButtonLineColor.setEnabled(True)
 
                 # color properties
-                ui.comboBoxFieldTypeC.setEnabled(True)
                 if ui.comboBoxFieldTypeC.currentText().lower() == 'none':
                     ui.toolButtonMarkerColor.setEnabled(True)
                 elif ui.comboBoxFieldTypeC.currentText().lower() == 'cluster':
-                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
 
             case 'variance' | 'cluster performance':
@@ -1558,8 +1571,6 @@ class StylingDock(Styling):
 
                 # color properties
                 if plot_type != 'clusters':
-                    ui.comboBoxFieldTypeC.setEnabled(True)
-                    ui.comboBoxFieldC.setEnabled(True)
                     ui.comboBoxFieldColormap.setEnabled(True)
                     ui.lineEditColorLB.setEnabled(True)
                     ui.lineEditColorUB.setEnabled(True)
@@ -1953,6 +1964,38 @@ class StylingDock(Styling):
 
     # style widget callbacks
     # -------------------------------------
+    def init_field_widgets(self, widget_dict, plot_type=None):
+        """Initializes widgets associated with axes for plotting
+
+        Enables and sets visibility of labels, comboboxes, and spinboxes associated with axes for choosing plot dimensions, including color.
+
+        Parameters
+        ----------
+        widget_dict : dict
+            Dictionary with field associated widgets and properties
+        
+        :see also: self.plot_widget_dict
+        """
+        if self.debug:
+            self.ui.logger.print(f"init_field_widgets: plot_type={plot_type}")
+        if plot_type is None:
+            setting = widget_dict['plot type'][self.plot_type]
+        else:
+            setting = widget_dict['plot type']['none']
+
+        for ax in range(3):
+            widget_dict['label'][ax].setEnabled(setting['ax'][ax])
+            widget_dict['label'][ax].setVisible(setting['ax'][ax])
+
+            widget_dict['parentbox'][ax].setEnabled(setting['ax'][ax])
+            widget_dict['parentbox'][ax].setVisible(setting['ax'][ax])
+
+            widget_dict['childbox'][ax].setEnabled(setting['ax'][ax])
+            widget_dict['childbox'][ax].setVisible(setting['ax'][ax])
+            if widget_dict['childbox'][ax] is not None:
+                widget_dict['childbox'][ax].setEnabled(setting['spinbox'][ax])
+                widget_dict['childbox'][ax].setVisible(setting['spinbox'][ax])
+
     def update_plot_type(self, new_plot_type=None, force=False):
         """Updates styles when plot type is changed
 
@@ -1971,31 +2014,37 @@ class StylingDock(Styling):
             if new_plot_type != self.ui.comboBoxPlotType.currentText():
                 self.ui.comboBoxPlotType.setCurrentText(new_plot_type)
                 self.ui.plot_types[self.ui.toolBox.currentIndex()][0] = self.ui.comboBoxPlotType.currentIndex()
+
         else:
             self.plot_type = self.ui.comboBoxPlotType.currentText()
+
+        ui = self.ui
+
+        print(f"PLOT TYPE = {self.plot_type}")
+        self.init_field_widgets(self.plot_widget_dict)
 
         # update ui
         match self.plot_type.lower():
             case 'field map' | 'gradient map':
-                self.ui.actionSwapAxes.setEnabled(True)
+                ui.actionSwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
-                self.ui.actionSwapAxes.setEnabled(True)
+                ui.actionSwapAxes.setEnabled(True)
             case 'correlation':
-                self.ui.actionSwapAxes.setEnabled(False)
-                if self.ui.comboBoxCorrelationMethod.currentText() == 'None':
-                    self.ui.comboBoxCorrelationMethod.setCurrentText('Pearson')
+                ui.actionSwapAxes.setEnabled(False)
+                if ui.comboBoxCorrelationMethod.currentText() == 'None':
+                    ui.comboBoxCorrelationMethod.setCurrentText('Pearson')
             case 'cluster performance':
-                self.ui.labelClusterMax.show()
-                self.ui.spinBoxClusterMax.show()
-                self.ui.labelNClusters.hide()
-                self.ui.spinBoxNClusters.hide()
+                ui.labelClusterMax.show()
+                ui.spinBoxClusterMax.show()
+                ui.labelNClusters.hide()
+                ui.spinBoxNClusters.hide()
             case 'cluster' | 'cluster score':
-                self.ui.labelClusterMax.hide()
-                self.ui.spinBoxClusterMax.hide()
-                self.ui.labelNClusters.show()
-                self.ui.spinBoxNClusters.show()
+                ui.labelClusterMax.hide()
+                ui.spinBoxClusterMax.hide()
+                ui.labelNClusters.show()
+                ui.spinBoxNClusters.show()
             case _:
-                self.ui.actionSwapAxes.setEnabled(False)
+                ui.actionSwapAxes.setEnabled(False)
 
         # update all plot widgets
         self.set_style_widgets()

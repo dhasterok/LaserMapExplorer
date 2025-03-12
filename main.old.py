@@ -188,7 +188,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             | 'tree' : (str) -- tree name, ``Analyte``, ``Analyte (normalized)``
             | 'sample_id' : (str) -- sample id, which doubles as ``treeView`` branch
             | 'plot_name' : (str) -- plot name, which doubles as ``treeView`` leaf
-            | 'plot_type' : (str) -- type of plot (e.g., ``analyte map``, ``scatter``, ``Cluster Score``)
+            | 'plot_type' : (str) -- type of plot (e.g., ``field map``, ``scatter``, ``Cluster Score``)
             | 'field_type' : (list of str) -- type of field(s) used to create plot
             | 'field' : (list of str) -- analyte or other field(s) used to create plot
             | 'figure' : (pgGraphicsWidget or mplc.MplCanvas) -- object holding figure for display
@@ -1057,7 +1057,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_hist_field_type_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
 
-        Called as an update to ``app_data.hist_field_type``.  Updates the histogram field type (also controls analyte maps).  Schedules a plot update.
+        Called as an update to ``app_data.hist_field_type``.  Updates the histogram field type (also controls field maps).  Schedules a plot update.
 
         Parameters
         ----------
@@ -1308,7 +1308,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_equalize_color_scale(self):
         self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
-        if self.plot_style.plot_type == "analyte map":
+        if self.plot_style.plot_type == "field map":
             self.plot_style.schedule_update()
 
     def update_corr_method(self):
@@ -1783,7 +1783,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.init_tabs()
 
-        # set analyte map to first available analyte
+        # set field map to first available analyte
         if self.app_data.selected_analytes is not None:
             self.plot_style.color_field = self.app_data.selected_analytes[0]
         

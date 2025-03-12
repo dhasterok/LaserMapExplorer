@@ -1225,7 +1225,263 @@
             <number>3</number>
            </property>
            <item>
-            <layout class="QFormLayout" name="formLayout_35">
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="2" column="2">
+              <widget class="QComboBox" name="comboBoxFieldY">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select field for y-axis or left ternary vertex</string>
+               </property>
+               <property name="currentText">
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>Field</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="3">
+              <widget class="QSpinBox" name="spinBoxFieldC">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="readOnly">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QComboBox" name="comboBoxFieldX">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select field for x-axis or top ternary vertex</string>
+               </property>
+               <property name="currentText">
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>Field</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="3">
+              <widget class="QSpinBox" name="spinBoxFieldY">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QComboBox" name="comboBoxFieldC">
+               <property name="maximumSize">
+                <size>
+                 <width>155</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Select field to color points</string>
+               </property>
+               <property name="currentText">
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>Field</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QComboBox" name="comboBoxFieldTypeC">
+               <property name="maximumSize">
+                <size>
+                 <width>155</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Color markers using the selected field type</string>
+               </property>
+               <property name="currentText">
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>Field type</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="comboBoxFieldTypeX">
+               <property name="maximumSize">
+                <size>
+                 <width>125</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select field for x-axis or top vertex of ternary</string>
+               </property>
+               <property name="placeholderText">
+                <string>Field type</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QComboBox" name="comboBoxFieldTypeZ">
+               <property name="maximumSize">
+                <size>
+                 <width>125</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select field for right vertex of ternary</string>
+               </property>
+               <property name="placeholderText">
+                <string>Field type</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="labelX">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="text">
+                <string>X</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QComboBox" name="comboBoxFieldZ">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select field for right ternary vertex</string>
+               </property>
+               <property name="placeholderText">
+                <string>Field</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="labelZ">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="text">
+                <string>Z</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QSpinBox" name="spinBoxFieldX">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="labelY">
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="text">
+                <string>Y</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="comboBoxFieldTypeY">
+               <property name="maximumSize">
+                <size>
+                 <width>125</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select field for y-axis or left vertex of ternary</string>
+               </property>
+               <property name="placeholderText">
+                <string>Field type</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="labelC">
+               <property name="text">
+                <string>C</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="labelPlotType">
                <property name="text">
@@ -1255,266 +1511,6 @@
                </property>
                <property name="placeholderText">
                 <string>Select a plot</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <item row="1" column="2">
-              <widget class="QComboBox" name="comboBoxFieldY">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Select field for y-axis or left ternary vertex</string>
-               </property>
-               <property name="currentText">
-                <string/>
-               </property>
-               <property name="placeholderText">
-                <string>Field</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="3">
-              <widget class="QSpinBox" name="spinBoxFieldC">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-               <property name="readOnly">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QComboBox" name="comboBoxFieldX">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Select field for x-axis or top ternary vertex</string>
-               </property>
-               <property name="currentText">
-                <string/>
-               </property>
-               <property name="placeholderText">
-                <string>Field</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="2">
-              <widget class="QComboBox" name="comboBoxFieldC">
-               <property name="maximumSize">
-                <size>
-                 <width>155</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>Select field to color points</string>
-               </property>
-               <property name="currentText">
-                <string/>
-               </property>
-               <property name="placeholderText">
-                <string>Field</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QComboBox" name="comboBoxFieldTypeC">
-               <property name="maximumSize">
-                <size>
-                 <width>155</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>Color markers using the selected field type</string>
-               </property>
-               <property name="currentText">
-                <string/>
-               </property>
-               <property name="placeholderText">
-                <string>Field type</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="comboBoxFieldTypeX">
-               <property name="maximumSize">
-                <size>
-                 <width>125</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Select field for x-axis or top vertex of ternary</string>
-               </property>
-               <property name="placeholderText">
-                <string>Field type</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="comboBoxFieldTypeZ">
-               <property name="maximumSize">
-                <size>
-                 <width>125</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Select field for right vertex of ternary</string>
-               </property>
-               <property name="placeholderText">
-                <string>Field type</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="labelX">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="text">
-                <string>X</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QComboBox" name="comboBoxFieldZ">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Select field for right ternary vertex</string>
-               </property>
-               <property name="placeholderText">
-                <string>Field</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="labelZ">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="text">
-                <string>Z</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="labelY">
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="text">
-                <string>Y</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="comboBoxFieldTypeY">
-               <property name="maximumSize">
-                <size>
-                 <width>125</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>.AppleSystemUIFont</family>
-                 <pointsize>11</pointsize>
-                 <stylestrategy>PreferDefault</stylestrategy>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Select field for y-axis or left vertex of ternary</string>
-               </property>
-               <property name="placeholderText">
-                <string>Field type</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="labelC">
-               <property name="text">
-                <string>C</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QSpinBox" name="spinBoxFieldX">
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QSpinBox" name="spinBoxFieldY">
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
@@ -1557,7 +1553,7 @@
            <string/>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>1</number>
           </property>
           <property name="tabSpacing">
            <number>2</number>
@@ -1571,7 +1567,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>546</height>
+             <height>548</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -1611,7 +1607,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>546</height>
+                 <height>548</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_71">
@@ -2327,7 +2323,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>546</height>
+             <height>548</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -2367,7 +2363,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>546</height>
+                 <height>548</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_74">
@@ -3003,7 +2999,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>546</height>
+             <height>548</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -3043,7 +3039,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>546</height>
+                 <height>548</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_76">
@@ -3504,7 +3500,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>546</height>
+             <height>548</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -3544,7 +3540,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>546</height>
+                 <height>548</height>
                 </rect>
                </property>
                <property name="font">
@@ -4117,7 +4113,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>546</height>
+             <height>548</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -4164,7 +4160,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>546</height>
+                 <height>548</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_82">
@@ -4352,7 +4348,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>546</height>
+             <height>548</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -4392,7 +4388,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>546</height>
+                 <height>548</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_84">

@@ -26,7 +26,7 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import cmcrameri as cmc
-from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca
+from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
 #import src.radar_factory
@@ -135,6 +135,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Initialise dimentionality reduction class 
         self.dimensional_reduction = DimensionalReduction(self)
+
+        # Initialise class from DataAnalysis
+        self.clustering = Clustering(self)
 
         self.init_ui()
         self.connect_actions()
@@ -352,12 +355,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxNegativeMethod.addItems(self.app_data.negative_methods)
         self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
-
+        
+        # Dimentional reduction ui widgets
         self.ComboBoxDimRedTechnique.clear()
         self.ComboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
-        #parent.comboBoxDimRedMethod.activated.connect()
-        self.spinBoxPCX.valueChanged.connect(lambda: self.update_dim_red_components(self.spinBoxPCX.value(),self.spinBoxPCY.value()))
-        self.spinBoxPCY.valueChanged.connect(lambda: self.update_dim_red_components(self.spinBoxPCX.value(),self.spinBoxPCY.value()))
+        self.app_data.dim_red_method = self.dimensional_reduction.dim_red_methods[0]
+        self.spinBoxPCX.valueChanged.connect(lambda: setattr(self.app_data, "dim_red_x",self.spinBoxPCX.value()))
+        self.spinBoxPCY.valueChanged.connect(lambda: setattr(self.app_data, "dim_red_y",self.spinBoxPCY.value()))
+
+        # Clustering ui widgets
+        self.spinBoxNClusters.valueChanged.connect(lambda: setattr(self.app_data, "num_clusters",self.spinBoxNClusters.value()))
+        self.comboBoxClusterDistance.clear()
+        self.comboBoxClusterDistance.addItems(self.clustering.distance_metrics)
+        self.app_data.cluster_distance = self.clustering.distance_metrics[0] 
+        self.comboBoxClusterDistance.activated.connect(lambda: setattr(self.app_data, "cluster_distance",self.comboBoxClusterDistance.currentText()))
+        # cluster exponent
+        self.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
+        self.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
+        self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
+        self.horizontalSliderClusterExponent.setTickInterval(1)
+        self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
+        self.horizontalSliderClusterExponent.sliderReleased.connect(lambda: setattr(self.app_data, "cluster_exponent",self.horizontalSliderClusterExponent.currentText()))
+
+        # starting seed
+        self.lineEditSeed.setValidator(QIntValidator(0,1000000000))
+        self.lineEditSeed.editingFinished.connect(lambda: setattr(self.app_data, "cluster_seed",self.lineEditSeed.text()))
+        self.toolButtonRandomSeed.clicked.connect(self.app_data.generate_random_seed)
+
+        # cluster method
+        self.comboBoxClusterMethod.addItems(self.dimensional_reduction.dim_red_methods)
+        self.app_data.cluster_method = self.clustering.cluster_methods[0]
+        self.comboBoxClusterMethod.activated.connect(lambda: setattr(self.app_data, "cluster_method",self.comboBoxClusterMethod.currentText()))
+
+        # Connect cluster method comboBox to slot
+        self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
 
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False, user_activated=False):
@@ -879,6 +910,83 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.actionSavePlotToTree.setEnabled(False)
 
             self.display_QV()
+
+    def group_changed(self):
+        if self.app_data.sample_id == '':
+            return
+        cluster_tab = self.mask_dock.cluster_tab
+        # block signals
+        cluster_tab.tableWidgetViewGroups.blockSignals(True)
+        cluster_tab.spinBoxClusterGroup.blockSignals(True)
+
+        # Clear the list widget
+        cluster_tab.tableWidgetViewGroups.clearContents()
+        cluster_tab.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
+
+        method = self.app_data.cluster_method
+        if method in self.data[self.app_data.sample_id].processed_data.columns:
+            if not self.data[self.app_data.sample_id].processed_data[method].empty:
+                clusters = self.data[self.app_data.sample_id].processed_data[method].dropna().unique()
+                clusters.sort()
+
+                self.app_data.cluster_dict[method]['selected_clusters'] = []
+                try:
+                    self.app_data.cluster_dict[method].pop(str(99))
+                except:
+                    pass
+
+                i = 0
+                while True:
+                    try:
+                        self.app_data.cluster_dict[method].pop(str(i))
+                        i += 1
+                    except:
+                        break
+
+
+                # set number of rows in tableWidgetViewGroups
+                # set default colors for clusters and update associated widgets
+                cluster_tab.spinBoxClusterGroup.setMinimum(1)
+                if 99 in clusters:
+                    cluster_tab.tableWidgetViewGroups.setRowCount(len(clusters)-1)
+                    cluster_tab.spinBoxClusterGroup.setMaximum(len(clusters)-1)
+
+                    hexcolor = self.plot_style.set_default_cluster_colors(mask=True)
+                else:
+                    cluster_tab.tableWidgetViewGroups.setRowCount(len(clusters))
+                    cluster_tab.spinBoxClusterGroup.setMaximum(len(clusters))
+
+                    hexcolor = self.plot_style.set_default_cluster_colors(mask=False)
+
+                for c in clusters:
+                    if c == 99:
+                        cluster_name = 'Mask'
+                        self.app_data.cluster_dict[method].update({str(c): {'name':cluster_name, 'link':[], 'color':hexcolor[-1]}})
+                        break
+                    else:
+                        cluster_name = f'Cluster {c+1}'
+
+                    # Initialize the flag
+                    self.isUpdatingTable = True
+                    cluster_tab.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
+                    cluster_tab.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
+                    # colors in table are set by self.plot_style.set_default_cluster_colors()
+                    #cluster_tab.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
+                    cluster_tab.tableWidgetViewGroups.selectRow(c)
+                    
+                    self.app_data.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
+
+                if 99 in clusters:
+                    self.app_data.cluster_dict[method]['selected_clusters'] = clusters[:-1]
+                else:
+                    self.app_data.cluster_dict[method]['selected_clusters'] = clusters
+        else:
+            print(f'(group_changed) Cluster method, ({method}) is not defined')
+
+        #print(self.app_data.cluster_dict)
+        cluster_tab.tableWidgetViewGroups.blockSignals(False)
+        cluster_tab.spinBoxClusterGroup.blockSignals(False)
+        self.isUpdatingTable = False
 
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
@@ -2442,25 +2550,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditDifferenceLowerQuantile.setEnabled(False)
                 self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
-    def update_dim_red_components(self,pc_x, pc_y):
-        """Updates the dimensional reduction components
-
-        Executes when the user changes the value of ``spinBoxPCX`` or ``spinBoxPCY``.
-
-        Sets the x and y principal components for dimensional reduction by updating
-        ``self.app_data.dim_red_x`` and ``self.app_data.dim_red_y``.
-
-        Parameters
-        ----------
-        pc_x : int
-            The principal component index for the x-axis.
-        pc_y : int
-            The principal component index for the y-axis.
-        """
-        self.app_data.dim_red_x = pc_x
-        self.app_data.dim_red_y = pc_y
-
-
     def update_neg_handling(self, method):
         """Auto-scales pixel values in map
 
@@ -2627,13 +2716,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
 
-            case 'variance' | 'vectors' | 'pca scatter' | 'pca heatmap' | 'pca score':
+            case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
+                if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+                    self.dimensional_reduction.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
-            case 'Cluster' | 'Cluster score':
+            case 'cluster' | 'cluster score':
+                method = self.app_data.cluster_method
+                if self.app_data.update_cluster_flag or \
+                        data.processed_data[method].empty or \
+                        (method not in list(data.processed_data.columns)):
+                    self.statusbar.showMessage('Computing clusters')
+                    self.clustering.compute_clusters(data, self.app_data, max_clusters = None)
+                    # enable cluster tab actions
+                    if hasattr(self, 'mask_dock'):
+                        self.mask_dock.cluster_tab.toggle_cluster_actions()
+                    # update cluster table in style menu
+                    self.group_changed()
+                    self.statusbar.showMessage('Clustering successful')
+
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)
-            
-            case 'performance':
+
+            case 'cluster performance':
+                self.clustering.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
                 canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.plot_style)
 
         self.clear_layout(self.widgetSingleView.layout())

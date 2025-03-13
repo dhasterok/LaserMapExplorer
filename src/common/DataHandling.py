@@ -288,6 +288,11 @@ class SampleObj(Observable):
             self.polygon_mask & \
             self.cluster_mask
 
+        self.dim_red_results = {}
+        self.cluster_results = {}
+        self.silhouette_scores = {}
+
+
         # autoscale and negative handling
         self.reset_data_handling()
 

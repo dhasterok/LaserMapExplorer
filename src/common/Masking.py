@@ -832,23 +832,22 @@ class ClusterTab():
         self.toggle_cluster_actions()
 
     def toggle_cluster_actions(self):
-        return
-        # if self.parent.main_window.data[self.parent.main_window.sample_id]:
-        #     self.spinBoxClusterGroup.setEnabled(True)
-        #     self.toolButtonClusterColor.setEnabled(True)
-        #     self.actionClusterColorReset.setEnabled(True)
-        #     self.actionClusterLink.setEnabled(True)
-        #     self.actionClusterDelink.setEnabled(True)
-        #     self.actionGroupMask.setEnabled(True)
-        #     self.actionGroupMaskInverse.setEnabled(True)
-        # else:
-        #     self.spinBoxClusterGroup.setEnabled(False)
-        #     self.toolButtonClusterColor.setEnabled(False)
-        #     self.actionClusterColorReset.setEnabled(False)
-        #     self.actionClusterLink.setEnabled(False)
-        #     self.actionClusterDelink.setEnabled(False)
-        #     self.actionGroupMask.setEnabled(False)
-        #     self.actionGroupMaskInverse.setEnabled(False)
+        if self.parent.main_window.data[self.parent.main_window.sample_id]:
+            self.spinBoxClusterGroup.setEnabled(True)
+            self.toolButtonClusterColor.setEnabled(True)
+            self.actionClusterColorReset.setEnabled(True)
+            self.actionClusterLink.setEnabled(True)
+            self.actionClusterDelink.setEnabled(True)
+            self.actionGroupMask.setEnabled(True)
+            self.actionGroupMaskInverse.setEnabled(True)
+        else:
+            self.spinBoxClusterGroup.setEnabled(False)
+            self.toolButtonClusterColor.setEnabled(False)
+            self.actionClusterColorReset.setEnabled(False)
+            self.actionClusterLink.setEnabled(False)
+            self.actionClusterDelink.setEnabled(False)
+            self.actionGroupMask.setEnabled(False)
+            self.actionGroupMaskInverse.setEnabled(False)
 
     def cluster_color_callback(self):
         """Updates color of a cluster

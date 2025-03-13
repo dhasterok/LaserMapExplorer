@@ -110,7 +110,7 @@ class AppData(Observable):
         else:
             self._ndim_analyte_set = list(self.ndim_list_dict.keys())[0]
 
-        self.ndim_analyte_df = pd.DataFrame(columns=['use', 'analyte'])
+        self.ndim_analyte_df = pd.DataFrame(columns=['use', 'Analyte'])
 
         self._ndim_analyte_set = self.ndim_list_dict[next(iter(self.ndim_list_dict))]
         self.ndim_quantiles = {
@@ -151,8 +151,21 @@ class AppData(Observable):
 
         self.update_cluster_flag = False
         self.update_pca_flag = False
+        
+        self.axis = ['x','y','z','c']
 
-    
+    def get_field(self, ax):
+        return getattr(self, f"{self.axis[ax]}_field")
+
+    def set_field(self, ax, value):
+        setattr(self, f"{self.axis[ax]}_field", value)
+
+    def get_field_type(self, ax):
+        return getattr(self, f"{self.axis[ax]}_field_type")
+
+    def set_field_type(self, ax, value):
+        setattr(self, f"{self.axis[ax]}_field_type", value)
+
     def validate_field_type(self, new_field_type):
         if self.sample_id == "":
             return False
@@ -255,51 +268,6 @@ class AppData(Observable):
     
         self._equalize_color_scale = flag
         self.notify_observers("equalize_color_scale", flag)
-
-    @property
-    def c_field_type(self):
-        """(str) Field type associated with colors or a histrogram"""
-        return self._c_field_type
-    
-    @c_field_type.setter
-    def c_field_type(self, new_field_type):
-        if self.debug:
-            self.logger.print(f"@c_field_type\n  old_value={self._c_field_type}\n  new_value={new_field_type}")
-        if new_field_type == self._c_field_type:
-            return
-
-        # update c_field_type
-        #self.validate_field_type(new_field_type)
-        self._c_field_type = new_field_type
-        self.notify_observers("c_field_type", new_field_type)
-
-        # update c_field
-        if new_field_type in ['', 'none', 'None']:
-            self.c_field = ''
-        else:
-            self.c_field = self.field_dict[new_field_type.lower()][0]
-
-
-    @property
-    def c_field(self):
-        """(str) Field associated with colors or a histrogram"""
-        return self._c_field
-
-    @c_field.setter
-    def c_field(self, new_field):
-        if self.debug:
-            self.logger.print(f"@c_field\n  old_value={self._c_field}\n  new_value={new_field}")
-        if new_field == self._c_field:
-            return
-
-        #self.validate_field(self._c_field_type, new_field)
-        self._c_field = new_field
-        self.notify_observers("c_field", new_field)
-
-        # update hist_bin_width
-        self.update_num_bins = False
-        self.update_hist_bin_width()
-        self.update_num_bins = True
 
     @property
     def default_hist_num_bins(self):
@@ -478,7 +446,7 @@ class AppData(Observable):
         if new_field_type != self._x_field_type:
             self.validate_field_type(new_field_type)
             self._x_field_type = new_field_type
-            self.notify_observers("x_field_type", new_field_type)
+            self.notify_observers("x_field_type", 0, new_field_type)
 
     @property
     def y_field_type(self):
@@ -492,7 +460,7 @@ class AppData(Observable):
         if new_field_type != self._y_field_type:
             self.validate_field_type(new_field_type)
             self._y_field_type = new_field_type
-            self.notify_observers("y_field_type", new_field_type)
+            self.notify_observers("y_field_type", 1, new_field_type)
 
     @property
     def z_field_type(self):
@@ -506,7 +474,31 @@ class AppData(Observable):
         if new_field_type != self._z_field_type:
             self.validate_field_type(new_field_type)
             self._z_field_type = new_field_type
-            self.notify_observers("z_field_type", new_field_type)
+            self.notify_observers("z_field_type", 2, new_field_type)
+
+    @property
+    def c_field_type(self):
+        """(str) Field type associated with colors or a histrogram"""
+        return self._c_field_type
+    
+    @c_field_type.setter
+    def c_field_type(self, new_field_type):
+        if self.debug:
+            self.logger.print(f"@c_field_type\n  old_value={self._c_field_type}\n  new_value={new_field_type}")
+        if new_field_type == self._c_field_type:
+            return
+
+        # update c_field_type
+        #self.validate_field_type(new_field_type)
+        self._c_field_type = new_field_type
+        self.notify_observers("c_field_type", 3, new_field_type)
+
+        # update c_field
+        if new_field_type in ['', 'none', 'None']:
+            self.c_field = ''
+        else:
+            self.c_field = self.field_dict[new_field_type][0]
+
 
     @property
     def x_field(self):
@@ -520,7 +512,7 @@ class AppData(Observable):
             return
     
         self._x_field = new_field
-        self.notify_observers("x_field", new_field)
+        self.notify_observers("x_field", 0, new_field)
     
     @property
     def y_field(self):
@@ -534,7 +526,7 @@ class AppData(Observable):
             return
     
         self._y_field = new_field
-        self.notify_observers("y_field", new_field)
+        self.notify_observers("y_field", 1, new_field)
     
     @property
     def z_field(self):
@@ -548,7 +540,23 @@ class AppData(Observable):
             return
     
         self._z_field = new_field
-        self.notify_observers("z_field", new_field)
+        self.notify_observers("z_field", 2, new_field)
+
+    @property
+    def c_field(self):
+        """(str) Field associated with colors or a histrogram"""
+        return self._c_field
+
+    @c_field.setter
+    def c_field(self, new_field):
+        if self.debug:
+            self.logger.print(f"@c_field\n  old_value={self._c_field}\n  new_value={new_field}")
+        if new_field == self._c_field:
+            return
+
+        #self.validate_field(self._c_field_type, new_field)
+        self._c_field = new_field
+        self.notify_observers("c_field", 3, new_field)
 
     @property
     def scatter_preset(self):
@@ -939,7 +947,7 @@ class AppData(Observable):
     def selected_analytes(self):
         """Gets the list of selected analytes for use in analyses."""
         if self.data and self.sample_id != '':
-            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
 
         return None
 
@@ -976,18 +984,18 @@ class AppData(Observable):
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
+                    set_fields = data.match_attributes({'data_type': 'Analyte', 'use': True})
                 else:
-                    set_fields = data.match_attribute('data_type', 'analyte')
+                    set_fields = data.match_attribute('data_type', 'Analyte')
             case 'Ratio' | 'Ratio (normalized)':
                 if filter == 'used':
-                    set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
+                    set_fields = data.match_attributes({'data_type': 'Ratio', 'use': True})
                 else:
-                    set_fields = data.match_attribute('data_type', 'ratio')
+                    set_fields = data.match_attribute('data_type', 'Ratio')
             case 'None':
                 return []
             case _:
-                set_fields = data.match_attribute('data_type', set_name.lower())
+                set_fields = data.match_attribute('data_type', set_name)
 
         return set_fields
 

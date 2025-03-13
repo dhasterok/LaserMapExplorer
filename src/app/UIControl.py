@@ -47,24 +47,24 @@ class UIFieldLogic():
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
+                if 'Cluster' in data_type_dict:
+                    field_list = ['Cluster']
                 else:
                     field_list = []
             case 'cluster score':
-                if 'cluster score' in data_type_dict:
-                    field_list = ['cluster score']
+                if 'Cluster score' in data_type_dict:
+                    field_list = ['Cluster score']
                 else:
                     field_list = []
             case 'cluster':
-                if 'cluster' in data_type_dict:
-                    field_list = ['cluster']
+                if 'Cluster' in data_type_dict:
+                    field_list = ['Cluster']
                 else:
-                    field_list = ['cluster score']
+                    field_list = ['Cluster score']
             case 'cluster performance':
                 field_list = []
             case 'pca score':
-                if 'pca score' in data_type_dict:
+                if 'PCA score' in data_type_dict:
                     field_list = ['PCA score']
                 else:
                     field_list = []
@@ -74,17 +74,17 @@ class UIFieldLogic():
                 field_list = ['Analyte', 'Analyte (normalized)']
 
                 # add check for ratios
-                if 'ratio' in data_type_dict:
+                if 'Ratio' in data_type_dict:
                     field_list.append('Ratio')
                     field_list.append('Ratio (normalized)')
 
                 if 'pca score' in data_type_dict:
                     field_list.append('PCA score')
 
-                if 'cluster' in data_type_dict:
+                if 'Cluster' in data_type_dict:
                     field_list.append('Cluster')
 
-                if 'cluster score' in data_type_dict:
+                if 'Cluster score' in data_type_dict:
                     field_list.append('Cluster score')
 
         # add None to list?
@@ -165,14 +165,14 @@ class UIFieldLogic():
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
                 if filter == 'used':
-                    set_fields = self.data.processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+                    set_fields = self.data.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
                 else:
-                    set_fields = self.data.processed_data.match_attribute('data_type', 'analyte')
+                    set_fields = self.data.processed_data.match_attribute('data_type', 'Analyte')
             case 'Ratio' | 'Ratio (normalized)':
                 if filter == 'used':
-                    set_fields = self.data.processed_data.match_attributes({'data_type': 'ratio', 'use': True})
+                    set_fields = self.data.processed_data.match_attributes({'data_type': 'Ratio', 'use': True})
                 else:
-                    set_fields = self.data.processed_data.match_attribute('data_type', 'ratio')
+                    set_fields = self.data.processed_data.match_attribute('data_type', 'Ratio')
             case 'None':
                 return []
             case _:

@@ -44,8 +44,8 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         self.norm_dict = {}
 
-        self.analytes = self.data.match_attribute('data_type','analyte')
-        self.ratio = self.data.match_attribute('data_type','ratio')
+        self.analytes = self.data.match_attribute('data_type','Analyte')
+        self.ratio = self.data.match_attribute('data_type','Ratio')
         for analyte in self.analytes+self.ratio:
             self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
 

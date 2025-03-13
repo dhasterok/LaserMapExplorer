@@ -118,7 +118,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
         'tree': field_type,
         'sample_id': app_data.sample_id,
         'plot_name': field,
-        'plot_type': 'analyte map',
+        'plot_type': 'field map',
         'field_type': field_type,
         'field': field,
         'figure': canvas,
@@ -688,13 +688,13 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
 
     match plot_style.plot_type:
         case 'histogram':
-            if processed or app_data.c_field_type != 'Analyte':
-                scatter_dict['x'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.xscale)
+            if processed or app_data.x_field_type != 'Analyte':
+                scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale)
             else:
-                scatter_dict['x'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.xscale, processed=False)
-        case 'PCA scatter' | 'PCA heatmap':
-            scatter_dict['x'] = data.get_vector('PCA score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
-            scatter_dict['y'] = data.get_vector('PCA score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
+                scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale, processed=False)
+        case 'pca scatter' | 'pca heatmap':
+            scatter_dict['x'] = data.get_vector('pca score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
+            scatter_dict['y'] = data.get_vector('pca score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
             if (app_data.c_field_type is None) or (app_data.c_field != ''):
                 scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field)
         case _:
@@ -1373,7 +1373,7 @@ def plot_ndim(parent, data, app_data, plot_style):
         'sample_id': app_data.sample_id,
         'plot_name': plot_name,
         'plot_type': plot_type,
-        'field_type': 'analyte',
+        'field_type': 'Analyte',
         'field': app_data.ndim_list,
         'figure': canvas,
         'style': plot_style.style_dict[plot_style.plot_type],

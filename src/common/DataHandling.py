@@ -1,4 +1,4 @@
-import re, copy
+import re, os, copy
 from src.app.config import DEBUG_PLOT
 import numpy as np
 import pandas as pd
@@ -116,28 +116,7 @@ class SampleObj(Observable):
         | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
         | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
         | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
-    processed_data
-        'analyte_info' : (dataframe) -- holds information regarding each analyte in sample id,
-            | 'analytes' (str) -- name of analyte
-            | 'sample_id' (str) -- sample id
-            | 'norm' (str) -- type of normalisation used(linear,log,logit)
-            | 'upper_bound' (float) -- upper bound for autoscaling/scaling
-            | 'lower_bound' (float) -- lower bound for autoscaling/scaling
-            | 'd_l_bound' (float) -- difference lower bound for autoscaling
-            | 'd_u_bound' (float) -- difference upper bound for autoscaling
-            | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-            | 'use' (bool) -- indicates whether the analyte is being used in the analysis
-        'ratio_info' : (dataframe) -- holds information  regarding computerd ratios 
-            | 'analyte_1' (str) -- name of analyte at numerator of ratio
-            | 'analyte_2' (str) -- name of analyte at denominator of ratio
-            | 'norm' (str) -- type of normalisation used(linear,log,logit)
-            | 'upper_bound' (float) --  upper bound for autoscaling/scaling
-            | 'lower_bound' (float) --  lower bound for autoscaling/scaling
-            | 'd_l_bound' (float) --  difference lower bound for autoscaling
-            | 'd_u_bound' (float) --  difference upper bound for autoscaling
-            | 'auto_scale' (bool) -- indicates whether auto_scaling is switched on for that analyte, use percentile bounds if False
-            | 'use' (bool) -- indicates whether the analyte is being used in the analysis
-        
+
         | 'crop' : () --
         | 'x_max' : () --
         | 'x_min' : () --
@@ -151,7 +130,6 @@ class SampleObj(Observable):
         | 'raw_data': () -- 
         | 'cropped_raw_data': () --
             
-        | 'ratio_info' : (dataframe) --
         | 'crop' : () --
         | 'x_max' : () --
         | 'x_min' : () --
@@ -161,7 +139,6 @@ class SampleObj(Observable):
         | 'crop_x_min' : () --
         | 'crop_y_max' : () --
         | 'crop_y_min' : () --
-        | 'processed data': () --
         | 'raw_data': () -- 
         | 'cropped_raw_data': () -- 
         | 'raw data' : (pandas.DataFrame) --
@@ -176,17 +153,13 @@ class SampleObj(Observable):
         | 'norm' : () --
         | 'analysis data' : (pandas.DataFrame) --
         | 'cropped_raw_data' : (pandas.DataFrame) --
-        | 'computed_data' : (dict) --
-            | 'PCA Score' : (pandas.DataFrame) --
-            | 'Cluster' : (pandas.DataFrame) --
-            | 'Cluster Score' : (pandas.DataFrame) --
-        | 'processed_data' : (pandas.DataFrame) --
 
-        | 'crop_mask' : (MaskObj) -- mask created from cropped axes.
-        | 'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
-        | 'polygon_mask' : (MaskObj) -- mask created from selected polygons.
-        | 'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
-        | 'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
+    'processed_data' : (pandas.DataFrame) --
+    'crop_mask' : (MaskObj) -- mask created from cropped axes.
+    'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
+    'polygon_mask' : (MaskObj) -- mask created from selected polygons.
+    'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
+    'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
     def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, debug=False):
         super().__init__()
@@ -235,7 +208,7 @@ class SampleObj(Observable):
         self.axis_dict = {}
 
         # data types stored in AttributeDataFrames.column_attributes['data_type']
-        self._valid_data_types = ['analyte','ratio','computed','special','pca score','cluster','cluster score']
+        self._valid_data_types = ['Analyte','Ratio','Computed','Special','PCA score','Cluster','Cluster score']
 
         # matrix order set by x-y sorting, which changes when swapping axes
         self.is_swapped = False
@@ -256,12 +229,17 @@ class SampleObj(Observable):
             self.logger.print("reset_data")
 
         # load data
+        metadata_path = self.file_path.replace('.lame.','.lmdf.')
+        metadata_df = None
+        if os.path.exists(metadata_path):
+            metadata_df = pd.read_csv(self.file_path, engine='c')
+
         sample_df = pd.read_csv(self.file_path, engine='c')
         sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
 
         # determine column data types
-        # initialize all as 'analyte'
-        data_type = ['analyte']*sample_df.shape[1]
+        # initialize all as 'Analyte'
+        data_type = ['Analyte']*sample_df.shape[1]
 
         # identify coordinate columns
         data_type[sample_df.columns.get_loc('X')] = 'coordinate'
@@ -276,7 +254,7 @@ class SampleObj(Observable):
         # Update the data_type list for ratio columns by finding their index positions
         for col in ratio_columns:
             col_index = sample_df.columns.get_loc(col)
-            data_type[col_index] = 'ratio'
+            data_type[col_index] = 'Ratio'
 
         # use an ExtendedDF.AttributeDataFrame to add attributes to the columns
         # may includes analytes, ratios, and special data
@@ -330,7 +308,7 @@ class SampleObj(Observable):
         self.raw_data.set_attribute(coordinate_columns, 'units', None)
         self.raw_data.set_attribute(coordinate_columns, 'use', False)
 
-        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='analyte')
+        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='Analyte')
         self.raw_data.set_attribute(analyte_columns, 'units', None)
         self.raw_data.set_attribute(analyte_columns, 'use', True)
         # quantile bounds
@@ -343,7 +321,7 @@ class SampleObj(Observable):
         self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
         self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
 
-        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='ratio')
+        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='Ratio')
         self.raw_data.set_attribute(analyte_columns, 'units', None)
         self.raw_data.set_attribute(analyte_columns, 'use', True)
         # quantile bounds
@@ -664,7 +642,7 @@ class SampleObj(Observable):
 
         if new_field is None:
             # if new_field is None, use first analyte field
-            field = self.processed_data.match_attribute('data_type','analyte')[0]
+            field = self.processed_data.match_attribute('data_type','Analyte')[0]
 
             self.negative_method = self.processed_data.get_attribute(field, 'negative_method')
             self.outlier_method = self.processed_data.get_attribute(field, 'outlier_method')
@@ -963,7 +941,7 @@ class SampleObj(Observable):
         # Generate the ratio column name
         ratio_name = f'{analyte_1} / {analyte_2}'
 
-        self.add_columns('ratio',ratio_name,ratio_array)
+        self.add_columns('Ratio',ratio_name,ratio_array)
         self.processed_data.set_attribute(ratio_name, 'use', True)
 
     def cluster_data(self):
@@ -976,8 +954,8 @@ class SampleObj(Observable):
 
         # Step 1: Clustering
         # ------------------
-        # Select columns where 'data_type' attribute is 'analyte'
-        analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'analyte') 
+        # Select columns where 'data_type' attribute is 'Analyte'
+        analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'Analyte') 
             and (self.raw_data.get_attribute(col, 'use') is not None
             and self.raw_data.get_attribute(col, 'use')) ]
 
@@ -1053,19 +1031,19 @@ class SampleObj(Observable):
         analyte_columns = []
         ratio_columns = []
         if (field == None) or (field == 'all'):
-            # Select columns where 'data_type' attribute is 'analyte'
-            analyte_columns = self.raw_data.match_attributes({'data_type': 'analyte', 'use': True})
-            # analyte_columns = self.raw_data.match_attribute('data_type', 'analyte')
+            # Select columns where 'data_type' attribute is 'Analyte'
+            analyte_columns = self.raw_data.match_attributes({'data_type': 'Analyte', 'use': True})
+            # analyte_columns = self.raw_data.match_attribute('data_type', 'Analyte')
             # analyte_columns = [col for col in analyte_columns if self.raw_data.get_attribute(col, 'use') is True]
-            # analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'analyte') 
+            # analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'Analyte') 
                 # and (self.raw_data.get_attribute(col, 'use') is not None
                 # and self.raw_data.get_attribute(col, 'use')) ]
 
-            # Select columns where 'data_type' attribute is 'ratio'
-            ratio_columns = self.raw_data.match_attributes({'data_type': 'ratio', 'use': True})
-            # ratio_columns = self.raw_data.match_attribute('data_type', 'ratio')
+            # Select columns where 'data_type' attribute is 'Ratio'
+            ratio_columns = self.raw_data.match_attributes({'data_type': 'Ratio', 'use': True})
+            # ratio_columns = self.raw_data.match_attribute('data_type', 'Ratio')
             # ratio_columns = [col for col in ratio_columns if self.raw_data.get_attribute(col, 'use') is True]
-            # ratio_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'ratio') 
+            # ratio_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'Ratio') 
             #     and (self.raw_data.get_attribute(col, 'use') is not None
             #     and self.raw_data.get_attribute(col, 'use')) ]
 
@@ -1100,7 +1078,7 @@ class SampleObj(Observable):
         # Compute ratios not included in raw_data
         # ---------------------------------------
         if ((field is None) or (field == 'all')) and (attribute_df is not None):
-            ratios = attribute_df.columns[(data_type == 'ratio').any()]
+            ratios = attribute_df.columns[(data_type == 'Ratio').any()]
 
             ratios_not_in_raw_data = [col for col in ratios if col not in ratio_columns]
 
@@ -1366,7 +1344,7 @@ class SampleObj(Observable):
         if field is not None: #if normalising single analyte
             self.processed_data.set_attribute(field,'norm',norm)
         else: #if normalising all analytes in sample
-            self.processed_data.set_attribute(self.processed_data.match_attribute('data_type','analyte'),'norm',norm)
+            self.processed_data.set_attribute(self.processed_data.match_attribute('data_type','Analyte'),'norm',norm)
 
         self.prep_data(field)
 
@@ -1382,8 +1360,8 @@ class SampleObj(Observable):
         field : str
             Name of field to plot. By default `None`.
         field_type : str, optional
-            Type of field to plot. Types include 'Analyte', 'Ratio', 'pca', 'Cluster', 'Cluster Score',
-            'Special', 'computed'. By default `'Analyte'`
+            Type of field to plot. Types include 'Analyte', 'Ratio', 'PCA', 'Cluster', 'Cluster score',
+            'Special', 'Computed'. By default `'Analyte'`
         norm : str
             Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
             data are returned with a linear scale.  By default `False`.
@@ -1457,7 +1435,7 @@ class SampleObj(Observable):
                     with np.errstate(divide='ignore', invalid='ignore'):
                         df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
 
-            case _:#'PCA Score' | 'Cluster' | 'Cluster Score' | 'Special' | 'Computed':
+            case _:#'PCA score' | 'Cluster' | 'Cluster score' | 'Special' | 'Computed':
                 df['array'] = self.processed_data[field].values
             
         # ----begin debugging----
@@ -1482,14 +1460,14 @@ class SampleObj(Observable):
             return
 
         # return normalised, filtered data with that will be used for analysis
-        #use_analytes = self.data[self.sample_id]['analyte_info'].loc[(self.data[self.sample_id]['analyte_info']['use']==True), 'analytes'].values
-        use_analytes = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+        #use_analytes = self.data[self.sample_id]['Analyte_info'].loc[(self.data[self.sample_id]['Analyte_info']['use']==True), 'Analytes'].values
+        use_analytes = self.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
 
         df = self.processed_data[use_analytes]
 
         #perform scaling for groups of analytes with same norm parameter
         for norm in ['log', 'logit']:
-            analyte_set = self.processed_data.match_attributes({'data_type': 'analyte', 'use': True, 'norm': norm})
+            analyte_set = self.processed_data.match_attributes({'data_type': 'Analyte', 'use': True, 'norm': norm})
             if not analyte_set:
                 continue
 
@@ -1701,7 +1679,7 @@ class SampleObj(Observable):
     
     def sort_data(self, method):
         # retrieve analyte_list
-        analyte_list = self.processed_data.match_attribute('data_type','analyte')
+        analyte_list = self.processed_data.match_attribute('data_type','Analyte')
 
         # sort analyte sort based on method chosen by user
         sorted_analyte_list = sort_analytes(method, analyte_list)
@@ -1795,26 +1773,26 @@ class SampleObj(Observable):
             self.prep_data(sample_id)
             
 
-        else:
-            if self.apply_outlier_to_all:
-                # Apply to all ratios in sample
-                self.processed_data['ratio_info']['auto_scale'] = auto_scale
-                self.processed_data['ratio_info']['upper_bound']= ub
-                self.processed_data['ratio_info']['lower_bound'] = lb
-                self.processed_data['ratio_info']['d_l_bound'] = d_lb
-                self.processed_data['ratio_info']['d_u_bound'] = d_ub
-                self.prep_data(sample_id)
-            else:
-                self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['analyte_1']==analyte_1)
-                                            & (self.processed_data['ratio_info']['analyte_2']==analyte_2),'auto_scale']  = auto_scale
-                self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['analyte_1']==analyte_1)
-                                            & (self.processed_data['ratio_info']['analyte_2']==analyte_2),
-                                            ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
-                self.prep_data(sample_id, analyte_1,analyte_2)
+        # else:
+        #     if self.apply_outlier_to_all:
+        #         # Apply to all ratios in sample
+        #         self.processed_data['ratio_info']['auto_scale'] = auto_scale
+        #         self.processed_data['ratio_info']['upper_bound']= ub
+        #         self.processed_data['ratio_info']['lower_bound'] = lb
+        #         self.processed_data['ratio_info']['d_l_bound'] = d_lb
+        #         self.processed_data['ratio_info']['d_u_bound'] = d_ub
+        #         self.prep_data(sample_id)
+        #     else:
+        #         self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['Analyte_1']==analyte_1)
+        #                                     & (self.processed_data['ratio_info']['Analyte_2']==analyte_2),'auto_scale']  = auto_scale
+        #         self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['Analyte_1']==analyte_1)
+        #                                     & (self.processed_data['ratio_info']['Analyte_2']==analyte_2),
+        #                                     ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+        #         self.prep_data(sample_id, analyte_1,analyte_2)
         return True  # User chose to proceed
 
     def sort_data(self, method):
         # retrieve analyte_list
-        analyte_list = self.processed_data.match_attribute('data_type','analyte')
+        analyte_list = self.processed_data.match_attribute('data_type','Analyte')
         sorted_analyte_list = sort_analytes(method, analyte_list)
         return analyte_list, sorted_analyte_list

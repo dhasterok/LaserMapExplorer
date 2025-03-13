@@ -695,14 +695,14 @@ class Notes(CustomDockWidget):
                     return
 
                 # Retrieve analytes matching specified attributes
-                analytes = self.parent.data[self.parent.sample_id].processed_data.match_attributes({'data_type': 'analyte', 'use': True})
+                analytes = self.parent.data[self.parent.sample_id].processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
                 analytes = np.insert(analytes, 0, 'lambda')  # Insert 'lambda' at the start of the analytes array
 
                 # Calculate explained variance in percentage
                 explained_variance = self.parent.pca_results.explained_variance_ratio_ * 100
 
                 # Retrieve PCA score headers matching the attribute condition
-                header = self.parent.data[self.parent.sample_id].processed_data.match_attributes({'data_type': 'pca score'})
+                header = self.parent.data[self.parent.sample_id].processed_data.match_attributes({'data_type': 'PCA score'})
 
                 # Create a matrix with explained variance and PCA components
                 matrix = np.vstack([explained_variance, self.parent.pca_results.components_])

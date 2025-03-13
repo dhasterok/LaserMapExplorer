@@ -92,7 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.duplicate_plot_info = None
         self.profile_state = False # True if profiling toggle is set to on
         self.polygon_state = False # True if polygon toggle is set to on
-        self.plot_dict = {} # a dictionary that keeps track of UI data for each toolBox page
+        self.control_settings = {} # a dictionary that keeps track of UI data for each toolBox page
 
         # setup initial logging options
         self.logger = LogCounter()
@@ -316,31 +316,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
 
 
-        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=False, global_list=True, user_activated=True)
-        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: setattr(self.app_data, "c_field_type", self.comboBoxFieldTypeC.currentText()))
-        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldIndex, add_none=False, user_activated=True)
-        #self.comboBoxFieldC.activated.connect(lambda index: print(f"Activated: {index}"))
-        #self.comboBoxFieldC.currentTextChanged.connect(lambda text: print(f"Text changed: {text}"))
-        #self.comboBoxFieldC.activated.connect(lambda: print(f"{self.app_data.c_field}"))
-        #self.comboBoxFieldC.activated.connect(self.plot_style.update_c_field_combobox)
-        self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
+        pt_dict = self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]
+        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=pt_dict['add_none'][3], global_list=True, user_activated=True)
+        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=3))
+        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldC, add_none=pt_dict['add_none'][3], user_activated=True)
+        #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
+        self.comboBoxFieldC.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=3))
         # update spinbox associated with map/color field
-        self.spinBoxFieldIndex.valueChanged.connect(self.c_field_spinbox_changed)
+        self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))
 
-        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, user_activated=True)
-        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field_type", self.comboBoxFieldTypeX.currentText()))
-        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=False, user_activated=True)
-        self.comboBoxFieldX.currentTextChanged.connect(lambda: setattr(self.app_data, "x_field", self.comboBoxFieldX.currentText()))
+        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, add_none=pt_dict['add_none'][0], user_activated=True)
+        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=0))
+        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=pt_dict['add_none'][0], user_activated=True)
+        self.comboBoxFieldX.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=0))
+        # update spinbox associated with map/color field
+        self.spinBoxFieldX.valueChanged.connect(lambda: self.field_spinbox_changed(ax=0))
 
-        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, user_activated=True)
-        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field_type", self.comboBoxFieldTypeY.currentText()))
-        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=False, user_activated=True)
-        self.comboBoxFieldY.currentTextChanged.connect(lambda: setattr(self.app_data, "y_field", self.comboBoxFieldY.currentText()))
+        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, add_none=pt_dict['add_none'][1], user_activated=True)
+        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=1))
+        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=pt_dict['add_none'][1], user_activated=True)
+        self.comboBoxFieldY.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=1))
+        # update spinbox associated with map/color field
+        self.spinBoxFieldY.valueChanged.connect(lambda: self.field_spinbox_changed(ax=1))
 
-        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, user_activated=True)
-        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field_type", self.comboBoxFieldTypeZ.currentText()))
-        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=True, user_activated=True)
-        self.comboBoxFieldZ.currentTextChanged.connect(lambda: setattr(self.app_data, "z_field", self.comboBoxFieldZ.currentText()))
+        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, add_none=pt_dict['add_none'][2], user_activated=True)
+        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=2))
+        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=pt_dict['add_none'][2], user_activated=True)
+        self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
 
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
 
@@ -418,32 +420,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if global_list:
             new_list = list(field_dict.keys())
             if 'normalized' not in new_list:
-                new_list.append('analyte (normalized)')
-                if 'ratio' in new_list:
-                    new_list.append('ratio (normalized)')
+                new_list.append('Analyte (normalized)')
+                if 'Ratio' in new_list:
+                    new_list.append('Ratio (normalized)')
         else:
             # set the list based on plot_style.plot_type and available field types
             match self.plot_style.plot_type.lower():
                 case 'correlation' | 'histogram' | 'tec':
-                    if 'cluster' in field_dict.keys():
+                    if 'Cluster' in field_dict.keys():
                         new_list = ['Cluster']
                     else:
                         new_list = []
                 case 'cluster score':
-                    if 'cluster score' in field_dict.keys():
+                    if 'Cluster score' in field_dict.keys():
                         new_list = ['Cluster score']
                     else:
                         new_list = []
                 case 'cluster':
-                    if 'cluster' in field_dict.keys():
+                    if 'Cluster' in field_dict.keys():
                         new_list = ['Cluster']
                     else:
                         new_list = ['Cluster score']
-                case 'cluster performance':
+                case 'performance':
                     new_list = []
                 case 'pca score':
                     if 'pca score' in field_dict.keys():
-                        new_list = ['PCA score']
+                        new_list = ['pca score']
                     else:
                         new_list = []
                 case 'ternary map':
@@ -453,17 +455,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     new_list = ['Analyte', 'Analyte (normalized)']
 
                     # add check for ratios
-                    if 'ratio' in field_dict.keys():
+                    if 'Ratio' in field_dict.keys():
                         new_list.append('Ratio')
                         new_list.append('Ratio (normalized)')
 
-                    if 'pca score' in field_dict.keys():
+                    if 'PCA score' in field_dict.keys():
                         new_list.append('PCA score')
 
-                    if 'cluster' in field_dict.keys():
+                    if 'Cluster' in field_dict.keys():
                         new_list.append('Cluster')
 
-                    if 'cluster score' in field_dict.keys():
+                    if 'Cluster score' in field_dict.keys():
                         new_list.append('Cluster score')
 
         # add 'None' as first option if required.
@@ -500,11 +502,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if old_field_type not in new_list:
             childbox.clear()
-            childbox.addItems(field_dict[new_list[0].lower()])
+            childbox.addItems(field_dict[new_list[0]])
             childbox.setCurrentIndex(0)
-        elif childbox.currentText() not in field_dict[old_field_type.lower()]:
+        elif childbox.currentText() not in field_dict[old_field_type]:
             childbox.clear()
-            childbox.addItems(field_dict[old_field_type.lower()])
+            childbox.addItems(field_dict[old_field_type])
             childbox.setCurrentIndex(0)
             
     def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, add_none=False, user_activated=False):
@@ -524,7 +526,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         old_list = childbox.allItems()
         # if no parent combobox supplied, then assume field type is `analyte`
         if parentbox is None:
-            field_list = self.app_data.field_dict['analyte']
+            field_list = self.app_data.field_dict['Analyte']
 
         # if parent combobox has no field type selected, clear childbox and return
         elif parentbox.currentText() in ['', 'none', 'None']:
@@ -536,7 +538,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_type = parentbox.currentText()
             if 'normalized' in field_type:
                 field_type = field_type.replace(' (normalized)','')
-            field_list = self.app_data.field_dict[field_type.lower()]
+            field_list = self.app_data.field_dict[field_type]
 
         # add 'None' as first option if required
         if add_none:
@@ -573,22 +575,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
 
         if not enable:
-            self.labelX.setVisible(False)
-            self.comboBoxFieldTypeX.setVisible(False)
-            self.comboBoxFieldX.setVisible(False)
-
-            self.labelY.setVisible(False)
-            self.comboBoxFieldTypeY.setVisible(False)
-            self.comboBoxFieldY.setVisible(False)
-
-            self.labelZ.setVisible(False)
-            self.comboBoxFieldTypeZ.setVisible(False)
-            self.comboBoxFieldZ.setVisible(False)
-
-            self.labelC.setVisible(False)
-            self.comboBoxFieldTypeC.setVisible(False)
-            self.comboBoxFieldC.setVisible(False)
-            self.spinBoxFieldIndex.setVisible(False)
+            self.plot_style.init_field_widgets(self.plot_style.axis_widget_dict)
 
             self.PreprocessPage.setEnabled(False)
             self.SelectAnalytePage.setEnabled(False)
@@ -645,7 +632,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # update the plot type comboBox options
         self.update_plot_type_combobox_options()
-        self.plot_style.plot_type = self.plot_dict[tab_id]['plot_list'][self.plot_dict[tab_id]['current_index']]
+        self.plot_style.plot_type = self.control_settings[tab_id]['plot_list'][self.control_settings[tab_id]['current_index']]
 
         match self.plot_style.plot_type:
             case 'cluster' | 'cluster score':
@@ -653,7 +640,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.spinBoxClusterMax.hide()
                 self.labelNClusters.show()
                 self.spinBoxNClusters.show()
-            case 'cluster performance':
+            case 'performance':
                 self.labelClusterMax.show()
                 self.spinBoxClusterMax.show()
                 self.labelNClusters.hide()
@@ -1006,7 +993,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         data = self.data[self.app_data.sample_id].processed_data
 
-        columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
+        columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
         nan_count = any(np.isnan(data[columns]))
         
@@ -1020,14 +1007,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("sample_id", self.update_sample_id_combobox)
         app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
         app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
-        app_data.add_observer("x_field_type", self.update_x_field_type_combobox)
-        app_data.add_observer("y_field_type", self.update_y_field_type_combobox)
-        app_data.add_observer("z_field_type", self.update_z_field_type_combobox)
-        app_data.add_observer("c_field_type", self.update_c_field_type_combobox)
-        app_data.add_observer("x_field", self.update_x_field_combobox)
-        app_data.add_observer("y_field", self.update_y_field_combobox)
-        app_data.add_observer("z_field", self.update_z_field_combobox)
-        app_data.add_observer("c_field", self.plot_style.update_c_field_combobox)
+        app_data.add_observer("x_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("y_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("z_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("c_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("x_field", self.plot_style.update_field)
+        app_data.add_observer("y_field", self.plot_style.update_field)
+        app_data.add_observer("z_field", self.plot_style.update_field)
+        app_data.add_observer("c_field", self.plot_style.update_field)
         app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
         app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
         app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
@@ -1144,7 +1131,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Resets the dictionaries for the Control Toolbox and plot types.
         
         The dictionary ``self.left_tab retains the index for each of the Control Toolbox pages.  This way they
-        can be easily referenced by name.  At the same time, the dictionary ``self.plot_dict retains the plot
+        can be easily referenced by name.  At the same time, the dictionary ``self.control_settings retains the plot
         types available to each page of the control toolbox and the override options when polygons or profiles
         are active."""
         # create diciontary for left tabs
@@ -1153,34 +1140,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.left_tab.update({'special': None})
 
         # create dictionaries for default plot styles
-        self.plot_dict = {-1: {'current_index': 0, 'plot_list': ['analyte map'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}} # -1 is for digitizing polygons and profiles
+        self.control_settings = {-1: {'current_index': 0, 'plot_list': ['field map'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}} # -1 is for digitizing polygons and profiles
 
         for tid in range(0,self.toolBox.count()):
             match self.toolBox.itemText(tid).lower():
                 case 'preprocess':
                     self.left_tab.update({'process': tid})
-                    self.plot_dict.update({self.left_tab['process']: {'current_index': 0, 'plot_list': ['analyte map', 'gradient map'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['process']: {'current_index': 0, 'plot_list': ['field map', 'gradient map'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'field viewer':
                     self.left_tab.update({'sample': tid})
-                    self.plot_dict.update({self.left_tab['sample']: {'current_index': 0, 'plot_list': ['analyte map', 'histogram', 'correlation'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['sample']: {'current_index': 0, 'plot_list': ['field map', 'histogram', 'correlation'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'spot data':
                     self.left_tab.update({'spot': tid})
-                    self.plot_dict.update({self.left_tab['spot']: {'current_index': 0, 'plot_list': ['analyte map', 'gradient map'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['spot']: {'current_index': 0, 'plot_list': ['field map', 'gradient map'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'scatter and heatmaps':
                     self.left_tab.update({'scatter': tid})
-                    self.plot_dict.update({self.left_tab['scatter']: {'current_index': 0, 'plot_list': ['scatter', 'heatmap', 'ternary map'], 'axes': [True, True, True, True], 'label': ['X','Y','Z','Color'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['scatter']: {'current_index': 0, 'plot_list': ['scatter', 'heatmap', 'ternary map'], 'axes': [True, True, True, True], 'label': ['X','Y','Z','Color'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'n-dim':
                     self.left_tab.update({'ndim': tid})
-                    self.plot_dict.update({self.left_tab['ndim']: {'current_index': 0, 'plot_list': ['TEC', 'Radar'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['ndim']: {'current_index': 0, 'plot_list': ['TEC', 'Radar'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'dimensional reduction':
                     self.left_tab.update({'multidim': tid})
-                    self.plot_dict.update({self.left_tab['multidim']: {'current_index': 0, 'plot_list': ['variance','vectors','PCA scatter','PCA heatmap','PCA score'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['multidim']: {'current_index': 0, 'plot_list': ['variance','vectors','pca scatter','pca heatmap','pca score'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'clustering':
                     self.left_tab.update({'cluster': tid})
-                    self.plot_dict.update({self.left_tab['cluster']: {'current_index': 0, 'plot_list': ['cluster', 'cluster score', 'cluster performance'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['cluster']: {'current_index': 0, 'plot_list': ['cluster', 'cluster score', 'performance'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'p-t-t functions':
                     self.left_tab.update({'special': tid})
-                    self.plot_dict.update({self.left_tab['special']: {'current_index': 0, 'plot_list': ['analyte map', 'gradient map', 'cluster score', 'PCA score', 'profile'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['special']: {'current_index': 0, 'plot_list': ['field map', 'gradient map', 'cluster score', 'pca score', 'profile'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
 
 
     def reindex_style_tab(self):
@@ -1312,8 +1299,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_ui_on_sample_change()
         self.update_widget_data_on_sample_change()
 
-        if self.plot_style.plot_type != 'analyte map':
-            self.plot_style.plot_type = 'analyte map'
+        if self.plot_style.plot_type != 'field map':
+            self.plot_style.plot_type = 'field map'
 
         # allow plots to be updated again
         self.plot_flag = True
@@ -1325,8 +1312,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.logger_options['UI']:
             self.logger.print(f"update_ui_on_sample_change\n")
         # reset all plot types on change of tab to the first option
-        for key in self.plot_dict.keys():
-            self.plot_dict[key]['current_index'] = 0
+        for key in self.control_settings.keys():
+            self.control_settings[key]['current_index'] = 0
 
         self.init_tabs(enable=True)
 
@@ -1380,7 +1367,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app_data.c_field_type = 'Analyte'
         field = ''
         if self.app_data.selected_analytes is None:
-            field = data.processed_data.match_attribute('data_type','analyte')[0]
+            field = data.processed_data.match_attribute('data_type','Analyte')[0]
         else:
             field = self.app_data.selected_analytes[0]
         self.app_data.c_field = field
@@ -1459,7 +1446,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Name of field to plot, Defaults to None
         analysis_type : str, optional
             Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score',
-            'Special', 'computed'. Some options require a field. Defaults to 'Analyte'
+            'Special', 'Computed'. Some options require a field. Defaults to 'Analyte'
         """
         if self.logger_options['Data']:
             self.logger.print(f"update_autoscale_widgets\n  field={field}")
@@ -1500,40 +1487,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_equalize_color_scale_toolbutton(self, value):
         self.toolButtonScaleEqualize.setChecked(value)
 
-        if self.plot_style.plot_type == 'analyte map':
+        if self.plot_style.plot_type == 'field map':
             self.plot_style.schedule_update()
 
     
 
-    def update_c_field_type_combobox(self, field_type):
-        """Updates ``MainWindow.comboBoxFieldTypeC.currentText()``
-
-        Called as an update to ``app_data.c_field_type``.  Updates the histogram field type (also controls analyte maps).  Schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            New field type.
-        """
-        if self.logger_options['UI']:
-            self.logger.print(f"update_c_field_type_combobox\n  field_type={field_type}")
-        self.comboBoxFieldTypeC.setCurrentText(field_type)
-
-        self.app_data.c_field_type = field_type
-
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
-
-    def c_field_spinbox_changed(self):
+    def field_spinbox_changed(self, ax):
         """Updates ``MainWindow.comboBoxFieldC``"""        
         if self.logger_options['UI']:
-            self.logger.print("c_field_spinbox_changed")
+            self.logger.print(f"field_spinbox_changed: ax={ax}")
 
-        self.spinBoxFieldIndex.blockSignals(True)
-        if self.spinBoxFieldIndex.value() != self.comboBoxFieldC.currentIndex():
-            self.comboBoxFieldC.setCurrentIndex(self.spinBoxFieldIndex.value())
-            self.plot_style.update_c_field_combobox()
-        self.spinBoxFieldIndex.blockSignals(False)
+        widget = self.plot_style.axis_widget_dict
+
+        widget['spinbox'][ax].blockSignals(True)
+        if widget['spinbox'][ax].value() != widget['childbox'][ax].currentIndex():
+            widget['childbox'][ax].setCurrentIndex(widget['childbox'][ax].value())
+            self.plot_style.update_field(ax)
+        widget['spinbox'][ax].blockSignals(False)
 
     def update_hist_bin_width_spinbox(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
@@ -1592,21 +1562,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_z_field_type_combobox(self, new_field_type):
         self.comboBoxFieldTypeZ.setCurrentText(new_field_type)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_x_field_combobox(self, new_field):
-        self.comboBoxFieldX.setCurrentText(new_field)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_y_field_combobox(self, new_field):
-        self.comboBoxFieldY.setCurrentText(new_field)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_z_field_combobox(self, new_field):
-        self.comboBoxFieldZ.setCurrentText(new_field)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.schedule_update()
 
@@ -1778,14 +1733,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             plot_idx = self.toolBox.currentIndex()
 
-        plot_types = self.plot_dict[plot_idx]['plot_list']
+        plot_types = self.control_settings[plot_idx]['plot_list']
         
         if plot_types == self.comboBoxPlotType.allItems():
             return
 
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(plot_types)
-        self.comboBoxPlotType.setCurrentText(plot_types[self.plot_dict[plot_idx]['current_index']])
+        self.comboBoxPlotType.setCurrentText(plot_types[self.control_settings[plot_idx]['current_index']])
 
         self.update_field_selection()
 
@@ -1805,41 +1760,53 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             flag = True
             self.plot_flag = False
 
-        self.update_field(self.plot_dict[idx], 0, self.labelX, self.comboBoxFieldTypeX, self.comboBoxFieldX, self.app_data.x_field_type, self.app_data.x_field)
-        self.update_field(self.plot_dict[idx], 1, self.labelY, self.comboBoxFieldTypeY, self.comboBoxFieldY, self.app_data.y_field_type, self.app_data.y_field)
-        self.update_field(self.plot_dict[idx], 2, self.labelZ, self.comboBoxFieldTypeZ, self.comboBoxFieldZ, self.app_data.z_field_type, self.app_data.z_field)
-        self.update_field(self.plot_dict[idx], 3, self.labelC, self.comboBoxFieldTypeC, self.comboBoxFieldC, self.app_data.c_field_type, self.app_data.c_field)
+        self.update_field(self.control_settings[idx], 0, self.labelX, self.comboBoxFieldTypeX, self.comboBoxFieldX, self.app_data.x_field_type, self.app_data.x_field)
+        self.update_field(self.control_settings[idx], 1, self.labelY, self.comboBoxFieldTypeY, self.comboBoxFieldY, self.app_data.y_field_type, self.app_data.y_field)
+        self.update_field(self.control_settings[idx], 2, self.labelZ, self.comboBoxFieldTypeZ, self.comboBoxFieldZ, self.app_data.z_field_type, self.app_data.z_field)
+        self.update_field(self.control_settings[idx], 3, self.labelC, self.comboBoxFieldTypeC, self.comboBoxFieldC, self.app_data.c_field_type, self.app_data.c_field)
 
         if flag:
             self.plot_flag = True
 
-    def update_field(self, plot_dict, axis_id, label, parentbox, childbox, field_type, field):
+    def update_field(self, control_settings, axis_id, label, parentbox, childbox, field_type, field):
+        """Updates field realted widgets 
 
-        flag = plot_dict['axes'][axis_id]
+        _extended_summary_
 
-        label.setVisible(flag)
-        parentbox.setVisible(flag)
-        childbox.setVisible(flag)
-        if axis_id == 3:
-            self.spinBoxFieldIndex.setVisible(flag)
+        Parameters
+        ----------
+        control_settings : _type_
+            _description_
+        axis_id : _type_
+            _description_
+        label : _type_
+            _description_
+        parentbox : _type_
+            _description_
+        childbox : _type_
+            _description_
+        field_type : _type_
+            _description_
+        field : _type_
+            _description_
+        """
+        label.setText(control_settings['label'][axis_id])
 
-        label.setText(plot_dict['label'][axis_id])
-
-        if plot_dict['saved_field_type'][axis_id] is not None:
-            field_type = plot_dict['save_field_type'][axis_id]
+        if control_settings['saved_field_type'][axis_id] is not None:
+            field_type = control_settings['save_field_type'][axis_id]
         else:
             add_none = False
             if axis_id in [2,3] and self.plot_style.plot_type not in ['scatter']:
                 add_none = False
             self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=True, global_list=True)
 
-        if plot_dict['saved_field'][axis_id] is not None:
-            field = plot_dict['save_field'][axis_id]
+        if control_settings['saved_field'][axis_id] is not None:
+            field = control_settings['save_field'][axis_id]
 
 
     def update_equalize_color_scale(self):
         self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
-        if self.plot_style.plot_type == "analyte map":
+        if self.plot_style.plot_type == "field map":
             self.plot_style.schedule_update()
 
     def update_corr_method(self):
@@ -1993,17 +1960,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_font_size_spinbox(self, new_font_size):
         self.doubleSpinBoxFontSize.setValue(new_font_size)
         self.plot_style.schedule_update()
-
-    def update_c_field_type_combobox(self, new_field_type):
-        self.comboBoxFieldTypeC.setCurrentText(new_field_type)
-
-        self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC)
-        self.app_data.c_field = self.comboBoxFieldC.currentText()
-        if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.app_data.c_field_type = new_field_type
-
-        self.plot_style.schedule_update()
-
 
     def update_cmap_combobox(self, new_colormap):
         self.comboBoxFieldColormap.setCurrentText(new_colormap)
@@ -2271,7 +2227,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = data.processed_data.match_attribute('data_type', 'analyte') + data.processed_data.match_attribute('data_type', 'ratio')
+            analyte_list = data.processed_data.match_attribute('data_type', 'Analyte') + data.processed_data.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -2356,7 +2312,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             tree = 'Ratio (normalized)'
             branch = self.app_data.sample_id
-            for ratio in self.data[branch].processed_data.match_attribute('data_type','ratio'):
+            for ratio in self.data[branch].processed_data.match_attribute('data_type','Ratio'):
                 item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
                 if item is None:
                     raise TypeError(f"Missing item ({ratio}) in plot_tree.")
@@ -2393,7 +2349,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         data = self.data[self.app_data.sample_id].processed_data
 
-        columns = data.match_attributes({'data_type': 'analyte', 'use': True}) + data.match_attributes({'data_type': 'ratio', 'use': True})
+        columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
         nan_count = any(np.isnan(data[columns]))
         
@@ -2420,25 +2376,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
-                if 'cluster' in self.app_data.field_dict:
+                if 'Cluster' in self.app_data.field_dict:
                     field_list = ['Cluster']
                 else:
                     field_list = []
             case 'cluster score':
-                if 'cluster score' in self.app_data.field_dict:
+                if 'Cluster score' in self.app_data.field_dict:
                     field_list = ['Cluster score']
                 else:
                     field_list = []
             case 'cluster':
-                if 'cluster' in self.app_data.field_dict:
+                if 'Cluster' in self.app_data.field_dict:
                     field_list = ['Cluster']
                 else:
                     field_list = ['Cluster score']
-            case 'cluster performance':
+            case 'performance':
                 field_list = []
             case 'pca score':
                 if 'pca score' in self.app_data.field_dict:
-                    field_list = ['PCA score']
+                    field_list = ['pca score']
                 else:
                     field_list = []
             case 'ternary map':
@@ -2448,17 +2404,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field_list = ['Analyte', 'Analyte (normalized)']
 
                 # add check for ratios
-                if 'ratio' in self.app_data.field_dict:
+                if 'Ratio' in self.app_data.field_dict:
                     field_list.append('Ratio')
                     field_list.append('Ratio (normalized)')
 
                 if 'pca score' in self.app_data.field_dict:
-                    field_list.append('PCA score')
+                    field_list.append('pca score')
 
-                if 'cluster' in self.app_data.field_dict:
+                if 'Cluster' in self.app_data.field_dict:
                     field_list.append('Cluster')
 
-                if 'cluster score' in self.app_data.field_dict:
+                if 'Cluster score' in self.app_data.field_dict:
                     field_list.append('Cluster score')
 
         self.plot_style.toggle_style_widgets()
@@ -2491,7 +2447,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
 
         if parentBox is None:
-            fields = self.app_data.field_dict['analyte']
+            fields = self.app_data.field_dict['Analyte']
         else:
             if parentBox.currentText() == 'None':
                 childBox.clear()
@@ -2499,7 +2455,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_type = parentBox.currentText()
             if 'normalized' in field_type:
                 field_type = field_type.replace(' (normalized)','')
-            fields = self.app_data.field_dict[field_type.lower()]
+            fields = self.app_data.field_dict[field_type]
 
         childBox.clear()
         childBox.addItems(fields)
@@ -2606,7 +2562,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = data.processed_data.match_attribute('data_type', 'analyte') + data.processed_data.match_attribute('data_type', 'ratio')
+            analyte_list = data.processed_data.match_attribute('data_type', 'Analyte') + data.processed_data.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -2650,7 +2606,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data = self.data[self.app_data.sample_id]
         
         match plot_type:
-            case 'analyte map':
+            case 'field map':
                 sample_id = self.app_data.sample_id
                 if not field_type:
                     field_type = self.app_data.c_field_type
@@ -2754,7 +2710,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         sample_id = plot_info['sample_id']
         tree = plot_info['plot_type']
-        # widget_dict = self.plot_widget_dict[tree][sample_id][plot_name]
+        # widget_dict = self.axis_widget_dict[tree][sample_id][plot_name]
 
         # if on QuickView canvas, then set to SingleView canvas
         if self.canvasWindow.currentIndex() == self.canvas_tab['qv']:
@@ -2794,7 +2750,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
 
-            if (self.plot_style.plot_type == 'analyte map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
+            if (self.plot_style.plot_type == 'field map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
                 current_map_df = self.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
                 plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, current_map_df)
         # add figure to MultiView canvas
@@ -3232,7 +3188,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             widget.deleteLater()
         del self.multiview_info_label[selected_plot_name+'1']
         del self.lasermaps[selected_plot_name+'1']
-        #self.plot_widget_dict[selected_plot_name] = widget
+        #self.axis_widget_dict[selected_plot_name] = widget
         #self.add_remove(selected_plot_name)
         self.comboBoxMVPlots.clear()
         self.comboBoxMVPlots.addItems(self.multi_view_index)
@@ -3271,7 +3227,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
 
         # fields in current sample
-        fields = self.app_data.field_dict['analyte']
+        fields = self.app_data.field_dict['Analyte']
 
         # clear the quickView layout
         self.clear_layout(self.widgetQuickView.layout())

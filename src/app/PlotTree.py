@@ -95,7 +95,7 @@ class PlotTree():
             return
 
         # add leaves for analytes
-        for analyte in data.match_attribute('data_type','analyte'):
+        for analyte in data.match_attribute('data_type','Analyte'):
             leaf = treeView.find_leaf(analyte_branch, analyte)
             if not leaf:
                 treeView.add_leaf(analyte_branch, analyte)
@@ -104,7 +104,7 @@ class PlotTree():
             if not leaf:
                 treeView.add_leaf(norm_analyte_branch, analyte)
 
-        if not data.match_attribute('data_type','ratio'):
+        if not data.match_attribute('data_type','Ratio'):
             return
 
         # add sample_id to ratio branch
@@ -122,7 +122,7 @@ class PlotTree():
             return
 
         # add leaves for ratios
-        for ratio in data.match_attribute('data_type','ratio'):
+        for ratio in data.match_attribute('data_type','Ratio'):
             leaf = treeView.find_leaf(ratio_branch, ratio)
             if not leaf:
                 treeView.add_leaf(ratio_branch, ratio)
@@ -284,7 +284,7 @@ class PlotTree():
                     self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
-                self.parent.update_fields(branch,'analyte map',tree, leaf, plot=True)
+                self.parent.update_fields(branch,'field map',tree, leaf, plot=True)
 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(field=leaf, field_type=tree)
@@ -334,8 +334,8 @@ class PlotTree():
         self.unhighlight_tree(self.tree['Ratio'])
         self.unhighlight_tree(self.tree['Analyte'])
 
-        analytes = data.processed_data.match_attribute('data_type','analyte')
-        ratios = data.processed_data.match_attribute('data_type','ratio')
+        analytes = data.processed_data.match_attribute('data_type','Analyte')
+        ratios = data.processed_data.match_attribute('data_type','Ratio')
 
         data.processed_data.set_attribute(analytes,'use',False)
         treeView = self.parent.treeView

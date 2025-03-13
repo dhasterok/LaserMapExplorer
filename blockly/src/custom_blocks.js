@@ -188,7 +188,7 @@ Blockly.common.defineBlocks({
             // Use the common validator that calls selectorChanged(...)
             const dropdown = this.getField('analyteSelectorDropdown');
             dropdown.setValidator((newValue) => {
-                return listSelectorChanged(newValue, this, 'analyte');
+                return listSelectorChanged(newValue, this, 'Analyte');
             });
         }
     }
@@ -916,7 +916,7 @@ const plot_map = {
         this.setHelpUrl('');
         this.setColour(285);
 
-        this.plotType = 'analyte_map'
+        this.plotType = 'field_map'
         // Add default blocks to Styling input only in the toolbox
         if (!this.isInFlyout) {
             const initialFieldType = this.getFieldValue('fieldType');
@@ -1888,7 +1888,7 @@ const specify_plot_type = {
         this.appendDummyInput()
             .appendField('Plot Type')
             .appendField(new Blockly.FieldDropdown([
-                ['Analyte Map', 'analyte_map'],
+                ['Field Map', 'field_map'],
                 ['Histogram', 'histogram'],
                 // ... other plot types
             ]), 'PLOT_TYPE');

@@ -271,7 +271,7 @@ class Workflow(CustomDockWidget):
             List of saved analyte list names.
         """
         path =''
-        if type =='analyte':
+        if type =='Analyte':
             path = 'resources/analytes_list'
         elif type =='field':
              path = 'resources/fields_list'

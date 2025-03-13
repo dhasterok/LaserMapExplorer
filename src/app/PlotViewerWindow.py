@@ -260,7 +260,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
                 plot_type = self.plot_info['plot_type']
                 
                 match plot_type:
-                    case 'analyte map':
+                    case 'field map':
                         field_type = self.plot_info['field_type']
                         field = self.plot_info['field']
                         save_data = self.data[self.sample_id].get_map_data(field, field_type)

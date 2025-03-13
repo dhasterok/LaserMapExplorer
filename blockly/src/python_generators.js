@@ -43,7 +43,7 @@ pythonGenerator.forBlock['select_analytes'] = function(block,generator) {
         code = '';
     } else if (analyteSelectorValue === 'Analyte selector') {
         code = 'self.main.open_select_analyte_dialog()\n';
-        code += `self.refresh_saved_lists_dropdown('analyte')\n`
+        code += `self.refresh_saved_lists_dropdown('Analyte')\n`
     } else if (analyteSelectorValue === 'Saved lists') {''
         var savedListName = block.getFieldValue('analyteSavedListsDropdown');
         var quotedListName = generator.quote_(savedListName);
@@ -185,7 +185,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // Retrieve the stored field from the block
     const field = generator.quote_(block.getFieldValue('field'));
 
-    const plot_type = generator.quote_('analyte map');
+    const plot_type = generator.quote_('field map');
     let code = '';
     code += `style_dict = {}\n`;
     code += '\n';

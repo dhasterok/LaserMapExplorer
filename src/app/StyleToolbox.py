@@ -737,7 +737,7 @@ class Styling(Observable):
     # -------------------------------------
     def _is_valid_bounds(self, value):
         """Validates if a the variable has properties consistent with bounds."""
-        return isinstance(value, list) and len(value) == 2 and value[1] > value[0]
+        return isinstance(value, list) and len(value) == 2 and value[1] >= value[0]
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""
@@ -971,7 +971,7 @@ class StylingDock(Styling):
                 'correlation': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
                 'histogram': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
                 'scatter': {'axis': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
-                'heatmap': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'heatmap': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'TEC': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'radar': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'variance': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
@@ -2015,9 +2015,10 @@ class StylingDock(Styling):
 
             widget_dict['childbox'][ax].setEnabled(setting['axis'][ax])
             widget_dict['childbox'][ax].setVisible(setting['axis'][ax])
-            if widget_dict['childbox'][ax] is not None:
-                widget_dict['childbox'][ax].setEnabled(setting['spinbox'][ax])
-                widget_dict['childbox'][ax].setVisible(setting['spinbox'][ax])
+
+            if widget_dict['spinbox'][ax] is not None:
+                widget_dict['spinbox'][ax].setEnabled(setting['spinbox'][ax])
+                widget_dict['spinbox'][ax].setVisible(setting['spinbox'][ax])
 
     def update_plot_type(self, new_plot_type=None, force=False):
         """Updates styles when plot type is changed

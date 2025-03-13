@@ -1,6 +1,7 @@
 import os, copy
 import numpy as np
 import pandas as pd
+import random
 import src.common.csvdict as csvdict
 from src.app.config import BASEDIR
 from src.common.Logger import LogCounter
@@ -138,11 +139,11 @@ class AppData(Observable):
         if 'distance' in self.cluster_dict[self._cluster_method].keys():
             self._cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         else:
-            self._cluster_distance = 0
+            self._cluster_distance = None
         if 'exponent' in self.cluster_dict[self._cluster_method].keys():
             self._cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
         else:
-            self._cluster_distance = 0
+            self._cluster_exponent = 0
         self._cluster_seed = self.cluster_dict[self._cluster_method]['seed']
         self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
         self._dim_red_precondition = False
@@ -151,7 +152,7 @@ class AppData(Observable):
         self.update_cluster_flag = False
         self.update_pca_flag = False
 
-
+    
     def validate_field_type(self, new_field_type):
         if self.sample_id == "":
             return False
@@ -163,6 +164,7 @@ class AppData(Observable):
 
     def validate_field(self, field_type, new_field):
         return True
+    
     #     field_list = self.get_field_list(set_name=field_type)
     #     if new_field in field_list:
     #         return true
@@ -800,6 +802,7 @@ class AppData(Observable):
             ValueError(f"Unknown cluster type ({method})")
 
         self._cluster_method = method
+        self._set_clustering_parameters()
         self.notify_observers("cluster_method", method)
 
     @property
@@ -830,6 +833,8 @@ class AppData(Observable):
             return
     
         self._num_clusters = new_value
+        # update cluster dict with new number of clusters
+        self.cluster_dict[self._cluster_method]['n_clusters'] = self._num_clusters
         self.notify_observers("num_clusters", new_value)
 
     @property
@@ -844,6 +849,8 @@ class AppData(Observable):
             return
     
         self._cluster_seed = new_value
+        # update cluster dict with new seed
+        self.cluster_dict[self._cluster_method]['seed'] = self._cluster_seed
         self.notify_observers("cluster_seed", new_value)
 
     @property
@@ -858,6 +865,8 @@ class AppData(Observable):
             return
     
         self._cluster_exponent = new_value
+        # update cluster dict with new cluster exponent value
+        self.cluster_dict[self._cluster_method]['exponent'] = self._cluster_exponent
         self.notify_observers("cluster_exponent", new_value)
 
     @property
@@ -872,6 +881,8 @@ class AppData(Observable):
             return
     
         self._cluster_distance = new_value
+        # update cluster dict with new cluster distance method
+        self.cluster_dict[self._cluster_method]['distance'] = self._cluster_distance
         self.notify_observers("cluster_distance", new_value)
 
     @property
@@ -1019,5 +1030,24 @@ class AppData(Observable):
         if self.debug:
             self.logger.print(f"histogram_reset_bins")
         self.hist_num_bins = self.default_hist_num_bins
+
+    def _set_clustering_parameters(self):
+        """Sets clustering parameters
+
+        Generally called when the clustering method is changed by the user.  Updates the plot.
+        """
+        if 'distance' in self.cluster_dict[self._cluster_method].keys():
+            self.cluster_distance = self.cluster_dict[self._cluster_method]['distance']
+        if 'exponent' in self.cluster_dict[self._cluster_method].keys():
+            self.cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
+
+    def generate_random_seed(self):
+        """Generates a random seed for clustering
+
+        Updates ``self.cluster_seed using a random number generator with one of 10**9 integers. 
+        """        
+        r = random.randint(0,1000000000)
+        self.cluster_seed = r
+        
 
 

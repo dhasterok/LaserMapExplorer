@@ -1431,7 +1431,7 @@ def plot_score_map(parent,data, app_data, plot_style):
     return canvas, data.processed_data[field]
 
 
-def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=None):
+def plot_pca(parent, data, app_data, plot_style):
     """Plot principal component analysis (PCA)
     
     Wrapper for one of four types of PCA plots:
@@ -1447,14 +1447,11 @@ def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=N
     if app_data == '':
         return
 
-    if app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
-        pca_results = dimensional_reduction.compute_pca(plot_style, app_data)
-    else:
-        pca_results = dimensional_reduction.pca_results
-
+    pca_results = data.pca_results
     # Determine which PCA plot to create based on the combobox selection
     plot_type = plot_style.plot_type
-    
+    #set clims 
+    plot_style.clim = [np.amin(pca_results.components_), np.amax(pca_results.components_)]
     match plot_type.lower():
         # make a plot of explained variance
         case 'variance':
@@ -1480,7 +1477,7 @@ def plot_pca(parent, dimensional_reduction, data, app_data, plot_style, canvas=N
             canvas = mplc.MplCanvas(parent=parent)
             plot_scatter(parent, data, app_data, plot_style, canvas=canvas)
 
-            plot_data= plot_pca_components(parent,pca_results, data, app_data, plot_style, canvas)
+            plot_data= plot_pca_components(pca_results, data, app_data, plot_style, canvas)
 
         # make a map of a principal component score
         case 'pca score':
@@ -1638,7 +1635,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, plot_style):
     plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
     return canvas, plot_data
 
-def plot_pca_components(parent, pca_results,data, app_data, plot_style,canvas):
+def plot_pca_components(pca_results,data, app_data, plot_style,canvas):
     """Adds vector components to PCA scatter and heatmaps
 
     Parameters
@@ -1685,3 +1682,210 @@ def plot_pca_components(parent, pca_results,data, app_data, plot_style,canvas):
 
     plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
     return plot_data
+
+
+def plot_clusters(parent, data, app_data, plot_style):
+    """Plot maps associated with clustering
+
+    Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
+    """        
+    print('plot_clusters')
+    if app_data.sample_id == '':
+        return
+
+    plot_type = plot_style.plot_type
+    method = app_data.cluster_method
+    match plot_type:
+        case 'cluster':
+            plot_name = f"{plot_type}_{method}_map"
+            canvas, plot_data = plot_cluster_map(parent, data, app_data, plot_style)
+        case 'cluster score':
+            plot_name = f"{plot_type}_{method}_{app_data.c_field}_score_map"
+            canvas, plot_data = plot_score_map(parent, data, app_data, plot_style)
+        case _:
+            print(f'Unknown clustering plot type: {plot_type}')
+            return
+
+    plot_style.update_figure_font(canvas, plot_style.font)
+
+    plot_info = {
+        'tree': 'Multidimensional Analysis',
+        'sample_id': app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': plot_style.plot_type,
+        'field_type':app_data.c_field,
+        'field':  app_data.field,
+        'figure': canvas,
+        'style': plot_style.style_dict[plot_style.plot_type],
+        'cluster_groups': app_data.cluster_dict[method]['selected_clusters'],
+        'view': [True,False],
+        'position': [],
+        'data': plot_data
+        }
+
+    return plot_info, canvas
+    # self.clear_layout(self.widgetSingleView.layout())
+    # self.widgetSingleView.layout().addWidget(canvas)
+
+
+def cluster_performance_plot(parent, data, app_data, plot_style):
+    """Plots used to estimate the optimal number of clusters
+
+    1. Elbow Method
+    The elbow method looks at the variance (or inertia) within clusters as the number
+    of clusters increases. The idea is to plot the sum of squared distances between
+    each point and its assigned cluster's centroid, known as the within-cluster sum
+    of squares (WCSS) or inertia, for different values of k (number of clusters).
+
+    Process:
+    * Run KMeans for a range of cluster numbers (k).
+    * Plot the inertia (WCSS) vs. the number of clusters.
+    * Look for the "elbow" point, where the rate of decrease sharply slows down,
+    indicating that adding more clusters does not significantly reduce the inertia.
+
+
+    2. Silhouette Score
+    The silhouette score measures how similar an object is to its own cluster compared
+    to other clusters. The score ranges from -1 to 1, where:
+
+    * A score close to 1 means the sample is well clustered.
+    * A score close to 0 means the sample lies on the boundary between clusters.
+    * A score close to -1 means the sample is assigned to the wrong cluster.
+
+    In cases where clusters have widely varying sizes or densities, Silhouette Score may provide the best result.
+
+    Process:
+    * Run KMeans for a range of cluster numbers (k).
+    * Calculate the silhouette score for each k.
+    * Choose the k with the highest silhouette score.
+    """        
+    if app_data.sample_id == '':
+        return
+
+    method = app_data.cluster_method
+    # maximum clusters for producing an cluster performance
+    max_clusters =app_data.max_clusters
+
+    # compute cluster results
+    inertia = app_data.cluster_results[method]
+    silhouette_scores =  app_data.silhouette_scores[method]
+
+    second_derivative = np.diff(np.diff(inertia))
+
+    #optimal_k = np.argmax(second_derivative) + 2  # Example heuristic
+
+    # Plot inertia
+    canvas = mplc.MplCanvas(parent=parent)
+
+    canvas.axes.plot(range(1, max_clusters+1), inertia, linestyle='-', linewidth=plot_style.line_width,
+        marker=plot_style.marker_dict[plot_style.marker], markeredgecolor=plot_style.marker_color, markerfacecolor='none', markersize=plot_style.marker_size,
+        color=plot_style.marker_color, label='Inertia')
+
+    # Plotting the cumulative explained variance
+
+    canvas.axes.set_xlabel('Number of clusters')
+    canvas.axes.set_ylabel('Inertia', color=plot_style.marker_color)
+    canvas.axes.tick_params(axis='y', labelcolor=plot_style.marker_color)
+    canvas.axes.set_title(f'Cluster performance: {method}')
+    #canvas.axes.axvline(x=optimal_k, linestyle='--', color='m', label=f'Elbow at k={optimal_k}')
+
+    # aspect ratio
+    canvas.axes.set_box_aspect(plot_style.aspect_ratio)
+
+    # Create a secondary y-axis to plot the second derivative
+    canvas.axes2 = canvas.axes.twinx()
+    canvas.axes2.plot(range(2, max_clusters), second_derivative, linestyle='-', linewidth=plot_style.line_width,
+        marker=plot_style.marker_dict[plot_style.marker], markersize=plot_style.marker_size,
+        color='r', label='3nd Derivative')
+
+    canvas.axes2.set_ylabel('2nd Derivative', color='r')
+    canvas.axes2.tick_params(axis='y', labelcolor='r')
+
+    # aspect ratio
+    canvas.axes2.set_box_aspect(plot_style.aspect_ratio)
+
+    canvas.axes3 = canvas.axes.twinx()
+    canvas.axes3.plot(range(1, max_clusters+1), silhouette_scores, linestyle='-', linewidth=plot_style.line_width,
+        marker=plot_style.marker_dict[plot_style.marker], markeredgecolor='orange', markerfacecolor='none', markersize=plot_style.marker_size,
+        color='orange', label='Silhouette Scores')
+
+    canvas.axes3.spines['right'].set_position(('outward', 60))  # Move it outward by 60 points
+    canvas.axes3.set_ylabel('Silhouette score', color='orange')
+    canvas.axes3.tick_params(axis='y', labelcolor='orange')
+
+    canvas.axes3.set_box_aspect(plot_style.aspect_ratio)
+
+
+    #print(f"Second derivative of inertia: {second_derivative}")
+    #print(f"Optimal number of clusters: {optimal_k}")
+
+    plot_type = plot_style.plot_type
+    plot_name = f"{plot_type}_{method}"
+    plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
+
+    plot_info = {
+        'tree': 'Multidimensional Analysis',
+        'sample_id': app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': plot_style.plot_type,
+        'field_type':app_data.c_field_type,
+        'field':  app_data.c_field,
+        'figure': canvas,
+        'style': plot_style.style_dict[plot_style.plot_type],
+        'cluster_groups': app_data.cluster_dict[method],
+        'view': [True,False],
+        'position': [],
+        'data': plot_data
+        }
+
+    return plot_info, canvas
+
+
+# -------------------------------------
+# Cluster functions
+# -------------------------------------
+def plot_cluster_map(parent, data, app_data, plot_style):
+    """Produces a map of cluster categories
+    
+    Creates the map on an ``mplc.MplCanvas``.  Each cluster category is assigned a unique color.
+    """
+    print('plot_cluster_map')
+    canvas = mplc.MplCanvas(parent=parent)
+
+    plot_type = plot_style.plot_type
+    method = app_data.cluster_method
+
+    # data frame for plotting
+    #groups = data[plot_type][method].values
+    groups = data.processed_data[method].values
+
+    reshaped_array = np.reshape(groups, data.array_size, order=data.order)
+
+    n_clusters = len(np.unique(groups))
+
+    cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(app_data.cluster_dict[method], alpha=plot_style.marker_alpha)
+
+    #boundaries = np.arange(-0.5, n_clusters, 1)
+    #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+    norm = plot_style.color_norm(n_clusters)
+
+    #cax = canvas.axes.imshow(self.array.astype('float'), cmap=plot_style.cmap, norm=norm, aspect = data.aspect_ratio)
+    cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=data.aspect_ratio)
+    canvas.array = reshaped_array
+    #cax.cmap.set_under(style['Scale']['OverlayColor'])
+
+    add_colorbar(plot_style, canvas, cax, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+
+    canvas.fig.subplots_adjust(left=0.05, right=1)  # Adjust these values as needed
+    canvas.fig.tight_layout()
+
+    canvas.axes.set_title(f'Clustering ({method})')
+    canvas.axes.tick_params(direction=None,
+        labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+        bottom=False, top=False, left=False, right=False)
+    #canvas.axes.set_axis_off()
+
+    # add scalebar
+    add_scalebar(app_data,plot_style,canvas.axes)
+
+    return canvas, data.processed_data[method]

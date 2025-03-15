@@ -431,7 +431,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         new_list = ['Cluster']
                     else:
                         new_list = []
-                case 'cluster score':
+                case 'cluster score map':
                     if 'Cluster score' in field_dict.keys():
                         new_list = ['Cluster score']
                     else:
@@ -635,7 +635,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.plot_type = self.field_control_settings[tab_id]['plot_list'][self.field_control_settings[tab_id]['saved_index']]
 
         match self.plot_style.plot_type:
-            case 'cluster' | 'cluster score':
+            case 'cluster' | 'cluster score map':
                 self.labelClusterMax.hide()
                 self.spinBoxClusterMax.hide()
                 self.labelNClusters.show()
@@ -1007,14 +1007,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("sample_id", self.update_sample_id_combobox)
         app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
         app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
-        app_data.add_observer("x_field_type", self.plot_style.update_field_type)
-        app_data.add_observer("y_field_type", self.plot_style.update_field_type)
-        app_data.add_observer("z_field_type", self.plot_style.update_field_type)
-        app_data.add_observer("c_field_type", self.plot_style.update_field_type)
-        app_data.add_observer("x_field", self.plot_style.update_field)
-        app_data.add_observer("y_field", self.plot_style.update_field)
-        app_data.add_observer("z_field", self.plot_style.update_field)
-        app_data.add_observer("c_field", self.plot_style.update_field)
+        app_data.add_observer("field_type", self.plot_style.update_field_type)
+        app_data.add_observer("field", self.plot_style.update_field)
         app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
         app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
         app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
@@ -1164,10 +1158,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.field_control_settings.update({self.left_tab['multidim']: {'saved_index': 0, 'plot_list': ['variance','vectors','pca scatter','pca heatmap','pca score'], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'clustering':
                     self.left_tab.update({'cluster': tid})
-                    self.field_control_settings.update({self.left_tab['cluster']: {'saved_index': 0, 'plot_list': ['cluster', 'cluster score', 'performance'], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.field_control_settings.update({self.left_tab['cluster']: {'saved_index': 0, 'plot_list': ['cluster', 'cluster score map', 'performance'], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'p-t-t functions':
                     self.left_tab.update({'special': tid})
-                    self.field_control_settings.update({self.left_tab['special']: {'saved_index': 0, 'plot_list': ['field map', 'gradient map', 'cluster score', 'pca score', 'profile'], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.field_control_settings.update({self.left_tab['special']: {'saved_index': 0, 'plot_list': ['field map', 'gradient map', 'cluster score map', 'pca score', 'profile'], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
 
 
     def reindex_style_tab(self):
@@ -1445,7 +1439,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         field : str, optional
             Name of field to plot, Defaults to None
         analysis_type : str, optional
-            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score',
+            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score map',
             'Special', 'Computed'. Some options require a field. Defaults to 'Analyte'
         """
         if self.logger_options['Data']:
@@ -1548,21 +1542,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_gradient_flag_checkbox(self, new_gradient_flag):
         self.checkBoxGradient.setChecked(new_gradient_flag)
         if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
-
-    def update_x_field_type_combobox(self, new_field_type):
-        self.comboBoxFieldTypeX.setCurrentText(new_field_type)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_y_field_type_combobox(self, new_field_type):
-        self.comboBoxFieldTypeY.setCurrentText(new_field_type)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
-
-    def update_z_field_type_combobox(self, new_field_type):
-        self.comboBoxFieldTypeZ.setCurrentText(new_field_type)
-        if self.toolBox.currentIndex() == self.left_tab['scatter']:
             self.plot_style.schedule_update()
 
     def update_scatter_preset_combobox(self, new_scatter_preset):
@@ -1747,7 +1726,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.plot_type = self.comboBoxPlotType.currentText()
 
     def update_field_widgets(self):
+        """_summary_
 
+        _extended_summary_
+        """
         idx = None
         if (hasattr(self, 'profile_dock') and self.profile_dock.actionProfileToggle.isChecked()) or (hasattr(self, 'mask_dock') and self.mask_dock.polygon_tab.actionPolyToggle.isChecked()):
             idx = -1
@@ -1775,42 +1757,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if flag:
             self.plot_flag = True
-
-    def update_field(self, control_settings, ax, label, parentbox, childbox, field_type, field):
-        """Updates field realted widgets 
-
-        _extended_summary_
-
-        Parameters
-        ----------
-        control_settings : _type_
-            _description_
-        ax : int
-            Axis id.
-        label : _type_
-            _description_
-        parentbox : _type_
-            _description_
-        childbox : _type_
-            _description_
-        field_type : _type_
-            _description_
-        field : _type_
-            _description_
-        """
-        label.setText(control_settings['label'][ax])
-
-        if control_settings['saved_field_type'][ax] is not None:
-            field_type = control_settings['save_field_type'][ax]
-        else:
-            add_none = False
-            if ax in [2,3] and self.plot_style.plot_type not in ['scatter']:
-                add_none = False
-            self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=True, global_list=True)
-
-        if control_settings['saved_field'][ax] is not None:
-            field = control_settings['save_field'][ax]
-
 
     def update_equalize_color_scale(self):
         self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
@@ -2363,83 +2309,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
 
-    def update_field_type_combobox(self, comboBox, addNone=False, plot_type=''):
-        """Updates field type combobox
-        
-        Used to update ``MainWindow.comboBoxFieldTypeC``, ``mask_dock.filter_tab.comboBoxFilterFieldType``,
-        ``MainWindow.comboBoxFieldTypeX``, ``MainWindow.comboBoxFieldTypeY``,
-        ``MainWindow.comboBoxFieldTypeZ``, and ``MainWindow.comboBoxFieldTypeC``
-
-        Parameters
-        ----------
-        combobox : QComboBox
-            The combobox to update.
-        addNone : bool
-            Adds ``None`` to the top of the ``combobox`` list
-        plot_type : str
-            The plot type helps to define the set of field types available, by default ``''`` (no change)
-        """
-        if self.app_data.sample_id == '':
-            return
-
-        match plot_type.lower():
-            case 'correlation' | 'histogram' | 'tec':
-                if 'Cluster' in self.app_data.field_dict:
-                    field_list = ['Cluster']
-                else:
-                    field_list = []
-            case 'cluster score':
-                if 'Cluster score' in self.app_data.field_dict:
-                    field_list = ['Cluster score']
-                else:
-                    field_list = []
-            case 'cluster':
-                if 'Cluster' in self.app_data.field_dict:
-                    field_list = ['Cluster']
-                else:
-                    field_list = ['Cluster score']
-            case 'performance':
-                field_list = []
-            case 'pca score':
-                if 'pca score' in self.app_data.field_dict:
-                    field_list = ['pca score']
-                else:
-                    field_list = []
-            case 'ternary map':
-                self.labelCbarDirection.setEnabled(True)
-                self.comboBoxCbarDirection.setEnabled(True)
-            case _:
-                field_list = ['Analyte', 'Analyte (normalized)']
-
-                # add check for ratios
-                if 'Ratio' in self.app_data.field_dict:
-                    field_list.append('Ratio')
-                    field_list.append('Ratio (normalized)')
-
-                if 'pca score' in self.app_data.field_dict:
-                    field_list.append('pca score')
-
-                if 'Cluster' in self.app_data.field_dict:
-                    field_list.append('Cluster')
-
-                if 'Cluster score' in self.app_data.field_dict:
-                    field_list.append('Cluster score')
-
-        self.plot_style.toggle_style_widgets()
-
-        # add None to list?
-        if addNone:
-            field_list.insert(0, 'None')
-
-        # clear comboBox items
-        comboBox.clear()
-        # add new items
-        comboBox.addItems(field_list)
-
-        # ----start debugging----
-        # print('update_field_type_combobox: '+plot_type+',  '+comboBox.currentText())
-        # ----end debugging----
-
     def update_field_combobox(self, parentBox, childBox):
         """Updates comboBoxes with fields for plots or analysis
 
@@ -2623,9 +2492,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return True
             case 'variance' | 'basis vectors' | 'performance':
                 return True
-            case 'score map':
+            case 'cluster score map':
                 axes = [3]
-            case 'scatter score', 'heatmap score':
+            case 'dimension score map':
+                axes = [3]
+            case 'dimension scatter', 'dimension heatmap':
                 axes = [0,1]
             case 'cluster':
                 axes = [3]
@@ -2716,16 +2587,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
 
-            case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
-                if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+            case 'variance' | 'vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
+                method = self.app_data.dim_red_method.split(':')
+                if self.app_data.update_pca_flag or not data.processed_data.match_attribute("data_type",f"{method} score"):
                     self.dimensional_reduction.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
-            case 'cluster' | 'cluster score':
+            case 'cluster' | 'cluster score map':
                 method = self.app_data.cluster_method
                 if self.app_data.update_cluster_flag or \
                         data.processed_data[method].empty or \
                         (method not in list(data.processed_data.columns)):
+                    # compute clusters
                     self.statusbar.showMessage('Computing clusters')
                     self.clustering.compute_clusters(data, self.app_data, max_clusters = None)
                     # enable cluster tab actions
@@ -2738,12 +2611,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)
 
             case 'cluster performance':
+                # compute performace as a function of number of clusters
                 self.clustering.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
                 canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.plot_style)
 
+        # add canvas to layout
         self.clear_layout(self.widgetSingleView.layout())
         self.widgetSingleView.layout().addWidget(canvas)
 
+        # add plot info to info_dock
         if hasattr(self,"info_dock"):
             self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 

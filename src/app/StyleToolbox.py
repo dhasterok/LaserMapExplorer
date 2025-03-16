@@ -966,11 +966,11 @@ class StylingDock(Styling):
                 '': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'field map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'gradient map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'ternary map': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'correlation': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
                 'histogram': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
                 'scatter': {'axis': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
                 'heatmap': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'ternary map': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'TEC': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'radar': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'variance': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
@@ -2068,28 +2068,68 @@ class StylingDock(Styling):
             case _:
                 ui.actionSwapAxes.setEnabled(False)
 
+        # update field widgets
+        self.update_field_widgets()
+
         # update all plot widgets
         self.set_style_widgets()
 
         if self.plot_type != '':
             self.schedule_update()
 
+    def update_field_widgets(self):
+        """Updates field widgets with saved settings
+         
+        Updates the label text, field type combobox, and field combobox with saved values associated with a
+        control toolbox tab.
+        """
+        idx = None
+        if (hasattr(self, 'profile_dock') and self.ui.profile_dock.actionProfileToggle.isChecked()) or (hasattr(self, 'mask_dock') and self.ui.mask_dock.polygon_tab.actionPolyToggle.isChecked()):
+            idx = -1
+        else:
+            idx = self.ui.toolBox.currentIndex()
+
+        # prevent updating of plot as all the changes are made
+        flag = False
+        if self.plot_flag:
+            flag = True
+            self.plot_flag = False
+
+        widget_dict = self.axis_widget_dict
+        setting = self.ui.field_control_settings[idx]
+        for ax in range(3):
+            widget_dict['label'][ax].setText(setting['label'][ax])
+
+            if setting['saved_field_type'][ax] is not None:
+                self.app_data.set_field_type(ax, setting['save_field_type'][ax])
+            else:
+                parentbox = widget_dict['parentbox'][ax]
+                childbox = widget_dict['childbox'][ax]
+                add_none = widget_dict['plot type'][self.plot_type]['add_none'][ax]
+                self.ui.update_field_type_combobox_options(parentbox, childbox, add_none=add_none, global_list=True)
+
+            if setting['saved_field'][ax] is not None:
+                self.app_data.set_field(ax, setting['save_field'][ax])
+
+        if flag:
+            self.plot_flag = True
+
     # axes
     # -------------------------------------
-    def axis_variable_changed(self, fieldtype, field, ax="None"):
+    def axis_variable_changed(self, field_type, field, ax="None"):
         """Updates axis variables when the field is changed.
 
         Parameters
         ----------
-        fieldtype : str
-            _description_
+        field_type : str
+            field type
         field : str
-            _description_
+            field
         ax : str, optional
             axis for plotting, by default "None"
         """
         if self.debug:
-            self.logger.print(f"axis_variable_changed:\n  fieldtype={fieldtype}\n  field={field}\n  ax={ax}")
+            self.logger.print(f"axis_variable_changed:\n  field_type={field_type}\n  field={field}\n  ax={ax}")
 
         ui = self.ui
 
@@ -2124,7 +2164,7 @@ class StylingDock(Styling):
                     ui.lineEditZLabel.setText('')
             return
         else:
-            amin, amax, scale, label = self.get_axis_values(fieldtype, field, ax)
+            amin, amax, scale, label = self.get_axis_values(field_type, field, ax)
 
             plot_type = self.plot_type
 

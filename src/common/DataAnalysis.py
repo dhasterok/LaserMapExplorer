@@ -146,22 +146,26 @@ class DimensionalReduction():
         df_scaled = scaler.fit_transform(df_filtered)
 
         # Perform PCA
-        data.dim_red_results[''] = PCA(n_components=min(len(df_filtered.columns), len(df_filtered)))  # Adjust n_components as needed
+        pca_results = PCA(n_components=min(len
+                                           (df_filtered.columns), len(df_filtered)))  # Adjust n_components as needed
+        
+        # store PCA results in data
+        data.dim_red_results[app_data.dim_red_method] = pca_results
 
         # compute pca scores
-        pca_scores = pd.DataFrame(data.pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(data.pca_results.n_components_)])
+        pca_scores = pd.DataFrame(pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(pca_results.n_components_)])
         
 
         # Add PCA scores to DataFrame for easier plotting
-        data.add_columns('pca score',pca_scores.columns,pca_scores.values,data.mask)
+        data.add_columns('PCA score',pca_scores.columns,pca_scores.values,data.mask)
         
         # update_pca_flag to prevent PCA running during when app_data.dim_red_y is being set
         app_data.update_pca_flag = False
         #update min and max of PCA spinboxes
-        if data.pca_results.n_components_ > 0:
+        if pca_results.n_components_ > 0:
             app_data.dim_red_x_min = 1
             app_data.dim_red_y_min = 1
-            app_data.dim_red_x_max =  data.pca_results.n_components_+1
-            app_data.dim_red_y_max =  data.pca_results.n_components_+1
+            app_data.dim_red_x_max =  pca_results.n_components_+1
+            app_data.dim_red_y_max =  pca_results.n_components_+1
             if app_data.dim_red_y == 1:
                 app_data.dim_red_y = int(2)

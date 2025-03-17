@@ -637,8 +637,11 @@ class Styling(Observable):
         if self.debug:
             self.logger.print(f"@clim:\n  old value: {self.style_dict[self._plot_type]['CLim']}\n  new value: {value}")
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['CLim'] = value
-            self.notify_observers("clim", value)
+            if value == self.style_dict[self._plot_type]['CLim']:
+                return
+            else:
+                self.style_dict[self._plot_type]['CLim'] = value
+                self.notify_observers("clim", value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 

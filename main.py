@@ -443,9 +443,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         new_list = ['Cluster score']
                 case 'performance':
                     new_list = []
-                case 'pca score':
-                    if 'pca score' in field_dict.keys():
-                        new_list = ['pca score']
+                case 'score map':
+                    if 'score map' in field_dict.keys():
+                        new_list = ['score map']
                     else:
                         new_list = []
                 case 'ternary map':
@@ -459,8 +459,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         new_list.append('Ratio')
                         new_list.append('Ratio (normalized)')
 
-                    if 'PCA score' in field_dict.keys():
-                        new_list.append('PCA score')
+                    if 'score map' in field_dict.keys():
+                        new_list.append('score map')
 
                     if 'Cluster' in field_dict.keys():
                         new_list.append('Cluster')
@@ -2553,9 +2553,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
 
-            case 'variance' | 'vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
-                method = self.app_data.dim_red_method.split(':')
-                if self.app_data.update_pca_flag or not data.processed_data.match_attribute("data_type",f"{method} score"):
+            case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
+                if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
                     self.dimensional_reduction.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 

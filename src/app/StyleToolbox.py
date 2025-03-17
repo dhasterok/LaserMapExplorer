@@ -2091,9 +2091,9 @@ class StylingDock(Styling):
 
         # prevent updating of plot as all the changes are made
         flag = False
-        if self.plot_flag:
+        if self.ui.plot_flag:
             flag = True
-            self.plot_flag = False
+            self.ui.plot_flag = False
 
         widget_dict = self.axis_widget_dict
         setting = self.ui.field_control_settings[idx]
@@ -2112,7 +2112,7 @@ class StylingDock(Styling):
                 self.app_data.set_field(ax, setting['save_field'][ax])
 
         if flag:
-            self.plot_flag = True
+            self.ui.plot_flag = True
 
     # axes
     # -------------------------------------

@@ -740,7 +740,7 @@ class Styling(Observable):
     # -------------------------------------
     def _is_valid_bounds(self, value):
         """Validates if a the variable has properties consistent with bounds."""
-        return isinstance(value, list) and len(value) == 2 and value[1] > value[0]
+        return isinstance(value, list) and len(value) == 2 and value[1] >= value[0]
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""
@@ -890,16 +890,18 @@ class StyleTheme():
                 'heatmap': copy.deepcopy(self.default_plot_style),
                 'ternary map': copy.deepcopy(self.default_plot_style),
                 'TEC': copy.deepcopy(self.default_plot_style),
-                'Radar': copy.deepcopy(self.default_plot_style),
+                'radar': copy.deepcopy(self.default_plot_style),
                 'variance': copy.deepcopy(self.default_plot_style),
-                'vectors': copy.deepcopy(self.default_plot_style),
-                'PCA scatter': copy.deepcopy(self.default_plot_style),
-                'PCA heatmap': copy.deepcopy(self.default_plot_style),
-                'PCA score': copy.deepcopy(self.default_plot_style),
+                'basis vectors': copy.deepcopy(self.default_plot_style),
+                'dimension scatter': copy.deepcopy(self.default_plot_style),
+                'dimension heatmap': copy.deepcopy(self.default_plot_style),
+                'dimension score map': copy.deepcopy(self.default_plot_style),
                 'cluster': copy.deepcopy(self.default_plot_style),
-                'cluster score': copy.deepcopy(self.default_plot_style),
+                'cluster score map': copy.deepcopy(self.default_plot_style),
                 'cluster performance': copy.deepcopy(self.default_plot_style),
-                'profile': copy.deepcopy(self.default_plot_style)}
+                'profile': copy.deepcopy(self.default_plot_style),
+                'polygon': copy.deepcopy(self.default_plot_style)
+                }
 
         styles['field map']['Colormap'] = 'plasma'
 
@@ -909,21 +911,18 @@ class StyleTheme():
         styles['correlation']['CbarDir'] = 'vertical'
         styles['correlation']['CLim'] = [-1,1]
 
-        styles['vectors']['AspectRatio'] = 1.0
-        styles['vectors']['Colormap'] = 'RdBu'
+        styles['basis vectors']['AspectRatio'] = 1.0
+        styles['basis vectors']['Colormap'] = 'RdBu'
 
         styles['gradient map']['Colormap'] = 'RdYlBu'
 
-        styles['cluster score']['Colormap'] = 'plasma'
-        styles['cluster score']['CbarDir'] = 'vertical'
-        styles['cluster score']['CScale'] = 'linear'
+        styles['cluster score map']['Colormap'] = 'plasma'
+        styles['dimension score map']['Colormap'] = 'viridis'
 
         styles['cluster']['CScale'] = 'discrete'
         styles['cluster']['MarkerAlpha'] = 100
 
         styles['cluster performance']['AspectRatio'] = 0.62
-
-        styles['PCA score']['CScale'] = 'linear'
 
         styles['scatter']['AspectRatio'] = 1
 
@@ -932,12 +931,12 @@ class StyleTheme():
         styles['heatmap']['CScale'] = 'log'
         styles['TEC']['AspectRatio'] = 0.62
         styles['variance']['AspectRatio'] = 0.62
-        styles['vectors']['CLim'] = [-1,1]
-        styles['PCA scatter']['LineColor'] = '#4d4d4d'
-        styles['PCA scatter']['LineWidth'] = 0.5
-        styles['PCA scatter']['AspectRatio'] = 1
-        styles['PCA heatmap']['AspectRatio'] = 1
-        styles['PCA heatmap']['LineColor'] = '#ffffff'
+        styles['basis vectors']['CLim'] = [-1,1]
+        styles['dimension scatter']['LineColor'] = '#4d4d4d'
+        styles['dimension scatter']['LineWidth'] = 0.5
+        styles['dimension scatter']['AspectRatio'] = 1
+        styles['dimension heatmap']['AspectRatio'] = 1
+        styles['dimension heatmap']['LineColor'] = '#ffffff'
 
         styles['variance']['FontSize'] = 8
 
@@ -970,20 +969,20 @@ class StylingDock(Styling):
                 '': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'field map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'gradient map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'ternary map': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'correlation': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
                 'histogram': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
                 'scatter': {'axis': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
-                'heatmap': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'heatmap': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'ternary map': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'TEC': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'radar': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'variance': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'basis vectors': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'cluster score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'dimension score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'scatter score': {'axis': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
-                'heatmap score': {'axis': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'dimension scatter': {'axis': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
+                'dimension heatmap': {'axis': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
                 'cluster': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'cluster score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'cluster performance': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'profile': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'polygon': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
@@ -1128,7 +1127,6 @@ class StylingDock(Styling):
         #self.ui.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
         # colors
         # marker color
-        #self.ui.comboBoxFieldTypeC.activated.connect(self.update_color_field_type)
         #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         #self.ui.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
@@ -1370,7 +1368,7 @@ class StylingDock(Styling):
                 ui.comboBoxCbarDirection.setEnabled(True)
                 ui.lineEditCbarLabel.setEnabled(True)
 
-            case 'correlation' | 'vectors':
+            case 'correlation' | 'basis vectors':
                 # axes properties
                 ui.comboBoxTickDirection.setEnabled(True)
 
@@ -2019,9 +2017,10 @@ class StylingDock(Styling):
 
             widget_dict['childbox'][ax].setEnabled(setting['axis'][ax])
             widget_dict['childbox'][ax].setVisible(setting['axis'][ax])
-            if widget_dict['childbox'][ax] is not None:
-                widget_dict['childbox'][ax].setEnabled(setting['spinbox'][ax])
-                widget_dict['childbox'][ax].setVisible(setting['spinbox'][ax])
+
+            if widget_dict['spinbox'][ax] is not None:
+                widget_dict['spinbox'][ax].setEnabled(setting['spinbox'][ax])
+                widget_dict['spinbox'][ax].setVisible(setting['spinbox'][ax])
 
     def update_plot_type(self, new_plot_type=None, force=False):
         """Updates styles when plot type is changed
@@ -2047,7 +2046,6 @@ class StylingDock(Styling):
 
         ui = self.ui
 
-        print(f"PLOT TYPE = {self.plot_type}")
         self.init_field_widgets(self.axis_widget_dict)
 
         # update ui
@@ -2073,28 +2071,68 @@ class StylingDock(Styling):
             case _:
                 ui.actionSwapAxes.setEnabled(False)
 
+        # update field widgets
+        self.update_field_widgets()
+
         # update all plot widgets
         self.set_style_widgets()
 
         if self.plot_type != '':
             self.schedule_update()
 
+    def update_field_widgets(self):
+        """Updates field widgets with saved settings
+         
+        Updates the label text, field type combobox, and field combobox with saved values associated with a
+        control toolbox tab.
+        """
+        idx = None
+        if (hasattr(self, 'profile_dock') and self.ui.profile_dock.actionProfileToggle.isChecked()) or (hasattr(self, 'mask_dock') and self.ui.mask_dock.polygon_tab.actionPolyToggle.isChecked()):
+            idx = -1
+        else:
+            idx = self.ui.toolBox.currentIndex()
+
+        # prevent updating of plot as all the changes are made
+        flag = False
+        if self.plot_flag:
+            flag = True
+            self.plot_flag = False
+
+        widget_dict = self.axis_widget_dict
+        setting = self.ui.field_control_settings[idx]
+        for ax in range(3):
+            widget_dict['label'][ax].setText(setting['label'][ax])
+
+            if setting['saved_field_type'][ax] is not None:
+                self.app_data.set_field_type(ax, setting['save_field_type'][ax])
+            else:
+                parentbox = widget_dict['parentbox'][ax]
+                childbox = widget_dict['childbox'][ax]
+                add_none = widget_dict['plot type'][self.plot_type]['add_none'][ax]
+                self.ui.update_field_type_combobox_options(parentbox, childbox, add_none=add_none, global_list=True)
+
+            if setting['saved_field'][ax] is not None:
+                self.app_data.set_field(ax, setting['save_field'][ax])
+
+        if flag:
+            self.plot_flag = True
+
     # axes
     # -------------------------------------
-    def axis_variable_changed(self, fieldtype, field, ax="None"):
+    def axis_variable_changed(self, field_type, field, ax="None"):
         """Updates axis variables when the field is changed.
 
         Parameters
         ----------
-        fieldtype : str
-            _description_
+        field_type : str
+            field type
         field : str
-            _description_
+            field
         ax : str, optional
             axis for plotting, by default "None"
         """
         if self.debug:
-            self.logger.print(f"axis_variable_changed:\n  fieldtype={fieldtype}\n  field={field}\n  ax={ax}")
+            self.logger.print(f"axis_variable_changed:\n  field_type={field_type}\n  field={field}\n  ax={ax}")
 
         ui = self.ui
 
@@ -2129,7 +2167,7 @@ class StylingDock(Styling):
                     ui.lineEditZLabel.setText('')
             return
         else:
-            amin, amax, scale, label = self.get_axis_values(fieldtype, field, ax)
+            amin, amax, scale, label = self.get_axis_values(field_type, field, ax)
 
             plot_type = self.plot_type
 
@@ -2438,8 +2476,8 @@ class StylingDock(Styling):
         data = self.ui.data[self.app_data.sample_id]
 
         if ax == 'c':
-            if self.ui.comboBoxPlotType.currentText() == 'vectors':
-                self.style_dict['vectors']['CLim'] = [np.amin(self.ui.pca_results.components_), np.amax(self.ui.pca_results.components_)]
+            if self.ui.comboBoxPlotType.currentText() == 'basis vectors':
+                self.style_dict['basis vectors']['CLim'] = [np.amin(self.ui.pca_results.components_), np.amax(self.ui.pca_results.components_)]
             elif not (self.ui.comboBoxFieldTypeC.currentText() in ['None','cluster']):
                 field_type = self.ui.comboBoxFieldTypeC.currentText()
                 field = self.ui.comboBoxFieldC.currentText()
@@ -3074,7 +3112,7 @@ class StylingDock(Styling):
             data = self.ui.data[self.app_data.sample_id]
 
             # update bin width for histograms
-            if ax == 1 and self.plot_type == 'histogram':
+            if ax == 0 and self.plot_type == 'histogram':
                 # update hist_bin_width
                 self.app_data.update_num_bins = False
                 self.app_data.update_hist_bin_width()

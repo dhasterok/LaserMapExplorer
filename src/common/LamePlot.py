@@ -1446,12 +1446,12 @@ def plot_pca(parent, data, app_data, plot_style):
     #'plot_pca')
     if app_data == '':
         return
-
-    pca_results = data.pca_results
+    canvas = mplc.MplCanvas(parent=parent)
+    pca_results = data.dim_red_results[app_data.dim_red_method]
     # Determine which PCA plot to create based on the combobox selection
     plot_type = plot_style.plot_type
     #set clims 
-    plot_style.clim = [np.amin(pca_results.components_), np.amax(pca_results.components_)]
+    # plot_style.clim = [np.amin(pca_results.components_), np.amax(pca_results.components_)]
     match plot_type.lower():
         # make a plot of explained variance
         case 'variance':
@@ -1474,7 +1474,7 @@ def plot_pca(parent, data, app_data, plot_style):
             plot_name = plot_type+f'_PC{pc_x}_PC{pc_y}'
             # Assuming pca_df contains scores for the principal components
             # uncomment to use plot scatter instead of ax.scatter
-            canvas = mplc.MplCanvas(parent=parent)
+            
             plot_scatter(parent, data, app_data, plot_style, canvas=canvas)
 
             plot_data= plot_pca_components(pca_results, data, app_data, plot_style, canvas)

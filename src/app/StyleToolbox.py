@@ -637,8 +637,11 @@ class Styling(Observable):
         if self.debug:
             self.logger.print(f"@clim:\n  old value: {self.style_dict[self._plot_type]['CLim']}\n  new value: {value}")
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['CLim'] = value
-            self.notify_observers("clim", value)
+            if value == self.style_dict[self._plot_type]['CLim']:
+                return
+            else:
+                self.style_dict[self._plot_type]['CLim'] = value
+                self.notify_observers("clim", value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
 
@@ -976,11 +979,12 @@ class StylingDock(Styling):
                 'radar': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
                 'variance': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'basis vectors': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'cluster score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'dimension score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'scatter score': {'axis': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
                 'heatmap score': {'axis': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
                 'cluster': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'performance': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'cluster performance': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
                 'profile': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
                 'polygon': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
             }

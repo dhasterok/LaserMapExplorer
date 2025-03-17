@@ -443,9 +443,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         new_list = ['Cluster score']
                 case 'performance':
                     new_list = []
-                case 'pca score':
-                    if 'pca score' in field_dict.keys():
-                        new_list = ['pca score']
+                case 'score map':
+                    if 'score map' in field_dict.keys():
+                        new_list = ['score map']
                     else:
                         new_list = []
                 case 'ternary map':
@@ -459,8 +459,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         new_list.append('Ratio')
                         new_list.append('Ratio (normalized)')
 
-                    if 'PCA score' in field_dict.keys():
-                        new_list.append('PCA score')
+                    if 'score map' in field_dict.keys():
+                        new_list.append('score map')
 
                     if 'Cluster' in field_dict.keys():
                         new_list.append('Cluster')
@@ -1161,13 +1161,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.control_settings.update({self.left_tab['ndim']: {'current_index': 0, 'plot_list': ['TEC', 'Radar'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'dimensional reduction':
                     self.left_tab.update({'multidim': tid})
-                    self.control_settings.update({self.left_tab['multidim']: {'current_index': 0, 'plot_list': ['variance','vectors','pca scatter','pca heatmap','pca score'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['multidim']: {'current_index': 0, 'plot_list': ['variance','vectors','pca scatter','pca heatmap','score map'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'clustering':
                     self.left_tab.update({'cluster': tid})
                     self.control_settings.update({self.left_tab['cluster']: {'current_index': 0, 'plot_list': ['cluster', 'cluster score', 'performance'], 'axes': [False, False, False, False], 'label': ['','','',''], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
                 case 'p-t-t functions':
                     self.left_tab.update({'special': tid})
-                    self.control_settings.update({self.left_tab['special']: {'current_index': 0, 'plot_list': ['field map', 'gradient map', 'cluster score', 'pca score', 'profile'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
+                    self.control_settings.update({self.left_tab['special']: {'current_index': 0, 'plot_list': ['field map', 'gradient map', 'cluster score', 'score map', 'profile'], 'axes': [False, False, False, True], 'label': ['','','','Map'], 'saved_field_type': [None, None, None, None], 'saved_field': [None, None, None, None]}})
 
 
     def reindex_style_tab(self):
@@ -2664,8 +2664,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
 
-            case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'PCA score':
-                if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+            case 'variance' | 'vectors' | 'PCA scatter' | 'PCA heatmap' | 'score map':
+                if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','score map'):
                     self.dimensional_reduction.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 

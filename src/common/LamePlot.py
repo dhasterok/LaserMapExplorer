@@ -1459,12 +1459,12 @@ def plot_pca(parent, data, app_data, plot_style):
             plot_name = plot_type
 
         # make an image of the PC vectors and their components
-        case 'vectors':
+        case 'basis vectors':
             canvas, plot_data = plot_pca_vectors(parent,pca_results, data, app_data, plot_style)
             plot_name = plot_type
 
         # make a scatter plot or heatmap of the data... add PC component vectors
-        case 'pca scatter'| 'pca heatmap':
+        case 'dimension scatter'| 'dimension heatmap':
             pc_x = int(app_data.dim_red_x)
             pc_y = int(app_data.dim_red_y)
 
@@ -1480,7 +1480,7 @@ def plot_pca(parent, data, app_data, plot_style):
             plot_data= plot_pca_components(pca_results, data, app_data, plot_style, canvas)
 
         # make a map of a principal component score
-        case 'pca score':
+        case 'dimension score map':
             if app_data.c_field_type.lower() == 'none' or app_data.c_field == '':
                 return
 

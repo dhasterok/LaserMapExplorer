@@ -1754,7 +1754,7 @@ class StylingDock(Styling):
         if self.debug:
             self.logger.print("set_style_widgets")
 
-        if self.app_data.sample_id == '':
+        if self.app_data.sample_id == '' or self.plot_type =='':
             return
 
         ui = self.ui

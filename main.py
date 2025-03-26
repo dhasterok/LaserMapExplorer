@@ -368,6 +368,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxClusterDistance.clear()
         self.comboBoxClusterDistance.addItems(self.clustering.distance_metrics)
         self.app_data.cluster_distance = self.clustering.distance_metrics[0] 
+
         self.comboBoxClusterDistance.activated.connect(lambda: setattr(self.app_data, "cluster_distance",self.comboBoxClusterDistance.currentText()))
         # cluster exponent
         self.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
@@ -375,20 +376,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
         self.horizontalSliderClusterExponent.setTickInterval(1)
         self.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.labelClusterExponent.setText(str(value/10)))
-        self.horizontalSliderClusterExponent.sliderReleased.connect(lambda: setattr(self.app_data, "cluster_exponent",self.horizontalSliderClusterExponent.currentText()))
+        self.horizontalSliderClusterExponent.sliderReleased.connect(lambda: setattr(self.app_data, "cluster_exponent",float(self.horizontalSliderClusterExponent.value()/10)))
 
         # starting seed
         self.lineEditSeed.setValidator(QIntValidator(0,1000000000))
-        self.lineEditSeed.editingFinished.connect(lambda: setattr(self.app_data, "cluster_seed",self.lineEditSeed.text()))
+        self.lineEditSeed.editingFinished.connect(lambda: setattr(self.app_data, "cluster_seed",int(self.lineEditSeed.text())))
         self.toolButtonRandomSeed.clicked.connect(self.app_data.generate_random_seed)
 
         # cluster method
-        self.comboBoxClusterMethod.addItems(self.dimensional_reduction.dim_red_methods)
+        self.comboBoxClusterMethod.addItems(self.clustering.cluster_methods)
         self.app_data.cluster_method = self.clustering.cluster_methods[0]
+        self.toggle_cluster_parameters(self.clustering.cluster_methods[0]) 
         self.comboBoxClusterMethod.activated.connect(lambda: setattr(self.app_data, "cluster_method",self.comboBoxClusterMethod.currentText()))
-
-        # Connect cluster method comboBox to slot
-        self.comboBoxClusterMethod.currentIndexChanged.connect(self.group_changed)
 
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, add_none=False, global_list=False, user_activated=False):
@@ -439,8 +438,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'cluster':
                     if 'Cluster' in field_dict.keys():
                         new_list = ['Cluster']
-                    else:
+                    elif 'Cluster score' in field_dict.keys():
                         new_list = ['Cluster score']
+                    else:
+                        new_list=[]
                 case 'performance':
                     new_list = []
                 case 'score map':
@@ -499,7 +500,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if 'normalized' in old_field_type:
             old_field_type = old_field_type.replace(' (normalized)','')
-
+        
         if old_field_type not in new_list:
             childbox.clear()
             childbox.addItems(field_dict[new_list[0]])
@@ -508,7 +509,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             childbox.clear()
             childbox.addItems(field_dict[old_field_type])
             childbox.setCurrentIndex(0)
-            
+        
     def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, add_none=False, user_activated=False):
         """Updates a field comobobox list.
 
@@ -630,6 +631,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         tab_id = self.toolBox.currentIndex()
 
+        data = self.data[self.app_data.sample_id]
+
+        # run clustering before changing plot_type if user selects clustering tab
+        if tab_id == self.left_tab['cluster'] :
+            self.compute_clusters_update_groups()
+            plot_clusters(self,data,self.app_data,self.plot_style)
+        # run dim red before changing plot_type if user selects dim red tab
+        if tab_id == self.left_tab['multidim'] :
+            if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+                self.dimensional_reduction.compute_dim_red(data, self.app_data)
         # update the plot type comboBox options
         self.update_plot_type_combobox_options()
         self.plot_style.plot_type = self.field_control_settings[tab_id]['plot_list'][self.field_control_settings[tab_id]['saved_index']]
@@ -640,7 +651,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.spinBoxClusterMax.hide()
                 self.labelNClusters.show()
                 self.spinBoxNClusters.show()
-            case 'performance':
+            case 'cluster performance':
                 self.labelClusterMax.show()
                 self.spinBoxClusterMax.show()
                 self.labelNClusters.hide()
@@ -911,82 +922,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.display_QV()
 
-    def group_changed(self):
-        if self.app_data.sample_id == '':
-            return
-        cluster_tab = self.mask_dock.cluster_tab
-        # block signals
-        cluster_tab.tableWidgetViewGroups.blockSignals(True)
-        cluster_tab.spinBoxClusterGroup.blockSignals(True)
-
-        # Clear the list widget
-        cluster_tab.tableWidgetViewGroups.clearContents()
-        cluster_tab.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
-
-        method = self.app_data.cluster_method
-        if method in self.data[self.app_data.sample_id].processed_data.columns:
-            if not self.data[self.app_data.sample_id].processed_data[method].empty:
-                clusters = self.data[self.app_data.sample_id].processed_data[method].dropna().unique()
-                clusters.sort()
-
-                self.app_data.cluster_dict[method]['selected_clusters'] = []
-                try:
-                    self.app_data.cluster_dict[method].pop(str(99))
-                except:
-                    pass
-
-                i = 0
-                while True:
-                    try:
-                        self.app_data.cluster_dict[method].pop(str(i))
-                        i += 1
-                    except:
-                        break
-
-
-                # set number of rows in tableWidgetViewGroups
-                # set default colors for clusters and update associated widgets
-                cluster_tab.spinBoxClusterGroup.setMinimum(1)
-                if 99 in clusters:
-                    cluster_tab.tableWidgetViewGroups.setRowCount(len(clusters)-1)
-                    cluster_tab.spinBoxClusterGroup.setMaximum(len(clusters)-1)
-
-                    hexcolor = self.plot_style.set_default_cluster_colors(mask=True)
-                else:
-                    cluster_tab.tableWidgetViewGroups.setRowCount(len(clusters))
-                    cluster_tab.spinBoxClusterGroup.setMaximum(len(clusters))
-
-                    hexcolor = self.plot_style.set_default_cluster_colors(mask=False)
-
-                for c in clusters:
-                    if c == 99:
-                        cluster_name = 'Mask'
-                        self.app_data.cluster_dict[method].update({str(c): {'name':cluster_name, 'link':[], 'color':hexcolor[-1]}})
-                        break
-                    else:
-                        cluster_name = f'Cluster {c+1}'
-
-                    # Initialize the flag
-                    self.isUpdatingTable = True
-                    cluster_tab.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
-                    cluster_tab.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
-                    # colors in table are set by self.plot_style.set_default_cluster_colors()
-                    #cluster_tab.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
-                    cluster_tab.tableWidgetViewGroups.selectRow(c)
-                    
-                    self.app_data.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
-
-                if 99 in clusters:
-                    self.app_data.cluster_dict[method]['selected_clusters'] = clusters[:-1]
-                else:
-                    self.app_data.cluster_dict[method]['selected_clusters'] = clusters
-        else:
-            print(f'(group_changed) Cluster method, ({method}) is not defined')
-
-        #print(self.app_data.cluster_dict)
-        cluster_tab.tableWidgetViewGroups.blockSignals(False)
-        cluster_tab.spinBoxClusterGroup.blockSignals(False)
-        self.isUpdatingTable = False
+    
 
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
@@ -1189,7 +1125,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.canvas_tab.update({'mv': tid})
                 case 'quick view':
                     self.canvas_tab.update({'qv': tid})
-         
+
+    def toggle_cluster_parameters(self,method):
+        if method == 'k-means':
+            self.horizontalSliderClusterExponent.setEnabled(False)
+            self.labelClusterExponent.setEnabled(False)
+            self.labelClusterDistance.setEnabled(False)
+        else:
+            self.horizontalSliderClusterExponent.setEnabled(True)
+            self.labelClusterExponent.setEnabled(True)
+            self.labelClusterDistance.setEnabled(True)
+        
     # -------------------------------
     # UI update functions
     # Executed when a property is changed
@@ -1495,7 +1441,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         widget['spinbox'][ax].blockSignals(True)
         if widget['spinbox'][ax].value() != widget['childbox'][ax].currentIndex():
-            widget['childbox'][ax].setCurrentIndex(widget['childbox'][ax].value())
+            widget['childbox'][ax].setCurrentIndex(widget['spinbox'][ax].value())
             self.plot_style.update_field(ax)
         widget['spinbox'][ax].blockSignals(False)
 
@@ -1625,6 +1571,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_cluster_method_combobox(self, new_cluster_method):
         self.comboBoxClusterMethod.setCurrentText(new_cluster_method)
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.toggle_cluster_parameters(new_cluster_method)
             self.plot_style.schedule_update()
 
     def update_max_clusters_spinbox(self, new_max_clusters):
@@ -1643,7 +1590,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.schedule_update()
 
     def update_cluster_exponent_slider(self, new_cluster_exponent):
-        self.horizontalSliderClusterExponent.setValue(new_cluster_exponent)
+        self.horizontalSliderClusterExponent.setValue(int(new_cluster_exponent*10))
         self.labelClusterExponent.setText(str(new_cluster_exponent))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.plot_style.schedule_update()
@@ -2559,20 +2506,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
             case 'cluster' | 'cluster score map':
-                method = self.app_data.cluster_method
-                if self.app_data.update_cluster_flag or \
-                        data.processed_data[method].empty or \
-                        (method not in list(data.processed_data.columns)):
-                    # compute clusters
-                    self.statusbar.showMessage('Computing clusters')
-                    self.clustering.compute_clusters(data, self.app_data, max_clusters = None)
-                    # enable cluster tab actions
-                    if hasattr(self, 'mask_dock'):
-                        self.mask_dock.cluster_tab.toggle_cluster_actions()
-                    # update cluster table in style menu
-                    self.group_changed()
-                    self.statusbar.showMessage('Clustering successful')
-
+                self.compute_clusters_update_groups()
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)
 
             case 'cluster performance':
@@ -2731,6 +2665,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # put plot_info back into table
         #print(plot_info)
         self.plot_tree.add_tree_item(plot_info)
+
+    def compute_clusters_update_groups(self):
+        """
+        Computes clusters and updates cluster groups.
+
+        This method:
+        1. Checks if clustering needs to be updated based on the application data flags.
+        2. Invokes the clustering computation if necessary.
+        3. Applies updated cluster colors and refreshes the cluster tab in the Mask Dock.
+        """
+        data = self.data[self.app_data.sample_id]
+        method = self.app_data.cluster_method
+        if self.app_data.update_cluster_flag or \
+                data.processed_data[method].empty or \
+                (method not in list(data.processed_data.columns)):
+            # compute clusters
+            self.statusbar.showMessage('Computing clusters')
+            self.clustering.compute_clusters(data, self.app_data, max_clusters = None)
+            # update cluster colors
+            self.app_data.cluster_group_changed(data, self.plot_style)
+            # enable cluster tab actions and update group table
+            if hasattr(self, 'mask_dock'):
+                self.mask_dock.cluster_tab.toggle_cluster_actions()
+                self.mask_dock.cluster_tab.update_table_widget()
+
+            self.statusbar.showMessage('Clustering successful')
 
     # -------------------------------------
     # Dialogs and Windows

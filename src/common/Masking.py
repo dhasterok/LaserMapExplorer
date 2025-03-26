@@ -890,3 +890,96 @@ class ClusterTab():
         if self.tableWidgetViewGroups.rowCount() == 0:
             return
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(int(self.spinBoxClusterGroup.value()-1),2).text())
+
+    def update_table_widget(self):
+        
+        app_data = self.main_window.app_data
+        data = self.main_window.data[app_data.sample_id]
+        
+        # # block signals
+        self.tableWidgetViewGroups.blockSignals(True)
+        self.spinBoxClusterGroup.blockSignals(True)
+
+        # Clear the list widget
+        self.tableWidgetViewGroups.clearContents()
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
+        method = app_data.cluster_method
+        if method in data[app_data.sample_id].processed_data.columns:
+            if not data[app_data.sample_id].processed_data[method].empty:
+                clusters = data.processed_data[method].dropna().unique()
+                clusters.sort()
+                # set number of rows in tableWidgetViewGroups
+                # set default colors for clusters and update associated widgets
+                self.spinBoxClusterGroup.setMinimum(1)
+                if 99 in clusters:
+                    self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
+                    self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
+
+                else:
+                    self.tableWidgetViewGroups.setRowCount(len(clusters))
+                    self.spinBoxClusterGroup.setMaximum(len(clusters))
+
+                for c in clusters:
+                    if c == 99:
+                        break
+                    cluster_name =  app_data.cluster_dict[method][c]['name']
+                    hexcolor = app_data.cluster_dict[method][c]['color']
+                    
+                    
+                    # Initialize the flag
+                    self.isUpdatingTable = True
+                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
+                    self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
+                    # colors in table are set by plot_style.set_default_cluster_colors()
+                    self.tableWidgetViewGroups.selectRow(c)
+                    
+
+        else:
+            print(f'(group_changed) Cluster method, ({method}) is not defined')
+
+        #print(app_data.cluster_dict)
+        self.tableWidgetViewGroups.blockSignals(False)
+        self.spinBoxClusterGroup.blockSignals(False)
+        self.isUpdatingTable = False
+
+
+
+    
+        # cluster styles
+    # -------------------------------------
+
+    def set_default_cluster_colors(self,plot_style,cluster_tab, mask=False):
+        """Sets cluster group to default colormap
+
+        Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in
+        ``self.styles['cluster']['Colormap'].  Change the default colormap
+        by changing ``self.comboBoxColormap``, when ``self.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
+
+        Returns
+        -------
+            str : hexcolor
+        """
+
+        #print('set_default_cluster_colors')
+        # cluster_tab = self.parent.mask_dock.cluster_tab
+
+        # cluster colormap
+        cmap = plot_style.get_colormap(N=self.tableWidgetViewGroups.rowCount())
+
+        # set color for each cluster and place color in table
+        colors = [cmap(i) for i in range(cmap.N)]
+
+        hexcolor = []
+        for i in range(self.tableWidgetViewGroups.rowCount()):
+            hexcolor.append(get_hex_color(colors[i]))
+            self.tableWidgetViewGroups.blockSignals(True)
+            self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
+            self.tableWidgetViewGroups.blockSignals(False)
+
+        if mask:
+            hexcolor.append(plot_style.style_dict['cluster']['OverlayColor'])
+
+        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
+
+        return hexcolor

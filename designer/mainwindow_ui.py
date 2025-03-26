@@ -2162,8 +2162,6 @@ class Ui_MainWindow(object):
         self.formLayout_33.setWidget(0, QFormLayout.LabelRole, self.labelClusterMethod)
 
         self.comboBoxClusterMethod = QComboBox(self.groupBoxClustering)
-        self.comboBoxClusterMethod.addItem("")
-        self.comboBoxClusterMethod.addItem("")
         self.comboBoxClusterMethod.setObjectName(u"comboBoxClusterMethod")
         self.comboBoxClusterMethod.setMaximumSize(QSize(150, 16777215))
         self.comboBoxClusterMethod.setFont(font8)
@@ -3871,8 +3869,6 @@ class Ui_MainWindow(object):
         self.spinBoxNClusters.setToolTip(QCoreApplication.translate("MainWindow", u"Change the number of clusters", None))
 #endif // QT_CONFIG(tooltip)
         self.labelClusterMethod.setText(QCoreApplication.translate("MainWindow", u"Method", None))
-        self.comboBoxClusterMethod.setItemText(0, QCoreApplication.translate("MainWindow", u"k-means", None))
-        self.comboBoxClusterMethod.setItemText(1, QCoreApplication.translate("MainWindow", u"fuzzy c-means", None))
 
 #if QT_CONFIG(tooltip)
         self.comboBoxClusterMethod.setToolTip(QCoreApplication.translate("MainWindow", u"Select clustering method", None))

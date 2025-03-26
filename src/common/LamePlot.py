@@ -1713,8 +1713,8 @@ def plot_clusters(parent, data, app_data, plot_style):
         'sample_id': app_data.sample_id,
         'plot_name': plot_name,
         'plot_type': plot_style.plot_type,
-        'field_type':app_data.c_field,
-        'field':  app_data.field,
+        'field_type':app_data.c_field_type,
+        'field':  app_data.c_field,
         'figure': canvas,
         'style': plot_style.style_dict[plot_style.plot_type],
         'cluster_groups': app_data.cluster_dict[method]['selected_clusters'],
@@ -1723,7 +1723,7 @@ def plot_clusters(parent, data, app_data, plot_style):
         'data': plot_data
         }
 
-    return plot_info, canvas
+    return canvas, plot_info
     # self.clear_layout(self.widgetSingleView.layout())
     # self.widgetSingleView.layout().addWidget(canvas)
 
@@ -1767,8 +1767,8 @@ def cluster_performance_plot(parent, data, app_data, plot_style):
     max_clusters =app_data.max_clusters
 
     # compute cluster results
-    inertia = app_data.cluster_results[method]
-    silhouette_scores =  app_data.silhouette_scores[method]
+    inertia = data.cluster_results[method]
+    silhouette_scores =  data.silhouette_scores[method]
 
     second_derivative = np.diff(np.diff(inertia))
 
@@ -1838,7 +1838,7 @@ def cluster_performance_plot(parent, data, app_data, plot_style):
         'data': plot_data
         }
 
-    return plot_info, canvas
+    return canvas, plot_info
 
 
 # -------------------------------------

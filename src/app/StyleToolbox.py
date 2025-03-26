@@ -2063,7 +2063,7 @@ class StylingDock(Styling):
                 ui.spinBoxClusterMax.show()
                 ui.labelNClusters.hide()
                 ui.spinBoxNClusters.hide()
-            case 'cluster' | 'cluster score':
+            case 'cluster' | 'cluster score map':
                 ui.labelClusterMax.hide()
                 ui.spinBoxClusterMax.hide()
                 ui.labelNClusters.show()
@@ -3046,8 +3046,8 @@ class StylingDock(Styling):
         parentbox = self.axis_widget_dict['parentbox'][ax]
 
         if field_type is None:   # user interaction, or direct setting of combobox
-            # set field property to combobox
-            self.app_data.set_field(ax, parentbox.currentText())
+            # set field type property to combobox
+            self.app_data.set_field_type(ax, parentbox.currentText())
         else:   # direct setting of property
             if field_type == parentbox.currentText() and field_type == self.app_data.get_field_type(ax):
                 return
@@ -3341,40 +3341,34 @@ class StylingDock(Styling):
     # cluster styles
     # -------------------------------------
 
-    def set_default_cluster_colors(self, mask=False):
+    def set_default_cluster_colors(self,n, mask=False):
         """Sets cluster group to default colormap
 
-        Sets the colors in ``MainWindow.tableWidgetViewGroups`` to the default colormap in
-        ``MainWindow.styles['cluster']['Colormap'].  Change the default colormap
-        by changing ``MainWindow.comboBoxColormap``, when ``MainWindow.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
+        Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in
+        ``self.styles['cluster']['Colormap'].  Change the default colormap
+        by changing ``self.comboBoxColormap``, when ``self.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
 
         Returns
         -------
+            N : number of cluster groups
             str : hexcolor
         """
-        if self.debug:
-            self.logger.print("set_default_cluster_colors")
 
         #print('set_default_cluster_colors')
-        cluster_tab = self.parent.mask_dock.cluster_tab
+        # cluster_tab = self.parent.mask_dock.cluster_tab
 
         # cluster colormap
-        cmap = self.get_colormap(N=self.parent.tableWidgetViewGroups.rowCount())
+        cmap = self.get_colormap(N=n)
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
 
         hexcolor = []
-        for i in range(cluster_tab.tableWidgetViewGroups.rowCount()):
+        for i in range(n):
             hexcolor.append(get_hex_color(colors[i]))
-            cluster_tab.tableWidgetViewGroups.blockSignals(True)
-            cluster_tab.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
-            cluster_tab.tableWidgetViewGroups.blockSignals(False)
-
+            
         if mask:
             hexcolor.append(self.style_dict['cluster']['OverlayColor'])
-
-        cluster_tab.toolButtonClusterColor.setStyleSheet("background-color: %s;" % cluster_tab.tableWidgetViewGroups.item(cluster_tab.spinBoxClusterGroup.value()-1,2).text())
 
         return hexcolor
 

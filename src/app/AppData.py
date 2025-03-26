@@ -1058,4 +1058,68 @@ class AppData(Observable):
         self.cluster_seed = r
         
 
+    def cluster_group_changed(self,data, plot_style):
+        """
+        Updates the cluster dictionary and selected cluster groups.
+
+        This method checks if the current clustering method is available in
+        ``data.processed_data[method]``. If found, it retrieves and sorts
+        the unique cluster labels, assigns colors using ``plot_style``,
+        and updates the internal dictionary (``self.cluster_dict``) with
+        each cluster’s information. If a mask cluster (label 99) exists,
+        it is separately handled and assigned the last color.
+
+        Parameters
+        ----------
+        data : object
+            The data container with processed cluster information stored in
+            ``data.processed_data[method]``.
+        plot_style : object
+            An object or utility providing default cluster color assignments.
+        """
+        if self.sample_id == '':
+            return
+        method =self.cluster_method
+        if method in data.processed_data.columns:
+            if not data.processed_data[method].empty:
+                clusters = data.processed_data[method].dropna().unique()
+                clusters.sort()
+
+                self.cluster_dict[method]['selected_clusters'] = []
+                try:
+                   self.cluster_dict[method].pop(str(99))
+                except:
+                    pass
+
+                i = 0
+                while True:
+                    try:
+                        self.cluster_dict[method].pop(str(i))
+                        i += 1
+                    except:
+                        break
+
+                if 99 in clusters:
+                    hexcolor = plot_style.set_default_cluster_colors(mask=True,n = len(clusters)-1)
+                else:
+                    hexcolor = plot_style.set_default_cluster_colors(mask=False, n = len(clusters))
+
+                for c in clusters:
+                    c = int(c)
+                    if c == 99:
+                        cluster_name = 'Mask'
+                        self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[-1]}})
+                        break
+                    else:
+                        cluster_name = f'Cluster {c+1}'
+
+                    
+                    self.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
+
+                if 99 in clusters:
+                   self.cluster_dict[method]['selected_clusters'] = clusters[:-1]
+                else:
+                   self.cluster_dict[method]['selected_clusters'] = clusters
+        else:
+            print(f'(group_changed) Cluster method, ({method}) is not defined')
 

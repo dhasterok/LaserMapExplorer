@@ -33,7 +33,7 @@ class Clustering():
 
         seed = app_data.cluster_seed
         method = app_data.cluster_method
-        exponent = app_data.cluster_exponent / 10
+        exponent = app_data.cluster_exponent
 
         # get clustering options
         if max_clusters is None: 
@@ -81,7 +81,7 @@ class Clustering():
 
                     #add k-means results to self.data
                     if max_clusters is None:
-                        data.add_columns('cluster', method, model.predict(array), data.mask)
+                        data.add_columns('Cluster', method, model.predict(array), data.mask)
                     else:
                         kmeans.fit(array)
                         cluster_results.append(kmeans.inertia_)
@@ -91,6 +91,8 @@ class Clustering():
                         else:
                             silhouette_scores.append(silhouette_score(array, kmeans.labels_, sample_size=1000))
                         print(f"{nc}: {silhouette_scores}")
+                        data.cluster_results[method] =cluster_results
+                        data.silhouette_scores[method] = silhouette_scores
 
             # fuzzy c-means
             case 'fuzzy c-means':
@@ -106,10 +108,10 @@ class Clustering():
                         # assign cluster scores to self.data
                         for n in range(nc):
                             #data['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
-                            data.add_columns('cluster score', 'cluster' + str(n), u[n-1,:], data.mask)
+                            data.add_columns('Cluster score', 'cluster' + str(n), u[n-1,:], data.mask)
 
                         #add cluster results to self.data
-                        data.add_columns('cluster', method, labels, data.mask)
+                        data.add_columns('Cluster', method, labels, data.mask)
                     else:
                         # weighted sum of squared errors (WSSE)
                         wsse = np.sum((u ** exponent) * (dist ** 2))
@@ -121,8 +123,9 @@ class Clustering():
                             silhouette_scores.append(silhouette_score(array, labels, sample_size=1000))
                         print(f"{nc}: {silhouette_scores}")
             
-        data.cluster_results[method] =cluster_results
-        data.silhouette_scores[method] = silhouette_scores
+                        data.cluster_results[method] =cluster_results
+                        data.silhouette_scores[method] = silhouette_scores
+
 
 
 

@@ -150,6 +150,7 @@ class AppData(Observable):
         self._num_basis_for_precondition = 0
 
         self.update_cluster_flag = False
+        self.updating_cluster_table_flag = False
         self.update_pca_flag = False
         
         self.axis = ['x','y','z','c']
@@ -1123,3 +1124,4 @@ class AppData(Observable):
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
 
+    

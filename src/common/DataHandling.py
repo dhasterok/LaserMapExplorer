@@ -627,6 +627,7 @@ class SampleObj(Observable):
 
         self.prep_data()
 
+
     @property
     def current_field(self):
         return self._current_field

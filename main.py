@@ -1963,7 +1963,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_data_min_diff_quantile(self,value):
         """Updates ``MainWindow.lineEditLowerQuantile.value``
         Called as an update to ``DataHandling.lineEditLowerQuantile``. 
-
         Parameters
         ----------
         value : float

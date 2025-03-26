@@ -62,6 +62,9 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         super().__init__(parent)
         self.main_window = parent
         self.debug = debug
+        self.data ={}
+        if self.main_window.data and self.main_window.app_data.sample_id != '':
+            self.data = self.main_window.data[self.main_window.app_data.sample_id]
 
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -110,11 +113,9 @@ class FilterTab():
     def __init__(self, parent, debug=False):
         self.parent = parent
         self.main_window = parent.main_window
-
         self.debug = debug
 
-        if self.main_window.data and parent.main_window.app_data.sample_id != '':
-            self.data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
+        
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -307,14 +308,14 @@ class FilterTab():
 
         # filter tab toolbar connections
         self.actionFilterAdd.triggered.connect(self.update_filter_table)
-        self.actionFilterAdd.triggered.connect(self.parent.main_window.apply_field_filters)
+        self.actionFilterAdd.triggered.connect(lambda: self.apply_field_filters_update_plot())
         self.actionFilterUp.triggered.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
-        self.actionFilterUp.triggered.connect(lambda: self.parent.main_window.apply_field_filters(update_plot=True))
+        self.actionFilterUp.triggered.connect(lambda: self.apply_field_filters_update_plot())
         self.actionFilterDown.triggered.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
-        self.actionFilterDown.triggered.connect(lambda: self.parent.main_window.apply_field_filters(update_plot=True))
+        self.actionFilterDown.triggered.connect(lambda: self.apply_field_filters_update_plot())
         self.actionFilterRemove.triggered.connect(self.remove_selected_rows)
         self.actionFilterRemove.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
-        self.actionFilterRemove.triggered.connect(lambda: self.parent.main_window.apply_field_filters(update_plot=True))
+        self.actionFilterRemove.triggered.connect(lambda: self.apply_field_filters_update_plot())
         self.actionFilterSave.triggered.connect(self.save_filter_table)
         self.actionFilterSelectAll.triggered.connect(self.tableWidgetFilters.selectAll)
 
@@ -328,6 +329,14 @@ class FilterTab():
 
         self.update_filter_values()
         self.load_filter_tables()
+
+    def apply_field_filters_update_plot(self):
+        """Updates filters in ``self.parent.data`` for given sample_id
+
+        Updates the plot once filter values have been update
+        """
+        self.parent.data.apply_field_filters()
+        self.main_window.plot_style.schedule_update()
 
     def update_filter_values(self):
         """Updates widgets that display the filter bounds for a selected field.
@@ -344,7 +353,7 @@ class FilterTab():
         #     return
         if not (field := self.comboBoxFilterField.currentText()): return
 
-        data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
+        data = self.parent.data
 
         self.lineEditFMin.value = data[field].min()
         self.callback_lineEditFMin()
@@ -359,7 +368,7 @@ class FilterTab():
         if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
             return
 
-        data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
+        data = self.parent.data
 
         try:
             array = data.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
@@ -378,7 +387,7 @@ class FilterTab():
         if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
             return
 
-        data = self.parent.main_window.data[self.parent.main_window.app_data.sample_id]
+        data = self.parent.data
 
         try:
             array = data.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
@@ -488,7 +497,7 @@ class FilterTab():
             filter_info = {'use':True, 'field_type': field_type, 'field': field, 'norm':scale ,'min': f_min,'max':f_max, 'operator':operator, 'persistent':True}
             self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.loc[len(self.parent.main_window.data[self.parent.main_window.sample_id].filter_df)] = filter_info
 
-        self.parent.main_window.apply_field_filters()
+        self.parent.data.apply_field_filters()
 
     def remove_selected_rows(self):
         """Remove selected rows from filter table.
@@ -508,7 +517,7 @@ class FilterTab():
                 self.tableWidgetFilters.removeRow(row)
                 self.parent.main_window.data[sample_id].filter_df.drop(self.parent.main_window.data[sample_id].filter_df[(self.parent.main_window.data[sample_id].filter_df['field'] == field)].index, inplace=True)
 
-        self.parent.main_window.apply_field_filters(sample_id)
+        self.parent.data.apply_field_filters()
 
     def save_filter_table(self):
         """Opens a dialog to save filter table
@@ -572,7 +581,7 @@ class FilterTab():
 class PolygonTab():
     def __init__(self, parent, debug=False):
         self.parent = parent
-
+        
         self.debug = debug
 
         #init table_fcn
@@ -669,7 +678,7 @@ class PolygonTab():
         tab_layout.addWidget(toolbar)
         
         self.tableWidgetPolyPoints = CustomTableWidget()
-        self.tableWidgetPolyPoints.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidgetPolyPoints.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.tableWidgetPolyPoints.setColumnCount(5)
 
         header = self.tableWidgetPolyPoints.horizontalHeader()
@@ -686,10 +695,13 @@ class PolygonTab():
 
         polygon_icon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
         self.parent.tabWidgetMask.addTab(self.polygon_tab, polygon_icon, "Polygons")
+        
+        # initialise polygon dictionary for a given sample id in self.parent.data
+        self.parent.data.polygon = PolygonManager(self, debug=self.parent.main_window.logger_options['Polygon'])
 
-        self.actionPolyCreate.triggered.connect(self.parent.main_window.polygon.increment_pid)
+        self.actionPolyCreate.triggered.connect(self.parent.data.polygon.increment_pid)
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.parent.main_window.polygon.view_selected_polygon)
+        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.parent.data.polygon.view_selected_polygon)
 
         self.actionPolyCreate.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
         self.actionPolyMovePoint.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
@@ -702,13 +714,11 @@ class PolygonTab():
     def polygon_state_changed(self):
         self.parent.main_window.profile_state = self.polygon_toggle.isChecked()
         if self.polygon_toggle.isChecked():
-            if not hasattr(self.parent.main_window,"polygon"):
-                self.parent.main_window.polygon = PolygonManager(self, debug=self.parent.main_window.logger_options['Polygon'])
             self.parent.main_window.update_plot_type_combobox()
             self.parent.main_window.profile_dock.profile_toggle.setChecked(False)
             self.parent.main_window.profile_dock.profile_state_changed()
 
-        self.parent.main_window.update_SV()
+        self.parent.main_window.plot_Style.schedule_update()
 
     def toggle_polygon_actions(self):
         """Toggle enabled state of polygon actions based on ``self.polygon_toggle`` checked state."""
@@ -743,7 +753,6 @@ class ClusterTab():
         self.parent = parent
 
         self.main_window = self.parent.main_window
-
         #init table_fcn
         self.table_fcn = TableFcn(self)
 
@@ -805,15 +814,15 @@ class ClusterTab():
         toolbar.addAction(self.actionGroupMaskInverse)
 
         self.tableWidgetViewGroups = CustomTableWidget()
-        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.tableWidgetViewGroups.setObjectName("tableWidgetViewGroups")
         self.tableWidgetViewGroups.setColumnCount(3)
         self.tableWidgetViewGroups.setRowCount(0)
         
         header = self.tableWidgetViewGroups.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(["Name", "Link", "Color"])
 
         tab_layout.addWidget(self.tableWidgetViewGroups)
@@ -824,15 +833,15 @@ class ClusterTab():
         self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
         self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
         self.actionClusterColorReset.triggered.connect(self.main_window.plot_style.set_default_cluster_colors)
-        self.tableWidgetViewGroups.itemChanged.connect(self.main_window.cluster_label_changed)
-        self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.main_window.update_clusters)
+        self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
+        self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
         self.actionGroupMask.triggered.connect(lambda: self.main_window.apply_cluster_mask(inverse=False))
         self.actionGroupMaskInverse.triggered.connect(lambda: self.main_window.apply_cluster_mask(inverse=True))
 
         self.toggle_cluster_actions()
 
     def toggle_cluster_actions(self):
-        if self.parent.main_window.data[self.parent.main_window.sample_id]:
+        if self.parent.data:
             self.spinBoxClusterGroup.setEnabled(True)
             self.toolButtonClusterColor.setEnabled(True)
             self.actionClusterColorReset.setEnabled(True)
@@ -927,7 +936,7 @@ class ClusterTab():
                     
                     
                     # Initialize the flag
-                    self.isUpdatingTable = True
+                    self.updating_cluster_table_flag = True
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
@@ -941,9 +950,73 @@ class ClusterTab():
         #print(app_data.cluster_dict)
         self.tableWidgetViewGroups.blockSignals(False)
         self.spinBoxClusterGroup.blockSignals(False)
-        self.isUpdatingTable = False
+        self.updating_cluster_table_flag = False
 
+    def cluster_label_changed(self, item):
+        # Initialize the flag
+        if not self.updating_cluster_table_flag: #change name only when cluster renamed
+            # Get the new name and the row of the changed item
+            new_name = item.text()
 
+            row = item.row()
+            if item.column() > 0:
+                return
+            
+            app_data = self.parent.main_window.app_data
+            # Extract the cluster id (assuming it's stored in the table)
+            cluster_id = row
+
+            old_name = app_data.cluster_dict[self.cluster_dict['active method']][cluster_id]['name']
+            # Check for duplicate names
+            for i in range(self.tableWidgetViewGroups.rowCount()):
+                if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
+                    # Duplicate name found, revert to the original name and show a warning
+                    item.setText(old_name)
+                    QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
+                    return
+
+            # Update self.parent.data[app_data.sample_id].processed_data with the new name
+            if app_data.cluster_dict['active method'] in self.parent.data[app_data.sample_id].processed_data.columns:
+                # Find the rows where the value matches cluster_id
+                rows_to_update = self.parent.data[app_data.sample_id].processed_data.loc[:,app_data.cluster_dict['active method']] == cluster_id
+
+                # Update these rows with the new name
+                self.parent.data[app_data.sample_id].processed_data.loc[rows_to_update, app_data.cluster_dict['active method']] = new_name
+
+            # update current_group to reflect the new cluster name
+            app_data.cluster_dict[app_data.cluster_dict['active method']][cluster_id]['name'] = new_name
+
+            # update plot with new cluster name
+            # trigger update to plot
+            self.parent.main_window.plot_style.schedule_update()
+
+    def update_clusters(self):
+        """Executed on update to cluster table.
+
+        Updates ``MainWindow.cluster_dict`` and plot when the selected cluster have changed.
+        """        
+        if not self.updating_cluster_table_flag:
+            app_data = self.parent.main_window.app_data
+            selected_clusters = []
+            method = app_data.cluster_dict['active method']
+
+            # get the selected clusters
+            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
+                selected_clusters.append(idx.row())
+            selected_clusters.sort()
+
+            # update selected cluster list in cluster_dict
+            if selected_clusters:
+                if np.array_equal(app_data.cluster_dict[method]['selected_clusters'], selected_clusters):
+                    return
+                app_data.cluster_dict[method]['selected_clusters'] = selected_clusters
+            else:
+                app_data.cluster_dict[method]['selected_clusters'] = []
+
+            # update plot
+            if (self.parent.main_window.plot_style.plot_type not in ['cluster', 'cluster score']) and (app_data.c_field_type == 'cluster'):
+                # trigger update to plot
+                self.parent.main_window.plot_style.schedule_update()
 
     
         # cluster styles

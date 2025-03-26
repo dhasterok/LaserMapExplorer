@@ -6,7 +6,7 @@ from PyQt6.QtGui import (
 from PyQt6.QtWidgets import ( 
         QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
         QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
-        QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction
+        QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QAbstractItemView
     )
 from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 from src.app.UIControl import UIFieldLogic
@@ -144,14 +144,14 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
 
         # create widget for placing profile plots
         self.widgetProfilePlot = QWidget()
-        self.widgetProfilePlot.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.widgetProfilePlot.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
         dock_layout.addWidget(self.widgetProfilePlot)
         # create profile controls
 
         profile_tools = QGroupBox()
         profile_tools.setTitle("Profile Options")
         profile_tools.setMinimumWidth(180)
-        profile_tools.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        profile_tools.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding))
         profile_tools.setContentsMargins(3,3,3,3)
         profile_tools_layout = QFormLayout()
         profile_group_layout = QVBoxLayout()
@@ -185,7 +185,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.tableWidgetControlPoints = QTableWidget()
         font = QFont()
         font.setPointSize(11)
-        font.setStyleStrategy(QFont.PreferDefault)
+        font.setStyleStrategy(QFont.StyleStrategy.PreferDefault)
         self.tableWidgetControlPoints.setFont(font)
         #self.tableWidgetControlPoints.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.tableWidgetControlPoints.setObjectName("tableWidgetControlPoints")
@@ -211,12 +211,12 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.tableWidgetControlPoints.setHorizontalHeaderItem(2, item)
         self.tableWidgetControlPoints.horizontalHeader().setDefaultSectionSize(80)
         self.tableWidgetControlPoints.horizontalHeader().setStretchLastSection(True)
-        self.tableWidgetControlPoints.setSelectionBehavior(QTableWidget.SelectRows)
+        self.tableWidgetControlPoints.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         header = self.tableWidgetControlPoints.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
 
         profile_group_layout.addWidget(self.tableWidgetControlPoints)
 
@@ -227,13 +227,13 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         axis_tools = QGroupBox()
         axis_tools.setTitle("Axis Options")
         axis_tools.setMinimumWidth(180)
-        axis_tools.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        axis_tools.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         axis_tools.setContentsMargins(3,3,3,3)
         axis_tools_layout = QVBoxLayout()
         axis_tools_layout.setContentsMargins(3,3,3,3)
         axis_tools.setLayout(axis_tools_layout)
 
-        subplot_layout = QFormLayout()
+        layoutSubplot = QFormLayout()
 
         # Create first spin box and label
         self.num_subplots_spinbox = QSpinBox()
@@ -246,16 +246,16 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         self.selected_subplot_spinbox.setValue(1)
 
         # Add the spin boxes and labels to the form layout
-        subplot_layout.addRow("No. subplots", self.num_subplots_spinbox)
-        subplot_layout.addRow("Selected subplot", self.selected_subplot_spinbox)
+        layoutSubplot.addRow("No. subplots", self.num_subplots_spinbox)
+        layoutSubplot.addRow("Selected subplot", self.selected_subplot_spinbox)
 
-        self.field_type_combobox = CustomComboBox(update_callback=lambda: self.update_field_type_combobox(self.field_type_combobox))
-        self.field_type_combobox.setToolTip("Select field type")
+        self.comboBoxFieldType = CustomComboBox(popup_callback=lambda: self.update_field_type_combobox(self.comboBoxFieldType))
+        self.comboBoxFieldType.setToolTip("Select field type")
 
-        field_layout = QHBoxLayout()
+        layoutField = QHBoxLayout()
 
-        self.field_combobox = QComboBox()
-        self.field_combobox.setToolTip("Select field")
+        self.comboBoxField = QComboBox()
+        self.comboBoxField.setToolTip("Select field")
 
 
         self.add_field_button = QToolButton()
@@ -265,25 +265,25 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         else:
             self.add_field_button.setText("Select a field to add it to the selected subplot")
 
-        self.remove_field_button = QToolButton()
+        self.buttonRemoveField = QToolButton()
         add_icon = QIcon(":resources/icons/icon-reject-64.svg")
         if not add_icon.isNull():
-            self.remove_field_button.setIcon(add_icon)
+            self.buttonRemoveField.setIcon(add_icon)
         else:
-            self.remove_field_button.setText("Select a field in the list below to remove it from the selected subplot")
+            self.buttonRemoveField.setText("Select a field in the list below to remove it from the selected subplot")
 
-        field_layout.addWidget(self.field_combobox)
-        field_layout.addWidget(self.add_field_button)
-        field_layout.addWidget(self.remove_field_button)
+        layoutField.addWidget(self.comboBoxField)
+        layoutField.addWidget(self.add_field_button)
+        layoutField.addWidget(self.buttonRemoveField)
 
         self.listViewProfile = QListView()
 
-        self.remove_field_button = QToolButton()
+        self.buttonRemoveField = QToolButton()
 
 
-        axis_tools_layout.addLayout(subplot_layout)
-        axis_tools_layout.addWidget(self.field_type_combobox)
-        axis_tools_layout.addLayout(field_layout)
+        axis_tools_layout.addLayout(layoutSubplot)
+        axis_tools_layout.addWidget(self.comboBoxFieldType)
+        axis_tools_layout.addLayout(layoutField)
         axis_tools_layout.addWidget(self.listViewProfile)
 
         left_layout.addWidget(axis_tools)
@@ -324,12 +324,12 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         # update profile plot when field in subplot table is changed
         
         # Connect the add and remove field buttons to methods
-        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.field_type_combobox, self.field_combobox))
+        self.comboBoxFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
         self.add_field_button.clicked.connect(self.profiling.add_field_to_listview)
         self.add_field_button.clicked.connect(lambda: self.profiling.plot_profiles())
-        self.remove_field_button.clicked.connect(self.profiling.remove_field_from_listview)
-        self.remove_field_button.clicked.connect(lambda: self.profiling.plot_profiles())
-        self.field_type_combobox.activated.connect(lambda: self.update_field_combobox(self.comboBoxProfileFieldType, self.comboBoxProfileField))
+        self.buttonRemoveField.clicked.connect(self.profiling.remove_field_from_listview)
+        self.buttonRemoveField.clicked.connect(lambda: self.profiling.plot_profiles())
+        self.comboBoxFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
 
         # below line is commented because plot_profiles is automatically triggered when user clicks on map once they are in profiling tab
         # self.toolButtonPlotProfile.clicked.connect(lambda:self.profiling.plot_profiles())

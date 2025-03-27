@@ -2454,7 +2454,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
                     canvas, self.plot_info = self.plot_map_pg(sample_id, field_type, field)
-                    # show created profiles if exists
+                    # show increated profiles if exists
                     if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                         self.profile_dock.profiling.clear_plot()
                         self.profile_dock.profiling.plot_existing_profile(self.plot)

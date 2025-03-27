@@ -87,7 +87,8 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     alphas = np.clip(alphas, .4, 1)
 
     alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-    canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+    # white plot screen when uncommented.
+    # canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
     canvas.array = reshaped_array
 
     canvas.axes.tick_params(direction=None,
@@ -129,6 +130,187 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
         }
     
     return canvas, plot_info
+
+
+def plot_map_pg(self, sample_id, field_type, field):
+        """Create a graphic widget for plotting a map
+
+        Create a map using pyqtgraph.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        field_type : str
+            Type of field for plotting
+        field : str
+            Field for plotting
+        """        
+        # ----start debugging----
+        # print('[plot_map_pg] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
+        # ----end debugging----
+
+        # get data for current map
+        scale = self.plot_style.cscale
+        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type, norm=scale)
+
+        # store map_df to save_data if data needs to be exported
+        self.save_data = map_df
+        
+        #Change transparency of values outside mask
+        self.array, rgba_array = self.array_to_image(map_df)
+
+        # plotWidget = QWidget()
+        # layout = QVBoxLayout()
+        # layout.setSpacing(0)
+        # plotWidget.setLayout(layout)
+
+        title = ''
+
+        view = self.canvasWindow.currentIndex()
+        if view == self.canvas_tab['sv']:
+            title = field
+        elif view == self.canvas_tab['mv']:
+            title = sample_id + '_' + field
+        else:
+            view = self.canvas_tab['sv']
+            self.canvasWindow.setCurrentIndex(view)
+            title = field
+
+        graphicWidget = GraphicsLayoutWidget(show=True)
+        graphicWidget.setObjectName('LaserMap')
+        graphicWidget.setBackground('w')
+
+        # layout.addWidget(graphicWidget)
+
+        # Create the ImageItem
+        img_item = ImageItem(image=self.array, antialias=False)
+
+        #set aspect ratio of rectangle
+        img_item.setRect(self.data[self.app_data.sample_id].x.min(),
+                self.data[self.app_data.sample_id].y.min(),
+                self.data[self.app_data.sample_id].x_range,
+                self.data[self.app_data.sample_id].y_range)
+
+        #--- add non-interactive image with integrated color ------------------
+        plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
+
+        plotWindow.addItem(img_item)
+
+        # turn off axes and
+        plotWindow.showAxes(False, showValues=(True,False,False,True) )
+        plotWindow.invertY(True)
+        plotWindow.setAspectLocked()
+
+        # Prevent zooming/panning outside the default view
+        ## These cut off parts of the map when plotting.
+        #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
+        #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
+        #plotWindow.setLimits(maxXRange=self.data[self.app_data.sample_id].x_range, maxYRange=self.data[self.app_data.sample_id].y_range)
+
+        #supress right click menu
+        plotWindow.setMenuEnabled(False)
+
+        # colorbar
+        cmap = colormap.get(self.plot_style.cmap, source = 'matplotlib')
+        #clb,cub,cscale,clabel = self.plot_style.get_axis_values(field_type,field)
+        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=self.plot_style.cbar_dir, pen='black')
+        img_item.setLookupTable(cmap.getLookupTable())
+        # graphicWidget.addItem(cbar)
+        pg.setConfigOption('leftButtonPan', False)
+
+        # ... Inside your plotting function
+        target = TargetItem(symbol = '+', )
+        target.setZValue(1e9)
+        plotWindow.addItem(target)
+
+        # store plots in self.lasermap to be used in profiling. self.lasermaps is a multi index dictionary with index: (field, view)
+        self.lasermaps[field,view] = (target, plotWindow, self.array)
+
+        #hide pointer
+        target.hide()
+
+        plotWindow.scene().sigMouseClicked.connect(lambda event,array=self.array, k=field, plot=plotWindow: self.plot_clicked(event,array, k, plotWindow))
+
+        #remove previous plot in single view
+        if view == 1:
+            #create label with analyte name
+            #create another label for value of the corresponding plot
+            labelMVInfoField = QLabel()
+            # labelMVInfoValueLabel.setMaximumSize(QSize(20, 16777215))
+            labelMVInfoField.setObjectName("labelMVInfoField"+field)
+            labelMVInfoField.setText(field)
+            font = QFont()
+            font.setPointSize(9)
+            labelMVInfoField.setFont(font)
+            verticalLayout = QVBoxLayout()
+            # Naming the verticalLayout
+            verticalLayout.setObjectName(field + str(view))
+            verticalLayout.addWidget(labelMVInfoField)
+
+            labelMVInfoValue = QLabel()
+            labelMVInfoValue.setObjectName("labelMVInfoValue"+field)
+            labelMVInfoValue.setFont(font)
+            verticalLayout.addWidget(labelMVInfoValue)
+            self.gridLayoutMVInfo.addLayout(verticalLayout, 0, self.gridLayoutMVInfo.count()+1, 1, 1)
+            # Store the reference to verticalLayout in a dictionary
+            self.multiview_info_label[field] = (labelMVInfoField, labelMVInfoValue)
+        else:
+            #print(self.lasermaps)
+            #print(self.prev_plot)
+            if self.prev_plot and (self.prev_plot,0) in self.lasermaps:
+                self.plot_info['view'][0] = False
+                del self.lasermaps[(self.prev_plot,0)]
+            # update variables which stores current plot in SV
+            self.plot = plotWindow
+            self.prev_plot = field
+            self.init_zoom_view()
+            # uncheck edge detection
+            self.mask_dock.polygon_tab.action_edge_detect.setChecked(False)
+
+
+        # Create a SignalProxy to handle mouse movement events
+        # Create a SignalProxy for this plot and connect it to mouseMoved
+
+        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: self.mouse_moved_pg(event,plot))
+
+        #add zoom window
+        plotWindow.getViewBox().autoRange()
+
+        # add edge detection
+        if self.mask_dock.polygon_tab.action_edge_detect.isChecked():
+            self.noise_reduction.add_edge_detection()
+
+        if view == 0 and self.plot_info:
+            self.plot_info['view'][0] = False
+            tmp = [True,False]
+        else:
+            tmp = [False,True]
+
+
+        self.plot_info = {
+            'tree': 'Analyte',
+            'sample_id': sample_id,
+            'plot_name': field,
+            'plot_type': 'field map',
+            'field_type': field_type,
+            'field': field,
+            'figure': graphicWidget,
+            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'cluster_groups': None,
+            'view': tmp,
+            'position': None
+            }
+
+        #self.plot_widget_dict[self.plot_info['tree']][self.plot_info['sample_id']][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
+        self.add_plotwidget_to_canvas(self.plot_info)
+
+        #self.update_tree(plot_info=self.plot_info)
+        self.plot_tree.add_tree_item(self.plot_info)
+
+        # add small histogram
+        if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
+            plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, map_df)
 
 def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
     """Creates a small histogram on the Samples and Fields tab associated with the selected map

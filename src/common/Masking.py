@@ -712,13 +712,14 @@ class PolygonTab():
 
 
     def polygon_state_changed(self):
-        self.parent.main_window.profile_state = self.polygon_toggle.isChecked()
+        self.parent.main_window.polygon_state = self.polygon_toggle.isChecked()
         if self.polygon_toggle.isChecked():
-            self.parent.main_window.update_plot_type_combobox()
-            self.parent.main_window.profile_dock.profile_toggle.setChecked(False)
-            self.parent.main_window.profile_dock.profile_state_changed()
+            # self.parent.main_window.update_plot_type_combobox()
+            if (hasattr(self.parent.main_window, "profile_dock")):
+                self.parent.main_window.profile_dock.profile_toggle.setChecked(False)
+                self.parent.main_window.profile_dock.profile_state_changed()
 
-        self.parent.main_window.plot_Style.schedule_update()
+        self.parent.main_window.plot_style.schedule_update()
 
     def toggle_polygon_actions(self):
         """Toggle enabled state of polygon actions based on ``self.polygon_toggle`` checked state."""
@@ -839,6 +840,7 @@ class ClusterTab():
         self.actionGroupMaskInverse.triggered.connect(lambda: self.main_window.apply_cluster_mask(inverse=True))
 
         self.toggle_cluster_actions()
+        self.update_table_widget()
 
     def toggle_cluster_actions(self):
         if self.parent.data:
@@ -913,8 +915,8 @@ class ClusterTab():
         self.tableWidgetViewGroups.clearContents()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
         method = app_data.cluster_method
-        if method in data[app_data.sample_id].processed_data.columns:
-            if not data[app_data.sample_id].processed_data[method].empty:
+        if method in data.processed_data.columns:
+            if not data.processed_data[method].empty:
                 clusters = data.processed_data[method].dropna().unique()
                 clusters.sort()
                 # set number of rows in tableWidgetViewGroups
@@ -937,6 +939,7 @@ class ClusterTab():
                     
                     # Initialize the flag
                     self.updating_cluster_table_flag = True
+                    c = int(c)
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
@@ -963,10 +966,11 @@ class ClusterTab():
                 return
             
             app_data = self.parent.main_window.app_data
+            method = app_data.cluster_method
             # Extract the cluster id (assuming it's stored in the table)
             cluster_id = row
 
-            old_name = app_data.cluster_dict[self.cluster_dict['active method']][cluster_id]['name']
+            old_name = app_data.cluster_dict[method][cluster_id]['name']
             # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
                 if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
@@ -975,16 +979,16 @@ class ClusterTab():
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
-            # Update self.parent.data[app_data.sample_id].processed_data with the new name
-            if app_data.cluster_dict['active method'] in self.parent.data[app_data.sample_id].processed_data.columns:
+            # Update self.parent.data.processed_data with the new name
+            if method in self.parent.data[app_data.sample_id].processed_data.columns:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.parent.data[app_data.sample_id].processed_data.loc[:,app_data.cluster_dict['active method']] == cluster_id
+                rows_to_update = self.parent.data[app_data.sample_id].processed_data.loc[:,method] == cluster_id
 
                 # Update these rows with the new name
-                self.parent.data[app_data.sample_id].processed_data.loc[rows_to_update, app_data.cluster_dict['active method']] = new_name
+                self.parent.data[app_data.sample_id].processed_data.loc[rows_to_update, method] = new_name
 
             # update current_group to reflect the new cluster name
-            app_data.cluster_dict[app_data.cluster_dict['active method']][cluster_id]['name'] = new_name
+            app_data.cluster_dict[method][cluster_id]['name'] = new_name
 
             # update plot with new cluster name
             # trigger update to plot
@@ -998,7 +1002,7 @@ class ClusterTab():
         if not self.updating_cluster_table_flag:
             app_data = self.parent.main_window.app_data
             selected_clusters = []
-            method = app_data.cluster_dict['active method']
+            method = app_data.cluster_method
 
             # get the selected clusters
             for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():

@@ -364,7 +364,8 @@ class PolygonManager:
         self.p_id = None  # Current polygon ID
         self.p_id_gen = 0  # Polygon ID generator
         self.point_index = None             # index for move point
-        # plot selected polygon from table
+        self.is_drawing = False
+        self.active_points = []   # points for a polygon under construction
 
     def add_samples(self):
         for sample_id in self.main_window.sample_ids:

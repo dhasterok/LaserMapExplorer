@@ -11,12 +11,12 @@ from src.common.CustomWidgets import CustomCheckButton
 from src.app.UITheme import UIThemes
 
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-import pyqtgraph as pg
-from pyqtgraph.GraphicsScene import exportDialog
-from pyqtgraph import (
-    setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
-    GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
-)
+# import pyqtgraph as pg
+# from pyqtgraph.GraphicsScene import exportDialog
+# from pyqtgraph import (
+#     setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
+#     GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
+# )
 #from datetime import datetimec
 import numpy as np
 import pandas as pd
@@ -66,7 +66,7 @@ from src.app.AppData import AppData
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
-setConfigOption('imageAxisOrder', 'row-major') # best performance
+# setConfigOption('imageAxisOrder', 'row-major') # best performance
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """_summary_
@@ -2453,14 +2453,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field = self.app_data.c_field
 
                 if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
-                    canvas, self.plot_info = self.plot_map_pg(sample_id, field_type, field)
+                    # canvas, self.plot_info = self.plot_map_pg(sample_id, field_type, field)
+                    canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
                     # show increated profiles if exists
                     if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                         self.profile_dock.profiling.clear_plot()
                         self.profile_dock.profiling.plot_existing_profile(self.plot)
-                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.polygon.polygons):  
-                        self.polygon.clear_plot()
-                        self.polygon.plot_existing_polygon(self.plot)
+                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (data.polygon.polygons!={}):  
+                        data.polygon.canvas = canvas
+                        data.polygon.clear_polygons(canvas.axes)
+                        data.polygon.plot_existing_polygon()
+                        # data.polygon.plot_existing_polygon(self.plot)
                 else:
                     if self.toolBox.currentIndex() == self.left_tab['process']:
                         canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=True)

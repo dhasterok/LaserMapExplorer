@@ -740,7 +740,7 @@ class Styling(Observable):
     # -------------------------------------
     def _is_valid_bounds(self, value):
         """Validates if a the variable has properties consistent with bounds."""
-        return isinstance(value, list) and len(value) == 2 and value[1] >= value[0]
+        return (value is None or value == [None, None]) or (isinstance(value, list) and len(value) == 2 and value[1] >= value[0])
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""
@@ -1172,6 +1172,9 @@ class StylingDock(Styling):
 
     def schedule_update(self):
         """Schedules an update to a plot only when ``self.ui.plot_flag == True``."""
+        if self.debug:
+            self.logger.print("schedule_update")
+
         if self.ui.plot_flag:
             self.scheduler.schedule_update()
 
@@ -1181,6 +1184,8 @@ class StylingDock(Styling):
         The theme is added to ``MainWindow.comboBoxStyleTheme`` and the style widget
         settings for each plot type (``MainWindow.styles``) are saved as a
         dictionary into the theme name with a ``.sty`` extension."""
+        if self.debug:
+            self.logger.print("save_style_theme")
 
         name = self.style_themes.input_theme_name_dlg(self.style_dict)
         self.ui.comboBoxStyleTheme.addItem(name)
@@ -1703,6 +1708,8 @@ class StylingDock(Styling):
         style : dict, optional
             Style dictionary for the current plot type. Defaults to ``None``
         """
+        if self.debug:
+            self.logger.print(f"set_style_dictionary\n  plot_type={plot_type}\n  style={style}")
         style = self.style_dict[self.plot_type]
 
         if not plot_type:
@@ -2086,6 +2093,8 @@ class StylingDock(Styling):
         Updates the label text, field type combobox, and field combobox with saved values associated with a
         control toolbox tab.
         """
+        if self.debug:
+            self.logger.print("update_field_widgets")
         idx = None
         if (hasattr(self, 'profile_dock') and self.ui.profile_dock.actionProfileToggle.isChecked()) or (hasattr(self, 'mask_dock') and self.ui.mask_dock.polygon_tab.actionPolyToggle.isChecked()):
             idx = -1

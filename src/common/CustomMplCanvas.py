@@ -383,6 +383,28 @@ class MplCanvas(FigureCanvas):
 
         return t
 
+    def on_click(self, event):
+        """Handle left/right clicks for distance calculation, polygons and profiles."""
+        if event.inaxes != self.axes:
+            return
+        self.setCursor(Qt.CursorShape.CrossCursor)
+        if self.ui.toolButtonDistance.isChecked():
+            self.distanceOnClick(event)
+            return
+        
+        # Polygon creation or moving
+        if self.is_creating_polygon or self.is_moving_polygon:
+            self.polygon_manager.handle_polygon_click(self,event, self.axes)
+            self.draw()  # refresh the plot
+            return 
+        
+        # Profile creation or moving
+        if self.is_creating_profile or self.is_moving_profile:
+            self.profiling.handle_profile_click(self, event, self.axes)
+            self.draw()
+            return
+
+
     def distanceOnClick(self, event):
         """Updates static endpoints of distance measuring line.
 
@@ -395,23 +417,46 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
+        
+        if event.inaxes:
+            if self.first_point is None:
+                # First click
+                self.first_point = (event.xdata, event.ydata)
+                self.ui.labelSVInfoDistance.setText(f"D: 0 {self.parent.app_data.preferences['Units']['Distance']}")
+            else:
+                # Second click
+                second_point = (event.xdata, event.ydata)
+
+                self.saved_line.append(self.plot_line(self.first_point, second_point))
+                self.saved_dtext.append(self.plot_text(self.first_point, second_point))
+                
+                self.distance_reset()
+
+        self.draw()
+
+    def on_mouse_move(self, event):
+        """Optional: handle dynamic feedback (e.g., while moving a polygon vertex)."""
+        if event.inaxes != self.axes:
+            return
+
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if self.ui.toolButtonDistance.isChecked():
-            if event.inaxes:
-                if self.first_point is None:
-                    # First click
-                    self.first_point = (event.xdata, event.ydata)
-                    self.ui.labelSVInfoDistance.setText(f"D: 0 {self.parent.app_data.preferences['Units']['Distance']}")
-                else:
-                    # Second click
-                    second_point = (event.xdata, event.ydata)
+        if (self.ui.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
+            self.distanceOnMove(event)
+            return
+        
+        # If in polygon creation mode, we can show dynamic lines
+        if (hasattr(self.ui, "mask_dock")):
+            if self.ui.mask_dock.polygon_tab.polygon_toggle.isChecked(): #check if polygon toggle is on
+                self.polygon_manager.handle_polygon_mouse_move(event, self.axes)
+                self.draw()
+                return
 
-                    self.saved_line.append(self.plot_line(self.first_point, second_point))
-                    self.saved_dtext.append(self.plot_text(self.first_point, second_point))
-                    
-                    self.distance_reset()
-
-            self.draw()
+        # If in profile creation mode, we can show dynamic lines or interpolation
+        if (hasattr(self.ui, "profile_dock")):
+            if self.ui.profile_dock.profile_toggle.isChecked():
+                self.profiling.handle_profile_mouse_move(event, self.axes)
+                self.draw()
+                return
 
     def distanceOnMove(self, event):
         """Updates dynamic second point of distance measuring line.
@@ -424,18 +469,17 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """        
-        self.setCursor(Qt.CursorShape.CrossCursor)
-        if (self.ui.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
-            if self.line:
-                self.line.remove()
-            if self.dtext:
-                self.dtext.remove()
+        
+        if self.line:
+            self.line.remove()
+        if self.dtext:
+            self.dtext.remove()
 
-            second_point = (event.xdata,event.ydata)
-            self.line = self.plot_line(self.first_point, second_point)
-            self.dtext = self.plot_text(self.first_point, second_point)
+        second_point = (event.xdata,event.ydata)
+        self.line = self.plot_line(self.first_point, second_point)
+        self.dtext = self.plot_text(self.first_point, second_point)
 
-            self.draw()
+        self.draw()
 
     def distance_reset(self):
         """Resets distance variables and clears plot

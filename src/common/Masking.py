@@ -10,7 +10,7 @@ from src.common.CustomWidgets import (
     CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 )
 from src.app.UIControl import UIFieldLogic
-from pyqtgraph import ( ScatterPlotItem )
+# from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.colors as colors
@@ -21,7 +21,7 @@ from scipy.stats import percentileofscore
 
 from src.app.UITheme import default_font
 from src.app.config import BASEDIR
-from src.common.Polygon import PolygonManager
+from src.common.PolygonNew import PolygonManager
 from src.common.colorfunc import get_hex_color, get_rgb_color
 
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -597,7 +597,7 @@ class PolygonTab():
         toolbar = QToolBar()
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
-        # profile toggle
+        # polygon toggle
         self.polygon_toggle = ToggleSwitch(toolbar, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
         self.polygon_toggle.setChecked(False)
         self.actionPolyToggle = QWidgetAction(toolbar)
@@ -704,10 +704,10 @@ class PolygonTab():
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
         self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
 
-        self.actionPolyCreate.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
-        self.actionPolyMovePoint.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
-        self.actionPolyAddPoint.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
-        self.actionPolyRemovePoint.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
+        self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
+        self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
+        self.actionPolyAddPoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
+        self.actionPolyRemovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
 
         self.toggle_polygon_actions()
 
@@ -724,6 +724,7 @@ class PolygonTab():
 
 
         self.parent.main_window.plot_style.schedule_update()
+        self.toggle_polygon_actions()
 
     def toggle_polygon_actions(self):
         """Toggle enabled state of polygon actions based on ``self.polygon_toggle`` checked state."""
@@ -733,11 +734,11 @@ class PolygonTab():
             self.actionPolyCreate.setEnabled(True)
             self.actionPolyMovePoint.setEnabled(False)
             self.actionPolyMovePoint.setChecked(False)
-            self.actionPolyAddPoint.setEnabled(False)
+            self.actionPolyAddPoint.setEnabled(True)
             self.actionPolyAddPoint.setChecked(False)
-            self.actionPolyRemovePoint.setEnabled(False)
-            self.actionPolyRemovePoint.setChecked(False)
-            self.actionPolyLink.setEnabled(False)
+            self.actionPolyRemovePoint.setEnabled(True)
+            self.actionPolyRemovePoint.setChecked(True)
+            self.actionPolyLink.setEnabled(True)
             self.actionPolyDelink.setEnabled(False)
             self.actionPolySave.setEnabled(False)
             self.actionPolyDelete.setEnabled(False)
@@ -746,8 +747,8 @@ class PolygonTab():
             self.comboBoxEdgeDetectMethod.setEnabled(False)
             self.actionPolyCreate.setEnabled(False)
             if self.tableWidgetPolyPoints.rowCount() > 1:
-                self.actionPolyLink.setEnabled(False)
-                self.actionPolyDelink.setEnabled(False)
+                self.actionPolyLink.setEnabled(True)
+                self.actionPolyDelink.setEnabled(True)
             if self.tableWidgetPolyPoints.rowCount() > 0:
                 self.actionPolySave.setEnabled(False)
                 self.actionPolyDelete.setEnabled(False)

@@ -11,12 +11,12 @@ from src.common.CustomWidgets import CustomCheckButton
 from src.app.UITheme import UIThemes
 
 #from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-import pyqtgraph as pg
-from pyqtgraph.GraphicsScene import exportDialog
-from pyqtgraph import (
-    setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
-    GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
-)
+# import pyqtgraph as pg
+# from pyqtgraph.GraphicsScene import exportDialog
+# from pyqtgraph import (
+#     setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
+#     GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
+# )
 #from datetime import datetimec
 import numpy as np
 import pandas as pd
@@ -66,7 +66,7 @@ from src.app.AppData import AppData
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
-setConfigOption('imageAxisOrder', 'row-major') # best performance
+# setConfigOption('imageAxisOrder', 'row-major') # best performance
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """_summary_

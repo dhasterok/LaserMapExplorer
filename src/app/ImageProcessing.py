@@ -82,10 +82,10 @@ class ImageProcessing():
             # remove existing filters
             self.parent.plot.removeItem(self.edge_img)
 
-        if not self.parent.toolButtonEdgeDetect.isChecked():
+        if not self.parent.mask_dock.polygon_dock.toolButtonEdgeDetect.isChecked():
             return
 
-        algorithm = self.parent.comboBoxEdgeDetectMethod.currentText().lower()
+        algorithm = self.parent.mask_dock.polygon_dock.comboBoxEdgeDetectMethod.currentText().lower()
         if algorithm == 'sobel':
             # Apply Sobel edge detection
             sobelx = cv2.Sobel(self.array, cv2.CV_64F, 1, 0, ksize=5)

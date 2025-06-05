@@ -98,18 +98,38 @@ class MplCanvas(FigureCanvas):
         self.saved_line = []
         self.saved_dtext = []
         self.array = None
+        self.annotations = {}
+        
+        self.interaction_mode = None
+        self.distance_cid_press = None
+        self.distance_cid_move = None
+
+
         if self.parent is not None and self.parent.app_data.sample_id in self.parent.app_data.data:
             if self.parent.plot_style.plot_type in self.parent.plot_style.map_plot_types:
                 self.map_flag = True
             else:
                 self.map_flag = False
-
-            # Connect the button and canvas events
-            self.mpl_connect('button_press_event', self.distanceOnClick)
-            self.mpl_connect('motion_notify_event', self.distanceOnMove)
+            
             self.mpl_connect('motion_notify_event', self.mouseLocation)
+        
+        # enable distance mode by default
+        if hasattr(self.ui, 'toolButtonDistance'):
+            self.ui.toolButtonDistance.clicked.connect( self.enable_distance_mode)
 
-        self.annotations = {}
+
+    def enable_distance_mode(self):
+        if self.ui.toolButtonDistance.isChecked():
+            # Connect the button and canvas events for distance measurement
+            self.distance_cid_press = self.mpl_connect('button_press_event', self.distanceOnClick)
+            self.distance_cid_move = self.mpl_connect('motion_notify_event', self.distanceOnMove)
+
+    def disable_distance_mode(self):
+        self.mpl_disconnect(self.distance_cid_press)
+        self.mpl_disconnect(self.distance_cid_move)
+        self.distance_cid_press = None
+        self.distance_cid_move = None
+
 
     def enterEvent(self, event):
         # Set cursor to cross when the mouse enters the window

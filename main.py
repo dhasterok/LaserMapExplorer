@@ -148,6 +148,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.init_canvas_widget()
 
+        self.mpl_canvas = None # will hold the current canvas
+
     def init_ui(self):
         """Initialize the UI"""
         # Add this line to set the size policy
@@ -1140,6 +1142,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # UI update functions
     # Executed when a property is changed
     # -------------------------------
+
+
     def update_sort_method(self, new_method):
         self.plot_tree.sort_tree(None, method=new_method)
 
@@ -1365,14 +1369,50 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ##### Add back in the persistent filters
 
         #clear polygons
-        if hasattr(self, "polygon"):
-            # self.polygon is created in mask_dock.polygon_tab
-            self.polygon.clear_polygons()
+        if hasattr(self, "mask_dock"):
+            if hasattr(self.mask_dock, "polygon_tab"):
+                # self.polygon is created in mask_dock.polygon_tab
+                self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
 
         #clear profiling
         if hasattr(self, "profile_dock"):
             self.profile_dock.profiling.clear_profiles()
             self.profile_dock.profile_toggle.setChecked(False)
+
+
+    def reset_checked_items(self,item):
+        """Resets tool buttons as filters/masks are toggled
+
+        Parameters
+        ----------
+        item : str
+            Identifier associated with toggle button that was clicked.
+        """        
+        #unchecks tool buttons to prevent incorrect behaviour during plot click
+        match item:
+            case 'crop':
+                if hasattr(self, "profile_dock"):
+                    self.profile_dock.actionControlPoints.setChecked(False)
+                if hasattr(self, "mask_dock"):
+                    if hasattr(self.mask_dock, "polygon_tab"):
+                        self.actionPointMove.setChecked(False)
+                        self.actionPolyCreate.setChecked(False)
+                        self.actionPolyMovePoint.setChecked(False)
+                        self.actionPolyAddPoint.setChecked(False)
+                        self.actionPolyRemovePoint.setChecked(False)
+            case 'profiling':
+                self.actionCrop.setChecked(False)
+                if hasattr(self, "mask_dock"):
+                    if hasattr(self.mask_dock, "polygon_tab"):
+                        self.actionPolyCreate.setChecked(False)
+                        self.actionPolyMovePoint.setChecked(False)
+                        self.actionPolyAddPoint.setChecked(False)
+                        self.actionPolyRemovePoint.setChecked(False)
+            case 'polygon':
+                self.actionCrop.setChecked(False)
+                if hasattr(self, "profile_dock"):
+                    self.profile_dock.actionControlPoints.setChecked(False)
+                    self.profile_dock.actionMovePoint.setChecked(False)
 
     def update_autoscale_widgets(self, field, field_type='Analyte'):
         """
@@ -2453,27 +2493,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field = self.app_data.c_field
 
                 if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
-                    canvas, self.plot_info = self.plot_map_pg(sample_id, field_type, field)
+                    canvas, self.plot_info =  plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
                     # show increated profiles if exists
                     if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                         self.profile_dock.profiling.clear_plot()
                         self.profile_dock.profiling.plot_existing_profile(self.plot)
-                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.polygon.polygons):  
-                        self.polygon.clear_plot()
-                        self.polygon.plot_existing_polygon(self.plot)
+                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.mask_dock.polygon_tab.polygon_manager.polygons):  
+                        self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
+                        self.mask_dock.polygon_tab.polygon_manager.plot_existing_polygon(canvas)
+
+                    
                 else:
                     if self.toolBox.currentIndex() == self.left_tab['process']:
                         canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=True)
                     else:
                         canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
-
-                    self.add_plotwidget_to_canvas(self.plot_info)
+                self.mpl_canvas = canvas
+                self.add_plotwidget_to_canvas(self.plot_info)
                     # I think add_tree_item is done in add_plotwidget_to_canvas, so it doesn't need to be repeated here
                     #self.plot_tree.add_tree_item(self.plot_info)
 
                 if hasattr(self,"info_dock"):
                     self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
-
+                
                 return
 
             case 'gradient map':

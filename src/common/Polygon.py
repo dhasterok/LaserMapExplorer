@@ -355,8 +355,8 @@ class PolygonManager:
     show_polygon_lines:
     update_table_widget:
     """
-    def __init__(self, main_window, debug=False):
-
+    def __init__(self,parent, main_window, debug=False):
+        self.parent = parent
         self.main_window = main_window
         self.debug = debug
 
@@ -549,7 +549,7 @@ class PolygonManager:
                 #update plot and table widget
                 # self.update_table_widget()
             else:
-                # find nearest profile point
+                # find nearest polygon point
                 mindist = 10**12
                 for i, (x_p,y_p,_) in enumerate(points):
                     dist = (x_p - x)**2 + (y_p - y)**2

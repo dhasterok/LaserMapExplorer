@@ -26,7 +26,7 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.format as fmt
-
+from src.common.PolygonMatplotlib import PolygonManager
 # Mask object
 # -------------------------------
 class MaskObj:
@@ -697,11 +697,12 @@ class PolygonTab():
         self.parent.tabWidgetMask.addTab(self.polygon_tab, polygon_icon, "Polygons")
         
         # initialise polygon dictionary for a given sample id in self.parent.data
-        self.parent.data.polygon = PolygonManager(self, debug=self.parent.main_window.logger_options['Polygon'])
-
-        self.actionPolyCreate.triggered.connect(self.parent.data.polygon.increment_pid)
+        self.polygon_manager = PolygonManager(parent = self, main_window = self.parent.main_window, debug=self.parent.main_window.logger_options['Polygon'])
+        #self.parent.main_window.data.polygon = self.polygon_manger.polygons
+        self.actionPolyCreate.triggered.connect(self.polygon_manager.increment_pid)
+        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.parent.main_window.mpl_canvas))
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.parent.data.polygon.view_selected_polygon)
+        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
 
         self.actionPolyCreate.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
         self.actionPolyMovePoint.triggered.connect(lambda: self.parent.main_window.reset_checked_items('polygon'))
@@ -719,14 +720,17 @@ class PolygonTab():
                 self.parent.main_window.profile_dock.profile_toggle.setChecked(False)
                 self.parent.main_window.profile_dock.profile_state_changed()
 
+        self.toggle_polygon_actions()
+
+
         self.parent.main_window.plot_style.schedule_update()
 
     def toggle_polygon_actions(self):
         """Toggle enabled state of polygon actions based on ``self.polygon_toggle`` checked state."""
         if self.polygon_toggle.isChecked():
-            self.actionEdgeDetect.setEnabled(False)
-            self.comboBoxEdgeDetectMethod.setEnabled(False)
-            self.actionPolyCreate.setEnabled(False)
+            self.actionEdgeDetect.setEnabled(True)
+            self.comboBoxEdgeDetectMethod.setEnabled(True)
+            self.actionPolyCreate.setEnabled(True)
             self.actionPolyMovePoint.setEnabled(False)
             self.actionPolyMovePoint.setChecked(False)
             self.actionPolyAddPoint.setEnabled(False)
@@ -747,6 +751,113 @@ class PolygonTab():
             if self.tableWidgetPolyPoints.rowCount() > 0:
                 self.actionPolySave.setEnabled(False)
                 self.actionPolyDelete.setEnabled(False)
+
+    def update_table_widget(self):
+        """Update the polygon table (PyQt6 version)."""
+        sample_id = self.parent.main_window.app_data.sample_id
+        table = self.tableWidgetPolyPoints
+
+        if sample_id in self.polygon_manager.polygons:
+            table.clearContents()
+            table.setRowCount(0)
+
+            for p_id, _ in self.polygon_manager.polygons[sample_id].items():
+                row_position = table.rowCount()
+                table.insertRow(row_position)
+
+                table.setItem(row_position, 0, QTableWidgetItem(str(p_id)))
+                table.setItem(row_position, 1, QTableWidgetItem(f'Polygon {p_id}'))
+                table.setItem(row_position, 2, QTableWidgetItem(''))
+                table.setItem(row_position, 3, QTableWidgetItem('In'))
+
+                checkBox = QCheckBox()
+                checkBox.setChecked(True)
+                # Correct slot signature for PyQt6 (int state)
+                def make_cb_callback(p_id_inner):
+                    return lambda state: self.apply_polygon_mask(update_plot=True, p_id=p_id_inner)
+                checkBox.stateChanged.connect(make_cb_callback(p_id))
+                table.setCellWidget(row_position, 4, checkBox)
+
+        self.apply_polygon_mask(update_plot=False)
+
+    def view_selected_polygon(self):
+        """View the selected polygon when a selection is made in the table widget ."""
+        sample_id = self.parent.main_window.app_data.sample_id
+
+        if sample_id in self.polygon_manager.polygons:
+            # Get selected rows (PyQt6 returns QModelIndex objects)
+            selected_rows = self.tableWidgetPolyPoints.selectionModel().selectedRows()
+
+            if selected_rows:
+                # Assume only one row is selected for simplicity
+                selected_row = selected_rows[0]
+                polygon_id_item = self.tableWidgetPolyPoints.item(selected_row.row(), 0)
+
+                if polygon_id_item:
+                    polygon_id = int(polygon_id_item.text())
+
+                    if polygon_id in self.polygon_manager.polygons[sample_id]:
+                        # Clear all current polygons from the plot
+                        self.polygon_manager.clear_plot()
+                        # Plot the selected polygon on self.ax
+                        self.polygon_manager.plot_existing_polygon(polygon_id)
+
+    # Polygon mask functions
+    # -------------------------------
+    def apply_polygon_mask(self, update_plot=True):
+        """Creates the polygon mask for masking data
+
+        Updates ``MainWindow.data[sample_id].polygon_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+        Parameters
+        ----------
+        update_plot : bool, optional
+            If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+        """        
+        sample_id = self.app_data.sample_id
+
+        # create array of all true
+        self.data[sample_id].polygon_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+
+        # remove all masks
+        self.actionClearFilters.setEnabled(True)
+        self.actionPolygonMask.setEnabled(True)
+        self.actionPolygonMask.setChecked(True)
+
+        # apply polygon mask
+        # Iterate through each polygon in self.polygons[self.main_window.sample_id]
+        for row in range(self.tableWidgetPolyPoints.rowCount()):
+            #check if checkbox is checked
+            checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
+
+            if checkBox.isChecked():
+                pid = int(self.tableWidgetPolyPoints.item(row,0).text())
+
+                polygon_points = self.polygon.polygons[sample_id][pid].points
+                polygon_points = [(x,y) for x,y,_ in polygon_points]
+
+                # Convert the list of (x, y) tuples to a list of points acceptable by Path
+                path = Path(polygon_points)
+
+                # Create a grid of points covering the entire array
+                # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
+
+                points = pd.concat([self.data[sample_id].processed_data['X'], self.data[sample_id].processed_data['Y']] , axis=1).values
+                # Use the path to determine which points are inside the polygon
+                inside_polygon = path.contains_points(points)
+
+                # Reshape the result back to the shape of self.array
+                inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.app_data.sample_id].array_size, order =  'C')
+                inside_polygon = inside_polygon_mask.flatten('F')
+                # Update the polygon mask - include points that are inside this polygon
+                self.data[sample_id].polygon_mask &= inside_polygon
+
+                #clear existing polygon lines
+                #self.polygon.clear_lines()
+
+        if update_plot:
+            self.apply_filters(fullmap=False)
+
 
 
 class ClusterTab():

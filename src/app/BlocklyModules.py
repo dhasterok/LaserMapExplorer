@@ -1153,3 +1153,12 @@ class LameBlockly():
         directory = os.path.join(BASEDIR, path)
         list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
         return list_names
+    
+
+    def execute_code(self,output_text_edit,code=None):
+        if not code:
+            # Get the code from the output_text_edit and execute it
+            code = output_text_edit.toPlainText()
+
+        print(code)
+        exec(code)

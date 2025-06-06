@@ -22,7 +22,7 @@ class BlocklyBridge(QObject):
         # Initiate the LameBlockly instance
         # This is a instance of Lame, which is customised to be run with Blockly
         self.lame_blockly = LameBlockly()
-        self.blockly  = blockly_webpage
+        self.blockly  = blockly_webpage # This is the QWebEngineView that displays the Blockly interface
 
     @pyqtSlot(str)
     def runCode(self, code):
@@ -35,7 +35,7 @@ class BlocklyBridge(QObject):
 
     @pyqtSlot(str)
     def executeCode(self, code):
-        self.execute_code(code)
+        self.lame_blockly.execute_code(self.output_text_edit, code)
 
     @pyqtSlot(str, result=str)
     def invokeSetStyleWidgets(self, plot_type):
@@ -93,13 +93,7 @@ class BlocklyBridge(QObject):
         return [dx, dy]
 
     
-    def execute_code(self,code=None):
-        if not code:
-            # Get the code from the output_text_edit and execute it
-            code = self.output_text_edit.toPlainText()
 
-        print(code)
-        exec(code)
 
     def convert_numpy_types(self, obj):
         """ Recursively convert NumPy types to Python native types. """
@@ -233,7 +227,7 @@ class Workflow(CustomDockWidget):
         self.web_view.page().setWebChannel(self.channel)
 
         # Button signals
-        self.run_action.triggered.connect(self.bridge.execute_code)
+        self.run_action.triggered.connect(lambda: self.bridge.lame_blockly.execute_code(self.output_text_edit))
 
         # Load the qwebchannel.js file and inject it into the page
         api_file = QFile(":/qtwebchannel/qwebchannel.js")

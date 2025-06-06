@@ -57,11 +57,11 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
+from src.app.AppData import AppData
 import os
 
 
-
-class Main():
+class LameBlockly():
     def __init__(self, *args, **kwargs):
 
         #Initialize nested data which will hold the main sets of data for analysis
@@ -94,7 +94,7 @@ class Main():
 
         self.io = LameIO(self, connect_actions=False)
 
-        self.plot_style = Styling(self)
+        self.plot_style = Styling()
         
         # Initialise plotviewer form
         self.plot_viewer = PlotViewer(self)
@@ -1133,3 +1133,23 @@ class Main():
             upperVal = style_dict["CLim"][1]
             self.plot_style.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
             self.plot_style.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)
+
+    
+    
+    def get_saved_lists(self,type):
+        """
+        Retrieves the names of saved analyte lists from the resources/analytes list directory.
+
+        Returns
+        -------
+        list
+            List of saved analyte list names.
+        """
+        path =''
+        if type =='Analyte':
+            path = 'resources/analytes_list'
+        elif type =='field':
+             path = 'resources/fields_list'
+        directory = os.path.join(BASEDIR, path)
+        list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
+        return list_names

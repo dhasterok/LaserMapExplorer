@@ -10,16 +10,20 @@ from src.app.config import BASEDIR
 from src.common.CustomWidgets import CustomDockWidget
 
 import numpy as np
-from src.app.Modules import Main
+from src.app.BlocklyModules import LameBlockly
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
-    def __init__(self,parent, output_text_edit):
+    def __init__(self,blockly_webpage, output_text_edit):
         super().__init__()
-        self.parent = parent  # Store reference to parent
-        self.output_text_edit = output_text_edit
-    
+        
+        self.output_text_edit = output_text_edit # This will be used to display the generated code
+        # Initiate the LameBlockly instance
+        # This is a instance of Lame, which is customised to be run with Blockly
+        self.lame_blockly = LameBlockly()
+        self.blockly  = blockly_webpage
+
     @pyqtSlot(str)
     def runCode(self, code):
         # Display the received code in the QTextEdit
@@ -31,15 +35,15 @@ class BlocklyBridge(QObject):
 
     @pyqtSlot(str)
     def executeCode(self, code):
-        self.parent.execute_code(code)
+        self.execute_code(code)
 
     @pyqtSlot(str, result=str)
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.parent.main.plot_style.style_dict.keys():
-            self.parent.main.plot_style.set_style_dictionary(plot_type)
-            style = self.parent.main.plot_style.style_dict[plot_type]
+        if plot_type in self.lame_blockly.plot_style.style_dict.keys():
+            self.lame_blockly.plot_style.set_style_dictionary(plot_type)
+            style = self.lame_blockly.plot_style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
@@ -51,12 +55,12 @@ class BlocklyBridge(QObject):
     
     @pyqtSlot(str,str, result=float)
     def getHistogramRange(self, fieldType, field):
-        return self.parent.main.histogram_get_range(fieldType, field)
+        return self.lame_blockly.histogram_get_range(fieldType, field)
     
     @pyqtSlot(str, result=list)
     def getFieldList(self, field_type):
         print('get_field_list')
-        return self.parent.main.get_field_list(field_type)
+        return self.lame_blockly.get_field_list(field_type)
     
     @pyqtSlot(result=str)
     def getBaseDir(self):
@@ -65,18 +69,16 @@ class BlocklyBridge(QObject):
     @pyqtSlot(result=list)
     def getRefValueList(self):
         
-        return self.parent.main.ref_list.tolist()
+        return self.lame_blockly.ref_list.tolist()
 
     @pyqtSlot(str,result=list)
     def getSavedLists(self,type):
         """
         Exposed method to JavaScript to get the list of saved analyte lists.
         """
-        saved_lists = self.parent.get_saved_lists(type)
+        saved_lists = self.get_saved_lists(type)
         return saved_lists
     
-
-
 
     @pyqtSlot(result=list)
     def getCurrentDimensions(self):
@@ -85,13 +87,19 @@ class BlocklyBridge(QObject):
         """
         dx =0
         dy = 0
-        if self.parent.main.sample_id:
-            dx = self.parent.main.data[self.parent.main.sample_id].dx
-            dy = self.parent.main.data[self.parent.main.sample_id].dy
+        if self.lame_blockly.sample_id:
+            dx = self.lame_blockly.data[self.lame_blockly.sample_id].dx
+            dy = self.lame_blockly.data[self.lame_blockly.sample_id].dy
         return [dx, dy]
 
     
+    def execute_code(self,code=None):
+        if not code:
+            # Get the code from the output_text_edit and execute it
+            code = self.output_text_edit.toPlainText()
 
+        print(code)
+        exec(code)
 
     def convert_numpy_types(self, obj):
         """ Recursively convert NumPy types to Python native types. """
@@ -107,6 +115,28 @@ class BlocklyBridge(QObject):
             return obj.tolist()
         else:
             return obj
+        
+    def store_sample_ids(self):
+        """
+        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
+        """
+        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
+        sample_ids_js_array = str(self.lame_blockly.sample_ids)
+        self.blockly.runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
+
+    def update_field_type_list(self, field_type_list):
+        # Convert the field type list to JSON
+        field_type_list_json = json.dumps(field_type_list)
+        # Send the field type list to JavaScript
+        self.blockly.runJavaScript(f"updateFieldTypeList({field_type_list_json})")
+    
+
+
+    def refresh_saved_lists_dropdown(self, type):
+            """
+            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
+            """
+            self.blockly.runJavaScript("refreshListsDropdown({type});")
         
 class Workflow(CustomDockWidget):
     """Creates the workflow method design dock.
@@ -134,7 +164,7 @@ class Workflow(CustomDockWidget):
 
         super().__init__(parent)
         self.parent = parent
-
+        
         container = QWidget()
 
         # Create the layout within parent.tabWorkflow
@@ -185,8 +215,7 @@ class Workflow(CustomDockWidget):
 
         dock_layout.addWidget(toolbar)
 
-        # Button signals
-        self.run_action.triggered.connect(self.execute_code)
+
         #self.save_action.triggered.connect(self.save_workflow)
         #self.clear_action.triggered.connect(self.clear_workflow)
 
@@ -196,9 +225,15 @@ class Workflow(CustomDockWidget):
 
         # Setup the WebChannel for communication
         self.channel = QWebChannel()
-        self.bridge = BlocklyBridge(self, self.output_text_edit)
+
+        # Create an instance of the BlocklyBridge and register it with the channel
+
+        self.bridge = BlocklyBridge(self.web_view.page(), self.output_text_edit)
         self.channel.registerObject('blocklyBridge', self.bridge)
         self.web_view.page().setWebChannel(self.channel)
+
+        # Button signals
+        self.run_action.triggered.connect(self.bridge.execute_code)
 
         # Load the qwebchannel.js file and inject it into the page
         api_file = QFile(":/qtwebchannel/qwebchannel.js")
@@ -225,62 +260,12 @@ class Workflow(CustomDockWidget):
 
         parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
-        # Initiate Main class from Modules.py
-        # self.main will hold instance of Main code without any UI interactions
-        self.main = Main()
+        
 
     def handleResizeEvent(self, event):
         self.web_view.page().runJavaScript("resizeBlocklyWorkspace()")
         event.accept()
 
-    def execute_code(self,code=None):
-        if not code:
-            # Get the code from the output_text_edit and execute it
-            code = self.output_text_edit.toPlainText()
-        # try:
-        #     print("Execute code:")
-        #     print(code)
-        #     exec(code)
-        # except Exception as e:
-        #     print(f"Error executing code: {e}")
 
-        print(code)
-        exec(code)
     
-    def store_sample_ids(self):
-        """
-        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
-        """
-        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
-        sample_ids_js_array = str(self.main.sample_ids)
-        self.web_view.page().runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
 
-    def update_field_type_list(self, field_type_list):
-        # Convert the field type list to JSON
-        field_type_list_json = json.dumps(field_type_list)
-        # Send the field type list to JavaScript
-        self.web_view.page().runJavaScript(f"updateFieldTypeList({field_type_list_json})")
-    
-    def get_saved_lists(self,type):
-        """
-        Retrieves the names of saved analyte lists from the resources/analytes list directory.
-
-        Returns
-        -------
-        list
-            List of saved analyte list names.
-        """
-        path =''
-        if type =='Analyte':
-            path = 'resources/analytes_list'
-        elif type =='field':
-             path = 'resources/fields_list'
-        directory = os.path.join(self.parent.BASEDIR, path)
-        list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
-        return list_names
-
-    def refresh_saved_lists_dropdown(self, type):
-            """
-            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
-            """
-            self.web_view.page().runJavaScript("refreshListsDropdown({type});")

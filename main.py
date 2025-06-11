@@ -346,6 +346,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=pt_dict['add_none'][2], user_activated=True)
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
 
+        # N-Dim Tab
+        #-------------------------
+        # setup comboBoxNDIM
+        self.comboBoxNDimAnalyteSet.clear()
+        self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
+        
+        self.comboBoxRefMaterial.addItems(self.app_data.ref_list.values)          # Select analyte Tab
+        self.comboBoxNDimRefMaterial.addItems(self.app_data.ref_list.values)      # NDim Tab
+        self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
+        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxNDimRefMaterial.currentText()))
+        self.comboBoxRefMaterial.setCurrentIndex(0)
+        self.comboBoxNDimRefMaterial.setCurrentIndex(0)
+        
+        self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
+        self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analyteSetAdd'))
+        self.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetNDim))
+        self.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetNDim))
+        self.toolButtonNDimSelectAll.clicked.connect(self.tableWidgetNDim.selectAll)
+        self.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.tableWidgetNDim))
+        self.toolButtonNDimSaveList.clicked.connect(self.save_ndim_list)
+
+        # N-dim table
+        header = self.tableWidgetNDim.horizontalHeader()
+        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
+        
         self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
@@ -357,8 +383,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxNegativeMethod.addItems(self.app_data.negative_methods)
         self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
-        
-        # Dimentional reduction ui widgets
+
+        # Dimensional reduction ui widgets
         self.ComboBoxDimRedTechnique.clear()
         self.ComboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
         self.app_data.dim_red_method = self.dimensional_reduction.dim_red_methods[0]
@@ -1573,6 +1599,59 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
             self.plot_style.schedule_update()
 
+    def update_ndim_table(self,calling_widget):
+        # Updates N-Dim table
+
+        # :param calling_widget:
+        # :type calling_widget: QWidget
+        # 
+        def on_use_checkbox_state_changed(row, state):
+            # Update the 'use' value in the filter_df for the given row
+            self.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
+
+        if calling_widget == 'analyteAdd':
+            el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
+            self.comboBoxNDimAnalyteSet.setCurrentText('user defined')
+        elif calling_widget == 'analyteSetAdd':
+            el_list = self.app_data.ndim_list_dict[self.comboBoxNDimAnalyteSet.currentText()]
+
+        analytes_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
+
+        analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
+
+        self.app_data.ndim_list.extend(analytes)
+
+        for analyte in analytes:
+            # Add a new row at the end of the table
+            row = self.tableWidgetNDim.rowCount()
+            self.tableWidgetNDim.insertRow(row)
+
+            # Create a QCheckBox for the 'use' column
+            chkBoxItem_use = QCheckBox()
+            chkBoxItem_use.setCheckState(True)
+            chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
+
+            self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
+            self.tableWidgetNDim.setItem(row, 1, QTableWidgetItem(analyte))
+    
+    def save_ndim_list(self):
+        # get the list name from the user
+        name, ok = QInputDialog.getText(self, 'Save custom TEC list', 'Enter name for new list:')
+        if ok:
+            try:
+                self.ndim_list_dict[name] = self.tableWidgetNDim.column_to_list('Analyte')
+
+                # export the csv
+                csvdict.export_dict_to_csv(self.ndim_list_dict,self.ndim_list_filename)
+            except:
+                QMessageBox.warning(self,'Error','could not save TEC file.')
+                
+        else:
+            # throw a warning that name is not saved
+            QMessageBox.warning(self,'Error','could not save TEC list.')
+
+            return
+
     def update_ndim_quantile_index_combobox(self, new_ndim_quantile_index):
         self.comboBoxNDimQuantiles.setCurrentIndex(new_ndim_quantile_index)
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
@@ -2176,37 +2255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         # update `self.app_data.ref_chem`
         ref_index = self.update_ref_chem_combobox_BE(ref_val)
-        self.update_ref_chem_combobox_UI(ref_index)
 
-    # toolbar functions
-    def update_ref_chem_combobox_BE(self, ref_val):
-        """Changes reference computing normalized analytes
-
-        Sets all `self.app_data.ref_chem` to a common normalizing reference.
-
-        Parameters
-        ----------
-        ref_val : str
-            Name of reference value from combobox/dropdown
-        """
-        ref_index =  self.app_data.ref_list.tolist().index(ref_val)
-
-        if ref_index:
-            self.data[self.app_data.sample_id].ref_chem = self.app_data.ref_chem
-
-            return ref_index
-
-
-    def update_ref_chem_combobox_UI(self, ref_index):
-        """Changes reference computing normalized analytes
-
-        Sets all QComboBox to a common normalizing reference.
-
-        Parameters
-        ----------
-        ref_index : int
-            Index of reference value from combobox/dropdown
-        """
         if ref_index:
             self.comboBoxRefMaterial.setCurrentIndex(ref_index)
             self.comboBoxNDimRefMaterial.setCurrentIndex(ref_index)
@@ -2249,6 +2298,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # trigger update to plot
             self.plot_style.schedule_update()
         #self.update_all_plots()
+
+    # toolbar functions
+    def update_ref_chem_combobox_BE(self, ref_val):
+        """Changes reference computing normalized analytes
+
+        Sets all `self.app_data.ref_chem` to a common normalizing reference.
+
+        Parameters
+        ----------
+        ref_val : str
+            Name of reference value from combobox/dropdown
+        """
+        ref_index = self.app_data.ref_list.tolist().index(ref_val)
+
+        if ref_index:
+            self.data[self.app_data.sample_id].ref_chem = self.app_data.ref_chem
+
+            return ref_index
 
     def update_invalid_data_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
@@ -2530,7 +2597,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
             case 'TEC' | 'Radar':
-                plot_ndim(self, self.data, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_ndim(self, self.data, self.app_data, self.plot_style)
 
             case 'histogram':
                 canvas, self.plot_info = plot_histogram(self, data, self.app_data, self.plot_style)
@@ -2556,8 +2623,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.plot_style)
 
         # add canvas to layout
-        self.clear_layout(self.widgetSingleView.layout())
-        self.widgetSingleView.layout().addWidget(canvas)
+        if canvas:
+            self.clear_layout(self.widgetSingleView.layout())
+            self.widgetSingleView.layout().addWidget(canvas)
 
         # add plot info to info_dock
         if hasattr(self,"info_dock"):

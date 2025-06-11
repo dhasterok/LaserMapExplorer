@@ -35,6 +35,8 @@ class AppData(Observable):
         # a dictionary of the field_types in self.data[sample_id].processed_data.  "coord" is excluded.
         self._field_dict = {}
 
+        self._ndim_list = []
+
         self._sample_id = ""
 
         self._x_field_type = ""
@@ -690,6 +692,15 @@ class AppData(Observable):
     
         self._ndim_analyte_set = new_list
         self.notify_observers("ndim_analyte_set", new_list) 
+
+    @property
+    def ndim_list(self):
+        return self._ndim_list
+
+    @ndim_list.setter
+    def ndim_list(self, new_list):
+        self._ndim_list = new_list
+        self.notify_observers("ndim_list", new_list)
 
     @property
     def ndim_quantile_index(self):

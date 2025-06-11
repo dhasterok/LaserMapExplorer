@@ -4701,7 +4701,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         analytes_list = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')
 
-        analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
+        #analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
+        seen = set()
+        analytes = []
+        for iso in el_list:
+            for col in analytes_list:
+                if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '', iso).lower():
+                    if col not in seen:
+                        seen.add(col)
+                        analytes.append(col)
 
         self.ndim_list.extend(analytes)
 
@@ -4712,7 +4720,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(True)
+            chkBoxItem_use.setCheckState(Qt.CheckState.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
@@ -4723,10 +4731,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         name, ok = QInputDialog.getText(self, 'Save custom TEC list', 'Enter name for new list:')
         if ok:
             try:
-                self.ndim_list_dict[name] = self.tableWidgetNDim.column_to_list('Analyte')
+                self.app_data.ndim_list_dict[name] = self.tableWidgetNDim.column_to_list('Analyte')
 
                 # export the csv
-                csvdict.export_dict_to_csv(self.ndim_list_dict,self.ndim_list_filename)
+                csvdict.export_dict_to_csv(self.app_data.ndim_list_dict,self.app_data.ndim_list_filename)
             except:
                 QMessageBox.warning(self,'Error','could not save TEC file.')
                 

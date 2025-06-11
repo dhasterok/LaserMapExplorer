@@ -372,8 +372,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
         
-        self.comboBoxNDimAnalyte = lambda: self.update_field_combobox_options(self.comboBoxNDimAnalyte)
-
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
 
         self.comboBoxOutlierMethod.addItems(self.app_data.outlier_methods)
@@ -1326,6 +1324,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.logger_options['UI']:
             self.logger.print(f"update_widget_data_on_sample_change\n")
 
+        self.update_field_combobox_options(self.comboBoxNDimAnalyte)
+
         data = self.data[self.app_data.sample_id]
         # update dx, dy, nx, ny
         self.update_dx_lineedit(data.dx)
@@ -1600,11 +1600,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.schedule_update()
 
     def update_ndim_table(self,calling_widget):
-        # Updates N-Dim table
-
-        # :param calling_widget:
-        # :type calling_widget: QWidget
-        # 
+        """Updates tableWidgetNDim"""
         def on_use_checkbox_state_changed(row, state):
             # Update the 'use' value in the filter_df for the given row
             self.data[self.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
@@ -1628,7 +1624,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(True)
+            chkBoxItem_use.setCheckState(Qt.CheckState.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
             self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)

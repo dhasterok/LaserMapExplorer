@@ -42,4 +42,5 @@ self.comboBoxFieldZ
 self.comboBoxFieldTypeC
 self.comboBoxFieldC
 self.comboBoxFieldColormap
+self.comboBoxNDimAnalyte
 self.comboBoxMarker

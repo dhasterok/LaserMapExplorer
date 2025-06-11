@@ -358,6 +358,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxRefMaterial.setCurrentIndex(self.app_data.ref_index)
         self.comboBoxNDimRefMaterial.setCurrentIndex(self.app_data.ref_index)
         self.comboBoxNDimQuantiles.setCurrentIndex(self.app_data.ndim_quantile_index)
+        self.comboBoxNDimQuantiles.activated.connect(lambda _: self.update_ndim_quantile_index())
         
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analyteSetAdd'))
@@ -989,7 +990,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("ternary_color_m", self.update_ternary_color_m_toolbutton)
         app_data.add_observer("norm_reference", self.update_norm_reference_combobox)
         app_data.add_observer("ndim_analyte_set", self.update_ndim_analyte_set_combobox)
-        app_data.add_observer("ndim_quantile_index", self.update_ndim_quantile_index_combobox)
+        app_data.add_observer("ndim_quantile_index", self.update_ndim_quantile_index)
         app_data.add_observer("dim_red_method", self.update_dim_red_method_combobox)
         app_data.add_observer("dim_red_x", self.update_dim_red_x_spinbox)
         app_data.add_observer("dim_red_y", self.update_dim_red_y_spinbox)
@@ -1631,13 +1632,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             return
 
-    def update_ndim_quantile_index_combobox(self, new_ndim_quantile_index):
-        self.comboBoxNDimQuantiles.setCurrentIndex(new_ndim_quantile_index)
+    def update_ndim_quantile_index(self, new_index=None):
+        """Updates quantiles displayed for NDim plots.
+
+        Updates quantile index for ``self.comboBoxNDimQuantiles`` or updates ``self.app_data.dim_quantile_index``
+        if new_index is not supplied.  Call plot update after updating quantiles.
+
+        Parameters
+        ----------
+        new_index : int, optional
+            New index into ``self.app_data.ndim_quantile_index``, by default None
+        """
+
+        if new_index is None:
+            self.app_data.ndim_quantile_index = self.comboBoxNDimQuantiles.currentIndex()
+        else:
+            self.comboBoxNDimQuantiles.blockSignals(True)
+            self.comboBoxNDimQuantiles.setCurrentIndex(new_index)
+            self.comboBoxNDimQuantiles.blockSignals(False)
+
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
             self.plot_style.schedule_update()
 
-    def update_dim_red_method_combobox(self, new_dim_red_method):
-        self.ComboBoxDimRedTechnique.setCurrentText(new_dim_red_method)
+    def update_dim_red_method_combobox(self, new_method):
+        self.ComboBoxDimRedTechnique.setCurrentText(new_method)
         # if self.toolBox.currentIndex() == self.left_tab['multidim']:
         #     self.plot_style.schedule_update()
 

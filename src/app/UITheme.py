@@ -151,8 +151,8 @@ class UIThemes():
         parent.toolBoxStyle.setItemIcon(parent.style_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Cluster tab
         #parent.tabWidgetMask.setItemIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
-        parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
-        parent.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
+        #parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
+        #parent.toolButtonClusterDelink.setIcon(QIcon(os.path.join(ICONPATH,'icon-unlink-dark-64.svg')))
 
     def set_light_theme(self):
         ss = load_stylesheet('light.qss')

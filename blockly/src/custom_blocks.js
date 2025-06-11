@@ -25,7 +25,7 @@ const load_directory = {
         this.setNextStatement(true, null);
         this.setTooltip('Loads files from a directory');
         this.setHelpUrl('');
-        this.setColour(225);
+        this.setColour(60);
     }
 };
 Blockly.Blocks['load_directory'] = load_directory;
@@ -40,7 +40,7 @@ const load_sample = {
         this.setNextStatement(true, null);
         this.setTooltip('Loads files from a directory');
         this.setHelpUrl('');
-        this.setColour(225);
+        this.setColour(60);
     }
 };
 Blockly.Blocks['load_sample'] = load_sample;
@@ -115,7 +115,7 @@ Blockly.Blocks['select_samples'] = select_samples;
 
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(230);
+        this.setColour(180);
         this.setTooltip('Loop over each sample in the provided directory');
         this.setHelpUrl('');
         if (!enableSampleIDsBlock) {
@@ -142,7 +142,7 @@ const loop_over_fields = {
 
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(230);
+        this.setColour(60);
         this.setTooltip('Loop over each field in the selected field type');
         this.setHelpUrl('');
         if (!enableSampleIDsBlock) {
@@ -183,7 +183,7 @@ Blockly.common.defineBlocks({
             this.setNextStatement(true, null);
             this.setTooltip('');
             this.setHelpUrl('');
-            this.setColour(225);
+            this.setColour(180);
 
             // Use the common validator that calls selectorChanged(...)
             const dropdown = this.getField('analyteSelectorDropdown');
@@ -223,7 +223,7 @@ Blockly.common.defineBlocks({
         // Statement connections
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(225);
+        this.setColour(180);
         this.setTooltip('Select a field type and a specific field.');
         this.setHelpUrl('');
 
@@ -263,7 +263,7 @@ Blockly.common.defineBlocks({
             this.setNextStatement(true, null);
             this.setTooltip('');
             this.setHelpUrl('');
-            this.setColour(225);
+            this.setColour(180);
 
             // Use the common validator that calls selectorChanged(...)
             const dropdown = this.getField('fieldSelectorDropdown');
@@ -289,7 +289,7 @@ Blockly.common.defineBlocks({
       // So it can be attached to the "exportTable" Value Input in correlation_analysis:
       this.setOutput(true, 'export_table');
 
-      this.setColour(230);
+      this.setColour(60);
       this.setTooltip('Exports selected fields as a table.');
       this.setHelpUrl('');
     }
@@ -317,7 +317,7 @@ const select_ref_val = {
       this.setNextStatement(true, null);
       this.setTooltip('');
       this.setHelpUrl('');
-      this.setColour(225);
+      this.setColour(180);
   
       // Populate dropdown asynchronously
       this.updateRefOptions();
@@ -358,7 +358,7 @@ const change_pixel_dimensions= {
             .appendField(new Blockly.FieldNumber(0), "dy");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(160);
+        this.setColour(180);
         this.setTooltip("Set the dx and dy dimensions");
         this.setHelpUrl("");
 
@@ -392,7 +392,7 @@ const swap_pixel_dimensions= {
           .appendField("Swap Dimensions dx ↔ dy");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setColour(20);
+      this.setColour(180);
       this.setTooltip("Swap the values of dx and dy");
       this.setHelpUrl("");
     }
@@ -406,7 +406,7 @@ const swap_x_y= {
           .appendField("Swap x ↔ y");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setColour(20);
+      this.setColour(180);
       this.setTooltip("Swap the values of coordinate axes");
       this.setHelpUrl("");
     }
@@ -448,7 +448,7 @@ const select_outlier_method = {
         this.setNextStatement(true, null);
         this.setTooltip('');
         this.setHelpUrl('');
-        this.setColour(225);
+        this.setColour(180);
 
         // Handle the selection change in analyteSelectorDropdown
         const dropdown = this.getField('outlierMethodDropdown');
@@ -502,7 +502,7 @@ const neg_handling_method = {
         this.setNextStatement(true, null);
         this.setTooltip('');
         this.setHelpUrl('');
-        this.setColour(225);
+        this.setColour(180);
     }
 };
 Blockly.common.defineBlocks({ neg_handling_method: neg_handling_method });
@@ -981,7 +981,7 @@ const plot_correlation = {
             .appendField('Export')
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(210);
+        this.setColour(285);
         this.setTooltip('Performs correlation analysis between two variables.');
         this.setHelpUrl('');
     }
@@ -1033,7 +1033,7 @@ const plot_histogram = {
         this.setNextStatement(true, null);
         this.setTooltip('Configure and render a histogram plot with specified settings.');
         this.setHelpUrl('');
-        this.setColour(210);
+        this.setColour(285);
         this.plotType = 'histogram'
         // Add default blocks for styling only if not in flyout
         if (!this.isInFlyout) {
@@ -1111,7 +1111,7 @@ Blockly.Blocks['modify_styles'] = {
         .appendField('Modify style');
         this.appendStatementInput('STACK')
             .setCheck('styling_item');
-        this.setColour(230);
+        this.setColour(300);
         this.setTooltip('Container for styling items.');
         this.contextMenu = false; // Hide from regular workspace context menu
     }
@@ -1138,7 +1138,7 @@ Blockly.Blocks['x_axis'] = {
             ]), 'xScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set X axis properties');
         this.setHelpUrl('');
     },
@@ -1165,7 +1165,7 @@ Blockly.Blocks['y_axis'] = {
             ]), 'yScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set Y axis properties');
         this.setHelpUrl('');
     },
@@ -1192,7 +1192,7 @@ Blockly.Blocks['z_axis'] = {
             ]), 'zScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set Z axis properties');
         this.setHelpUrl('');
     },
@@ -1219,7 +1219,7 @@ Blockly.Blocks['c_axis'] = {
             ]), 'cScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set C axis properties');
         this.setHelpUrl('');
     },
@@ -1237,7 +1237,7 @@ Blockly.Blocks['font'] = {
         .appendField(new Blockly.FieldNumber(11, 4, 100), 'fontSize');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set axis label/annotation font');
         this.setHelpUrl('');
     },
@@ -1256,7 +1256,7 @@ Blockly.Blocks['tick_direction'] = {
             ]), 'tickDirectionDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set tick direction');
         this.setHelpUrl('');
     },
@@ -1269,7 +1269,7 @@ Blockly.Blocks['aspect_ratio'] = {
         .appendField(new Blockly.FieldTextInput(''), 'aspectRatio');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Set aspect ratio');
         this.setHelpUrl('');
     },
@@ -1489,7 +1489,7 @@ Blockly.Blocks['histogram_options'] = {
   
       this.setTooltip('Specify bin width / num. bins for the histogram.');
       this.setHelpUrl('');
-      this.setColour(180);
+      this.setColour(285);
   
       // 3) We store a property for the histogram range
       //    If updateHistogramOptions fetches [min,max], we can store it here
@@ -1996,7 +1996,7 @@ const data_filtering = {
             .appendField('Value');
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(200);
+        this.setColour(300);
         this.setTooltip('Filters data based on the specified condition.');
         this.setHelpUrl('');
     }
@@ -2007,10 +2007,14 @@ Blockly.Blocks['data_filtering'] = data_filtering;
 
 const clustering = {
     init: function() {
+        this.appendDummyInput('header')
+            .appendField('Clustering')
+            .setAlign(Blockly.inputs.Align.CENTRE)
         this.appendDummyInput()
-            .appendField('Perform Clustering using')
+            .appendField('Clustering Method')
             .appendField(new Blockly.FieldDropdown([
                 ['K-Means', 'k_means'],
+                ['Fuzzy c-means', 'c_means'],
                 ['Hierarchical', 'hierarchical'],
                 ['DBSCAN', 'dbscan'],
                 ['Gaussian Mixture', 'gmm']
@@ -2020,7 +2024,7 @@ const clustering = {
             .appendField('Parameters');
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(230);
+        this.setColour(160);
         this.setTooltip('Clusters the data using the selected method.');
         this.setHelpUrl('');
     }

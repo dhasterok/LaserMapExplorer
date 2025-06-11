@@ -62,7 +62,7 @@ import os
 import json
 from src.common.Logger import LogCounter
 class LameBlockly():
-    def __init__(self, main_window, blockly_webpage, *args, **kwargs):
+    def __init__(self,status_bar ,blockly_webpage, *args, **kwargs):
         # setup initial logging options
         self.logger = LogCounter()
         self.logger_options = {
@@ -80,9 +80,6 @@ class LameBlockly():
                 'Browser': False,
                 'UI': False
             }
-
-        self.statusBar = main_window.statusBar  # This will be used to display messages
-
         #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}
         self.lasermaps = {}
@@ -99,7 +96,7 @@ class LameBlockly():
         self.app_data = AppData(self.data)
 
         self.blockly  = blockly_webpage # This is the QWebEngineView that displays the Blockly interface
-
+        self.statusLabel = status_bar
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'

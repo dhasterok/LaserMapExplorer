@@ -1,6 +1,6 @@
 import sys, os, json
 from PyQt6.QtWidgets import ( 
-    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar
+    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar, QLabel
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
@@ -8,20 +8,20 @@ from PyQt6.QtGui import QIcon, QAction, QFont
 from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
 from src.common.CustomWidgets import CustomDockWidget
-
+from src.common.Status import StatusMessageManager
 import numpy as np
 from src.app.BlocklyModules import LameBlockly
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
-    def __init__(self,main_window,blockly_webpage, output_text_edit):
+    def __init__(self,status_bar, blockly_webpage, output_text_edit):
         super().__init__()
         
         self.output_text_edit = output_text_edit # This will be used to display the generated code
         # Initiate the LameBlockly instance
         # This is a instance of Lame, which is customised to be run with Blockly
-        self.lame_blockly = LameBlockly(main_window,blockly_webpage)
+        self.lame_blockly = LameBlockly(status_bar, blockly_webpage)
         
 
     @pyqtSlot(str)
@@ -146,7 +146,8 @@ class Workflow(CustomDockWidget):
         self.output_text_edit.setReadOnly(True)
         dock_layout.addWidget(self.output_text_edit)
         
-        toolbar = QToolBar("Notes Toolbar", self)
+                #### toolbar setup ####
+        toolbar = QToolBar("Blockly Toolbar", self)
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
@@ -158,6 +159,8 @@ class Workflow(CustomDockWidget):
         else:
             self.run_action.setText("Run")
         self.run_action.setToolTip("Execute workflow")
+        # Button signals
+        self.run_action.triggered.connect(lambda: self.bridge.lame_blockly.execute_code(self.output_text_edit))
 
         # Export button
         self.save_action = QAction()
@@ -183,10 +186,15 @@ class Workflow(CustomDockWidget):
         toolbar.addAction(self.save_action)
         toolbar.addSeparator()
         toolbar.addAction(self.clear_action)
-
+                # Add a stretch (spacer) so label is at the right, optional
+        toolbar.addSeparator()  # Optional: visual separator
+        
+        # Add status label
+        self.statusLabel = QLabel("Ready")
+        toolbar.addWidget(self.statusLabel)
         dock_layout.addWidget(toolbar)
-
-
+        
+        #### Blockly Setup ####
         #self.save_action.triggered.connect(self.save_workflow)
         #self.clear_action.triggered.connect(self.clear_workflow)
 
@@ -199,12 +207,9 @@ class Workflow(CustomDockWidget):
 
         # Create an instance of the BlocklyBridge and register it with the channel
 
-        self.bridge = BlocklyBridge(main_window ,self.web_view.page(), self.output_text_edit)
+        self.bridge = BlocklyBridge(self.statusLabel,self.web_view.page(), self.output_text_edit)
         self.channel.registerObject('blocklyBridge', self.bridge)
         self.web_view.page().setWebChannel(self.channel)
-
-        # Button signals
-        self.run_action.triggered.connect(lambda: self.bridge.lame_blockly.execute_code(self.output_text_edit))
 
         # Load the qwebchannel.js file and inject it into the page
         api_file = QFile(":/qtwebchannel/qwebchannel.js")
@@ -217,6 +222,14 @@ class Workflow(CustomDockWidget):
         self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
         # Add the web view to the layout
         dock_layout.addWidget(self.web_view)
+
+
+
+
+        
+
+
+
 
         # Connect resize event
         main_window.resizeEvent = self.handleResizeEvent

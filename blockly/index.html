@@ -9,31 +9,13 @@
     <div id="blocklyDiv" style="height: 1024px; width: 100%;"></div>
     <xml id="toolbox" style="display: none">
         <!-- Variables -->
-        <category name="Variables" custom="VARIABLE" colour="330">
-            <block type="variables_get"></block>
-            <block type="variables_set"></block>
-        </category>
-        <!-- Loops -->
-        <category name="Loops" colour="120">
-            <block type="controls_repeat_ext"></block>
-            <block type="controls_for"></block>
-            <block type="controls_whileUntil"></block>
-            
-        </category>
-        <!-- Logic -->
-        <category name="Logic" colour="210">
-            <block type="controls_if"></block>
-            <block type="logic_compare"></block>
-        </category>
-        <!-- Math -->
-        <category name="Math" colour="230">
-            <block type="math_number"></block>
-            <block type="math_arithmetic"></block>
-        </category>
-        <!-- Text -->ik
-        <category name="Text" colour="160">
-            <block type="text"></block>
-            <block type="text_print"></block>
+        <!-- Custom Blocks -->
+        <category name="File I/O" colour="60">
+            <block type="load_directory"></block>
+            <block type="load_sample"></block>
+            <block type="loop_over_samples"></block> 
+            <block type="loop_over_fields"></block> 
+            <block type="export_table"></block>
         </category>
         <!-- Analysis -->
         <category name="Samples and fields" colour="180">
@@ -51,18 +33,10 @@
         <!-- Analysis -->
         <category name="Analysis" colour="160">
             <block type="scatter_and_heatmaps"></block>
-            <block type="scatter_plot_settings"></block>
-            <block type="heatmap_settings"></block>
             <block type="profiling"></block>
             <block type="clustering"></block>
-        </category>
-        <!-- Custom Blocks -->
-        <category name="File I/O" colour="60">
-            <block type="load_directory"></block>
-            <block type="load_sample"></block>
-            <block type="loop_over_samples"></block> 
-            <block type="loop_over_fields"></block> 
-            <block type="export_table"></block>
+            <block type="scatter_plot_settings"></block>
+            <block type="heatmap_settings"></block>
         </category>
         <!-- Plot Category -->
         <category name="Plot" colour="285">
@@ -72,7 +46,7 @@
             <block type="histogram_options"></block> 
         </category>
         <!-- Style Category -->
-        <category name="Style" colour="285">
+        <category name="Style" colour="300">
             <block type="modify_styles"></block>
             <block type="x_axis"></block>
             <block type="y_axis"></block>
@@ -90,6 +64,32 @@
             <block type="colormap"></block>    
             <block type="show_mass"></block>
             <block type="color_by_cluster"></block>
+        </category>
+        <!-- Data Manipulation -->
+        <category name="Variables" custom="VARIABLE" colour="330">
+            <block type="variables_get"></block>
+            <block type="variables_set"></block>
+        </category>
+        <!-- Loops -->
+        <category name="Loops" colour="120">
+            <block type="controls_repeat_ext"></block>
+            <block type="controls_for"></block>
+            <block type="controls_whileUntil"></block>
+        </category>
+        <!-- Logic -->
+        <category name="Logic" colour="140">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+        </category>
+        <!-- Math -->
+        <category name="Math" colour="160">
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+        </category>
+        <!-- Text -->ik
+        <category name="Text" colour="100">
+            <block type="text"></block>
+            <block type="text_print"></block>
         </category>
     </xml>
     <!-- Load qwebchannel.js -->

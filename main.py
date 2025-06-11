@@ -355,8 +355,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNDimRefMaterial.addItems(self.app_data.ref_list.values)      # NDim Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
         self.comboBoxNDimRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxNDimRefMaterial.currentText()))
-        self.comboBoxRefMaterial.setCurrentIndex(0)
-        self.comboBoxNDimRefMaterial.setCurrentIndex(0)
+        self.comboBoxRefMaterial.setCurrentIndex(self.app_data.ref_index)
+        self.comboBoxNDimRefMaterial.setCurrentIndex(self.app_data.ref_index)
+        self.comboBoxNDimQuantiles.setCurrentIndex(self.app_data.ndim_quantile_index)
         
         self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analyteSetAdd'))
@@ -2575,7 +2576,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
             case 'TEC' | 'Radar':
-                canvas, self.plot_info = plot_ndim(self, self.data, self.app_data, self.plot_style)
+                canvas, self.plot_info = plot_ndim(self, data, self.app_data, self.plot_style)
 
             case 'histogram':
                 canvas, self.plot_info = plot_histogram(self, data, self.app_data, self.plot_style)

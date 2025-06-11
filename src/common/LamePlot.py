@@ -1418,7 +1418,7 @@ def plot_ndim(parent, data, app_data, plot_style):
     if not app_data.ndim_list:
         return None, None
 
-    df_filtered, _  = data[app_data.sample_id].get_processed_data()
+    df_filtered, _  = data.get_processed_data()
 
     # match self.comboBoxNorm.currentText():
     #     case 'log':
@@ -1436,7 +1436,7 @@ def plot_ndim(parent, data, app_data, plot_style):
     plot_data = None
 
     # Get quantile for plotting TEC & radar plots
-    quantiles = app_data.ndim_quantiles(app_data.ndim_quantile_index)
+    quantiles = app_data.ndim_quantiles[app_data.ndim_quantile_index]
     # match app_data.ndim_quantile_index:
     #     case 0:
     #         quantiles = [0.5]
@@ -1474,7 +1474,7 @@ def plot_ndim(parent, data, app_data, plot_style):
         cluster_flag = False
 
     
-    canvas = mplc.MplCanvas(parent=parent, proj='radar')
+    canvas = mplc.MplCanvas(parent=parent)
 
     match plot_type:
         case 'Radar':

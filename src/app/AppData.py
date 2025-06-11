@@ -121,7 +121,7 @@ class AppData(Observable):
             2: [0.25, 0.5, 0.75],
             3: [0.05, 0.25, 0.5, 0.75, 0.95]
         }
-        self._ndim_quantile_index = 0
+        self._ndim_quantile_index = 2
         
         self._dim_red_method = "PCA: Principal component analysis (PCA)"
         self._dim_red_x = 0

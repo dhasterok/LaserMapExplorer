@@ -1,4 +1,7 @@
 import os, pickle
+import pandas as pd
+import numpy as np
+from PIL import Image
 from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QMessageBox
 from PyQt6.QtGui import QIcon, QPixmap
 import src.app.SpotImporter as SpotImporter

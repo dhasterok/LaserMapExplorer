@@ -1416,7 +1416,7 @@ def plot_ndim(parent, data, app_data, plot_style):
     The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``mplc.MplCanvas`` for display in the centralWidget views.
     """
     if not app_data.ndim_list:
-        return
+        return None, None
 
     df_filtered, _  = data[app_data.sample_id].get_processed_data()
 

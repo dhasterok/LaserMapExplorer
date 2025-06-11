@@ -1,10 +1,10 @@
 import sys, os, json
 from PyQt6.QtWidgets import ( 
-    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar 
+    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QFont
 from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
 from src.common.CustomWidgets import CustomDockWidget
@@ -15,14 +15,14 @@ os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
-    def __init__(self,blockly_webpage, output_text_edit):
+    def __init__(self,main_window,blockly_webpage, output_text_edit):
         super().__init__()
         
         self.output_text_edit = output_text_edit # This will be used to display the generated code
         # Initiate the LameBlockly instance
         # This is a instance of Lame, which is customised to be run with Blockly
-        self.lame_blockly = LameBlockly()
-        self.blockly  = blockly_webpage # This is the QWebEngineView that displays the Blockly interface
+        self.lame_blockly = LameBlockly(main_window,blockly_webpage)
+        
 
     @pyqtSlot(str)
     def runCode(self, code):
@@ -87,9 +87,9 @@ class BlocklyBridge(QObject):
         """
         dx =0
         dy = 0
-        if self.lame_blockly.sample_id:
-            dx = self.lame_blockly.data[self.lame_blockly.sample_id].dx
-            dy = self.lame_blockly.data[self.lame_blockly.sample_id].dy
+        if self.lame_blockly.app_data.sample_id:
+            dx = self.lame_blockly.data[self.lame_blockly.app_data.sample_id].dx
+            dy = self.lame_blockly.data[self.lame_blockly.app_data.sample_id].dy
         return [dx, dy]
 
     
@@ -110,28 +110,6 @@ class BlocklyBridge(QObject):
         else:
             return obj
         
-    def store_sample_ids(self):
-        """
-        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
-        """
-        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
-        sample_ids_js_array = str(self.lame_blockly.sample_ids)
-        self.blockly.runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
-
-    def update_field_type_list(self, field_type_list):
-        # Convert the field type list to JSON
-        field_type_list_json = json.dumps(field_type_list)
-        # Send the field type list to JavaScript
-        self.blockly.runJavaScript(f"updateFieldTypeList({field_type_list_json})")
-    
-
-
-    def refresh_saved_lists_dropdown(self, type):
-            """
-            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
-            """
-            self.blockly.runJavaScript("refreshListsDropdown({type});")
-        
 class Workflow(CustomDockWidget):
     """Creates the workflow method design dock.
 
@@ -144,28 +122,27 @@ class Workflow(CustomDockWidget):
 
     Parameters
     ----------
-    parent : QMainWindow, optional
+    main_window : QMainWindow, optional
         MainWindow UI, by default None
 
     Raises
     ------
     TypeError
-        parent must be an instance of QMainWindow.
+        main_window must be an instance of QMainWindow.
     """        
-    def __init__(self,parent = None):
-        if not isinstance(parent, QMainWindow):
-            raise TypeError("Parent must be an instance of QMainWindow.")
+    def __init__(self,main_window = None):
+        if not isinstance(main_window, QMainWindow):
+            raise TypeError("main_window must be an instance of QMainWindow.")
 
-        super().__init__(parent)
-        self.parent = parent
+        super().__init__(main_window)
         
         container = QWidget()
 
-        # Create the layout within parent.tabWorkflow
+        # Create the layout within main_window.tabWorkflow
         dock_layout = QVBoxLayout()   
 
         # Create a QTextEdit to display the generated code
-        self.output_text_edit = QTextEdit(self.parent)
+        self.output_text_edit = QTextEdit(main_window)
         self.output_text_edit.setReadOnly(True)
         dock_layout.addWidget(self.output_text_edit)
         
@@ -222,7 +199,7 @@ class Workflow(CustomDockWidget):
 
         # Create an instance of the BlocklyBridge and register it with the channel
 
-        self.bridge = BlocklyBridge(self.web_view.page(), self.output_text_edit)
+        self.bridge = BlocklyBridge(main_window ,self.web_view.page(), self.output_text_edit)
         self.channel.registerObject('blocklyBridge', self.bridge)
         self.web_view.page().setWebChannel(self.channel)
 
@@ -242,7 +219,7 @@ class Workflow(CustomDockWidget):
         dock_layout.addWidget(self.web_view)
 
         # Connect resize event
-        parent.resizeEvent = self.handleResizeEvent
+        main_window.resizeEvent = self.handleResizeEvent
 
         # Set layout to the container
         container.setLayout(dock_layout)
@@ -252,7 +229,7 @@ class Workflow(CustomDockWidget):
         self.setWindowTitle("Workflow Method Design")
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        main_window.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         
 

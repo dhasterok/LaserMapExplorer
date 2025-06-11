@@ -34,7 +34,7 @@ from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
-
+from src.common.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotViewerWindow import PlotViewer
@@ -59,16 +59,32 @@ from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
 from src.app.AppData import AppData
 import os
-
-
+import json
+from src.common.Logger import LogCounter
 class LameBlockly():
-    def __init__(self, *args, **kwargs):
+    def __init__(self, main_window, blockly_webpage, *args, **kwargs):
+        # setup initial logging options
+        self.logger = LogCounter()
+        self.logger_options = {
+                'IO': False,
+                'Data': False,
+                'Analyte selector': False,
+                'Plot selector': False,
+                'Plotting': False,
+                'Polygon': False,
+                'Profile': False,
+                'Masking': False,
+                'Tree': False,
+                'Styles': True,
+                'Calculator': False,
+                'Browser': False,
+                'UI': False
+            }
+
+        self.statusBar = main_window.statusBar  # This will be used to display messages
 
         #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}
-        self.BASEDIR = BASEDIR
-        self.sample_id = ''
-        self.sample_ids =[]
         self.lasermaps = {}
         self.outlier_method = 'none'
         self.negative_method = 'ignore negatives'
@@ -81,6 +97,8 @@ class LameBlockly():
         self.field_type_list = ['Analyte', 'Analyte (normalized)']
 
         self.app_data = AppData(self.data)
+
+        self.blockly  = blockly_webpage # This is the QWebEngineView that displays the Blockly interface
 
         # Plot Selector
         #-------------------------
@@ -118,12 +136,12 @@ class LameBlockly():
 
         # # Clustering
         # #-------------------------
-        # # cluster dictionary
-        self.cluster_dict = {
-            'active method' : 'k-means',
-            'k-means':{'n_clusters':5, 'seed':23, 'selected_clusters':[]},
-            'fuzzy c-means':{'n_clusters':5, 'exponent':2.1, 'distance':'euclidean', 'seed':23, 'selected_clusters':[]}
-        }
+        # Initialise dimentionality reduction class 
+        self.dimensional_reduction = DimensionalReduction(self)
+
+        # Initialise class from DataAnalysis
+        self.clustering = Clustering(self)
+
 
         # distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
         
@@ -150,40 +168,18 @@ class LameBlockly():
         if DEBUG:
             print(f"change_sample, index: {index}")
 
-        if self.sample_id == self.sample_ids[index]:
+        if self.app_data.sample_id == self.app_data.sample_list[index]:
             # if selected sample id is same as previous
             return
             
-        self.sample_id = self.sample_ids[index]
-        
-        # self.notes.save_notes_file()
-        # self.notes.autosaveTimer.stop()
-
-        # # notes and autosave timer
-        # self.notes_file = os.path.join(self.selected_directory,self.sample_id+'.rst')
-        # # open notes file if it exists
-        # if os.path.exists(self.notes_file):
-        #     try:
-        #         with open(self.notes_file,'r') as file:
-        #             self.textEditNotes.setText(file.read())
-        #     except:
-        #         file_name = os.path.basename(self.notes_file)
-        #         self.statusbar.showMessage(f'Cannot read {file_name}')
-        #         pass
-        # # put current notes into self.textEditNotes
-        # self.notes.autosaveTimer.start()
-
-        # add sample to sample dictionary
-        if self.sample_id not in self.data:
-            # load sample's *.lame file
-            file_path = os.path.join(self.app_data.selected_directory, self.csv_files[index])
-            self.data[self.sample_id] = SampleObj(self.sample_id, file_path, self.outlier_method, self.negative_method)
+        self.app_data.sample_id = self.app_data.sample_list[index]
+        self.io.initialise_sample_object(self.outlier_method, self.negative_method)
 
     # -------------------------------------
     # Reset to start
     # -------------------------------------
     def reset_analysis(self, selection='full'):
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
 
@@ -202,7 +198,7 @@ class LameBlockly():
                 self.plot_flag = True
                 # self.update_SV()
             # reset_sample id
-            self.sample_id = None
+            self.app_data.sample_id = None
 
     def open_select_analyte_dialog(self):
         """Opens Select Analyte dialog
@@ -212,7 +208,7 @@ class LameBlockly():
         .. seealso::
             :ref:`AnalyteSelectionWindow` for the dialog
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         self.analyte_dialog = AnalyteDialog(self)
@@ -233,7 +229,7 @@ class LameBlockly():
         .. seealso::
             :ref:`AnalyteSelectionWindow` for the dialog
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
         self.field_selection_dialog = FieldDialog(self)
@@ -258,19 +254,19 @@ class LameBlockly():
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        for analyte in self.data[self.sample_id].processed_data.match_attribute('data_type','Analyte'):
+        for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
             if analyte in list(analyte_dict.keys()):
-                self.data[self.sample_id].processed_data.set_attribute(analyte, 'use', True)
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
             else:
-                self.data[self.sample_id].processed_data.set_attribute(analyte, 'use', False)
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
-                if analyte not in self.data[self.sample_id].processed_data.columns:
+                if analyte not in self.data[self.app_data.sample_id].processed_data.columns:
                     analyte_1, analyte_2 = analyte.split(' / ') 
-                    self.data[self.sample_id].compute_ratio(analyte_1, analyte_2)
+                    self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
 
-            self.data[self.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+            self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
 
     
@@ -297,17 +293,17 @@ class LameBlockly():
         canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
 
         # set color limits
-        if field not in self.data[self.sample_id].axis_dict:
+        if field not in self.data[self.app_data.sample_id].axis_dict:
             self.plot_style.initialize_axis_values(field_type,field)
             self.plot_style.set_style_dictionary()
 
         # get data for current map
-        #scale = self.data[self.sample_id].processed_data.get_attribute(field, 'norm')
+        #scale = self.data[self.app_data.sample_id].processed_data.get_attribute(field, 'norm')
         scale = self.plot_style.cscale
-        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
 
-        array_size = self.data[self.sample_id].array_size
-        aspect_ratio = self.data[self.sample_id].aspect_ratio
+        array_size = self.data[self.app_data.sample_id].array_size
+        aspect_ratio = self.data[self.app_data.sample_id].aspect_ratio
 
         # store map_df to save_data if data needs to be exported
         self.save_data = map_df.copy()
@@ -320,7 +316,7 @@ class LameBlockly():
         #     map_df.loc[sorted_data.index, 'array'] = cdf.values
 
         # plot map
-        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.sample_id].order)
+        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.app_data.sample_id].order)
             
         norm = self.plot_style.color_norm()
 
@@ -339,8 +335,8 @@ class LameBlockly():
         cax.set_clim(clim[0], clim[1])
 
         # use mask to create an alpha layer
-        mask = self.data[self.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.sample_id].order)
+        mask = self.data[self.app_data.sample_id].mask.astype(float)
+        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.app_data.sample_id].order)
 
         alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
         alphas = np.clip(alphas, .4, 1)
@@ -392,7 +388,7 @@ class LameBlockly():
             return
 
         # get currently selected data
-        current_plot_df = self.data[self.sample_id].get_map_data(field, field_type)
+        current_plot_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
 
         # update bin width
         range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
@@ -412,7 +408,7 @@ class LameBlockly():
         self.update_bins = False
 
         # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(field, field_type)
+        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
 
         # update n bins
         self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
@@ -481,7 +477,7 @@ class LameBlockly():
 
             # Get the cluster labels for the data
             cluster_color, cluster_label, _ = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
-            cluster_group = self.data[self.sample_id].processed_data.loc[:,method]
+            cluster_group = self.data[self.app_data.sample_id].processed_data.loc[:,method]
             clusters = self.cluster_dict[method]['selected_clusters']
 
             # Plot histogram for all clusters
@@ -563,18 +559,18 @@ class LameBlockly():
         else:
             font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
 
-        # set y-limits as p-axis min and max in self.data[self.sample_id].axis_dict
+        # set y-limits as p-axis min and max in self.data[self.app_data.sample_id].axis_dict
         if hist_type != 'log-scaling' :
             pflag = False
-            if 'pstatus' not in self.data[self.sample_id].axis_dict[x['field']]:
+            if 'pstatus' not in self.data[self.app_data.sample_id].axis_dict[x['field']]:
                 pflag = True
-            elif self.data[self.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
+            elif self.data[self.app_data.sample_id].axis_dict[x['field']]['pstatus'] == 'auto':
                 pflag = True
 
             if pflag:
                 ymin, ymax = canvas.axes.get_ylim()
                 d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
-                self.data[self.sample_id].axis_dict[x['field']].update(d)
+                self.data[self.app_data.sample_id].axis_dict[x['field']].update(d)
                 # self.plot_style.set_axis_widgets('y', x['field'])
 
             # grab probablility axes limits
@@ -612,7 +608,7 @@ class LameBlockly():
 
         self.plot_info = {
             'tree': 'Histogram',
-            'sample_id': self.sample_id,
+            'sample_id': self.app_data.sample_id,
             'plot_name': field_type+'_'+field,
             'field_type': field_type,
             'field': field,
@@ -637,7 +633,7 @@ class LameBlockly():
         canvas.axes.clear()
 
         # get the data for computing correlations
-        df_filtered, analytes = self.data[self.sample_id].get_processed_data()
+        df_filtered, analytes = self.data[self.app_data.sample_id].get_processed_data()
 
         # Calculate the correlation matrix
         method = corr_method.lower()
@@ -645,7 +641,7 @@ class LameBlockly():
             correlation_matrix = df_filtered.corr(method=method)
         else:
             algorithm = field
-            cluster_group = self.data[self.sample_id].processed_data.loc[:,algorithm]
+            cluster_group = self.data[self.app_data.sample_id].processed_data.loc[:,algorithm]
             selected_clusters = self.cluster_dict[algorithm]['selected_clusters']
 
             ind = np.isin(cluster_group, selected_clusters)
@@ -711,7 +707,7 @@ class LameBlockly():
 
         self.plot_info = {
             'tree': 'Correlation',
-            'sample_id': self.sample_id,
+            'sample_id': self.app_data.sample_id,
             'plot_name': plot_name,
             'plot_type': 'correlation',
             'method': method,
@@ -741,40 +737,40 @@ class LameBlockly():
         match plot_type:
             case 'histogram':
                 if processed or field_type != 'Analyte':
-                    scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale)
+                    scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale)
                 else:
-                    scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale, processed=False)
+                    scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale, processed=False)
             case 'PCA scatter' | 'PCA heatmap':
-                scatter_dict['x'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
-                scatter_dict['y'] = self.data[self.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
+                scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.app_data.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
                 if (field_type is None) or (self.comboBoxColorByField.currentText != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(field_type, field)
+                    scatter_dict['c'] = self.data[self.app_data.sample_id].get_vector(field_type, field)
             case _:
-                scatter_dict['x'] = self.data[self.sample_id].get_vector(field_type_x, field_x, norm=self.plot_style.xscale)
-                scatter_dict['y'] = self.data[self.sample_id].get_vector(field_type_y, field_y, norm=self.plot_style.yscale)
+                scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type_x, field_x, norm=self.plot_style.xscale)
+                scatter_dict['y'] = self.data[self.app_data.sample_id].get_vector(field_type_y, field_y, norm=self.plot_style.yscale)
                 if (field_type is not None) and (field_type != ''):
-                    scatter_dict['z'] = self.data[self.sample_id].get_vector(field_type_z, field_z, norm=self.plot_style.zscale)
+                    scatter_dict['z'] = self.data[self.app_data.sample_id].get_vector(field_type_z, field_z, norm=self.plot_style.zscale)
                 elif (field_z is not None) and (field_z != ''):
-                    scatter_dict['c'] = self.data[self.sample_id].get_vector(field_type, field, norm=self.plot_style.cscale)
+                    scatter_dict['c'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.plot_style.cscale)
 
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-            if scatter_dict['x']['field'] not in self.data[self.sample_id].axis_dict.keys():
+            if scatter_dict['x']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
                 self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
                 # self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-            if scatter_dict['y']['field'] not in self.data[self.sample_id].axis_dict.keys():
+            if scatter_dict['y']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
                 self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
                 # self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-            if scatter_dict['z']['field'] not in self.data[self.sample_id].axis_dict.keys():
+            if scatter_dict['z']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
                 self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
                 # self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-            if scatter_dict['c']['field'] not in self.data[self.sample_id].axis_dict.keys():
+            if scatter_dict['c']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
                 self.plot_style.set_color_axis_widgets()
                 # self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 
@@ -799,9 +795,9 @@ class LameBlockly():
         length = self.plot_style.scale_length
         if (length is not None) and (direction != 'none'):
             if direction == 'horizontal':
-                dd = self.data[self.sample_id].dx
+                dd = self.data[self.app_data.sample_id].dx
             else:
-                dd = self.data[self.sample_id].dy
+                dd = self.data[self.app_data.sample_id].dy
             sb = scalebar( width=length,
                     pixel_width=dd,
                     units=self.preferences['Units']['Distance'],
@@ -928,10 +924,10 @@ class LameBlockly():
         plot_type : str
             The plot type helps to define the set of field types available, by default ``''`` (no change)
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return
 
-        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
@@ -999,7 +995,7 @@ class LameBlockly():
         Set names are consistent with QComboBox.
         """
         
-        data_type_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
         # add check for ratios
         if 'ratio' in data_type_dict:
             self.field_type_list.append('Ratio')
@@ -1036,7 +1032,7 @@ class LameBlockly():
         self.workflow.refresh_analyte_dropdown(analyte_list_names)
 
     def update_analyte_selection_from_file(self,filename):
-        filepath = os.path.join(self.BASEDIR, 'resources/analytes_list', filename+'.txt')
+        filepath = os.path.join(BASEDIR, 'resources/analytes_list', filename+'.txt')
         analyte_dict ={}
         with open(filepath, 'r') as f:
             for line in f.readlines():
@@ -1047,7 +1043,7 @@ class LameBlockly():
 
 
     def update_field_list_from_file(self,filename):
-        filepath = os.path.join(self.BASEDIR, 'resources/fields_list', filename+'.txt')
+        filepath = os.path.join(BASEDIR, 'resources/fields_list', filename+'.txt')
         field_dict ={}
         with open(filepath, 'r') as f:
             for line in f.readlines():
@@ -1057,9 +1053,9 @@ class LameBlockly():
         print(field_dict)
 
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
-        sample_id = self.sample_id
+        sample_id = self.app_data.sample_id
         # Apply to all analytes in sample
-        columns = self.data[self.sample_id].processed_data.columns
+        columns = self.data[self.app_data.sample_id].processed_data.columns
 
         # update column attributes
         if (lb and ub):
@@ -1088,10 +1084,10 @@ class LameBlockly():
         list
             Set_fields, a list of fields within the input set
         """
-        if self.sample_id == '':
+        if self.app_data.sample_id == '':
             return ['']
 
-        data = self.data[self.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed_data
 
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
@@ -1102,7 +1098,7 @@ class LameBlockly():
                 return []
             case _:
                 #populate field name with column names of corresponding dataframe remove 'X', 'Y' is it exists
-                #set_fields = [col for col in self.data[self.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
+                #set_fields = [col for col in self.data[self.app_data.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
                 set_fields = data.match_attribute('data_type', set_name.lower())
 
         return set_fields
@@ -1162,3 +1158,28 @@ class LameBlockly():
 
         print(code)
         exec(code)
+
+
+
+    ### Blockly functions ##
+    def store_sample_ids(self):
+        """
+        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.
+        """
+        # Convert the sample_ids list to a format that JavaScript can use (a JSON array)
+        sample_ids_js_array = str(self.app_data.sample_list)
+        self.blockly.runJavaScript(f"updateSampleDropdown({sample_ids_js_array})")
+
+    def update_field_type_list(self, field_type_list):
+        # Convert the field type list to JSON
+        field_type_list_json = json.dumps(field_type_list)
+        # Send the field type list to JavaScript
+        self.blockly.runJavaScript(f"updateFieldTypeList({field_type_list_json})")
+    
+
+
+    def refresh_saved_lists_dropdown(self, type):
+            """
+            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
+            """
+            self.blockly.runJavaScript("refreshListsDropdown({type});")

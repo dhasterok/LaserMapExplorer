@@ -5,6 +5,7 @@ import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
 from src.app.config import BASEDIR
 import src.common.CustomMplCanvas as mplc
+from src.common.DataHandling import SampleObj
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
@@ -20,9 +21,9 @@ class LameIO():
         if parent is None:
             return
 
-
-        if connect_actions:
-            parent.actionOpenSample.triggered.connect(self.open_sample)
+        self.connect_actions = connect_actions
+        if self.connect_actions:
+            parent.actionOpenSample.triggered.connect(lambda: self.open_sample())
             parent.actionOpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
             parent.actionImportSpots.triggered.connect(self.import_spots)
             parent.actionOpenProject.triggered.connect(lambda: self.open_project())
@@ -62,7 +63,7 @@ class LameIO():
             parent.statusBar().showMessage("No valid csv file found.")
             return
         
-        self.initialize_samples_and_tabs()
+        self.parent.app_data.sample_list = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.app_data.csv_files]
 
 
     def open_directory(self, path=None):
@@ -110,8 +111,8 @@ class LameIO():
                 parent.statusBar().showMessage("No valid csv files found.")
             return
                 #clear the current analysis
-
-        self.initialize_samples_and_tabs()
+        # update sample_list
+        self.parent.app_data.sample_list = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.app_data.csv_files]
 
 
     def import_spots(self):
@@ -331,28 +332,6 @@ class LameIO():
 
                         parent.statusBar().showMessage("Project loaded successfully")
 
-    def initialize_samples_and_tabs(self):
-        """
-        Initialize samples and tabs in the application.
-
-        This method performs the following tasks:
-        - Clears the current analysis
-        - Sets up sample IDs
-        - Populates the sample ID combobox
-        - Changes to the first sample
-        - Initializes tabs
-        - Sets up profiling and polygon samples
-        
-        Initializes ``MainWindow.treeView``.  The ``tree`` is intialized for each of the plot groups.
-        ``Analyte`` its normalized counterpart are initialized with the full list of analytes.  Table
-        data are stored in ``MainWindow.treeModel``.
-        """
-        if self.debug:
-            print("initialize_samples_and_tabs")
-
-        self.parent.app_data.sample_list = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.app_data.csv_files]
-        #self.parent.change_sample(0)
-
     def import_files(self):
         """Opens an import dialog from ``MapImporter`` to open selected data directories."""
         if self.debug:
@@ -367,3 +346,29 @@ class LameIO():
         #    self.open_directory(path=self.importDialog.root_path)
 
         # change sample
+
+    def initialise_sample_object(self, outlier_method, negative_method):
+        """Initializes sample objects for each sample in the application.
+
+        This method creates a sample object for each sample in the application and stores it in the
+        ``MainWindow.data`` dictionary.
+        """
+        # add sample to sample dictionary
+        if self.parent.app_data.sample_id and self.parent.app_data.sample_id not in self.parent.data:
+            # obtain index of current sample
+            index = self.parent.app_data.sample_list.index(self.parent.app_data.sample_id)
+
+            # load sample's *.lame file
+            file_path = os.path.join(self.parent.app_data.selected_directory, self.parent.app_data.csv_files[index])
+            self.parent.data[self.parent.app_data.sample_id] = SampleObj(
+                sample_id = self.parent.app_data.sample_id,
+                file_path = file_path,
+                outlier_method = outlier_method,
+                negative_method =negative_method,
+                ref_chem = self.parent.app_data.ref_chem,
+                debug=self.parent.logger_options['Data']
+            )
+
+            # connect data observers if required
+            if self.connect_actions:
+                self.parent.connect_data_observers(self.parent.data[self.parent.app_data.sample_id])

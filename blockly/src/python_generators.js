@@ -13,8 +13,9 @@ pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     // Generate code with or without directory parameter
     // self is instance of Workflow class
     var code = (dir_name === "'directory path'")
-        ? 'self.io.open_directory(ui_update=False)\nself.store_sample_ids()\n'
-        : 'self.io.open_directory(' + dir_name + ', ui_update=False)\nself.store_sample_ids()\n';
+        ? 'self.io.open_directory()\nself.store_sample_ids()\n'
+        : 'self.io.open_directory(' + dir_name + ', )\nself.store_sample_ids()\n';
+    code += 'self.io.initialise_sample_object(self.outlier_method, self.negative_method)\n';  
     return code;
 };
 
@@ -22,8 +23,10 @@ pythonGenerator.forBlock['load_sample'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));
     // Generate code with or without directory parameter
     var code = (dir_name === "'file path'")
-        ? 'self.io.open_sample(ui_update=False)\nself.store_sample_ids()\n'
-        : 'self.io.open_sample(' + dir_name + 'ui_update=False)\nself.store_sample_ids()\n';
+        ? 'self.io.open_sample()\nself.store_sample_ids()\n'
+        : 'self.io.open_sample(' + dir_name + ')\nself.store_sample_ids()\n'
+        
+    code += 'self.io.initialise_sample_object(self.outlier_method, self.negative_method)\n';  
     return code;
 };
 
@@ -31,7 +34,7 @@ pythonGenerator.forBlock['load_sample'] = function(block, generator) {
 // Python Generator: Select Samples
 pythonGenerator.forBlock['select_samples'] = function(block, generator) {
     var sample_id = generator.quote_(block.getFieldValue('SAMPLE_IDS'));
-    var code = 'self.change_sample(self.sample_ids.index(' + sample_id + '))\n';
+    var code = 'self.change_sample(self.app_data.sample_list.index(' + sample_id + '))\n';
     return code;
 };
 
@@ -90,18 +93,18 @@ pythonGenerator.forBlock['select_ref_val'] = function(block) {
 pythonGenerator.forBlock['change_pixel_dimensions'] = function(block, generator) {
     var dx = block.getFieldValue('dx');
     var dy = block.getFieldValue('dy');
-    var code = 'self.data[self.sample_id].update_resolution(dx ='+dx+ ', dy ='+ dy+', ui_update = False)\n';
+    var code = 'self.data[self.app_data.sample_id].update_resolution(dx ='+dx+ ', dy ='+ dy+')\n';
     return code;
 };
 
 
 pythonGenerator.forBlock['swap_pixel_dimensions'] = function(block) {
-    var code = 'self.data[self.sample_id].swap_resolution\n';
+    var code = 'self.data[self.app_data.sample_id].swap_resolution\n';
     return code;
 };
 
 pythonGenerator.forBlock['swap_x_y'] = function(block) {
-    var code = 'self.data[self.sample_id].swap_xy\n';
+    var code = 'self.data[self.app_data.sample_id].swap_xy\n';
     return code;
 };
 
@@ -122,7 +125,7 @@ pythonGenerator.forBlock['select_outlier_method'] = function(block) {
         code += `self.update_bounds(ub=${uB}, lb=${uB}, d_ub=${dUB}, d_lb=${dLB})\n`;
     }
     
-    code += `self.data[self.sample_id].outlier_method='${method}'\n`;
+    code += `self.data[self.app_data.sample_id].outlier_method='${method}'\n`;
     return code;
 };
 
@@ -130,7 +133,7 @@ pythonGenerator.forBlock['select_outlier_method'] = function(block) {
 pythonGenerator.forBlock['neg_handling_method'] = function(block) {
     var method = block.getFieldValue('negMethodDropdown');
     
-     var code = `self.data[self.sample_id].negative_method='${method}'\n`;
+     var code = `self.data[self.app_data.sample_id].negative_method='${method}'\n`;
     return code;
 };
 
@@ -164,7 +167,7 @@ pythonGenerator.forBlock['loop_over_samples'] = function(block, generator) {
     var variable_sample_ids = JSON.stringify(sample_ids);
     var statements_do = generator.statementToCode(block, 'DO');
     var code = 'for field in ' + variable_sample_ids + ':\n' +
-        generator.INDENT + 'self.change_sample(self.sample_ids.index(sample_id), save_analysis= False)\n' +
+        generator.INDENT + 'self.change_sample(self.app_data.sample_list.index(sample_id), save_analysis= False)\n' +
         statements_do;
     return code;
 };
@@ -206,7 +209,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
 
     // 5) Plot
-    code += `self.plot_map_mpl(self.sample_id, field_type = ${field_type},field = ${field})\n`;
+    code += `self.plot_map_mpl(self.app_data.sample_id, field_type = ${field_type},field = ${field})\n`;
     code += `self.plot_viewer.show()`
     return code;
 };

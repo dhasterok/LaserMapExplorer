@@ -37,7 +37,6 @@ from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
-from src.common.DataHandling import SampleObj
 from src.app.PlotTree import PlotTree
 from src.common.DataAnalysis import Clustering, DimensionalReduction
 from src.common.Masking import MaskDock
@@ -308,7 +307,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def connect_widgets(self):
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
-
+        self.comboBoxSampleId.activated.connect(self.update_sample_id)
 
         self.lineEditDX.editingFinished.connect(self.update_dx)
         self.lineEditDY.editingFinished.connect(self.update_dy)
@@ -1177,7 +1176,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         self.comboBoxSampleId.setCurrentText(new_sample_id)
 
-
+        
         self.change_sample()
 
         # self.profile_dock.profiling.add_samples()
@@ -1198,23 +1197,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # set plot flag to false, allow plot to update only at the end
         self.plot_flag = False
 
-        # add sample to sample dictionary
         if self.app_data.sample_id not in self.data:
-            # obtain index of current sample
-            index = self.app_data.sample_list.index(self.app_data.sample_id)
-
-            # load sample's *.lame file
-            file_path = os.path.join(self.app_data.selected_directory, self.app_data.csv_files[index])
-            self.data[self.app_data.sample_id] = SampleObj(
-                sample_id = self.app_data.sample_id,
-                file_path = file_path,
-                outlier_method = self.comboBoxOutlierMethod.currentText(),
-                negative_method =self.comboBoxNegativeMethod.currentText(),
-                ref_chem = self.app_data.ref_chem,
-                debug=self.logger_options['Data']
-            )
+            self.io.initialise_sample_object(outlier_method=self.comboBoxOutlierMethod.currentText(), negative_method = self.comboBoxNegativeMethod.currentText())
             self.connect_data_observers(self.data[self.app_data.sample_id])
-
             # enable widgets that require self.data not be empty
             self.toggle_data_widgets()
             
@@ -1663,15 +1648,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # See if the user wants to really change samples and save or discard the current work
         if self.data and self.app_data.sample_id != '':
             # Create and configure the QMessageBox
-            msgBox = QMessageBox.warning(self,
+            response = QMessageBox.warning(self,
                     "Save sample",
                     "Do you want to save the current analysis?",
                     QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save)
             #iconWarning = QIcon(":/resources/icons/icon-warning-64.svg")
             #msgBox.setWindowIcon(iconWarning)  # Set custom icon
 
-            # Display the dialog and wait for user action
-            response = msgBox.exec()
 
             # If the user clicks discard, then no need to save, just change the sample
             if response == QMessageBox.StandardButton.Save:
@@ -1684,9 +1667,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # at this point, the user has decided to proceed with changing the sample
         # update the current sample ID
         self.app_data.sample_id = self.comboBoxSampleId.currentText()
-
+        # initiate the sample change
         self.change_sample()
-
 
     def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""

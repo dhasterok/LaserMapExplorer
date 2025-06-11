@@ -1288,9 +1288,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if hasattr(self,"info_dock"):
             self.info_dock.update_tab_widget()
 
-        if hasattr(self, 'workflow'):
-            self.update_blockly_field_types()
-
         # set canvas to single view
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.canvas_changed()

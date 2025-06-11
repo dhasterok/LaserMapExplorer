@@ -9,6 +9,7 @@ import src.app.MapImporter as MapImporter
 from src.app.config import BASEDIR
 import src.common.CustomMplCanvas as mplc
 from src.common.DataHandling import SampleObj
+from src.common.Status import StatusMessageManager
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
@@ -35,6 +36,7 @@ class LameIO():
 
         self.parent = parent
         self.debug = debug
+        self.status_manager = StatusMessageManager(self.parent)
 
     def open_sample(self, path=None):
         """Opens a single \\*.lame.csv file.
@@ -63,7 +65,7 @@ class LameIO():
         parent.app_data.csv_files = [os.path.split(file)[1] for file in file_list if file.endswith('.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog
-            parent.statusBar().showMessage("No valid csv file found.")
+            self.status_manager.show_message("No valid csv file found.")
             return
         
         self.parent.app_data.sample_list = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.app_data.csv_files]
@@ -101,7 +103,7 @@ class LameIO():
             if dialog.exec():
                 parent.app_data.selected_directory = dialog.selectedFiles()[0]
             else:
-                parent.statusBar().showMessage("Open directory canceled.")
+                self.status_manager.show_message("Open directory canceled.")
                 return
         else:
             parent.app_data.selected_directory = path
@@ -110,13 +112,11 @@ class LameIO():
         parent.app_data.csv_files = [file for file in file_list if file.endswith('.lame.csv')]
         if parent.app_data.csv_files == []:
             # warning dialog
-            if hasattr(parent,'statusBar'):
-                parent.statusBar().showMessage("No valid csv files found.")
-            return
+            self.status_manager.show_message("No valid csv files found.")
                 #clear the current analysis
         # update sample_list
         self.parent.app_data.sample_list = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.app_data.csv_files]
-
+        self.status_manager.show_message("Sample list updated.")
 
     def import_spots(self):
         """Import a data file with spot data."""
@@ -216,7 +216,7 @@ class LameIO():
                     parent.profiling.save_profiles(project_dir, sample_id)
                     parent.polygon.save_polygons(project_dir, sample_id)
                 
-                parent.statusBar().showMessage("Analysis saved successfully")
+                self.status_manager.show_message("Analysis saved successfully")
 
     def open_project(self):
         """Open a project session.
@@ -230,15 +230,12 @@ class LameIO():
 
         if parent.data:
             # Create and configure the QMessageBox
-            msgBox = QMessageBox.warning(
+            response = QMessageBox.warning(
                 parent,
                 "Save analysis",
                 "Do you want to save the current analysis?",
                 QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save
             )
-
-            # Display the dialog and wait for user action
-            response = msgBox.exec()
 
             if response == QMessageBox.StandardButton.Save:
                 self.save_project()
@@ -333,7 +330,7 @@ class LameIO():
                         parent.plot_flag = True
                         parent.update_SV()
 
-                        parent.statusBar().showMessage("Project loaded successfully")
+                        self.status_manager.show_message("Project loaded successfully")
 
     def import_files(self):
         """Opens an import dialog from ``MapImporter`` to open selected data directories."""
@@ -375,3 +372,6 @@ class LameIO():
             # connect data observers if required
             if self.connect_actions:
                 self.parent.connect_data_observers(self.parent.data[self.parent.app_data.sample_id])
+
+
+    

@@ -12,7 +12,7 @@ from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtWidgets import QMessageBox
-
+from src.common.Status import StatusMessageManager
 from src.common.Logger import LogCounter
 
 class SampleObj(Observable):

@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QToolButton, QLabel, QLineEdit
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEngineProfile
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtGui import QIcon, QMouseEvent
     
@@ -133,7 +134,7 @@ class Browser(QDockWidget):
         toolbar_layout = QHBoxLayout(toolbar)
         toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
         toolbar_layout.setSpacing(5)  # Spacing between buttons
-        toolbar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        toolbar.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         # self.groupBoxBrowserControl = QtWidgets.QGroupBox(self.container)
         # self.groupBoxBrowserControl.setMinimumSize(QtCore.QSize(0, 40))
@@ -170,7 +171,7 @@ class Browser(QDockWidget):
         self.browser_location = QLineEdit()
         self.browser_location.setMinimumSize(QSize(200, 20))
         self.browser_location.setMaximumSize(QSize(16777215, 20))
-        self.browser_location.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.browser_location.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         toolbar_layout.addWidget(self.home_button)
         toolbar_layout.addWidget(self.back_button)
@@ -227,19 +228,19 @@ class Browser(QDockWidget):
         """        
         if self.parent.actionHelp.isChecked():
             # Handle hover events
-            if event.type() == QEvent.Enter:
+            if event.type() == QEvent.Type.Enter:
                 if obj in self.help_mapping:
                     self.parent.setCursor(Qt.CursorShape.WhatsThisCursor)
                 else:
                     self.parent.setCursor(Qt.CursorShape.ForbiddenCursor)
                 return True
-            elif event.type() == QEvent.Leave:
+            elif event.type() == QEvent.Type.Leave:
                 # Reset cursor when leaving a widget
                 self.parent.setCursor(Qt.CursorShape.WhatsThisCursor)
                 return True
 
             # Handle mouse press events
-            if event.type() == QEvent.MouseButtonPress:
+            if event.type() == QEvent.Type.MouseButtonPress:
                 self.parent.actionHelp.setChecked(False)
                 self.parent.setCursor(Qt.CursorShape.ArrowCursor)
 

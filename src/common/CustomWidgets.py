@@ -394,7 +394,7 @@ class CustomActionMenu(QAction):
 
         # Function to display the menu
         def show_menu():
-            self.menu.exec_(QCursor.pos())
+            self.menu.exec(QCursor.pos())
 
         # Connect the action to the show_menu function
         self.triggered.connect(show_menu)

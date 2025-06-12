@@ -140,9 +140,9 @@ class UIThemes():
         #parent.toolBoxTreeView.setItemIcon(parent.right_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Calculator
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-        #if hasattr(parent,'calculator'):
-            #parent.actionCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
-            #parent.toolButtonFormulaDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        if hasattr(parent,'calculator'):
+            parent.actionCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-run-64.svg')))
+            parent.toolButtonFormulaDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Style Toolbox
         parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(os.path.join(ICONPATH,'icon-axes-dark-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
@@ -258,7 +258,7 @@ class UIThemes():
         # Calculator
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
         if hasattr(parent,'calculator'):
-            parent.calculator.actionCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-64.svg')))
+            parent.calculator.actionCalculate.setIcon(QIcon(os.path.join(ICONPATH,'icon-run-64.svg')))
             parent.calculator.toolButtonFormulaDelete.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
         # Style Toolbox
         parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(os.path.join(ICONPATH,'icon-axes-64.svg')))

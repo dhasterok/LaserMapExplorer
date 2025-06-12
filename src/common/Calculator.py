@@ -101,7 +101,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
         # calculate new field based on formula entered by user
         self.actionCalculate = QAction()
-        self.actionCalculate.setIcon(QIcon(":resources/icons/icon-calculator-64.svg"))
+        self.actionCalculate.setIcon(QIcon(":resources/icons/icon-run-64.svg"))
         self.actionCalculate.setToolTip("Calculate field")
         toolbar.addAction(self.actionCalculate)
 

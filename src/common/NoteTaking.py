@@ -247,7 +247,7 @@ class Notes(CustomDockWidget):
 
         self.text_edit = QTextEdit()
         self.text_edit.setFont(QFont("Monaco", 10))
-        self.text_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.text_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.text_edit.setMaximumSize(QSize(524287, 524287))
         self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
 
@@ -364,7 +364,7 @@ class Notes(CustomDockWidget):
 
     def write_equation(self, equation):
         cursor = self.text_edit.textCursor()
-        cursor.movePosition(QTextCursor.EndOfLine)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfLine)
 
         equation_text = equation
         new_text = f"\n.. math::\n  {equation_text}\n"
@@ -481,7 +481,8 @@ class Notes(CustomDockWidget):
         line_number = cursor.blockNumber()
 
         # Move the cursor to the end of the selected line
-        cursor.movePosition(QTextCursor.EndOfLine)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfLine)
+
         #cursor.movePosition(QTextCursor.NextBlock)
 
         # Insert the line of "="
@@ -597,18 +598,18 @@ class Notes(CustomDockWidget):
         if references_index != -1:
             # "References" section exists, move cursor to the end of it
             cursor.setPosition(references_index)
-            cursor.movePosition(QTextCursor.NextBlock)  # Move to the block after "References"
+            cursor.movePosition(QTextCursor.MoveOperation.NextBlock)  # Move to the block after "References"
 
             # Move to the last non-empty block in the "References" section
             while cursor.block().text().strip() != "" and not cursor.atEnd():
-                cursor.movePosition(QTextCursor.NextBlock)
+                cursor.movePosition(QTextCursor.MoveOperation.NextBlock)
 
             # Insert the citation at the end of the "References" section
             cursor.insertBlock()
             cursor.insertText(f"{citation_text}\n")
         else:
             # "References" section doesn't exist, create it at the end
-            cursor.movePosition(QTextCursor.End)
+            cursor.movePosition(QTextCursor.MoveOperation.End)
             cursor.insertBlock()
             cursor.insertText("\nReferences\n==========\n")
             cursor.insertBlock()
@@ -669,25 +670,31 @@ class Notes(CustomDockWidget):
         infotype : str
             Name of preformatted information
         """
+
+        data = self.parent.data[self.parent.app_data.sample_id]
+
         match infotype:
             case 'sample info':
-                self.text_edit.insertPlainText(f'**Sample ID: {self.parent.sample_id}**\n')
-                self.text_edit.insertPlainText('*' * (len(self.parent.sample_id) + 15) + '\n')
+                self.text_edit.insertPlainText(f'**Sample ID: {self.parent.app_data.sample_id}**\n')
+                self.text_edit.insertPlainText('*' * (len(self.parent.app_data.sample_id) + 15) + '\n')
                 self.text_edit.insertPlainText(f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n')
                 # width/height
                 # list of all analytes
                 self.text_edit.insertPlainText(':User: Your name here\n')
                 pass
             case 'analytes':
-                fields = self.parent.get_field_list()
-                self.text_edit.insertPlainText('\n\n:analytes used: '+', '.join(fields))
+                analytes = data.processed_data.match_attribute('data_type', 'Analyte')
+                ratios = data.processed_data.match_attribute('data_type', 'Ratio')
+                if analytes:
+                    self.text_edit.insertPlainText('\n\n:analytes used: '+', '.join(analytes))
+                if ratios:
+                    self.text_edit.insertPlainText('\n\n:ratios used: '+', '.join(ratios))
             case 'plot info':
                 text = ['\n\n:plot type: '+self.parent.plot_info['plot_type'],
                         ':plot name: '+self.parent.plot_info['plot_name']+'\n']
                 self.text_edit.insertPlainText('\n'.join(text))
             case 'filters':
-                filter_table = self.parent.data[self.parent.sample_id]['filter_info']
-                rst_table = self.to_rst_table(filter_table)
+                rst_table = self.to_rst_table(data.filter_df)
 
                 self.text_edit.insertPlainText(rst_table)
             case 'pca results':
@@ -695,14 +702,14 @@ class Notes(CustomDockWidget):
                     return
 
                 # Retrieve analytes matching specified attributes
-                analytes = self.parent.data[self.parent.sample_id].processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
+                analytes = data.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
                 analytes = np.insert(analytes, 0, 'lambda')  # Insert 'lambda' at the start of the analytes array
 
                 # Calculate explained variance in percentage
                 explained_variance = self.parent.pca_results.explained_variance_ratio_ * 100
 
                 # Retrieve PCA score headers matching the attribute condition
-                header = self.parent.data[self.parent.sample_id].processed_data.match_attributes({'data_type': 'PCA score'})
+                header = data.processed_data.match_attributes({'data_type': 'PCA score'})
 
                 # Create a matrix with explained variance and PCA components
                 matrix = np.vstack([explained_variance, self.parent.pca_results.components_])

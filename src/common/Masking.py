@@ -68,7 +68,12 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
 
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
+        self.setFloating(False)
         self.setWindowTitle(title)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
+
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+
         #self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
@@ -704,10 +709,10 @@ class PolygonTab():
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
         self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
 
-        self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
-        self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
-        self.actionPolyAddPoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
-        self.actionPolyRemovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
+        #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
+        #self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
+        #self.actionPolyAddPoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
+        #self.actionPolyRemovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
 
         self.toggle_polygon_actions()
 

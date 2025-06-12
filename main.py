@@ -302,6 +302,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def connect_actions(self):
+        self.actionReportBug.triggered.connect(lambda: self.open_browser('report_bug'))
+        self.actionUserGuide.triggered.connect(lambda: self.open_browser('user_guide'))
+        self.actionTutorials.triggered.connect(lambda: self.open_browser('tutorials'))
+
         pass
 
     def connect_widgets(self):

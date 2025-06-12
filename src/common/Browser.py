@@ -36,7 +36,11 @@ class WebEngineView(QWebEngineView):
 
         # Set up a JavaScript console message handler
         self.page().setWebChannel(None)
-        self.page().setFeaturePermission(QUrl(), QWebEnginePage.Notifications, QWebEnginePage.PermissionGrantedByUser)
+        self.page().setFeaturePermission(
+            QUrl(),
+            QWebEnginePage.Feature.Notifications,
+            QWebEnginePage.PermissionPolicy.PermissionGrantedByUser
+            )
         self.page().javaScriptConsoleMessage = self.handle_console_message
 
     @pyqtSlot(bool)
@@ -55,7 +59,7 @@ class WebEngineView(QWebEngineView):
     @pyqtSlot()
     def on_load_started(self):
         """Executes when page starts to load."""
-        self.parent.statusBar.showMessage("Loading started...")
+        self.parent.statusBar().showMessage("Loading started...")
 
     @pyqtSlot(int)
     def on_load_progress(self, progress):
@@ -66,7 +70,7 @@ class WebEngineView(QWebEngineView):
         progress : int
             Loading fraction
         """        
-        self.parent.statusBar.showMessage(f"Loading progress: {progress}%")
+        self.parent.statusBar().showMessage(f"Loading progress: {progress}%")
 
     def show_error_page(self):
         """Displays 404 error page."""
@@ -188,12 +192,11 @@ class Browser(QDockWidget):
 
         self.setWindowTitle("Documentation")
 
-        self.setMinimumSize(QSize(300, 150))
+        self.setMinimumSize(QSize(800, 500))
         self.setMaximumSize(QSize(16777215, 16777215))
 
         # open browser
         self.open_browser()
-        #self.parent.browser = WebEngineView(self.parent)
 
         # connect widget slots
         self.home_button.clicked.connect(self.go_to_home)

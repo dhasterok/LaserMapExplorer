@@ -2619,10 +2619,16 @@ class StylingDock(Styling):
                     scale = 'linear'
                 else:
                     symbol, mass = self.parse_field(field)
-                    if field_type == 'Analyte':
-                        data.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol} ({self.app_data.preferences['Units']['Concentration']})"
+                    label = ''
+                    if mass:
+                        label = f"$^{{{mass}}}${symbol}"
                     else:
-                        data.axis_dict[field]['label'] = f"$^{{{mass}}}${symbol}$_N$ ({self.app_data.preferences['Units']['Concentration']})"
+                        label = f"{symbol}"
+
+                    if field_type == 'Analyte':
+                        data.axis_dict[field]['label'] = f"{label} ({self.app_data.preferences['Units']['Concentration']})"
+                    else: # normalized analyte
+                        data.axis_dict[field]['label'] = f"{label}$_N$ ({self.app_data.preferences['Units']['Concentration']})"
 
                     scale = data.processed_data.get_attribute(field, 'norm')
 
@@ -2633,10 +2639,25 @@ class StylingDock(Styling):
                 field_2 = field.split(' / ')[1]
                 symbol_1, mass_1 = self.parse_field(field_1)
                 symbol_2, mass_2 = self.parse_field(field_2)
+
+                # numerator
+                label_1 = ''
+                if mass_1: # isotope
+                    label_1 = f"$^{{{mass_1}}}${symbol_1}"
+                else: # element
+                    label_1 = f"{symbol_1}"
+
+                # denominator
+                label_2 = ''
+                if mass_2: # isotope
+                    label_2 = f"$^{{{mass_2}}}${symbol_2}"
+                else: # element
+                    label_2 = f"{symbol_2}"
+
                 if field_type == 'Ratio':
-                    data.axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1} / $^{{{mass_2}}}${symbol_2}"
-                else:
-                    data.axis_dict[field]['label'] = f"$^{{{mass_1}}}${symbol_1}$_N$ / $^{{{mass_2}}}${symbol_2}$_N$"
+                    data.axis_dict[field]['label'] = f"{label_1} / {label_2}"
+                else:   # normalized ratio
+                    data.axis_dict[field]['label'] = f"{label_1}$_N$ / {label_2}$_N$"
 
                 amin = np.nanmin(array)
                 amax = np.nanmax(array)
@@ -3069,7 +3090,7 @@ class StylingDock(Styling):
 
 
     def update_field(self, ax, field=None):
-        """Used to update widgets associaed with an axis after a field change to either the combobox or underlying data.
+        """Used to update widgets associated with an axis after a field change to either the combobox or underlying data.
 
         Used to update, x, y, z, and c axes related widgets including fields, spinboxes, labels, limits and scale.  
 
@@ -3097,6 +3118,7 @@ class StylingDock(Styling):
         if field is None:   # user interaction, or direct setting of combobox
             # set field property to combobox
             self.app_data.set_field(ax, childbox.currentText())
+            field = childbox.currentText()
         else:   # direct setting of property
             if field == childbox.currentText() and field == self.app_data.get_field(ax):
                 return

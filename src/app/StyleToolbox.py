@@ -966,26 +966,26 @@ class StylingDock(Styling):
             'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditColorLB],
             'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditColorUB],
             'plot type': {
-                '': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'field map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'gradient map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'correlation': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
-                'histogram': {'axis': [True, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
-                'scatter': {'axis': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
-                'heatmap': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'ternary map': {'axis': [True, True, True, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'TEC': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
-                'radar': {'axis': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
-                'variance': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'basis vectors': {'axis': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'dimension score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'dimension scatter': {'axis': [True, True, False, True], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
-                'dimension heatmap': {'axis': [True, True, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'cluster': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'cluster score map': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'cluster performance': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'profile': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'polygon': {'axis': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
+                '': {'axis': [False, False, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'field map': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'gradient map': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'correlation': {'axis': [True, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
+                'histogram': {'axis': [True, False, False, True], 'global_list': [True, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
+                'scatter': {'axis': [True, True, True, True], 'global_list': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
+                'heatmap': {'axis': [True, True, True, False], 'global_list': [True, True, True, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'ternary map': {'axis': [True, True, True, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'TEC': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
+                'radar': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
+                'variance': {'axis': [False, False, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'basis vectors': {'axis': [False, False, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'dimension score map': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'dimension scatter': {'axis': [True, True, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
+                'dimension heatmap': {'axis': [True, True, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
+                'cluster': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'cluster score map': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'cluster performance': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
+                'profile': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
+                'polygon': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
             }
         }
 
@@ -2013,7 +2013,7 @@ class StylingDock(Styling):
         if plot_type is None:
             setting = widget_dict['plot type'][self.plot_type]
         else:
-            setting = widget_dict['plot type']['none']
+            setting = widget_dict['plot type'][plot_type]
 
         for ax in range(3):
             widget_dict['label'][ax].setEnabled(setting['axis'][ax])
@@ -2053,7 +2053,7 @@ class StylingDock(Styling):
 
         ui = self.ui
 
-        self.init_field_widgets(self.axis_widget_dict)
+        self.init_field_widgets(self.axis_widget_dict, self.plot_type)
 
         # update ui
         match self.plot_type.lower():
@@ -3118,7 +3118,7 @@ class StylingDock(Styling):
         if field is None:   # user interaction, or direct setting of combobox
             # set field property to combobox
             self.app_data.set_field(ax, childbox.currentText())
-            field = childbox.currentText()
+            #field = childbox.currentText()
         else:   # direct setting of property
             if field == childbox.currentText() and field == self.app_data.get_field(ax):
                 return

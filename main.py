@@ -321,32 +321,76 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
 
 
-        pt_dict = self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]
-        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC, add_none=pt_dict['add_none'][3], global_list=True, user_activated=True)
+        self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(
+            self.comboBoxFieldTypeC,
+            self.comboBoxFieldC,
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][3],
+            global_list=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['global_list'][3],
+            user_activated=True
+            )
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=3))
-        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldC, self.comboBoxFieldTypeC, spinbox=self.spinBoxFieldC, add_none=pt_dict['add_none'][3], user_activated=True)
+        self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(
+            self.comboBoxFieldC,
+            self.comboBoxFieldTypeC,
+            spinbox=self.spinBoxFieldC,
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][3],
+            user_activated=True
+            )
         #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         self.comboBoxFieldC.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=3))
         # update spinbox associated with map/color field
         self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))
 
-        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeX, self.comboBoxFieldX, add_none=pt_dict['add_none'][0], user_activated=True)
+        self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(
+            self.comboBoxFieldTypeX,
+            self.comboBoxFieldX,
+            global_list=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['global_list'][0],
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][0],
+            user_activated=True
+            )
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=0))
-        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldX, self.comboBoxFieldTypeX, add_none=pt_dict['add_none'][0], user_activated=True)
+        self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(
+            self.comboBoxFieldX,
+            self.comboBoxFieldTypeX,
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][0],
+            user_activated=True
+            )
         self.comboBoxFieldX.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=0))
         # update spinbox associated with map/color field
         self.spinBoxFieldX.valueChanged.connect(lambda: self.field_spinbox_changed(ax=0))
 
-        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeY, self.comboBoxFieldY, add_none=pt_dict['add_none'][1], user_activated=True)
+        self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(
+            self.comboBoxFieldTypeY,
+            self.comboBoxFieldY,
+            global_list=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['global_list'][1],
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][1],
+            user_activated=True
+            )
         self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=1))
-        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldY, self.comboBoxFieldTypeY, add_none=pt_dict['add_none'][1], user_activated=True)
+        self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(
+            self.comboBoxFieldY,
+            self.comboBoxFieldTypeY,
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][1],
+            user_activated=True
+            )
         self.comboBoxFieldY.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=1))
         # update spinbox associated with map/color field
         self.spinBoxFieldY.valueChanged.connect(lambda: self.field_spinbox_changed(ax=1))
 
-        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(self.comboBoxFieldTypeZ, self.comboBoxFieldZ, add_none=pt_dict['add_none'][2], user_activated=True)
+        self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(
+            self.comboBoxFieldTypeZ,
+            self.comboBoxFieldZ,
+            global_list=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['global_list'][2],
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][2],
+            user_activated=True
+            )
         self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=2))
-        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(self.comboBoxFieldZ, self.comboBoxFieldTypeZ, add_none=pt_dict['add_none'][2], user_activated=True)
+        self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(
+            self.comboBoxFieldZ,
+            self.comboBoxFieldTypeZ,
+            add_none=self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['add_none'][2],
+            user_activated=True
+            )
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
 
         # N-Dim Tab

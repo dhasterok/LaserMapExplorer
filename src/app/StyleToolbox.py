@@ -966,26 +966,143 @@ class StylingDock(Styling):
             'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditColorLB],
             'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditColorUB],
             'plot type': {
-                '': {'axis': [False, False, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'field map': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'gradient map': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'correlation': {'axis': [True, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, True]},
-                'histogram': {'axis': [True, False, False, True], 'global_list': [True, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [True, False, False, True]},
-                'scatter': {'axis': [True, True, True, True], 'global_list': [True, True, True, True], 'add_none': [False, False, True, True], 'spinbox': [False, False, False, True]},
-                'heatmap': {'axis': [True, True, True, False], 'global_list': [True, True, True, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'ternary map': {'axis': [True, True, True, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'TEC': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
-                'radar': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, True], 'spinbox': [False, False, False, False]},
-                'variance': {'axis': [False, False, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'basis vectors': {'axis': [False, False, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'dimension score map': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'dimension scatter': {'axis': [True, True, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, True], 'spinbox': [True, True, False, True]}, 
-                'dimension heatmap': {'axis': [True, True, False, False], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [True, True, False, False]},
-                'cluster': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'cluster score map': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'cluster performance': {'axis': [False, False, False, True], 'global_list': [False, False, False, False], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, False]},
-                'profile': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]},
-                'polygon': {'axis': [False, False, False, True], 'global_list': [False, False, False, True], 'add_none': [False, False, False, False], 'spinbox': [False, False, False, True]}
+                '': {
+                    'axis': [False, False, False, False],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, False],
+                    },
+                'field map': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, True],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
+                    },
+                'gradient map': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Analyte','Ratio','Calculated','Special']
+                    },
+                'correlation': {
+                    'axis': [True, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, True],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Cluster']
+                    },
+                'histogram': {
+                    'axis': [True, False, False, True],
+                    'global_list': [True, False, False, False],
+                    'add_none': [False, False, False, True],
+                    'spinbox': [True, False, False, True],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
+                    },
+                'scatter': {
+                    'axis': [True, True, True, True],
+                    'global_list': [True, True, True, True],
+                    'add_none': [False, False, True, True],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
+                    },
+                'heatmap': {
+                    'axis': [True, True, True, False],
+                    'global_list': [True, True, True, True],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, False],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
+                    },
+                'ternary map': {
+                    'axis': [True, True, True, False],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, False],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
+                    },
+                'TEC': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, True],
+                    'spinbox': [False, False, False, False],
+                    'field_type': ['Analyte']
+                    },
+                'radar': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, True],
+                    'add_none': [False, False, False, True],
+                    'spinbox': [False, False, False, False],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
+                    },
+                'variance': {
+                    'axis': [False, False, False, False],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, False]
+                    },
+                'basis vectors': {
+                    'axis': [False, False, False, False],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [True, True, False, False]
+                    },
+                'dimension score map': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['PCA score']
+                    },
+                'dimension scatter': {
+                    'axis': [True, True, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, True],
+                    'spinbox': [True, True, False, True],
+                    'field_type': ['PCA score']
+                    }, 
+                'dimension heatmap': {
+                    'axis': [True, True, False, False],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [True, True, False, False],
+                    'field_type': ['PCA score']
+                    },
+                'cluster': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, False],
+                    'field_type': ['Cluster']
+                    },
+                'cluster score map': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Cluster score']
+                    },
+                'cluster performance': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, False],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, False],
+                    'field_type': ['Cluster']
+                    },
+                'profile': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, True],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
+                    },
+                'polygon': {
+                    'axis': [False, False, False, True],
+                    'global_list': [False, False, False, True],
+                    'add_none': [False, False, False, False],
+                    'spinbox': [False, False, False, True],
+                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
+                    }
             }
         }
 

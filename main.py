@@ -499,50 +499,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     new_list.append('Ratio (normalized)')
         else:
             # set the list based on plot_style.plot_type and available field types
-            match self.plot_style.plot_type.lower():
-                case 'correlation' | 'histogram' | 'tec':
-                    if 'Cluster' in field_dict.keys():
-                        new_list = ['Cluster']
-                    else:
-                        new_list = []
-                case 'cluster score map':
-                    if 'Cluster score' in field_dict.keys():
-                        new_list = ['Cluster score']
-                    else:
-                        new_list = []
-                case 'cluster':
-                    if 'Cluster' in field_dict.keys():
-                        new_list = ['Cluster']
-                    elif 'Cluster score' in field_dict.keys():
-                        new_list = ['Cluster score']
-                    else:
-                        new_list=[]
-                case 'performance':
-                    new_list = []
-                case 'score map':
-                    if 'score map' in field_dict.keys():
-                        new_list = ['score map']
-                    else:
-                        new_list = []
-                case 'ternary map':
-                    self.labelCbarDirection.setEnabled(True)
-                    self.comboBoxCbarDirection.setEnabled(True)
-                case _:
-                    new_list = ['Analyte', 'Analyte (normalized)']
+            new_list = [key for key in field_dict.keys() if key in self.plot_style.axis_widget_dict['plot type'][self.plot_style.plot_type]['field_type']]
 
-                    # add check for ratios
-                    if 'Ratio' in field_dict.keys():
-                        new_list.append('Ratio')
-                        new_list.append('Ratio (normalized)')
+            if 'Analyte' in new_list:
+                index = new_list.index('Analyte')
+                new_list.insert(index+1, 'Analyte (normalized)')
 
-                    if 'score map' in field_dict.keys():
-                        new_list.append('score map')
-
-                    if 'Cluster' in field_dict.keys():
-                        new_list.append('Cluster')
-
-                    if 'Cluster score' in field_dict.keys():
-                        new_list.append('Cluster score')
+            if 'Ratio' in new_list:
+                index = new_list.index('Ratio')
+                new_list.insert(index+1, 'Ratio (normalized)')
 
         # add 'None' as first option if required.
         if add_none:

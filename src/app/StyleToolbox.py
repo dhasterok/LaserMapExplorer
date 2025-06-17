@@ -865,12 +865,38 @@ class StyleTheme():
         styles = {}
 
         self.default_plot_style = {
-                'XLim': [0,1], 'XScale': 'linear', 'XLabel': '', 'YLim': [0,1], 'YScale': 'linear', 'YLabel': '', 'ZLim': [0,1], 'ZLabel': '', 'ZScale': 'linear', 'AspectRatio': 1.0, 'TickDir': 'out',
-                'Font': '', 'FontSize': 11.0,
-                'ScaleDir': 'none', 'ScaleLocation': 'northeast', 'ScaleLength': None, 'OverlayColor': '#ffffff',
-                'Marker': 'circle', 'MarkerSize': 6, 'MarkerColor': '#1c75bc', 'MarkerAlpha': 30,
-                'LineWidth': 1.5, 'LineMultiplier': 1, 'LineColor': '#1c75bc',
-                'CLim': [0,1], 'CScale': 'linear', 'CLabel': '', 'Colormap': 'viridis', 'CbarReverse': False, 'CbarDir': 'vertical', 'Resolution': 10 }
+                'XLim': [0,1],
+                'XScale': 'linear',
+                'XLabel': '',
+                'YLim': [0,1],
+                'YScale': 'linear',
+                'YLabel': '',
+                'ZLim': [0,1],
+                'ZLabel': '',
+                'ZScale': 'linear',
+                'AspectRatio': 1.0,
+                'TickDir': 'out',
+                'Font': '',
+                'FontSize': 11.0,
+                'ScaleDir': 'none',
+                'ScaleLocation': 'northeast',
+                'ScaleLength': None,
+                'OverlayColor': '#ffffff',
+                'Marker': 'circle',
+                'MarkerSize': 6,
+                'MarkerColor': '#1c75bc',
+                'MarkerAlpha': 30,
+                'LineWidth': 1.5,
+                'LineMultiplier': 1,
+                'LineColor': '#1c75bc',
+                'CLim': [0,1],
+                'CScale': 'linear',
+                'CLabel': '',
+                'Colormap': 'viridis',
+                'CbarReverse': False,
+                'CbarDir': 'vertical',
+                'Resolution': 10
+                }
 
         # try to load one of the preferred fonts
         default_font = ['Avenir','Candara','Myriad Pro','Myriad','Aptos','Calibri','Helvetica','Arial','Verdana']

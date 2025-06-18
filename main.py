@@ -1997,7 +1997,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditDX.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.schedule_update()
-            field = "X"
+            field = 'Xc'
             if isinstance(self.plot_info, dict) \
                 and 'field_type' in self.plot_info \
                 and 'field' in self.plot_info:
@@ -2018,7 +2018,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditDY.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
             self.plot_style.schedule_update()
-            field = "Y"
+            field = 'Yc'
             if isinstance(self.plot_info, dict) \
                 and 'field_type' in self.plot_info \
                 and 'field' in self.plot_info:

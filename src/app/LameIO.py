@@ -347,6 +347,7 @@ class LameIO():
 
         # change sample
 
+
     def initialise_sample_object(self, outlier_method, negative_method):
         """Initializes sample objects for each sample in the application.
 
@@ -373,5 +374,53 @@ class LameIO():
             if self.connect_actions:
                 self.parent.connect_data_observers(self.parent.data[self.parent.app_data.sample_id])
 
-
     
+    def images_to_dataframe(self, directory):
+        """Reads image files into a data structure and saves in LaME format."""
+        # Get base directory name for output CSV
+        dir_name = os.path.basename(os.path.normpath(directory))
+        output_filename = f"{dir_name}.lame.xrf.csv"
+        
+        # Get sorted list of image files
+        image_files = sorted([
+            f for f in os.listdir(directory)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff'))
+        ])
+        
+        if not image_files:
+            raise ValueError("No image files found in the directory.")
+        
+        all_columns = {}
+        
+        # Load the first image to get dimensions
+        first_image = Image.open(os.path.join(directory, image_files[0])).convert('RGB')
+        width, height = first_image.size
+        
+        # Create X and Y coordinate columns
+        x_coords, y_coords = np.meshgrid(range(width), range(height))
+        all_columns['X'] = x_coords.flatten()
+        all_columns['Y'] = y_coords.flatten()
+        
+        for image_file in image_files:
+            # Open and convert to grayscale intensity
+            img = Image.open(os.path.join(directory, image_file)).convert('RGB')
+            img_array = np.array(img).astype(np.float32)
+            
+            # Convert RGB to intensity (simple average)
+            intensity = img_array.max(axis=2)  # Shape: (H, W)
+            
+            # Normalize intensity to 0-100
+            normalized = (intensity / 255.0) * 100
+            
+            # Derive safe column name
+            base_name = os.path.splitext(image_file)[0]
+            column_name = 'Yt' if base_name == 'Y' else base_name
+            
+            # Add to columns
+            all_columns[column_name] = normalized.flatten(order='F')
+        
+        # Create DataFrame and save to CSV
+        df = pd.DataFrame(all_columns)
+        df.to_csv(os.path.join(directory, output_filename), index=False)
+        
+        return df

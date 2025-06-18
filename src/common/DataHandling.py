@@ -242,8 +242,8 @@ class SampleObj(Observable):
         data_type = ['Analyte']*sample_df.shape[1]
 
         # identify coordinate columns
-        data_type[sample_df.columns.get_loc('X')] = 'coordinate'
-        data_type[sample_df.columns.get_loc('Y')] = 'coordinate'
+        data_type[sample_df.columns.get_loc('Xc')] = 'coordinate'
+        data_type[sample_df.columns.get_loc('Yc')] = 'coordinate'
 
         # identify and ratio columns
         ratio_pattern = re.compile(r'([A-Za-z]+[0-9]*) / ([A-Za-z]+[0-9]*)')
@@ -261,14 +261,14 @@ class SampleObj(Observable):
         self.raw_data = AttributeDataFrame(data=sample_df)
         self.raw_data.set_attribute(list(self.raw_data.columns), 'data_type', data_type)
 
-        self.x = self._orig_x = self.raw_data['X']
-        self.y = self._orig_y = self.raw_data['Y']
+        self.x = self._orig_x = self.raw_data['Xc']
+        self.y = self._orig_y = self.raw_data['Yc']
         self._orig_dx = self.dx
         self._orig_dy = self.dy
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
-        self._xlim = [self.raw_data['X'].min(), self.raw_data['X'].max()]
-        self._ylim = [self.raw_data['Y'].min(), self.raw_data['Y'].max()]
+        self._xlim = [self.raw_data['Xc'].min(), self.raw_data['Xc'].max()]
+        self._ylim = [self.raw_data['Yc'].min(), self.raw_data['Yc'].max()]
 
         # initialize crop flag to false
         self.crop = False
@@ -278,10 +278,10 @@ class SampleObj(Observable):
         #self.raw_data = sample_df[non_ratio_columns]
 
         # set mask of size of analyte array
-        self._crop_mask = np.ones_like(self.raw_data['X'].values, dtype=bool)
-        self.filter_mask = np.ones_like(self.raw_data['X'].values, dtype=bool)
-        self.polygon_mask = np.ones_like(self.raw_data['X'].values, dtype=bool)
-        self.cluster_mask = np.ones_like(self.raw_data['X'].values, dtype=bool)
+        self._crop_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
+        self.filter_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
+        self.polygon_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
+        self.cluster_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
         self.mask = \
             self.crop_mask & \
             self.filter_mask & \
@@ -405,14 +405,14 @@ class SampleObj(Observable):
 
             # Recalculates X for self.raw_data
             # (does not use self.processed_data because the x limits will otherwise be incorrect)
-            # X = round(self.raw_data['X']/self._dx)
-            X = self.raw_data['X']/self._dx
+            # X = round(self.raw_data['Xc']/self._dx)
+            X = self.raw_data['Xc']/self._dx
             self._dx = new_dx
             X_new = new_dx*X
 
             # Extract cropped region and update self.processed_data
             self._x = X_new[self.crop_mask]
-            self.processed_data['X'] = self._x
+            self.processed_data['Xc'] = self._x
             
             self._updating = False
         
@@ -610,20 +610,20 @@ class SampleObj(Observable):
         self.crop=True
 
         self._crop_mask = (
-            (self.raw_data['X'] >= new_xlim[0]) & 
-            (self.raw_data['X'] <= new_xlim[1]) &
-            (self.raw_data['Y'] <= self.raw_data['Y'].max() - new_ylim[0]) &
-            (self.raw_data['Y'] >= self.raw_data['Y'].max() - new_ylim[1])
+            (self.raw_data['Xc'] >= new_xlim[0]) & 
+            (self.raw_data['Xc'] <= new_xlim[1]) &
+            (self.raw_data['Yc'] <= self.raw_data['Yc'].max() - new_ylim[0]) &
+            (self.raw_data['Yc'] >= self.raw_data['Yc'].max() - new_ylim[1])
         )
 
         #crop clipped_analyte_data based on self.crop_mask
         self.raw_data[self.crop_mask].reset_index(drop=True)
         self.processed_data = self.processed_data[self.crop_mask].reset_index(drop=True)
 
-        self.x = self.processed_data['X']
-        self.y = self.processed_data['Y']
+        self.x = self.processed_data['Xc']
+        self.y = self.processed_data['Yc']
 
-        self._crop_mask = np.ones_like(self.raw_data['X'], dtype=bool)
+        self._crop_mask = np.ones_like(self.raw_data['Xc'], dtype=bool)
 
         self.prep_data()
 
@@ -832,8 +832,8 @@ class SampleObj(Observable):
         self._swap_xy(self.raw_data)
         self._swap_xy(self.processed_data)
 
-        self.x = self.raw_data['X']
-        self.y = self.raw_data['Y']
+        self.x = self.raw_data['Xc']
+        self.y = self.raw_data['Yc']
 
         # swap orientation of original dx and dy to be consistent with X and Y
         self._orig_dx, self._orig_dy = self._orig_dy, self._orig_dx
@@ -851,11 +851,11 @@ class SampleObj(Observable):
         if self.debug:
             self.logger.print(f"_swap_xy") 
 
-        xtemp = df['Y']
-        df['Y'] = df['X']
-        df['X'] = xtemp
+        xtemp = df['Yc']
+        df['Yc'] = df['Xc']
+        df['Xc'] = xtemp
 
-        df = df.sort_values(['Y','X'])
+        df = df.sort_values(['Yc','Xc'])
 
     def update_resolution(self, axis, value):
         """Updates DX and DY for a dataframe
@@ -886,21 +886,21 @@ class SampleObj(Observable):
         if self.debug:
             self.logger.print(f"swap_resolution")  
 
-        X = round(self.raw_data['X']/self.dx)
-        Y = round(self.raw_data['Y']/self.dy)
+        X = round(self.raw_data['Xc']/self.dx)
+        Y = round(self.raw_data['Yc']/self.dy)
 
-        Xp = round(self.processed_data['X']/self.dx)
-        Yp = round(self.processed_data['Y']/self.dy)
+        Xp = round(self.processed_data['Xc']/self.dx)
+        Yp = round(self.processed_data['Yc']/self.dy)
 
         dx = self.dx
         self.dx = self.dy
         self.dy = dx
 
-        self.raw_data['X'] = self.dx*X
-        self.raw_data['Y'] = self.dy*Y
+        self.raw_data['Xc'] = self.dx*X
+        self.raw_data['Yc'] = self.dy*Y
 
-        self.processed_data['X'] = self.dx*Xp
-        self.processed_data['Y'] = self.dy*Yp
+        self.processed_data['Xc'] = self.dx*Xp
+        self.processed_data['Yc'] = self.dy*Yp
 
     def reset_crop(self):
         """Reset the data to the original bounds.
@@ -990,8 +990,8 @@ class SampleObj(Observable):
 
         if DEBUG_PLOT:
             # Reshape the full_labels array based on unique X and Y values
-            x_unique = self.raw_data['X'].nunique()  # Assuming 'X' is a column in raw_data
-            y_unique = self.raw_data['Y'].nunique()  # Assuming 'Y' is a column in raw_data
+            x_unique = self.raw_data['Xc'].nunique()  # Assuming 'X' is a column in raw_data
+            y_unique = self.raw_data['Yc'].nunique()  # Assuming 'Y' is a column in raw_data
 
             # Ensure the reshaped array has the same shape as the spatial grid
             reshaped_labels = np.reshape(self.cluster_labels, (y_unique, x_unique), order='F')
@@ -1380,7 +1380,7 @@ class SampleObj(Observable):
 
         # if sample_id != self.sample_id:
         #     #axis mask is not used when plot analytes of a different sample
-        #     crop_mask  = np.ones_like( self.raw_data['X'], dtype=bool)
+        #     crop_mask  = np.ones_like( self.raw_data['Xc'], dtype=bool)
         # else:
         #     crop_mask = self.data[self.sample_id]['crop_mask']
         
@@ -1388,7 +1388,7 @@ class SampleObj(Observable):
         #crop_mask = self.crop_mask
         
         #crop plot if filter applied
-        df = self.processed_data[['X','Y']]
+        df = self.processed_data[['Xc','Yc']]
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
@@ -1641,7 +1641,7 @@ class SampleObj(Observable):
         """        
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
         if self.filter_df.empty:
-            self.filter_mask = np.ones_like(self.processed_data['X'].values, dtype=bool)
+            self.filter_mask = np.ones_like(self.processed_data['Xc'].values, dtype=bool)
             return
 
         # by creating a mask based on min and max of the corresponding filter analytes

@@ -865,15 +865,26 @@ class StyleTheme():
         styles = {}
 
         self.default_plot_style = {
+                'XFieldType': 'None',
+                'XField': 'None',
                 'XLim': [0,1],
                 'XScale': 'linear',
                 'XLabel': '',
+                'YFieldType': 'None',
+                'YField': 'None',
                 'YLim': [0,1],
                 'YScale': 'linear',
                 'YLabel': '',
+                'ZFieldType': 'None',
+                'ZField': 'None',
                 'ZLim': [0,1],
                 'ZLabel': '',
                 'ZScale': 'linear',
+                'CFieldType': 'None',
+                'CField': 'None',
+                'CLim': [0,1],
+                'CScale': 'linear',
+                'CLabel': '',
                 'AspectRatio': 1.0,
                 'TickDir': 'out',
                 'Font': '',
@@ -889,9 +900,6 @@ class StyleTheme():
                 'LineWidth': 1.5,
                 'LineMultiplier': 1,
                 'LineColor': '#1c75bc',
-                'CLim': [0,1],
-                'CScale': 'linear',
-                'CLabel': '',
                 'Colormap': 'viridis',
                 'CbarReverse': False,
                 'CbarDir': 'vertical',
@@ -930,6 +938,8 @@ class StyleTheme():
                 }
 
         styles['field map']['Colormap'] = 'plasma'
+        styles['field map']['XField'] = 'Xc'
+        styles['field map']['YField'] = 'Yc'
 
         styles['correlation']['AspectRatio'] = 1.0
         styles['correlation']['FontSize'] = 8
@@ -941,33 +951,53 @@ class StyleTheme():
         styles['basis vectors']['Colormap'] = 'RdBu'
 
         styles['gradient map']['Colormap'] = 'RdYlBu'
+        styles['gradient map']['XField'] = 'Xc'
+        styles['gradient map']['YField'] = 'Yc'
 
         styles['cluster score map']['Colormap'] = 'plasma'
+        styles['cluster score map']['XField'] = 'Xc'
+        styles['cluster score map']['YField'] = 'Yc'
+
         styles['dimension score map']['Colormap'] = 'viridis'
+        styles['dimension score map']['XField'] = 'Xc'
+        styles['dimension score map']['YField'] = 'Yc'
 
         styles['cluster']['CScale'] = 'discrete'
         styles['cluster']['MarkerAlpha'] = 100
+        styles['cluster']['FieldType'] = 'Cluster'
 
         styles['cluster performance']['AspectRatio'] = 0.62
 
         styles['scatter']['AspectRatio'] = 1
+        styles['scatter']['XFieldType'] = 'Analyte'
+        styles['scatter']['YFieldType'] = 'Analyte'
 
         styles['heatmap']['AspectRatio'] = 1
         styles['heatmap']['CLim'] = [1,1000]
         styles['heatmap']['CScale'] = 'log'
+        styles['heatmap']['XFieldType'] = 'Analyte'
+        styles['heatmap']['YFieldType'] = 'Analyte'
+
         styles['TEC']['AspectRatio'] = 0.62
         styles['variance']['AspectRatio'] = 0.62
         styles['basis vectors']['CLim'] = [-1,1]
+
         styles['dimension scatter']['LineColor'] = '#4d4d4d'
         styles['dimension scatter']['LineWidth'] = 0.5
         styles['dimension scatter']['AspectRatio'] = 1
+        styles['dimension scatter']['XFieldType'] = 'PCA score'
+        styles['dimension scatter']['YFieldType'] = 'PCA score'
+
         styles['dimension heatmap']['AspectRatio'] = 1
         styles['dimension heatmap']['LineColor'] = '#ffffff'
+        styles['dimension scatter']['XFieldType'] = 'PCA score'
+        styles['dimension scatter']['YFieldType'] = 'PCA score'
 
         styles['variance']['FontSize'] = 8
 
         styles['histogram']['AspectRatio'] = 0.62
         styles['histogram']['LineWidth'] = 0
+        styles['histogram']['XFieldType'] = 'Analyte'
 
         styles['profile']['AspectRatio'] = 0.62
         styles['profile']['LineWidth'] = 1.0
@@ -1861,13 +1891,13 @@ class StylingDock(Styling):
         data = self.ui.data[self.app_data.sample_id]
                 
         if plot_type.lower() in self.map_plot_types:
-            if ('X' not in list(data.axis_dict.keys())) or ('Y' not in list(data.axis_dict.keys())):
+            if ('Xc' not in list(data.axis_dict.keys())) or ('Yc' not in list(data.axis_dict.keys())):
                 # initialize 'X' and 'Y' axes
                 # all plot types use the same map dimensions so just use Analyte for the field_type
-                self.initialize_axis_values('Analyte','X')
-                self.initialize_axis_values('Analyte','Y')
-            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','X')
-            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Y')
+                self.initialize_axis_values('Analyte','Xc')
+                self.initialize_axis_values('Analyte','Yc')
+            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','Xc')
+            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Yc')
 
             # set style dictionary values for X and Y
             style['XLim'] = [xmin, xmax]
@@ -1943,18 +1973,24 @@ class StylingDock(Styling):
             if ('X' not in list(data.axis_dict.keys())) or ('Y' not in list(data.axis_dict.keys())):
                 # initialize 'X' and 'Y' axes
                 # all plot types use the same map dimensions so just use Analyte for the field_type
-                self.initialize_axis_values('Analyte','X')
-                self.initialize_axis_values('Analyte','Y')
-            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','X')
-            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Y')
+                self.initialize_axis_values('Analyte','Xc')
+                self.initialize_axis_values('Analyte','Yc')
+            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','Xc')
+            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Yc')
 
             # set style dictionary values for X and Y
             style['XLim'] = [xmin, xmax]
             style['XScale'] = xscale
             style['XLabel'] = 'X'
+            style['XFieldType'] = 'Coordinate'
+            style['XField'] = 'Xc'
+
             style['YLim'] = [ymin, ymax]
             style['YScale'] = yscale
             style['YLabel'] = 'Y'
+            style['YFieldType'] = 'Coordinate'
+            style['YField'] = 'Yc'
+
             style['AspectRatio'] = data.aspect_ratio
 
             # do not round axes limits for maps
@@ -2578,7 +2614,7 @@ class StylingDock(Styling):
 
         match ax:
             case 'x':
-                if field == 'X':
+                if field == 'Xc':
                     self.ui.lineEditXLB.value = data.axis_dict[field]['min']
                     self.ui.lineEditXUB.value = data.axis_dict[field]['max']
                 else:
@@ -2593,7 +2629,7 @@ class StylingDock(Styling):
                     self.ui.lineEditYLabel.setText(self.ui.comboBoxHistType.currentText())
                     self.ui.comboBoxYScale.setCurrentText('linear')
                 else:
-                    if field == 'X':
+                    if field == 'Xc':
                         self.ui.lineEditYLB.value = data.axis_dict[field]['min']
                         self.ui.lineEditYUB.value = data.axis_dict[field]['max']
                     else:
@@ -2749,16 +2785,16 @@ class StylingDock(Styling):
             data.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
 
         #current_plot_df = pd.DataFrame()
-        if field not in ['X','Y']:
+        if field not in ['Xc','Yc']:
             df = data.get_map_data(field, field_type)
             array = df['array'][data.mask].values if not df.empty else []
         else:
-            # field 'X' and 'Y' require separate extraction
+            # field 'Xc' and 'Yc' require separate extraction
             array = data.processed_data[field].values
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
-                if field in ['X','Y']:
+                if field in ['Xc','Yc']:
                     scale = 'linear'
                 else:
                     symbol, mass = self.parse_field(field)
@@ -2812,7 +2848,7 @@ class StylingDock(Styling):
                 amax = np.nanmax(array)
 
         # do not round 'X' and 'Y' so full extent of map is viewable
-        if field not in ['X','Y']:
+        if field not in ['Xc','Yc']:
             amin = fmt.oround(amin, order=2, toward=0)
             amax = fmt.oround(amax, order=2, toward=1)
 

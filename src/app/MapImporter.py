@@ -419,7 +419,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     case 'Standard':
                         self.add_combobox(row, col, self.standard_list, 0)
                     case 'Scan axis':
-                        self.add_combobox(row,col, ['X', 'Y'], 0)
+                        self.add_combobox(row,col, ['Xc', 'Yc'], 0)
                     case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
                         self.add_checkbox(row, col, False)
                     # case _:
@@ -782,7 +782,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             sample_id = self.sample_ids[i]
 
             # scan axis
-            if self.metadata['directory_data']['Scan axis'][i] == 'X':
+            if self.metadata['directory_data']['Scan axis'][i] == 'Xc':
                 swap_axis = False
             else:
                 swap_axis = True
@@ -871,13 +871,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 
                 # reverse x and/or y if needed
                 if reverse_x:
-                    final_data['X'] = -final_data['X']
+                    final_data['Xc'] = -final_data['Xc']
                 if reverse_y:
-                    final_data['Y'] = -final_data['Y']
+                    final_data['Yc'] = -final_data['Yc']
                 
                 # Adjust coordinates based on the reading direction and make upper left corner as (0,0)
-                final_data['X'] = final_data['X'] - final_data['X'].min()
-                final_data['Y'] = final_data['Y'] - final_data['Y'].min()
+                final_data['Xc'] = final_data['Xc'] - final_data['Xc'].min()
+                final_data['Yc'] = final_data['Yc'] - final_data['Yc'].min()
             else:
                 final_data = pd.concat(data_frames, axis = 1)
             
@@ -888,8 +888,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             QApplication.processEvents()
             if is_numeric:
                 final_data = pd.concat(data_frames, ignore_index=True)
-                final_data['X'] -= final_data['X'].min() if reverse_x else 0
-                final_data['Y'] -= final_data['Y'].min() if reverse_y else 0
+                final_data['Xc'] -= final_data['Xc'].min() if reverse_x else 0
+                final_data['Yc'] -= final_data['Yc'].min() if reverse_y else 0
             else:
                 final_data = pd.concat(data_frames, axis=1)
 
@@ -934,11 +934,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         """        
         df = pd.read_csv(file_path, skiprows=3)
         if swap_xy:
-            df.insert(1,'Y',(int(line_no)-1)*dy)
-            df.insert(0,'X',range(0, len(df))*dx)
+            df.insert(1,'Yc',(int(line_no)-1)*dy)
+            df.insert(0,'Xc',range(0, len(df))*dx)
         else:
-            df.insert(0,'X',(int(line_no)-1)*dx)
-            df.insert(1,'Y',range(0, len(df))*dy)
+            df.insert(0,'Xc',(int(line_no)-1)*dx)
+            df.insert(1,'Yc',range(0, len(df))*dy)
         return df
    
     def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None):
@@ -1029,8 +1029,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             new_df = pd.DataFrame(df.values.flatten(), columns=[analyte])
 
         if dx is not None:
-            new_df.insert(0,'X', X.flatten('F'))
-            new_df.insert(1,'Y', Y.flatten('F'))
+            new_df.insert(0,'Xc', X.flatten('F'))
+            new_df.insert(1,'Yc', Y.flatten('F'))
 
         return new_df
    
@@ -1044,11 +1044,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         data = pd.read_csv(file_path)
         
         # Rename the first two columns to X and Y
-        data.columns = ['X', 'Y'] + list(data.columns[2:])
+        data.columns = ['Xc', 'Yc'] + list(data.columns[2:])
     
         # Calculate unique counts to define the grid
-        nr = data['X'].nunique()
-        nc = data['Y'].nunique()
+        nr = data['Xc'].nunique()
+        nc = data['Yc'].nunique()
     
         # Generate ScanNum and SpotNum
         ScanNum = pd.DataFrame((1 + i for i in range(nc)).repeat(nr)).reset_index(drop=True)
@@ -1059,7 +1059,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         data.insert(1, 'SpotNum', SpotNum)
     
         # Insert a NaN column for Time_Sec_ after 'Y'
-        data.insert(data.columns.get_loc('Y') + 1, 'Time_Sec_', pd.Series([float('nan')] * len(data)))
+        data.insert(data.columns.get_loc('Yc') + 1, 'Time_Sec_', pd.Series([float('nan')] * len(data)))
         return data
 
     def guess_analyte_from_filename(self, filename):

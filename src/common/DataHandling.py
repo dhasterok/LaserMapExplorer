@@ -766,6 +766,8 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(column_name, 'diff_lower_bound', self._default_difference_lower_bound)
             self.processed_data.set_attribute(column_name, 'diff_upper_bound', self._default_difference_upper_bound)
 
+            self.processed_data.set_attribute(column_name,'label',self.create_label(column_name))
+
             # Set min and max unmasked values
             #v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
             #v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
@@ -782,6 +784,65 @@ class SampleObj(Observable):
             return result[column_names[0]]
 
         return result
+
+    def create_label(self, column_name):
+        """Creates a default label for plotting
+
+        Creates a default label for plotting 
+
+        Parameters
+        ----------
+        column_name : _type_
+            _description_
+        """        
+        data_type = self.processed_data.get_attribute(column_name,'data_type') 
+        label = None
+        match data_type:
+            case 'Analyte' | 'Analyte (normalized)': 
+                symbol, mass = self.parse_field(field)
+                if mass:
+                    label = f"$^{{{mass}}}${symbol}"
+                else:
+                    label = f"{symbol}"
+
+                unit = self.processed_data.get_attribute(column_name,'units')
+                if data_type == 'Analyte':
+                    label = f"{label} ({unit})"
+                else: # normalized analyte
+                    label = f"{label}$_N$ ({unit})"
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = field.split(' / ')[0]
+                field_2 = field.split(' / ')[1]
+                symbol_1, mass_1 = self.parse_field(field_1)
+                symbol_2, mass_2 = self.parse_field(field_2)
+
+                # numerator
+                label_1 = ''
+                if mass_1: # isotope
+                    label_1 = f"$^{{{mass_1}}}${symbol_1}"
+                else: # element
+                    label_1 = f"{symbol_1}"
+
+                # denominator
+                label_2 = ''
+                if mass_2: # isotope
+                    label_2 = f"$^{{{mass_2}}}${symbol_2}"
+                else: # element
+                    label_2 = f"{symbol_2}"
+
+                if data_type == 'Ratio':
+                    label = f"{label_1} / {label_2}"
+                else:   # normalized ratio
+                    label = f"{label_1}$_N$ / {label_2}$_N$"
+            case _:
+                unit = self.processed_data.get_atribute(column_name,'units')
+                if unit == None:
+                    label = f"{column_name}"
+                else:
+                    label = f"{column_name} ({unit})"
+
+        return label
+
 
     def delete_column(self, column_name):
         """Deletes a column and associated attributes from the AttributeDataFrame.

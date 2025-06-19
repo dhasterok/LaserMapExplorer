@@ -447,9 +447,9 @@ class MetadataTab():
         self.metadata_table.setColumnCount(0)
         self.metadata_table.setRowCount(0)
 
-        self.editable_rows = {"label", "units", "use", "norm"}
+        self.editable_rows = {"label": str, "units": str, "use": bool, "norm": ["linear","log","symlog"]}
         self.metadata_table.itemChanged.connect(self.update_column_attributes_on_cell_change)
-        
+
         tab_layout.addWidget(self.metadata_table)
 
 
@@ -461,7 +461,9 @@ class MetadataTab():
 
         self.field_combobox.currentIndexChanged.connect(self.update_table)
 
-        data = self.data.processed_data.column_attributes
+        data = self.data.processed_data
+        data.attribute_callback = self.on_attribute_batch_changed
+
         self.update_metadata(data)
 
     def toggle_view(self):
@@ -476,7 +478,7 @@ class MetadataTab():
         # ComboBox for column selection
         self.field_combobox.addItem("All")
         self.field_combobox.addItem("Selected")
-        self.field_combobox.addItems(data.keys())
+        self.field_combobox.addItems(data.column_attributes.keys())
 
         # self.selected_columns = list(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys())
         # self.selected_rows = list(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys(1).keys())
@@ -534,18 +536,45 @@ class MetadataTab():
             self.metadata_table.setCellWidget(row_idx, 0, checkbox)
 
             # Populate the rest of the cells
+            # for col_idx, col_key in enumerate(columns_to_display, start=1):
+            #     value = data.get(col_key, {}).get(row_key, "")
+            #     item = QTableWidgetItem(str(value))
+
+            #     # Make editable only if the row is in editable_rows
+            #     if row_key in self.editable_rows:
+            #         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            #     else:
+            #         item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
+            #     #item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)  # Make it read-only
+            #     self.metadata_table.setItem(row_idx, col_idx, item)
+
             for col_idx, col_key in enumerate(columns_to_display, start=1):
                 value = data.get(col_key, {}).get(row_key, "")
-                item = QTableWidgetItem(str(value))
 
-                # Make editable only if the row is in editable_rows
-                if row_key in self.editable_rows:
-                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                editor = self.editable_rows.get(row_key)
+
+                if editor == bool:
+                    checkbox = QCheckBox()
+                    checkbox.setChecked(bool(value))
+                    checkbox.stateChanged.connect(lambda state, rk=row_key, ck=col_key: self.update_column_attributes_on_checkbox_state(state, rk, ck))
+                    self.metadata_table.setCellWidget(row_idx, col_idx, checkbox)
+
+                elif isinstance(editor, list):  # enum/choice type (e.g., for 'norm')
+                    combobox = QComboBox()
+                    combobox.addItems(editor)
+                    if value in editor:
+                        combobox.setCurrentText(value)
+                    combobox.currentTextChanged.connect(lambda text, rk=row_key, ck=col_key: self.update_column_attributes_on_combobox_change(text, rk, ck))
+                    self.metadata_table.setCellWidget(row_idx, col_idx, combobox)
+
                 else:
-                    item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-
-                #item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)  # Make it read-only
-                self.metadata_table.setItem(row_idx, col_idx, item)
+                    item = QTableWidgetItem(str(value))
+                    if row_key in self.editable_rows:
+                        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                    else:
+                        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    self.metadata_table.setItem(row_idx, col_idx, item)
 
         # Adjust metadata table appearance
         self.metadata_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -599,6 +628,19 @@ class MetadataTab():
         self.rows_flag = not self.rows_flag
         self.update_table()
 
+    def update_column_attributes_on_checkbox_state(self, state, row_key, col_key):
+        value = state == Qt.CheckState.Checked
+        if col_key not in self.data.processed_data.column_attributes:
+            self.data.processed_data.column_attributes[col_key] = {}
+
+        self.data.processed_data.column_attributes[col_key][row_key] = value
+
+    def update_column_attributes_on_combobox_change(self, value, row_key, col_key):
+        if col_key not in self.data.processed_data.column_attributes:
+            self.data.processed_data.column_attributes[col_key] = {}
+        self.data.processed_data.column_attributes[col_key][row_key] = value
+
+
     def update_column_attributes_on_cell_change(self, item):
         row = item.row()
         col = item.column()
@@ -612,14 +654,52 @@ class MetadataTab():
         col_key = self.metadata_table.horizontalHeaderItem(col).text()
 
         # Only update editable rows
-        if row_key not in self.editable_rows:
-            return
+        if self.editable_rows.get(row_key) == bool:
+            return  # Skip boolean — handled via checkbox callback
 
         # Update column_attributes
         if col_key not in self.data.processed_data.column_attributes:
             self.data.processed_data.column_attributes[col_key] = {}
 
         self.data.processed_data.column_attributes[col_key][row_key] = item.text()
+
+    def on_attribute_batch_changed(self, columns, attribute, values):
+        # Map row keys and column keys to indices
+        row_map = {
+            self.metadata_table.verticalHeaderItem(i).text(): i
+            for i in range(1, self.metadata_table.rowCount())
+        }
+        col_map = {
+            self.metadata_table.horizontalHeaderItem(i).text(): i
+            for i in range(1, self.metadata_table.columnCount())
+        }
+
+        # Only update if the attribute (row) and column are currently visible
+        if attribute not in row_map:
+            return
+
+        row_idx = row_map[attribute]
+        for col_name, val in zip(columns, values):
+            if col_name not in col_map:
+                continue
+            col_idx = col_map[col_name]
+
+            editor_type = self.editable_rows.get(attribute)
+
+            if editor_type == bool:
+                widget = self.metadata_table.cellWidget(row_idx, col_idx)
+                if isinstance(widget, QCheckBox):
+                    widget.setChecked(bool(val))
+
+            elif isinstance(editor_type, list):  # e.g., norm choices
+                widget = self.metadata_table.cellWidget(row_idx, col_idx)
+                if isinstance(widget, QComboBox):
+                    widget.setCurrentText(str(val))
+
+            else:
+                item = self.metadata_table.item(row_idx, col_idx)
+                if item:
+                    item.setText(str(val))
 
     def export_metadata(self):
         pass

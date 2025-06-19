@@ -90,6 +90,8 @@ class AttributeDataFrame(pd.DataFrame):
         return AttributeDataFrame
     
     def __init__(self, data=None, *args, **kwargs):
+        super().__init__()
+
         # Initialize column attributes
         self.column_attributes = kwargs.pop('column_attributes', {})
         
@@ -99,7 +101,8 @@ class AttributeDataFrame(pd.DataFrame):
         
         # Initialize the DataFrame
         super(AttributeDataFrame, self).__init__(data, *args, **kwargs)
-        #self._update_callbacks = {}  # Dictionary to store update callbacks
+
+        self.attribute_callback = None
 
     def __getitem__(self, key):
         result = super().__getitem__(key)
@@ -277,7 +280,11 @@ class AttributeDataFrame(pd.DataFrame):
         else:
             for col in columns:
                 self._set_attribute(col, attribute, values)
-    
+
+        # Emit signal after updating
+        if self.attribute_callback:
+            self.attribute_callback(columns, attribute, values)
+
     def match_attribute(self, attribute, value):
         """
         Returns a list of columns where a specific attribute matches the given value.

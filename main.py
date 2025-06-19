@@ -1237,7 +1237,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_flag = False
 
         if self.app_data.sample_id not in self.data:
-            self.io.initialise_sample_object(outlier_method=self.comboBoxOutlierMethod.currentText(), negative_method = self.comboBoxNegativeMethod.currentText())
+            self.io.initialize_sample_object(outlier_method=self.comboBoxOutlierMethod.currentText(), negative_method = self.comboBoxNegativeMethod.currentText())
             self.connect_data_observers(self.data[self.app_data.sample_id])
             # enable widgets that require self.data not be empty
             self.toggle_data_widgets()

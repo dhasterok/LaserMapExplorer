@@ -2797,7 +2797,7 @@ class StylingDock(Styling):
                 if field in ['Xc','Yc']:
                     scale = 'linear'
                 else:
-                    symbol, mass = self.parse_field(field)
+                    symbol, mass = data.parse_field(field)
                     label = ''
                     if mass:
                         label = f"$^{{{mass}}}${symbol}"
@@ -2816,8 +2816,8 @@ class StylingDock(Styling):
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
                 field_2 = field.split(' / ')[1]
-                symbol_1, mass_1 = self.parse_field(field_1)
-                symbol_2, mass_2 = self.parse_field(field_2)
+                symbol_1, mass_1 = data.parse_field(field_1)
+                symbol_2, mass_2 = data.parse_field(field_2)
 
                 # numerator
                 label_1 = ''
@@ -2856,30 +2856,6 @@ class StylingDock(Styling):
 
         data.axis_dict[field].update(d)
         #print(data.axis_dict[field])
-
-    def parse_field(self,field):
-        """Converts a field to symbol and mass.
-
-        Separates an analyte field with a element symbol-mass name to its separate parts.
-
-        Parameters
-        ----------
-        field : str
-            Field name to separate into symbol and mass.
-
-        Returns
-        -------
-        str, int
-            Returns the element symbol and mass.
-        """
-        if self.debug:
-            self.logger.print(f"parse_field, field: {field}")
-
-        match = re.match(r"([A-Za-z]+)(\d*)", field)
-        symbol = match.group(1) if match else field
-        mass = int(match.group(2)) if match.group(2) else None
-
-        return symbol, mass
 
     def aspect_ratio_callback(self):
         """Update aspect ratio

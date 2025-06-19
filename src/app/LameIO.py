@@ -348,7 +348,7 @@ class LameIO():
         # change sample
 
 
-    def initialise_sample_object(self, outlier_method, negative_method):
+    def initialize_sample_object(self, outlier_method, negative_method):
         """Initializes sample objects for each sample in the application.
 
         This method creates a sample object for each sample in the application and stores it in the

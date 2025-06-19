@@ -446,7 +446,12 @@ class MetadataTab():
         self.metadata_table.setObjectName("metadata_table")
         self.metadata_table.setColumnCount(0)
         self.metadata_table.setRowCount(0)
+
+        self.editable_rows = {"label", "units", "use", "norm"}
+        self.metadata_table.itemChanged.connect(self.update_column_attributes_on_cell_change)
+        
         tab_layout.addWidget(self.metadata_table)
+
 
         # set metadata 
         self.parent.tabWidgetInfo.addTab(self.metadata_tab, "Metadata")
@@ -475,20 +480,22 @@ class MetadataTab():
 
         # self.selected_columns = list(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys())
         # self.selected_rows = list(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys(1).keys())
-        self.selected_columns = []
-        self.selected_rows = []
+        self.selected_columns = set()
+        self.selected_rows = set()
 
         # Initialize the table
         self.update_table()
 
     def update_table(self):
+        self.metadata_table.blockSignals(True)
+
         data = self.data.processed_data.column_attributes
 
         # Determine the selected display option
         selected_option = self.field_combobox.currentText()
 
         # Get rows and columns to display
-        rows = set([key for column in data.values() for key in column.keys()])
+        rows = sorted(set([key for column in data.values() for key in column.keys()]))
         columns = list(data.keys())
 
         rows_to_display = [
@@ -530,12 +537,21 @@ class MetadataTab():
             for col_idx, col_key in enumerate(columns_to_display, start=1):
                 value = data.get(col_key, {}).get(row_key, "")
                 item = QTableWidgetItem(str(value))
-                item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)  # Make it read-only
+
+                # Make editable only if the row is in editable_rows
+                if row_key in self.editable_rows:
+                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                else:
+                    item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
+                #item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)  # Make it read-only
                 self.metadata_table.setItem(row_idx, col_idx, item)
 
         # Adjust metadata table appearance
         self.metadata_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.metadata_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+
+        self.metadata_table.blockSignals(False)
 
     def toggle_row_selection(self, state, row):
         """Toggle selection of rows based on checkbox state."""
@@ -582,6 +598,28 @@ class MetadataTab():
 
         self.rows_flag = not self.rows_flag
         self.update_table()
+
+    def update_column_attributes_on_cell_change(self, item):
+        row = item.row()
+        col = item.column()
+
+        # Ignore header row/column (0)
+        if row == 0 or col == 0:
+            return
+
+        # Get the row and column keys
+        row_key = self.metadata_table.verticalHeaderItem(row).text()
+        col_key = self.metadata_table.horizontalHeaderItem(col).text()
+
+        # Only update editable rows
+        if row_key not in self.editable_rows:
+            return
+
+        # Update column_attributes
+        if col_key not in self.data.processed_data.column_attributes:
+            self.data.processed_data.column_attributes[col_key] = {}
+
+        self.data.processed_data.column_attributes[col_key][row_key] = item.text()
 
     def export_metadata(self):
         pass

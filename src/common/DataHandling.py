@@ -669,6 +669,29 @@ class SampleObj(Observable):
         """Validates if a the method is a valid string."""
         return isinstance(text, str) and text.lower() in ['none', 'quantile criteria', 'quantile and distance criteria', 'chauvenet criterion', 'log(n>x) inflection']
 
+    def parse_field(self,field):
+        """Converts a field to symbol and mass.
+
+        Separates an analyte field with a element symbol-mass name to its separate parts.
+
+        Parameters
+        ----------
+        field : str
+            Field name to separate into symbol and mass.
+
+        Returns
+        -------
+        str, int
+            Returns the element symbol and mass.
+        """
+        if self.debug:
+            self.logger.print(f"parse_field, field: {field}")
+
+        match = re.match(r"([A-Za-z]+)(\d*)", field)
+        symbol = match.group(1) if match else field
+        mass = int(match.group(2)) if match.group(2) else None
+
+        return symbol, mass
 
     def add_columns(self, data_type, column_names, array, mask=None):
         """
@@ -799,7 +822,7 @@ class SampleObj(Observable):
         label = None
         match data_type:
             case 'Analyte' | 'Analyte (normalized)': 
-                symbol, mass = self.parse_field(field)
+                symbol, mass = self.parse_field(column_name)
                 if mass:
                     label = f"$^{{{mass}}}${symbol}"
                 else:
@@ -835,7 +858,7 @@ class SampleObj(Observable):
                 else:   # normalized ratio
                     label = f"{label_1}$_N$ / {label_2}$_N$"
             case _:
-                unit = self.processed_data.get_atribute(column_name,'units')
+                unit = self.processed_data.get_attribute(column_name,'units')
                 if unit == None:
                     label = f"{column_name}"
                 else:
@@ -1157,12 +1180,15 @@ class SampleObj(Observable):
 
         # Compute special fields?
         # -----------------------
+        for col in self.processed_data.columns:
+            self.processed_data.set_attribute(col,'label',self.create_label(col))
 
 
         # Clip outliers / autoscale the data
         # ------------------
         # loop over all fields
         for col in (col for col in self.processed_data.columns if self.processed_data.get_attribute(col, 'data_type') != 'coordinate'):
+
             lq = self.processed_data.get_attribute(col, 'lower_bound')
             uq = self.processed_data.get_attribute(col, 'upper_bound')
             # skip is autoscale is False for column

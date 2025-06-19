@@ -170,7 +170,7 @@ class LameBlockly():
             return
             
         self.app_data.sample_id = self.app_data.sample_list[index]
-        self.io.initialise_sample_object(self.outlier_method, self.negative_method)
+        self.io.initialize_sample_object(self.outlier_method, self.negative_method)
 
     # -------------------------------------
     # Reset to start

@@ -408,7 +408,7 @@ class MetadataTab():
         self.norm_combobox.setMaximumSize(QSize(16777215, 16777215))
         self.norm_combobox.setFont(self.parent.font)
         self.norm_combobox.setEditable(False)
-        self.norm_combobox.addItems(['linear', 'log', 'logit', 'mixed'])
+        self.norm_combobox.addItems(['linear', 'log', 'logit', 'symlog', 'mixed'])
         # self.norm_combobox.activated.connect(lambda: self.update_norm(self.norm_combobox.currentText()))
         self.norm_combobox.setToolTip("Set the norm for all analytes")
 

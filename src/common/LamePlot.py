@@ -76,6 +76,8 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
             #clim = np.log10(plot_style.clim)
         case 'logit':
             print('Color limits for logit are not currently implemented')
+        case 'symlog':
+            print('Color limits for symlog are not currently implemented')
 
     cax.set_clim(clim[0], clim[1])
 
@@ -329,7 +331,7 @@ def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
     # Histogram
     #remove by mask and drop rows with na
     mask = data.mask
-    if plot_style.cscale == 'log' or 'logit':
+    if plot_style.cscale in ['log', 'logit', 'symlog']:
         mask = mask & current_plot_df['array'].notna() & (current_plot_df['array'] > 0)
     else:
         mask = mask & current_plot_df['array'].notna()

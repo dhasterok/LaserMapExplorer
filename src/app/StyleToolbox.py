@@ -29,13 +29,13 @@ class Styling(Observable):
     xlabel : str
         X-axis label
     xscale : str
-        X-axis scale function, ``linear``, ``log``, or ``logit``
+        X-axis scale function, ``linear``, ``log``, ``logit``, or ``symlog``
     ylim : list[float]
         Y-axis limits, [lower_bound, upper_bound]
     ylabel : str
         Y-axis label
     yscale : str
-        Y-axis scale function, ``linear``, ``log``, or ``logit``
+        Y-axis scale function, ``linear``, ``log``, ``logit``, or ``symlog``
     zlabel : str
         Z-axis label
     aspect_ratio : float
@@ -81,7 +81,7 @@ class Styling(Observable):
     clabel : str
         Color-axis label
     cscale : str
-        Color-axis scale function, ``linear``, ``log``, or ``logit``
+        Color-axis scale function, ``linear``, ``log``, ``logit``, or ``symlog``
     resolution : int
         Resolution for heat maps
     map_plot_types : list
@@ -256,7 +256,7 @@ class Styling(Observable):
             self.style_dict[self._plot_type]['XScale'] = scale
             self.notify_observers("xscale", scale)
         else:
-            raise TypeError("scale must be linear, log or logit.")
+            raise TypeError("scale must be linear, log, logit, or symlog.")
 
     # ylim
     @property
@@ -301,7 +301,7 @@ class Styling(Observable):
             self.style_dict[self._plot_type]['YScale'] = scale
             self.notify_observers("yscale", scale)
         else:
-            raise TypeError("scale must be linear, log or logit.")
+            raise TypeError("scale must be linear, log, logit, or symlog.")
 
     # zlim
     @property
@@ -346,7 +346,7 @@ class Styling(Observable):
             self.style_dict[self._plot_type]['ZScale'] = scale
             self.notify_observers("zscale", scale)
         else:
-            raise TypeError("scale must be linear, log or logit.")
+            raise TypeError("scale must be linear, log, logit,  or symlog.")
 
     # aspect_ratio
     @property
@@ -673,7 +673,7 @@ class Styling(Observable):
             self.style_dict[self._plot_type]['CScale'] = scale
             self.notify_observers("cscale", scale)
         else:
-            raise TypeError("scale must be linear, log or logit.")
+            raise TypeError("scale must be linear, log, logit, or symlog.")
 
     # resolution
     @property
@@ -744,7 +744,7 @@ class Styling(Observable):
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""
-        return isinstance(text, str) and text in ['linear', 'log', 'logit']
+        return isinstance(text, str) and text in ['linear', 'log', 'logit', 'symlog']
     
     def _is_valid_hex_color(self, hex_color):
         """Validates if a given string is a valid hex color code."""

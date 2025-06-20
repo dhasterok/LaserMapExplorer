@@ -57,7 +57,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.default_dir  = os.path.join(parent.BASEDIR, "resources", "analyte_list")  # Default directory
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
-        self.scale_methods = ['linear','log','logit','mixed']
+        self.scale_methods = ['linear','log','logit','symlog','mixed']
         for scale in self.scale_methods:
             self.comboBoxScale.addItem(scale)
         self.comboBoxScale.currentIndexChanged.connect(self.update_all_combos)
@@ -529,7 +529,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         analyte_pair : str
             Analyte or ratio, ratios are entered as analyte1 / analyte2.
         norm : str
-            Normization method for vector, ``linear``, ``log``, and ``logit``, Defaults to ``linear``
+            Normization method for vector, ``linear``, ``log``, ``logit``, and ``symlog``, Defaults to ``linear``
         """        
         if '/' in analyte_pair:
             row_header, col_header = analyte_pair.split(' / ')
@@ -551,7 +551,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.tableWidgetSelected.insertRow(new_row)
             self.tableWidgetSelected.setItem(new_row, 0, QTableWidgetItem(analyte_pair))
             combo = QComboBox()
-            combo.addItems(['linear', 'log', 'logit'])
+            combo.addItems(['linear', 'log', 'logit', 'symlog'])
             combo.setCurrentText(norm)
             self.tableWidgetSelected.setCellWidget(new_row, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)

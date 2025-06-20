@@ -1135,6 +1135,7 @@ Blockly.Blocks['x_axis'] = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
+            ['Symlog', 'symlog'],
             ]), 'xScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
@@ -1162,6 +1163,7 @@ Blockly.Blocks['y_axis'] = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
+            ['Symlog', 'symlog'],
             ]), 'yScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
@@ -1189,6 +1191,7 @@ Blockly.Blocks['z_axis'] = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
+            ['Symlog', 'symlog'],
             ]), 'zScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
@@ -1216,6 +1219,7 @@ Blockly.Blocks['c_axis'] = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
+            ['Symlog', 'symlog'],
             ]), 'cScaleDropdown');
         this.setPreviousStatement(true, 'styling');
         this.setNextStatement(true, 'styling');
@@ -1605,6 +1609,7 @@ const axis_and_labels = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
+            ['Symlog', 'symlog'],
             ]), 'xScaleDropdown');
         this.appendDummyInput('yLabelHeader')
         .appendField('Y Label')
@@ -1619,6 +1624,7 @@ const axis_and_labels = {
             ['Linear', 'linear'],
             ['Log', 'log'],
             ['Logit', 'logit'],
+            ['Symlog', 'symlog'],
             ]), 'yScaleDropdown');
         this.appendDummyInput('zLabelHeader')
         .appendField('Z Label')

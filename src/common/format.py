@@ -92,3 +92,52 @@ def dynamic_format(value, threshold=1e4, order=4, toward=None):
         return f'{{:.{order-1}e}}'.format(value)  # Scientific notation with order decimal places
     else:
         return f'{{:.{order}g}}'.format(value)
+
+
+def symlog(x, linear_threshold=1.0):
+    """Transforms data from linear to symlog space
+
+    The advantage of a symlog transformation is that produces a log-like distribution for most
+    values, but can be used on negative and zero values as well as positive values,
+    preserves symmetry about 0.
+
+    A symlog transformation is symlog(x) = sign(x) * log_{10}(1 + |x / a|), where a is the 
+    linear threshold, region where the transformation is approximately linear.
+
+    Parameters
+    ----------
+    x : numpy.array
+        the array of values to transform
+    linear_threshold : float, optional
+        linear threshold, often chosen as the mean, median, or standard deviation of the data
+        or simply, by default 1.0
+
+    Returns
+    -------
+    numpy.array
+        _description_
+    """    
+    x = np.asarray(x)
+    return np.sign(x) * np.log10(1 + np.abs(x / linear_threshold))
+
+def invsymlog(y, linthresh=1.0):
+    """Inverse symlog transform back to linear space
+
+    Converts an array back to into linear space.
+
+    Parameters
+    ----------
+    y : numpy.array
+        the array of values to transform
+    linear_threshold : float, optional
+        linear threshold, often chosen as the mean, median, or standard deviation of the data
+        or simply, by default 1.0
+
+    Returns
+    -------
+    numpy.array
+        
+    :see also: symlog
+    """    
+    y = np.asarray(y)
+    return np.sign(y) * linthresh * (10**np.abs(y) - 1)

@@ -782,6 +782,8 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(column_name,'label',self.create_label(column_name))
 
             # Set min and max unmasked values
+            self.processed_data.set_attribute(col,'lower_limit',np.min(self.processed_data[col][mask]))
+            self.processed_data.set_attribute(col,'upper_limit',np.max(self.processed_data[col][mask]))
             #v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
             #v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
 
@@ -1144,11 +1146,6 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(ratios_not_in_raw_data, 'norm', attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
             self.processed_data.set_attribute(ratios_not_in_raw_data, 'auto_scale', attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
 
-        # Compute special fields?
-        # -----------------------
-        for col in self.processed_data.columns:
-            self.processed_data.set_attribute(col,'label',self.create_label(col))
-
 
         # Clip outliers / autoscale the data
         # ------------------
@@ -1191,6 +1188,13 @@ class SampleObj(Observable):
 
                 transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
                 self.processed_data.loc[cluster_mask, col] = transformed_data
+
+        # Compute special fields?
+        # -----------------------
+        for col in self.processed_data.columns:
+            self.processed_data.set_attribute(col,'label',self.create_label(col))
+            self.processed_data.set_attribute(col,'lower_limit',np.min(self.processed_data[col]))
+            self.processed_data.set_attribute(col,'upper_limit',np.max(self.processed_data[col]))
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """Predicts the optimal number of clusters

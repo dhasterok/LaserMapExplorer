@@ -150,7 +150,7 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         idx = self.tabWidgetInfo.currentIndex()
         match self.tabWidgetInfo.tabText(idx).lower():
             case "metadata":
-                self.metadata_tab.update_metadata(self.data.processed_data.column_attributes)
+                self.metadata_tab.update_metadata(self.data.processed_data)
             case "data":
                 update_dataframe(self.data.processed_data, self.dataframe_tab.data_table)
             case "field":

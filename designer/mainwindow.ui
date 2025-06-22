@@ -151,6 +151,7 @@
               </property>
               <property name="font">
                <font>
+                <family>.AppleSystemUIFont</family>
                 <pointsize>11</pointsize>
                 <stylestrategy>PreferDefault</stylestrategy>
                </font>
@@ -1317,6 +1318,13 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <family>.AppleSystemUIFont</family>
+                 <pointsize>11</pointsize>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
                <property name="toolTip">
                 <string>Color markers using the selected field type</string>
                </property>
@@ -1553,7 +1561,7 @@
            <string/>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>3</number>
           </property>
           <property name="tabSpacing">
            <number>2</number>
@@ -5420,6 +5428,11 @@
                    <string>log</string>
                   </property>
                  </item>
+                 <item>
+                  <property name="text">
+                   <string>symlog</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
                <item row="3" column="1">
@@ -5520,6 +5533,11 @@
                  <item>
                   <property name="text">
                    <string>log</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>symlog</string>
                   </property>
                  </item>
                 </widget>
@@ -5650,6 +5668,11 @@
                  <item>
                   <property name="text">
                    <string>log</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>symlog</string>
                   </property>
                  </item>
                 </widget>
@@ -6690,6 +6713,11 @@
                  <item>
                   <property name="text">
                    <string>log</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>symlog</string>
                   </property>
                  </item>
                 </widget>

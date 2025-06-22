@@ -5,10 +5,12 @@ from scipy import ndimage
 from scipy.signal import convolve2d, wiener, decimate
 from pyqtgraph import ( ImageItem )
 import cv2
+from src.common.Logger import auto_log_methods
 
 # -------------------------------------
 # Image processing functions
 # -------------------------------------
+@auto_log_methods(logger_key='Image', prefix="IMAGE: ", show_args=True)
 class ImageProcessing():
     """Image processing methods for use in LaME.
 
@@ -32,8 +34,9 @@ class ImageProcessing():
         Add noise reduction to the current laser map plot.
     plot_gradient : 
         Produces a gradient map with arrows showing gradient direction and colors indicating magnitude
-    """    
-    def __init__(self, parent):
+    """
+
+    def __init__(self, parent, logger_options=None, logger_key=None):
 
         self.parent = parent
 

@@ -27,6 +27,8 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.format as fmt
 from src.common.PolygonMatplotlib import PolygonManager
+from src.common.Logger import auto_log_methods
+
 # Mask object
 # -------------------------------
 class MaskObj:
@@ -53,15 +55,14 @@ class MaskObj:
 
 
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
-
+@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class MaskDock(CustomDockWidget, UIFieldLogic):
-    def __init__(self, parent=None, title="Masking Toolbox", debug=False):
+    def __init__(self, parent=None, title="Masking Toolbox", logger_options=None, logger_key=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.main_window = parent
-        self.debug = debug
         self.data ={}
         if self.main_window.data and self.main_window.app_data.sample_id != '':
             self.data = self.main_window.data[self.main_window.app_data.sample_id]

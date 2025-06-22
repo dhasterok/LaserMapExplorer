@@ -1,37 +1,88 @@
-import sys, threading, inspect
+import sys, functools, inspect
 
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
-        QMainWindow, QTextEdit, QWidget, QVBoxLayout,
+        QMainWindow, QLineEdit, QTextEdit, QWidget, QVBoxLayout,
         QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox
     )
-from PyQt6.QtGui import QIcon, QAction, QFont
+from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QColor, QTextDocument
 
 from src.common.CustomWidgets import CustomDockWidget
 
-class LogCounter():
-    """Indent logger messages."""
-    log_counter = 1
+_global_logger = None
 
-    @staticmethod
-    def get_stack_depth():
-        """Return the call stack depth"""
-        return len(inspect.stack()) - 3 # adjust based on call stack
+def set_global_logger(logger):
+    global _global_logger
+    _global_logger = logger
 
-    @staticmethod
-    def print(msg):
-        """Log message with dynamic indent"""
-        depth = LogCounter.get_stack_depth()
-        if depth == 1:
-            LogCounter.log_counter += 1
-        prefix = f"{LogCounter.log_counter}.{depth}"
-        print(f"{prefix}  {msg}")
+def get_global_logger():
+    return _global_logger
 
-    @staticmethod
-    def reset_counter():
-        """Reset the counter"""
-        LogCounter.log_counter = 1
+def log(msg, prefix=""):
+    logger = get_global_logger()
+    if logger and hasattr(logger, 'write'):
+        logger.write(f"{prefix}{msg}")
+    else:
+        print(f"{prefix}{msg}")
 
+def log_call(logger_key=None, prefix="", show_args=False, show_call_chain=False):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            # Check if logging is enabled for the given logger_key
+            if logger_key:
+                if not getattr(self, 'logger_options', {}).get(logger_key, False):
+                    return func(self, *args, **kwargs)
+
+            # Build message
+            func_name = func.__qualname__
+            caller = inspect.stack()[1].function
+            parts = [f"{prefix}[{caller} → {func_name}]"]
+            if show_args:
+                arg_list = [describe_arg(arg) for arg in args]
+                kwarg_list = [f"{k}={describe_arg(v)}" for k, v in kwargs.items()]
+                parts.append("args=[" + ", ".join(arg_list + kwarg_list) + "]")
+            if show_call_chain:
+                chain = " → ".join(f.function for f in reversed(inspect.stack()[1:4]))
+                parts.append(f"chain: {chain}")
+            log(" | ".join(parts))
+            return func(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
+def describe_arg(arg):
+    """Return a string description of the argument."""
+    try:
+        if hasattr(arg, 'objectName') and callable(arg.objectName):
+            name = arg.objectName()
+            cls = arg.__class__.__name__
+            return f"<{cls} name='{name}'>"
+        return repr(arg)
+    except Exception:
+        return "<unprintable>"
+
+def log_ui_call(logger=None, **log_options):
+    """Decorator for logging GUI-triggered events with a 'UI:' prefix."""
+    def decorator(func):
+        @log_call(logger=logger, **log_options)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Inject UI prefix via message composition in the main decorator
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+def auto_log_methods(logger_key=None, **log_options):
+    def decorator(cls):
+        print(f"[DEBUG] Wrapping methods for: {cls.__name__}")
+        for attr_name, attr in cls.__dict__.items():
+            # Only wrap user-defined methods
+            if inspect.isfunction(attr) and not attr_name.startswith("__"):
+                print(f"  - Wrapping method: {attr_name}")
+                wrapped = log_call(logger_key=logger_key, **log_options)(attr)
+                setattr(cls, attr_name, wrapped)
+        return cls
+    return decorator
 
 class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.
@@ -49,7 +100,12 @@ class LoggerDock(CustomDockWidget):
 
         super().__init__(parent)
         self.parent = parent
-        self.logger = LogCounter()
+
+        self.match_cursors = []
+        self.current_match_index = -1
+
+        #self.logger = LogCounter()
+        set_global_logger(self)
 
         # Create container
         container = QWidget()
@@ -89,8 +145,38 @@ class LoggerDock(CustomDockWidget):
             self.action_clear.setText("Clear")
         self.action_clear.setToolTip("Clear log")
 
-        toolbar.addAction(self.action_save)
+        # Create search bar
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search log...")
+        self.search_input.returnPressed.connect(self.highlight_search_matches)
+
+        clear_search_action = QAction("✖", self)
+        clear_search_action.setToolTip("Clear search")
+        clear_search_action.triggered.connect(self.clear_search)
+
+        # Case Insensitive toggle
+        self.case_insensitive_action = QAction("Aa", self)
+        self.case_insensitive_action.setCheckable(True)
+        self.case_insensitive_action.setToolTip("Toggle case-insensitive search")
+
+        # Previous Match button
+        self.previous_match_action = QAction("↑", self)
+        self.previous_match_action.setToolTip("Previous match")
+        self.previous_match_action.triggered.connect(lambda: self.navigate_match(forward=False))
+
+        # Next Match button
+        self.next_match_action = QAction("↓", self)
+        self.next_match_action.setToolTip("Next match")
+        self.next_match_action.triggered.connect(lambda: self.navigate_match(forward=True))
+
         toolbar.addAction(self.action_settings)
+        toolbar.addAction(self.action_save)
+        toolbar.addSeparator()
+        toolbar.addAction(clear_search_action)
+        toolbar.addWidget(self.search_input)
+        toolbar.addAction(self.case_insensitive_action)
+        toolbar.addAction(self.previous_match_action)
+        toolbar.addAction(self.next_match_action)
         toolbar.addSeparator()
         toolbar.addAction(self.action_clear)
 
@@ -181,11 +267,102 @@ class LoggerDock(CustomDockWidget):
         if self.isVisible():
             sys.stdout = self   # Redirect stdout to logger
             sys.stderr = self   # Redirect stderr to logger
-            self.logger.reset_counter()
         else:
             sys.stdout = sys.__stdout__  # Restore to default stdout    
             sys.stderr = sys.__stderr__  # Restore to default stderr    
-            self.logger.reset_counter()
+
+    def highlight_search_matches(self):
+        query = self.search_input.text()
+        self.match_cursors = []
+
+        # Reset formatting
+        cursor = self.text_edit.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
+        fmt_clear = QTextCharFormat()
+        cursor.setPosition(0)
+        cursor.movePosition(QTextCursor.MoveOperation.End, QTextCursor.MoveMode.KeepAnchor)
+        cursor.setCharFormat(fmt_clear)
+
+        if not query:
+            return
+
+        # Highlight format
+        highlight_format = QTextCharFormat()
+        highlight_format.setBackground(QColor("yellow"))
+        highlight_format.setForeground(QColor("black"))
+
+        # Case sensitivity
+        if self.case_insensitive_action.isChecked():
+            find_flags = QTextDocument.FindFlag(0)
+        else:
+            find_flags = QTextDocument.FindFlag.FindCaseSensitively
+
+        # Find all matches
+        doc = self.text_edit.document()
+        cursor = QTextCursor(doc)
+        while True:
+            cursor = doc.find(query, cursor, find_flags)
+            if cursor.isNull():
+                break
+            self.match_cursors.append(cursor.selectionStart())
+            cursor.mergeCharFormat(highlight_format)
+
+        # Select the first match
+        if self.match_cursors:
+            self.current_match_index = 0
+            self.select_current_match()
+        else:
+            self.current_match_index = -1
+
+    def navigate_match(self, forward=True):
+        if not self.match_cursors:
+            return
+
+        if forward:
+            self.current_match_index = (self.current_match_index + 1) % len(self.match_cursors)
+        else:
+            self.current_match_index = (self.current_match_index - 1) % len(self.match_cursors)
+
+        self.select_current_match()
+
+    def select_current_match(self):
+        if self.current_match_index < 0 or not self.match_cursors:
+            self.text_edit.setExtraSelections([])  # clear if no matches
+            return
+
+        # Highlight current match in cyan
+        cursor = self.text_edit.textCursor()
+        cursor.setPosition(self.match_cursors[self.current_match_index])
+        cursor.movePosition(QTextCursor.MoveOperation.NextCharacter, QTextCursor.MoveMode.KeepAnchor, len(self.search_input.text()))
+
+        selection = QTextEdit.ExtraSelection()
+        selection.cursor = cursor
+        selection.format.setBackground(QColor("cyan"))
+        selection.format.setForeground(QColor("black"))
+
+        self.text_edit.setExtraSelections([selection])
+        self.text_edit.setTextCursor(cursor)
+        self.text_edit.ensureCursorVisible()
+
+    def clear_search(self):
+        # Clear search text
+        self.search_input.setText("")
+
+        # Clear cyan selection (ExtraSelections)
+        self.text_edit.setExtraSelections([])
+
+        # Clear yellow background from all text
+        cursor = self.text_edit.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
+        cursor.setPosition(0)
+        cursor.movePosition(QTextCursor.MoveOperation.End, QTextCursor.MoveMode.KeepAnchor)
+        clear_format = QTextCharFormat()
+        cursor.setCharFormat(clear_format)
+
+        # Reset match state
+        self.match_cursors = []
+        self.current_match_index = -1
+    
 
 class LoggerOptionsDialog(QDialog):
     """Allows the user to set logger options.

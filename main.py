@@ -58,7 +58,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import LogCounter, LoggerDock
+from src.common.Logger import auto_log_methods, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
@@ -67,6 +67,7 @@ from src.app.AppData import AppData
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 # setConfigOption('imageAxisOrder', 'row-major') # best performance
 
+@auto_log_methods(logger_key='Main', prefix="MAIN: ", show_args=True)
 class MainWindow(QMainWindow, Ui_MainWindow):
     """_summary_
 
@@ -94,17 +95,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.field_control_settings = {} # a dictionary that keeps track of UI data for each toolBox page
 
         # setup initial logging options
-        self.logger = LogCounter()
         self.logger_options = {
+                'Main': True,
                 'IO': False,
-                'Data': False,
+                'Data': True,
                 'Analyte selector': False,
-                'Plot selector': False,
                 'Plotting': False,
                 'Polygon': False,
                 'Profile': False,
                 'Masking': False,
-                'Tree': False,
+                'Tree': True,
                 'Styles': True,
                 'Calculator': False,
                 'Browser': False,
@@ -124,10 +124,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #       critical UI properties
         #       notifiers when properties change
         #       data structure and properties (DataHandling), data
-        self.app_data = AppData(self.data, debug=self.logger_options['Data'])
+        self.app_data = AppData(self.data, logger_options=self.logger_options, logger_key="Data")
 
         # initialize the styling data and dock
-        self.plot_style = StylingDock(self, debug=self.logger_options['Styles'])
+        self.plot_style = StylingDock(self, logger_options=self.logger_options, logger_key="Styles")
 
         self.connect_app_data_observers(self.app_data)
         self.connect_plot_style_observers(self.plot_style)
@@ -229,18 +229,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.info_tab = {}
         self.actionInfo.triggered.connect(self.open_info_dock)
 
-        self.io = LameIO(parent=self, connect_actions=True, debug=self.logger_options['IO'])
+        self.io = LameIO(parent=self, connect_actions=True, logger_options=self.logger_options, logger_key="IO")
 
         self.actionHelp.setCheckable(True)
         self.actionHelp.toggled.connect(self.toggle_help_mode)
 
         # initialize used classes
         self.crop_tool = CropTool(self)
-        self.plot_tree = PlotTree(self, debug=self.logger_options['Tree'])
+        self.plot_tree = PlotTree(self, logger_options=self.logger_options, logger_key="Tree")
         self.table_fcn = TableFcn(self)
         #self.clustertool = Clustering(self)
         #self.dimredtool = DimensionalReduction(self)
-        self.noise_reduction = ImageProcessing(self)
+        self.noise_reduction = ImageProcessing(self, logger_options=self.logger_options, logger_key="Image")
 
         self.actionQuit_LaME.triggered.connect(self.quit)
 
@@ -658,14 +658,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.calculator.setEnabled(True)
             self.toolBoxStyle.setEnabled(True)
 
-    def toolbox_changed(self):
+    def toolbox_changed(self, *args, **kwargs):
         """Updates styles associated with toolbox page
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
         """
-        if self.logger_options['UI']:
-            self.logger.print(f"toolbox_changed")
-
         if self.app_data.sample_id == '':
             return
 
@@ -1230,9 +1227,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Changes sample and plots first map.
         
         The UI is updated with a newly or previously loaded sample data."""
-        if self.logger_options['Data']:
-            self.logger.print(f"change_sample\n")
-
         # set plot flag to false, allow plot to update only at the end
         self.plot_flag = False
 
@@ -1277,8 +1271,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.schedule_update()
 
     def update_ui_on_sample_change(self):
-        if self.logger_options['UI']:
-            self.logger.print(f"update_ui_on_sample_change\n")
         # reset all plot types on change of tab to the first option
         for key in self.field_control_settings.keys():
             self.field_control_settings[key]['saved_index'] = 0
@@ -1318,9 +1310,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def update_widget_data_on_sample_change(self):
-        if self.logger_options['UI']:
-            self.logger.print(f"update_widget_data_on_sample_change\n")
-
         self.update_field_combobox_options(self.comboBoxNDimAnalyte)
 
         data = self.data[self.app_data.sample_id]
@@ -1354,8 +1343,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ???
 
     def update_mask_and_profile_widgets(self):
-        if self.logger_options['Data']:
-            self.logger.print(f"update_mask_and_profile_widgets\n")
         #update filters, polygon, profiles with existing data
         self.actionClearFilters.setEnabled(False)
         if np.all(self.data[self.app_data.sample_id].filter_mask):
@@ -1451,8 +1438,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score map',
             'Special', 'Computed'. Some options require a field. Defaults to 'Analyte'
         """
-        if self.logger_options['Data']:
-            self.logger.print(f"update_autoscale_widgets\n  field={field}")
         # get Auto scale parameters and neg handling from analyte info
         data = self.data[self.app_data.sample_id]
         parameters = data.processed_data.column_attributes[field]
@@ -1477,8 +1462,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
     def update_mask_dock(self):
-        if self.logger_options['Data']:
-            self.logger.print(f"update_mask_dock\n")
         # Update filter UI 
         if hasattr(self, "mask_dock"):
             data = self.data[self.app_data.sample_id].processed_data
@@ -1497,9 +1480,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def field_spinbox_changed(self, ax):
         """Updates ``MainWindow.comboBoxFieldC``"""        
-        if self.logger_options['UI']:
-            self.logger.print(f"field_spinbox_changed: ax={ax}")
-
         widget = self.plot_style.axis_widget_dict
 
         widget['spinbox'][ax].blockSignals(True)
@@ -1746,9 +1726,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == self.comboBoxSampleId.currentText():
             return
 
-        if self.logger_options['Data']:
-            self.logger.print(f"update_sample_id: {self.app_data.sample_id}\n")
-
         # See if the user wants to really change samples and save or discard the current work
         if self.data and self.app_data.sample_id != '':
             # Create and configure the QMessageBox
@@ -1776,10 +1753,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
-        if self.logger_options['UI']:
-            self.logger.print("update_plot_top_combobox_options")
-
-
         if self.profile_state == True or self.polygon_state == True:
             plot_idx = -1
         else:
@@ -2407,10 +2380,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Parameters
         ----------
         method : str
-            Method used to remove outliers."""        
-        if self.logger_options['UI']:
-            self.logger.print(f"update_outlier_removal: method={method}")
-
+            Method used to remove outliers.
+        """        
         data = self.data[self.app_data.sample_id]
 
         if data.outlier_method == method:
@@ -2458,9 +2429,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         method : str
             Method for dealing with negatives
         """
-        if self.logger_options['UI']:
-            self.logger.print(f"update_neg_handling: method={method}")
-
         data = self.data[self.app_data.sample_id]
 
         if self.checkBoxApplyAll.isChecked():
@@ -2548,9 +2516,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
-        if self.logger_options['Plotting']:
-            self.logger.print(f"update_SV")
-
         # check to make sure that the basic elements of a plot are satisfied, i.e.,
         #   sample_id is not an empty str
         #   plot_type is not empty or none
@@ -2648,9 +2613,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         current_plot_df : dict, optional
             Defaults to None
         """
-        if self.logger_options['Plotting']:
-            self.logger.print(f"add_plotwidget_to_canvas\n  plot_info={plot_info}\n  position={position}")
-
         sample_id = plot_info['sample_id']
         tree = plot_info['plot_type']
         # widget_dict = self.axis_widget_dict[tree][sample_id][plot_name]
@@ -2817,9 +2779,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens Workflow dock, creates on first instance.  The Workflow is used to design processing algorithms that
         can batch process samples, or simply record the process of analyzing a sample.
         """
-        if self.logger_options['UI']:
-            self.logger.print(f"open_workflow")
-
         if not hasattr(self, 'workflow'):
             self.workflow = Workflow(self)
 
@@ -2842,11 +2801,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         tab_name : str (optional)
             Will open the dock to the requested tab, options include 'filter', 'polygon' and cluster', by default None
         """
-        if self.logger_options['UI']:
-            self.logger.print(f"open_mask_dock: tab_name={tab_name}")
-
         if not hasattr(self, 'mask_dock'):
-            self.mask_dock = MaskDock(self, debug=self.logger_options['Masking'])
+            self.mask_dock = MaskDock(self, logger_options=self.logger_options, logger_key="Mask")
 
             self.mask_tab = {}
             for tid in range(self.mask_dock.tabWidgetMask.count()):
@@ -2923,9 +2879,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Opens Calculator dock, creates on first instance.  The Calculator is used to compute custom fields.
         """            
-        if self.logger_options['UI']:
-            self.logger.print(f"open_calculator")
-
         if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
             self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
@@ -2942,8 +2895,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens Info Dock, creates on first instance.  The Info Dock can be used to interrogate the data and its
         metadata as well as plot related properties.
         """
-        if self.logger_options['UI']:
-            self.logger.print(f"open_info_dock")
         if not hasattr(self, 'info_dock'):
             self.info_dock = InfoDock(self, "LaME Info")
 
@@ -2963,7 +2914,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.help_mapping[self.info_dock] = 'info_tool'
 
-    def open_logger(self):
+    def open_logger(self, *args, **kwargs):
         """Opens Logger Dock
 
         Opens Logger Dock, creates on first instance.  The Logger Dock prints information that can be used to recreate
@@ -2986,8 +2937,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Opens Browser dock, creates on first instance.
         """
-        if self.logger_options['UI']:
-            self.logger.print(f"open_browser")
         if not hasattr(self, 'browser'):
             self.browser = Browser(self, self.help_mapping, BASEDIR, debug=self.logger_options['Browser'])
         else:

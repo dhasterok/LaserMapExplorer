@@ -60,7 +60,7 @@ from src.common.Logger import LoggerDock
 from src.app.AppData import AppData
 import os
 import json
-from src.common.Logger import LogCounter
+
 class LameBlockly():
     def __init__(self,status_bar ,blockly_webpage, *args, **kwargs):
         # setup initial logging options

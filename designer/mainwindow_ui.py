@@ -397,7 +397,11 @@ class Ui_MainWindow(object):
         self.comboBoxSampleId = QComboBox(self.widgetSampleSelect)
         self.comboBoxSampleId.setObjectName(u"comboBoxSampleId")
         self.comboBoxSampleId.setMaximumSize(QSize(16777215, 16777215))
-        self.comboBoxSampleId.setFont(font)
+        font5 = QFont()
+        font5.setFamilies([u".AppleSystemUIFont"])
+        font5.setPointSize(11)
+        font5.setStyleStrategy(QFont.PreferDefault)
+        self.comboBoxSampleId.setFont(font5)
 
         self.verticalLayout_29.addWidget(self.comboBoxSampleId)
 
@@ -448,10 +452,10 @@ class Ui_MainWindow(object):
         self.labelMVInfoLabel = QLabel(self.widgetPlotInfoMV)
         self.labelMVInfoLabel.setObjectName(u"labelMVInfoLabel")
         self.labelMVInfoLabel.setMaximumSize(QSize(35, 16777215))
-        font5 = QFont()
-        font5.setPointSize(9)
-        font5.setStyleStrategy(QFont.PreferDefault)
-        self.labelMVInfoLabel.setFont(font5)
+        font6 = QFont()
+        font6.setPointSize(9)
+        font6.setStyleStrategy(QFont.PreferDefault)
+        self.labelMVInfoLabel.setFont(font6)
 
         self.horizontalLayout_28.addWidget(self.labelMVInfoLabel)
 
@@ -461,7 +465,7 @@ class Ui_MainWindow(object):
         self.labelMVInfoY.setObjectName(u"labelMVInfoY")
         self.labelMVInfoY.setMinimumSize(QSize(60, 0))
         self.labelMVInfoY.setMaximumSize(QSize(60, 16777215))
-        self.labelMVInfoY.setFont(font5)
+        self.labelMVInfoY.setFont(font6)
 
         self.verticalLayout_16.addWidget(self.labelMVInfoY)
 
@@ -469,7 +473,7 @@ class Ui_MainWindow(object):
         self.labelMVInfoX.setObjectName(u"labelMVInfoX")
         self.labelMVInfoX.setMinimumSize(QSize(60, 0))
         self.labelMVInfoX.setMaximumSize(QSize(60, 16777215))
-        self.labelMVInfoX.setFont(font5)
+        self.labelMVInfoX.setFont(font6)
 
         self.verticalLayout_16.addWidget(self.labelMVInfoX)
 
@@ -644,7 +648,7 @@ class Ui_MainWindow(object):
         self.labelSVInfoY.setObjectName(u"labelSVInfoY")
         self.labelSVInfoY.setMinimumSize(QSize(60, 0))
         self.labelSVInfoY.setMaximumSize(QSize(60, 16777215))
-        self.labelSVInfoY.setFont(font5)
+        self.labelSVInfoY.setFont(font6)
 
         self.verticalLayout_17.addWidget(self.labelSVInfoY)
 
@@ -652,7 +656,7 @@ class Ui_MainWindow(object):
         self.labelSVInfoX.setObjectName(u"labelSVInfoX")
         self.labelSVInfoX.setMinimumSize(QSize(60, 0))
         self.labelSVInfoX.setMaximumSize(QSize(60, 16777215))
-        self.labelSVInfoX.setFont(font5)
+        self.labelSVInfoX.setFont(font6)
 
         self.verticalLayout_17.addWidget(self.labelSVInfoX)
 
@@ -665,7 +669,7 @@ class Ui_MainWindow(object):
         self.labelSVInfoValue.setObjectName(u"labelSVInfoValue")
         self.labelSVInfoValue.setMinimumSize(QSize(70, 0))
         self.labelSVInfoValue.setMaximumSize(QSize(70, 16777215))
-        self.labelSVInfoValue.setFont(font5)
+        self.labelSVInfoValue.setFont(font6)
 
         self.verticalLayout_18.addWidget(self.labelSVInfoValue)
 
@@ -673,7 +677,7 @@ class Ui_MainWindow(object):
         self.labelSVInfoDistance.setObjectName(u"labelSVInfoDistance")
         self.labelSVInfoDistance.setMinimumSize(QSize(70, 0))
         self.labelSVInfoDistance.setMaximumSize(QSize(70, 16777215))
-        self.labelSVInfoDistance.setFont(font5)
+        self.labelSVInfoDistance.setFont(font6)
 
         self.verticalLayout_18.addWidget(self.labelSVInfoDistance)
 
@@ -727,27 +731,27 @@ class Ui_MainWindow(object):
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 1158, 37))
-        font6 = QFont()
-        font6.setPointSize(12)
-        font6.setStyleStrategy(QFont.PreferDefault)
-        self.menubar.setFont(font6)
+        font7 = QFont()
+        font7.setPointSize(12)
+        font7.setStyleStrategy(QFont.PreferDefault)
+        self.menubar.setFont(font7)
         self.menubar.setNativeMenuBar(True)
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
-        self.menuFile.setFont(font6)
+        self.menuFile.setFont(font7)
         self.menuPlot = QMenu(self.menubar)
         self.menuPlot.setObjectName(u"menuPlot")
-        self.menuPlot.setFont(font6)
+        self.menuPlot.setFont(font7)
         self.menuAnalyze = QMenu(self.menubar)
         self.menuAnalyze.setObjectName(u"menuAnalyze")
-        self.menuAnalyze.setFont(font6)
+        self.menuAnalyze.setFont(font7)
         self.menuLaME = QMenu(self.menubar)
         self.menuLaME.setObjectName(u"menuLaME")
-        font7 = QFont()
-        font7.setPointSize(12)
-        font7.setBold(True)
-        font7.setStyleStrategy(QFont.PreferDefault)
-        self.menuLaME.setFont(font7)
+        font8 = QFont()
+        font8.setPointSize(12)
+        font8.setBold(True)
+        font8.setStyleStrategy(QFont.PreferDefault)
+        self.menuLaME.setFont(font8)
         self.menuTools = QMenu(self.menubar)
         self.menuTools.setObjectName(u"menuTools")
         self.menuHelp = QMenu(self.menubar)
@@ -793,17 +797,13 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.comboBoxFieldY = QComboBox(self.groupBox)
         self.comboBoxFieldY.setObjectName(u"comboBoxFieldY")
-        font8 = QFont()
-        font8.setFamilies([u".AppleSystemUIFont"])
-        font8.setPointSize(11)
-        font8.setStyleStrategy(QFont.PreferDefault)
-        self.comboBoxFieldY.setFont(font8)
+        self.comboBoxFieldY.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldY, 2, 2, 1, 1)
 
         self.spinBoxFieldC = QSpinBox(self.groupBox)
         self.spinBoxFieldC.setObjectName(u"spinBoxFieldC")
-        self.spinBoxFieldC.setFont(font8)
+        self.spinBoxFieldC.setFont(font5)
         self.spinBoxFieldC.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxFieldC.setReadOnly(False)
 
@@ -811,7 +811,7 @@ class Ui_MainWindow(object):
 
         self.comboBoxFieldX = QComboBox(self.groupBox)
         self.comboBoxFieldX.setObjectName(u"comboBoxFieldX")
-        self.comboBoxFieldX.setFont(font8)
+        self.comboBoxFieldX.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldX, 1, 2, 1, 1)
 
@@ -830,39 +830,40 @@ class Ui_MainWindow(object):
         self.comboBoxFieldTypeC = QComboBox(self.groupBox)
         self.comboBoxFieldTypeC.setObjectName(u"comboBoxFieldTypeC")
         self.comboBoxFieldTypeC.setMaximumSize(QSize(155, 16777215))
+        self.comboBoxFieldTypeC.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldTypeC, 4, 1, 1, 1)
 
         self.comboBoxFieldTypeX = QComboBox(self.groupBox)
         self.comboBoxFieldTypeX.setObjectName(u"comboBoxFieldTypeX")
         self.comboBoxFieldTypeX.setMaximumSize(QSize(125, 16777215))
-        self.comboBoxFieldTypeX.setFont(font8)
+        self.comboBoxFieldTypeX.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldTypeX, 1, 1, 1, 1)
 
         self.comboBoxFieldTypeZ = QComboBox(self.groupBox)
         self.comboBoxFieldTypeZ.setObjectName(u"comboBoxFieldTypeZ")
         self.comboBoxFieldTypeZ.setMaximumSize(QSize(125, 16777215))
-        self.comboBoxFieldTypeZ.setFont(font8)
+        self.comboBoxFieldTypeZ.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldTypeZ, 3, 1, 1, 1)
 
         self.labelX = QLabel(self.groupBox)
         self.labelX.setObjectName(u"labelX")
-        self.labelX.setFont(font8)
+        self.labelX.setFont(font5)
         self.labelX.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout_2.addWidget(self.labelX, 1, 0, 1, 1)
 
         self.comboBoxFieldZ = QComboBox(self.groupBox)
         self.comboBoxFieldZ.setObjectName(u"comboBoxFieldZ")
-        self.comboBoxFieldZ.setFont(font8)
+        self.comboBoxFieldZ.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldZ, 3, 2, 1, 1)
 
         self.labelZ = QLabel(self.groupBox)
         self.labelZ.setObjectName(u"labelZ")
-        self.labelZ.setFont(font8)
+        self.labelZ.setFont(font5)
         self.labelZ.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout_2.addWidget(self.labelZ, 3, 0, 1, 1)
@@ -875,7 +876,7 @@ class Ui_MainWindow(object):
 
         self.labelY = QLabel(self.groupBox)
         self.labelY.setObjectName(u"labelY")
-        self.labelY.setFont(font8)
+        self.labelY.setFont(font5)
         self.labelY.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout_2.addWidget(self.labelY, 2, 0, 1, 1)
@@ -883,7 +884,7 @@ class Ui_MainWindow(object):
         self.comboBoxFieldTypeY = QComboBox(self.groupBox)
         self.comboBoxFieldTypeY.setObjectName(u"comboBoxFieldTypeY")
         self.comboBoxFieldTypeY.setMaximumSize(QSize(125, 16777215))
-        self.comboBoxFieldTypeY.setFont(font8)
+        self.comboBoxFieldTypeY.setFont(font5)
 
         self.gridLayout_2.addWidget(self.comboBoxFieldTypeY, 2, 1, 1, 1)
 
@@ -958,7 +959,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_58.setObjectName(u"horizontalLayout_58")
         self.labelSampleResolution = QLabel(self.groupBoxSampleOptions)
         self.labelSampleResolution.setObjectName(u"labelSampleResolution")
-        self.labelSampleResolution.setFont(font8)
+        self.labelSampleResolution.setFont(font5)
 
         self.horizontalLayout_58.addWidget(self.labelSampleResolution)
 
@@ -982,13 +983,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_59.setObjectName(u"horizontalLayout_59")
         self.labelResolutionNx = QLabel(self.groupBoxSampleOptions)
         self.labelResolutionNx.setObjectName(u"labelResolutionNx")
-        self.labelResolutionNx.setFont(font8)
+        self.labelResolutionNx.setFont(font5)
 
         self.horizontalLayout_59.addWidget(self.labelResolutionNx)
 
         self.lineEditResolutionNx = QLineEdit(self.groupBoxSampleOptions)
         self.lineEditResolutionNx.setObjectName(u"lineEditResolutionNx")
-        self.lineEditResolutionNx.setFont(font8)
+        self.lineEditResolutionNx.setFont(font5)
         self.lineEditResolutionNx.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.lineEditResolutionNx.setReadOnly(True)
 
@@ -996,13 +997,13 @@ class Ui_MainWindow(object):
 
         self.labelResolutionNy = QLabel(self.groupBoxSampleOptions)
         self.labelResolutionNy.setObjectName(u"labelResolutionNy")
-        self.labelResolutionNy.setFont(font8)
+        self.labelResolutionNy.setFont(font5)
 
         self.horizontalLayout_59.addWidget(self.labelResolutionNy)
 
         self.lineEditResolutionNy = QLineEdit(self.groupBoxSampleOptions)
         self.lineEditResolutionNy.setObjectName(u"lineEditResolutionNy")
-        self.lineEditResolutionNy.setFont(font8)
+        self.lineEditResolutionNy.setFont(font5)
         self.lineEditResolutionNy.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.lineEditResolutionNy.setReadOnly(True)
 
@@ -1015,7 +1016,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.labelPixelResolution = QLabel(self.groupBoxSampleOptions)
         self.labelPixelResolution.setObjectName(u"labelPixelResolution")
-        self.labelPixelResolution.setFont(font8)
+        self.labelPixelResolution.setFont(font5)
 
         self.horizontalLayout_11.addWidget(self.labelPixelResolution)
 
@@ -1036,13 +1037,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_60.setObjectName(u"horizontalLayout_60")
         self.labelDX = QLabel(self.groupBoxSampleOptions)
         self.labelDX.setObjectName(u"labelDX")
-        self.labelDX.setFont(font8)
+        self.labelDX.setFont(font5)
 
         self.horizontalLayout_60.addWidget(self.labelDX)
 
         self.lineEditDX = QLineEdit(self.groupBoxSampleOptions)
         self.lineEditDX.setObjectName(u"lineEditDX")
-        self.lineEditDX.setFont(font8)
+        self.lineEditDX.setFont(font5)
         self.lineEditDX.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_60.addWidget(self.lineEditDX)
@@ -1060,13 +1061,13 @@ class Ui_MainWindow(object):
 
         self.labelDY = QLabel(self.groupBoxSampleOptions)
         self.labelDY.setObjectName(u"labelDY")
-        self.labelDY.setFont(font8)
+        self.labelDY.setFont(font5)
 
         self.horizontalLayout_60.addWidget(self.labelDY)
 
         self.lineEditDY = QLineEdit(self.groupBoxSampleOptions)
         self.lineEditDY.setObjectName(u"lineEditDY")
-        self.lineEditDY.setFont(font8)
+        self.lineEditDY.setFont(font5)
         self.lineEditDY.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_60.addWidget(self.lineEditDY)
@@ -1113,7 +1114,7 @@ class Ui_MainWindow(object):
         self.toolButtonScaleEqualize.setObjectName(u"toolButtonScaleEqualize")
         self.toolButtonScaleEqualize.setMinimumSize(QSize(32, 32))
         self.toolButtonScaleEqualize.setMaximumSize(QSize(32, 32))
-        self.toolButtonScaleEqualize.setFont(font8)
+        self.toolButtonScaleEqualize.setFont(font5)
         icon53 = QIcon()
         icon53.addFile(u":/resources/icons/icon-histeq-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.toolButtonScaleEqualize.setIcon(icon53)
@@ -1159,7 +1160,7 @@ class Ui_MainWindow(object):
 
         self.labelQuantileBounds = QLabel(self.groupBoxAutoscale)
         self.labelQuantileBounds.setObjectName(u"labelQuantileBounds")
-        self.labelQuantileBounds.setFont(font8)
+        self.labelQuantileBounds.setFont(font5)
         self.labelQuantileBounds.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.formLayout_25.setWidget(3, QFormLayout.LabelRole, self.labelQuantileBounds)
@@ -1169,7 +1170,7 @@ class Ui_MainWindow(object):
         self.lineEditLowerQuantile = QLineEdit(self.groupBoxAutoscale)
         self.lineEditLowerQuantile.setObjectName(u"lineEditLowerQuantile")
         self.lineEditLowerQuantile.setMaximumSize(QSize(103, 16777215))
-        self.lineEditLowerQuantile.setFont(font8)
+        self.lineEditLowerQuantile.setFont(font5)
         self.lineEditLowerQuantile.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_62.addWidget(self.lineEditLowerQuantile)
@@ -1177,7 +1178,7 @@ class Ui_MainWindow(object):
         self.lineEditUpperQuantile = QLineEdit(self.groupBoxAutoscale)
         self.lineEditUpperQuantile.setObjectName(u"lineEditUpperQuantile")
         self.lineEditUpperQuantile.setMaximumSize(QSize(103, 16777215))
-        self.lineEditUpperQuantile.setFont(font8)
+        self.lineEditUpperQuantile.setFont(font5)
         self.lineEditUpperQuantile.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_62.addWidget(self.lineEditUpperQuantile)
@@ -1187,7 +1188,7 @@ class Ui_MainWindow(object):
 
         self.labelDifferenceBounds = QLabel(self.groupBoxAutoscale)
         self.labelDifferenceBounds.setObjectName(u"labelDifferenceBounds")
-        self.labelDifferenceBounds.setFont(font8)
+        self.labelDifferenceBounds.setFont(font5)
         self.labelDifferenceBounds.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.formLayout_25.setWidget(4, QFormLayout.LabelRole, self.labelDifferenceBounds)
@@ -1197,7 +1198,7 @@ class Ui_MainWindow(object):
         self.lineEditDifferenceLowerQuantile = QLineEdit(self.groupBoxAutoscale)
         self.lineEditDifferenceLowerQuantile.setObjectName(u"lineEditDifferenceLowerQuantile")
         self.lineEditDifferenceLowerQuantile.setMaximumSize(QSize(103, 16777215))
-        self.lineEditDifferenceLowerQuantile.setFont(font8)
+        self.lineEditDifferenceLowerQuantile.setFont(font5)
         self.lineEditDifferenceLowerQuantile.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_63.addWidget(self.lineEditDifferenceLowerQuantile)
@@ -1205,7 +1206,7 @@ class Ui_MainWindow(object):
         self.lineEditDifferenceUpperQuantile = QLineEdit(self.groupBoxAutoscale)
         self.lineEditDifferenceUpperQuantile.setObjectName(u"lineEditDifferenceUpperQuantile")
         self.lineEditDifferenceUpperQuantile.setMaximumSize(QSize(103, 16777215))
-        self.lineEditDifferenceUpperQuantile.setFont(font8)
+        self.lineEditDifferenceUpperQuantile.setFont(font5)
         self.lineEditDifferenceUpperQuantile.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_63.addWidget(self.lineEditDifferenceUpperQuantile)
@@ -1278,7 +1279,7 @@ class Ui_MainWindow(object):
         self.formLayout_26.setContentsMargins(3, 3, 3, 3)
         self.labelBinWidth = QLabel(self.groupBoxHistogram)
         self.labelBinWidth.setObjectName(u"labelBinWidth")
-        self.labelBinWidth.setFont(font8)
+        self.labelBinWidth.setFont(font5)
         self.labelBinWidth.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.formLayout_26.setWidget(1, QFormLayout.LabelRole, self.labelBinWidth)
@@ -1287,7 +1288,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_66.setObjectName(u"horizontalLayout_66")
         self.labelNoBins = QLabel(self.groupBoxHistogram)
         self.labelNoBins.setObjectName(u"labelNoBins")
-        self.labelNoBins.setFont(font8)
+        self.labelNoBins.setFont(font5)
         self.labelNoBins.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_66.addWidget(self.labelNoBins)
@@ -1296,7 +1297,7 @@ class Ui_MainWindow(object):
         self.toolButtonHistogramReset.setObjectName(u"toolButtonHistogramReset")
         self.toolButtonHistogramReset.setMinimumSize(QSize(20, 20))
         self.toolButtonHistogramReset.setMaximumSize(QSize(20, 20))
-        self.toolButtonHistogramReset.setFont(font8)
+        self.toolButtonHistogramReset.setFont(font5)
         self.toolButtonHistogramReset.setIcon(icon50)
         self.toolButtonHistogramReset.setIconSize(QSize(14, 14))
 
@@ -1309,7 +1310,7 @@ class Ui_MainWindow(object):
         self.spinBoxNBins.setObjectName(u"spinBoxNBins")
         sizePolicy2.setHeightForWidth(self.spinBoxNBins.sizePolicy().hasHeightForWidth())
         self.spinBoxNBins.setSizePolicy(sizePolicy2)
-        self.spinBoxNBins.setFont(font8)
+        self.spinBoxNBins.setFont(font5)
         self.spinBoxNBins.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxNBins.setKeyboardTracking(False)
         self.spinBoxNBins.setMinimum(1)
@@ -1330,7 +1331,7 @@ class Ui_MainWindow(object):
         self.comboBoxHistType.setObjectName(u"comboBoxHistType")
         sizePolicy2.setHeightForWidth(self.comboBoxHistType.sizePolicy().hasHeightForWidth())
         self.comboBoxHistType.setSizePolicy(sizePolicy2)
-        self.comboBoxHistType.setFont(font8)
+        self.comboBoxHistType.setFont(font5)
 
         self.formLayout_26.setWidget(3, QFormLayout.FieldRole, self.comboBoxHistType)
 
@@ -1338,7 +1339,7 @@ class Ui_MainWindow(object):
         self.doubleSpinBoxBinWidth.setObjectName(u"doubleSpinBoxBinWidth")
         sizePolicy2.setHeightForWidth(self.doubleSpinBoxBinWidth.sizePolicy().hasHeightForWidth())
         self.doubleSpinBoxBinWidth.setSizePolicy(sizePolicy2)
-        self.doubleSpinBoxBinWidth.setFont(font8)
+        self.doubleSpinBoxBinWidth.setFont(font5)
         self.doubleSpinBoxBinWidth.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.doubleSpinBoxBinWidth.setKeyboardTracking(False)
         self.doubleSpinBoxBinWidth.setMaximum(100000.000000000000000)
@@ -1358,7 +1359,7 @@ class Ui_MainWindow(object):
         self.formLayout_27.setObjectName(u"formLayout_27")
         self.labelCorrelationMethod = QLabel(self.groupBox_5)
         self.labelCorrelationMethod.setObjectName(u"labelCorrelationMethod")
-        self.labelCorrelationMethod.setFont(font8)
+        self.labelCorrelationMethod.setFont(font5)
 
         self.formLayout_27.setWidget(0, QFormLayout.LabelRole, self.labelCorrelationMethod)
 
@@ -1371,13 +1372,13 @@ class Ui_MainWindow(object):
         self.comboBoxCorrelationMethod.addItem("")
         self.comboBoxCorrelationMethod.setObjectName(u"comboBoxCorrelationMethod")
         self.comboBoxCorrelationMethod.setMaximumSize(QSize(16777215, 16777215))
-        self.comboBoxCorrelationMethod.setFont(font8)
+        self.comboBoxCorrelationMethod.setFont(font5)
 
         self.horizontalLayout_14.addWidget(self.comboBoxCorrelationMethod)
 
         self.checkBoxCorrelationSquared = QCheckBox(self.groupBox_5)
         self.checkBoxCorrelationSquared.setObjectName(u"checkBoxCorrelationSquared")
-        self.checkBoxCorrelationSquared.setFont(font8)
+        self.checkBoxCorrelationSquared.setFont(font5)
 
         self.horizontalLayout_14.addWidget(self.checkBoxCorrelationSquared)
 
@@ -1397,7 +1398,7 @@ class Ui_MainWindow(object):
         self.formLayout_28.setContentsMargins(3, 3, 3, 3)
         self.labelMethods = QLabel(self.groupBoxNoiseReduction)
         self.labelMethods.setObjectName(u"labelMethods")
-        self.labelMethods.setFont(font8)
+        self.labelMethods.setFont(font5)
 
         self.formLayout_28.setWidget(0, QFormLayout.LabelRole, self.labelMethods)
 
@@ -1410,13 +1411,13 @@ class Ui_MainWindow(object):
         self.comboBoxNoiseReductionMethod.addItem("")
         self.comboBoxNoiseReductionMethod.setObjectName(u"comboBoxNoiseReductionMethod")
         self.comboBoxNoiseReductionMethod.setMaximumSize(QSize(150, 16777215))
-        self.comboBoxNoiseReductionMethod.setFont(font8)
+        self.comboBoxNoiseReductionMethod.setFont(font5)
 
         self.formLayout_28.setWidget(0, QFormLayout.FieldRole, self.comboBoxNoiseReductionMethod)
 
         self.labelNoiseOption1 = QLabel(self.groupBoxNoiseReduction)
         self.labelNoiseOption1.setObjectName(u"labelNoiseOption1")
-        self.labelNoiseOption1.setFont(font8)
+        self.labelNoiseOption1.setFont(font5)
         self.labelNoiseOption1.setAlignment(Qt.AlignCenter)
 
         self.formLayout_28.setWidget(1, QFormLayout.LabelRole, self.labelNoiseOption1)
@@ -1430,7 +1431,7 @@ class Ui_MainWindow(object):
         self.spinBoxNoiseOption1.setSizePolicy(sizePolicy7)
         self.spinBoxNoiseOption1.setMinimumSize(QSize(50, 0))
         self.spinBoxNoiseOption1.setMaximumSize(QSize(16777215, 16777215))
-        self.spinBoxNoiseOption1.setFont(font8)
+        self.spinBoxNoiseOption1.setFont(font5)
         self.spinBoxNoiseOption1.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxNoiseOption1.setKeyboardTracking(False)
         self.spinBoxNoiseOption1.setMaximum(200)
@@ -1441,7 +1442,7 @@ class Ui_MainWindow(object):
         self.labelNoiseOption2 = QLabel(self.groupBoxNoiseReduction)
         self.labelNoiseOption2.setObjectName(u"labelNoiseOption2")
         self.labelNoiseOption2.setEnabled(False)
-        self.labelNoiseOption2.setFont(font8)
+        self.labelNoiseOption2.setFont(font5)
 
         self.formLayout_28.setWidget(2, QFormLayout.LabelRole, self.labelNoiseOption2)
 
@@ -1452,7 +1453,7 @@ class Ui_MainWindow(object):
         self.doubleSpinBoxNoiseOption2.setSizePolicy(sizePolicy7)
         self.doubleSpinBoxNoiseOption2.setMinimumSize(QSize(50, 0))
         self.doubleSpinBoxNoiseOption2.setMaximumSize(QSize(16777215, 16777215))
-        self.doubleSpinBoxNoiseOption2.setFont(font8)
+        self.doubleSpinBoxNoiseOption2.setFont(font5)
         self.doubleSpinBoxNoiseOption2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.doubleSpinBoxNoiseOption2.setDecimals(1)
 
@@ -1461,7 +1462,7 @@ class Ui_MainWindow(object):
         self.labelApplySmoothing = QLabel(self.groupBoxNoiseReduction)
         self.labelApplySmoothing.setObjectName(u"labelApplySmoothing")
         self.labelApplySmoothing.setEnabled(False)
-        self.labelApplySmoothing.setFont(font8)
+        self.labelApplySmoothing.setFont(font5)
 
         self.formLayout_28.setWidget(3, QFormLayout.LabelRole, self.labelApplySmoothing)
 
@@ -1471,21 +1472,21 @@ class Ui_MainWindow(object):
         self.comboBoxApplyNoiseReduction.setObjectName(u"comboBoxApplyNoiseReduction")
         self.comboBoxApplyNoiseReduction.setEnabled(False)
         self.comboBoxApplyNoiseReduction.setMaximumSize(QSize(150, 16777215))
-        self.comboBoxApplyNoiseReduction.setFont(font8)
+        self.comboBoxApplyNoiseReduction.setFont(font5)
 
         self.formLayout_28.setWidget(3, QFormLayout.FieldRole, self.comboBoxApplyNoiseReduction)
 
         self.labelGradient = QLabel(self.groupBoxNoiseReduction)
         self.labelGradient.setObjectName(u"labelGradient")
         self.labelGradient.setEnabled(False)
-        self.labelGradient.setFont(font8)
+        self.labelGradient.setFont(font5)
 
         self.formLayout_28.setWidget(4, QFormLayout.LabelRole, self.labelGradient)
 
         self.checkBoxGradient = QCheckBox(self.groupBoxNoiseReduction)
         self.checkBoxGradient.setObjectName(u"checkBoxGradient")
         self.checkBoxGradient.setEnabled(False)
-        self.checkBoxGradient.setFont(font8)
+        self.checkBoxGradient.setFont(font5)
 
         self.formLayout_28.setWidget(4, QFormLayout.FieldRole, self.checkBoxGradient)
 
@@ -1521,7 +1522,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_76.setContentsMargins(6, 6, 6, 6)
         self.groupBoxAxes = QGroupBox(self.scrollAreaWidgetContentsScatter)
         self.groupBoxAxes.setObjectName(u"groupBoxAxes")
-        self.groupBoxAxes.setFont(font8)
+        self.groupBoxAxes.setFont(font5)
         self.verticalLayout_77 = QVBoxLayout(self.groupBoxAxes)
         self.verticalLayout_77.setObjectName(u"verticalLayout_77")
         self.verticalLayout_77.setContentsMargins(3, 3, 3, 3)
@@ -1552,7 +1553,7 @@ class Ui_MainWindow(object):
 
         self.labelScatterPreset = QLabel(self.groupBoxAxes)
         self.labelScatterPreset.setObjectName(u"labelScatterPreset")
-        self.labelScatterPreset.setFont(font8)
+        self.labelScatterPreset.setFont(font5)
         self.labelScatterPreset.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayoutAxes.addWidget(self.labelScatterPreset, 0, 0, 1, 1)
@@ -1619,7 +1620,7 @@ class Ui_MainWindow(object):
 
         self.LabelTernaryColors = QLabel(self.groupBoxTernaryMap)
         self.LabelTernaryColors.setObjectName(u"LabelTernaryColors")
-        self.LabelTernaryColors.setFont(font8)
+        self.LabelTernaryColors.setFont(font5)
 
         self.formLayout_30.setWidget(1, QFormLayout.LabelRole, self.LabelTernaryColors)
 
@@ -1706,13 +1707,13 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 300, 548))
-        self.scrollAreaWidgetContents.setFont(font8)
+        self.scrollAreaWidgetContents.setFont(font5)
         self.verticalLayout_80 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_80.setObjectName(u"verticalLayout_80")
         self.verticalLayout_80.setContentsMargins(6, 6, 6, 6)
         self.groupBoxNDim = QGroupBox(self.scrollAreaWidgetContents)
         self.groupBoxNDim.setObjectName(u"groupBoxNDim")
-        self.groupBoxNDim.setFont(font8)
+        self.groupBoxNDim.setFont(font5)
         self.groupBoxNDim.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
         self.verticalLayout_9 = QVBoxLayout(self.groupBoxNDim)
         self.verticalLayout_9.setObjectName(u"verticalLayout_9")
@@ -1721,7 +1722,7 @@ class Ui_MainWindow(object):
         self.formLayout_31.setObjectName(u"formLayout_31")
         self.labelNDimRefValues = QLabel(self.groupBoxNDim)
         self.labelNDimRefValues.setObjectName(u"labelNDimRefValues")
-        self.labelNDimRefValues.setFont(font8)
+        self.labelNDimRefValues.setFont(font5)
         self.labelNDimRefValues.setAlignment(Qt.AlignCenter)
 
         self.formLayout_31.setWidget(0, QFormLayout.LabelRole, self.labelNDimRefValues)
@@ -1729,13 +1730,13 @@ class Ui_MainWindow(object):
         self.comboBoxNDimRefMaterial = QComboBox(self.groupBoxNDim)
         self.comboBoxNDimRefMaterial.setObjectName(u"comboBoxNDimRefMaterial")
         self.comboBoxNDimRefMaterial.setMaximumSize(QSize(200, 16777215))
-        self.comboBoxNDimRefMaterial.setFont(font8)
+        self.comboBoxNDimRefMaterial.setFont(font5)
 
         self.formLayout_31.setWidget(0, QFormLayout.FieldRole, self.comboBoxNDimRefMaterial)
 
         self.labelNDimAnalyte = QLabel(self.groupBoxNDim)
         self.labelNDimAnalyte.setObjectName(u"labelNDimAnalyte")
-        self.labelNDimAnalyte.setFont(font8)
+        self.labelNDimAnalyte.setFont(font5)
         self.labelNDimAnalyte.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.formLayout_31.setWidget(1, QFormLayout.LabelRole, self.labelNDimAnalyte)
@@ -1745,7 +1746,7 @@ class Ui_MainWindow(object):
         self.comboBoxNDimAnalyte = QComboBox(self.groupBoxNDim)
         self.comboBoxNDimAnalyte.setObjectName(u"comboBoxNDimAnalyte")
         self.comboBoxNDimAnalyte.setMaximumSize(QSize(16777215, 16777215))
-        self.comboBoxNDimAnalyte.setFont(font8)
+        self.comboBoxNDimAnalyte.setFont(font5)
 
         self.horizontalLayout_70.addWidget(self.comboBoxNDimAnalyte)
 
@@ -1769,7 +1770,7 @@ class Ui_MainWindow(object):
 
         self.labelNDimPredefined = QLabel(self.groupBoxNDim)
         self.labelNDimPredefined.setObjectName(u"labelNDimPredefined")
-        self.labelNDimPredefined.setFont(font8)
+        self.labelNDimPredefined.setFont(font5)
         self.labelNDimPredefined.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.formLayout_31.setWidget(2, QFormLayout.LabelRole, self.labelNDimPredefined)
@@ -1780,7 +1781,7 @@ class Ui_MainWindow(object):
         self.comboBoxNDimAnalyteSet.addItem("")
         self.comboBoxNDimAnalyteSet.setObjectName(u"comboBoxNDimAnalyteSet")
         self.comboBoxNDimAnalyteSet.setMaximumSize(QSize(16777215, 16777215))
-        self.comboBoxNDimAnalyteSet.setFont(font8)
+        self.comboBoxNDimAnalyteSet.setFont(font5)
 
         self.horizontalLayout_71.addWidget(self.comboBoxNDimAnalyteSet)
 
@@ -1834,7 +1835,7 @@ class Ui_MainWindow(object):
         self.tableWidgetNDim.setHorizontalHeaderItem(1, __qtablewidgetitem1)
         self.tableWidgetNDim.setObjectName(u"tableWidgetNDim")
         self.tableWidgetNDim.setMaximumSize(QSize(16777215, 16777215))
-        self.tableWidgetNDim.setFont(font8)
+        self.tableWidgetNDim.setFont(font5)
         self.tableWidgetNDim.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidgetNDim.horizontalHeader().setDefaultSectionSize(75)
         self.tableWidgetNDim.horizontalHeader().setStretchLastSection(True)
@@ -1893,7 +1894,7 @@ class Ui_MainWindow(object):
         self.toolButtonNDimRemove.setObjectName(u"toolButtonNDimRemove")
         self.toolButtonNDimRemove.setMinimumSize(QSize(32, 32))
         self.toolButtonNDimRemove.setMaximumSize(QSize(32, 32))
-        self.toolButtonNDimRemove.setFont(font8)
+        self.toolButtonNDimRemove.setFont(font5)
         self.toolButtonNDimRemove.setIcon(icon44)
         self.toolButtonNDimRemove.setIconSize(QSize(24, 24))
 
@@ -1922,7 +1923,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_81.setContentsMargins(0, 0, 0, 0)
         self.scrollAreaMultiDim = QScrollArea(self.MultidimensionalPage)
         self.scrollAreaMultiDim.setObjectName(u"scrollAreaMultiDim")
-        self.scrollAreaMultiDim.setFont(font8)
+        self.scrollAreaMultiDim.setFont(font5)
         self.scrollAreaMultiDim.setFrameShape(QFrame.NoFrame)
         self.scrollAreaMultiDim.setFrameShadow(QFrame.Plain)
         self.scrollAreaMultiDim.setWidgetResizable(True)
@@ -1939,7 +1940,7 @@ class Ui_MainWindow(object):
         self.formLayout_32.setContentsMargins(3, 3, 3, 3)
         self.labelDimRedTechnique = QLabel(self.groupBox_12)
         self.labelDimRedTechnique.setObjectName(u"labelDimRedTechnique")
-        self.labelDimRedTechnique.setFont(font8)
+        self.labelDimRedTechnique.setFont(font5)
 
         self.formLayout_32.setWidget(0, QFormLayout.LabelRole, self.labelDimRedTechnique)
 
@@ -1948,20 +1949,20 @@ class Ui_MainWindow(object):
         sizePolicy2.setHeightForWidth(self.ComboBoxDimRedTechnique.sizePolicy().hasHeightForWidth())
         self.ComboBoxDimRedTechnique.setSizePolicy(sizePolicy2)
         self.ComboBoxDimRedTechnique.setMaximumSize(QSize(220, 16777215))
-        self.ComboBoxDimRedTechnique.setFont(font8)
+        self.ComboBoxDimRedTechnique.setFont(font5)
 
         self.formLayout_32.setWidget(0, QFormLayout.FieldRole, self.ComboBoxDimRedTechnique)
 
         self.labelPCX = QLabel(self.groupBox_12)
         self.labelPCX.setObjectName(u"labelPCX")
-        self.labelPCX.setFont(font8)
+        self.labelPCX.setFont(font5)
         self.labelPCX.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
         self.formLayout_32.setWidget(1, QFormLayout.LabelRole, self.labelPCX)
 
         self.labelPCY = QLabel(self.groupBox_12)
         self.labelPCY.setObjectName(u"labelPCY")
-        self.labelPCY.setFont(font8)
+        self.labelPCY.setFont(font5)
         self.labelPCY.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
         self.formLayout_32.setWidget(2, QFormLayout.LabelRole, self.labelPCY)
@@ -1969,7 +1970,7 @@ class Ui_MainWindow(object):
         self.spinBoxPCY = QSpinBox(self.groupBox_12)
         self.spinBoxPCY.setObjectName(u"spinBoxPCY")
         self.spinBoxPCY.setMaximumSize(QSize(16777215, 16777215))
-        self.spinBoxPCY.setFont(font8)
+        self.spinBoxPCY.setFont(font5)
         self.spinBoxPCY.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxPCY.setKeyboardTracking(False)
 
@@ -1978,7 +1979,7 @@ class Ui_MainWindow(object):
         self.spinBoxPCX = QSpinBox(self.groupBox_12)
         self.spinBoxPCX.setObjectName(u"spinBoxPCX")
         self.spinBoxPCX.setMaximumSize(QSize(16777215, 16777215))
-        self.spinBoxPCX.setFont(font8)
+        self.spinBoxPCX.setFont(font5)
         self.spinBoxPCX.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxPCX.setKeyboardTracking(False)
 
@@ -2038,13 +2039,13 @@ class Ui_MainWindow(object):
 
         self.labelNClusters = QLabel(self.groupBoxClustering)
         self.labelNClusters.setObjectName(u"labelNClusters")
-        self.labelNClusters.setFont(font8)
+        self.labelNClusters.setFont(font5)
 
         self.formLayout_33.setWidget(2, QFormLayout.LabelRole, self.labelNClusters)
 
         self.labelExponent = QLabel(self.groupBoxClustering)
         self.labelExponent.setObjectName(u"labelExponent")
-        self.labelExponent.setFont(font8)
+        self.labelExponent.setFont(font5)
 
         self.formLayout_33.setWidget(3, QFormLayout.LabelRole, self.labelExponent)
 
@@ -2052,14 +2053,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.labelClusterExponent = QLabel(self.groupBoxClustering)
         self.labelClusterExponent.setObjectName(u"labelClusterExponent")
-        self.labelClusterExponent.setFont(font8)
+        self.labelClusterExponent.setFont(font5)
 
         self.horizontalLayout_2.addWidget(self.labelClusterExponent)
 
         self.horizontalSliderClusterExponent = QSlider(self.groupBoxClustering)
         self.horizontalSliderClusterExponent.setObjectName(u"horizontalSliderClusterExponent")
         self.horizontalSliderClusterExponent.setMaximumSize(QSize(150, 16777215))
-        self.horizontalSliderClusterExponent.setFont(font8)
+        self.horizontalSliderClusterExponent.setFont(font5)
         self.horizontalSliderClusterExponent.setMinimum(1)
         self.horizontalSliderClusterExponent.setMaximum(3)
         self.horizontalSliderClusterExponent.setOrientation(Qt.Horizontal)
@@ -2073,20 +2074,20 @@ class Ui_MainWindow(object):
 
         self.labelClusterDistance = QLabel(self.groupBoxClustering)
         self.labelClusterDistance.setObjectName(u"labelClusterDistance")
-        self.labelClusterDistance.setFont(font8)
+        self.labelClusterDistance.setFont(font5)
 
         self.formLayout_33.setWidget(4, QFormLayout.LabelRole, self.labelClusterDistance)
 
         self.comboBoxClusterDistance = QComboBox(self.groupBoxClustering)
         self.comboBoxClusterDistance.setObjectName(u"comboBoxClusterDistance")
         self.comboBoxClusterDistance.setMaximumSize(QSize(150, 16777215))
-        self.comboBoxClusterDistance.setFont(font8)
+        self.comboBoxClusterDistance.setFont(font5)
 
         self.formLayout_33.setWidget(4, QFormLayout.FieldRole, self.comboBoxClusterDistance)
 
         self.labelClusterStartingSeed = QLabel(self.groupBoxClustering)
         self.labelClusterStartingSeed.setObjectName(u"labelClusterStartingSeed")
-        self.labelClusterStartingSeed.setFont(font8)
+        self.labelClusterStartingSeed.setFont(font5)
 
         self.formLayout_33.setWidget(5, QFormLayout.LabelRole, self.labelClusterStartingSeed)
 
@@ -2096,7 +2097,7 @@ class Ui_MainWindow(object):
         self.toolButtonRandomSeed.setObjectName(u"toolButtonRandomSeed")
         self.toolButtonRandomSeed.setMinimumSize(QSize(32, 32))
         self.toolButtonRandomSeed.setMaximumSize(QSize(32, 32))
-        self.toolButtonRandomSeed.setFont(font8)
+        self.toolButtonRandomSeed.setFont(font5)
         icon61 = QIcon()
         icon61.addFile(u":/resources/icons/icon-randomize-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.toolButtonRandomSeed.setIcon(icon61)
@@ -2107,7 +2108,7 @@ class Ui_MainWindow(object):
         self.lineEditSeed = QLineEdit(self.groupBoxClustering)
         self.lineEditSeed.setObjectName(u"lineEditSeed")
         self.lineEditSeed.setMaximumSize(QSize(150, 16777215))
-        self.lineEditSeed.setFont(font8)
+        self.lineEditSeed.setFont(font5)
         self.lineEditSeed.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout.addWidget(self.lineEditSeed)
@@ -2117,19 +2118,19 @@ class Ui_MainWindow(object):
 
         self.labelClusterWithPCA = QLabel(self.groupBoxClustering)
         self.labelClusterWithPCA.setObjectName(u"labelClusterWithPCA")
-        self.labelClusterWithPCA.setFont(font8)
+        self.labelClusterWithPCA.setFont(font5)
 
         self.formLayout_33.setWidget(6, QFormLayout.LabelRole, self.labelClusterWithPCA)
 
         self.checkBoxWithPCA = QCheckBox(self.groupBoxClustering)
         self.checkBoxWithPCA.setObjectName(u"checkBoxWithPCA")
-        self.checkBoxWithPCA.setFont(font8)
+        self.checkBoxWithPCA.setFont(font5)
 
         self.formLayout_33.setWidget(6, QFormLayout.FieldRole, self.checkBoxWithPCA)
 
         self.labelPCANumBasis = QLabel(self.groupBoxClustering)
         self.labelPCANumBasis.setObjectName(u"labelPCANumBasis")
-        self.labelPCANumBasis.setFont(font8)
+        self.labelPCANumBasis.setFont(font5)
         self.labelPCANumBasis.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
         self.formLayout_33.setWidget(7, QFormLayout.LabelRole, self.labelPCANumBasis)
@@ -2137,7 +2138,7 @@ class Ui_MainWindow(object):
         self.spinBoxPCANumBasis = QSpinBox(self.groupBoxClustering)
         self.spinBoxPCANumBasis.setObjectName(u"spinBoxPCANumBasis")
         self.spinBoxPCANumBasis.setMaximumSize(QSize(150, 16777215))
-        self.spinBoxPCANumBasis.setFont(font8)
+        self.spinBoxPCANumBasis.setFont(font5)
         self.spinBoxPCANumBasis.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxPCANumBasis.setKeyboardTracking(False)
 
@@ -2146,7 +2147,7 @@ class Ui_MainWindow(object):
         self.spinBoxNClusters = QSpinBox(self.groupBoxClustering)
         self.spinBoxNClusters.setObjectName(u"spinBoxNClusters")
         self.spinBoxNClusters.setMaximumSize(QSize(150, 16777215))
-        self.spinBoxNClusters.setFont(font8)
+        self.spinBoxNClusters.setFont(font5)
         self.spinBoxNClusters.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.spinBoxNClusters.setKeyboardTracking(False)
         self.spinBoxNClusters.setMinimum(1)
@@ -2157,14 +2158,16 @@ class Ui_MainWindow(object):
 
         self.labelClusterMethod = QLabel(self.groupBoxClustering)
         self.labelClusterMethod.setObjectName(u"labelClusterMethod")
-        self.labelClusterMethod.setFont(font8)
+        self.labelClusterMethod.setFont(font5)
 
         self.formLayout_33.setWidget(0, QFormLayout.LabelRole, self.labelClusterMethod)
 
         self.comboBoxClusterMethod = QComboBox(self.groupBoxClustering)
+        self.comboBoxClusterMethod.addItem("")
+        self.comboBoxClusterMethod.addItem("")
         self.comboBoxClusterMethod.setObjectName(u"comboBoxClusterMethod")
         self.comboBoxClusterMethod.setMaximumSize(QSize(150, 16777215))
-        self.comboBoxClusterMethod.setFont(font8)
+        self.comboBoxClusterMethod.setFont(font5)
 
         self.formLayout_33.setWidget(0, QFormLayout.FieldRole, self.comboBoxClusterMethod)
 
@@ -2407,6 +2410,7 @@ class Ui_MainWindow(object):
         self.comboBoxXScale.addItem("")
         self.comboBoxXScale.addItem("")
         self.comboBoxXScale.addItem("")
+        self.comboBoxXScale.addItem("")
         self.comboBoxXScale.setObjectName(u"comboBoxXScale")
 
         self.formLayout_11.setWidget(2, QFormLayout.FieldRole, self.comboBoxXScale)
@@ -2455,6 +2459,7 @@ class Ui_MainWindow(object):
         self.formLayout_11.setWidget(6, QFormLayout.LabelRole, self.labelYScale)
 
         self.comboBoxYScale = QComboBox(self.scrollAreaWidgetContentsAxes)
+        self.comboBoxYScale.addItem("")
         self.comboBoxYScale.addItem("")
         self.comboBoxYScale.addItem("")
         self.comboBoxYScale.addItem("")
@@ -2525,6 +2530,7 @@ class Ui_MainWindow(object):
         self.formLayout_11.setWidget(7, QFormLayout.FieldRole, self.line)
 
         self.comboBoxZScale = QComboBox(self.scrollAreaWidgetContentsAxes)
+        self.comboBoxZScale.addItem("")
         self.comboBoxZScale.addItem("")
         self.comboBoxZScale.addItem("")
         self.comboBoxZScale.addItem("")
@@ -3008,6 +3014,7 @@ class Ui_MainWindow(object):
         self.comboBoxColorScale = QComboBox(self.scrollAreaWidgetContentsColors)
         self.comboBoxColorScale.addItem("")
         self.comboBoxColorScale.addItem("")
+        self.comboBoxColorScale.addItem("")
         self.comboBoxColorScale.setObjectName(u"comboBoxColorScale")
 
         self.formLayout_19.setWidget(2, QFormLayout.FieldRole, self.comboBoxColorScale)
@@ -3243,7 +3250,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.canvasWindow.setCurrentIndex(0)
-        self.toolBox.setCurrentIndex(1)
+        self.toolBox.setCurrentIndex(3)
         self.toolBox.layout().setSpacing(2)
         self.comboBoxNDimQuantiles.setCurrentIndex(2)
         self.toolBoxStyle.setCurrentIndex(3)
@@ -3869,6 +3876,8 @@ class Ui_MainWindow(object):
         self.spinBoxNClusters.setToolTip(QCoreApplication.translate("MainWindow", u"Change the number of clusters", None))
 #endif // QT_CONFIG(tooltip)
         self.labelClusterMethod.setText(QCoreApplication.translate("MainWindow", u"Method", None))
+        self.comboBoxClusterMethod.setItemText(0, QCoreApplication.translate("MainWindow", u"k-means", None))
+        self.comboBoxClusterMethod.setItemText(1, QCoreApplication.translate("MainWindow", u"fuzzy c-means", None))
 
 #if QT_CONFIG(tooltip)
         self.comboBoxClusterMethod.setToolTip(QCoreApplication.translate("MainWindow", u"Select clustering method", None))
@@ -3922,6 +3931,7 @@ class Ui_MainWindow(object):
         self.comboBoxXScale.setItemText(0, QCoreApplication.translate("MainWindow", u"linear", None))
         self.comboBoxXScale.setItemText(1, QCoreApplication.translate("MainWindow", u"scientific", None))
         self.comboBoxXScale.setItemText(2, QCoreApplication.translate("MainWindow", u"log", None))
+        self.comboBoxXScale.setItemText(3, QCoreApplication.translate("MainWindow", u"symlog", None))
 
 #if QT_CONFIG(tooltip)
         self.lineEditYLabel.setToolTip(QCoreApplication.translate("MainWindow", u"Type y label", None))
@@ -3940,6 +3950,7 @@ class Ui_MainWindow(object):
         self.comboBoxYScale.setItemText(0, QCoreApplication.translate("MainWindow", u"linear", None))
         self.comboBoxYScale.setItemText(1, QCoreApplication.translate("MainWindow", u"scientific", None))
         self.comboBoxYScale.setItemText(2, QCoreApplication.translate("MainWindow", u"log", None))
+        self.comboBoxYScale.setItemText(3, QCoreApplication.translate("MainWindow", u"symlog", None))
 
         self.labelZLabel.setText(QCoreApplication.translate("MainWindow", u"Z Label", None))
 #if QT_CONFIG(tooltip)
@@ -3963,6 +3974,7 @@ class Ui_MainWindow(object):
         self.comboBoxZScale.setItemText(0, QCoreApplication.translate("MainWindow", u"linear", None))
         self.comboBoxZScale.setItemText(1, QCoreApplication.translate("MainWindow", u"scientific", None))
         self.comboBoxZScale.setItemText(2, QCoreApplication.translate("MainWindow", u"log", None))
+        self.comboBoxZScale.setItemText(3, QCoreApplication.translate("MainWindow", u"symlog", None))
 
         self.labelZScale.setText(QCoreApplication.translate("MainWindow", u"Z Scale", None))
         self.labelZLim.setText(QCoreApplication.translate("MainWindow", u"Z Limits", None))
@@ -4075,6 +4087,7 @@ class Ui_MainWindow(object):
         self.labelColorScale.setText(QCoreApplication.translate("MainWindow", u"Scale", None))
         self.comboBoxColorScale.setItemText(0, QCoreApplication.translate("MainWindow", u"linear", None))
         self.comboBoxColorScale.setItemText(1, QCoreApplication.translate("MainWindow", u"log", None))
+        self.comboBoxColorScale.setItemText(2, QCoreApplication.translate("MainWindow", u"symlog", None))
 
         self.labelReverseColormap.setText(QCoreApplication.translate("MainWindow", u"Reverse", None))
         self.labelFieldColormap.setText(QCoreApplication.translate("MainWindow", u"Colormap", None))

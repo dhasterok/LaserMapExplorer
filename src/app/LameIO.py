@@ -10,9 +10,12 @@ from src.app.config import BASEDIR
 import src.common.CustomMplCanvas as mplc
 from src.common.DataHandling import SampleObj
 from src.common.Status import StatusMessageManager
+from src.common.Logger import auto_log_methods
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
+
+@auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
 class LameIO():
     """Handles most I/O for the main window of LaME
 
@@ -21,9 +24,11 @@ class LameIO():
     parent : QObject, optional
         MainWindow UI, by default None
     """        
-    def __init__(self, parent=None, connect_actions=True, debug=False):
+    def __init__(self, parent=None, connect_actions=True, logger_options=None, logger_key=None):
         if parent is None:
             return
+
+        self.logger_options = logger_options
 
         self.connect_actions = connect_actions
         if self.connect_actions:
@@ -35,7 +40,7 @@ class LameIO():
             parent.actionImportFiles.triggered.connect(lambda: self.import_files())
 
         self.parent = parent
-        self.debug = debug
+
         self.status_manager = StatusMessageManager(self.parent)
 
     def open_sample(self, path=None):
@@ -89,9 +94,6 @@ class LameIO():
         path : str
             Path to datafiles, if ``None``, an open directory dialog is openend, by default ``None``
         """
-        if self.debug:
-            print("open_directory")
-
         parent = self.parent 
 
         if path is None:
@@ -367,7 +369,7 @@ class LameIO():
                 outlier_method = outlier_method,
                 negative_method =negative_method,
                 ref_chem = self.parent.app_data.ref_chem,
-                debug=self.parent.logger_options['Data']
+                logger_options=self.logger_options, logger_key='Data'
             )
 
             # connect data observers if required

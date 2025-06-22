@@ -13,9 +13,10 @@ from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
-from src.common.Logger import LogCounter
-from format import symlog
+from src.common.format import symlog
+from src.common.Logger import auto_log_methods
 
+@auto_log_methods(logger_key='Data', prefix="DATA: ", show_args=True)
 class SampleObj(Observable):
     """Creates a sample object to store and manipulate geochemical data in map form
     
@@ -162,13 +163,8 @@ class SampleObj(Observable):
     'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
     'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
-    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, debug=False):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, logger_options=None, logger_key=None):
         super().__init__()
-        self.debug = debug
-        self.logger = LogCounter()
-
-        if self.debug:
-            self.logger.print(f"SampleeObj.__init__\n  sample_id: {sample_id}\n  file_path: {file_path}\n  outlier_method: {outlier_method}\n  negative_method: {negative_method}")
 
         self.sample_id = sample_id
         self.file_path = file_path
@@ -226,9 +222,6 @@ class SampleObj(Observable):
 
         What is not reset?
         """        
-        if self.debug:
-            self.logger.print("reset_data")
-
         # load data
         metadata_path = self.file_path.replace('.lame.','.lmdf.')
         metadata_df = None
@@ -302,9 +295,6 @@ class SampleObj(Observable):
 
         _extended_summary_
         """        
-        if self.debug:
-            self.logger.print("reset_data_handling")
-
         coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
         self.raw_data.set_attribute(coordinate_columns, 'units', None)
         self.raw_data.set_attribute(coordinate_columns, 'use', False)
@@ -685,9 +675,6 @@ class SampleObj(Observable):
         str, int
             Returns the element symbol and mass.
         """
-        if self.debug:
-            self.logger.print(f"parse_field, field: {field}")
-
         match = re.match(r"([A-Za-z]+)(\d*)", field)
         symbol = match.group(1) if match else field
         mass = int(match.group(2)) if match.group(2) else None
@@ -731,9 +718,6 @@ class SampleObj(Observable):
             If a mask is provided, its length must match the height of `processed_data`, and the number of `True` values
             in the mask must match the number of rows in `array`.
         """
-        if self.debug:
-            self.logger.print(f"add_columns") 
-
         # Ensure column_names is a list, even if adding a single column
         if isinstance(column_names, str):
             column_names = [column_names]
@@ -881,9 +865,6 @@ class SampleObj(Observable):
         ValueError
             Raises an error if the column is not a member of the AttributeDataFrame.
         """        
-        if self.debug:
-            self.logger.print(f"delete_column") 
-
         # Check if the column exists
         if column_name not in self.processed_data.columns:
             raise ValueError(f"Column {column_name} does not exist in the DataFrame.")
@@ -904,9 +885,6 @@ class SampleObj(Observable):
 
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
-        if self.debug:
-            self.logger.print(f"swap_xy") 
-
         self.is_swapped = not self.is_swapped
 
         if self.is_swapped:
@@ -933,9 +911,6 @@ class SampleObj(Observable):
         df : pandas.DataFrame
             data frame to swap X and Y coordinates
         """
-        if self.debug:
-            self.logger.print(f"_swap_xy") 
-
         xtemp = df['Yc']
         df['Yc'] = df['Xc']
         df['Xc'] = xtemp
@@ -968,9 +943,6 @@ class SampleObj(Observable):
 
         Recalculates X and Y for a dataframe
         """  
-        if self.debug:
-            self.logger.print(f"swap_resolution")  
-
         X = round(self.raw_data['Xc']/self.dx)
         Y = round(self.raw_data['Yc']/self.dy)
 
@@ -993,9 +965,6 @@ class SampleObj(Observable):
         Reseting the data to the original bounds results in deleting progress on analyses,
         computations, etc.
         """
-        if self.debug:
-            self.logger.print(f"reset_crop") 
-
         # bring up dialog asking if user wishes to proceed
         if not self.confirm_reset():
             return
@@ -1015,9 +984,6 @@ class SampleObj(Observable):
         analyte_2 : str
             Analyte field to be used as denominator of ratio.
         """
-        if self.debug:
-            self.logger.print(f"compute_ratio, analyte_1: {analyte_1}, analyte_2: {analyte_2}") 
-
         # Create a mask where both analytes are positive
         mask = (self.processed_data[analyte_1] > 0) & (self.processed_data[analyte_2] > 0)
 
@@ -1035,9 +1001,6 @@ class SampleObj(Observable):
 
         _extended_summary_
         """
-        if self.debug:
-            self.logger.print(f"cluster_data") 
-
         # Step 1: Clustering
         # ------------------
         # Select columns where 'data_type' attribute is 'Analyte'
@@ -1110,9 +1073,6 @@ class SampleObj(Observable):
             processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
             run for the first time.
         """ 
-        if self.debug:
-            self.logger.print(f"prep_data, field {field}") 
-
         attribute_df = None
         analyte_columns = []
         ratio_columns = []
@@ -1224,9 +1184,6 @@ class SampleObj(Observable):
                 transformed_data = self.clip_outliers(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq)
                 self.processed_data.loc[cluster_mask, col] = transformed_data
 
-                if self.debug:
-                    self.logger.print(f"outlier_detection\n  percentiles: {[pl, pu, dpl, dpu]}\n  compositional: {compositional}\n  max_val: {max_val}")
-
                 transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
                 self.processed_data.loc[cluster_mask, col] = transformed_data
 
@@ -1250,9 +1207,6 @@ class SampleObj(Observable):
         int
             Returns the optimal number of k-means clusters.
         """
-        if self.debug:
-            self.logger.print(f"k_optimal_clusters, max_clusters: {max_clusters}") 
-
         inertia = []
 
         # clip outliers and make entirely positive
@@ -1333,9 +1287,6 @@ class SampleObj(Observable):
         numpy.ndarray
             Clipped data vector
         """        
-        if self.debug:
-            self.logger.print(f"clip_outliers\n  outlier_method: {outlier_method}\n  pl: {pl}\n  pu: {pu}\n  dpl: {dpl}\n  dpu: {dpu}")
-
         t_array = np.copy(array)
 
         match outlier_method.lower():
@@ -1380,9 +1331,6 @@ class SampleObj(Observable):
         numpy.ndarray
             Transformed data
         """
-        if self.debug:
-            self.logger.print(f"transform_array:  negative_method: {negative_method}")
-
         match negative_method.lower():
             case 'ignore negatives':
                 # do nothing, the values remain unchanged
@@ -1427,9 +1375,6 @@ class SampleObj(Observable):
         update : bool, optional
             Update the scale information of the data, by default False
         """ 
-        if self.debug:
-            self.logger.print(f"update_norm:  field: {field},  norm: {norm}")
-
         if field is not None: #if normalising single analyte
             self.processed_data.set_attribute(field,'norm',norm)
         else: #if normalising all analytes in sample
@@ -1460,8 +1405,6 @@ class SampleObj(Observable):
         pandas.DataFrame
             Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
         """
-        if self.debug:
-            self.logger.print(f"get_map_data\n  field type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
         # ----begin debugging----
         # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
         # ----end debugging----
@@ -1542,9 +1485,6 @@ class SampleObj(Observable):
         bool
             Analytes included from processed data
         """
-        if self.debug:
-            self.logger.print("get_processed_data")
-
         if self.sample_id == '':
             return
 
@@ -1590,9 +1530,6 @@ class SampleObj(Observable):
             Dictionary with array and additional relevant plot data, contains
             'field', 'type', 'label', and 'array'.
         """
-        if self.debug:
-            self.logger.print(f"get_vector\n  field_type: {field_type}\n  field: {field}\n  norm: {norm}\n  processed: {processed}")
-
         # initialize dictionary
         value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
 

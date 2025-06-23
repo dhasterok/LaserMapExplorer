@@ -2849,7 +2849,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.profile_dock.show()
 
 
-    def open_notes(self):
+    def open_notes(self, *args, **kwargs):
         """Opens Notes Dock
 
         Opens Notes Dock, creates on first instance.  The notes can be used to record important information about

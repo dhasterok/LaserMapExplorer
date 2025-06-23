@@ -13,6 +13,7 @@ from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string
 import src.common.format as fmt
 from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
+from src.common.SearchTool import SearchWidget
 
 # -------------------------------
 # Notes functions
@@ -218,6 +219,16 @@ class Notes(CustomDockWidget):
         self.action_preview_pdf.setChecked(False)
         self.action_preview_pdf.setEnabled(False)
 
+        # Create Text Edit region for ReST Notes
+        self.text_edit = QTextEdit()
+        self.text_edit.setFont(QFont("Monaco", 10))
+        self.text_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.text_edit.setMaximumSize(QSize(524287, 524287))
+        self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
+
+        # Create search
+        self.search_widget = SearchWidget(self.text_edit, self, enable_replace=True, realtime=False)
+
         # add buttons to toolbar
         toolbar.addAction(self.action_header)
         toolbar.addAction(self.action_bold)
@@ -239,17 +250,13 @@ class Notes(CustomDockWidget):
         toolbar.addAction(self.action_options)
 
         toolbar.addSeparator()
+        toolbar.addWidget(self.search_widget)
+        toolbar.addSeparator()
 
         toolbar.addAction(self.action_export)
         toolbar.addAction(self.action_preview_pdf)
 
         widget_layout = QHBoxLayout()
-
-        self.text_edit = QTextEdit()
-        self.text_edit.setFont(QFont("Monaco", 10))
-        self.text_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.text_edit.setMaximumSize(QSize(524287, 524287))
-        self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
 
         if self._notes_file is None:
             self.file_label = QLabel("File: [load sample to display file]")

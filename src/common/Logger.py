@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QColor, QTextDocument
 
 from src.common.CustomWidgets import CustomDockWidget
+from src.common.SearchTool import SearchWidget
 
 _global_logger = None
 
@@ -145,48 +146,25 @@ class LoggerDock(CustomDockWidget):
             self.action_clear.setText("Clear")
         self.action_clear.setToolTip("Clear log")
 
-        # Create search bar
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search log...")
-        self.search_input.returnPressed.connect(self.highlight_search_matches)
-
-        clear_search_action = QAction("✖", self)
-        clear_search_action.setToolTip("Clear search")
-        clear_search_action.triggered.connect(self.clear_search)
-
-        # Case Insensitive toggle
-        self.case_insensitive_action = QAction("Aa", self)
-        self.case_insensitive_action.setCheckable(True)
-        self.case_insensitive_action.setToolTip("Toggle case-insensitive search")
-
-        # Previous Match button
-        self.previous_match_action = QAction("↑", self)
-        self.previous_match_action.setToolTip("Previous match")
-        self.previous_match_action.triggered.connect(lambda: self.navigate_match(forward=False))
-
-        # Next Match button
-        self.next_match_action = QAction("↓", self)
-        self.next_match_action.setToolTip("Next match")
-        self.next_match_action.triggered.connect(lambda: self.navigate_match(forward=True))
-
-        toolbar.addAction(self.action_settings)
-        toolbar.addAction(self.action_save)
-        toolbar.addSeparator()
-        toolbar.addAction(clear_search_action)
-        toolbar.addWidget(self.search_input)
-        toolbar.addAction(self.case_insensitive_action)
-        toolbar.addAction(self.previous_match_action)
-        toolbar.addAction(self.next_match_action)
-        toolbar.addSeparator()
-        toolbar.addAction(self.action_clear)
-
-        logger_layout.addWidget(toolbar)
-
         # Create QTextEdit for logging
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
         self.text_edit.setFont(QFont("Monaco",10))
 
+        # Create search bar
+        self.text_edit = QTextEdit()
+        self.text_edit.setReadOnly(True)
+        self.text_edit.setFont(QFont("Monaco",10))
+        self.search_widget = SearchWidget(self.text_edit, self, enable_replace=False, realtime=False)
+
+        toolbar.addAction(self.action_settings)
+        toolbar.addAction(self.action_save)
+        toolbar.addSeparator()
+        toolbar.addWidget(self.search_widget)
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_clear)
+
+        logger_layout.addWidget(toolbar)
         logger_layout.addWidget(self.text_edit)
 
         # handle actions
@@ -270,98 +248,6 @@ class LoggerDock(CustomDockWidget):
         else:
             sys.stdout = sys.__stdout__  # Restore to default stdout    
             sys.stderr = sys.__stderr__  # Restore to default stderr    
-
-    def highlight_search_matches(self):
-        query = self.search_input.text()
-        self.match_cursors = []
-
-        # Reset formatting
-        cursor = self.text_edit.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.Start)
-        fmt_clear = QTextCharFormat()
-        cursor.setPosition(0)
-        cursor.movePosition(QTextCursor.MoveOperation.End, QTextCursor.MoveMode.KeepAnchor)
-        cursor.setCharFormat(fmt_clear)
-
-        if not query:
-            return
-
-        # Highlight format
-        highlight_format = QTextCharFormat()
-        highlight_format.setBackground(QColor("yellow"))
-        highlight_format.setForeground(QColor("black"))
-
-        # Case sensitivity
-        if self.case_insensitive_action.isChecked():
-            find_flags = QTextDocument.FindFlag(0)
-        else:
-            find_flags = QTextDocument.FindFlag.FindCaseSensitively
-
-        # Find all matches
-        doc = self.text_edit.document()
-        cursor = QTextCursor(doc)
-        while True:
-            cursor = doc.find(query, cursor, find_flags)
-            if cursor.isNull():
-                break
-            self.match_cursors.append(cursor.selectionStart())
-            cursor.mergeCharFormat(highlight_format)
-
-        # Select the first match
-        if self.match_cursors:
-            self.current_match_index = 0
-            self.select_current_match()
-        else:
-            self.current_match_index = -1
-
-    def navigate_match(self, forward=True):
-        if not self.match_cursors:
-            return
-
-        if forward:
-            self.current_match_index = (self.current_match_index + 1) % len(self.match_cursors)
-        else:
-            self.current_match_index = (self.current_match_index - 1) % len(self.match_cursors)
-
-        self.select_current_match()
-
-    def select_current_match(self):
-        if self.current_match_index < 0 or not self.match_cursors:
-            self.text_edit.setExtraSelections([])  # clear if no matches
-            return
-
-        # Highlight current match in cyan
-        cursor = self.text_edit.textCursor()
-        cursor.setPosition(self.match_cursors[self.current_match_index])
-        cursor.movePosition(QTextCursor.MoveOperation.NextCharacter, QTextCursor.MoveMode.KeepAnchor, len(self.search_input.text()))
-
-        selection = QTextEdit.ExtraSelection()
-        selection.cursor = cursor
-        selection.format.setBackground(QColor("cyan"))
-        selection.format.setForeground(QColor("black"))
-
-        self.text_edit.setExtraSelections([selection])
-        self.text_edit.setTextCursor(cursor)
-        self.text_edit.ensureCursorVisible()
-
-    def clear_search(self):
-        # Clear search text
-        self.search_input.setText("")
-
-        # Clear cyan selection (ExtraSelections)
-        self.text_edit.setExtraSelections([])
-
-        # Clear yellow background from all text
-        cursor = self.text_edit.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.Start)
-        cursor.setPosition(0)
-        cursor.movePosition(QTextCursor.MoveOperation.End, QTextCursor.MoveMode.KeepAnchor)
-        clear_format = QTextCharFormat()
-        cursor.setCharFormat(clear_format)
-
-        # Reset match state
-        self.match_cursors = []
-        self.current_match_index = -1
     
 
 class LoggerOptionsDialog(QDialog):

@@ -58,6 +58,8 @@ class MaskObj:
 @auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class MaskDock(CustomDockWidget, UIFieldLogic):
     def __init__(self, parent=None, title="Masking Toolbox", logger_options=None, logger_key=None):
+        self.logger_options = logger_options
+
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
@@ -98,9 +100,9 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.tabWidgetMask = QTabWidget(container)
         self.tabWidgetMask.setObjectName("Mask Tab Widget")
 
-        self.filter_tab = FilterTab(self, debug=debug)
-        self.polygon_tab = PolygonTab(self, debug=debug)
-        self.cluster_tab = ClusterTab(self, debug=debug)
+        self.filter_tab = FilterTab(self, logger_options=self.logger_options, logger_key="Mask")
+        self.polygon_tab = PolygonTab(self, logger_options=self.logger_options, logger_key="Mask")
+        self.cluster_tab = ClusterTab(self, logger_options=self.logger_options, logger_key="Mask")
 
         dock_layout.addWidget(self.tabWidgetMask)
         self.setWidget(container)
@@ -115,13 +117,11 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
 
         self.filter_tab.update_filter_values()
 
+@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class FilterTab():
-    def __init__(self, parent, debug=False):
+    def __init__(self, parent, logger_options=None, logger_key=None):
         self.parent = parent
         self.main_window = parent.main_window
-        self.debug = debug
-
-        
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -584,12 +584,13 @@ class FilterTab():
 
         self.update_filter_table()
 
+@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class PolygonTab():
-    def __init__(self, parent, debug=False):
+    def __init__(self, parent, logger_options=None, logger_key=None):
         self.parent = parent
-        
-        self.debug = debug
 
+        self.logger_options = logger_options
+        
         #init table_fcn
         self.table_fcn = TableFcn(self)
 
@@ -703,7 +704,7 @@ class PolygonTab():
         self.parent.tabWidgetMask.addTab(self.polygon_tab, polygon_icon, "Polygons")
         
         # initialise polygon dictionary for a given sample id in self.parent.data
-        self.polygon_manager = PolygonManager(parent = self, main_window = self.parent.main_window, debug=self.parent.main_window.logger_options['Polygon'])
+        self.polygon_manager = PolygonManager(parent = self, main_window = self.parent.main_window, logger_options=self.logger_options, logger_key="Polygon")
         #self.parent.main_window.data.polygon = self.polygon_manger.polygons
         self.actionPolyCreate.triggered.connect(self.polygon_manager.increment_pid)
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.parent.main_window.mpl_canvas))
@@ -867,8 +868,9 @@ class PolygonTab():
 
 
 
+@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class ClusterTab():
-    def __init__(self, parent, debug=False):
+    def __init__(self, parent, logger_options=None, logger_key=None):
         self.parent = parent
 
         self.main_window = self.parent.main_window
@@ -985,9 +987,6 @@ class ClusterTab():
         backround ``self.toolButtonClusterColor`` color.  Also updates ``self.tableWidgetViewGroups``
         color associated with selected cluster.  The selected cluster is determined by ``self.spinBoxClusterGroup.value()``
         """
-        if self.debug:
-            print("cluster_color_callback")
-
         #print('cluster_color_callback')
         if self.tableWidgetViewGroups.rowCount() == 0:
             return
@@ -1013,9 +1012,6 @@ class ClusterTab():
 
         Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
         """
-        if self.debug:
-            print("select_cluster_group_callback")
-
         if self.tableWidgetViewGroups.rowCount() == 0:
             return
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(int(self.spinBoxClusterGroup.value()-1),2).text())

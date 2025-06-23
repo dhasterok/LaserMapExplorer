@@ -8,9 +8,11 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtGui import QIcon, QMouseEvent
+from src.common.Logger import auto_log_methods
     
 # WebEngineView - Web engine for viewing userguide help pages
 # -------------------------------
+@auto_log_methods(logger_key='Browser', prefix="BROWSER: ", show_args=True)
 class WebEngineView(QWebEngineView):
     """Creates a web engine widget to display user guide
 
@@ -21,11 +23,10 @@ class WebEngineView(QWebEngineView):
     QWebEngineView : QWebEngine
         A web engine widget
     """    
-    def __init__(self, parent=None, debug=False):
+    def __init__(self, parent=None, logger_options=None, logger_key=None):
         super().__init__(parent)
 
         self.parent = parent
-        self.debug = debug
 
         # Connect signals
         self.loadFinished.connect(self.on_load_finished)
@@ -82,6 +83,7 @@ class WebEngineView(QWebEngineView):
         #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
 
+@auto_log_methods(logger_key='Browser', prefix="BROWSER: ", show_args=True)
 class Browser(QDockWidget):
     """A collection of browser related methods.
 
@@ -93,8 +95,6 @@ class Browser(QDockWidget):
         Dictionary with objects as keys and page (excluding html) for navigation
     base_path : str
         Base directory to docs/build/html.
-    debug : bool, optional
-        A verbose mode for the browser, by Default ``False``
 
     Methods
     -------
@@ -112,17 +112,14 @@ class Browser(QDockWidget):
     TypeError :
         Parent must be an instance of QMainWindow
     """    
-    def __init__(self, parent=None, help_mapping={}, base_path='', debug=False):
+    def __init__(self, parent=None, help_mapping={}, base_path='', logger_options=None, logger_key=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         super().__init__(parent)
 
-        container = QWidget()
+        self.logger_options = logger_options
 
-        self.debug = debug
-        
-        if self.debug:
-            print("Initializing browser")
+        container = QWidget()
 
         if parent is None:
             return
@@ -252,9 +249,6 @@ class Browser(QDockWidget):
                 else:
                     return False
 
-                if self.debug:
-                    print(f"Browser.eventFilter: Accessing help page {obj}:{self.help_mapping[obj]}")
-
                 return True
 
         return super().eventFilter(obj, event)
@@ -265,12 +259,9 @@ class Browser(QDockWidget):
 
         A browser for the LaME documentation.  It can access some external sites, but the browser is primarily for help data.
         """        
-        if self.debug:
-            print("open_browser")
-
         # Open a file dialog to select a local HTML file
         # Create a QWebEngineView widget
-        self.engine = WebEngineView(self.parent)
+        self.engine = WebEngineView(self.parent, logger_options=self.logger_options, logger_key="Browser")
         self.dock_layout.addWidget(self.engine)
 
         #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")
@@ -278,9 +269,6 @@ class Browser(QDockWidget):
 
     def go_to_home(self):
         """The browser returns to the documentation index.html file"""        
-        if self.debug:
-            print("go_to_home")
-
         filename = os.path.join(self.base_path,"docs/build/html/index.html")
 
         self.browser_location.setText(filename)
@@ -297,9 +285,6 @@ class Browser(QDockWidget):
         location : str, optional
             Name of webpage (excluding base directory and .html)
         """
-        if self.debug:
-            print(f"go_to_page, location {location}")
-
         if not location:
             location = self.browser_location.text()
         else:

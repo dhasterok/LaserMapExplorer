@@ -15,6 +15,7 @@ from PyQt6.QtGui import QIcon, QAction
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic
+from src.common.Logger import auto_log_methods
 
 def calc_error(parent, func, err, addinfo):
     """Raise a calculator-related error
@@ -37,6 +38,7 @@ def calc_error(parent, func, err, addinfo):
 # -------------------------------
 # Calculator
 # -------------------------------
+@auto_log_methods(logger_key='Calculator', prefix="CALC: ", show_args=True)
 class CalculatorDock(CustomDockWidget, UIFieldLogic):
     """Creates a CustomFieldCalculator with UI controls inside a dock widget that can be added to a QMainWindow
 
@@ -59,7 +61,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
     TypeError
         Parent must be an instance of QMainWindow.
     """        
-    def __init__(self, parent=None, filename=None, debug=False):
+    def __init__(self, parent=None, filename=None, logger_options=None, logger_key=None):
         # super().__init__(self, parent=None)
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
@@ -79,8 +81,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         # create an instance of CustomFieldCalculator for the heavy lifting
         if parent.app_data.sample_id != '':
             self.cfc = CustomFieldCalculator(debug)
-
-        self.debug = debug
 
         if filename is None:
             self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
@@ -280,9 +280,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
-        if self.debug:
-            print("calc_help")
-
         try:
             if not hasattr(self.parent,"browser"):
                 self.parent.open_browser()
@@ -303,9 +300,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         operator : str
             Inserts operators from calculator
         """        
-        if self.debug:
-            print(f"calc_insert_operator, operator {operator}")
-
         cursor = self.calc_text_edit.textCursor()
         cursor.insertText(operator)
 
@@ -321,9 +315,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         operator : str
             Inserts operators from calculator
         """        
-        if self.debug:
-            print(f"calc_insert_function, function: {func_name}")
-
         cursor = self.calc_text_edit.textCursor()
         if cursor.hasSelection():
             cursor.insertText(f"{func_name}({cursor.selectedText()})")
@@ -346,9 +337,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         Adds the selected field as ``{field_type.field}``.  If the field is normalized,
         a ``_N`` is added to the end of the field name, i.e., ``{field_type.field_N}``.
         """        
-        if self.debug:
-            print("calc_add_field")
-
         # get field type and name
         field_type = self.comboBoxFieldType.currentText()
         field = self.comboBoxField.currentText()
@@ -378,9 +366,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         Loads the file saved in ``self.calc_filename``, unless the file is overridden by user preferences.  The file
         should be formatted as *name: expression*.  The expression may contain mulitple *case(cond, expr)* separated by a ``;``.
         """        
-        if self.debug:
-            print("calc_load_dict")
-
         self.calc_dict = {}
         try:
             with open(self.calc_filename, 'r') as file:
@@ -407,9 +392,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         Removes the formula from ``MainWindow.formula_combobox``, the file given by ``MainWindow.calc_filename`` and 
         ``parent.app_data.data[parent.app_data.sample_id].processed_data``.
         """
-        if self.debug:
-            print("calc_delete_formula")
-
         func = 'calc_delete_formula'
 
         # get name of formula
@@ -443,9 +425,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
     
     def calc_load_formula(self):
         """Loads a predefined formula to use in the calculator"""        
-        if self.debug:
-            print("calc_load_formula")
-
         name = self.comboBoxFormula.currentText()
 
         self.calc_text_edit.clear()
@@ -459,9 +438,6 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine
         whether to add an item to ``MainWindow.formula_combobox``.
         """        
-        if self.debug:
-            print("calc_add_formula")
-
         self.add_formula = True
 
     def calculate_new_field(self, save=False):
@@ -548,9 +524,6 @@ class CustomFieldCalculator():
         str, str :
             returns the conditional (cond) and expression (expr)
         """
-        if self.debug:
-            print(f"calc_parse, text: {txt}")
-
         func = 'CustomFieldCalculator.calc_parse'
 
         # remove whitespace
@@ -659,9 +632,6 @@ class CustomFieldCalculator():
         new_field : str
             Name of new field to be computed
         """
-        if self.debug:
-            print(f"calculate_new_field, new_field: {new_field}")
-
         func = 'calculate_new_field'
 
         # parse the expression
@@ -753,9 +723,6 @@ class CustomFieldCalculator():
         np.ndarray of float or bool
             Result of evaluated expression.
         """        
-        if self.debug:
-            print(f"calc_evaluate_expr\n  expr: {expr}\n  val_dict: {val_dict}\n  keep: {keep}")
-
         func = 'calc_evaluate_expr'
         try:
             if val_dict is None:

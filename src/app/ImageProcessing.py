@@ -39,6 +39,7 @@ class ImageProcessing():
     def __init__(self, parent, logger_options=None, logger_key=None):
 
         self.parent = parent
+        
 
         self.noise_red_img = None
         self.grad_img = None

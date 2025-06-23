@@ -2,6 +2,7 @@ import os, pickle
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import ( QMessageBox, QTableWidgetItem, QGraphicsPolygonItem, QCheckBox )
 from pyqtgraph import ( ScatterPlotItem, PlotDataItem )
+from src.common.Logger import auto_log_methods
 
 
 # Polygons
@@ -339,8 +340,8 @@ class Polygon:
 #             self.point_index = None             # index for move point
 #             self.p_id = None           # polygon ID
 #             self.p_id_gen = 0 #Polygon_id generator
-
-class PolygonManager:
+@auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
+class PolygonManager():
     """Operations related to polygon generation and manipulation
 
     Polygons can be used to select or exclude regions of maps for analysis.
@@ -355,10 +356,9 @@ class PolygonManager:
     show_polygon_lines:
     update_table_widget:
     """
-    def __init__(self,parent, main_window, debug=False):
+    def __init__(self,parent, main_window, logger_options=None, logger_key=None):
         self.parent = parent
         self.main_window = main_window
-        self.debug = debug
 
         self.polygons = {}  # Dict to store polygons for each sample
         self.p_id = None  # Current polygon ID

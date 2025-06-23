@@ -14,10 +14,12 @@ from docutils.core import publish_string
 import src.common.format as fmt
 from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
+from src.common.Logger import auto_log_methods
 
 # -------------------------------
 # Notes functions
 # -------------------------------
+@auto_log_methods(logger_key='Notes', prefix="NOTE: ", show_args=True)
 class Notes(CustomDockWidget):
     """A dock that can be used to take notes in ReStructured Text (ReST) including formatted output.
 
@@ -42,7 +44,7 @@ class Notes(CustomDockWidget):
     TypeError
         Parent must be an instance of QMainWindow.
     """        
-    def __init__(self, parent=None, filename=None, title='Notes'):
+    def __init__(self, parent=None, filename=None, title='Notes', logger_options=None, logger_key=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 

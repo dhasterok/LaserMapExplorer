@@ -4,8 +4,11 @@ from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.common.CustomWidgets import RotatedHeaderView
 import os
+from src.common.Logger import auto_log_methods
+
 # Analyte GUI
 # -------------------------------
+@auto_log_methods(logger_key='Selector', prefix="SELECTOR: ", show_args=True)
 class AnalyteDialog(QDialog, Ui_Dialog):
     """Creates an dialog to select analytes and ratios of analytes
 
@@ -28,7 +31,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         _description_
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, parent, debug=False):
+    def __init__(self, parent, logger_options=None, logger_key=None):
         if (parent.__class__.__name__ == 'Main'):
             super().__init__() #initialisng with no parent widget
         else:
@@ -37,8 +40,6 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         if parent.sample_id is None or parent.sample_id == '':
             return
-
-        self.debug = debug
 
         self.data = parent.data[parent.sample_id].processed_data
 
@@ -578,8 +579,8 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             col = index.column()
 
             # debugging
-            if self.debug:
-                print(f"Mouse location: ({row}, {col})")
+            #if self.debug:
+            #   print(f"Mouse location: ({row}, {col})")
 
             # Reset the previous row and column to normal font if they exist
             if self.prev_row is not None:

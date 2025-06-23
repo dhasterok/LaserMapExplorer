@@ -99,7 +99,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Main': True,
                 'IO': False,
                 'Data': True,
-                'Analyte selector': False,
+                'Selector': False,
                 'Plotting': False,
                 'Polygon': False,
                 'Profile': False,
@@ -2773,7 +2773,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Dialogs and Windows
     # -------------------------------------
-    def open_workflow(self):
+    def open_workflow(self, *args, **kwargs):
         """Opens Workflow dock.
 
         Opens Workflow dock, creates on first instance.  The Workflow is used to design processing algorithms that
@@ -2790,7 +2790,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-    def open_mask_dock(self, tab_name=None):
+    def open_mask_dock(self, tab_name=None, *args, **kwargs):
         """Opens Mask Dock
 
         Opens Mask Dock, creates on first instance.  The Mask Dock includes tabs for filtering, creating and masking
@@ -2831,7 +2831,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab[tab_name])
 
 
-    def open_profile(self):
+    def open_profile(self, *args, **kwargs):
         """Opens Profile dock
 
         Opens Profile dock, creates on first instance.  The profile dock is used to create and display
@@ -2841,7 +2841,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Profile
         """
         if not hasattr(self, 'profile'):
-            self.profile_dock = ProfileDock(self, debug=self.logger_options['Profile'])
+            self.profile_dock = ProfileDock(self, logger_options=self.logger_options, logger_key="Profile")
 
             if not (self.profile_dock in self.help_mapping.keys()):
                 self.help_mapping[self.profile_dock] = 'profiles'
@@ -2874,14 +2874,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
 
-    def open_calculator(self):
+    def open_calculator(self, *args, **kwargs):
         """Opens Calculator dock
 
         Opens Calculator dock, creates on first instance.  The Calculator is used to compute custom fields.
         """            
         if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
-            self.calculator = CalculatorDock(self, filename=calc_file, debug=self.logger_options['Calculator'])
+            self.calculator = CalculatorDock(self, filename=calc_file, logger_options=self.logger_options, logger_key="Calculator")
 
             if not (self.calculator in self.help_mapping.keys()):
                 self.help_mapping[self.calculator] = 'calculator'
@@ -2889,7 +2889,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.calculator.show()
         #self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-    def open_info_dock(self):
+    def open_info_dock(self, *args, **kwargs):
         """Opens Info Dock.
         
         Opens Info Dock, creates on first instance.  The Info Dock can be used to interrogate the data and its
@@ -2932,13 +2932,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-    def open_browser(self, action=None):
+    def open_browser(self, action=None, *args, **kwargs):
         """Opens Browser dock with documentation
 
         Opens Browser dock, creates on first instance.
         """
         if not hasattr(self, 'browser'):
-            self.browser = Browser(self, self.help_mapping, BASEDIR, debug=self.logger_options['Browser'])
+            self.browser = Browser(self, self.help_mapping, BASEDIR, logger_options=self.logger_options, logger_key="Browser")
         else:
             self.browser.show()
 
@@ -2954,7 +2954,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case _:
                 self.browser.go_to_home()
 
-    def open_select_analyte_dialog(self):
+    def open_select_analyte_dialog(self, *args, **kwargs):
         """Opens Select Analyte dialog
 
         Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.
@@ -2965,7 +2965,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        self.analyte_dialog = AnalyteDialog(self, debug=self.logger_options['Analyte selector'])
+        self.analyte_dialog = AnalyteDialog(self, logger_options=self.logger_options, logger_key="Selector")
         self.analyte_dialog.show()
 
         result = self.analyte_dialog.exec()  # Store the result here

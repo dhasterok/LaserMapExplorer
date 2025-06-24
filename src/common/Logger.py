@@ -51,6 +51,7 @@ def log_call(logger_key=None, prefix="", show_args=False, show_call_chain=False)
         return wrapper
     return decorator
 
+
 def describe_arg(arg):
     """Return a string description of the argument."""
     try:
@@ -77,13 +78,20 @@ def auto_log_methods(logger_key=None, **log_options):
     def decorator(cls):
         print(f"[DEBUG] Wrapping methods for: {cls.__name__}")
         for attr_name, attr in cls.__dict__.items():
-            # Only wrap user-defined methods
+            # Only wrap user-defined functions that aren't marked to skip
             if inspect.isfunction(attr) and not attr_name.startswith("__"):
+                if getattr(attr, "_no_log", False):
+                    print(f"  - Skipping method (no_log): {attr_name}")
+                    continue
                 print(f"  - Wrapping method: {attr_name}")
                 wrapped = log_call(logger_key=logger_key, **log_options)(attr)
                 setattr(cls, attr_name, wrapped)
         return cls
     return decorator
+
+def no_log(func):
+    func._no_log = True
+    return func
 
 class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.

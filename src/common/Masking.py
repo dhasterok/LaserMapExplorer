@@ -59,6 +59,7 @@ class MaskObj:
 class MaskDock(CustomDockWidget, UIFieldLogic):
     def __init__(self, parent=None, title="Masking Toolbox", logger_options=None, logger_key=None):
         self.logger_options = logger_options
+        self.logger_key = logger_key
 
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
@@ -122,6 +123,9 @@ class FilterTab():
     def __init__(self, parent, logger_options=None, logger_key=None):
         self.parent = parent
         self.main_window = parent.main_window
+
+        self.logger_options = logger_options
+        self.logger_key = logger_key
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -590,6 +594,7 @@ class PolygonTab():
         self.parent = parent
 
         self.logger_options = logger_options
+        self.logger_key = logger_key
         
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -871,6 +876,9 @@ class PolygonTab():
 @auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class ClusterTab():
     def __init__(self, parent, logger_options=None, logger_key=None):
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         self.parent = parent
 
         self.main_window = self.parent.main_window

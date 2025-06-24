@@ -9,10 +9,13 @@ from src.common.Logger import auto_log_methods
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods
 
-@auto_log_methods(logger_key='Data', prefix="DATA: ", show_args=True)
+@auto_log_methods(logger_key='Data', prefix="APPDATA: ", show_args=True)
 class AppData(Observable):
     def __init__(self, data, logger_options=None, logger_key=None):
         super().__init__()
+
+        self.logger_options = logger_options
+        self.logger_key = logger_key
 
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui

@@ -60,6 +60,9 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
     """        
     def __init__(self, parent=None, filename=None, logger_options=None, logger_key=None):
         # super().__init__(self, parent=None)
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         elif parent is None:
@@ -501,7 +504,8 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 @auto_log_methods(logger_key='Calculator', prefix="CALC: ", show_args=True)
 class CustomFieldCalculator():
     def __init__(self, logger_options=None, logger_key=None):
-        pass
+        self.logger_options = logger_options
+        self.logger_key = logger_key
         
     def calc_parse(self, data, ref_chem, txt=None):
         """Prepares expression for calculating a custom field 

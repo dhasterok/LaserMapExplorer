@@ -38,6 +38,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             super().__init__(parent) #initialise with mainWindow as parentWidget
         self.setupUi(self)
 
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         if parent.sample_id is None or parent.sample_id == '':
             return
 

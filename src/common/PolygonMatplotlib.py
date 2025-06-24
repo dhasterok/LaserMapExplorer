@@ -76,6 +76,9 @@ class SerializablePolygon:
 @auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
 class PolygonManager:
     def __init__(self,parent, main_window, logger_options=None, logger_key=None):
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         self.parent = parent
         self.main_window = main_window
         

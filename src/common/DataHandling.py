@@ -165,6 +165,9 @@ class SampleObj(Observable):
     def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, logger_options=None, logger_key=None):
         super().__init__()
 
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         self.sample_id = sample_id
         self.file_path = file_path
         self._current_field = None

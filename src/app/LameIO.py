@@ -29,6 +29,8 @@ class LameIO():
             return
 
         self.logger_options = logger_options
+        self.logger_key = logger_key
+
 
         self.connect_actions = connect_actions
         if self.connect_actions:

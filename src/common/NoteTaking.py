@@ -49,6 +49,9 @@ class Notes(CustomDockWidget):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         self.parent = parent
 
         self._notes_file = None

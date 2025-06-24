@@ -78,7 +78,7 @@ class LameBlockly():
                 'Styles': True,
                 'Calculator': False,
                 'Browser': False,
-                'UI': False
+                'UI': True
             }
         #Initialize nested data which will hold the main sets of data for analysis
         self.data = {}

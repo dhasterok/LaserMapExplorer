@@ -58,7 +58,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import auto_log_methods, LoggerDock
+from src.common.Logger import auto_log_methods, log, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
@@ -97,18 +97,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # setup initial logging options
         self.logger_options = {
                 'Main': True,
-                'IO': False,
+                'IO': True,
                 'Data': True,
-                'Selector': False,
-                'Plotting': False,
-                'Polygon': False,
-                'Profile': False,
-                'Masking': False,
+                'Selector': True,
+                'Plotting': True,
+                'Polygon': True,
+                'Profile': True,
+                'Masking': True,
                 'Tree': True,
                 'Styles': True,
-                'Calculator': False,
-                'Browser': False,
-                'UI': False
+                'Calculator': True,
+                'Browser': True,
+                'UI': True
             }
         self.help_mapping = create_help_mapping(self)
 
@@ -311,14 +311,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def connect_widgets(self):
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
+        self.toolBox.currentChanged.connect(lambda: log(f"toolBox, index=[{self.toolBox.itemText(self.toolBox.currentIndex())}]",prefix="UI: "))
+
         self.comboBoxSampleId.activated.connect(self.update_sample_id)
+        self.comboBoxSampleId.activated.connect(lambda: log(f"comboBoxSampleId, value=[{self.comboBoxSampleId.currentText()}]",prefix="UI: "))
 
         self.lineEditDX.editingFinished.connect(self.update_dx)
         self.lineEditDY.editingFinished.connect(self.update_dy)
-        self.actionFullMap.triggered.connect(self.reset_crop)
+        self.lineEditDX.editingFinished.connect(lambda: log(f"lineEditDX, value=[{self.lineEditDX.value}]",prefix="UI: "))
+        self.lineEditDY.editingFinished.connect(lambda: log(f"lineEditDY, value=[{self.lineEditDY.value}]",prefix="UI: "))
 
+        self.actionFullMap.triggered.connect(self.reset_crop)
+        self.actionFullMap.triggered.connect(lambda: log(f"actionFullMap, state=[{self.actionFullMap.isChecked}]",prefix="UI: "))
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
+        self.toolButtonSwapResolution.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI: "))
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
+        self.toolButtonPixelResolutionReset.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI: "))
 
 
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(
@@ -329,6 +337,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=3))
+        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeC, value=[{self.comboBoxFieldTypeC.currentText()}]",prefix="UI: "))
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldC,
             self.comboBoxFieldTypeC,
@@ -338,6 +347,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
         #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         self.comboBoxFieldC.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=3))
+        self.comboBoxFieldC.currentTextChanged.connect(lambda: log(f"comboBoxFieldC, value=[{self.comboBoxFieldC.currentText()}]",prefix="UI: "))
         # update spinbox associated with map/color field
         self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))
 
@@ -349,6 +359,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=0))
+        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeX, value=[{self.comboBoxFieldTypeX.currentText()}]",prefix="UI: "))
         self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldX,
             self.comboBoxFieldTypeX,
@@ -356,6 +367,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldX.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=0))
+        self.comboBoxFieldX.currentTextChanged.connect(lambda: log(f"comboBoxFieldX, value=[{self.comboBoxFieldX.currentText()}]",prefix="UI: "))
         # update spinbox associated with map/color field
         self.spinBoxFieldX.valueChanged.connect(lambda: self.field_spinbox_changed(ax=0))
 
@@ -367,6 +379,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=1))
+        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeY, value=[{self.comboBoxFieldTypeY.currentText()}]",prefix="UI: "))
         self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldY,
             self.comboBoxFieldTypeY,
@@ -374,6 +387,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldY.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=1))
+        self.comboBoxFieldY.currentTextChanged.connect(lambda: log(f"comboBoxFieldY, value=[{self.comboBoxFieldY.currentText()}]",prefix="UI: "))
         # update spinbox associated with map/color field
         self.spinBoxFieldY.valueChanged.connect(lambda: self.field_spinbox_changed(ax=1))
 
@@ -385,6 +399,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=2))
+        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeZ, value=[{self.comboBoxFieldTypeZ.currentText()}]",prefix="UI: "))
         self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldZ,
             self.comboBoxFieldTypeZ,
@@ -392,6 +407,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
+        self.comboBoxFieldZ.currentTextChanged.connect(lambda: log(f"comboBoxFieldZ, value=[{self.comboBoxFieldZ.currentText()}]",prefix="UI: "))
 
         # N-Dim Tab
         #-------------------------

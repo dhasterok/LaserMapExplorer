@@ -14,6 +14,9 @@ from src.common.Logger import auto_log_methods, log
 @auto_log_methods(logger_key='Tree', prefix="TREE: ", show_args=True)
 class PlotTree():
     def __init__(self, parent, logger_options=None, logger_key=None):
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         self.parent = parent
 
         #create plot tree

@@ -35,11 +35,12 @@ class ImageProcessing():
     plot_gradient : 
         Produces a gradient map with arrows showing gradient direction and colors indicating magnitude
     """
-
     def __init__(self, parent, logger_options=None, logger_key=None):
 
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         self.parent = parent
-        
 
         self.noise_red_img = None
         self.grad_img = None

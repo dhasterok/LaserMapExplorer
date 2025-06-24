@@ -157,6 +157,10 @@ class Styling(Observable):
     """    
     def __init__(self, logger_options=None, logger_key=None):
         super().__init__()
+
+        self.logger_options = logger_options
+        self.logger_key = logger_key
+
         
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
@@ -927,7 +931,9 @@ class StyleTheme():
 class StylingDock(Styling):
     def __init__(self, parent, logger_options=None, logger_key=None):
         super().__init__(logger_options, logger_key)
+
         self.logger_options = logger_options
+        self.logger_key = logger_key
 
         self.axis_widget_dict = {
             'label': [parent.labelX, parent.labelY, parent.labelZ, parent.labelC],

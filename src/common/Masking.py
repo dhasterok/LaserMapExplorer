@@ -111,7 +111,7 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.visibilityChanged.connect(self.update_tab_widget)
         #self.tabWidgetMask.currentChanged.connect(self.update_tab_widget)
 
-    def update_tab_widget(self):
+    def update_tab_widget(self, *args, **kwargs):
         if not self.isVisible():
             return
 
@@ -344,7 +344,7 @@ class FilterTab():
         self.parent.data.apply_field_filters()
         self.main_window.plot_style.schedule_update()
 
-    def update_filter_values(self):
+    def update_filter_values(self, *args, **kwargs):
         """Updates widgets that display the filter bounds for a selected field.
 
         Updates ``self.lineEditFMin`` and ``self.lineEditFMax`` values for display when the
@@ -704,7 +704,7 @@ class PolygonTab():
         self.parent.tabWidgetMask.addTab(self.polygon_tab, polygon_icon, "Polygons")
         
         # initialise polygon dictionary for a given sample id in self.parent.data
-        self.polygon_manager = PolygonManager(parent = self, main_window = self.parent.main_window, logger_options=self.logger_options, logger_key="Polygon")
+        self.polygon_manager = PolygonManager(parent = self, main_window=self.parent.main_window, logger_options=self.logger_options, logger_key="Polygon")
         #self.parent.main_window.data.polygon = self.polygon_manger.polygons
         self.actionPolyCreate.triggered.connect(self.polygon_manager.increment_pid)
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.parent.main_window.mpl_canvas))
@@ -760,7 +760,7 @@ class PolygonTab():
                 self.actionPolySave.setEnabled(False)
                 self.actionPolyDelete.setEnabled(False)
 
-    def update_table_widget(self):
+    def update_table_widget(self, *args, **kwargs):
         """Update the polygon table (PyQt6 version)."""
         sample_id = self.parent.main_window.app_data.sample_id
         table = self.tableWidgetPolyPoints

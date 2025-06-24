@@ -29,9 +29,6 @@ def calc_error(parent, func, err, addinfo):
     addinfo : str
         Additional info (generally exception raised)
     """        
-    if parent.debug:
-        print(f"calc_error\n  func: {func}\n  err: {err}\n  addinfo: {addinfo}")
-
     parent.message_label.setText(f"Error: {err}")
     QMessageBox.warning(parent,"Calculation Error",f"Error: {err}\n\n({func}) {addinfo}",QMessageBox.StandardButton.Ok)
 
@@ -80,7 +77,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
         # create an instance of CustomFieldCalculator for the heavy lifting
         if parent.app_data.sample_id != '':
-            self.cfc = CustomFieldCalculator(debug)
+            self.cfc = CustomFieldCalculator(logger_options=self.logger_options, logger_key="Calculator")
 
         if filename is None:
             self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
@@ -500,11 +497,11 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
                 calc_error(self, func, err, e)
                 return
 
- 
 
+@auto_log_methods(logger_key='Calculator', prefix="CALC: ", show_args=True)
 class CustomFieldCalculator():
-    def __init__(self, debug=False):
-        self.debug = debug
+    def __init__(self, logger_options=None, logger_key=None):
+        pass
         
     def calc_parse(self, data, ref_chem, txt=None):
         """Prepares expression for calculating a custom field 

@@ -52,9 +52,6 @@ class LameIO():
         path : str
             Path to datafile, if ``None``, an open directory dialog is openend, by default ``None``
         """
-        if self.debug:
-            print("open_sample")
-
         parent = self.parent
         if path is None:
             dialog = QFileDialog()
@@ -122,9 +119,6 @@ class LameIO():
 
     def import_spots(self):
         """Import a data file with spot data."""
-        if self.debug:
-            print("import_spots")
-
         # import spot dialog
         self.spotDialog = SpotImporter.SpotImporter(self.parent)
         self.spotDialog.show()
@@ -139,9 +133,6 @@ class LameIO():
 
         Populates ``MainWindow.tableWidgetSpots``.
         """
-        if self.debug:
-            print("populate_spot_table")
-
         parent = self.parent
 
         if parent.sample_id == '':
@@ -163,9 +154,6 @@ class LameIO():
 
         Saves (mostly) everything for recalling later.
         """
-        if self.debug:
-            print("save_project")
-
         parent = self.parent
         projects_dir = os.path.join(BASEDIR, "projects")
         
@@ -225,9 +213,6 @@ class LameIO():
 
         Restores a project session: data, analysis, and plots.
         """        
-        if self.debug:
-            print("open_project")
-
         parent = self.parent
 
         if parent.data:
@@ -336,9 +321,6 @@ class LameIO():
 
     def import_files(self):
         """Opens an import dialog from ``MapImporter`` to open selected data directories."""
-        if self.debug:
-            print("import_files")
-
         # import data dialog
         self.importDialog = MapImporter.MapImporter(self.parent)
         self.importDialog.show()

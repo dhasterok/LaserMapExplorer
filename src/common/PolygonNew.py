@@ -2,6 +2,7 @@ import pickle
 import os
 import numpy as np
 from matplotlib.patches import Polygon as MplPolygon
+from src.common.Logger import auto_log_methods, log
 
 class Polygon:
     """Stores data about one polygon and references to the drawn Patch."""
@@ -10,14 +11,13 @@ class Polygon:
         self.points = []   # list of (x, y)
         self.patch = None  # Matplotlib Patch reference
 
+@auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
 class PolygonManager:
     """
     Manages polygon creation, storage, and drawing on a Matplotlib axes.
     Includes save/load methods using the `pickle` module.
     """
-
-    def __init__(self,parent, debug=False):
-        self.debug = debug
+    def __init__(self, parent, logger_options=None, logger_key=None):
         self.parent = parent
         # For multi-sample usage, you might have {sample_id: {p_id: Polygon}}.
         # For simplicity, this snippet just uses a single dict of polygons:
@@ -282,8 +282,7 @@ class PolygonManager:
         with open(filepath, 'wb') as f:
             pickle.dump(data, f)
 
-        if self.debug:
-            print(f"[PolygonManager] Saved {len(data)} polygons to {filepath}")
+        log(f"Saved {len(data)} polygons to {filepath}", prefix="POLYGON:")
 
     def load_polygons(self, filepath, axes):
         """
@@ -291,9 +290,7 @@ class PolygonManager:
         Expects the same structure as produced by `save_polygons`.
         """
         if not os.path.exists(filepath):
-            if self.debug:
-                print(f"[PolygonManager] File not found: {filepath}")
-            return
+            log(f"File not found: {filepath}", prefix="POLYGON")
 
         with open(filepath, 'rb') as f:
             data = pickle.load(f)
@@ -325,5 +322,4 @@ class PolygonManager:
 
         axes.figure.canvas.draw_idle()
 
-        if self.debug:
-            print(f"[PolygonManager] Loaded {len(data)} polygons from {filepath}")
+        log(f"Loaded {len(data)} polygons from {filepath}", prefix="POLYGON")

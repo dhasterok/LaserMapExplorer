@@ -349,7 +349,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         
         self.toggle_profile_actions()
 
-    def update_dock_visibility(self):
+    def update_dock_visibility(self, *args, **kwargs):
         if not self.profile_toggle.isChecked():
             return
 
@@ -400,7 +400,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
             self.actionDeleteProfile.setEnabled(False)
 
         
-    def update_profile_spinbox(self):
+    def update_profile_spinbox(self, *args, **kwargs):
         """Updates the maximum number of subplots that can be selected.
 
         Updates ``MainWindow.spinBoxProfileSelectedSubplot.setMaximum()
@@ -408,7 +408,7 @@ class ProfileDock(CustomDockWidget, UIFieldLogic):
         n = self.num_subplots_spinbox.value()
         self.selected_subplot_spinbox.setMaximum(int(n))
 
-    def profile_state_changed(self):
+    def profile_state_changed(self, *args, **kwargs):
         self.main_window.profile_state = self.profile_toggle.isChecked()
         if self.profile_toggle.isChecked():
             self.main_window.update_plot_type_combobox()
@@ -1289,7 +1289,7 @@ class Profiling:
         scatter_points.clear()
 
 
-    def plot_profiles(self, fields=None, num_subplots=None, selected_subplot=None, interpolate=None, sort_axis=None):
+    def plot_profiles(self, fields=None, num_subplots=None, selected_subplot=None, interpolate=None, sort_axis=None, *args, **kwargs):
         """Plot averaged profile values with error bars.
 
         Plots the profile values stored in self.profiles with error bars on the specified subplot(s),
@@ -1845,7 +1845,7 @@ class Profiling:
                 return (scatter, errorbars)
         return None
 
-    def add_field_to_listview(self, field=None, update=True):
+    def add_field_to_listview(self, field=None, update=True, *args, **kwargs):
         """Add selected fields to the profile list view and update the fields per subplot."""
         # Get the currently selected subplot index
         selected_subplot = self.profile_dock.spinBoxProfileSelectedSubplot.value() - 1  # 0-based index

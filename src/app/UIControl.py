@@ -101,7 +101,7 @@ class UIFieldLogic():
     # ----end debugging----
 
     # updates field comboboxes for analysis and plotting
-    def update_field_combobox(self, parentBox, childBox):
+    def update_field_combobox(self, parentBox, childBox, *args, **kwargs):
         """Updates comboBoxes with fields for plots or analysis
 
         Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.

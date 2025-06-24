@@ -8,7 +8,7 @@ from src.common.Logger import auto_log_methods
 # Polygons
 # -------------------------------
 class Polygon:
-    def __init__(self, p_id, debug=False):
+    def __init__(self, p_id, ):
         self.p_id = p_id
         self.points = []  # List to store points as (x, y, scatter)
         self.lines = []  # List to store lines as graphical items
@@ -340,6 +340,7 @@ class Polygon:
 #             self.point_index = None             # index for move point
 #             self.p_id = None           # polygon ID
 #             self.p_id_gen = 0 #Polygon_id generator
+
 @auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
 class PolygonManager():
     """Operations related to polygon generation and manipulation

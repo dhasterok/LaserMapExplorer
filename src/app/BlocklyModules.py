@@ -50,7 +50,7 @@ from src.app.SpecialTools import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color

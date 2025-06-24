@@ -52,7 +52,7 @@ from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
 import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, DEBUG, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -1751,7 +1751,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # initiate the sample change
         self.change_sample()
 
-    def update_plot_type_combobox_options(self):
+    def update_plot_type_combobox_options(self, *args, **kwargs):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
         if self.profile_state == True or self.polygon_state == True:
             plot_idx = -1

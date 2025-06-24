@@ -4,6 +4,7 @@ from matplotlib.patches import Polygon as MplPolygon
 from matplotlib.lines import Line2D
 import os
 import pickle
+from src.common.Logger import auto_log_methods, log
 
 class InteractivePolygon:
     def __init__(self, ax, verts):
@@ -72,12 +73,11 @@ class SerializablePolygon:
         self.patch = None      # Matplotlib Polygon patch (set when drawn)
         self.vertex_markers = []  # Optionally store scatter objects
 
+@auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
 class PolygonManager:
-    def __init__(self,parent, main_window, debug=False):
+    def __init__(self,parent, main_window, logger_options=None, logger_key=None):
         self.parent = parent
         self.main_window = main_window
-        self.debug = debug
-        
         
         self.polygons = {}  # {sample_id: {p_id: SerializablePolygon}}
         self.p_id_gen = 0   # global counter (can be made per-sample if needed)

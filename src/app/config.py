@@ -8,9 +8,6 @@ ICONPATH = os.path.join(BASEDIR, 'resources', 'icons')
 # Path to the stylesheet
 SSPATH = os.path.join(BASEDIR, 'resources', 'styles')
 
-DEBUG = False
-DEBUG_PLOT = False
-
 def load_stylesheet(filename):
     replacements = {
         '{icon_path}': ICONPATH.replace('\\', '/'),  # Ensure correct path format

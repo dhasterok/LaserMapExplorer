@@ -1,5 +1,4 @@
 import re, os, copy
-from src.app.config import DEBUG_PLOT
 import numpy as np
 import pandas as pd
 from src.common.ExtendedDF import AttributeDataFrame
@@ -1036,22 +1035,22 @@ class SampleObj(Observable):
         self.cluster_labels = np.full(mask_valid.shape[0], np.nan)
         self.cluster_labels[mask_valid] = cluster_labels
 
-        if DEBUG_PLOT:
-            # Reshape the full_labels array based on unique X and Y values
-            x_unique = self.raw_data['Xc'].nunique()  # Assuming 'X' is a column in raw_data
-            y_unique = self.raw_data['Yc'].nunique()  # Assuming 'Y' is a column in raw_data
+        # if DEBUG_PLOT:
+        #     # Reshape the full_labels array based on unique X and Y values
+        #     x_unique = self.raw_data['Xc'].nunique()  # Assuming 'X' is a column in raw_data
+        #     y_unique = self.raw_data['Yc'].nunique()  # Assuming 'Y' is a column in raw_data
 
-            # Ensure the reshaped array has the same shape as the spatial grid
-            reshaped_labels = np.reshape(self.cluster_labels, (y_unique, x_unique), order='F')
+        #     # Ensure the reshaped array has the same shape as the spatial grid
+        #     reshaped_labels = np.reshape(self.cluster_labels, (y_unique, x_unique), order='F')
 
-            # Plot using imshow
-            fig, ax1 = plt.subplots() 
-            cax = ax1.imshow(reshaped_labels, cmap='viridis', interpolation='none')
-            cbar = fig.colorbar(cax, label='Cluster Labels', ax=ax1, orientation='horizontal')
-            ax1.set_title('Cluster Labels with NaN Handling')
-            ax1.set_xlabel('X')
-            ax1.set_ylabel('Y')
-            fig.show()
+        #     # Plot using imshow
+        #     fig, ax1 = plt.subplots() 
+        #     cax = ax1.imshow(reshaped_labels, cmap='viridis', interpolation='none')
+        #     cbar = fig.colorbar(cax, label='Cluster Labels', ax=ax1, orientation='horizontal')
+        #     ax1.set_title('Cluster Labels with NaN Handling')
+        #     ax1.set_xlabel('X')
+        #     ax1.set_ylabel('Y')
+        #     fig.show()
 
     def prep_data(self, field=None):
         """Applies adjustments to data data prior to analyses and plotting.
@@ -1240,26 +1239,26 @@ class SampleObj(Observable):
         # 1 because it starts at 0 and 1 because it is the second derivative
         optimal_k = np.argmax(second_derivative) + 2  # Example heuristic
 
-        if DEBUG_PLOT:
-            # Plot inertia
-            fig, ax1 = plt.subplots()
+        # if DEBUG_PLOT:
+        #     # Plot inertia
+        #     fig, ax1 = plt.subplots()
 
-            ax1.plot(range(1, max_clusters+1), inertia, marker='o', color='b', label='Inertia')
-            ax1.set_xlabel('Number of clusters')
-            ax1.set_ylabel('Inertia', color='b')
-            ax1.tick_params(axis='y', labelcolor='b')
-            ax1.set_title('Elbow Method for Optimal Clusters')
-            ax1.axvline(x=optimal_k, linestyle='--', color='r', label=f'Elbow at k={optimal_k}')
+        #     ax1.plot(range(1, max_clusters+1), inertia, marker='o', color='b', label='Inertia')
+        #     ax1.set_xlabel('Number of clusters')
+        #     ax1.set_ylabel('Inertia', color='b')
+        #     ax1.tick_params(axis='y', labelcolor='b')
+        #     ax1.set_title('Elbow Method for Optimal Clusters')
+        #     ax1.axvline(x=optimal_k, linestyle='--', color='r', label=f'Elbow at k={optimal_k}')
 
 
-            # Create a secondary y-axis to plot the second derivative
-            ax2 = ax1.twinx()
-            ax2.plot(range(2, max_clusters), second_derivative, marker='x', color='r', label='2nd Derivative')
-            ax2.set_ylabel('2nd Derivative', color='r')
-            ax2.tick_params(axis='y', labelcolor='r')
+        #     # Create a secondary y-axis to plot the second derivative
+        #     ax2 = ax1.twinx()
+        #     ax2.plot(range(2, max_clusters), second_derivative, marker='x', color='r', label='2nd Derivative')
+        #     ax2.set_ylabel('2nd Derivative', color='r')
+        #     ax2.tick_params(axis='y', labelcolor='r')
 
-            self.logger.print(f"Second derivative of inertia: {second_derivative}")
-            self.logger.print(f"Optimal number of clusters: {optimal_k}")
+        #     self.logger.print(f"Second derivative of inertia: {second_derivative}")
+        #     self.logger.print(f"Optimal number of clusters: {optimal_k}")
 
         return optimal_k
 

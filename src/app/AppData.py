@@ -4,18 +4,15 @@ import pandas as pd
 import random
 import src.common.csvdict as csvdict
 from src.app.config import BASEDIR
-from src.common.Logger import auto_log_methods
-
 from src.common.Observable import Observable
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 @auto_log_methods(logger_key='Data', prefix="APPDATA: ", show_args=True)
 class AppData(Observable):
-    def __init__(self, data, logger_options=None, logger_key=None):
+    def __init__(self, data):
         super().__init__()
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Data'
 
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         # in future will be set from preference ui

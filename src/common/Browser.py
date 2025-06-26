@@ -8,7 +8,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtGui import QIcon, QMouseEvent
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
     
 # WebEngineView - Web engine for viewing userguide help pages
 # -------------------------------
@@ -23,9 +23,9 @@ class WebEngineView(QWebEngineView):
     QWebEngineView : QWebEngine
         A web engine widget
     """    
-    def __init__(self, parent=None, logger_options=None, logger_key=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-
+        self.logger_key = 'Browser'
         self.parent = parent
 
         # Connect signals
@@ -112,12 +112,12 @@ class Browser(QDockWidget):
     TypeError :
         Parent must be an instance of QMainWindow
     """    
-    def __init__(self, parent=None, help_mapping={}, base_path='', logger_options=None, logger_key=None):
+    def __init__(self, parent=None, help_mapping={}, base_path=''):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         super().__init__(parent)
 
-        self.logger_options = logger_options
+        self.logger_key = 'Browser'
 
         container = QWidget()
 
@@ -261,7 +261,7 @@ class Browser(QDockWidget):
         """        
         # Open a file dialog to select a local HTML file
         # Create a QWebEngineView widget
-        self.engine = WebEngineView(self.parent, logger_options=self.logger_options, logger_key="Browser")
+        self.engine = WebEngineView(self.parent)
         self.dock_layout.addWidget(self.engine)
 
         #file_name, _ = QFileDialog.getOpenFileName(self, "Open HTML File", "", "HTML Files (*.html *.htm)")

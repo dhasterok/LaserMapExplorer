@@ -6,16 +6,15 @@ import src.common.CustomMplCanvas as mplc
 from src.common.CustomWidgets import StandardItem, CustomTreeView
 from src.common.SortAnalytes import sort_analytes
 
-from src.common.Logger import auto_log_methods, log
+from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 # -------------------------------
 # Plot Selector (tree) functions
 # -------------------------------
 @auto_log_methods(logger_key='Tree', prefix="TREE: ", show_args=True)
 class PlotTree():
-    def __init__(self, parent, logger_options=None, logger_key=None):
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+    def __init__(self, parent):
+        self.logger_key = 'Tree'
 
         self.parent = parent
 

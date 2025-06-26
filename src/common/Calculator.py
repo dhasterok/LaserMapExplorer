@@ -15,7 +15,7 @@ from PyQt6.QtGui import QIcon, QAction
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 def calc_error(parent, func, err, addinfo):
     """Raise a calculator-related error
@@ -58,10 +58,9 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
     TypeError
         Parent must be an instance of QMainWindow.
     """        
-    def __init__(self, parent=None, filename=None, logger_options=None, logger_key=None):
+    def __init__(self, parent=None, filename=None):
         # super().__init__(self, parent=None)
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Calculator'
 
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
@@ -80,7 +79,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
         # create an instance of CustomFieldCalculator for the heavy lifting
         if parent.app_data.sample_id != '':
-            self.cfc = CustomFieldCalculator(logger_options=self.logger_options, logger_key="Calculator")
+            self.cfc = CustomFieldCalculator()
 
         if filename is None:
             self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
@@ -503,9 +502,8 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
 
 @auto_log_methods(logger_key='Calculator', prefix="CALC: ", show_args=True)
 class CustomFieldCalculator():
-    def __init__(self, logger_options=None, logger_key=None):
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+    def __init__(self):
+        self.logger_key = 'Calculator'
         
     def calc_parse(self, data, ref_chem, txt=None):
         """Prepares expression for calculating a custom field 

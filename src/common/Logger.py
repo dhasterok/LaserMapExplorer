@@ -93,6 +93,21 @@ def no_log(func):
     func._no_log = True
     return func
 
+class LoggerConfig:
+    _options = {}
+
+    @classmethod
+    def set_options(cls, options_dict):
+        cls._options = options_dict
+
+    @classmethod
+    def get_option(cls, key):
+        return cls._options.get(key, False)
+
+    @classmethod
+    def get_all(cls):
+        return cls._options
+
 class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.
 

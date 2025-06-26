@@ -17,7 +17,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods, log
 class StyleObj():
     pass
 
-@auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
+@auto_log_methods(logger_key='Style', show_args=True)
 class Styling(Observable):
     """Manages plot styling for different plot types and syncs with main window UI.
 
@@ -1195,7 +1195,7 @@ class StyleTheme():
         return styles
     
 
-@auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
+@auto_log_methods(logger_key='Style', show_args=True)
 class StylingDock(Styling):
     def __init__(self, parent, logger_options=None, logger_key=None):
         super().__init__(parent,logger_options, logger_key)

@@ -73,7 +73,7 @@ class SerializablePolygon:
         self.patch = None      # Matplotlib Polygon patch (set when drawn)
         self.vertex_markers = []  # Optionally store scatter objects
 
-@auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
+@auto_log_methods(logger_key='Polygon', show_args=True)
 class PolygonManager:
     def __init__(self,parent, main_window, logger_options=None, logger_key=None):
         self.logger_options = logger_options

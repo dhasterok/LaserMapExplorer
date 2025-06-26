@@ -11,7 +11,7 @@ class Polygon:
         self.points = []   # list of (x, y)
         self.patch = None  # Matplotlib Patch reference
 
-@auto_log_methods(logger_key='Polygon', prefix="POLYGON: ", show_args=True)
+@auto_log_methods(logger_key='Polygon', show_args=True)
 class PolygonManager:
     """
     Manages polygon creation, storage, and drawing on a Matplotlib axes.
@@ -282,7 +282,7 @@ class PolygonManager:
         with open(filepath, 'wb') as f:
             pickle.dump(data, f)
 
-        log(f"Saved {len(data)} polygons to {filepath}", prefix="POLYGON:")
+        log(f"Saved {len(data)} polygons to {filepath}", prefix="POLYGON")
 
     def load_polygons(self, filepath, axes):
         """

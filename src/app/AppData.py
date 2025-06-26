@@ -7,7 +7,7 @@ from src.app.config import BASEDIR
 from src.common.Observable import Observable
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
-@auto_log_methods(logger_key='Data', prefix="APPDATA: ", show_args=True)
+@auto_log_methods(logger_key='Data', show_args=True)
 class AppData(Observable):
     def __init__(self, data):
         super().__init__()

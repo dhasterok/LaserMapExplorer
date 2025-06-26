@@ -19,7 +19,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 # -------------------------------
 # Notes functions
 # -------------------------------
-@auto_log_methods(logger_key='Notes', prefix="NOTE: ", show_args=True)
+@auto_log_methods(logger_key='Notes', show_args=True)
 class Notes(CustomDockWidget):
     """A dock that can be used to take notes in ReStructured Text (ReST) including formatted output.
 

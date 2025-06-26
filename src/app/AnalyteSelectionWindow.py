@@ -8,7 +8,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 
 # Analyte GUI
 # -------------------------------
-@auto_log_methods(logger_key='Selector', prefix="SELECTOR: ", show_args=True)
+@auto_log_methods(logger_key='Selector', show_args=True)
 class AnalyteDialog(QDialog, Ui_Dialog):
     """Creates an dialog to select analytes and ratios of analytes
 

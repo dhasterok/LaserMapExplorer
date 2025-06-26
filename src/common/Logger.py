@@ -26,14 +26,18 @@ def log(msg, prefix=""):
     else:
         print(f"{prefix}{msg}")
 
-def log_call(logger_key=None, prefix="", show_args=False, show_call_chain=False):
+def log_call(logger_key=None, show_args=False, show_call_chain=False):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             # Check if logging is enabled for the given logger_key
-            if logger_key:
+            if logger_key and LoggerConfig.get_option(logger_key):
+                prefix = f"{logger_key.upper()}: "
+
                 if not getattr(self, 'logger_options', {}).get(logger_key, False):
                     return func(self, *args, **kwargs)
+            else:
+                prefix = ""
 
             # Build message
             func_name = func.__qualname__
@@ -124,6 +128,13 @@ class LoggerDock(CustomDockWidget):
 
         super().__init__(parent)
         self.parent = parent
+
+        self.log_colors = {
+            "Error": "red",
+            "Warning": "orange",
+            "UI": "blue",
+            "Data": "green",
+        }
 
         self.match_cursors = []
         self.current_match_index = -1
@@ -233,7 +244,27 @@ class LoggerDock(CustomDockWidget):
         message : str
             Message to display in logger
         """        
-        self.text_edit.append(message)  # Append the message to the QTextEdit
+        # check and change text color if necessary
+        color = self.detect_color_from_message(message)
+        self.text_edit.setTextColor(QColor(color))
+
+        # add message to to text_edit
+        self.text_edit.append(message)
+
+        # reset default color
+        self.text_edit.setTextColor(QColor("black"))
+
+    def detect_color_from_message(self, message):
+        prefix = message.split(" ", 1)[0].rstrip(":")  # Extract prefix like "UI", "DATA", etc.
+        for key, color in self.log_colors.items():
+            if prefix.lower() == key.lower():
+                return color
+        return self.default_color()
+
+    def default_color(self):
+        palette = self.text_edit.palette()
+        bg = palette.color(self.text_edit.backgroundRole()).lightness()
+        return "lightgray" if bg < 128 else "black"
 
     def flush(self):
         """Flushes the write buffer.
@@ -289,6 +320,8 @@ class LoggerOptionsDialog(QDialog):
     """        
     def __init__(self, options_dict, parent=None):
         super().__init__(parent)
+
+        
         self.setWindowTitle("Logger Options")
         self.setLayout(QVBoxLayout())
 

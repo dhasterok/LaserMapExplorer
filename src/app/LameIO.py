@@ -15,7 +15,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 # File I/O related functions
 # -------------------------------------
 
-@auto_log_methods(logger_key='IO', prefix="IO: ", show_args=True)
+@auto_log_methods(logger_key='IO', show_args=True)
 class LameIO():
     """Handles most I/O for the main window of LaME
 

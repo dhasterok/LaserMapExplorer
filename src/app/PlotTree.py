@@ -11,7 +11,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods, log
 # -------------------------------
 # Plot Selector (tree) functions
 # -------------------------------
-@auto_log_methods(logger_key='Tree', prefix="TREE: ", show_args=True)
+@auto_log_methods(logger_key='Tree', show_args=True)
 class PlotTree():
     def __init__(self, parent):
         self.logger_key = 'Tree'

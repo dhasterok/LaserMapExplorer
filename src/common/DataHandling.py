@@ -15,7 +15,7 @@ from src.common.Status import StatusMessageManager
 from src.common.format import symlog
 from src.common.Logger import LoggerConfig, auto_log_methods
 
-@auto_log_methods(logger_key='Data', prefix="DATA: ", show_args=True)
+@auto_log_methods(logger_key='Data', show_args=True)
 class SampleObj(Observable):
     """Creates a sample object to store and manipulate geochemical data in map form
     

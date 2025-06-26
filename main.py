@@ -67,7 +67,7 @@ from src.app.AppData import AppData
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 # setConfigOption('imageAxisOrder', 'row-major') # best performance
 
-@auto_log_methods(logger_key='Main', prefix="MAIN: ", show_args=True)
+@auto_log_methods(logger_key='Main', show_args=True)
 class MainWindow(QMainWindow, Ui_MainWindow):
     """_summary_
 

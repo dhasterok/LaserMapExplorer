@@ -12,7 +12,7 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR
 from src.common.Observable import Observable
 from src.common.ScheduleTimer import Scheduler
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 class StyleObj():
     pass
@@ -155,11 +155,10 @@ class Styling(Observable):
             Prints debugging messages to stdout, by default ``False``
 
     """    
-    def __init__(self, logger_options=None, logger_key=None):
+    def __init__(self):
         super().__init__()
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Style'
 
         
         # create the default style dictionary (self.style_dict for each plot type)
@@ -691,12 +690,14 @@ class Styling(Observable):
     # -------------------------------------
     def print_properties(self):
         for attr, value in vars(self).items():
-            self.logger.print(f"{attr}: {value}")
+            log(f"{attr}: {value}", prefix="DEBUG")
 
 
 class StyleTheme():
-    def __init__(self, parent=None, logger_options=None, logger_key=None):
+    def __init__(self, parent=None):
         self.parent = parent
+
+        self.logger_key = 'Style'
 
     # Themes
     # -------------------------------------
@@ -890,6 +891,8 @@ class StyleTheme():
         styles['scatter']['AspectRatio'] = 1
         styles['scatter']['XFieldType'] = 'Analyte'
         styles['scatter']['YFieldType'] = 'Analyte'
+        styles['scatter']['ZFieldType'] = 'None'
+        styles['scatter']['CFieldType'] = 'None'
 
         styles['heatmap']['AspectRatio'] = 1
         styles['heatmap']['CLim'] = [1,1000]
@@ -917,6 +920,7 @@ class StyleTheme():
         styles['histogram']['AspectRatio'] = 0.62
         styles['histogram']['LineWidth'] = 0
         styles['histogram']['XFieldType'] = 'Analyte'
+        styles['histogram']['CFieldType'] = 'None'
 
         styles['profile']['AspectRatio'] = 0.62
         styles['profile']['LineWidth'] = 1.0
@@ -929,11 +933,10 @@ class StyleTheme():
 
 @auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
 class StylingDock(Styling):
-    def __init__(self, parent, logger_options=None, logger_key=None):
-        super().__init__(logger_options, logger_key)
+    def __init__(self, parent):
+        super().__init__()
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Style'
 
         self.axis_widget_dict = {
             'label': [parent.labelX, parent.labelY, parent.labelZ, parent.labelC],
@@ -1089,7 +1092,7 @@ class StylingDock(Styling):
         self.app_data = parent.app_data
 
         # initialize style themes and associated widgets
-        self.style_themes = StyleTheme(parent, logger_options=self.logger_options, logger_key="Style")
+        self.style_themes = StyleTheme(parent)
 
         parent.comboBoxStyleTheme.clear()
         parent.comboBoxStyleTheme.addItems(self.style_themes.load_theme_names())

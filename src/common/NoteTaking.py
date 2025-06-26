@@ -14,7 +14,7 @@ from docutils.core import publish_string
 import src.common.format as fmt
 from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 # -------------------------------
 # Notes functions
@@ -44,13 +44,12 @@ class Notes(CustomDockWidget):
     TypeError
         Parent must be an instance of QMainWindow.
     """        
-    def __init__(self, parent=None, filename=None, title='Notes', logger_options=None, logger_key=None):
+    def __init__(self, parent=None, filename=None, title='Notes'):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Notes'
 
         self.parent = parent
 

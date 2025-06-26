@@ -27,7 +27,7 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.format as fmt
 from src.common.PolygonMatplotlib import PolygonManager
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 # Mask object
 # -------------------------------
@@ -57,9 +57,8 @@ class MaskObj:
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
 @auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class MaskDock(CustomDockWidget, UIFieldLogic):
-    def __init__(self, parent=None, title="Masking Toolbox", logger_options=None, logger_key=None):
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+    def __init__(self, parent=None, title="Masking Toolbox"):
+        self.logger_key = 'Mask'
 
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
@@ -101,9 +100,9 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
         self.tabWidgetMask = QTabWidget(container)
         self.tabWidgetMask.setObjectName("Mask Tab Widget")
 
-        self.filter_tab = FilterTab(self, logger_options=self.logger_options, logger_key="Mask")
-        self.polygon_tab = PolygonTab(self, logger_options=self.logger_options, logger_key="Mask")
-        self.cluster_tab = ClusterTab(self, logger_options=self.logger_options, logger_key="Mask")
+        self.filter_tab = FilterTab(self)
+        self.polygon_tab = PolygonTab(self)
+        self.cluster_tab = ClusterTab(self)
 
         dock_layout.addWidget(self.tabWidgetMask)
         self.setWidget(container)
@@ -120,12 +119,11 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
 
 @auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class FilterTab():
-    def __init__(self, parent, logger_options=None, logger_key=None):
+    def __init__(self, parent):
         self.parent = parent
         self.main_window = parent.main_window
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Mask'
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -590,11 +588,10 @@ class FilterTab():
 
 @auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class PolygonTab():
-    def __init__(self, parent, logger_options=None, logger_key=None):
+    def __init__(self, parent):
         self.parent = parent
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Mask'
         
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -875,9 +872,8 @@ class PolygonTab():
 
 @auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
 class ClusterTab():
-    def __init__(self, parent, logger_options=None, logger_key=None):
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+    def __init__(self, parent):
+        self.logger_key = 'Mask'
 
         self.parent = parent
 

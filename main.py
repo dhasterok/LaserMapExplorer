@@ -58,7 +58,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import auto_log_methods, log, LoggerDock
+from src.common.Logger import LoggerConfig, auto_log_methods, log, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
@@ -99,6 +99,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Main': True,
                 'IO': True,
                 'Data': True,
+                'Image': True,
                 'Selector': True,
                 'Plotting': True,
                 'Polygon': True,
@@ -110,6 +111,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Browser': True,
                 'UI': True
             }
+        LoggerConfig.set_options(self.logger_options)
+
         self.help_mapping = create_help_mapping(self)
 
         # The data dictionary will hold the data with a key for each sample
@@ -124,10 +127,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #       critical UI properties
         #       notifiers when properties change
         #       data structure and properties (DataHandling), data
-        self.app_data = AppData(self.data, logger_options=self.logger_options, logger_key="Data")
+        self.app_data = AppData(self.data)
 
         # initialize the styling data and dock
-        self.plot_style = StylingDock(self, logger_options=self.logger_options, logger_key="Styles")
+        self.plot_style = StylingDock(self)
 
         self.connect_app_data_observers(self.app_data)
         self.connect_plot_style_observers(self.plot_style)
@@ -229,18 +232,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.info_tab = {}
         self.actionInfo.triggered.connect(self.open_info_dock)
 
-        self.io = LameIO(parent=self, connect_actions=True, logger_options=self.logger_options, logger_key="IO")
+        self.io = LameIO(parent=self, connect_actions=True)
 
         self.actionHelp.setCheckable(True)
         self.actionHelp.toggled.connect(self.toggle_help_mode)
 
         # initialize used classes
         self.crop_tool = CropTool(self)
-        self.plot_tree = PlotTree(self, logger_options=self.logger_options, logger_key="Tree")
+        self.plot_tree = PlotTree(self)
         self.table_fcn = TableFcn(self)
         #self.clustertool = Clustering(self)
         #self.dimredtool = DimensionalReduction(self)
-        self.noise_reduction = ImageProcessing(self, logger_options=self.logger_options, logger_key="Image")
+        self.noise_reduction = ImageProcessing(self)
 
         self.actionQuit_LaME.triggered.connect(self.quit)
 
@@ -2818,7 +2821,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Will open the dock to the requested tab, options include 'filter', 'polygon' and cluster', by default None
         """
         if not hasattr(self, 'mask_dock'):
-            self.mask_dock = MaskDock(self, logger_options=self.logger_options, logger_key="Mask")
+            self.mask_dock = MaskDock(self)
 
             self.mask_tab = {}
             for tid in range(self.mask_dock.tabWidgetMask.count()):
@@ -2857,7 +2860,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Profile
         """
         if not hasattr(self, 'profile'):
-            self.profile_dock = ProfileDock(self, logger_options=self.logger_options, logger_key="Profile")
+            self.profile_dock = ProfileDock(self)
 
             if not (self.profile_dock in self.help_mapping.keys()):
                 self.help_mapping[self.profile_dock] = 'profiles'
@@ -2897,7 +2900,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
-            self.calculator = CalculatorDock(self, filename=calc_file, logger_options=self.logger_options, logger_key="Calculator")
+            self.calculator = CalculatorDock(self, filename=calc_file)
 
             if not (self.calculator in self.help_mapping.keys()):
                 self.help_mapping[self.calculator] = 'calculator'
@@ -2954,7 +2957,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Opens Browser dock, creates on first instance.
         """
         if not hasattr(self, 'browser'):
-            self.browser = Browser(self, self.help_mapping, BASEDIR, logger_options=self.logger_options, logger_key="Browser")
+            self.browser = Browser(self, self.help_mapping, BASEDIR)
         else:
             self.browser.show()
 
@@ -2981,7 +2984,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        self.analyte_dialog = AnalyteDialog(self, logger_options=self.logger_options, logger_key="Selector")
+        self.analyte_dialog = AnalyteDialog(self)
         self.analyte_dialog.show()
 
         result = self.analyte_dialog.exec()  # Store the result here

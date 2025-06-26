@@ -4,7 +4,7 @@ from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.common.CustomWidgets import RotatedHeaderView
 import os
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 # Analyte GUI
 # -------------------------------
@@ -31,15 +31,14 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         _description_
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, parent, logger_options=None, logger_key=None):
+    def __init__(self, parent):
         if (parent.__class__.__name__ == 'Main'):
             super().__init__() #initialisng with no parent widget
         else:
             super().__init__(parent) #initialise with mainWindow as parentWidget
         self.setupUi(self)
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Selector'
 
         if parent.sample_id is None or parent.sample_id == '':
             return

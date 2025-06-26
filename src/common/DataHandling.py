@@ -13,7 +13,7 @@ from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
 from src.common.format import symlog
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 @auto_log_methods(logger_key='Data', prefix="DATA: ", show_args=True)
 class SampleObj(Observable):
@@ -162,11 +162,10 @@ class SampleObj(Observable):
     'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
     'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """    
-    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, logger_options=None, logger_key=None):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None):
         super().__init__()
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Data'
 
         self.sample_id = sample_id
         self.file_path = file_path

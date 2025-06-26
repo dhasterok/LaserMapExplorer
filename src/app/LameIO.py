@@ -10,12 +10,12 @@ from src.app.config import BASEDIR
 import src.common.CustomMplCanvas as mplc
 from src.common.DataHandling import SampleObj
 from src.common.Status import StatusMessageManager
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
 
-@auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
+@auto_log_methods(logger_key='IO', prefix="IO: ", show_args=True)
 class LameIO():
     """Handles most I/O for the main window of LaME
 
@@ -24,12 +24,11 @@ class LameIO():
     parent : QObject, optional
         MainWindow UI, by default None
     """        
-    def __init__(self, parent=None, connect_actions=True, logger_options=None, logger_key=None):
+    def __init__(self, parent=None, connect_actions=True):
         if parent is None:
             return
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'IO'
 
 
         self.connect_actions = connect_actions
@@ -352,8 +351,7 @@ class LameIO():
                 file_path = file_path,
                 outlier_method = outlier_method,
                 negative_method =negative_method,
-                ref_chem = self.parent.app_data.ref_chem,
-                logger_options=self.logger_options, logger_key='Data'
+                ref_chem = self.parent.app_data.ref_chem
             )
 
             # connect data observers if required

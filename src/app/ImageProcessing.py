@@ -5,7 +5,7 @@ from scipy import ndimage
 from scipy.signal import convolve2d, wiener, decimate
 from pyqtgraph import ( ImageItem )
 import cv2
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 # -------------------------------------
 # Image processing functions
@@ -35,10 +35,9 @@ class ImageProcessing():
     plot_gradient : 
         Produces a gradient map with arrows showing gradient direction and colors indicating magnitude
     """
-    def __init__(self, parent, logger_options=None, logger_key=None):
+    def __init__(self, parent):
 
-        self.logger_options = logger_options
-        self.logger_key = logger_key
+        self.logger_key = 'Image'
 
         self.parent = parent
 

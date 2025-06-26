@@ -16,15 +16,17 @@ from matplotlib.figure import Figure
 import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
 import numpy as np
-from src.common.Logger import auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods
 
 @auto_log_methods(logger_key='Profile', prefix="PROFILE: ", show_args=True)
 class ProfileDock(CustomDockWidget, UIFieldLogic):
-    def __init__(self, parent=None, logger_options=None, logger_key=None):
+    def __init__(self, parent=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
+        self.logger_key = 'Profile'
+
         self.main_window = parent
 
         self.profiling = Profiling(self)

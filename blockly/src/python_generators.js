@@ -15,7 +15,7 @@ pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var code = (dir_name === "'directory path'")
         ? 'self.io.open_directory()\nself.store_sample_ids()\n'
         : 'self.io.open_directory(' + dir_name + ', )\nself.store_sample_ids()\n';
-    code += 'self.io.initialise_sample_object(self.outlier_method, self.negative_method)\n';  
+    code += 'self.io.initialize_sample_object(self.outlier_method, self.negative_method)\n';  
     return code;
 };
 
@@ -26,7 +26,7 @@ pythonGenerator.forBlock['load_sample'] = function(block, generator) {
         ? 'self.io.open_sample()\nself.store_sample_ids()\n'
         : 'self.io.open_sample(' + dir_name + ')\nself.store_sample_ids()\n'
         
-    code += 'self.io.initialise_sample_object(self.outlier_method, self.negative_method)\n';  
+    code += 'self.io.initialize_sample_object(self.outlier_method, self.negative_method)\n';  
     return code;
 };
 
@@ -205,12 +205,15 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += `if (style_dict):\n` +
     generator.INDENT +`self.plot_style.style_dict[${plot_type}] = {**self.plot_style.style_dict[${plot_type}], **style_dict}\n`+
     generator.INDENT +`print(self.plot_style.style_dict[${plot_type}])\n`+
-    generator.INDENT +`self.plot_style.set_style_dictionary(${plot_type})\n`+
-    generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
+    generator.INDENT +`self.plot_style.plot_type =${plot_type}\n` +
+    generator.INDENT +`self.app_data.c_field =${field}\n` +
+    generator.INDENT +`self.app_data.c_field_type =${field_type}\n`;
+    // generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
 
     // 5) Plot
-    code += `self.plot_map_mpl(self.app_data.sample_id, field_type = ${field_type},field = ${field})\n`;
-    code += `self.plot_viewer.show()`
+    code += `canvas, plot_info = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field})\n`;
+    code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`
+    code += `self.show()`
     return code;
 };
 
@@ -261,7 +264,7 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
   code += `if (style_dict):\n` +
   generator.INDENT +`self.plot_style.style_dict[${plot_type}] = {**self.plot_style.style_dict[${plot_type}], **style_dict}\n`+
   generator.INDENT +`print(self.plot_style.style_dict[${plot_type}])\n`+
-  generator.INDENT +`self.plot_style.set_style_dictionary(${plot_type})\n`+
+  generator.INDENT +`self.plot_style.set_style_dictionary(data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_type =${plot_type})\n`+
   generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
 
   // 5) Get nBins from "histogramOptions" or default to 100

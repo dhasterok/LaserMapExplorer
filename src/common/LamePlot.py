@@ -36,12 +36,14 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
 
     # set color limits
     if field not in data.axis_dict:
-        plot_style.initialize_axis_values(field_type,field)
-        plot_style.set_style_widgets()
+        plot_style.initialize_axis_values(data,field_type,field)
+        if hasattr(plot_style,'set_style_widgets'): 
+            plot_style.set_style_widgets() # update ui widgets and style dictionary
+        else:
+            plot_style.set_style_dictionary(data, app_data) # update style dictionary
 
     # get data for current map
     #scale = data.processed_data.get_attribute(field, 'norm')
-    scale = plot_style.cscale
     map_df = data.get_map_data(field, field_type)
 
     array_size = data.array_size
@@ -892,17 +894,17 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
         if scatter_dict['x']['field'] not in data.axis_dict.keys():
-            plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-            plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
+            plot_style.initialize_axis_values(data,scatter_dict['x']['type'], scatter_dict['x']['field'])
+            plot_style.set_axis_widgets(data,'x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
         if scatter_dict['y']['field'] not in data.axis_dict.keys():
-            plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+            plot_style.initialize_axis_values(data,scatter_dict['y']['type'], scatter_dict['y']['field'])
             plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
         if scatter_dict['z']['field'] not in data.axis_dict.keys():
-            plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+            plot_style.initialize_axis_values(data,scatter_dict['z']['type'], scatter_dict['z']['field'])
             plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):

@@ -32,6 +32,7 @@ import src.common.csvdict as csvdict
 from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
+from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.DataAnalysis import Clustering, DimensionalReduction
@@ -42,7 +43,7 @@ from src.common.DataHandling import SampleObj
 from src.app.PlotTree import PlotTree
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessing as ip
-from src.app.StyleToolbox import Styling
+from src.app.StyleToolbox import Styling, StyleTheme
 from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
@@ -61,10 +62,11 @@ from src.app.AppData import AppData
 import os
 import json
 
-class LameBlockly():
-    def __init__(self,status_bar ,blockly_webpage, *args, **kwargs):
+class LameBlockly(PlotViewer):
+    def __init__(self,parent, *args, **kwargs):
+        super().__init__(self)
         # setup initial logging options
-        self.logger = LogCounter()
+        # self.logger = LogCounter()
         self.logger_options = {
                 'IO': False,
                 'Data': False,
@@ -95,8 +97,8 @@ class LameBlockly():
 
         self.app_data = AppData(self.data)
 
-        self.blockly  = blockly_webpage # This is the QWebEngineView that displays the Blockly interface
-        self.statusLabel = status_bar
+        self.blockly  = parent.web_view.page() # This is the QWebEngineView that displays the Blockly interface
+        self.statusLabel = parent.statusLabel
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -107,12 +109,15 @@ class LameBlockly():
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         self.preferences = copy.deepcopy(self.default_preferences)
 
-        self.io = LameIO(self, connect_actions=False)
+        self.io = LameIO(self, connect_actions=False,logger_options=self.logger_options, logger_key="IO" )
 
-        self.plot_style = Styling()
+        self.plot_style = Styling(self,logger_options=self.logger_options, logger_key="Style")
+        #set style using 'default' style them
+        self.style_themes = StyleTheme(parent, logger_options=self.logger_options, logger_key="Style")
+        self.plot_style.style_dict = self.style_themes.default_style_dict()
         
-        # Initialise plotviewer form
-        self.plot_viewer = PlotViewer(self)
+        # # Initialise plotviewer form
+        # self.plot_viewer = PlotViewer(self)
         self.update_bins = False
 
         self.showMass = False
@@ -162,8 +167,8 @@ class LameBlockly():
         index: int
             index of sample name for identifying data.
         """
-        if DEBUG:
-            print(f"change_sample, index: {index}")
+        # if DEBUG:
+        #     print(f"change_sample, index: {index}")
 
         if self.app_data.sample_id == self.app_data.sample_list[index]:
             # if selected sample id is same as previous
@@ -272,104 +277,104 @@ class LameBlockly():
     # -------------------------------------
     # laser map functions and plotting
     # -------------------------------------
-    def plot_map_mpl(self, sample_id, field_type, field):
-        """Create a matplotlib canvas for plotting a map
+    # def plot_map_mpl(self, sample_id, field_type, field):
+    #     """Create a matplotlib canvas for plotting a map
 
-        Create a map using ``mplc.MplCanvas``.
+    #     Create a map using ``mplc.MplCanvas``.
 
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier
-        field_type : str
-            Type of field for plotting
-        field : str
-            Field for plotting
-        """        
-        # create plot canvas
-        canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
+    #     Parameters
+    #     ----------
+    #     sample_id : str
+    #         Sample identifier
+    #     field_type : str
+    #         Type of field for plotting
+    #     field : str
+    #         Field for plotting
+    #     """        
+    #     # create plot canvas
+    #     canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
 
-        # set color limits
-        if field not in self.data[self.app_data.sample_id].axis_dict:
-            self.plot_style.initialize_axis_values(field_type,field)
-            self.plot_style.set_style_dictionary()
+    #     # set color limits
+    #     if field not in self.data[self.app_data.sample_id].axis_dict:
+    #         self.plot_style.initialize_axis_values(field_type,field)
+    #         self.plot_style.set_style_dictionary()
 
-        # get data for current map
-        #scale = self.data[self.app_data.sample_id].processed_data.get_attribute(field, 'norm')
-        scale = self.plot_style.cscale
-        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
+    #     # get data for current map
+    #     #scale = self.data[self.app_data.sample_id].processed_data.get_attribute(field, 'norm')
+    #     scale = self.plot_style.cscale
+    #     map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
 
-        array_size = self.data[self.app_data.sample_id].array_size
-        aspect_ratio = self.data[self.app_data.sample_id].aspect_ratio
+    #     array_size = self.data[self.app_data.sample_id].array_size
+    #     aspect_ratio = self.data[self.app_data.sample_id].aspect_ratio
 
-        # store map_df to save_data if data needs to be exported
-        self.save_data = map_df.copy()
+    #     # store map_df to save_data if data needs to be exported
+    #     self.save_data = map_df.copy()
 
-        # # equalized color bins to CDF function
-        # if self.toolButtonScaleEqualize.isChecked():
-        #     sorted_data = map_df['array'].sort_values()
-        #     cum_sum = sorted_data.cumsum()
-        #     cdf = cum_sum / cum_sum.iloc[-1]
-        #     map_df.loc[sorted_data.index, 'array'] = cdf.values
+    #     # # equalized color bins to CDF function
+    #     # if self.toolButtonScaleEqualize.isChecked():
+    #     #     sorted_data = map_df['array'].sort_values()
+    #     #     cum_sum = sorted_data.cumsum()
+    #     #     cdf = cum_sum / cum_sum.iloc[-1]
+    #     #     map_df.loc[sorted_data.index, 'array'] = cdf.values
 
-        # plot map
-        reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.app_data.sample_id].order)
+    #     # plot map
+    #     reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.app_data.sample_id].order)
             
-        norm = self.plot_style.color_norm()
+    #     norm = self.plot_style.color_norm()
 
-        cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+    #     cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
-        self.add_colorbar(canvas, cax)
-        match self.plot_style.cscale:
-            case 'linear':
-                clim = self.plot_style.clim
-            case 'log':
-                clim = self.plot_style.clim
-                #clim = np.log10(self.plot_style.clim)
-            case 'logit':  
-                print('Color limits for logit are not currently implemented')
+    #     self.add_colorbar(canvas, cax)
+    #     match self.plot_style.cscale:
+    #         case 'linear':
+    #             clim = self.plot_style.clim
+    #         case 'log':
+    #             clim = self.plot_style.clim
+    #             #clim = np.log10(self.plot_style.clim)
+    #         case 'logit':  
+    #             print('Color limits for logit are not currently implemented')
 
-        cax.set_clim(clim[0], clim[1])
+    #     cax.set_clim(clim[0], clim[1])
 
-        # use mask to create an alpha layer
-        mask = self.data[self.app_data.sample_id].mask.astype(float)
-        reshaped_mask = np.reshape(mask, array_size, order=self.data[self.app_data.sample_id].order)
+    #     # use mask to create an alpha layer
+    #     mask = self.data[self.app_data.sample_id].mask.astype(float)
+    #     reshaped_mask = np.reshape(mask, array_size, order=self.data[self.app_data.sample_id].order)
 
-        alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
-        alphas = np.clip(alphas, .4, 1)
+    #     alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
+    #     alphas = np.clip(alphas, .4, 1)
 
-        alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-        canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
-        canvas.array = reshaped_array
+    #     alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
+    #     canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+    #     canvas.array = reshaped_array
 
-        canvas.axes.tick_params(direction=None,
-            labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-            bottom=False, top=False, left=False, right=False)
+    #     canvas.axes.tick_params(direction=None,
+    #         labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+    #         bottom=False, top=False, left=False, right=False)
 
-        canvas.set_initial_extent()
+    #     canvas.set_initial_extent()
 
 
         
-        # add scalebar
-        self.add_scalebar(canvas.axes)
+    #     # add scalebar
+    #     self.add_scalebar(canvas.axes)
 
-        canvas.fig.tight_layout()
+    #     canvas.fig.tight_layout()
 
-        self.plot_info = {
-            'tree': field_type,
-            'sample_id': sample_id,
-            'plot_name': field,
-            'plot_type': 'field map',
-            'field_type': field_type,
-            'field': field,
-            'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
-            'cluster_groups': None,
-            'view': [True,False],
-            'position': None
-            }
+    #     self.plot_info = {
+    #         'tree': field_type,
+    #         'sample_id': sample_id,
+    #         'plot_name': field,
+    #         'plot_type': 'field map',
+    #         'field_type': field_type,
+    #         'field': field,
+    #         'figure': canvas,
+    #         'style': self.plot_style.style_dict[self.plot_style.plot_type],
+    #         'cluster_groups': None,
+    #         'view': [True,False],
+    #         'position': None
+    #         }
         
-        self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
+    #     self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
 
     # -------------------------------------
@@ -1088,9 +1093,9 @@ class LameBlockly():
 
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':
-                set_fields = data.match_attributes({'data_type': 'analyte', 'use': True})
+                set_fields = data.match_attributes({'data_type': 'Analyte', 'use': True})
             case 'Ratio' | 'Ratio (normalized)':
-                set_fields = data.match_attributes({'data_type': 'ratio', 'use': True})
+                set_fields = data.match_attributes({'data_type': 'Ratio', 'use': True})
             case 'None':
                 return []
             case _:

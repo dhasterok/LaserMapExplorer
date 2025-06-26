@@ -155,13 +155,13 @@ class Styling(Observable):
             Prints debugging messages to stdout, by default ``False``
 
     """    
-    def __init__(self, logger_options=None, logger_key=None):
+    def __init__(self,parent, logger_options=None, logger_key=None):
         super().__init__()
 
         self.logger_options = logger_options
         self.logger_key = logger_key
 
-        
+        self.app_data = parent.app_data
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
         self.map_plot_types = ['field map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
@@ -668,6 +668,270 @@ class Styling(Observable):
                 length = 0.2 * x_range
 
         return length
+    
+    def set_style_dictionary(self,data, app_data, plot_type=None, style=None):
+        """Sets values in style dictionary
+
+        Parameters
+        ----------
+        plot_type : str, optional
+            Dictionary key into ``MainWindow.styles``, Defaults to ``None``
+        style : dict, optional
+            Style dictionary for the current plot type. Defaults to ``None``
+        """
+        if not plot_type:
+            plot_type = self._plot_type
+        
+        style = self.style_dict[plot_type]
+                
+        if plot_type.lower() in self.map_plot_types:
+            if ('Xc' not in list(data.axis_dict.keys())) or ('Yc' not in list(data.axis_dict.keys())):
+                # initialize 'X' and 'Y' axes
+                # all plot types use the same map dimensions so just use Analyte for the field_type
+                self.initialize_axis_values(data,'Analyte','Xc')
+                self.initialize_axis_values(data,'Analyte','Yc')
+            xmin,xmax,xscale,xlabel = self.get_axis_values(data,'Analyte','Xc')
+            ymin,ymax,yscale,ylabel = self.get_axis_values(data,'Analyte','Yc')
+
+            # set style dictionary values for X and Y
+            style['XLim'] = [xmin, xmax]
+            style['XScale'] = xscale
+            style['XLabel'] = 'X'
+            style['YLim'] = [ymin, ymax]
+            style['YScale'] = yscale
+            style['YLabel'] = 'Y'
+            style['AspectRatio'] = data.aspect_ratio
+
+        if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
+            style['ScaleLength'] = self.default_scale_length()
+
+        if app_data.c_field in list(data.axis_dict.keys()):
+            field = app_data.c_field
+            style['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
+            style['CLabel'] = data.axis_dict[field]['label']
+
+        if app_data.c_field_type == 'cluster':
+            style['CScale'] = 'discrete'
+        else:
+            style['CScale'] = 'linear'
+
+    def initialize_axis_values(self,data, field_type, field):
+        """Initialize axis dict for a given field_type and field
+
+        Parameters
+        ----------
+        field_type : str
+            Field type, generally determined by a field type combobox.
+        field : str
+            Field, generally determined by a field combobox.
+        """        
+
+        # initialize variables
+        if field not in data.axis_dict.keys():
+            data.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
+
+        #current_plot_df = pd.DataFrame()
+        if field not in ['Xc','Yc']:
+            df = data.get_map_data(field, field_type)
+            array = df['array'][data.mask].values if not df.empty else []
+        else:
+            # field 'Xc' and 'Yc' require separate extraction
+            array = data.processed_data[field].values
+
+        match field_type:
+            case 'Analyte' | 'Analyte (normalized)':
+                if field in ['Xc','Yc']:
+                    scale = 'linear'
+                else:
+                    symbol, mass = data.parse_field(field)
+                    label = ''
+                    if mass:
+                        label = f"$^{{{mass}}}${symbol}"
+                    else:
+                        label = f"{symbol}"
+
+                    if field_type == 'Analyte':
+                        data.axis_dict[field]['label'] = f"{label} ({self.app_data.preferences['Units']['Concentration']})"
+                    else: # normalized analyte
+                        data.axis_dict[field]['label'] = f"{label}$_N$ ({self.app_data.preferences['Units']['Concentration']})"
+
+                    scale = data.processed_data.get_attribute(field, 'norm')
+
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = field.split(' / ')[0]
+                field_2 = field.split(' / ')[1]
+                symbol_1, mass_1 = data.parse_field(field_1)
+                symbol_2, mass_2 = data.parse_field(field_2)
+
+                # numerator
+                label_1 = ''
+                if mass_1: # isotope
+                    label_1 = f"$^{{{mass_1}}}${symbol_1}"
+                else: # element
+                    label_1 = f"{symbol_1}"
+
+                # denominator
+                label_2 = ''
+                if mass_2: # isotope
+                    label_2 = f"$^{{{mass_2}}}${symbol_2}"
+                else: # element
+                    label_2 = f"{symbol_2}"
+
+                if field_type == 'Ratio':
+                    data.axis_dict[field]['label'] = f"{label_1} / {label_2}"
+                else:   # normalized ratio
+                    data.axis_dict[field]['label'] = f"{label_1}$_N$ / {label_2}$_N$"
+
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
+                scale = data.processed_data.get_attribute(field, 'norm')
+            case _:
+                scale = 'linear'
+
+                amin = np.nanmin(array)
+                amax = np.nanmax(array)
+
+        # do not round 'X' and 'Y' so full extent of map is viewable
+        if field not in ['Xc','Yc']:
+            amin = fmt.oround(amin, order=2, toward=0)
+            amax = fmt.oround(amax, order=2, toward=1)
+
+        d = {'status':'auto', 'min':amin, 'max':amax, 'scale':scale}
+
+        data.axis_dict[field].update(d)
+        #print(data.axis_dict[field])
+
+    def get_axis_values(self,data, field_type, field, ax=None):
+        """Gets axis values
+
+        Returns the axis parameters *field_type* > *field* for plotting, including the minimum and maximum vales,
+        the scale (``linear`` or ``log``) and the axis label.  For x, y and color axes associated with the plot,
+        no axis needs to be supplied.  For a probability axis associated with histogram PDF plots, ``ax=p``.
+
+        Parameters
+        ----------
+        field_type : str
+            Field type of axis data
+        field : str
+            Field name of axis data
+        ax : str, optional
+            stored axis: ``p`` for probability axis, otherwise all are same, by default None
+
+        Returns
+        -------
+        float, float, str, float
+            Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
+        """ 
+
+        axis_dict = data.axis_dict
+
+        if field not in axis_dict.keys():
+            self.initialize_axis_values(data,field_type, field)
+
+        # get axis values from axis_dict
+        amin = axis_dict[field]['min']
+        amax = axis_dict[field]['max']
+        scale = axis_dict[field]['scale']
+        label = axis_dict[field]['label']
+
+        # if probability axis associated with histogram
+        if ax == 'p':
+            pmin = axis_dict[field]['pmin']
+            pmax = axis_dict[field]['pmax']
+            return amin, amax, scale, label, pmin, pmax
+
+        return amin, amax, scale, label
+    
+    # color functions 
+    def color_norm(self, N=None):
+        """Normalize colors for colormap
+
+        Parameters
+        ----------
+        N : int, optional
+            The number of colors for discrete color maps, Defaults to None
+        
+        Returns
+        -------
+            matplotlib.colors.Norm
+                Color norm for plotting.
+        """
+        norm = None
+        match self.cscale:
+            case 'linear':
+                norm = colors.Normalize(vmin=self.clim[0], vmax=self.clim[1])
+            case 'log':
+                norm = colors.LogNorm(vmin=self.clim[0], vmax=self.clim[1])
+            case 'discrete':
+                if N is None:
+                    if hasattr(self,'ui'):
+                        QMessageBox(self.ui, "Warning","N must not be None when color scale is discrete.")
+                    return
+                boundaries = np.arange(-0.5, N, 1)
+                norm = colors.BoundaryNorm(boundaries, N, clip=True)
+
+        #scalarMappable = plt.cm.ScalarMappable(cmap=self.style.get_colormap(), norm=norm)
+
+        return norm
+    
+    def get_colormap(self, N=None):
+        """Gets the color map
+
+        Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
+
+        Parameters
+        ----------
+        N : int, optional
+            Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
+
+        Returns
+        -------
+        matplotlib.colormap.ListedColormap : colormap
+        """
+        if hasattr(self,'ui') and hasattr(self,'ui'):
+            if self.ui.canvasWindow.currentIndex() == self.ui.canvas_tab['qv']:
+                plot_type = 'field map'
+
+
+        if self.cmap in self.mpl_colormaps:
+            if N is not None:
+                cmap = plt.get_cmap(self.cmap, N)
+            else:
+                cmap = plt.get_cmap(self.cmap)
+        else:
+            cmap = self.create_custom_colormap(self.cmap, N)
+
+        if self.cbar_reverse:
+            cmap = cmap.reversed()
+
+        return cmap
+
+    def create_custom_colormap(self, name, N=None):
+        """Creates custom colormaps
+
+        Custom colormaps as found in ``resources/appdata/custom_colormaps.xlsx``.
+
+        Parameters
+        ----------
+        name : str
+            Name of colormap
+        N : int, optional
+            Number of colors to compute using colormap, by default None
+
+        Returns
+        -------
+        matplotlib.LinearSegmentedColormap
+            Colormap
+        """
+        if N is None:
+            N = 256
+
+        color_list = get_rgb_color(self.custom_color_dict[name])
+        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
+
+        return cmap
 
     # -------------------------------------
     # Validation functions
@@ -930,7 +1194,7 @@ class StyleTheme():
 @auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
 class StylingDock(Styling):
     def __init__(self, parent, logger_options=None, logger_key=None):
-        super().__init__(logger_options, logger_key)
+        super().__init__(parent,logger_options, logger_key)
 
         self.logger_options = logger_options
         self.logger_key = logger_key
@@ -1774,53 +2038,7 @@ class StylingDock(Styling):
         ui.labelCbarLabel.setEnabled(ui.lineEditCbarLabel.isEnabled())
         ui.labelHeatmapResolution.setEnabled(ui.spinBoxHeatmapResolution.isEnabled())
 
-    def set_style_dictionary(self, plot_type=None, style=None):
-        """Sets values in style dictionary
-
-        Parameters
-        ----------
-        plot_type : str, optional
-            Dictionary key into ``MainWindow.styles``, Defaults to ``None``
-        style : dict, optional
-            Style dictionary for the current plot type. Defaults to ``None``
-        """
-        style = self.style_dict[self.plot_type]
-
-        if not plot_type:
-            plot_type = self.plot_type
-
-        data = self.ui.data[self.app_data.sample_id]
-                
-        if plot_type.lower() in self.map_plot_types:
-            if ('Xc' not in list(data.axis_dict.keys())) or ('Yc' not in list(data.axis_dict.keys())):
-                # initialize 'X' and 'Y' axes
-                # all plot types use the same map dimensions so just use Analyte for the field_type
-                self.initialize_axis_values('Analyte','Xc')
-                self.initialize_axis_values('Analyte','Yc')
-            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','Xc')
-            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Yc')
-
-            # set style dictionary values for X and Y
-            style['XLim'] = [xmin, xmax]
-            style['XScale'] = xscale
-            style['XLabel'] = 'X'
-            style['YLim'] = [ymin, ymax]
-            style['YScale'] = yscale
-            style['YLabel'] = 'Y'
-            style['AspectRatio'] = data.aspect_ratio
-
-        if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
-            style['ScaleLength'] = self.default_scale_length()
-
-        if self.app_data.c_field in list(data.axis_dict.keys()):
-            field = self.app_data.c_field
-            style['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
-            style['CLabel'] = data.axis_dict[field]['label']
-
-        if self.app_data.c_field_type == 'cluster':
-            style['CScale'] = 'discrete'
-        else:
-            style['CScale'] = 'linear'
+   
 
     def set_style_widgets(self):
         """Sets values in right toolbox style page
@@ -1871,10 +2089,10 @@ class StylingDock(Styling):
             if ('X' not in list(data.axis_dict.keys())) or ('Y' not in list(data.axis_dict.keys())):
                 # initialize 'X' and 'Y' axes
                 # all plot types use the same map dimensions so just use Analyte for the field_type
-                self.initialize_axis_values('Analyte','Xc')
-                self.initialize_axis_values('Analyte','Yc')
-            xmin,xmax,xscale,xlabel = self.get_axis_values('Analyte','Xc')
-            ymin,ymax,yscale,ylabel = self.get_axis_values('Analyte','Yc')
+                self.initialize_axis_values(data,'Analyte','Xc')
+                self.initialize_axis_values(data,'Analyte','Yc')
+            xmin,xmax,xscale,xlabel = self.get_axis_values(data,'Analyte','Xc')
+            ymin,ymax,yscale,ylabel = self.get_axis_values(data,'Analyte','Yc')
 
             # set style dictionary values for X and Y
             style['XLim'] = [xmin, xmax]
@@ -2241,7 +2459,7 @@ class StylingDock(Styling):
                     ui.lineEditZLabel.setText('')
             return
         else:
-            amin, amax, scale, label = self.get_axis_values(field_type, field, ax)
+            amin, amax, scale, label = self.get_axis_values(data,field_type, field, ax)
 
             plot_type = self.plot_type
 
@@ -2536,20 +2754,20 @@ class StylingDock(Styling):
                 field = self.ui.comboBoxFieldC.currentText()
                 if field == '':
                     return
-                self.initialize_axis_values(field_type, field)
+                self.initialize_axis_values(data,field_type, field)
 
             self.set_color_axis_widgets()
         else:
             match self.ui.comboBoxPlotType.currentText().lower():
                 case 'field map' | 'cluster' | 'cluster score' | 'pca score':
                     field = ax.upper()
-                    self.initialize_axis_values('Analyte', field)
+                    self.initialize_axis_values(data,'Analyte', field)
                     self.set_axis_widgets(ax, field)
                 case 'histogram':
                     field = self.ui.comboBoxFieldC.currentText()
                     if ax == 'x':
                         field_type = self.ui.comboBoxFieldTypeC.currentText()
-                        self.initialize_axis_values(field_type, field)
+                        self.initialize_axis_values(data,field_type, field)
                         self.set_axis_widgets(ax, field)
                     else:
                         data.axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
@@ -2567,7 +2785,7 @@ class StylingDock(Styling):
                             field = self.ui.comboBoxFieldZ.currentText()
                     if (field_type == '') | (field == ''):
                         return
-                    self.initialize_axis_values(field_type, field)
+                    self.initialize_axis_values(data,field_type, field)
                     self.set_axis_widgets(ax, field)
 
                 case 'PCA scatter' | 'PCA heatmap':
@@ -2576,7 +2794,7 @@ class StylingDock(Styling):
                         field = self.ui.spinBoxPCX.currentText()
                     else:
                         field = self.ui.spinBoxPCY.currentText()
-                    self.initialize_axis_values(field_type, field)
+                    self.initialize_axis_values(data,field_type, field)
                     self.set_axis_widgets(ax, field)
 
                 case _:
@@ -2585,136 +2803,6 @@ class StylingDock(Styling):
         self.set_style_widgets()
         self.schedule_update()
 
-    def get_axis_values(self, field_type, field, ax=None):
-        """Gets axis values
-
-        Returns the axis parameters *field_type* > *field* for plotting, including the minimum and maximum vales,
-        the scale (``linear`` or ``log``) and the axis label.  For x, y and color axes associated with the plot,
-        no axis needs to be supplied.  For a probability axis associated with histogram PDF plots, ``ax=p``.
-
-        Parameters
-        ----------
-        field_type : str
-            Field type of axis data
-        field : str
-            Field name of axis data
-        ax : str, optional
-            stored axis: ``p`` for probability axis, otherwise all are same, by default None
-
-        Returns
-        -------
-        float, float, str, float
-            Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
-        """ 
-        data = self.ui.data[self.app_data.sample_id]
-
-        axis_dict = data.axis_dict
-
-        if field not in axis_dict.keys():
-            self.initialize_axis_values(field_type, field)
-
-        # get axis values from axis_dict
-        amin = axis_dict[field]['min']
-        amax = axis_dict[field]['max']
-        scale = axis_dict[field]['scale']
-        label = axis_dict[field]['label']
-
-        # if probability axis associated with histogram
-        if ax == 'p':
-            pmin = axis_dict[field]['pmin']
-            pmax = axis_dict[field]['pmax']
-            return amin, amax, scale, label, pmin, pmax
-
-        return amin, amax, scale, label
-
-    def initialize_axis_values(self, field_type, field):
-        """Initialize axis dict for a given field_type and field
-
-        Parameters
-        ----------
-        field_type : str
-            Field type, generally determined by a field type combobox.
-        field : str
-            Field, generally determined by a field combobox.
-        """        
-        data = self.ui.data[self.app_data.sample_id]
-
-        # initialize variables
-        if field not in data.axis_dict.keys():
-            data.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
-
-        #current_plot_df = pd.DataFrame()
-        if field not in ['Xc','Yc']:
-            df = data.get_map_data(field, field_type)
-            array = df['array'][data.mask].values if not df.empty else []
-        else:
-            # field 'Xc' and 'Yc' require separate extraction
-            array = data.processed_data[field].values
-
-        match field_type:
-            case 'Analyte' | 'Analyte (normalized)':
-                if field in ['Xc','Yc']:
-                    scale = 'linear'
-                else:
-                    symbol, mass = data.parse_field(field)
-                    label = ''
-                    if mass:
-                        label = f"$^{{{mass}}}${symbol}"
-                    else:
-                        label = f"{symbol}"
-
-                    if field_type == 'Analyte':
-                        data.axis_dict[field]['label'] = f"{label} ({self.app_data.preferences['Units']['Concentration']})"
-                    else: # normalized analyte
-                        data.axis_dict[field]['label'] = f"{label}$_N$ ({self.app_data.preferences['Units']['Concentration']})"
-
-                    scale = data.processed_data.get_attribute(field, 'norm')
-
-                amin = np.nanmin(array)
-                amax = np.nanmax(array)
-            case 'Ratio' | 'Ratio (normalized)':
-                field_1 = field.split(' / ')[0]
-                field_2 = field.split(' / ')[1]
-                symbol_1, mass_1 = data.parse_field(field_1)
-                symbol_2, mass_2 = data.parse_field(field_2)
-
-                # numerator
-                label_1 = ''
-                if mass_1: # isotope
-                    label_1 = f"$^{{{mass_1}}}${symbol_1}"
-                else: # element
-                    label_1 = f"{symbol_1}"
-
-                # denominator
-                label_2 = ''
-                if mass_2: # isotope
-                    label_2 = f"$^{{{mass_2}}}${symbol_2}"
-                else: # element
-                    label_2 = f"{symbol_2}"
-
-                if field_type == 'Ratio':
-                    data.axis_dict[field]['label'] = f"{label_1} / {label_2}"
-                else:   # normalized ratio
-                    data.axis_dict[field]['label'] = f"{label_1}$_N$ / {label_2}$_N$"
-
-                amin = np.nanmin(array)
-                amax = np.nanmax(array)
-                scale = data.processed_data.get_attribute(field, 'norm')
-            case _:
-                scale = 'linear'
-
-                amin = np.nanmin(array)
-                amax = np.nanmax(array)
-
-        # do not round 'X' and 'Y' so full extent of map is viewable
-        if field not in ['Xc','Yc']:
-            amin = fmt.oround(amin, order=2, toward=0)
-            amax = fmt.oround(amax, order=2, toward=1)
-
-        d = {'status':'auto', 'min':amin, 'max':amax, 'scale':scale}
-
-        data.axis_dict[field].update(d)
-        #print(data.axis_dict[field])
 
     def aspect_ratio_callback(self):
         """Update aspect ratio
@@ -3186,92 +3274,8 @@ class StylingDock(Styling):
 
         return cluster_color, cluster_label, cmap
 
-    def color_norm(self, N=None):
-        """Normalize colors for colormap
 
-        Parameters
-        ----------
-        N : int, optional
-            The number of colors for discrete color maps, Defaults to None
-        
-        Returns
-        -------
-            matplotlib.colors.Norm
-                Color norm for plotting.
-        """
-        norm = None
-        match self.cscale:
-            case 'linear':
-                norm = colors.Normalize(vmin=self.clim[0], vmax=self.clim[1])
-            case 'log':
-                norm = colors.LogNorm(vmin=self.clim[0], vmax=self.clim[1])
-            case 'discrete':
-                if N is None:
-                    QMessageBox(self.ui, "Warning","N must not be None when color scale is discrete.")
-                    return
-                boundaries = np.arange(-0.5, N, 1)
-                norm = colors.BoundaryNorm(boundaries, N, clip=True)
-
-        #scalarMappable = plt.cm.ScalarMappable(cmap=self.style.get_colormap(), norm=norm)
-
-        return norm
-
-    def get_colormap(self, N=None):
-        """Gets the color map
-
-        Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.
-
-        Parameters
-        ----------
-        N : int, optional
-            Creates a discrete color map, if not supplied, the colormap is continuous, Defaults to None.
-
-        Returns
-        -------
-        matplotlib.colormap.ListedColormap : colormap
-        """
-        if hasattr(self.ui,'canvas_tab') and hasattr(self.ui,'canvasWindow'):
-            if self.ui.canvasWindow.currentIndex() == self.ui.canvas_tab['qv']:
-                plot_type = 'field map'
-
-
-        if self.cmap in self.mpl_colormaps:
-            if N is not None:
-                cmap = plt.get_cmap(self.cmap, N)
-            else:
-                cmap = plt.get_cmap(self.cmap)
-        else:
-            cmap = self.create_custom_colormap(self.cmap, N)
-
-        if self.cbar_reverse:
-            cmap = cmap.reversed()
-
-        return cmap
-
-    def create_custom_colormap(self, name, N=None):
-        """Creates custom colormaps
-
-        Custom colormaps as found in ``resources/appdata/custom_colormaps.xlsx``.
-
-        Parameters
-        ----------
-        name : str
-            Name of colormap
-        N : int, optional
-            Number of colors to compute using colormap, by default None
-
-        Returns
-        -------
-        matplotlib.LinearSegmentedColormap
-            Colormap
-        """
-        if N is None:
-            N = 256
-
-        color_list = get_rgb_color(self.custom_color_dict[name])
-        cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
-
-        return cmap
+    
 
     def cbar_direction_callback(self):
         """Sets the colorbar direction

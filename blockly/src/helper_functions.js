@@ -320,7 +320,7 @@ export function updateStylingChain(plotBlock) {
       // 3a) Check if the style dictionary is empty
       const style = JSON.parse(styleStr);
       if (style.constructor === Object && Object.keys(style).length === 0) {
-        console.warn('Style dictionary not provided for plotType:', this.plotType);
+        console.warn('Style dictionary not provided for plotType:', plotType);
         return; // Exit if style is not available
       } else {
         console.log('updating styles');

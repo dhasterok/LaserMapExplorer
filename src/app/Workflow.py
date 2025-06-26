@@ -8,20 +8,20 @@ from PyQt6.QtGui import QIcon, QAction, QFont
 from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize
 from src.app.config import BASEDIR
 from src.common.CustomWidgets import CustomDockWidget
-from src.common.Status import StatusMessageManager
 import numpy as np
 from src.app.BlocklyModules import LameBlockly
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
 class BlocklyBridge(QObject):
-    def __init__(self,status_bar, blockly_webpage, output_text_edit):
+    def __init__(self,parent):
         super().__init__()
+
+        self.output_text_edit = parent.output_text_edit # This will be used to display the generated code
         
-        self.output_text_edit = output_text_edit # This will be used to display the generated code
         # Initiate the LameBlockly instance
         # This is a instance of Lame, which is customised to be run with Blockly
-        self.lame_blockly = LameBlockly(status_bar, blockly_webpage)
+        self.lame_blockly = LameBlockly(parent)
         
 
     @pyqtSlot(str)
@@ -42,7 +42,7 @@ class BlocklyBridge(QObject):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
         if plot_type in self.lame_blockly.plot_style.style_dict.keys():
-            self.lame_blockly.plot_style.set_style_dictionary(plot_type)
+            self.lame_blockly.plot_style.set_style_dictionary(data = self.lame_blockly.data[self.lame_blockly.app_data.sample_id], app_data =self.lame_blockly.app_data, plot_type = plot_type)
             style = self.lame_blockly.plot_style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
@@ -207,7 +207,7 @@ class Workflow(CustomDockWidget):
 
         # Create an instance of the BlocklyBridge and register it with the channel
 
-        self.bridge = BlocklyBridge(self.statusLabel,self.web_view.page(), self.output_text_edit)
+        self.bridge = BlocklyBridge(parent=self)
         self.channel.registerObject('blocklyBridge', self.bridge)
         self.web_view.page().setWebChannel(self.channel)
 

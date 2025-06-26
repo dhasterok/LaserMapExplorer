@@ -714,7 +714,7 @@ class Styling(Observable):
         else:
             style['CScale'] = 'linear'
 
-    def initialize_axis_values(self,data, field_type, field):
+    def initialize_axis_values(self, data, field_type, field):
         """Initialize axis dict for a given field_type and field
 
         Parameters

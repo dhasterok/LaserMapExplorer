@@ -677,7 +677,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.calculator.setEnabled(True)
             self.toolBoxStyle.setEnabled(True)
 
-    def toolbox_changed(self, *args, **kwargs):
+    def toolbox_changed(self, tab_ind=None):
         """Updates styles associated with toolbox page
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
@@ -685,7 +685,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        tab_id = self.toolBox.currentIndex()
+        if not tab_ind:
+            tab_id = self.toolBox.currentIndex()
 
         data = self.data[self.app_data.sample_id]
 

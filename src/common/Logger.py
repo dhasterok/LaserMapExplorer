@@ -1,4 +1,4 @@
-import sys, functools, inspect
+import sys, functools, inspect, types
 
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
@@ -27,15 +27,28 @@ def log(msg, prefix=""):
         print(f"{prefix}{msg}")
 
 def log_call(logger_key=None, show_args=False, show_call_chain=False):
+    """Method decorator to log function whenever it is called
+
+    Parameters
+    ----------
+    logger_key : str, optional
+        key into dict logger_options, by default None
+    show_args : bool, optional
+        If True will print method arguments in the log, by default False
+    show_call_chain : bool, optional
+        If True will give the supply chain, by default False
+    """    
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
-            # Check if logging is enabled for the given logger_key
+        def wrapper(*args, **kwargs):
+            # Determine if 'self' exists (bound method)
+            self_obj = args[0] if args else None
             if logger_key and LoggerConfig.get_option(logger_key):
                 prefix = f"{logger_key.upper()}: "
 
-                if not getattr(self, 'logger_options', {}).get(logger_key, False):
-                    return func(self, *args, **kwargs)
+                if self_obj and hasattr(self_obj, 'logger_options'):
+                    if not self_obj.logger_options.get(logger_key, False):
+                        return func(*args, **kwargs)
             else:
                 prefix = ""
 
@@ -43,17 +56,21 @@ def log_call(logger_key=None, show_args=False, show_call_chain=False):
             func_name = func.__qualname__
             caller = inspect.stack()[1].function
             parts = [f"{prefix}[{caller} → {func_name}]"]
+
             if show_args:
                 arg_list = [describe_arg(arg) for arg in args]
                 kwarg_list = [f"{k}={describe_arg(v)}" for k, v in kwargs.items()]
                 parts.append("args=[" + ", ".join(arg_list + kwarg_list) + "]")
+
             if show_call_chain:
                 chain = " → ".join(f.function for f in reversed(inspect.stack()[1:4]))
                 parts.append(f"chain: {chain}")
+
             log(" | ".join(parts))
-            return func(self, *args, **kwargs)
+            return func(*args, **kwargs)
         return wrapper
     return decorator
+
 
 
 def describe_arg(arg):
@@ -78,18 +95,31 @@ def log_ui_call(logger=None, **log_options):
         return wrapper
     return decorator
 
-def auto_log_methods(logger_key=None, **log_options):
+def auto_log_methods(logger_key: str=None, **log_options):
+    """Decorator that wraps all methods in a class   
+
+    Parameters
+    ----------
+    logger_key : str, optional
+        key into dict logger_options, by default None
+    """    
     def decorator(cls):
         print(f"[DEBUG] Wrapping methods for: {cls.__name__}")
-        for attr_name, attr in cls.__dict__.items():
-            # Only wrap user-defined functions that aren't marked to skip
-            if inspect.isfunction(attr) and not attr_name.startswith("__"):
-                if getattr(attr, "_no_log", False):
-                    print(f"  - Skipping method (no_log): {attr_name}")
-                    continue
-                print(f"  - Wrapping method: {attr_name}")
-                wrapped = log_call(logger_key=logger_key, **log_options)(attr)
-                setattr(cls, attr_name, wrapped)
+        for attr_name in dir(cls):
+            if attr_name.startswith("__"):
+                continue
+
+            attr = getattr(cls, attr_name)
+            if not isinstance(attr, types.FunctionType):
+                continue  # Skip non-function attributes
+
+            if getattr(attr, "_no_log", False):
+                print(f"  - Skipping method (no_log): {attr_name}")
+                continue
+
+            print(f"  - Wrapping method: {attr_name}")
+            wrapped = log_call(logger_key=logger_key, **log_options)(attr)
+            setattr(cls, attr_name, wrapped)
         return cls
     return decorator
 

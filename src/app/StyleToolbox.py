@@ -802,7 +802,7 @@ class Styling(Observable):
         data.axis_dict[field].update(d)
         #print(data.axis_dict[field])
 
-    def get_axis_values(self,data, field_type, field, ax=None):
+    def get_axis_values(self, data, field_type, field, ax=None):
         """Gets axis values
 
         Returns the axis parameters *field_type* > *field* for plotting, including the minimum and maximum vales,
@@ -1206,7 +1206,7 @@ class StylingDock(Styling):
             'label': [parent.labelX, parent.labelY, parent.labelZ, parent.labelC],
             'parentbox': [parent.comboBoxFieldTypeX, parent.comboBoxFieldTypeY, parent.comboBoxFieldTypeZ, parent.comboBoxFieldTypeC],
             'childbox': [parent.comboBoxFieldX, parent.comboBoxFieldY, parent.comboBoxFieldZ, parent.comboBoxFieldC],
-            'spinbox': [parent.spinBoxFieldX, parent.spinBoxFieldY, None, parent.spinBoxFieldC],
+            'spinbox': [parent.spinBoxFieldX, parent.spinBoxFieldY, parent.spinBoxFieldZ, parent.spinBoxFieldC],
             'scalebox': [parent.comboBoxXScale, parent.comboBoxYScale, parent.comboBoxZScale, parent.comboBoxColorScale],
             'axis_label': [parent.lineEditXLabel, parent.lineEditYLabel, parent.lineEditZLabel, parent.lineEditCbarLabel],
             'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditColorLB],
@@ -1367,9 +1367,10 @@ class StylingDock(Styling):
 
         self.style_dict = self.style_themes.default_style_dict()
 
-
+        # toggles signals from widgets, if false, blocks widgets from sending signals
         self._signal_state = True
 
+        # used to schedule plot updates
         self.scheduler = Scheduler(callback=self.ui.update_SV)
 
         self.ui.fontComboBox.setCurrentFont(QFont(self.style_themes.default_plot_style['Font'], 11))
@@ -1380,13 +1381,11 @@ class StylingDock(Styling):
         self.ui.toolButtonNDimUp.clicked.connect(self.schedule_update)
         self.ui.toolButtonNDimDown.clicked.connect(self.schedule_update)
         self.ui.toolButtonNDimRemove.clicked.connect(self.schedule_update)
-
         
         self.ui.comboBoxMarker.clear()
         self.ui.comboBoxMarker.addItems(self.marker_dict.keys())
 
         self._plot_type = "field map"
-
 
         self.ui.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeX.currentText(), self.ui.comboBoxFieldX.currentText(), 'x'))
         self.ui.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeY.currentText(), self.ui.comboBoxFieldY.currentText(), 'y'))
@@ -2462,7 +2461,7 @@ class StylingDock(Styling):
                     ui.lineEditZLabel.setText('')
             return
         else:
-            amin, amax, scale, label = self.get_axis_values(data,field_type, field, ax)
+            amin, amax, scale, label = self.get_axis_values(self.ui.data,field_type, field, ax)
 
             plot_type = self.plot_type
 
@@ -2757,7 +2756,7 @@ class StylingDock(Styling):
                 field = self.ui.comboBoxFieldC.currentText()
                 if field == '':
                     return
-                self.initialize_axis_values(data,field_type, field)
+                self.initialize_axis_values(data, field_type, field)
 
             self.set_color_axis_widgets()
         else:
@@ -3110,7 +3109,7 @@ class StylingDock(Styling):
         if self.ui.comboBoxFieldTypeC.currentText() != 'None' or self.ui.comboBoxFieldC.currentText() != '' or self.ui.comboBoxFieldTypeC.currentText() in ['cluster']:
             self.schedule_update()
 
-    def update_field_type(self, ax, field_type=None):
+    def update_field_type(self, ax, field_type=None, *args, **kwargs):
         # only update field if the axis is enabled 
         if not self.axis_widget_dict['plot type'][self.plot_type]['axis'][ax]:
             return
@@ -3193,7 +3192,7 @@ class StylingDock(Styling):
 
             # initialize axis values for plotting
             if field not in data.axis_dict.keys():
-                self.initialize_axis_values(parentbox.currentText(), field)
+                self.initialize_axis_values(data, parentbox.currentText(), field)
 
             # initialize color widgets
             if ax == 3:

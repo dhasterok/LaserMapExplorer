@@ -1522,6 +1522,13 @@
                </property>
               </widget>
              </item>
+             <item row="3" column="3">
+              <widget class="QSpinBox" name="spinBoxFieldZ">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
@@ -1561,7 +1568,7 @@
            <string/>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>1</number>
           </property>
           <property name="tabSpacing">
            <number>2</number>
@@ -2909,39 +2916,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="1">
-                    <widget class="QComboBox" name="comboBoxApplyNoiseReduction">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>150</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <family>.AppleSystemUIFont</family>
-                       <pointsize>11</pointsize>
-                       <stylestrategy>PreferDefault</stylestrategy>
-                      </font>
-                     </property>
-                     <property name="toolTip">
-                      <string>Apply to the data used for analysis?</string>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>No</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Yes</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
                    <item row="4" column="0">
                     <widget class="QLabel" name="labelGradient">
                      <property name="enabled">
@@ -2961,6 +2935,23 @@
                    </item>
                    <item row="4" column="1">
                     <widget class="QCheckBox" name="checkBoxGradient">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <family>.AppleSystemUIFont</family>
+                       <pointsize>11</pointsize>
+                       <stylestrategy>PreferDefault</stylestrategy>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QCheckBox" name="checkBoxApplyNoiseReduction">
                      <property name="enabled">
                       <bool>false</bool>
                      </property>

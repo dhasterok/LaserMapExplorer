@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QWidget, QLineEdit, QToolButton, QHBoxLayout, QMessageBox
+    QWidget, QLineEdit, QToolButton, QHBoxLayout, QMessageBox, QLabel, QTextEdit
 )
 from PyQt6.QtGui import (
     QTextCursor, QTextCharFormat, QColor, QTextDocument, QAction
@@ -71,6 +71,10 @@ class SearchWidget(QWidget):
         self.next_button.setText("↓")
         self.next_button.setToolTip("Next match")
         layout.addWidget(self.next_button)
+        
+        self.match_label = QLabel("0 / 0")
+        self.match_label.setMinimumWidth(60)
+        layout.addWidget(self.match_label)
 
         self.clear_button = QToolButton()
         self.clear_button.setText("✖")
@@ -126,6 +130,9 @@ class SearchWidget(QWidget):
         self.text_edit.setExtraSelections([])
 
         if not query:
+            self.total_matches = 0
+            self.current_index = -1
+            self.update_match_label()
             return
 
         # Create search flags
@@ -137,23 +144,36 @@ class SearchWidget(QWidget):
         try:
             if use_regex:
                 pattern = re.compile(query, 0 if case_sensitive else re.IGNORECASE)
-                matches = list(pattern.finditer(text))
-                self.match_positions = [m.start() for m in matches]
-                match_lengths = [m.end() - m.start() for m in matches]
+                self.matches = list(pattern.finditer(text))
+                self.match_positions = [m.start() for m in self.matches]
+                match_lengths = [m.end() - m.start() for m in self.matches]
+                self.match_lengths = match_lengths
             else:
-                matches = []
+                self.match_positions = []
                 match_lengths = []
+                self.matches = []
+
                 i = 0
-                while i < len(text):
-                    index = text.find(query, i) if case_sensitive else text.lower().find(query.lower(), i)
+                search_text = text if case_sensitive else text.lower()
+                query_text = query if case_sensitive else query.lower()
+
+                while i < len(search_text):
+                    index = search_text.find(query_text, i)
                     if index == -1:
                         break
                     self.match_positions.append(index)
                     match_lengths.append(len(query))
+                    self.match_lengths = match_lengths
+
+                    self.matches.append((index, len(query)))
                     i = index + len(query)
         except re.error as e:
             QMessageBox.warning(self, "Regex Error", f"Invalid regex pattern:\n{e}")
             return
+
+        self.total_matches = len(self.matches)
+        self.current_index = 0 if self.matches else -1
+        self.update_match_label()
 
         # Apply highlight
         for i, pos in enumerate(self.match_positions):
@@ -168,7 +188,7 @@ class SearchWidget(QWidget):
         # Highlight current match
         if self.match_positions:
             self.current_index = 0
-            self.select_current(match_lengths[0])
+            self.select_current(match_lengths[self.current_index])
 
     def select_current(self, length):
         cursor = self.text_edit.textCursor()
@@ -185,7 +205,16 @@ class SearchWidget(QWidget):
         selection.format.setForeground(QColor("black"))
         self.text_edit.setExtraSelections([selection])
 
+    def update_match_label(self):
+        if self.total_matches == 0:
+            self.match_label.setText("0 / 0")
+        else:
+            self.match_label.setText(f"{self.current_index + 1} / {self.total_matches}")
+
     def navigate_match(self, forward=True):
+        print("Current index:", self.current_index)
+        print("Total matches:", len(self.match_positions))
+
         if not self.match_positions:
             return
         if forward:
@@ -193,44 +222,9 @@ class SearchWidget(QWidget):
         else:
             self.current_index = (self.current_index - 1 + len(self.match_positions)) % len(self.match_positions)
 
-        match_length = len(self.search_input.text()) if not self.regex_button.isChecked() else 1  # simplified
+        self.update_match_label()  # ← missing?
+        match_length = self.match_lengths[self.current_index]
         self.select_current(match_length)
-
-    def replace_current(self):
-        if self.current_index < 0 or not self.replace_input:
-            return
-        cursor = self.text_edit.textCursor()
-        cursor.beginEditBlock()
-        cursor.removeSelectedText()
-        cursor.insertText(self.replace_input.text())
-        cursor.endEditBlock()
-        self.highlight_matches()
-
-    def replace_all(self):
-        if not self.match_positions or not self.replace_input:
-            return
-        replacement = self.replace_input.text()
-        text = self.text_edit.toPlainText()
-        query = self.search_input.text()
-        case_sensitive = self.case_button.isChecked()
-
-        if self.regex_button.isChecked():
-            try:
-                flags = 0 if case_sensitive else re.IGNORECASE
-                pattern = re.compile(query, flags)
-                text = pattern.sub(replacement, text)
-            except re.error as e:
-                QMessageBox.warning(self, "Regex Error", f"Invalid regex pattern:\n{e}")
-                return
-        else:
-            if not case_sensitive:
-                pattern = re.compile(re.escape(query), re.IGNORECASE)
-                text = pattern.sub(replacement, text)
-            else:
-                text = text.replace(query, replacement)
-
-        self.text_edit.setPlainText(text)
-        self.highlight_matches()
 
     def clear_search(self):
         self.search_input.setText("")

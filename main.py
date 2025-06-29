@@ -58,7 +58,7 @@ import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import LoggerConfig, auto_log_methods, log, LoggerDock
+from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
@@ -101,12 +101,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Data': True,
                 'Image': True,
                 'Selector': True,
-                'Plotting': True,
+                'Plot': True,
                 'Polygon': True,
                 'Profile': True,
-                'Masking': True,
+                'Mask': True,
                 'Tree': True,
-                'Styles': True,
+                'Style': True,
                 'Calculator': True,
                 'Browser': True,
                 'UI': True
@@ -141,6 +141,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Initialise class from DataAnalysis
         self.clustering = Clustering(self)
 
+        self.connect_logger()
         self.init_ui()
         self.connect_actions()
         self.connect_widgets()
@@ -151,6 +152,86 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.init_canvas_widget()
 
         self.mpl_canvas = None # will hold the current canvas
+
+    @no_log
+    def connect_logger(self):
+        # MainWindow toolbar
+        self.actionOpenSample.triggered.connect(lambda: log("actionOpenSample", prefix="UI"))
+        self.actionOpenDirectory.triggered.connect(lambda: log("actionOpenDirectory", prefix="UI"))
+        self.actionOpenProject.triggered.connect(lambda: log("actionOpenProject", prefix="UI"))
+        self.actionSaveProject.triggered.connect(lambda: log("actionSaveProject", prefix="UI"))
+        self.comboBoxSampleId.activated.connect(lambda: log(f"comboBoxSampleId, value=[{self.comboBoxSampleId.currentText()}]", prefix="UI"))
+        self.actionSelectAnalytes.triggered.connect(lambda: log("actionSelectAnalytes", prefix="UI"))
+        self.actionWorkflowTool.triggered.connect(lambda: log("actionWorkflowTool", prefix="UI"))
+        self.actionFullMap.triggered.connect(lambda: log("actionFullMap", prefix="UI"))
+        self.actionCrop.triggered.connect(lambda: log("actionCrop", prefix="UI"))
+        self.actionSwapAxes.triggered.connect(lambda: log("actionSwapAxes", prefix="UI"))
+        self.actionNoiseReduction.triggered.connect(lambda: log("actionNoiseReduction", prefix="UI"))
+        self.actionClearFilters.triggered.connect(lambda: log("actionClearFilters", prefix="UI"))
+        self.actionFilters.triggered.connect(lambda: log("actionFilters", prefix="UI"))
+        self.actionPolygonMask.triggered.connect(lambda: log("actionPolygonMask", prefix="UI"))
+        self.actionClusterMask.triggered.connect(lambda: log("actionClusterMask", prefix="UI"))
+        self.actionUpdatePlot.triggered.connect(lambda: log("actionUpdatePlot", prefix="UI"))
+        self.actionSavePlotToTree.triggered.connect(lambda: log("actionSavePlotToTree", prefix="UI"))
+        self.actionNotes.triggered.connect(lambda: log("actionNotes", prefix="UI"))
+        self.actionCalculator.triggered.connect(lambda: log("actionCalculator", prefix="UI"))
+        self.actionReportBug.triggered.connect(lambda: log("actionReportBug", prefix="UI"))
+        self.actionHelp.triggered.connect(lambda: log("actionHelp", prefix="UI"))
+        self.actionReset.triggered.connect(lambda: log("actionReset", prefix="UI"))
+        self.actionViewMode.triggered.connect(lambda: log("actionViewMode", prefix="UI"))
+
+        # left/control toolbox
+        # plot and axes controls
+        self.toolBox.currentChanged.connect(lambda: log(f"toolBox, index=[{self.toolBox.itemText(self.toolBox.currentIndex())}]",prefix="UI"))
+        self.comboBoxPlotType.currentTextChanged.connect(lambda: log(f"comboBoxPlotType value=[{self.comboBoxPlotType.currentText()}]", prefix="UI"))
+        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeC, value=[{self.comboBoxFieldTypeC.currentText()}]",prefix="UI"))
+        self.comboBoxFieldC.currentTextChanged.connect(lambda: log(f"comboBoxFieldC, value=[{self.comboBoxFieldC.currentText()}]",prefix="UI"))
+        self.spinBoxFieldC.valueChanged.connect(lambda: log(f"spinBoxFieldC value=[{self.spinBoxFieldC.value()}]", prefix="UI"))
+        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeX, value=[{self.comboBoxFieldTypeX.currentText()}]",prefix="UI"))
+        self.comboBoxFieldX.currentTextChanged.connect(lambda: log(f"comboBoxFieldX, value=[{self.comboBoxFieldX.currentText()}]",prefix="UI"))
+        self.spinBoxFieldX.valueChanged.connect(lambda: log(f"spinBoxFieldX value=[{self.spinBoxFieldX.value()}]", prefix="UI"))
+        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeY, value=[{self.comboBoxFieldTypeY.currentText()}]",prefix="UI"))
+        self.comboBoxFieldY.currentTextChanged.connect(lambda: log(f"comboBoxFieldY, value=[{self.comboBoxFieldY.currentText()}]",prefix="UI"))
+        self.spinBoxFieldY.valueChanged.connect(lambda: log(f"spinBoxFieldY value=[{self.spinBoxFieldY.value()}]", prefix="UI"))
+        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeZ, value=[{self.comboBoxFieldTypeZ.currentText()}]",prefix="UI"))
+        self.comboBoxFieldZ.currentTextChanged.connect(lambda: log(f"comboBoxFieldZ, value=[{self.comboBoxFieldZ.currentText()}]",prefix="UI"))
+        self.spinBoxFieldZ.valueChanged.connect(lambda: log(f"spinBoxFieldZ value=[{self.spinBoxFieldZ.value()}]", prefix="UI"))
+
+        # preprocessing controls
+        self.lineEditResolutionNx.editingFinished.connect(lambda: log(f"lineEditResolutionNx value=[{self.lineEditResolutionNx.value}]", prefix="UI"))
+        self.lineEditResolutionNy.editingFinished.connect(lambda: log(f"lineEditResolutionNy value=[{self.lineEditResolutionNy.value}]", prefix="UI"))
+        self.toolButtonPixelResolutionReset.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
+        self.lineEditDX.editingFinished.connect(lambda: log(f"lineEditDX, value=[{self.lineEditDX.value}]",prefix="UI"))
+        self.lineEditDY.editingFinished.connect(lambda: log(f"lineEditDY, value=[{self.lineEditDY.value}]",prefix="UI"))
+        self.toolButtonResolutionReset.clicked.connect(lambda: log("toolButtonsRolutionReset",prefix="UI"))
+        self.toolButtonSwapResolution.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
+        self.toolButtonAutoScale.clicked.connect(lambda: log(f"toolButtonAutoScale value=[{self.toolButtonAutoScale.isChecked()}]", prefix="UI"))
+        self.toolButtonScaleEqualize.clicked.connect(lambda: log(f"toolButtonScaleEqualize value=[{self.toolButtonScaleEqualize.isChecked()}]", prefix="UI"))
+        self.checkBoxShowHistCmap.checkStateChanged.connect(lambda: log(f"checkBoxShowHistCmap value=[{self.checkBoxShowHistCmap.isChecked()}]", prefix="UI"))
+        self.checkBoxApplyAll.checkStateChanged.connect(lambda: log(f"checkBoxApplyAll value=[{self.checkBoxApplyAll.isChecked()}]", prefix="UI"))
+        self.toolButtonOutlierReset.clicked.connect(lambda: log("toolButtonOutlierReset", prefix="UI"))
+        self.comboBoxOutlierMethod.activated.connect(lambda: log(f"comboBoxOutlierMethod value=[{self.comboBoxOutlierMethod.currentText()}]", prefix="UI"))
+        self.comboBoxNegativeMethod.activated.connect(lambda: log(f"comboBoxNegativeMethod value=[{self.comboBoxNegativeMethod.currentText()}]", prefix="UI"))
+        self.lineEditLowerQuantile.editingFinished.connect(lambda: log(f"lineEditLowerQuantile value=[{self.lineEditLowerQuantile.value}]", prefix="UI"))
+        self.lineEditUpperQuantile.editingFinished.connect(lambda: log(f"lineEditUpperQuantile value=[{self.lineEditUpperQuantile.value}]", prefix="UI"))
+        self.lineEditDifferenceLowerQuantile.editingFinished.connect(lambda: log(f"lineEditDifferenceLowerQuantile value=[{self.lineEditDifferenceLowerQuantile.value}]", prefix="UI"))
+        self.lineEditDifferenceUpperQuantile.editingFinished.connect(lambda: log(f"lineEditDifferenceUpperQuantile value=[{self.lineEditDifferenceUpperQuantile.value}]", prefix="UI"))
+        
+        # field viewer
+        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda: log(f"doubleSpinBoxBinWidth value=[{self.doubleSpinBoxBinWidth.value()}]", prefix="UI"))
+        self.spinBoxNBins.valueChanged.connect(lambda: log(f"spinBoxNBins value=[{self.spinBoxNBins.value()}]", prefix="UI"))
+        self.toolButtonHistogramReset.clicked.connect(lambda: log("toolButtonHistogramReset", prefix="UI"))
+        self.comboBoxCorrelationMethod.activated.connect(lambda: log(f"comboBoxCorrelationMethod value=[{self.comboBoxCorrelationMethod.currentText()}]", prefix="UI"))
+        self.checkBoxCorrelationSquared.checkStateChanged.connect(lambda: log(f"checkBoxCorrelationSquared value=[{self.checkBoxCorrelationSquared.isChecked()}]", prefix="UI"))
+        self.comboBoxNoiseReductionMethod.activated.connect(lambda: log(f"comboBoxNoiseReductionMethod value=[{self.comboBoxNoiseReductionMethod.currentText()}]", prefix="UI"))
+        self.spinBoxNoiseOption1.valueChanged.connect(lambda: log(f"spinBoxNoiseOption1 value=[{self.spinBoxNoiseOption1.value}]", prefix="UI"))
+        self.doubleSpinBoxNoiseOption2.valueChanged.connect(lambda: log(f"doubleSpinBoxNoiseOption2 value=[{self.doubleSpinBoxNoiseOption2.value}]", prefix="UI"))
+        self.checkBoxApplyNoiseReduction.checkStateChanged.connect(lambda: log(f"checkBoxApplyNoiseReduction value=[{self.checkBoxApplyNoiseReduction.isChecked()}]", prefix="UI"))
+        self.checkBoxGradient.checkStateChanged.connect(lambda: log(f"checkBoxGradient value=[{self.checkBoxGradient.isChecked()}]", prefix="UI"))
+
+        # right/styling toolbox
+
+
 
     def init_ui(self):
         """Initialize the UI"""
@@ -314,22 +395,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def connect_widgets(self):
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
-        self.toolBox.currentChanged.connect(lambda: log(f"toolBox, index=[{self.toolBox.itemText(self.toolBox.currentIndex())}]",prefix="UI: "))
 
         self.comboBoxSampleId.activated.connect(self.update_sample_id)
-        self.comboBoxSampleId.activated.connect(lambda: log(f"comboBoxSampleId, value=[{self.comboBoxSampleId.currentText()}]",prefix="UI: "))
 
         self.lineEditDX.editingFinished.connect(self.update_dx)
         self.lineEditDY.editingFinished.connect(self.update_dy)
-        self.lineEditDX.editingFinished.connect(lambda: log(f"lineEditDX, value=[{self.lineEditDX.value}]",prefix="UI: "))
-        self.lineEditDY.editingFinished.connect(lambda: log(f"lineEditDY, value=[{self.lineEditDY.value}]",prefix="UI: "))
+
 
         self.actionFullMap.triggered.connect(self.reset_crop)
-        self.actionFullMap.triggered.connect(lambda: log(f"actionFullMap, state=[{self.actionFullMap.isChecked}]",prefix="UI: "))
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
-        self.toolButtonSwapResolution.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI: "))
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
-        self.toolButtonPixelResolutionReset.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI: "))
 
 
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(
@@ -340,7 +415,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=3))
-        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeC, value=[{self.comboBoxFieldTypeC.currentText()}]",prefix="UI: "))
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldC,
             self.comboBoxFieldTypeC,
@@ -350,7 +424,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
         #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         self.comboBoxFieldC.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=3))
-        self.comboBoxFieldC.currentTextChanged.connect(lambda: log(f"comboBoxFieldC, value=[{self.comboBoxFieldC.currentText()}]",prefix="UI: "))
         # update spinbox associated with map/color field
         self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))
 
@@ -362,7 +435,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=0))
-        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeX, value=[{self.comboBoxFieldTypeX.currentText()}]",prefix="UI: "))
         self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldX,
             self.comboBoxFieldTypeX,
@@ -370,7 +442,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldX.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=0))
-        self.comboBoxFieldX.currentTextChanged.connect(lambda: log(f"comboBoxFieldX, value=[{self.comboBoxFieldX.currentText()}]",prefix="UI: "))
         # update spinbox associated with map/color field
         self.spinBoxFieldX.valueChanged.connect(lambda: self.field_spinbox_changed(ax=0))
 
@@ -382,7 +453,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=1))
-        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeY, value=[{self.comboBoxFieldTypeY.currentText()}]",prefix="UI: "))
         self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldY,
             self.comboBoxFieldTypeY,
@@ -390,7 +460,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldY.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=1))
-        self.comboBoxFieldY.currentTextChanged.connect(lambda: log(f"comboBoxFieldY, value=[{self.comboBoxFieldY.currentText()}]",prefix="UI: "))
         # update spinbox associated with map/color field
         self.spinBoxFieldY.valueChanged.connect(lambda: self.field_spinbox_changed(ax=1))
 
@@ -402,7 +471,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: self.plot_style.update_field_type(ax=2))
-        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: log(f"comboBoxFieldTypeZ, value=[{self.comboBoxFieldTypeZ.currentText()}]",prefix="UI: "))
         self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldZ,
             self.comboBoxFieldTypeZ,
@@ -410,7 +478,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             user_activated=True
             )
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
-        self.comboBoxFieldZ.currentTextChanged.connect(lambda: log(f"comboBoxFieldZ, value=[{self.comboBoxFieldZ.currentText()}]",prefix="UI: "))
+        self.spinBoxFieldZ.valueChanged.connect(lambda: self.field_spinbox_changed(ax=2))
 
         # N-Dim Tab
         #-------------------------
@@ -677,7 +745,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.calculator.setEnabled(True)
             self.toolBoxStyle.setEnabled(True)
 
-    def toolbox_changed(self, tab_ind=None):
+    def toolbox_changed(self, tab_id=None):
         """Updates styles associated with toolbox page
 
         Executes on change of ``MainWindow.toolBox.currentIndex()``.  Updates style related widgets.
@@ -685,7 +753,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.app_data.sample_id == '':
             return
 
-        if not tab_ind:
+        if not tab_id:
             tab_id = self.toolBox.currentIndex()
 
         data = self.data[self.app_data.sample_id]
@@ -1296,6 +1364,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.field_control_settings[key]['saved_index'] = 0
 
         self.init_tabs(enable=True)
+
+        self.toolButtonAutoScale.clicked.connect(lambda: self.data[self.app_data.sample_id].auto_scale_value(self.toolButtonAutoScale.isChecked()))
 
         # update slot connections that depend on the sample
         self.toolButtonOutlierReset.clicked.connect(lambda: self.data[self.app_data.sample_id].reset_data_handling(self.comboBoxOutlierMethod.currentText(), self.comboBoxNegativeMethod.currentText()))
@@ -1995,7 +2065,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 and 'field_type' in self.plot_info \
                 and 'field' in self.plot_info:
                 # update x axis limits in style_dict 
-                self.plot_style.initialize_axis_values(self.plot_info['field_type'], self.plot_info['field'])
+                self.plot_style.initialize_axis_values(self.data, self.plot_info['field_type'], self.plot_info['field'])
                 # update limits in styling tabs
                 self.plot_style.set_axis_widgets("x",field)
 

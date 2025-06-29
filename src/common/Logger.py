@@ -21,6 +21,8 @@ def get_global_logger():
 
 def log(msg, prefix=""):
     logger = get_global_logger()
+    if not (prefix == ""):
+        prefix = f"{prefix}: "
     if logger and hasattr(logger, 'write'):
         logger.write(f"{prefix}{msg}")
     else:
@@ -44,7 +46,7 @@ def log_call(logger_key=None, show_args=False, show_call_chain=False):
             # Determine if 'self' exists (bound method)
             self_obj = args[0] if args else None
             if logger_key and LoggerConfig.get_option(logger_key):
-                prefix = f"{logger_key.upper()}: "
+                prefix = f"{logger_key.upper()}"
 
                 if self_obj and hasattr(self_obj, 'logger_options'):
                     if not self_obj.logger_options.get(logger_key, False):
@@ -55,7 +57,7 @@ def log_call(logger_key=None, show_args=False, show_call_chain=False):
             # Build message
             func_name = func.__qualname__
             caller = inspect.stack()[1].function
-            parts = [f"{prefix}[{caller} → {func_name}]"]
+            parts = [f"{prefix}: [{caller} → {func_name}]"]
 
             if show_args:
                 arg_list = [describe_arg(arg) for arg in args]
@@ -64,14 +66,12 @@ def log_call(logger_key=None, show_args=False, show_call_chain=False):
 
             if show_call_chain:
                 chain = " → ".join(f.function for f in reversed(inspect.stack()[1:4]))
-                parts.append(f"chain: {chain}")
+                parts.append(f"chain:/ {chain}")
 
             log(" | ".join(parts))
             return func(*args, **kwargs)
         return wrapper
     return decorator
-
-
 
 def describe_arg(arg):
     """Return a string description of the argument."""
@@ -83,17 +83,6 @@ def describe_arg(arg):
         return repr(arg)
     except Exception:
         return "<unprintable>"
-
-def log_ui_call(logger=None, **log_options):
-    """Decorator for logging GUI-triggered events with a 'UI:' prefix."""
-    def decorator(func):
-        @log_call(logger=logger, **log_options)
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # Inject UI prefix via message composition in the main decorator
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
 
 def auto_log_methods(logger_key: str=None, **log_options):
     """Decorator that wraps all methods in a class   

@@ -18,7 +18,7 @@ from src.common.scalebar import scalebar
 from src.common.ternary_plot import ternary
 from src.common.Logger import LoggerConfig, log_call, log
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_histogram=False):
     """Create a matplotlib canvas for plotting a map
 
@@ -137,7 +137,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     
     return canvas, plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_map_pg(self, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
 
@@ -318,7 +318,7 @@ def plot_map_pg(self, sample_id, field_type, field):
         if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
             plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, map_df)
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
     """Creates a small histogram on the Samples and Fields tab associated with the selected map
 
@@ -401,7 +401,7 @@ def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
     parent.clear_layout(parent.widgetHistView.layout())
     parent.widgetHistView.layout().addWidget(canvas)
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_histogram(parent, data, app_data, plot_style):
     """Plots a histogramn in the canvas window"""
     
@@ -424,7 +424,7 @@ def plot_histogram(parent, data, app_data, plot_style):
         x = get_scatter_data(data, app_data, plot_style, processed=True)['x']
 
     # determine edges
-    xmin,xmax,xscale,xlbl = plot_style.get_axis_values(x['type'],x['field'])
+    xmin,xmax,xscale,xlbl = plot_style.get_axis_values(data, x['type'],x['field'])
     plot_style.xlim = [xmin, xmax]
     plot_style.xscale = xscale
     #if xscale == 'log':
@@ -560,7 +560,7 @@ def plot_histogram(parent, data, app_data, plot_style):
             plot_style.set_axis_widgets('y', x['field'])
 
         # grab probablility axes limits
-        _, _, _, _, ymin, ymax = plot_style.get_axis_values(x['type'],x['field'],ax='p')
+        _, _, _, _, ymin, ymax = plot_style.get_axis_values(data, x['type'],x['field'],ax='p')
 
         # x-axis
         canvas.axes.set_xlabel(xlbl, fontdict=font)
@@ -611,7 +611,7 @@ def plot_histogram(parent, data, app_data, plot_style):
 
     return canvas, plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def logax(ax, lim, axis='y', label='', tick_label_rotation=0):
     """
     Produces log-axes limits and labels.
@@ -740,7 +740,7 @@ def add_colorbar(plot_style, canvas, cax, cbartype='continuous', grouplabels=Non
     #else:
     #    print('(add_colorbar) Unknown type: '+cbartype)
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def add_scalebar(app_data, plot_style, ax):
     """Add a scalebar to a map
 
@@ -769,7 +769,7 @@ def add_scalebar(app_data, plot_style, ax):
     else:
         return
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_correlation(parent, data, app_data, plot_style):
     """Creates an image of the correlation matrix"""
     #print('plot_correlation')
@@ -870,7 +870,7 @@ def plot_correlation(parent, data, app_data, plot_style):
     return canvas, plot_info
 
  
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def get_scatter_data(data, app_data, plot_style, processed=True):
 
     scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
@@ -923,7 +923,7 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
 # -------------------------------------
 # Scatter/Heatmap functions
 # -------------------------------------
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_scatter(parent, data, app_data, plot_style, canvas=None):
     """Creates a plots from self.toolBox Scatter page.
 
@@ -973,7 +973,7 @@ def plot_scatter(parent, data, app_data, plot_style, canvas=None):
 
         return canvas, plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def biplot(canvas, data, app_data, plot_style, x, y, c):
     """Creates scatter bi-plots
 
@@ -1046,8 +1046,8 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
         
 
     # axes
-    xmin, xmax, xscale, xlbl = plot_style.get_axis_values(x['type'],x['field'])
-    ymin, ymax, yscale, ylbl = plot_style.get_axis_values(y['type'],y['field'])
+    xmin, xmax, xscale, xlbl = plot_style.get_axis_values(data, x['type'],x['field'])
+    ymin, ymax, yscale, ylbl = plot_style.get_axis_values(data, y['type'],y['field'])
 
     # labels
     font = {'size':plot_style.font_size}
@@ -1097,7 +1097,7 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
 
     return plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
     """Creates ternary scatter plots
 
@@ -1196,7 +1196,7 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
 
     return plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
     """Creates 2D histogram figure
 
@@ -1271,7 +1271,7 @@ def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
 
     return plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
     """Creates a ternary histogram figure
 
@@ -1337,7 +1337,7 @@ def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
 
     return plot_info
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_ternary_map(parent, data, app_data, plot_style):
     """Creates map colored by ternary coordinate positions"""
     if plot_style.plot_type != 'ternary map':
@@ -1421,7 +1421,7 @@ def plot_ternary_map(parent, data, app_data, plot_style):
 # -------------------------------------
 # TEC and Radar plots
 # -------------------------------------
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_ndim(parent, data, app_data, plot_style):
     """Produces trace element compatibility (TEC) and Radar plots
     
@@ -1586,7 +1586,7 @@ def plot_ndim(parent, data, app_data, plot_style):
 # -------------------------------------
 # PCA functions and plotting
 # -------------------------------------
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_score_map(parent,data, app_data, plot_style):
     """Plots score maps
 
@@ -1629,7 +1629,7 @@ def plot_score_map(parent,data, app_data, plot_style):
 
     return canvas, data.processed_data[field]
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_pca(parent, data, app_data, plot_style):
     """Plot principal component analysis (PCA)
     
@@ -1710,7 +1710,7 @@ def plot_pca(parent, data, app_data, plot_style):
     #update_canvas(canvas)
     #self.update_field_combobox(self.comboBoxHistFieldType, self.comboBoxHistField)
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_pca_variance(parent,pca_results, plot_style):
     """Creates a plot of explained variance, individual and cumulative, for PCA
 
@@ -1765,7 +1765,7 @@ def plot_pca_variance(parent,pca_results, plot_style):
     plot_data = pd.DataFrame(np.vstack((n_components, variances, cumulative_variances)).T, columns = ['Components','Variance','Cumulative Variance'])
     return canvas, plot_data
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_pca_vectors(parent,pca_results, data, app_data, plot_style):
     """Displays a heat map of PCA vector components
 
@@ -1836,7 +1836,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, plot_style):
     plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
     return canvas, plot_data
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_pca_components(pca_results,data, app_data, plot_style,canvas):
     """Adds vector components to PCA scatter and heatmaps
 
@@ -1885,7 +1885,7 @@ def plot_pca_components(pca_results,data, app_data, plot_style,canvas):
     plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
     return plot_data
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_clusters(parent, data, app_data, plot_style):
     """Plot maps associated with clustering
 
@@ -1928,7 +1928,7 @@ def plot_clusters(parent, data, app_data, plot_style):
     # self.clear_layout(self.widgetSingleView.layout())
     # self.widgetSingleView.layout().addWidget(canvas)
 
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def cluster_performance_plot(parent, data, app_data, plot_style):
     """Plots used to estimate the optimal number of clusters
 
@@ -2045,7 +2045,7 @@ def cluster_performance_plot(parent, data, app_data, plot_style):
 # -------------------------------------
 # Cluster functions
 # -------------------------------------
-@log_call(logger_key='Plotting', show_args=True)
+@log_call(logger_key='Plot', show_args=True)
 def plot_cluster_map(parent, data, app_data, plot_style):
     """Produces a map of cluster categories
     

@@ -911,6 +911,12 @@ class Ui_MainWindow(object):
 
         self.gridLayout_2.addWidget(self.comboBoxPlotType, 0, 1, 1, 1)
 
+        self.spinBoxFieldZ = QSpinBox(self.groupBox)
+        self.spinBoxFieldZ.setObjectName(u"spinBoxFieldZ")
+        self.spinBoxFieldZ.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.gridLayout_2.addWidget(self.spinBoxFieldZ, 3, 3, 1, 1)
+
 
         self.verticalLayout_19.addLayout(self.gridLayout_2)
 
@@ -1466,16 +1472,6 @@ class Ui_MainWindow(object):
 
         self.formLayout_28.setWidget(3, QFormLayout.LabelRole, self.labelApplySmoothing)
 
-        self.comboBoxApplyNoiseReduction = QComboBox(self.groupBoxNoiseReduction)
-        self.comboBoxApplyNoiseReduction.addItem("")
-        self.comboBoxApplyNoiseReduction.addItem("")
-        self.comboBoxApplyNoiseReduction.setObjectName(u"comboBoxApplyNoiseReduction")
-        self.comboBoxApplyNoiseReduction.setEnabled(False)
-        self.comboBoxApplyNoiseReduction.setMaximumSize(QSize(150, 16777215))
-        self.comboBoxApplyNoiseReduction.setFont(font5)
-
-        self.formLayout_28.setWidget(3, QFormLayout.FieldRole, self.comboBoxApplyNoiseReduction)
-
         self.labelGradient = QLabel(self.groupBoxNoiseReduction)
         self.labelGradient.setObjectName(u"labelGradient")
         self.labelGradient.setEnabled(False)
@@ -1489,6 +1485,13 @@ class Ui_MainWindow(object):
         self.checkBoxGradient.setFont(font5)
 
         self.formLayout_28.setWidget(4, QFormLayout.FieldRole, self.checkBoxGradient)
+
+        self.checkBoxApplyNoiseReduction = QCheckBox(self.groupBoxNoiseReduction)
+        self.checkBoxApplyNoiseReduction.setObjectName(u"checkBoxApplyNoiseReduction")
+        self.checkBoxApplyNoiseReduction.setEnabled(False)
+        self.checkBoxApplyNoiseReduction.setFont(font5)
+
+        self.formLayout_28.setWidget(3, QFormLayout.FieldRole, self.checkBoxApplyNoiseReduction)
 
 
         self.verticalLayout_74.addWidget(self.groupBoxNoiseReduction)
@@ -3250,7 +3253,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.canvasWindow.setCurrentIndex(0)
-        self.toolBox.setCurrentIndex(3)
+        self.toolBox.setCurrentIndex(1)
         self.toolBox.layout().setSpacing(2)
         self.comboBoxNDimQuantiles.setCurrentIndex(2)
         self.toolBoxStyle.setCurrentIndex(3)
@@ -3713,14 +3716,9 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.labelNoiseOption2.setText(QCoreApplication.translate("MainWindow", u" Option 2", None))
         self.labelApplySmoothing.setText(QCoreApplication.translate("MainWindow", u"Apply to analysis", None))
-        self.comboBoxApplyNoiseReduction.setItemText(0, QCoreApplication.translate("MainWindow", u"No", None))
-        self.comboBoxApplyNoiseReduction.setItemText(1, QCoreApplication.translate("MainWindow", u"Yes", None))
-
-#if QT_CONFIG(tooltip)
-        self.comboBoxApplyNoiseReduction.setToolTip(QCoreApplication.translate("MainWindow", u"Apply to the data used for analysis?", None))
-#endif // QT_CONFIG(tooltip)
         self.labelGradient.setText(QCoreApplication.translate("MainWindow", u"Gradient", None))
         self.checkBoxGradient.setText("")
+        self.checkBoxApplyNoiseReduction.setText("")
         self.toolBox.setItemText(self.toolBox.indexOf(self.SelectAnalytePage), QCoreApplication.translate("MainWindow", u"Field Viewer", None))
         self.groupBoxAxes.setTitle(QCoreApplication.translate("MainWindow", u"Biplot and ternary", None))
         self.toolButtonScatterSavePreset.setText(QCoreApplication.translate("MainWindow", u"...", None))

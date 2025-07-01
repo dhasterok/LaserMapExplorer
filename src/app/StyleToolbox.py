@@ -17,7 +17,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods, log
 class StyleObj():
     pass
 
-@auto_log_methods(logger_key='Style', show_args=True)
+@auto_log_methods(logger_key='Style')
 class Styling(Observable):
     """Manages plot styling for different plot types and syncs with main window UI.
 
@@ -139,7 +139,7 @@ class Styling(Observable):
         'Multiplier' : (hex str) -- color of markers, set by ``toolButtonLineColor``
 
         * associated with widgets in the toolBoxTreeView > Styling > Colors tab
-        'CLabel' : (str) -- colorbar label, set in ``lineEditCbarLabel``
+        'CLabel' : (str) -- colorbar label, set in ``lineEditCLabel``
         'CLim' : (list of float) -- color bounds, set by ``lineEditXLB`` and ``lineEditXUB`` for the lower and upper bounds
         'CScale' : (str) -- c-axis normalization ``linear`` or ``log`` (note for ternary plots the scale is linear), set by ``comboBoxYScale``
         'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
@@ -1195,7 +1195,7 @@ class StyleTheme():
         return styles
     
 
-@auto_log_methods(logger_key='Style', show_args=True)
+@auto_log_methods(logger_key='Style')
 class StylingDock(Styling):
     def __init__(self, parent, logger_options=None, logger_key=None):
         super().__init__(parent,logger_options, logger_key)
@@ -1207,10 +1207,10 @@ class StylingDock(Styling):
             'parentbox': [parent.comboBoxFieldTypeX, parent.comboBoxFieldTypeY, parent.comboBoxFieldTypeZ, parent.comboBoxFieldTypeC],
             'childbox': [parent.comboBoxFieldX, parent.comboBoxFieldY, parent.comboBoxFieldZ, parent.comboBoxFieldC],
             'spinbox': [parent.spinBoxFieldX, parent.spinBoxFieldY, parent.spinBoxFieldZ, parent.spinBoxFieldC],
-            'scalebox': [parent.comboBoxXScale, parent.comboBoxYScale, parent.comboBoxZScale, parent.comboBoxColorScale],
-            'axis_label': [parent.lineEditXLabel, parent.lineEditYLabel, parent.lineEditZLabel, parent.lineEditCbarLabel],
-            'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditColorLB],
-            'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditColorUB],
+            'scalebox': [parent.comboBoxXScale, parent.comboBoxYScale, parent.comboBoxZScale, parent.comboBoxCScale],
+            'axis_label': [parent.lineEditXLabel, parent.lineEditYLabel, parent.lineEditZLabel, parent.lineEditCLabel],
+            'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditCLB],
+            'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditCUB],
             'plot type': {
                 '': {
                     'axis': [False, False, False, False],
@@ -1417,11 +1417,11 @@ class StylingDock(Styling):
         #self.ui.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x',self.ui.lineEditXLabel.text()))
         #self.ui.lineEditYLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('y',self.ui.lineEditYLabel.text()))
         #self.ui.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z',self.ui.lineEditZLabel.text()))
-        #self.ui.lineEditCbarLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',self.ui.lineEditCbarLabel.text()))
+        #self.ui.lineEditCLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',self.ui.lineEditCLabel.text()))
 
         #self.ui.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxXScale,'x'))
         #self.ui.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxYScale,'y'))
-        #self.ui.comboBoxColorScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxColorScale,'c'))
+        #self.ui.comboBoxCScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxCScale,'c'))
 
         self.ui.lineEditXLB.setValidator(QDoubleValidator())
         self.ui.lineEditXLB.precision = 3
@@ -1441,12 +1441,12 @@ class StylingDock(Styling):
         self.ui.lineEditZUB.setValidator(QDoubleValidator())
         self.ui.lineEditZUB.precision = 3
         self.ui.lineEditZUB.toward = 1
-        self.ui.lineEditColorLB.setValidator(QDoubleValidator())
-        self.ui.lineEditColorLB.precision = 3
-        self.ui.lineEditColorLB.toward = 0
-        self.ui.lineEditColorUB.setValidator(QDoubleValidator())
-        self.ui.lineEditColorUB.precision = 3
-        self.ui.lineEditColorUB.toward = 1
+        self.ui.lineEditCLB.setValidator(QDoubleValidator())
+        self.ui.lineEditCLB.precision = 3
+        self.ui.lineEditCLB.toward = 0
+        self.ui.lineEditCUB.setValidator(QDoubleValidator())
+        self.ui.lineEditCUB.precision = 3
+        self.ui.lineEditCUB.toward = 1
         self.ui.lineEditAspectRatio.setValidator(QDoubleValidator())
         self.ui.lineEditAspectRatio.precision = 3
         self.ui.lineEditAspectRatio.toward = 1
@@ -1457,8 +1457,8 @@ class StylingDock(Styling):
         #self.ui.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, float(self.ui.lineEditYUB.text())))
         #self.ui.lineEditZLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 0, float(self.ui.lineEditZLB.text())))
         #self.ui.lineEditZUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 1, float(self.ui.lineEditZUB.text())))
-        #self.ui.lineEditColorLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(self.ui.lineEditColorLB.text())))
-        #self.ui.lineEditColorUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(self.ui.lineEditColorUB.text())))
+        #self.ui.lineEditCLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(self.ui.lineEditCLB.text())))
+        #self.ui.lineEditCUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(self.ui.lineEditCUB.text())))
 
         #self.ui.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
         #self.ui.comboBoxTickDirection.activated.connect(self.tickdir_callback)
@@ -1597,10 +1597,10 @@ class StylingDock(Styling):
         ui.spinBoxHeatmapResolution.blockSignals(self._signal_state)
         ui.comboBoxFieldColormap.blockSignals(self._signal_state)
         ui.checkBoxReverseColormap.blockSignals(self._signal_state)
-        ui.lineEditColorLB.blockSignals(self._signal_state)
-        ui.lineEditColorUB.blockSignals(self._signal_state)
-        ui.comboBoxColorScale.blockSignals(self._signal_state)
-        ui.lineEditCbarLabel.blockSignals(self._signal_state)
+        ui.lineEditCLB.blockSignals(self._signal_state)
+        ui.lineEditCUB.blockSignals(self._signal_state)
+        ui.comboBoxCScale.blockSignals(self._signal_state)
+        ui.lineEditCLabel.blockSignals(self._signal_state)
         ui.comboBoxCbarDirection.blockSignals(self._signal_state)
 
 
@@ -1658,10 +1658,10 @@ class StylingDock(Styling):
         ui.spinBoxHeatmapResolution.setEnabled(False)
         ui.comboBoxFieldColormap.setEnabled(False)
         ui.checkBoxReverseColormap.setEnabled(False)
-        ui.lineEditColorLB.setEnabled(False)
-        ui.lineEditColorUB.setEnabled(False)
-        ui.comboBoxColorScale.setEnabled(False)
-        ui.lineEditCbarLabel.setEnabled(False)
+        ui.lineEditCLB.setEnabled(False)
+        ui.lineEditCUB.setEnabled(False)
+        ui.comboBoxCScale.setEnabled(False)
+        ui.lineEditCLabel.setEnabled(False)
         ui.comboBoxCbarDirection.setEnabled(False)
 
         # clusters
@@ -1711,11 +1711,11 @@ class StylingDock(Styling):
 
                 # color properties
                 ui.comboBoxFieldColormap.setEnabled(True)
-                ui.lineEditColorLB.setEnabled(True)
-                ui.lineEditColorUB.setEnabled(True)
-                ui.comboBoxColorScale.setEnabled(True)
+                ui.lineEditCLB.setEnabled(True)
+                ui.lineEditCUB.setEnabled(True)
+                ui.comboBoxCScale.setEnabled(True)
                 ui.comboBoxCbarDirection.setEnabled(True)
-                ui.lineEditCbarLabel.setEnabled(True)
+                ui.lineEditCLabel.setEnabled(True)
 
             case 'correlation' | 'basis vectors':
                 # axes properties
@@ -1723,8 +1723,8 @@ class StylingDock(Styling):
 
                 # color properties
                 ui.comboBoxFieldColormap.setEnabled(True)
-                ui.lineEditColorLB.setEnabled(True)
-                ui.lineEditColorUB.setEnabled(True)
+                ui.lineEditCLB.setEnabled(True)
+                ui.lineEditCUB.setEnabled(True)
                 ui.comboBoxCbarDirection.setEnabled(True)
 
             case 'histogram':
@@ -1800,11 +1800,11 @@ class StylingDock(Styling):
                     ui.comboBoxCbarDirection.setEnabled(True)
 
                     ui.comboBoxFieldColormap.setEnabled(True)
-                    ui.lineEditColorLB.setEnabled(True)
-                    ui.lineEditColorUB.setEnabled(True)
-                    ui.comboBoxColorScale.setEnabled(True)
+                    ui.lineEditCLB.setEnabled(True)
+                    ui.lineEditCUB.setEnabled(True)
+                    ui.comboBoxCScale.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
-                    ui.lineEditCbarLabel.setEnabled(True)
+                    ui.lineEditCLabel.setEnabled(True)
 
             case 'heatmap' | 'PCA heatmap':
                 # axes properties
@@ -1836,11 +1836,11 @@ class StylingDock(Styling):
 
                 # color properties
                 ui.comboBoxFieldColormap.setEnabled(True)
-                ui.lineEditColorLB.setEnabled(True)
-                ui.lineEditColorUB.setEnabled(True)
-                ui.comboBoxColorScale.setEnabled(True)
+                ui.lineEditCLB.setEnabled(True)
+                ui.lineEditCUB.setEnabled(True)
+                ui.comboBoxCScale.setEnabled(True)
                 ui.comboBoxCbarDirection.setEnabled(True)
-                ui.lineEditCbarLabel.setEnabled(True)
+                ui.lineEditCLabel.setEnabled(True)
 
                 ui.spinBoxHeatmapResolution.setEnabled(True)
             case 'ternary map':
@@ -1946,11 +1946,11 @@ class StylingDock(Styling):
                 # color properties
                 if plot_type != 'clusters':
                     ui.comboBoxFieldColormap.setEnabled(True)
-                    ui.lineEditColorLB.setEnabled(True)
-                    ui.lineEditColorUB.setEnabled(True)
-                    ui.comboBoxColorScale.setEnabled(True)
+                    ui.lineEditCLB.setEnabled(True)
+                    ui.lineEditCUB.setEnabled(True)
+                    ui.comboBoxCScale.setEnabled(True)
                     ui.comboBoxCbarDirection.setEnabled(True)
-                    ui.lineEditCbarLabel.setEnabled(True)
+                    ui.lineEditCLabel.setEnabled(True)
             case 'profile':
                 # axes properties
                 ui.lineEditXLB.setEnabled(True)
@@ -2033,11 +2033,11 @@ class StylingDock(Styling):
         ui.checkBoxReverseColormap.setEnabled(ui.comboBoxFieldColormap.isEnabled())
         ui.labelReverseColormap.setEnabled(ui.checkBoxReverseColormap.isEnabled())
         ui.labelFieldColormap.setEnabled(ui.comboBoxFieldColormap.isEnabled())
-        ui.labelColorScale.setEnabled(ui.comboBoxColorScale.isEnabled())
-        ui.labelColorBounds.setEnabled(ui.lineEditColorLB.isEnabled())
-        ui.toolButtonCAxisReset.setEnabled(ui.labelColorBounds.isEnabled())
+        ui.labelCScale.setEnabled(ui.comboBoxCScale.isEnabled())
+        ui.labelCBounds.setEnabled(ui.lineEditCLB.isEnabled())
+        ui.toolButtonCAxisReset.setEnabled(ui.labelCBounds.isEnabled())
         ui.labelCbarDirection.setEnabled(ui.comboBoxCbarDirection.isEnabled())
-        ui.labelCbarLabel.setEnabled(ui.lineEditCbarLabel.isEnabled())
+        ui.labelCLabel.setEnabled(ui.lineEditCLabel.isEnabled())
         ui.labelHeatmapResolution.setEnabled(ui.spinBoxHeatmapResolution.isEnabled())
 
    
@@ -2210,28 +2210,28 @@ class StylingDock(Styling):
         if field in list(data.axis_dict.keys()):
             style['CLim'] = [data.axis_dict[field]['min'], data.axis_dict[field]['max']]
             style['CLabel'] = data.axis_dict[field]['label']
-        ui.lineEditColorLB.value = style['CLim'][0]
-        ui.lineEditColorUB.value = style['CLim'][1]
+        ui.lineEditCLB.value = style['CLim'][0]
+        ui.lineEditCUB.value = style['CLim'][1]
         if self.app_data.c_field_type == 'cluster':
             # set color field to active cluster method
             ui.comboBoxFieldC.setCurrentText(ui.cluster_dict['active method'])
 
             # set color scale to discrete
-            ui.comboBoxColorScale.clear()
-            ui.comboBoxColorScale.addItem('discrete')
-            ui.comboBoxColorScale.setCurrentText('discrete')
+            ui.comboBoxCScale.clear()
+            ui.comboBoxCScale.addItem('discrete')
+            ui.comboBoxCScale.setCurrentText('discrete')
 
             style['CScale'] = 'discrete'
         else:
             # set color scale options to linear/log
-            ui.comboBoxColorScale.clear()
-            ui.comboBoxColorScale.addItems(['linear','log'])
+            ui.comboBoxCScale.clear()
+            ui.comboBoxCScale.addItems(['linear','log'])
             style['CScale'] = 'linear'
-            ui.comboBoxColorScale.setCurrentText(style['CScale'])
+            ui.comboBoxCScale.setCurrentText(style['CScale'])
             
-        ui.comboBoxColorScale.setCurrentText(style['CScale'])
+        ui.comboBoxCScale.setCurrentText(style['CScale'])
         ui.comboBoxCbarDirection.setCurrentText(style['CbarDir'])
-        ui.lineEditCbarLabel.setText(style['CLabel'])
+        ui.lineEditCLabel.setText(style['CLabel'])
 
         ui.spinBoxHeatmapResolution.blockSignals(True)
         ui.spinBoxHeatmapResolution.setValue(style['Resolution'])
@@ -2281,9 +2281,9 @@ class StylingDock(Styling):
     #             'LineColor': get_hex_color(parent.toolButtonLineColor.palette().button().color()),
 
     #             # update color properties
-    #             'CLabel': parent.lineEditCbarLabel.text(),
-    #             'CLim': [float(parent.lineEditColorLB.text()), float(parent.lineEditColorUB.text())],
-    #             'CScale': parent.comboBoxColorScale.currentText(),
+    #             'CLabel': parent.lineEditCLabel.text(),
+    #             'CLim': [float(parent.lineEditCLB.text()), float(parent.lineEditCUB.text())],
+    #             'CScale': parent.comboBoxCScale.currentText(),
     #             'Colormap': parent.comboBoxFieldColormap.currentText(),
     #             'CbarReverse': parent.checkBoxReverseColormap.isChecked(),
     #             'CbarDir': parent.comboBoxCbarDirection.currentText(),
@@ -2679,9 +2679,9 @@ class StylingDock(Styling):
         field = self.ui.comboBoxFieldC.currentText()
         if field == '':
             return
-        self.ui.lineEditColorLB.value = data.axis_dict[field]['min']
-        self.ui.lineEditColorUB.value = data.axis_dict[field]['max']
-        self.ui.comboBoxColorScale.setCurrentText(data.axis_dict[field]['scale'])
+        self.ui.lineEditCLB.value = data.axis_dict[field]['min']
+        self.ui.lineEditCUB.value = data.axis_dict[field]['max']
+        self.ui.comboBoxCScale.setCurrentText(data.axis_dict[field]['scale'])
 
     def set_axis_widgets(self, ax, field):
         """Sets axis widgets in the style toolbox
@@ -3085,7 +3085,7 @@ class StylingDock(Styling):
         """Executes on change to *ColorByField* combobox
         
         Updates style associated with ``MainWindow.comboBoxFieldTypeC``.  Also updates
-        ``MainWindow.comboBoxFieldC`` and ``MainWindow.comboBoxColorScale``."""
+        ``MainWindow.comboBoxFieldC`` and ``MainWindow.comboBoxCScale``."""
         self.color_field_type = self.ui.comboBoxFieldTypeCType.currentText()
 
         # need this line to update field comboboxes when colorby field is updated
@@ -3295,11 +3295,11 @@ class StylingDock(Styling):
 
         Sets the color label in ``MainWindow.styles`` for the current plot type.
         """
-        if self.clabel == self.ui.lineEditCbarLabel.text():
+        if self.clabel == self.ui.lineEditCLabel.text():
             return
-        self.clabel = self.ui.lineEditCbarLabel.text()
+        self.clabel = self.ui.lineEditCLabel.text()
 
-        if self.ui.comboBoxCbarLabel.isEnabled():
+        if self.ui.comboBoxCLabel.isEnabled():
             self.schedule_update()
 
     # cluster styles

@@ -35,7 +35,7 @@ def calc_error(parent, func, err, addinfo):
 # -------------------------------
 # Calculator
 # -------------------------------
-@auto_log_methods(logger_key='Calculator', show_args=True)
+@auto_log_methods(logger_key='Calculator')
 class CalculatorDock(CustomDockWidget, UIFieldLogic):
     """Creates a CustomFieldCalculator with UI controls inside a dock widget that can be added to a QMainWindow
 
@@ -500,7 +500,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
                 return
 
 
-@auto_log_methods(logger_key='Calculator', show_args=True)
+@auto_log_methods(logger_key='Calculator')
 class CustomFieldCalculator():
     def __init__(self):
         self.logger_key = 'Calculator'

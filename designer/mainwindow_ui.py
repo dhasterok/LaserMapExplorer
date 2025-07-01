@@ -1661,9 +1661,7 @@ class Ui_MainWindow(object):
         self.toolButtonSaveTernaryColormap.setObjectName(u"toolButtonSaveTernaryColormap")
         self.toolButtonSaveTernaryColormap.setMinimumSize(QSize(32, 32))
         self.toolButtonSaveTernaryColormap.setMaximumSize(QSize(32, 32))
-        icon54 = QIcon()
-        icon54.addFile(u":/icons/resources/icons/icon-save-file-64.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonSaveTernaryColormap.setIcon(icon54)
+        self.toolButtonSaveTernaryColormap.setIcon(icon2)
         self.toolButtonSaveTernaryColormap.setIconSize(QSize(24, 24))
 
         self.horizontalLayoutTernaryColors.addWidget(self.toolButtonSaveTernaryColormap)
@@ -1673,9 +1671,9 @@ class Ui_MainWindow(object):
         self.toolButtonTernaryMap.setEnabled(True)
         self.toolButtonTernaryMap.setMinimumSize(QSize(32, 32))
         self.toolButtonTernaryMap.setMaximumSize(QSize(32, 32))
-        icon55 = QIcon()
-        icon55.addFile(u":/resources/icons/icon-illuminati-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonTernaryMap.setIcon(icon55)
+        icon54 = QIcon()
+        icon54.addFile(u":/resources/icons/icon-illuminati-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonTernaryMap.setIcon(icon54)
         self.toolButtonTernaryMap.setIconSize(QSize(24, 24))
 
         self.horizontalLayoutTernaryColors.addWidget(self.toolButtonTernaryMap)
@@ -1761,9 +1759,9 @@ class Ui_MainWindow(object):
         self.toolButtonNDimAnalyteAdd.setObjectName(u"toolButtonNDimAnalyteAdd")
         self.toolButtonNDimAnalyteAdd.setMinimumSize(QSize(32, 32))
         self.toolButtonNDimAnalyteAdd.setMaximumSize(QSize(32, 32))
-        icon56 = QIcon()
-        icon56.addFile(u":/resources/icons/icon-accept-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonNDimAnalyteAdd.setIcon(icon56)
+        icon55 = QIcon()
+        icon55.addFile(u":/resources/icons/icon-accept-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonNDimAnalyteAdd.setIcon(icon55)
         self.toolButtonNDimAnalyteAdd.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_70.addWidget(self.toolButtonNDimAnalyteAdd)
@@ -1851,9 +1849,9 @@ class Ui_MainWindow(object):
         self.toolButtonNDimSelectAll.setObjectName(u"toolButtonNDimSelectAll")
         self.toolButtonNDimSelectAll.setMinimumSize(QSize(32, 32))
         self.toolButtonNDimSelectAll.setMaximumSize(QSize(32, 32))
-        icon57 = QIcon()
-        icon57.addFile(u":/resources/icons/icon-select-all-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonNDimSelectAll.setIcon(icon57)
+        icon56 = QIcon()
+        icon56.addFile(u":/resources/icons/icon-select-all-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonNDimSelectAll.setIcon(icon56)
         self.toolButtonNDimSelectAll.setIconSize(QSize(24, 24))
 
         self.verticalLayout_12.addWidget(self.toolButtonNDimSelectAll)
@@ -1862,9 +1860,9 @@ class Ui_MainWindow(object):
         self.toolButtonNDimUp.setObjectName(u"toolButtonNDimUp")
         self.toolButtonNDimUp.setMinimumSize(QSize(32, 32))
         self.toolButtonNDimUp.setMaximumSize(QSize(32, 32))
-        icon58 = QIcon()
-        icon58.addFile(u":/resources/icons/icon-up-arrow-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonNDimUp.setIcon(icon58)
+        icon57 = QIcon()
+        icon57.addFile(u":/resources/icons/icon-up-arrow-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonNDimUp.setIcon(icon57)
         self.toolButtonNDimUp.setIconSize(QSize(24, 24))
 
         self.verticalLayout_12.addWidget(self.toolButtonNDimUp)
@@ -1873,9 +1871,9 @@ class Ui_MainWindow(object):
         self.toolButtonNDimDown.setObjectName(u"toolButtonNDimDown")
         self.toolButtonNDimDown.setMinimumSize(QSize(32, 32))
         self.toolButtonNDimDown.setMaximumSize(QSize(32, 32))
-        icon59 = QIcon()
-        icon59.addFile(u":/resources/icons/icon-down-arrow-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonNDimDown.setIcon(icon59)
+        icon58 = QIcon()
+        icon58.addFile(u":/resources/icons/icon-down-arrow-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonNDimDown.setIcon(icon58)
         self.toolButtonNDimDown.setIconSize(QSize(24, 24))
 
         self.verticalLayout_12.addWidget(self.toolButtonNDimDown)
@@ -1947,14 +1945,14 @@ class Ui_MainWindow(object):
 
         self.formLayout_32.setWidget(0, QFormLayout.LabelRole, self.labelDimRedTechnique)
 
-        self.ComboBoxDimRedTechnique = QComboBox(self.groupBox_12)
-        self.ComboBoxDimRedTechnique.setObjectName(u"ComboBoxDimRedTechnique")
-        sizePolicy2.setHeightForWidth(self.ComboBoxDimRedTechnique.sizePolicy().hasHeightForWidth())
-        self.ComboBoxDimRedTechnique.setSizePolicy(sizePolicy2)
-        self.ComboBoxDimRedTechnique.setMaximumSize(QSize(220, 16777215))
-        self.ComboBoxDimRedTechnique.setFont(font5)
+        self.comboBoxDimRedTechnique = QComboBox(self.groupBox_12)
+        self.comboBoxDimRedTechnique.setObjectName(u"comboBoxDimRedTechnique")
+        sizePolicy2.setHeightForWidth(self.comboBoxDimRedTechnique.sizePolicy().hasHeightForWidth())
+        self.comboBoxDimRedTechnique.setSizePolicy(sizePolicy2)
+        self.comboBoxDimRedTechnique.setMaximumSize(QSize(220, 16777215))
+        self.comboBoxDimRedTechnique.setFont(font5)
 
-        self.formLayout_32.setWidget(0, QFormLayout.FieldRole, self.ComboBoxDimRedTechnique)
+        self.formLayout_32.setWidget(0, QFormLayout.FieldRole, self.comboBoxDimRedTechnique)
 
         self.labelPCX = QLabel(self.groupBox_12)
         self.labelPCX.setObjectName(u"labelPCX")
@@ -1999,9 +1997,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_81.addWidget(self.scrollAreaMultiDim)
 
-        icon60 = QIcon()
-        icon60.addFile(u":/resources/icons/icon-dimensional-analysis-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBox.addItem(self.MultidimensionalPage, icon60, u"Dimensional Reduction")
+        icon59 = QIcon()
+        icon59.addFile(u":/resources/icons/icon-dimensional-analysis-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBox.addItem(self.MultidimensionalPage, icon59, u"Dimensional Reduction")
         self.ClusteringPage = QWidget()
         self.ClusteringPage.setObjectName(u"ClusteringPage")
         self.ClusteringPage.setEnabled(True)
@@ -2101,9 +2099,9 @@ class Ui_MainWindow(object):
         self.toolButtonRandomSeed.setMinimumSize(QSize(32, 32))
         self.toolButtonRandomSeed.setMaximumSize(QSize(32, 32))
         self.toolButtonRandomSeed.setFont(font5)
-        icon61 = QIcon()
-        icon61.addFile(u":/resources/icons/icon-randomize-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonRandomSeed.setIcon(icon61)
+        icon60 = QIcon()
+        icon60.addFile(u":/resources/icons/icon-randomize-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonRandomSeed.setIcon(icon60)
         self.toolButtonRandomSeed.setIconSize(QSize(24, 24))
 
         self.horizontalLayout.addWidget(self.toolButtonRandomSeed)
@@ -2248,9 +2246,9 @@ class Ui_MainWindow(object):
         self.toolButtonSortAnalyte.setMinimumSize(QSize(32, 32))
         self.toolButtonSortAnalyte.setMaximumSize(QSize(32, 32))
         self.toolButtonSortAnalyte.setFont(font12)
-        icon62 = QIcon()
-        icon62.addFile(u":/resources/icons/icon-sort-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonSortAnalyte.setIcon(icon62)
+        icon61 = QIcon()
+        icon61.addFile(u":/resources/icons/icon-sort-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolButtonSortAnalyte.setIcon(icon61)
         self.toolButtonSortAnalyte.setIconSize(QSize(28, 28))
         self.toolButtonSortAnalyte.setPopupMode(QToolButton.InstantPopup)
 
@@ -2594,9 +2592,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_31.addWidget(self.scrollAreaAxes)
 
-        icon63 = QIcon()
-        icon63.addFile(u":/resources/icons/icon-axes-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleAxes, icon63, u"Axes and Labels")
+        icon62 = QIcon()
+        icon62.addFile(u":/resources/icons/icon-axes-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleAxes, icon62, u"Axes and Labels")
         self.StyleAnnotations = QWidget()
         self.StyleAnnotations.setObjectName(u"StyleAnnotations")
         self.StyleAnnotations.setGeometry(QRect(0, 0, 292, 367))
@@ -2753,7 +2751,7 @@ class Ui_MainWindow(object):
         self.toolButtonAnnotationSelectAll.setMinimumSize(QSize(28, 28))
         self.toolButtonAnnotationSelectAll.setMaximumSize(QSize(28, 28))
         self.toolButtonAnnotationSelectAll.setStyleSheet(u"border : none;")
-        self.toolButtonAnnotationSelectAll.setIcon(icon57)
+        self.toolButtonAnnotationSelectAll.setIcon(icon56)
         self.toolButtonAnnotationSelectAll.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_38.addWidget(self.toolButtonAnnotationSelectAll)
@@ -2774,9 +2772,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_35.addWidget(self.scrollAreaAnnotations)
 
-        icon64 = QIcon()
-        icon64.addFile(u":/resources/icons/icon-text-and-scales-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleAnnotations, icon64, u"Annotations and Scale")
+        icon63 = QIcon()
+        icon63.addFile(u":/resources/icons/icon-text-and-scales-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleAnnotations, icon63, u"Annotations and Scale")
         self.StyleMarkers = QWidget()
         self.StyleMarkers.setObjectName(u"StyleMarkers")
         self.StyleMarkers.setGeometry(QRect(0, 0, 254, 367))
@@ -2932,9 +2930,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_36.addWidget(self.scrollAreaMarkers)
 
-        icon65 = QIcon()
-        icon65.addFile(u":/resources/icons/icon-marker-and-lines-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleMarkers, icon65, u"Markers and Lines")
+        icon64 = QIcon()
+        icon64.addFile(u":/resources/icons/icon-marker-and-lines-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleMarkers, icon64, u"Markers and Lines")
         self.StyleColors = QWidget()
         self.StyleColors.setObjectName(u"StyleColors")
         self.StyleColors.setGeometry(QRect(0, 0, 292, 367))
@@ -2961,23 +2959,23 @@ class Ui_MainWindow(object):
 
         self.formLayout_19.setWidget(3, QFormLayout.FieldRole, self.comboBoxFieldColormap)
 
-        self.labelCbarLabel = QLabel(self.scrollAreaWidgetContentsColors)
-        self.labelCbarLabel.setObjectName(u"labelCbarLabel")
+        self.labelCLabel = QLabel(self.scrollAreaWidgetContentsColors)
+        self.labelCLabel.setObjectName(u"labelCLabel")
 
-        self.formLayout_19.setWidget(0, QFormLayout.LabelRole, self.labelCbarLabel)
+        self.formLayout_19.setWidget(0, QFormLayout.LabelRole, self.labelCLabel)
 
-        self.lineEditCbarLabel = QLineEdit(self.scrollAreaWidgetContentsColors)
-        self.lineEditCbarLabel.setObjectName(u"lineEditCbarLabel")
+        self.lineEditCLabel = QLineEdit(self.scrollAreaWidgetContentsColors)
+        self.lineEditCLabel.setObjectName(u"lineEditCLabel")
 
-        self.formLayout_19.setWidget(0, QFormLayout.FieldRole, self.lineEditCbarLabel)
+        self.formLayout_19.setWidget(0, QFormLayout.FieldRole, self.lineEditCLabel)
 
         self.horizontalLayout_33 = QHBoxLayout()
         self.horizontalLayout_33.setObjectName(u"horizontalLayout_33")
-        self.labelColorBounds = QLabel(self.scrollAreaWidgetContentsColors)
-        self.labelColorBounds.setObjectName(u"labelColorBounds")
-        self.labelColorBounds.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
+        self.labelCBounds = QLabel(self.scrollAreaWidgetContentsColors)
+        self.labelCBounds.setObjectName(u"labelCBounds")
+        self.labelCBounds.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
-        self.horizontalLayout_33.addWidget(self.labelColorBounds)
+        self.horizontalLayout_33.addWidget(self.labelCBounds)
 
         self.toolButtonCAxisReset = QToolButton(self.scrollAreaWidgetContentsColors)
         self.toolButtonCAxisReset.setObjectName(u"toolButtonCAxisReset")
@@ -2994,33 +2992,33 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_18 = QHBoxLayout()
         self.horizontalLayout_18.setObjectName(u"horizontalLayout_18")
-        self.lineEditColorLB = QLineEdit(self.scrollAreaWidgetContentsColors)
-        self.lineEditColorLB.setObjectName(u"lineEditColorLB")
-        self.lineEditColorLB.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.lineEditCLB = QLineEdit(self.scrollAreaWidgetContentsColors)
+        self.lineEditCLB.setObjectName(u"lineEditCLB")
+        self.lineEditCLB.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.horizontalLayout_18.addWidget(self.lineEditColorLB)
+        self.horizontalLayout_18.addWidget(self.lineEditCLB)
 
-        self.lineEditColorUB = QLineEdit(self.scrollAreaWidgetContentsColors)
-        self.lineEditColorUB.setObjectName(u"lineEditColorUB")
-        self.lineEditColorUB.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.lineEditCUB = QLineEdit(self.scrollAreaWidgetContentsColors)
+        self.lineEditCUB.setObjectName(u"lineEditCUB")
+        self.lineEditCUB.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.horizontalLayout_18.addWidget(self.lineEditColorUB)
+        self.horizontalLayout_18.addWidget(self.lineEditCUB)
 
 
         self.formLayout_19.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_18)
 
-        self.labelColorScale = QLabel(self.scrollAreaWidgetContentsColors)
-        self.labelColorScale.setObjectName(u"labelColorScale")
+        self.labelCScale = QLabel(self.scrollAreaWidgetContentsColors)
+        self.labelCScale.setObjectName(u"labelCScale")
 
-        self.formLayout_19.setWidget(2, QFormLayout.LabelRole, self.labelColorScale)
+        self.formLayout_19.setWidget(2, QFormLayout.LabelRole, self.labelCScale)
 
-        self.comboBoxColorScale = QComboBox(self.scrollAreaWidgetContentsColors)
-        self.comboBoxColorScale.addItem("")
-        self.comboBoxColorScale.addItem("")
-        self.comboBoxColorScale.addItem("")
-        self.comboBoxColorScale.setObjectName(u"comboBoxColorScale")
+        self.comboBoxCScale = QComboBox(self.scrollAreaWidgetContentsColors)
+        self.comboBoxCScale.addItem("")
+        self.comboBoxCScale.addItem("")
+        self.comboBoxCScale.addItem("")
+        self.comboBoxCScale.setObjectName(u"comboBoxCScale")
 
-        self.formLayout_19.setWidget(2, QFormLayout.FieldRole, self.comboBoxColorScale)
+        self.formLayout_19.setWidget(2, QFormLayout.FieldRole, self.comboBoxCScale)
 
         self.labelReverseColormap = QLabel(self.scrollAreaWidgetContentsColors)
         self.labelReverseColormap.setObjectName(u"labelReverseColormap")
@@ -3087,9 +3085,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_37.addWidget(self.scrollAreaColors)
 
-        icon66 = QIcon()
-        icon66.addFile(u":/resources/icons/icon-rgb-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleColors, icon66, u"Coloring")
+        icon65 = QIcon()
+        icon65.addFile(u":/resources/icons/icon-rgb-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleColors, icon65, u"Coloring")
         self.StyleRegression = QWidget()
         self.StyleRegression.setObjectName(u"StyleRegression")
         self.StyleRegression.setGeometry(QRect(0, 0, 254, 367))
@@ -3253,10 +3251,10 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.canvasWindow.setCurrentIndex(0)
-        self.toolBox.setCurrentIndex(1)
+        self.toolBox.setCurrentIndex(4)
         self.toolBox.layout().setSpacing(2)
         self.comboBoxNDimQuantiles.setCurrentIndex(2)
-        self.toolBoxStyle.setCurrentIndex(3)
+        self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxStyle.layout().setSpacing(2)
 
 
@@ -4070,11 +4068,11 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.comboBoxFieldColormap.setToolTip(QCoreApplication.translate("MainWindow", u"Colormap for grids or points", None))
 #endif // QT_CONFIG(tooltip)
-        self.labelCbarLabel.setText(QCoreApplication.translate("MainWindow", u"Cbar label", None))
+        self.labelCLabel.setText(QCoreApplication.translate("MainWindow", u"Cbar label", None))
 #if QT_CONFIG(tooltip)
-        self.lineEditCbarLabel.setToolTip(QCoreApplication.translate("MainWindow", u"Set colorbar label", None))
+        self.lineEditCLabel.setToolTip(QCoreApplication.translate("MainWindow", u"Set colorbar label", None))
 #endif // QT_CONFIG(tooltip)
-        self.labelColorBounds.setText(QCoreApplication.translate("MainWindow", u"Clim", None))
+        self.labelCBounds.setText(QCoreApplication.translate("MainWindow", u"Clim", None))
 #if QT_CONFIG(tooltip)
         self.toolButtonCAxisReset.setToolTip(QCoreApplication.translate("MainWindow", u"Reset histogram axes", None))
 #endif // QT_CONFIG(tooltip)
@@ -4082,10 +4080,10 @@ class Ui_MainWindow(object):
         self.toolButtonCAxisReset.setAccessibleName(QCoreApplication.translate("MainWindow", u"color axis reset", None))
 #endif // QT_CONFIG(accessibility)
         self.toolButtonCAxisReset.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
-        self.labelColorScale.setText(QCoreApplication.translate("MainWindow", u"Scale", None))
-        self.comboBoxColorScale.setItemText(0, QCoreApplication.translate("MainWindow", u"linear", None))
-        self.comboBoxColorScale.setItemText(1, QCoreApplication.translate("MainWindow", u"log", None))
-        self.comboBoxColorScale.setItemText(2, QCoreApplication.translate("MainWindow", u"symlog", None))
+        self.labelCScale.setText(QCoreApplication.translate("MainWindow", u"Scale", None))
+        self.comboBoxCScale.setItemText(0, QCoreApplication.translate("MainWindow", u"linear", None))
+        self.comboBoxCScale.setItemText(1, QCoreApplication.translate("MainWindow", u"log", None))
+        self.comboBoxCScale.setItemText(2, QCoreApplication.translate("MainWindow", u"symlog", None))
 
         self.labelReverseColormap.setText(QCoreApplication.translate("MainWindow", u"Reverse", None))
         self.labelFieldColormap.setText(QCoreApplication.translate("MainWindow", u"Colormap", None))

@@ -67,7 +67,7 @@ from src.app.AppData import AppData
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 # setConfigOption('imageAxisOrder', 'row-major') # best performance
 
-@auto_log_methods(logger_key='Main', show_args=True)
+@auto_log_methods(logger_key='Main')
 class MainWindow(QMainWindow, Ui_MainWindow):
     """_summary_
 
@@ -155,7 +155,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @no_log
     def connect_logger(self):
-        # MainWindow toolbar
+        """Connects user interactions with widgets to the logger"""        
+        ## MainWindow toolbar
         self.actionOpenSample.triggered.connect(lambda: log("actionOpenSample", prefix="UI"))
         self.actionOpenDirectory.triggered.connect(lambda: log("actionOpenDirectory", prefix="UI"))
         self.actionOpenProject.triggered.connect(lambda: log("actionOpenProject", prefix="UI"))
@@ -180,7 +181,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionReset.triggered.connect(lambda: log("actionReset", prefix="UI"))
         self.actionViewMode.triggered.connect(lambda: log("actionViewMode", prefix="UI"))
 
-        # left/control toolbox
+        ## left/control toolbox
         # plot and axes controls
         self.toolBox.currentChanged.connect(lambda: log(f"toolBox, index=[{self.toolBox.itemText(self.toolBox.currentIndex())}]",prefix="UI"))
         self.comboBoxPlotType.currentTextChanged.connect(lambda: log(f"comboBoxPlotType value=[{self.comboBoxPlotType.currentText()}]", prefix="UI"))
@@ -229,7 +230,106 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.checkBoxApplyNoiseReduction.checkStateChanged.connect(lambda: log(f"checkBoxApplyNoiseReduction value=[{self.checkBoxApplyNoiseReduction.isChecked()}]", prefix="UI"))
         self.checkBoxGradient.checkStateChanged.connect(lambda: log(f"checkBoxGradient value=[{self.checkBoxGradient.isChecked()}]", prefix="UI"))
 
-        # right/styling toolbox
+        # scatter and heatmaps
+        self.comboBoxScatterPreset.activated.connect(lambda: log(f"comboBoxScatterPreset value=[{self.comboBoxScatterPreset.currentText()}]", prefix="UI"))
+        self.toolButtonScatterSavePreset.clicked.connect(lambda: log("toolButtonScatterSavePreset", prefix="UI"))
+        self.comboBoxHeatmaps.activated.connect(lambda: log(f"comboBoxHeatmaps value=[{self.comboBoxHeatmaps.currentText()}]", prefix="UI"))
+        self.comboBoxTernaryColormap.activated.connect(lambda: log(f"comboBoxTernaryColormap value=[{self.comboBoxTernaryColormap.currentText()}]", prefix="UI"))
+        self.toolButtonTCmapXColor.clicked.connect(lambda: log("toolButtonTCmapXColor", prefix="UI"))
+        self.toolButtonTCmapYColor.clicked.connect(lambda: log("toolButtonTCmapYColor", prefix="UI"))
+        self.toolButtonTCmapZColor.clicked.connect(lambda: log("toolButtonTCmapZColor", prefix="UI"))
+        self.toolButtonTCmapMColor.clicked.connect(lambda: log("toolButtonTCmapMColor", prefix="UI"))
+        self.toolButtonSaveTernaryColormap.clicked.connect(lambda: log("toolButtonSaveTernaryColormap", prefix="UI"))
+        self.toolButtonTernaryMap.clicked.connect(lambda: log("toolButtonTernaryMap", prefix="UI"))
+
+        # n-dim
+        self.comboBoxNDimRefMaterial.activated.connect(lambda: log(f"comboBoxNDimRefMaterial value=[{self.comboBoxNDimRefMaterial.currentText()}]", prefix="UI"))
+        self.comboBoxNDimAnalyte.activated.connect(lambda: log(f"comboBoxNDimAnalyte value=[{self.comboBoxNDimAnalyte.currentText()}]", prefix="UI"))
+        self.toolButtonNDimAnalyteAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.comboBoxNDimAnalyteSet.activated.connect(lambda: log(f"comboBoxNDimAnalyteSet value=[{self.comboBoxNDimAnalyteSet.currentText()}]", prefix="UI"))
+        self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.comboBoxNDimQuantiles.activated.connect(lambda: log(f"comboBoxNDimQuantiles value=[{self.comboBoxNDimQuantiles.currentText()}]", prefix="UI"))
+        self.toolButtonNDimSelectAll.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.toolButtonNDimUp.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.toolButtonNDimDown.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.toolButtonNDimSaveList.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.toolButtonNDimRemove.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+
+        # dimensional reduction
+        self.comboBoxDimRedTechnique.activated.connect(lambda: log(f"comboBoxDimRedTechnique value=[{self.comboBoxDimRedTechnique.currentText()}]", prefix="UI"))
+        self.spinBoxPCX.valueChanged.connect(lambda: log(f"spinBoxPCX value=[{self.spinBoxPCX.value()}]", prefix="UI"))
+        self.spinBoxPCY.valueChanged.connect(lambda: log(f"spinBoxPCY value=[{self.spinBoxPCY.value()}]", prefix="UI"))
+
+        # clustering
+        self.comboBoxClusterMethod.activated.connect(lambda: log(f"comboBoxClusterMethod value=[{self.comboBoxClusterMethod.currentText()}]", prefix="UI"))
+        self.spinBoxNClusters.valueChanged.connect(lambda: log(f"spinBoxNClusters value=[{self.spinBoxNClusters.value()}]", prefix="UI"))
+        self.horizontalSliderClusterExponent.valueChanged.connect(lambda: log(f"horizontalSliderClusterExponent value=[{self.horizontalSliderClusterExponent.value()}]", prefix="UI"))
+        self.comboBoxClusterDistance.activated.connect(lambda: log(f"comboBoxClusterDistance value=[{self.comboBoxClusterDistance.currentText()}]", prefix="UI"))
+        self.lineEditSeed.editingFinished.connect(lambda: log(f"lineEditSeed value=[{self.lineEditSeed.value}]", prefix="UI"))
+        self.toolButtonRandomSeed.clicked.connect(lambda: log("toolButtonRandomSeed", prefix="UI"))
+        self.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.checkBoxWithPCA.isChecked()}]", prefix="UI"))
+        self.spinBoxPCANumBasis.valueChanged.connect(lambda: log(f"spinBoxPCANumBasis value=[{self.spinBoxPCANumBasis.value()}]", prefix="UI"))
+
+        ## right/plot tree dock
+        self.comboBoxRefMaterial.activated.connect(lambda: log(f"comboBoxRefMaterial value=[{self.comboBoxRefMaterial.currentText()}]", prefix="UI"))
+        self.toolButtonSortAnalyte.clicked.connect(lambda: log("toolButtonSortAnalyte", prefix="UI"))
+        self.toolButtonRemovePlot.clicked.connect(lambda: log("toolButtonSortAnalyte", prefix="UI"))
+
+        ## right/styling toolbox
+        self.comboBoxStyleTheme.activated.connect(lambda: log(f"comboBoxStyleTheme value=[{self.comboBoxStyleTheme.currentText()}]", prefix="UI"))
+        self.toolButtonSaveTheme.clicked.connect(lambda: log("toolButtonTheme", prefix="UI"))
+
+        # axes and labels
+        self.lineEditXLabel.editingFinished.connect(lambda: log(f"lineEditXLabel value=[{self.lineEditXLabel.text()}]", prefix="UI"))
+        self.lineEditXLB.editingFinished.connect(lambda: log(f"lineEditXLB value=[{self.lineEditXLB.value}]", prefix="UI"))
+        self.lineEditXUB.editingFinished.connect(lambda: log(f"lineEditXUB value=[{self.lineEditXUB.value}]", prefix="UI"))
+        self.toolButtonXAxisReset.clicked.connect(lambda: log("toolButtonXAxisReset", prefix="UI"))
+        self.comboBoxXScale.activated.connect(lambda: log(f"comboBoxXScale value=[{self.comboBoxXScale.currentText()}]", prefix="UI"))
+        self.lineEditYLabel.editingFinished.connect(lambda: log(f"lineEditYLabel value=[{self.lineEditYLabel.text()}]", prefix="UI"))
+        self.lineEditYLB.editingFinished.connect(lambda: log(f"lineEditYLB value=[{self.lineEditYLB.value}]", prefix="UI"))
+        self.lineEditYUB.editingFinished.connect(lambda: log(f"lineEditYUB value=[{self.lineEditYUB.value}]", prefix="UI"))
+        self.toolButtonYAxisReset.clicked.connect(lambda: log("toolButtonYAxisReset", prefix="UI"))
+        self.comboBoxYScale.activated.connect(lambda: log(f"comboBoxYScale value=[{self.comboBoxYScale.currentText()}]", prefix="UI"))
+        self.lineEditZLabel.editingFinished.connect(lambda: log(f"lineEditZLabel value=[{self.lineEditZLabel.text()}]", prefix="UI"))
+        self.lineEditZLB.editingFinished.connect(lambda: log(f"lineEditZLB value=[{self.lineEditZLB.value}]", prefix="UI"))
+        self.lineEditZUB.editingFinished.connect(lambda: log(f"lineEditZUB value=[{self.lineEditZUB.value}]", prefix="UI"))
+        self.toolButtonZAxisReset.clicked.connect(lambda: log("toolButtonZAxisReset", prefix="UI"))
+        self.comboBoxZScale.activated.connect(lambda: log(f"comboBoxZScale value=[{self.comboBoxZScale.currentText()}]", prefix="UI"))
+        self.lineEditAspectRatio.editingFinished.connect(lambda: log(f"lineEditAspectRatio value=[{self.lineEditAspectRatio.text()}]", prefix="UI"))
+        self.comboBoxTickDirection.activated.connect(lambda: log(f"comboBoxTickDirection value=[{self.comboBoxTickDirection.currentText()}]", prefix="UI"))
+
+        # annotations and scale
+        self.comboBoxScaleDirection.activated.connect(lambda: log(f"comboBoxScaleDirection value=[{self.comboBoxScaleDirection.currentText()}]", prefix="UI"))
+        self.comboBoxScaleLocation.activated.connect(lambda: log(f"comboBoxScaleLocation value=[{self.comboBoxScaleLocation.currentText()}]", prefix="UI"))
+        self.lineEditScaleLength.editingFinished.connect(lambda: log(f"lineEditScaleLength value=[{self.lineEditScaleLength.value}]", prefix="UI"))
+        self.toolButtonOverlayColor.clicked.connect(lambda: log("toolButtonOverlayColor", prefix="UI"))
+        self.fontComboBox.activated.connect(lambda: log(f"fontComboBox value=[{self.fontComboBox.currentText()}]", prefix="UI"))
+        self.doubleSpinBoxFontSize.valueChanged.connect(lambda: log(f"doubleSpinBoxFontSize value=[{self.doubleSpinBoxFontSize.value()}]", prefix="UI"))
+        self.checkBoxShowMass.checkStateChanged.connect(lambda: log(f"checkBoxShowMass value=[{self.checkBoxShowMass.isChecked()}]", prefix="UI"))
+
+        # markers and lines
+        self.comboBoxMarker.activated.connect(lambda: log(f"comboBoxMarker value=[{self.comboBoxMarker.currentText()}]", prefix="UI"))
+        self.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: log(f"doubleSpinBoxMarkerSize value=[{self.doubleSpinBoxMarkerSize.value()}]", prefix="UI"))
+        self.toolButtonMarkerColor.clicked.connect(lambda: log("toolButtonMarkerColor", prefix="UI"))
+        self.horizontalSliderMarkerAlpha.valueChanged.connect(lambda: log(f"horizontalSliderMarkerAlpha value=[{self.horizontalSliderMarkerAlpha.value()}]", prefix="UI"))
+        self.doubleSpinBoxLineWidth.valueChanged.connect(lambda: log(f"doubleSpinBoxLineWidth value=[{self.doubleSpinBoxLineWidth.value()}]", prefix="UI"))
+        self.toolButtonLineColor.clicked.connect(lambda: log("toolButtonLineColor", prefix="UI"))
+        self.lineEditLengthMultiplier.editingFinished.connect(lambda: log(f"lineEditLengthMultiplier value=[{self.lineEditLengthMultiplier.value}]", prefix="UI"))
+
+        # coloring
+        self.lineEditCLabel.editingFinished.connect(lambda: log(f"lineEditCLabel value=[{self.lineEditCLabel.text()}]", prefix="UI"))
+        self.lineEditCLB.editingFinished.connect(lambda: log(f"lineEditCLB value=[{self.lineEditCLB.value}]", prefix="UI"))
+        self.lineEditCUB.editingFinished.connect(lambda: log(f"lineEditCUB value=[{self.lineEditCUB.value}]", prefix="UI"))
+        self.toolButtonCAxisReset.clicked.connect(lambda: log("toolButtonCAxisReset", prefix="UI"))
+        self.comboBoxCScale.activated.connect(lambda: log(f"comboBoxCScale value=[{self.comboBoxCScale.currentText()}]", prefix="UI"))
+        self.comboBoxFieldColormap.activated.connect(lambda: log(f"comboBoxFieldColormap value=[{self.comboBoxFieldColormap.currentText()}]", prefix="UI"))
+        self.comboBoxCbarDirection.activated.connect(lambda: log(f"comboBoxCbarDirection value=[{self.comboBoxCbarDirection.currentText()}]", prefix="UI"))
+        self.checkBoxReverseColormap.checkStateChanged.connect(lambda: log(f"checkBoxReverseColormap value=[{self.checkBoxReverseColormap.isChecked()}]", prefix="UI"))
+        self.spinBoxHeatmapResolution.valueChanged.connect(lambda: log(f"spinBoxHeatmapResolution value=[{self.spinBoxHeatmapResolution.value()}]", prefix="UI"))
+
+        # regression
+
+        ## status bar
 
 
 
@@ -519,8 +619,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNegativeMethod.activated.connect(lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText()))
 
         # Dimensional reduction ui widgets
-        self.ComboBoxDimRedTechnique.clear()
-        self.ComboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
+        self.comboBoxDimRedTechnique.clear()
+        self.comboBoxDimRedTechnique.addItems(self.dimensional_reduction.dim_red_methods)
         self.app_data.dim_red_method = self.dimensional_reduction.dim_red_methods[0]
         self.spinBoxPCX.valueChanged.connect(lambda: setattr(self.app_data, "dim_red_x",self.spinBoxPCX.value()))
         self.spinBoxPCY.valueChanged.connect(lambda: setattr(self.app_data, "dim_red_y",self.spinBoxPCY.value()))
@@ -1738,7 +1838,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.schedule_update()
 
     def update_dim_red_method_combobox(self, new_method):
-        self.ComboBoxDimRedTechnique.setCurrentText(new_method)
+        self.comboBoxDimRedTechnique.setCurrentText(new_method)
         # if self.toolBox.currentIndex() == self.left_tab['multidim']:
         #     self.plot_style.schedule_update()
 
@@ -2030,16 +2130,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.schedule_update()
 
     def update_clim_lineedits(self, new_xlim):
-        self.lineEditColorLB.value = new_xlim[0]
-        self.lineEditColorUB.value = new_xlim[1]
+        self.lineEditCLB.value = new_xlim[0]
+        self.lineEditCUB.value = new_xlim[1]
         self.plot_style.schedule_update()
 
     def update_clabel_lineedit(self, new_label):
-        self.lineEditCbarLabel.setText(new_label)
+        self.lineEditCLabel.setText(new_label)
         self.plot_style.schedule_update()
         
     def update_cscale_combobox(self, new_scale):
-        self.comboBoxColorScale.setCurrentText(new_scale)
+        self.comboBoxCScale.setCurrentText(new_scale)
         self.plot_style.schedule_update()
 
     def update_resolution_spinbox(self, new_resolution):

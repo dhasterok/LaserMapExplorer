@@ -7,14 +7,15 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from src.common.Logger import LoggerConfig, auto_log_methods
 
+@auto_log_methods(logger_key="Clustering")
 class Clustering():
     def __init__(self, parent):
-
+        self.logger_key = "Clustering"
         self.parent = parent
 
         self.distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
-
         self.cluster_methods = ['k-means', 'fuzzy c-means']
 
     def compute_clusters(self,data, app_data, max_clusters = None):

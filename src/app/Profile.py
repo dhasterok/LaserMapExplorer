@@ -18,7 +18,7 @@ from matplotlib.collections import PathCollection
 import numpy as np
 from src.common.Logger import LoggerConfig, auto_log_methods
 
-@auto_log_methods(logger_key='Profile', show_args=True)
+@auto_log_methods(logger_key='Profile')
 class ProfileDock(CustomDockWidget, UIFieldLogic):
     def __init__(self, parent=None):
         if not isinstance(parent, QMainWindow):

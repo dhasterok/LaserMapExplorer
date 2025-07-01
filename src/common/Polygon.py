@@ -341,7 +341,7 @@ class Polygon:
 #             self.p_id = None           # polygon ID
 #             self.p_id_gen = 0 #Polygon_id generator
 
-@auto_log_methods(logger_key='Polygon', show_args=True)
+@auto_log_methods(logger_key='Polygon')
 class PolygonManager():
     """Operations related to polygon generation and manipulation
 

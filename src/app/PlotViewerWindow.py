@@ -1,6 +1,6 @@
-from PyQt6.QtCore import (Qt, pyqtSignal, QObject, QEvent)
-from PyQt6.QtWidgets import (QWidget,QVBoxLayout, QGridLayout, QSizePolicy,QMenu, QDialog, QTableWidgetItem, QLabel, QComboBox, QHeaderView, QFileDialog, QMessageBox)
-from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QSizePolicy, QMenu, QFileDialog
+)
 from pyqtgraph import (
     ViewBox, 
     GraphicsLayoutWidget,
@@ -10,9 +10,11 @@ from src.ui.PlotViewer import Ui_widgetPlotViewer
 from src.app.config import BASEDIR
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import src.common.CustomMplCanvas as mplc
-import os
+from src.common.Logger import auto_log_methods
+
 # Analyte GUI
 # -------------------------------
+@auto_log_methods(logger_key="Plot")
 class PlotViewer(QWidget, Ui_widgetPlotViewer):
     """Creates an widget to display plots
 
@@ -33,6 +35,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
     def __init__(self, parent):
         super().__init__()
         self.setupUi(self)
+        self.logger_key = "Plot"
         self.parent = parent
         self.duplicate_plot_info = None
 

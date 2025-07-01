@@ -8,7 +8,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 
 # Analyte GUI
 # -------------------------------
-@auto_log_methods(logger_key='Selector', show_args=True)
+@auto_log_methods(logger_key='Selector')
 class AnalyteDialog(QDialog, Ui_Dialog):
     """Creates an dialog to select analytes and ratios of analytes
 
@@ -334,8 +334,10 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             Colorbar image to be displayed in UI.
         """        
         image = QImage(width, height, QImage.Format_RGB32)
+
         painter = QPainter(image)
         painter.fillRect(0, 0, width, height, Qt.white)  # Fill background with white
+
         pad =20
         # Draw color gradient
         for i in range(pad,height-pad):

@@ -1,9 +1,7 @@
-from PyQt6.QtCore import (Qt, pyqtSignal, QObject, QEvent)
 from PyQt6.QtWidgets import (
-    QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox,
-    QHeaderView, QFileDialog, QListWidget, QAbstractItemView
+    QMessageBox, QDialog, QTableWidgetItem, 
+    QHeaderView, QFileDialog, QAbstractItemView
 )
-from PyQt6.QtGui import (QImage, QColor, QFont, QPixmap, QPainter, QBrush)
 from src.ui.FieldSelectionDialog import Ui_FieldDialog
 from src.app.config import BASEDIR
 import os

@@ -11,7 +11,7 @@ class Polygon:
         self.points = []   # list of (x, y)
         self.patch = None  # Matplotlib Patch reference
 
-@auto_log_methods(logger_key='Polygon', show_args=True)
+@auto_log_methods(logger_key='Polygon')
 class PolygonManager:
     """
     Manages polygon creation, storage, and drawing on a Matplotlib axes.

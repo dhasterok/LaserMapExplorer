@@ -430,6 +430,22 @@ class MetadataTab():
         self.action_export_metadata.setIcon(export_notes_icon)
         self.action_export_metadata.setToolTip("Export metadata to notes")
 
+        # adjust precision
+        self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
+        sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
+        self.action_sigfigs_more.setIcon(sigfigs_more_icon)
+        self.action_sigfigs_more.triggered.connect(increase_precision)
+        self.action_sigfigs_more.triggered.connect(self.update_table)
+        self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
+
+        self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
+        sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
+        self.action_sigfigs_less.setIcon(sigfigs_less_icon)
+        self.action_sigfigs_less.triggered.connect(decrease_precision)
+        self.action_sigfigs_less.triggered.connect(self.update_table)
+        self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
+        
+
         # add actions and widgets to toolbar
         toolbar.addWidget(field_label)
         toolbar.addWidget(self.field_combobox)
@@ -441,6 +457,8 @@ class MetadataTab():
         toolbar.addWidget(self.norm_combobox)
         toolbar.addSeparator()
         toolbar.addAction(self.action_export_metadata)
+        toolbar.addAction(self.action_sigfigs_more)
+        toolbar.addAction(self.action_sigfigs_less)
 
         self.metadata_table = QTableWidget(self.metadata_tab)
         self.metadata_table.setObjectName("metadata_table")
@@ -489,6 +507,7 @@ class MetadataTab():
         self.update_table()
 
     def update_table(self):
+        global PRECISION
         self.metadata_table.blockSignals(True)
 
         data = self.data.processed_data.column_attributes
@@ -569,7 +588,10 @@ class MetadataTab():
                     self.metadata_table.setCellWidget(row_idx, col_idx, combobox)
 
                 else:
-                    item = QTableWidgetItem(str(value))
+                    try: 
+                        item = QTableWidgetItem(str(f"{value:.{PRECISION}g}")) #set precision for float values
+                    except:
+                        item = QTableWidgetItem(str(value))
                     if row_key in self.editable_rows:
                         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
                     else:

@@ -782,8 +782,8 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(column_name,'label',self.create_label(column_name))
 
             # Set min and max unmasked values
-            self.processed_data.set_attribute(col,'lower_limit',np.min(self.processed_data[col][mask]))
-            self.processed_data.set_attribute(col,'upper_limit',np.max(self.processed_data[col][mask]))
+            self.processed_data.set_attribute(col,'plot_lower_limit',np.min(self.processed_data[col][mask]))
+            self.processed_data.set_attribute(col,'plot_upper_limit',np.max(self.processed_data[col][mask]))
             #v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
             #v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
 
@@ -1193,8 +1193,8 @@ class SampleObj(Observable):
         # -----------------------
         for col in self.processed_data.columns:
             self.processed_data.set_attribute(col,'label',self.create_label(col))
-            self.processed_data.set_attribute(col,'lower_limit',np.min(self.processed_data[col]))
-            self.processed_data.set_attribute(col,'upper_limit',np.max(self.processed_data[col]))
+            self.processed_data.set_attribute(col,'plot_lower_limit',np.min(self.processed_data[col]))
+            self.processed_data.set_attribute(col,'plot_upper_limit',np.max(self.processed_data[col]))
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """Predicts the optimal number of clusters

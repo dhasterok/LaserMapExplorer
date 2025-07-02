@@ -15,7 +15,7 @@ from src.common.Status import StatusMessageManager
 from src.common.format import symlog
 from src.common.Logger import LoggerConfig, auto_log_methods
 
-@auto_log_methods(logger_key='Data', prefix="DATA: ", show_args=True)
+@auto_log_methods(logger_key='Data')
 class SampleObj(Observable):
     """Creates a sample object to store and manipulate geochemical data in map form
     
@@ -387,7 +387,6 @@ class SampleObj(Observable):
     @property
     def dx(self):
         """float: Width of pixels in x-direction."""
-        self.notify_observers("dx", self._dx)
         return self._dx
 
     @dx.setter
@@ -407,13 +406,14 @@ class SampleObj(Observable):
             self.processed_data['Xc'] = self._x
             
             self._updating = False
+
+            self.notify_observers("dx", self._dx)
         
             
 
     @property
     def dy(self):
         """float: Width of pixels in y-direction."""
-        self.notify_observers("dy", self._dy)
         return self._dy
 
     @dy.setter
@@ -432,30 +432,34 @@ class SampleObj(Observable):
             self.processed_data['Y'] = self._y
             
             self._updating = False
+
+            self.notify_observers("dy", self._dy)
         
 
     @property
     def nx(self):
-        self.notify_observers("nx", self._nx)
         return self._nx
     
     @nx.setter
     def nx(self, new_nx):
         if new_nx == self._nx:
             return
+
         self._nx = new_nx
+        self.notify_observers("nx", self._nx)
         
 
     @property
     def ny(self):
-        self.notify_observers("ny", self._ny)   
         return self._ny
     
     @ny.setter
     def ny(self, new_ny):
         if new_ny == self._ny:
             return
+
         self._ny = new_ny
+        self.notify_observers("ny", self._ny)   
         
             
 

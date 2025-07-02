@@ -7,8 +7,8 @@ self.lineEditDifferenceUpperQuantile
 self.lineEditLowerQuantile
 self.lineEditUpperQuantile
 self.lineEditLengthMultiplier
-self.lineEditColorUB
-self.lineEditColorLB
+self.lineEditCUB
+self.lineEditCLB
 self.lineEditAspectRatio
 self.lineEditYUB
 self.lineEditYLB

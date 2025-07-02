@@ -10,7 +10,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 # -------------------------------------
 # Image processing functions
 # -------------------------------------
-@auto_log_methods(logger_key='Image', prefix="IMAGE: ", show_args=True)
+@auto_log_methods(logger_key='Image')
 class ImageProcessing():
     """Image processing methods for use in LaME.
 

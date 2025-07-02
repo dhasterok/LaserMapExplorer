@@ -12,7 +12,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
     
 # WebEngineView - Web engine for viewing userguide help pages
 # -------------------------------
-@auto_log_methods(logger_key='Browser', prefix="BROWSER: ", show_args=True)
+@auto_log_methods(logger_key='Browser')
 class WebEngineView(QWebEngineView):
     """Creates a web engine widget to display user guide
 
@@ -83,7 +83,7 @@ class WebEngineView(QWebEngineView):
         #print(f"JavaScript Console: {message} at line {line} in {source_id}")
 
 
-@auto_log_methods(logger_key='Browser', prefix="BROWSER: ", show_args=True)
+@auto_log_methods(logger_key='Browser')
 class Browser(QDockWidget):
     """A collection of browser related methods.
 

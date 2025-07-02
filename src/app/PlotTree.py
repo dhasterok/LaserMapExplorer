@@ -11,7 +11,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods, log
 # -------------------------------
 # Plot Selector (tree) functions
 # -------------------------------
-@auto_log_methods(logger_key='Tree', prefix="TREE: ", show_args=True)
+@auto_log_methods(logger_key='Tree')
 class PlotTree():
     def __init__(self, parent):
         self.logger_key = 'Tree'
@@ -249,7 +249,7 @@ class PlotTree():
             self.parent.plot_style.initialize_axis_values(tree, leaf)
             self.parent.plot_style.set_style_widgets()
             if self.plot_info:
-                log("plot_info exists, adding to canvas", "  NOTE: ")
+                log("plot_info exists, adding to canvas", "NOTE")
 
                 self.parent.add_plotwidget_to_canvas(self.plot_info)
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
@@ -257,7 +257,7 @@ class PlotTree():
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
                 self.parent.update_spinboxes(self.parent.plot_info['field'],self.parent.plot_info['field_type'])
             else:
-                log("plot_info does not exist, creating map", "  NOTE: ")
+                log("plot_info does not exist, creating map", "NOTE")
 
                 # print('tree_double_click: plot_map_pg')
                 if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process']]:

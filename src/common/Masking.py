@@ -55,7 +55,7 @@ class MaskObj:
 
 
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
-@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
+@auto_log_methods(logger_key='Mask')
 class MaskDock(CustomDockWidget, UIFieldLogic):
     def __init__(self, parent=None, title="Masking Toolbox"):
         self.logger_key = 'Mask'
@@ -117,7 +117,7 @@ class MaskDock(CustomDockWidget, UIFieldLogic):
 
         self.filter_tab.update_filter_values()
 
-@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
+@auto_log_methods(logger_key='Mask')
 class FilterTab():
     def __init__(self, parent):
         self.parent = parent
@@ -586,7 +586,7 @@ class FilterTab():
 
         self.update_filter_table()
 
-@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
+@auto_log_methods(logger_key='Mask')
 class PolygonTab():
     def __init__(self, parent):
         self.parent = parent
@@ -870,7 +870,7 @@ class PolygonTab():
 
 
 
-@auto_log_methods(logger_key='Mask', prefix="MASK: ", show_args=True)
+@auto_log_methods(logger_key='Mask')
 class ClusterTab():
     def __init__(self, parent):
         self.logger_key = 'Mask'

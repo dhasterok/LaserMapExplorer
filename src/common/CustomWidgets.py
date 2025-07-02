@@ -456,15 +456,19 @@ class CustomDockWidget(QDockWidget):
 class ToggleSwitch(QWidget):
     stateChanged = pyqtSignal(bool)  # Signal emitted when the state changes
 
-    def __init__(self, parent=None, height=24, duration=100, fg_color=None, bg_left_color=None, bg_right_color=None):
+    def __init__(self, parent=None, height=24, duration=100, fg_color="#f0f0f0", bg_left_color="#ffffff", bg_right_color="#478ae4"):
         super().__init__(parent)
-        self.height = height
-        self.width = height * 2
-        self.setFixedSize(self.width, self.height)
+        self._height = height
+        self._width = height * 2
+        self.setFixedSize(self._width, self._height)
+
         self._checked = False
+
         self._thumb_pos = 2  # Initial position
-        self.animation = QPropertyAnimation(self, b"thumb_pos")
-        self.animation.setDuration(duration)  # Smooth animation
+        self.duration = duration
+
+        self._animation = QPropertyAnimation(self, b"thumb_pos")
+        self._animation.setDuration(duration)  # Smooth animation
 
         if is_valid_hex_color(fg_color):
             self.fg_color = fg_color
@@ -485,45 +489,55 @@ class ToggleSwitch(QWidget):
         """Toggle switch state and emit signal"""
         self._checked = not self._checked
         self.animation.setStartValue(self._thumb_pos)
-        self.animation.setEndValue(self.width - self.height + 2 if self._checked else 2)
+        self.animation.setEndValue(self._width - self._height + 2 if self._checked else 2)
         self.animation.start()
 
         self.stateChanged.emit(self._checked)  # Emit signal
 
-    def setChecked(self, state):
-        if not isinstance(state, bool):
-            TypeError("ToggleSwitch requires state argument to be a bool")
+    def setChecked(self, checked: bool):
+        if self._checked != checked:
+            self._checked = checked
+            start = self._thumb_pos
+            end = self._width - self._height + 2 if self._checked else 2
+            self._animation.stop()
+            self._animation.setStartValue(start)
+            self._animation.setEndValue(end)
+            self._animation.start()
+            self.stateChanged.emit(self._checked)
 
-        if state == self._checked:
-            return
 
-        self.toggle()
-
-
-    def isChecked(self):
+    def isChecked(self) -> bool:
         """Return the current state of the toggle switch"""
         return self._checked
 
     def mousePressEvent(self, event):
         """Toggle switch on click"""
         if event.button() == Qt.MouseButton.LeftButton:
-            self.toggle()
+            self.setChecked(not self._checked)
+
+    def sizeHint(self):
+        return self.size()
 
     def paintEvent(self, event):
         """Draw switch"""
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        try:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Draw background
-        bg_color = QColor(self.bg_right_color) if self._checked else QColor(self.bg_left_color)
-        painter.setBrush(bg_color)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawRoundedRect(0, 0, self.width, self.height, self.height // 2, self.height // 2)
+            # Draw background
+            bg_color = QColor(self.bg_right_color if self._checked else self.bg_left_color)
+            painter.setBrush(bg_color)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRoundedRect(0, 0, self._width, self._height, self._height // 2, self._height // 2)
 
-        # Draw sliding thumb
-        thumb_size = self.height - 4
-        painter.setBrush(QColor(self.fg_color))
-        painter.drawEllipse(QRect(self._thumb_pos, 2, thumb_size, thumb_size))
+
+            # Draw the thumb (slider)
+            thumb_diameter = self._height - 4
+            painter.setBrush(QColor(self.fg_color))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(QRect(int(self._thumb_pos), 2, thumb_diameter, thumb_diameter))
+        finally:
+            painter.end()
 
     def get_thumb_pos(self):
         return self._thumb_pos
@@ -532,7 +546,8 @@ class ToggleSwitch(QWidget):
         self._thumb_pos = pos
         self.update()  # Redraw switch
 
-    thumb_pos = property(get_thumb_pos, set_thumb_pos)
+    thumb_pos = pyqtProperty(float, get_thumb_pos, set_thumb_pos)
+    #thumb_pos = property(get_thumb_pos, set_thumb_pos)
 
 class CustomCheckButton(QToolButton):
     """A button that changes icons when checked

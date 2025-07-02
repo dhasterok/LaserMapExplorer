@@ -211,7 +211,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
 
     // 5) Plot
-    code += `canvas, plot_info = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field})\n`;
+    code += `canvas, plot_info = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`
     code += `self.show()`
     return code;

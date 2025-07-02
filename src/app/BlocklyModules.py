@@ -109,11 +109,11 @@ class LameBlockly(PlotViewer):
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         self.preferences = copy.deepcopy(self.default_preferences)
 
-        self.io = LameIO(self, connect_actions=False,logger_options=self.logger_options, logger_key="IO" )
+        self.io = LameIO(self, connect_actions=False )
 
-        self.plot_style = Styling(self,logger_options=self.logger_options, logger_key="Style")
+        self.plot_style = Styling(self)
         #set style using 'default' style them
-        self.style_themes = StyleTheme(parent, logger_options=self.logger_options, logger_key="Style")
+        self.style_themes = StyleTheme(parent)
         self.plot_style.style_dict = self.style_themes.default_style_dict()
         
         # # Initialise plotviewer form

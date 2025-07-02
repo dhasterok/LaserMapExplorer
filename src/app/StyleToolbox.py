@@ -155,7 +155,7 @@ class Styling(Observable):
             Prints debugging messages to stdout, by default ``False``
 
     """    
-    def __init__(self,parent, logger_options=None, logger_key=None):
+    def __init__(self,parent):
         super().__init__()
 
         self.logger_key = 'Style'
@@ -1197,8 +1197,8 @@ class StyleTheme():
 
 @auto_log_methods(logger_key='Style', prefix="STYLE: ", show_args=True)
 class StylingDock(Styling):
-    def __init__(self, parent, logger_options=None, logger_key=None):
-        super().__init__(parent,logger_options, logger_key)
+    def __init__(self, parent):
+        super().__init__(parent)
 
         self.logger_key = 'Style'
 

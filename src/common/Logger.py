@@ -368,9 +368,9 @@ class LoggerDock(CustomDockWidget):
 
     def set_logger_options(self):
         """ Opens a dialog to edit logger options."""
-        dialog = LoggerOptionsDialog(self.parent.logger_options, self)
+        dialog = LoggerOptionsDialog(LoggerConfig._options, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.parent.logger_options = dialog.get_updated_options()
+            LoggerConfig.set_options(dialog.get_updated_options())
 
 
     def logger_visibility_change(self):

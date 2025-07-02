@@ -212,9 +212,6 @@ class SearchWidget(QWidget):
             self.match_label.setText(f"{self.current_index + 1} / {self.total_matches}")
 
     def navigate_match(self, forward=True):
-        print("Current index:", self.current_index)
-        print("Total matches:", len(self.match_positions))
-
         if not self.match_positions:
             return
         if forward:

@@ -889,8 +889,8 @@ class Styling(Observable):
 
         # if probability axis associated with histogram
         if ax == 'p':
-            pmin = data.processed_data.get_attribute(field,'pmin')
-            pmax = data.processed_data.get_attribute(field,'pmax')
+            pmin = data.processed_data.get_attribute(field,'p_min')
+            pmax = data.processed_data.get_attribute(field,'p_max')
             return amin, amax, scale, label, pmin, pmax
 
         return amin, amax, scale, label
@@ -2313,7 +2313,7 @@ class StylingDock(Styling):
             else:
                 parentbox = widget_dict['parentbox'][ax]
                 childbox = widget_dict['childbox'][ax]
-                add_none = widget_dict['plot type'][self.plot_type]['add_none'][ax]
+                # add_none = widget_dict['plot type'][self.plot_type]['add_none'][ax]
                 self.ui.update_field_type_combobox_options(parentbox, childbox, ax=ax)
 
             if setting['saved_field'][ax] is not None:
@@ -2369,7 +2369,7 @@ class StylingDock(Styling):
                     ui.lineEditZLabel.setText('')
             return
         else:
-            amin, amax, scale, label = self.get_axis_values(self.ui.data,field_type, field, ax)
+            amin, amax, scale, label = self.get_axis_values(self.ui.data[self.app_data.sample_id],field_type, field, ax)
 
             plot_type = self.plot_type
 

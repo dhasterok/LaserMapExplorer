@@ -1158,67 +1158,60 @@ class SampleObj(Observable):
         # Clip outliers / autoscale the data
         # ------------------
         # loop over all fields
-        for col in self.processed_data.columns:
-            if self.processed_data.get_attribute(col, 'data_type') != 'coordinate':
-                lq = self.processed_data.get_attribute(col, 'lower_bound')
-                uq = self.processed_data.get_attribute(col, 'upper_bound')
-                # skip is autoscale is False for column
-                if not self.processed_data.get_attribute(col, 'autoscale'):
-                    #clip data using ub and lb
-                    lq_val = np.nanpercentile(self.processed_data[col], lq, axis=0)
-                    uq_val = np.nanpercentile(self.processed_data[col], uq, axis=0)
-                    self.processed_data[col] = np.clip(self.processed_data[col], lq_val, uq_val)
-                    continue
+        for col in (col for col in self.processed_data.columns if self.processed_data.get_attribute(col, 'data_type') != 'coordinate'):
 
-                d_lq = self.processed_data.get_attribute(col, 'diff_lower_bound')
-                d_uq = self.processed_data.get_attribute(col, 'diff_upper_bound')
+            lq = self.processed_data.get_attribute(col, 'lower_bound')
+            uq = self.processed_data.get_attribute(col, 'upper_bound')
+            # skip is autoscale is False for column
+            if not self.processed_data.get_attribute(col, 'autoscale'):
+                #clip data using ub and lb
+                lq_val = np.nanpercentile(self.processed_data[col], lq, axis=0)
+                uq_val = np.nanpercentile(self.processed_data[col], uq, axis=0)
+                self.processed_data[col] = np.clip(self.processed_data[col], lq_val, uq_val)
+                continue
 
-                match self.processed_data.get_attribute(col, 'units'):
-                    case 'ppm':
-                        compositional = True
-                        max_val = 1e6
-                        shift_percentile = 90
-                    case 'cps':
-                        compositional = True
-                        max_val = 1e6
-                        shift_percentile = 90
-                    case _:
-                        compositional = True
-                        max_val = 1e6
-                        shift_percentile = 90
+            d_lq = self.processed_data.get_attribute(col, 'diff_lower_bound')
+            d_uq = self.processed_data.get_attribute(col, 'diff_upper_bound')
 
-                # Apply robust outlier detection to each cluster
-                for idx in np.unique(self.cluster_labels):
-                    cluster_mask = (self.cluster_labels == idx)
+            match self.processed_data.get_attribute(col, 'units'):
+                case 'ppm':
+                    compositional = True
+                    max_val = 1e6
+                    shift_percentile = 90
+                case 'cps':
+                    compositional = True
+                    max_val = 1e6
+                    shift_percentile = 90
+                case _:
+                    compositional = True
+                    max_val = 1e6
+                    shift_percentile = 90
 
-                    transformed_data = self.clip_outliers(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq)
-                    self.processed_data.loc[cluster_mask, col] = transformed_data
+            # Apply robust outlier detection to each cluster
+            for idx in np.unique(self.cluster_labels):
+                cluster_mask = (self.cluster_labels == idx)
 
-                    transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
-                    self.processed_data.loc[cluster_mask, col] = transformed_data
-                
-                # Set min and max unmasked values
-                amin = fmt.oround(np.min(self.processed_data[col]), order=2, toward=0)
-                amax = fmt.oround(np.max(self.processed_data[col]), order=2, toward=1)
-                
-                # add labels for plotting
-                self.processed_data.set_attribute(col,'label',self.create_label(col))
-            else:
-                # Set min and max axis columns
-                amin = np.min(self.processed_data[col])
-                amax = np.max(self.processed_data[col])
+                transformed_data = self.clip_outliers(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq)
+                self.processed_data.loc[cluster_mask, col] = transformed_data
 
-            # update field plot limits
-            self.processed_data.set_attribute(column_name,'plot_min',amin)
-            self.processed_data.set_attribute(column_name,'plot_max',amax)
-        
+                transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                self.processed_data.loc[cluster_mask, col] = transformed_data
+
         
         # Compute special fields?
         # -----------------------
-
+        for col in self.processed_data.columns:
+            self.processed_data.set_attribute(col,'label',self.create_label(col))
             
+            # Set min and max unmasked values
+            amin = np.min(self.processed_data[col])
+            amax = np.max(self.processed_data[col])
             
-
+            if col not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
+                amin = fmt.oround(amin, order=2, toward=0)
+                amax = fmt.oround(amax, order=2, toward=1)
+            self.processed_data.set_attribute(col,'plot_min',amin)
+            self.processed_data.set_attribute(col,'plot_max',amax)
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """Predicts the optimal number of clusters

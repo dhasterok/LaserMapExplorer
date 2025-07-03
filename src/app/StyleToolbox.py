@@ -101,7 +101,7 @@ class Styling(Observable):
     style_dict : dict of dict
         Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
         for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
-        plot type.  While data related to plot and color axes may be stored in *style_dict*, *axis_dict* stores labels, bounds and scale for most plot fields.
+        plot type.  While data related to plot and color axes may be stored in *style_dict*, *data.processed_data.column_attributes* stores labels, bounds and scale for most plot fields.
 
         style_dict[plot_type] -- plot types include ``field map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
         ``TEC``, ``radar``, ``variance``, ``vectors``, ``pca scatter``, ``pca heatmap``, ``PCA Score``, ``Clusters``, ``Cluster Score``, ``profile``
@@ -832,12 +832,6 @@ class Styling(Observable):
         if plot_type.lower() in self.map_plot_types:
             if ('Xc' not in list(data.column_attrributes.keys())) or ('Yc' not in list(data.column_attrributes.keys())):
                 return
-                
-                
-                # initialize 'X' and 'Y' axes
-                # all plot types use the same map dimensions so just use Analyte for the field_type
-                # self.initialize_axis_values(data,'Analyte','Xc')
-                # self.initialize_axis_values(data,'Analyte','Yc')
 
             
             xmin,xmax,xscale,xlabel = self.get_axis_values(data,'Analyte','Xc')
@@ -865,94 +859,6 @@ class Styling(Observable):
         else:
             style['CScale'] = 'linear'
 
-    # def initialize_axis_values(self, data, field_type, field):
-    #     """Initialize axis dict for a given field_type and field
-
-    #     Parameters
-    #     ----------
-    #     field_type : str
-    #         Field type, generally determined by a field type combobox.
-    #     field : str
-    #         Field, generally determined by a field combobox.
-    #     """        
-
-    #     # initialize variables
-    #     if field not in data.axis_dict.column_attributes.keys():
-    #         data.axis_dict.update({field:{'status':'auto', 'label':field, 'min':None, 'max':None}})
-
-    #     #current_plot_df = pd.DataFrame()
-    #     if field not in ['Xc','Yc']:
-    #         df = data.get_map_data(field, field_type)
-    #         array = df['array'][data.mask].values if not df.empty else []
-    #     else:
-    #         # field 'Xc' and 'Yc' require separate extraction
-    #         array = data.processed_data[field].values
-
-    #     match field_type:
-    #         case 'Analyte' | 'Analyte (normalized)':
-    #             if field in ['Xc','Yc']:
-    #                 scale = 'linear'
-    #             else:
-    #                 symbol, mass = data.parse_field(field)
-    #                 label = ''
-    #                 if mass:
-    #                     label = f"$^{{{mass}}}${symbol}"
-    #                 else:
-    #                     label = f"{symbol}"
-
-    #                 if field_type == 'Analyte':
-    #                     data.processed_data.get_attribute(field,'label') = f"{label} ({self.app_data.preferences['Units']['Concentration']})"
-    #                 else: # normalized analyte
-    #                     data.processed_data.get_attribute(field,'label'] = f"{label}$_N$ ({self.app_data.preferences['Units']['Concentration']})"
-
-    #                 scale = data.processed_data.get_attribute(field, 'norm')
-
-    #             amin = np.nanmin(array)
-    #             amax = np.nanmax(array)
-    #         case 'Ratio' | 'Ratio (normalized)':
-    #             field_1 = field.split(' / ')[0]
-    #             field_2 = field.split(' / ')[1]
-    #             symbol_1, mass_1 = data.parse_field(field_1)
-    #             symbol_2, mass_2 = data.parse_field(field_2)
-
-    #             # numerator
-    #             label_1 = ''
-    #             if mass_1: # isotope
-    #                 label_1 = f"$^{{{mass_1}}}${symbol_1}"
-    #             else: # element
-    #                 label_1 = f"{symbol_1}"
-
-    #             # denominator
-    #             label_2 = ''
-    #             if mass_2: # isotope
-    #                 label_2 = f"$^{{{mass_2}}}${symbol_2}"
-    #             else: # element
-    #                 label_2 = f"{symbol_2}"
-
-    #             if field_type == 'Ratio':
-    #                 data.processed_data.get_attribute(field,'label'] = f"{label_1} / {label_2}"
-    #             else:   # normalized ratio
-    #                 data.processed_data.get_attribute(field,'label'] = f"{label_1}$_N$ / {label_2}$_N$"
-
-    #             amin = np.nanmin(array)
-    #             amax = np.nanmax(array)
-    #             scale = data.processed_data.get_attribute(field, 'norm')
-    #         case _:
-    #             scale = 'linear'
-
-    #             amin = np.nanmin(array)
-    #             amax = np.nanmax(array)
-
-    #     # do not round 'X' and 'Y' so full extent of map is viewable
-    #     if field not in ['Xc','Yc']:
-    #         amin = fmt.oround(amin, order=2, toward=0)
-    #         amax = fmt.oround(amax, order=2, toward=1)
-
-    #     d = {'status':'auto', 'min':amin, 'max':amax, 'norm':scale}
-
-    #     data.axis_dict[field].update(d)
-        #print(data.axis_dict[field])
-
     def get_axis_values(self, data, field_type, field, ax=None):
         """Gets axis values
 
@@ -975,12 +881,7 @@ class Styling(Observable):
             Axis parameters: minimum, maximum, scale (``linear`` or ``log``), axis label
         """ 
 
-
-        if field not in data.processed_data.column_attributes.keys():
-            raise ValueError(f"Field '{field}' not found in data attributes.")
-            #self.initialize_axis_values(data,field_type, field)
-
-        # get axis values from axis_dict
+        # get axis values from processed data
         amin = data.processed_data.get_attribute(field,'plot_min')
         amax = data.processed_data.get_attribute(field,'plot_max')
         scale = data.processed_data.get_attribute(field,'norm')
@@ -2100,11 +2001,6 @@ class StylingDock(Styling):
         # axes properties
         # for map plots, check to see that 'X' and 'Y' are initialized
         if self.plot_type.lower() in self.map_plot_types:
-            # if ('X' not in list(data.processed_data.column_attrributes.keys())) or ('Y' not in list(data.processed_data.column_attributes.keys())):
-            #     # initialize 'X' and 'Y' axes
-            #     # all plot types use the same map dimensions so just use Analyte for the field_type
-            #     self.initialize_axis_values(data,'Analyte','Xc')
-            #     self.initialize_axis_values(data,'Analyte','Yc')
             xmin,xmax,xscale,xlabel = self.get_axis_values(data,'Analyte','Xc')
             ymin,ymax,yscale,ylabel = self.get_axis_values(data,'Analyte','Yc')
 
@@ -2702,7 +2598,7 @@ class StylingDock(Styling):
         ax : str
             Axis 'x', 'y', or 'z'
         field : str
-            Field plotted on axis, used as key to ``MainWindow.axis_dict``
+            Field plotted on axis, used as column name to ``MainWindow.data.processed_data`` dataframe.
         """
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2743,17 +2639,13 @@ class StylingDock(Styling):
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
 
-        Axes parameters with ``MainWindow.axis_dict['status']`` can be ``auto`` or ``custom``, where ``custom``
-        is set by the user in the appropriate *lineEdit* widgets.  The ``auto`` status is set by the full range
-        of values of a data column.        
+        Resets the axis limits and scales to auto values, and updates the style dictionary.     
 
         Parameters
         ----------
         ax : str
             axis to reset values, can be ``x``, ``y``, and ``c``
 
-        .. seealso::
-            :ref: `initialize_axis_values` for initializing the axis dictionary
         """
         data = self.ui.data[self.app_data.sample_id]
 
@@ -2765,23 +2657,24 @@ class StylingDock(Styling):
                 field = self.ui.comboBoxFieldC.currentText()
                 if field == '':
                     return
-                self.initialize_axis_values(data, field_type, field)
+                data.processed_data.prep_data(field)
 
             self.set_color_axis_widgets()
         else:
             match self.ui.comboBoxPlotType.currentText().lower():
                 case 'field map' | 'cluster' | 'cluster score' | 'pca score':
                     field = ax.upper()
-                    self.initialize_axis_values(data,'Analyte', field)
+                    data.processed_data.prep_data(field)
                     self.set_axis_widgets(ax, field)
                 case 'histogram':
                     field = self.ui.comboBoxFieldC.currentText()
                     if ax == 'x':
                         field_type = self.ui.comboBoxFieldTypeC.currentText()
-                        self.initialize_axis_values(data,field_type, field)
+                        data.processed_data.prep_data(field)
                         self.set_axis_widgets(ax, field)
                     else:
-                        data.axis_dict[field].update({'pstatus':'auto', 'pmin':None, 'pmax':None})
+                        data.processed_data.set_attribute(field, 'p_min', None)
+                        data.processed_data.set_attribute(field, 'p_max', None)
 
                 case 'scatter' | 'heatmap':
                     match ax:
@@ -2796,7 +2689,7 @@ class StylingDock(Styling):
                             field = self.ui.comboBoxFieldZ.currentText()
                     if (field_type == '') | (field == ''):
                         return
-                    self.initialize_axis_values(data,field_type, field)
+                    data.processed_data.prep_data(field)
                     self.set_axis_widgets(ax, field)
 
                 case 'PCA scatter' | 'PCA heatmap':
@@ -2805,7 +2698,7 @@ class StylingDock(Styling):
                         field = self.ui.spinBoxPCX.currentText()
                     else:
                         field = self.ui.spinBoxPCY.currentText()
-                    self.initialize_axis_values(data,field_type, field)
+                    data.processed_data.prep_data(field)
                     self.set_axis_widgets(ax, field)
 
                 case _:
@@ -3197,10 +3090,6 @@ class StylingDock(Styling):
                 self.app_data.update_num_bins = False
                 self.app_data.update_hist_bin_width()
                 self.app_data.update_num_bins = True
-
-            # initialize axis values for plotting
-            if field not in data.processed_data.column_attributes.keys():
-                self.initialize_axis_values(data, parentbox.currentText(), field)
 
             # initialize color widgets
             if ax == 3:

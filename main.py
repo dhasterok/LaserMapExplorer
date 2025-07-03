@@ -392,7 +392,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
 
-        self.canvasWindow.currentChanged.connect(self.canvas_changed)
+        self.canvasWindow.currentChanged.connect(lambda: self.canvas_changed())
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
         self.canvas_changed()
         self.init_tabs(enable=False)

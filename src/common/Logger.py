@@ -13,13 +13,47 @@ from src.common.SearchTool import SearchWidget
 _global_logger = None
 
 def set_global_logger(logger):
+    """
+    Set the global logger instance.
+
+    Parameters
+    ----------
+    logger : object
+        An object with a `write(str)` method used to handle log output.
+        Typically, this could be a file-like object or a custom logger.
+    """
     global _global_logger
     _global_logger = logger
 
 def get_global_logger():
+    """
+    Retrieve the global logger instance.
+
+    Returns
+    -------
+    object
+        The global logger previously set by `set_global_logger()`.
+    """
     return _global_logger
 
 def log(msg, prefix=""):
+    """
+    Write a log message using the global logger, respecting pause state and formatting.
+
+    Parameters
+    ----------
+    msg : str
+        The message to be logged.
+
+    prefix : str, optional
+        A label to prepend to the message, typically representing a module or category.
+        If provided, it is formatted as 'PREFIX: '.
+
+    Notes
+    -----
+    If logging is paused (via `LoggerConfig.set_paused(True)`), no output is produced.
+    If no global logger is set, output falls back to standard output using `print`.
+    """
     if LoggerConfig.is_paused():
         return
 
@@ -134,6 +168,54 @@ def no_log(func):
     return func
 
 class LoggerConfig:
+    """
+    Central configuration manager for logging behavior within the application.
+
+    This class provides global settings for controlling what gets logged and how logging is displayed.
+    It includes toggles for enabling or disabling logging for specific keys (e.g., class or method names),
+    as well as global flags for displaying method arguments, call chains, and for pausing logging entirely.
+
+    Class Attributes
+    ----------------
+    _options : dict
+        A dictionary mapping logger keys (typically strings identifying classes or methods)
+        to booleans indicating whether logging is enabled for that key.
+    _show_args : bool
+        Flag indicating whether function arguments should be printed in logs.
+    _show_call_chain : bool
+        Flag indicating whether to include the call chain (stack trace) in log messages.
+    _paused : bool
+        If True, logging is globally paused.
+
+    Methods
+    -------
+    set_options(options_dict: dict)
+        Set the entire logging options dictionary.
+    
+    get_option(key: str) -> bool
+        Retrieve whether logging is enabled for the given key.
+    
+    get_all() -> dict
+        Return the entire logging options dictionary.
+    
+    set_show_args(value: bool)
+        Enable or disable logging of function arguments.
+    
+    get_show_args() -> bool
+        Return whether function arguments will be logged.
+    
+    set_show_call_chain(value: bool)
+        Enable or disable logging of call chains.
+    
+    get_show_call_chain() -> bool
+        Return whether call chains will be logged.
+    
+    set_paused(value: bool)
+        Pause or resume all logging globally.
+    
+    is_paused() -> bool
+        Return whether logging is currently paused.
+    """
     # _options is used to set flags for the logged items (classes/methods)
     _options = {}
 
@@ -183,7 +265,16 @@ class LoggerConfig:
 class LoggerDock(CustomDockWidget):
     """A dock widget that contains a logging display.
 
-    A logging dock widget useful for debugging and recording actions.
+    A logging dock widget useful for debugging and recording actions.  Requires the parent to have
+    an attribute parent.logger_options, which is a dictionary with keys being the logger prefixes and
+    an associated boolean value for each indicating to log (True) or skip logging (False) given actions.
+
+    The logger will produce default color text for default prefixes:
+        Error - red
+        Warning - orange
+        UI - blue
+        data - green
+    These can be extended or changed if the a parent.log_colors exists.
 
     Parameters
     ----------
@@ -203,6 +294,8 @@ class LoggerDock(CustomDockWidget):
             "UI": "blue",
             "Data": "green",
         }
+        if hasattr(parent, 'log_colors'):
+            self.log_colors.update(parent.log_colors)
 
         self.match_cursors = []
         self.current_match_index = -1
@@ -333,6 +426,20 @@ class LoggerDock(CustomDockWidget):
         self.text_edit.setTextColor(QColor("black"))
 
     def detect_color_from_message(self, message):
+        """Determines the color for the message text
+
+        Determines the message color from the prefix.
+
+        Parameters
+        ----------
+        message : str
+            Log message with prefix.
+
+        Returns
+        -------
+        str
+            Returns a hex string with the color
+        """
         prefix = message.split(" ", 1)[0].rstrip(":")  # Extract prefix like "UI", "DATA", etc.
         for key, color in self.log_colors.items():
             if prefix.lower() == key.lower():
@@ -340,6 +447,7 @@ class LoggerDock(CustomDockWidget):
         return self.default_color()
 
     def default_color(self):
+        """Sets default color for text in the LoggerDock"""
         palette = self.text_edit.palette()
         bg = palette.color(self.text_edit.backgroundRole()).lightness()
         return "lightgray" if bg < 128 else "black"
@@ -478,10 +586,12 @@ class LoggerOptionsDialog(QDialog):
         self.layout().addWidget(button_box)
     
     def select_all_options(self):
+        """Select all checkboxes for logger options"""
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(True)
 
     def select_none_options(self):
+        """Deselect all checkboxes for logger options"""
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(False)
 

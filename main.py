@@ -674,9 +674,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         old_field_type = parentbox.currentText()
 
         plot_type = self.plot_style.plot_type
-
         plot_dict = self.plot_style.plot_axis_dict[plot_type]
-
         field_dict = self.app_data.field_dict
 
         new_list = []
@@ -685,11 +683,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if ax == 3 and 'cfield_type' in plot_dict.keys():
             # set the list based on plot_style.plot_type and available field types
             new_list = [key for key in field_dict.keys() if key in plot_dict['cfield_type']]
-        elif plot_dict['global_list'][ax]:
-            new_list = list(field_dict.keys())
-        else:
+        elif 'field_type' in plot_dict.keys():
             # set the list based on plot_style.plot_type and available field types
             new_list = [key for key in field_dict.keys() if key in plot_dict['field_type']]
+        else:
+            new_list = list(field_dict.keys())
 
         if 'normalized' not in new_list:
             if 'Analyte' in new_list:
@@ -1181,8 +1179,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         app_data.add_observer("sample_id", self.update_sample_id_combobox)
         app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
         app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
-        app_data.add_observer("field_type", self.plot_style.update_field_type)
-        app_data.add_observer("field", self.plot_style.update_field)
+        app_data.add_observer("x_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("x_field", self.plot_style.update_field)
+        app_data.add_observer("y_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("y_field", self.plot_style.update_field)
+        app_data.add_observer("z_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("z_field", self.plot_style.update_field)
+        app_data.add_observer("c_field_type", self.plot_style.update_field_type)
+        app_data.add_observer("c_field", self.plot_style.update_field)
         app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
         app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
         app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
@@ -1534,6 +1538,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if self.plot_style.plot_type != 'field map':
             self.plot_style.plot_type = 'field map'
+
+        if 'Analyte' in self.app_data.field_dict.keys():
+            self.app_data.c_field_type = 'Analyte'
+            self.app_data.c_field = self.app_data.field_dict['Analyte'][0]
+        elif 'Ratio' in self.app_data.field_dict.keys():
+            self.app_data.c_field_type = 'Ratio'
+            self.app_data.c_field = self.app_data.field_dict['Ratio'][0]
+        else:
+            self.app_data.c_field_type = self.app_data.field_dict[0]
+            self.app_data.c_field = self.app_data.field_dict[self.app_data.field_dict[0]][0]
 
         # allow plots to be updated again
         self.plot_flag = True

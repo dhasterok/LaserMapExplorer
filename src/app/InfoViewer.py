@@ -465,7 +465,7 @@ class MetadataTab():
         self.metadata_table.setColumnCount(0)
         self.metadata_table.setRowCount(0)
 
-        self.editable_rows = {"label": str, "units": str, "use": bool, "norm": ["linear","log","symlog"]}
+        self.editable_rows = {"label": str, "units": str, "use": bool, "norm": ["linear","log","symlog"], "plot_max": float,"plot_min":float}
         self.metadata_table.itemChanged.connect(self.update_column_attributes_on_cell_change)
 
         tab_layout.addWidget(self.metadata_table)

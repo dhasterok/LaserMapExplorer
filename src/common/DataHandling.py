@@ -7,6 +7,7 @@ from scipy.stats import yeojohnson
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+import src.common.format as fmt
 from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
@@ -782,10 +783,14 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(column_name,'label',self.create_label(column_name))
 
             # Set min and max unmasked values
-            self.processed_data.set_attribute(col,'plot_lower_limit',np.min(self.processed_data[col][mask]))
-            self.processed_data.set_attribute(col,'plot_upper_limit',np.max(self.processed_data[col][mask]))
-            #v_min = self.processed_data[column_name][mask].min() if mask is not None else self.processed_data[column_name].min()
-            #v_max = self.processed_data[column_name][mask].max() if mask is not None else self.processed_data[column_name].max()
+            amin = np.min(self.processed_data[column_name][mask])
+            amax = np.max(self.processed_data[column_name][mask])
+            
+            if column_name not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
+                amin = fmt.oround(amin, order=2, toward=0)
+                amax = fmt.oround(amax, order=2, toward=1)
+            self.processed_data.set_attribute(column_name,'plot_min',amin)
+            self.processed_data.set_attribute(column_name,'plot_max',amax)
 
             # Set additional attributes
             self.processed_data.set_attribute(column_name, 'norm', 'linear')
@@ -793,6 +798,9 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(column_name, 'outlier_method', None)
             self.processed_data.set_attribute(column_name, 'smoothing_method', None)
             self.processed_data.set_attribute(column_name, 'auto_scale', False)
+            # add probability axis associated with histograms
+            self.processed_data.set_attribute(column_name, 'p_min', None)
+            self.processed_data.set_attribute(column_name, 'p_max', None)
 
         # Return a message if a single column was added, or the result dictionary for multiple columns
         if len(column_names) == 1:
@@ -1193,8 +1201,8 @@ class SampleObj(Observable):
         # -----------------------
         for col in self.processed_data.columns:
             self.processed_data.set_attribute(col,'label',self.create_label(col))
-            self.processed_data.set_attribute(col,'plot_lower_limit',np.min(self.processed_data[col]))
-            self.processed_data.set_attribute(col,'plot_upper_limit',np.max(self.processed_data[col]))
+            self.processed_data.set_attribute(col,'plot_min',np.min(self.processed_data[col]))
+            self.processed_data.set_attribute(col,'plot_max',np.max(self.processed_data[col]))
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """Predicts the optimal number of clusters

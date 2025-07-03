@@ -36,13 +36,11 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     # create plot canvas
     canvas = mplc.MplCanvas(parent=parent)
 
-    # set color limits
-    if field not in data.axis_dict:
-        plot_style.initialize_axis_values(data,field_type,field)
-        if hasattr(plot_style,'set_style_widgets'): 
-            plot_style.set_style_widgets() # update ui widgets and style dictionary
-        else:
-            plot_style.set_style_dictionary(data, app_data) # update style dictionary
+
+    if hasattr(plot_style,'set_style_widgets'): 
+        plot_style.set_style_widgets() # update ui widgets and style dictionary
+    else:
+        plot_style.set_style_dictionary(data, app_data) # update style dictionary
 
     # get data for current map
     #scale = data.processed_data.get_attribute(field, 'norm')
@@ -545,18 +543,18 @@ def plot_histogram(parent, data, app_data, plot_style):
     else:
         font = {'font':plot_style.font, 'size':plot_style.font_size}
 
-    # set y-limits as p-axis min and max in data.axis_dict
+    # set y-limits as p-axis min and max in data.processed_data.column_attributes
     if app_data.hist_plot_style != 'log-scaling' :
         pflag = False
-        if 'pstatus' not in data.axis_dict[x['field']]:
+        if 'pstatus' not in data.processed_data.column_attributes[x['field']]:
             pflag = True
-        elif data.axis_dict[x['field']]['pstatus'] == 'auto':
+        elif data.processed_data.column_attributes[x['field']]['pstatus'] == 'auto':
             pflag = True
 
         if pflag:
             ymin, ymax = canvas.axes.get_ylim()
             d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
-            data.axis_dict[x['field']].update(d)
+            data.processed_data.column_attributes[x['field']].update(d)
             plot_style.set_axis_widgets('y', x['field'])
 
         # grab probablility axes limits
@@ -899,22 +897,22 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
 
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['x']['field'] not in data.axis_dict.keys():
+        if scatter_dict['x']['field'] not in data.processed_data.column_attributes.keys():
             plot_style.initialize_axis_values(data,scatter_dict['x']['type'], scatter_dict['x']['field'])
             plot_style.set_axis_widgets(data,'x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['y']['field'] not in data.axis_dict.keys():
+        if scatter_dict['y']['field'] not in data.processed_data.column_attributes.keys():
             plot_style.initialize_axis_values(data,scatter_dict['y']['type'], scatter_dict['y']['field'])
             plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-        if scatter_dict['z']['field'] not in data.axis_dict.keys():
+        if scatter_dict['z']['field'] not in data.processed_data.column_attributes.keys():
             plot_style.initialize_axis_values(data,scatter_dict['z']['type'], scatter_dict['z']['field'])
             plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-        if scatter_dict['c']['field'] not in data.axis_dict.keys():
+        if scatter_dict['c']['field'] not in data.processed_data.column_attributes.keys():
             plot_style.set_color_axis_widgets()
             plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 

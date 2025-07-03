@@ -196,6 +196,8 @@ class Styling(Observable):
 
         self.axis = ['x','y','z','c']
 
+        self.default_plot_axis_dict()
+
 
     # -------------------------------------
     # Styling properties
@@ -667,6 +669,150 @@ class Styling(Observable):
                 length = 0.2 * x_range
 
         return length
+
+    def default_plot_axis_dict(self):
+        self.plot_axis_dict = {
+            '': {
+                'axis': [False, False, False, False],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, False],
+                'field_type': {},
+                },
+            'field map': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, True],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special'],
+                },
+            'gradient map': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Analyte','Ratio','Calculated','Special']
+                },
+            'correlation': {
+                'axis': [True, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, True],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Cluster']
+                },
+            'histogram': {
+                'axis': [True, False, False, True],
+                'global_list': [True, False, False, False],
+                'add_none': [False, False, False, True],
+                'spinbox': [True, False, False, True],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special'],
+                'cfield_type': ['Cluster']
+                },
+            'scatter': {
+                'axis': [True, True, True, True],
+                'global_list': [True, True, True, True],
+                'add_none': [False, False, True, True],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
+                },
+            'heatmap': {
+                'axis': [True, True, True, False],
+                'global_list': [True, True, True, True],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, False],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
+                },
+            'ternary map': {
+                'axis': [True, True, True, False],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, False],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
+                },
+            'TEC': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, True],
+                'spinbox': [False, False, False, False],
+                'field_type': ['Analyte'],
+                'cfield_type': ['Cluster']
+                },
+            'radar': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, True],
+                'add_none': [False, False, False, True],
+                'spinbox': [False, False, False, False],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
+                },
+            'variance': {
+                'axis': [False, False, False, False],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, False]
+                },
+            'basis vectors': {
+                'axis': [False, False, False, False],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [True, True, False, False]
+                },
+            'dimension score map': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, True],
+                'field_type': ['PCA score']
+                },
+            'dimension scatter': {
+                'axis': [True, True, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, True],
+                'spinbox': [True, True, False, True],
+                'field_type': ['PCA score']
+                }, 
+            'dimension heatmap': {
+                'axis': [True, True, False, False],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [True, True, False, False],
+                'field_type': ['PCA score']
+                },
+            'cluster': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, False],
+                'field_type': ['Cluster']
+                },
+            'cluster score map': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Cluster score']
+                },
+            'cluster performance': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, False],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, False],
+                'field_type': ['Cluster']
+                },
+            'profile': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, True],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
+                },
+            'polygon': {
+                'axis': [False, False, False, True],
+                'global_list': [False, False, False, True],
+                'add_none': [False, False, False, False],
+                'spinbox': [False, False, False, True],
+                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
+                }
+        }
     
     def set_style_dictionary(self,data, app_data, plot_type=None, style=None):
         """Sets values in style dictionary
@@ -1216,145 +1362,6 @@ class StylingDock(Styling):
             'axis_label': [parent.lineEditXLabel, parent.lineEditYLabel, parent.lineEditZLabel, parent.lineEditCLabel],
             'lbound': [parent.lineEditXLB, parent.lineEditYLB, parent.lineEditZLB, parent.lineEditCLB],
             'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditCUB],
-            'plot type': {
-                '': {
-                    'axis': [False, False, False, False],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, False],
-                    },
-                'field map': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, True],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
-                    },
-                'gradient map': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Analyte','Ratio','Calculated','Special']
-                    },
-                'correlation': {
-                    'axis': [True, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, True],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Cluster']
-                    },
-                'histogram': {
-                    'axis': [True, False, False, True],
-                    'global_list': [True, False, False, False],
-                    'add_none': [False, False, False, True],
-                    'spinbox': [True, False, False, True],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
-                    },
-                'scatter': {
-                    'axis': [True, True, True, True],
-                    'global_list': [True, True, True, True],
-                    'add_none': [False, False, True, True],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
-                    },
-                'heatmap': {
-                    'axis': [True, True, True, False],
-                    'global_list': [True, True, True, True],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, False],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
-                    },
-                'ternary map': {
-                    'axis': [True, True, True, False],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, False],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
-                    },
-                'TEC': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, True],
-                    'spinbox': [False, False, False, False],
-                    'field_type': ['Analyte']
-                    },
-                'radar': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, True],
-                    'add_none': [False, False, False, True],
-                    'spinbox': [False, False, False, False],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
-                    },
-                'variance': {
-                    'axis': [False, False, False, False],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, False]
-                    },
-                'basis vectors': {
-                    'axis': [False, False, False, False],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [True, True, False, False]
-                    },
-                'dimension score map': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['PCA score']
-                    },
-                'dimension scatter': {
-                    'axis': [True, True, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, True],
-                    'spinbox': [True, True, False, True],
-                    'field_type': ['PCA score']
-                    }, 
-                'dimension heatmap': {
-                    'axis': [True, True, False, False],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [True, True, False, False],
-                    'field_type': ['PCA score']
-                    },
-                'cluster': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, False],
-                    'field_type': ['Cluster']
-                    },
-                'cluster score map': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Cluster score']
-                    },
-                'cluster performance': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, False],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, False],
-                    'field_type': ['Cluster']
-                    },
-                'profile': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, True],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
-                    },
-                'polygon': {
-                    'axis': [False, False, False, True],
-                    'global_list': [False, False, False, True],
-                    'add_none': [False, False, False, False],
-                    'spinbox': [False, False, False, True],
-                    'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
-                    }
-            }
         }
 
         self.ui = parent
@@ -2187,7 +2194,7 @@ class StylingDock(Styling):
         add_none = True
         if self.plot_type in self.map_plot_types:
             add_none = False
-        ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, add_none=add_none)
+        ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, ax=3)
         if self.app_data.c_field_type is None or self.app_data.c_field_type == '':
             ui.comboBoxFieldTypeC.setCurrentIndex(1)
             self.app_data.c_field_type = ui.comboBoxFieldTypeC.currentText()
@@ -2296,7 +2303,7 @@ class StylingDock(Styling):
 
     # style widget callbacks
     # -------------------------------------
-    def init_field_widgets(self, widget_dict, plot_type=None):
+    def init_field_widgets(self, plot_axis_dict, widget_dict, plot_type=None, *args, **kwargs):
         """Initializes widgets associated with axes for plotting
 
         Enables and sets visibility of labels, comboboxes, and spinboxes associated with axes for choosing plot dimensions, including color.
@@ -2309,9 +2316,9 @@ class StylingDock(Styling):
         :see also: self.axis_widget_dict
         """
         if plot_type is None:
-            setting = widget_dict['plot type'][self.plot_type]
+            setting = plot_axis_dict[self.plot_type]
         else:
-            setting = widget_dict['plot type'][plot_type]
+            setting = plot_axis_dict[plot_type]
 
         for ax in range(3):
             widget_dict['label'][ax].setEnabled(setting['axis'][ax])
@@ -2348,7 +2355,7 @@ class StylingDock(Styling):
 
         ui = self.ui
 
-        self.init_field_widgets(self.axis_widget_dict, self.plot_type)
+        self.init_field_widgets(self.plot_axis_dict, self.axis_widget_dict, plot_type=self.plot_type)
 
         # update ui
         match self.plot_type.lower():
@@ -2411,7 +2418,7 @@ class StylingDock(Styling):
                 parentbox = widget_dict['parentbox'][ax]
                 childbox = widget_dict['childbox'][ax]
                 add_none = widget_dict['plot type'][self.plot_type]['add_none'][ax]
-                self.ui.update_field_type_combobox_options(parentbox, childbox, add_none=add_none, global_list=True)
+                self.ui.update_field_type_combobox_options(parentbox, childbox, ax=ax)
 
             if setting['saved_field'][ax] is not None:
                 self.app_data.set_field(ax, setting['save_field'][ax])
@@ -3113,7 +3120,7 @@ class StylingDock(Styling):
 
     def update_field_type(self, ax, field_type=None, *args, **kwargs):
         # only update field if the axis is enabled 
-        if not self.axis_widget_dict['plot type'][self.plot_type]['axis'][ax]:
+        if not self.plot_axis_dict[self.plot_type]['axis'][ax]:
             return
             #self.set_axis_lim(ax, [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')])
             #self.set_axis_label(ax, data.processed_data.get_attribute(field,'label'])
@@ -3148,7 +3155,7 @@ class StylingDock(Styling):
             New field value for axis to update ``app_data`` or combobox, by default None
         """
         # only update field if the axis is enabled 
-        if not self.axis_widget_dict['plot type'][self.plot_type]['axis'][ax]:
+        if not self.plot_axis_dict[self.plot_type]['axis'][ax]:
             return
             #self.set_axis_lim(ax, [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')])
             #self.set_axis_label(ax, data.processed_data.get_attribute(field,'label'])

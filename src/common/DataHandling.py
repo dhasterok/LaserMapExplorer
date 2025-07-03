@@ -1197,12 +1197,21 @@ class SampleObj(Observable):
                 transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
                 self.processed_data.loc[cluster_mask, col] = transformed_data
 
+        
         # Compute special fields?
         # -----------------------
         for col in self.processed_data.columns:
             self.processed_data.set_attribute(col,'label',self.create_label(col))
-            self.processed_data.set_attribute(col,'plot_min',np.min(self.processed_data[col]))
-            self.processed_data.set_attribute(col,'plot_max',np.max(self.processed_data[col]))
+            
+            # Set min and max unmasked values
+            amin = np.min(self.processed_data[col])
+            amax = np.max(self.processed_data[col])
+            
+            if col not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
+                amin = fmt.oround(amin, order=2, toward=0)
+                amax = fmt.oround(amax, order=2, toward=1)
+            self.processed_data.set_attribute(col,'plot_min',amin)
+            self.processed_data.set_attribute(col,'plot_max',amax)
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """Predicts the optimal number of clusters

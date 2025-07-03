@@ -545,16 +545,12 @@ def plot_histogram(parent, data, app_data, plot_style):
 
     # set y-limits as p-axis min and max in data.processed_data.column_attributes
     if app_data.hist_plot_style != 'log-scaling' :
-        pflag = False
-        if 'pstatus' not in data.processed_data.column_attributes[x['field']]:
-            pflag = True
-        elif data.processed_data.column_attributes[x['field']]['pstatus'] == 'auto':
-            pflag = True
-
-        if pflag:
+        pmin = data.processed_data.get_attribute(x['field'], 'p_min')
+        pmax = data.processed_data.get_attribute(x['field'], 'p_max')
+        if pmin is None or pmax is None:
             ymin, ymax = canvas.axes.get_ylim()
-            d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
-            data.processed_data.column_attributes[x['field']].update(d)
+            data.processed_data.set_attribute(x['field'], 'p_min', fmt.oround(ymin,order=2,toward=0))
+            data.processed_data.set_attribute(x['field'], 'p_max', fmt.oround(ymax,order=2,toward=1))
             plot_style.set_axis_widgets('y', x['field'])
 
         # grab probablility axes limits

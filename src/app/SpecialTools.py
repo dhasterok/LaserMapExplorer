@@ -315,8 +315,9 @@ class SpecialFunctions():
         """Updates isotopes and decay constants when dating method changes.
 
         Default decay constants are as follows:
-        * Lu-Hf : :math:`1.867 \pm 0.008 \times 10^{-5}` Ma (Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3)
-        * Re-Os : :math:`1.666 \pm 0.005 \times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)
+        - **Lu-Hf**: :math:`1.867 \\pm 0.008 \\times 10^{-5}` Ma (Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3)
+
+        - **Re-Os**: :math:`1.666 \\pm 0.005 \\times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)
         """
         data = self.parent.data[self.parent.sample_id].processed_data
 

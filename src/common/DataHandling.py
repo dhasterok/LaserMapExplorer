@@ -1214,24 +1214,27 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(col,'plot_max',amax)
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
-        """Predicts the optimal number of clusters
+        """
+        Predicts the optimal number of clusters.
 
-        Predicts the optimal number of kmeans clusters using the elbow method from the within-cluster sum of squares (WCSS):
+        Predicts the optimal number of k-means clusters using the elbow method based on the within-cluster sum of squares (WCSS):
+
         .. math::
-            WCSS = \sum_{i=1}^k \sum_{x \in C_i} (x - \mu_i)^2
-        The optimal number of clusters is determined by taking the k-value associated with the maximum value of the second derivative.
+            WCSS = \\sum_{i=1}^k \\sum_{x \\in C_i} (x - \\mu_i)^2
+
+        The optimal number of clusters is determined by selecting the k-value corresponding to the maximum value of the second derivative of WCSS.
 
         Parameters
         ----------
         data : numpy.ndarray
-            Data used in clustering. Make sure it has NaN and +/- inf values removed.
+            Data used in clustering. Make sure it has NaN and ±inf values removed.
         max_clusters : int, optional
-            Computes cluster results from ``1`` to ``max_clusters``, by default 10
+            Computes cluster results from 1 to ``max_clusters``, by default 10.
 
         Returns
         -------
         int
-            Returns the optimal number of k-means clusters.
+            The optimal number of k-means clusters.
         """
         inertia = []
 

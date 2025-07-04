@@ -1,0 +1,834 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>common.PolygonNew &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/PolygonNew';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.PolygonNew</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for common.PolygonNew</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Polygon</span> <span class="k">as</span> <span class="n">MplPolygon</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
+
+<div class="viewcode-block" id="Polygon">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.Polygon">[docs]</a>
+<span class="k">class</span> <span class="nc">Polygon</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stores data about one polygon and references to the drawn Patch.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="o">=</span> <span class="n">p_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># list of (x, y)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Matplotlib Patch reference</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager">[docs]</a>
+<span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Polygon&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PolygonManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manages polygon creation, storage, and drawing on a Matplotlib axes.</span>
+<span class="sd">    Includes save/load methods using the `pickle` module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">logger_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="c1"># For multi-sample usage, you might have {sample_id: {p_id: Polygon}}.</span>
+        <span class="c1"># For simplicity, this snippet just uses a single dict of polygons:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span> <span class="o">=</span> <span class="p">{}</span>    <span class="c1"># {p_id: Polygon instance}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Creation mode flags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_drawing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_points</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># points for polygon under construction</span>
+
+        <span class="c1"># Moving existing polygon vertex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_polygon_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_vertex_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertex_picked_up</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Booleans controlling modes (Polygon creation)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_creating_polygon</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_add_point_polygon</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Polygon Creation</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="PolygonManager.create_new_polygon">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.create_new_polygon">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_new_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Begin a new polygon by incrementing the ID and setting is_drawing=True.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span>
+        <span class="n">new_poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_poly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_drawing</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+    
+
+<div class="viewcode-block" id="PolygonManager.handle_polygon_click">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_click">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_polygon_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">canvas</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">is_moving</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called by MplCanvas on mouse click in polygon mode.</span>
+<span class="sd">          - If is_moving=False =&gt; creation logic</span>
+<span class="sd">          - If is_moving=True  =&gt; pick up or place a vertex</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># update canvas if different</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">!=</span> <span class="n">canvas</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">=</span> <span class="n">canvas</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_add_point_polygon</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_polygon_add_point_click</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_moving</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_polygon_move_click</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_polygon_creation_click</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.handle_polygon_add_point_click">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_add_point_click">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_polygon_add_point_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert a new vertex into the closest line segment of the selected polygon.</span>
+<span class="sd">        For simplicity, we pick *one* polygon as &#39;current&#39; or we loop over polygons </span>
+<span class="sd">        to find which one user is editing. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># only left-click for adding a vertex</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Example: Suppose we choose the polygon with ID self.current_p_id</span>
+        <span class="c1"># Or you might do additional logic to pick which polygon is &quot;selected&quot;</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">poly</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">points</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># Not enough points for a line segment</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Find line segment with min distance from (x, y)</span>
+        <span class="n">min_distance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="n">insert_after_index</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">points</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)]</span>  <span class="c1"># loop back for last segment</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_to_line_segment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">min_distance</span><span class="p">:</span>
+                <span class="n">min_distance</span> <span class="o">=</span> <span class="n">dist</span>
+                <span class="n">insert_after_index</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="c1"># Insert (x,y) after that segment</span>
+        <span class="k">if</span> <span class="n">insert_after_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Insert new vertex</span>
+            <span class="n">points</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">insert_after_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+            <span class="c1"># Re-draw the polygon</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_polygon_patch</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="PolygonManager.distance_to_line_segment">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.distance_to_line_segment">[docs]</a>
+    <span class="k">def</span> <span class="nf">distance_to_line_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns min distance from (px,py) to line segment [ (x1,y1), (x2,y2) ].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># parametric t of the projection onto the line</span>
+        <span class="n">line_len_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">if</span> <span class="n">line_len_sq</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+            <span class="c1"># the segment&#39;s points are effectively the same</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">x1</span><span class="p">,</span> <span class="n">py</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="p">((</span><span class="n">px</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="p">))</span> <span class="o">/</span> <span class="n">line_len_sq</span>
+        <span class="c1"># clamp t to [0,1]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+        <span class="c1"># projection</span>
+        <span class="n">proj_x</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
+        <span class="n">proj_y</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">proj_x</span><span class="p">,</span> <span class="n">py</span> <span class="o">-</span> <span class="n">proj_y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.update_polygon_patch">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.update_polygon_patch">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_polygon_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poly</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the old patch if present, create a new patch from updated points, </span>
+<span class="sd">        and add it to axes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">poly</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">new_patch</span> <span class="o">=</span> <span class="n">MplPolygon</span><span class="p">(</span>
+            <span class="n">xy</span><span class="o">=</span><span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+            <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+            <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">new_patch</span><span class="p">)</span>
+        <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="n">new_patch</span>
+
+        <span class="c1"># Force redraw if necessary</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.handle_polygon_creation_click">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_creation_click">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_polygon_creation_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If we are in creation mode, left-click =&gt; add point, right-click =&gt; finalize.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_drawing</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Right-click =&gt; finalize polygon</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalize_polygon</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_drawing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Left-click =&gt; add a point</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="c1"># Optional: scatter for visual feedback</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">line</span><span class="p">,</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y0</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">)</span></div>
+
+                <span class="c1"># store line reference if you need to remove later</span>
+
+<div class="viewcode-block" id="PolygonManager.finalize_polygon">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.finalize_polygon">[docs]</a>
+    <span class="k">def</span> <span class="nf">finalize_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the polygon by adding a patch to the axes.&quot;&quot;&quot;</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span><span class="p">]</span>
+        <span class="n">poly</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="p">)</span>  <span class="c1"># store a copy</span>
+
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">MplPolygon</span><span class="p">(</span>
+            <span class="n">xy</span><span class="o">=</span><span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+            <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+            <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="n">patch</span></div>
+
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Polygon Move / Edit</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="PolygonManager.handle_polygon_move_click">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_move_click">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_polygon_move_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If user is in &quot;move polygon vertex&quot; mode:</span>
+<span class="sd">          1) If not picked up a vertex, find nearest vertex</span>
+<span class="sd">          2) Otherwise, place it</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex_picked_up</span><span class="p">:</span>
+            <span class="c1"># first click =&gt; pick up vertex</span>
+            <span class="n">found_poly</span><span class="p">,</span> <span class="n">found_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_nearest_vertex</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">found_poly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_polygon_id</span> <span class="o">=</span> <span class="n">found_poly</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_vertex_idx</span> <span class="o">=</span> <span class="n">found_idx</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vertex_picked_up</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># second click =&gt; place vertex</span>
+            <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_polygon_vertex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_polygon_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_vertex_idx</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vertex_picked_up</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_polygon_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_vertex_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.find_nearest_vertex">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.find_nearest_vertex">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_nearest_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">click_x</span><span class="p">,</span> <span class="n">click_y</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return (polygon_id, vertex_index) for the nearest vertex if within max_dist,</span>
+<span class="sd">        otherwise (None, -1).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">best_poly</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">best_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">best_sqdist</span> <span class="o">=</span> <span class="n">max_dist</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">click_x</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">click_y</span>
+            <span class="n">sqdist</span> <span class="o">=</span> <span class="n">dx</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span><span class="o">*</span><span class="n">dy</span>
+            <span class="n">idx_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">sqdist</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sqdist</span><span class="p">[</span><span class="n">idx_min</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">best_sqdist</span><span class="p">:</span>
+                <span class="n">best_sqdist</span> <span class="o">=</span> <span class="n">sqdist</span><span class="p">[</span><span class="n">idx_min</span><span class="p">]</span>
+                <span class="n">best_idx</span> <span class="o">=</span> <span class="n">idx_min</span>
+                <span class="n">best_poly</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="k">return</span> <span class="n">best_poly</span><span class="p">,</span> <span class="n">best_idx</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.update_polygon_vertex">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.update_polygon_vertex">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_polygon_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_id</span><span class="p">,</span> <span class="n">vertex_idx</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update a single vertex and re-draw the patch.&quot;&quot;&quot;</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">polygon_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">poly</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">vertex_idx</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">vertex_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">pts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">pts</span><span class="p">[</span><span class="n">vertex_idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">)</span>
+        <span class="n">poly</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">pts</span>
+
+        <span class="c1"># re-draw patch</span>
+        <span class="k">if</span> <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">poly</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">MplPolygon</span><span class="p">(</span>
+            <span class="n">xy</span><span class="o">=</span><span class="n">poly</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+            <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+            <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="n">patch</span></div>
+
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Clearing, Saving, and Loading Polygons</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="PolygonManager.clear_polygons">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.clear_polygons">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all polygons from the plot.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">poly</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.save_polygons">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.save_polygons">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the current polygons to a file (using pickle).</span>
+<span class="sd">        We&#39;ll store just the polygon points in a dict: {p_id: [ (x,y), (x,y), ... ]}.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">points</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+        <span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> polygons to </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;POLYGON&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PolygonManager.load_polygons">
+<a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.load_polygons">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load polygons from a file and re-draw them on the given axes.</span>
+<span class="sd">        Expects the same structure as produced by `save_polygons`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;POLYGON&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># Remove existing polygons from axes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_polygons</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+
+        <span class="c1"># Reconstruct polygons</span>
+        <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">points</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>  <span class="c1"># ensure correct type if stored as string</span>
+            <span class="k">if</span> <span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">points</span>
+
+            <span class="c1"># Create the patch</span>
+            <span class="n">patch</span> <span class="o">=</span> <span class="n">MplPolygon</span><span class="p">(</span>
+                <span class="n">xy</span><span class="o">=</span><span class="n">points</span><span class="p">,</span>
+                <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span>
+            <span class="p">)</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="n">patch</span>
+
+            <span class="c1"># Update p_id_gen if needed to avoid collisions</span>
+            <span class="k">if</span> <span class="n">pid</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span> <span class="o">=</span> <span class="n">pid</span>
+
+        <span class="n">axes</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span>
+
+        <span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> polygons from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;POLYGON&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

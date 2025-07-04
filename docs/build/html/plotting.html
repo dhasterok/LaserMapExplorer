@@ -1,0 +1,728 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Plotting &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'plotting';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Profiles" href="profiles.html" />
+    <link rel="prev" title="Filter" href="filtering.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="import.html">Import Formats</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">The Basic Interface</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="top_toolbar.html">Main Toolbar (Top)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Control Toolbox (Left)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property Toolbox (Right)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lower_tabs.html">Lower Tabs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="filtering.html">Filter</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Analysis Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Docks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="calculator.html">Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">Logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow Method Design (WMD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_reference.html">Block Reference &amp; Interface</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="userguide.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plotting</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="plotting">
+<h1>Plotting<a class="headerlink" href="#plotting" title="Link to this heading">#</a></h1>
+<p>There are a number of plots that are possible within <em>LaME</em>.  A list of plot types and where they are generated is given below.  If you would like a new type of plot or additional options, file a feature request on the GitHub page or contact us (<a class="reference internal" href="contact.html"><span class="doc">Contact</span></a>).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Plot type</p></th>
+<th class="head"><p>Tab</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>map</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>linear</p></li>
+<li><p>log</p></li>
+<li><p>normalized</p></li>
+<li><p>gradient map</p></li>
+</ul>
+</td>
+<td><p><em>Samples and Fields</em></p>
+<p><em>Preprocess</em></p>
+</td>
+</tr>
+<tr class="row-even"><td><p>correlation</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>Pearson</p></li>
+<li><p>Spearman</p></li>
+<li><p>Kendall</p></li>
+</ul>
+</td>
+<td><p><em>Preprocess</em></p></td>
+</tr>
+<tr class="row-even"><td><p>histogram</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>normal</p></li>
+<li><p>KDE</p></li>
+</ul>
+</td>
+<td><p><em>Preprocessing</em></p></td>
+</tr>
+<tr class="row-even"><td><p>sctter and heatmaps</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>scatter</p></li>
+<li><p>heatmap</p></li>
+<li><p>ternary colored map</p></li>
+</ul>
+</td>
+<td><p><em>Scatter and Heatmaps</em></p></td>
+</tr>
+<tr class="row-even"><td><p>multidimensional</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>TEC (spider)</p></li>
+<li><p>radar</p></li>
+</ul>
+</td>
+<td><p><em>n-Dim</em></p></td>
+</tr>
+<tr class="row-even"><td><p>PCA</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>variance</p></li>
+<li><p>vector</p></li>
+<li><p>PCA scatter</p></li>
+<li><p>PCA score</p></li>
+<li><p>PCA heatmap</p></li>
+</ul>
+</td>
+<td><p><em>PCA</em></p></td>
+</tr>
+<tr class="row-even"><td><p>clustering</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><ul class="simple">
+<li><p>cluster map</p></li>
+<li><p>cluster scores</p></li>
+<li><p>cluster performance</p></li>
+</ul>
+</td>
+<td><p><em>Clustering</em></p></td>
+</tr>
+<tr class="row-even"><td><p>profile</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>geochemistry profile</p></td>
+<td><p><em>Profiling</em></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="map-form-plots">
+<h2>Map-form plots<a class="headerlink" href="#map-form-plots" title="Link to this heading">#</a></h2>
+<p>Map visualizations are the foundation of spatial analysis in <em>LaME</em>. These plots display the distribution of elemental concentrations across your sample, with options for:</p>
+<ul class="simple">
+<li><p>Linear or logarithmic scaling to highlight different concentration ranges</p></li>
+<li><p>Gradient mapping to emphasize compositional boundaries</p></li>
+<li><p>Normalization to reference values for comparative analysis</p></li>
+<li><p>Custom colormaps and scaling for optimal feature visibility</p></li>
+</ul>
+<p>The map display automatically updates to reflect any active filters, masks, or preprocessing steps, making it easy to focus on regions of interest.</p>
+</section>
+<section id="correlation">
+<h2>Correlation<a class="headerlink" href="#correlation" title="Link to this heading">#</a></h2>
+<p>Correlation plots visualize relationships between analytes using different statistical methods (Pearson, Spearman, Kendall). The plots display correlation coefficients as a color-coded matrix, helping identify co-varying elements.</p>
+</section>
+<section id="histograms">
+<h2>Histograms<a class="headerlink" href="#histograms" title="Link to this heading">#</a></h2>
+<p>Histogram plots show the frequency distribution of concentration values (typically in ppm or wt%) for individual analytes within a sample. Available as standard histograms or kernel density estimation (KDE) plots for smoother distribution visualization.</p>
+</section>
+<section id="id1">
+<h2><a class="reference external" href="analysis_visualization.html#scatters-and-heatmaps">Scatter and Heatmaps</a><a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>This category includes three visualization types:</p>
+<ul class="simple">
+<li><p>Scatter plots showing relationships between two variables</p></li>
+<li><p>Heatmaps displaying point density in variable space</p></li>
+<li><p>Ternary colored maps projecting three-component relationships onto the sample space</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2><a class="reference external" href="analysis_visualization.html#n-dim-analysis">Multidimensional</a><a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<section id="trace-element-compatibility-tec">
+<h3>Trace element compatibility (TEC)<a class="headerlink" href="#trace-element-compatibility-tec" title="Link to this heading">#</a></h3>
+<p>TEC diagrams (spider plots) display multiple elements normalized to a reference composition, arranged by geochemical compatibility.</p>
+</section>
+<section id="radar">
+<h3>Radar<a class="headerlink" href="#radar" title="Link to this heading">#</a></h3>
+<p>Radar plots display multiple variables on radial axes, offering an alternative view of multidimensional relationships.</p>
+</section>
+</section>
+<section id="id3">
+<h2><a class="reference external" href="multidimensional.html#principal-component-analysis">PCA</a><a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>Principal Component Analysis visualizations include:</p>
+<ul class="simple">
+<li><p>Explained variance plots showing component significance</p></li>
+<li><p>Vector heatmaps displaying element contributions</p></li>
+<li><p>PCA scatter plots showing sample relationships in PC space</p></li>
+<li><p>PCA score maps showing spatial distribution of components</p></li>
+<li><p>PCA heatmaps displaying density in PC space</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2><a class="reference external" href="multidimensional.html#clustering">Clustering</a><a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<p>Three main clustering visualizations:</p>
+<ul class="simple">
+<li><p>Cluster maps showing spatial distribution of groups</p></li>
+<li><p>Cluster scores showing degree of group membership</p></li>
+<li><p>Cluster performance plots for optimizing cluster numbers</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2><a class="reference external" href="profiles.html">Profile</a><a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<p>Profile plots display variations in analyte concentrations along user-defined transects across the sample.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="filtering.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Filter</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="profiles.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Profiles</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#map-form-plots">Map-form plots</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#correlation">Correlation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#histograms">Histograms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Scatter and Heatmaps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Multidimensional</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trace-element-compatibility-tec">Trace element compatibility (TEC)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#radar">Radar</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">PCA</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Clustering</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Profile</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/plotting.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

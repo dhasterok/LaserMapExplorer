@@ -119,7 +119,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             Contents of ``tableWidgetMetadata``.
         """        
         data = self.tableWidgetMetadata.to_dataframe()
-        data['Select files'] = data['Select files'].str.extract('(\d+)').astype(int)
+        data['Select files'] = data['Select files'].str.extract(r'(\d+)').astype(int)
         data = data.rename(columns={'X\nreverse':'Reverse X', 'Y\nreverse': 'Reverse Y', 'Spot size\n(µm)': 'Spot size', 'Sweep\n(s)': 'Sweep', 'Speed\n(µm/s)':'Speed'})
 
         return data

@@ -1,0 +1,2624 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>app.Profile &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/app.Profile';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="app.ProfileNew" href="app.ProfileNew.html" />
+    <link rel="prev" title="app.PlotViewerWindow" href="app.PlotViewerWindow.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules.html">src Modules</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../app.html">app package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../common.html">common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui.html">ui package</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules Summary</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="app.html">app</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="app.AnalyteSelectionWindow.html">app.AnalyteSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.AppData.html">app.AppData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.BlocklyModules.html">app.BlocklyModules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.CropImage.html">app.CropImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.CustomTableWidget.html">app.CustomTableWidget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.FieldSelectionWindow.html">app.FieldSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.ImageProcessing.html">app.ImageProcessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.InfoViewer.html">app.InfoViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.LameIO.html">app.LameIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.MapImporter.html">app.MapImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.PlotTree.html">app.PlotTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.PlotViewerWindow.html">app.PlotViewerWindow</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">app.Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.ProfileNew.html">app.ProfileNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.QuickView.html">app.QuickView</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpecialTools.html">app.SpecialTools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpotImporter.html">app.SpotImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpotTools.html">app.SpotTools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.StyleToolbox.html">app.StyleToolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.UIControl.html">app.UIControl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.UITheme.html">app.UITheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.Workflow.html">app.Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.config.html">app.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.help_mapping.html">app.help_mapping</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ui.html">ui</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ui.AnalyteSelectionDialog.html">ui.AnalyteSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.FieldSelectionDialog.html">ui.FieldSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.FileSelectorDialog.html">ui.FileSelectorDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.IsotopeSelectionDialog.html">ui.IsotopeSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.MainWindow.html">ui.MainWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.MapImportDialog.html">ui.MapImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.PlotViewer.html">ui.PlotViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.PreferencesWindow.html">ui.PreferencesWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.QuickViewDialog.html">ui.QuickViewDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.SpotImportDialog.html">ui.SpotImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.resources_rc.html">ui.resources_rc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="common.html">common</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.Browser.html">common.Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Calculator.html">common.Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.CustomMplCanvas.html">common.CustomMplCanvas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.CustomWidgets.html">common.CustomWidgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.DataAnalysis.html">common.DataAnalysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.DataHandling.html">common.DataHandling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ExtendedDF.html">common.ExtendedDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.LamePlot.html">common.LamePlot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Logger.html">common.Logger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Masking.html">common.Masking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.MolecularWeightCalculator.html">common.MolecularWeightCalculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.NoteTaking.html">common.NoteTaking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Observable.html">common.Observable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Polygon.html">common.Polygon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.PolygonMatplotlib.html">common.PolygonMatplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.PolygonNew.html">common.PolygonNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ScheduleTimer.html">common.ScheduleTimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.SearchTool.html">common.SearchTool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.SortAnalytes.html">common.SortAnalytes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Status.html">common.Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.TableFunctions.html">common.TableFunctions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.colorfunc.html">common.colorfunc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.csvdict.html">common.csvdict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.format.html">common.format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.gausscensor.html">common.gausscensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.outliers.html">common.outliers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.plot_spider.html">common.plot_spider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.radar.html">common.radar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.radar_factory.html">common.radar_factory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.scalebar.html">common.scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ternary_plot.html">common.ternary_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.varfunc.html">common.varfunc</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../documentation.html" class="nav-link">Documentation</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="app.html" class="nav-link">app</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.Profile</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-app.Profile">
+<span id="app-profile"></span><h1>app.Profile<a class="headerlink" href="#module-app.Profile" title="Link to this heading">#</a></h1>
+<p class="rubric">Functions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_log_methods</span></code>([logger_key])</p></td>
+<td><p>Decorator that wraps all methods in a class</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomComboBox</span></code>([popup_callback])</p></td>
+<td><p>Initialize the CustomComboBox with an option update callback that executes at popup before the items are displayed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomDockWidget</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomLineEdit</span></code>([parent, value, precision, ...])</p></td>
+<td><p>Custom line edit widget, when the only input should be of type float</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Figure</span></code>([figsize, dpi, facecolor, edgecolor, ...])</p></td>
+<td><p>The top level container for all the plot elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureCanvas</span></code></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">FigureCanvasQTAgg</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code>()</p></td>
+<td><p>Central configuration manager for logging behavior within the application.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PathCollection</span></code>(paths[, sizes])</p></td>
+<td><p>A collection of <cite>~.path.Path</cite>s, as created by e.g. <cite>~.Axes.scatter</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profile" title="app.Profile.Profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Profile</span></code></a>(name, sort, radius, thresh, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.ProfileDock" title="app.Profile.ProfileDock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProfileDock</span></code></a>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling" title="app.Profile.Profiling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Profiling</span></code></a>(parent)</p></td>
+<td><p>Initialize the Profiling class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QAbstractItemView</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QAction</span></code>(QAction QAction)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QComboBox</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QFont</span></code>(QFont QFont QFont QFont)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QFormLayout</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QGroupBox</span></code>(QGroupBox)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QHBoxLayout</span></code>(QHBoxLayout)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QHeaderView</span></code>(orientation[, parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QIcon</span></code>(QIcon QIcon QIcon QIcon QIcon)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QInputDialog</span></code>([parent, flags])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QIntValidator</span></code>(QIntValidator)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QLabel</span></code>() QLabel)
+))</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QListView</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QMainWindow</span></code>([parent, flags])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QMessageBox</span></code>(QMessageBox)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QScrollArea</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSize</span></code>(QSize QSize)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSizePolicy</span></code>(QSizePolicy QSizePolicy QSizePolicy)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSpinBox</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QStandardItem</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QStandardItemModel</span></code>(QStandardItemModel)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTableWidget</span></code>(QTableWidget)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTableWidgetItem</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QToolBar</span></code>(QToolBar)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QToolButton</span></code>([parent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QVBoxLayout</span></code>(QVBoxLayout)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QWidget</span></code>([parent, flags])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QWidgetAction</span></code>(parent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Qt</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ScatterPlotItem</span></code>(*args, **kargs)</p></td>
+<td><p>Displays a set of x/y points.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ToggleSwitch</span></code>([parent, height, duration, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">UIFieldLogic</span></code>([data])</p></td>
+<td><p>Methods associated with fields and field type, specifically comboboxes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="app.Profile.Profile">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.Profile.</span></span><span class="sig-name descname"><span class="pre">Profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profile" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.Profile.</span></span><span class="sig-name descname"><span class="pre">ProfileDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#ProfileDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.ProfileDock" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomDockWidget</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">UIFieldLogic</span></code></p>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">acceptDrops</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accessibleDescription</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accessibleName</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actionEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actions</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">activateWindow</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addAction</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addActions</span></code>(self, actions)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjustSize</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">allowedAreas</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">autoFillBackground</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backgroundRole</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">baseSize</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">blockSignals</span></code>(self, b)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">changeEvent</span></code>(self, event)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childAt</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childrenRect</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childrenRegion</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clearFocus</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clearMask</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.ProfileDock.closeEvent" title="app.Profile.ProfileDock.closeEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">closeEvent</span></code></a>(event)</p></td>
+<td><p>Override the close event to hide the dock widget instead of closing it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorCount</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">connectNotify</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contentsMargins</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contentsRect</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextMenuEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextMenuPolicy</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code>(self[, window, initializeWindow, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">createWindowContainer</span></code>(window[, parent, flags])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cursor</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">customEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deleteLater</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">depth</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">destroy</span></code>(self[, destroyWindow, destroySubWindows])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatio</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatioF</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatioFScale</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnect</span></code>(-&gt; bool disconnect)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnectNotify</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dragEnterEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dragLeaveEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dragMoveEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dropEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dumpObjectInfo</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dumpObjectTree</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dynamicPropertyNames</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">effectiveWinId</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ensurePolished</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">enterEvent</span></code>(self, event)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">event</span></code>(self, event)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eventFilter</span></code>(self, a0, a1)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">features</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find</span></code>(a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findChild</span></code>(-&gt; QObjectT)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findChildren</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusInEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusNextChild</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusNextPrevChild</span></code>(self, next)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusOutEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusPolicy</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusPreviousChild</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusProxy</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">focusWidget</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">font</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fontInfo</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fontMetrics</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">foregroundRole</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">frameGeometry</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">frameSize</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">geometry</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.ProfileDock.get_field_list" title="app.Profile.ProfileDock.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([set_name, filter])</p></td>
+<td><p>Gets the fields associated with a defined set</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab</span></code>(self[, rectangle])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grabGesture</span></code>(self, type[, flags])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grabKeyboard</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grabMouse</span></code>(grabMouse)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grabShortcut</span></code>(self, key[, context])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphicsEffect</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphicsProxyWidget</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hasFocus</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hasHeightForWidth</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hasMouseTracking</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hasTabletTracking</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">height</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">heightForWidth</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">heightMM</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hide</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hideEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inherits</span></code>(self, classname)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initPainter</span></code>(self, painter)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initStyleOption</span></code>(self, option)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inputMethodEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inputMethodHints</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inputMethodQuery</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">insertAction</span></code>(self, before, action)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">insertActions</span></code>(self, before, actions)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">installEventFilter</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isActiveWindow</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isAncestorOf</span></code>(self, child)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isAreaAllowed</span></code>(self, area)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isEnabled</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isEnabledTo</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isFloating</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isFullScreen</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isHidden</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isLeftToRight</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isMaximized</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isMinimized</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isModal</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isQuickItemType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isRightToLeft</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isSignalConnected</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isVisible</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isVisibleTo</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWidgetType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWindow</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWindowModified</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWindowType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keyPressEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keyReleaseEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keyboardGrabber</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">killTimer</span></code>(self, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">layout</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">layoutDirection</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">leaveEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">locale</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">logicalDpiX</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">logicalDpiY</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lower</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapFrom</span></code>(-&gt; QPoint)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapFromGlobal</span></code>(-&gt; QPoint)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapFromParent</span></code>(-&gt; QPoint)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapTo</span></code>(-&gt; QPoint)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapToGlobal</span></code>(-&gt; QPoint)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mapToParent</span></code>(-&gt; QPoint)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">maximumHeight</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">maximumSize</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">maximumWidth</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metaObject</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metric</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimumHeight</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimumSize</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimumSizeHint</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimumWidth</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mouseDoubleClickEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mouseGrabber</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mouseMoveEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mousePressEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mouseReleaseEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code>(move)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveToThread</span></code>(self, thread)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nativeEvent</span></code>(self, eventType, message)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nativeParentWidget</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nextInFocusChain</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalGeometry</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">objectName</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">overrideWindowFlags</span></code>(self, type)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">overrideWindowState</span></code>(self, state)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">paintEngine</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">paintEvent</span></code>(self, event)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">paintingActive</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">palette</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parentWidget</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">physicalDpiX</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">physicalDpiY</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">previousInFocusChain</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyqtConfigure</span></code>(...)</p></td>
+<td><p>Each keyword argument is either the name of a Qt property or a Qt signal.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">raise_</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">receivers</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rect</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">releaseKeyboard</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">releaseMouse</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">releaseShortcut</span></code>(self, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeAction</span></code>(self, action)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeEventFilter</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code>(, sourceRegion, flags, sourceRegion, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">repaint</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resize</span></code>(resize)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resizeEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">restoreGeometry</span></code>(self, geometry)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">saveGeometry</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">screen</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">scroll</span></code>(scroll)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sender</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">senderSignalIndex</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAcceptDrops</span></code>(self, on)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAccessibleDescription</span></code>(self, description)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAccessibleName</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAllowedAreas</span></code>(self, areas)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAttribute</span></code>(self, attribute[, on])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAutoFillBackground</span></code>(self, enabled)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setBackgroundRole</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setBaseSize</span></code>(setBaseSize)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setContentsMargins</span></code>(setContentsMargins)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setContextMenuPolicy</span></code>(self, policy)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setCursor</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDisabled</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setEnabled</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFeatures</span></code>(self, features)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFixedHeight</span></code>(self, h)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFixedSize</span></code>(setFixedSize)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFixedWidth</span></code>(self, w)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFloating</span></code>(self, floating)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFocus</span></code>(setFocus)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFocusPolicy</span></code>(self, policy)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFocusProxy</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setFont</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setForegroundRole</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setGeometry</span></code>(setGeometry)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setGraphicsEffect</span></code>(self, effect)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setHidden</span></code>(self, hidden)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setInputMethodHints</span></code>(self, hints)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setLayout</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setLayoutDirection</span></code>(self, direction)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setLocale</span></code>(self, locale)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMask</span></code>(setMask)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMaximumHeight</span></code>(self, maxh)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMaximumSize</span></code>(setMaximumSize)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMaximumWidth</span></code>(self, maxw)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMinimumHeight</span></code>(self, minh)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMinimumSize</span></code>(setMinimumSize)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMinimumWidth</span></code>(self, minw)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setMouseTracking</span></code>(self, enable)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setObjectName</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setPalette</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setParent</span></code>(setParent)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setProperty</span></code>(self, name, value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setScreen</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setShortcutAutoRepeat</span></code>(self, id[, enabled])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setShortcutEnabled</span></code>(self, id[, enabled])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setSizeIncrement</span></code>(setSizeIncrement)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setSizePolicy</span></code>(setSizePolicy)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setStatusTip</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setStyle</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setStyleSheet</span></code>(self, styleSheet)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setTabOrder</span></code>(a0, a1)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setTabletTracking</span></code>(self, enable)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setTitleBarWidget</span></code>(self, widget)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setToolTip</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setToolTipDuration</span></code>(self, msec)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUpdatesEnabled</span></code>(self, enable)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setVisible</span></code>(self, visible)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWhatsThis</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWidget</span></code>(self, widget)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowFilePath</span></code>(self, filePath)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowFlag</span></code>(self, a0[, on])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowFlags</span></code>(self, type)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowIcon</span></code>(self, icon)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowIconText</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowModality</span></code>(self, windowModality)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowModified</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowOpacity</span></code>(self, level)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowRole</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowState</span></code>(self, state)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setWindowTitle</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sharedPainter</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">showEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">showFullScreen</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">showMaximized</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">showMinimized</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">showNormal</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">signalsBlocked</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sizeHint</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sizeIncrement</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sizePolicy</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stackUnder</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">startTimer</span></code>(self, interval[, timerType])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">statusTip</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">style</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleSheet</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">titleBarWidget</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggleViewAction</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">underMouse</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ungrabGesture</span></code>(self, type)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unsetCursor</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unsetLayoutDirection</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unsetLocale</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code>(update update update
+ -&gt; None
+ -&gt; None)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateGeometry</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateMicroFocus</span></code>(self[, query])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.ProfileDock.update_data" title="app.Profile.ProfileDock.update_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data</span></code></a>(data)</p></td>
+<td><p>Updates the data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.ProfileDock.update_field_combobox" title="app.Profile.ProfileDock.update_field_combobox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_field_combobox</span></code></a>(parentBox, childBox, ...)</p></td>
+<td><p>Updates comboBoxes with fields for plots or analysis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.ProfileDock.update_field_type_combobox" title="app.Profile.ProfileDock.update_field_type_combobox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_field_type_combobox</span></code></a>(comboBox[, ...])</p></td>
+<td><p>Updates field type combobox</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.ProfileDock.update_profile_spinbox" title="app.Profile.ProfileDock.update_profile_spinbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_profile_spinbox</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Updates the maximum number of subplots that can be selected.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">updatesEnabled</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visibleRegion</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">whatsThis</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">wheelEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">widget</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">width</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">widthMM</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">winId</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">window</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowFilePath</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowFlags</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowHandle</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowIcon</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowIconText</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowModality</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowOpacity</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowRole</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowState</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowTitle</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">windowType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><strong>DockWidgetFeature</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>PaintDeviceMetric</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>RenderFlag</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>allowedAreasChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>customContextMenuRequested</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>destroyed</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>dockLocationChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>featuresChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>objectNameChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>profile_state_changed</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>toggle_profile_actions</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>topLevelChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>update_dock_visibility</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>visibilityChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>windowIconChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>windowIconTextChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>windowTitleChanged</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.closeEvent">
+<span class="sig-name descname"><span class="pre">closeEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.Profile.ProfileDock.closeEvent" title="Link to this definition">#</a></dt>
+<dd><p>Override the close event to hide the dock widget instead of closing it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.get_field_list">
+<span class="sig-name descname"><span class="pre">get_field_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Analyte'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.Profile.ProfileDock.get_field_list" title="Link to this definition">#</a></dt>
+<dd><p>Gets the fields associated with a defined set</p>
+<p>Set names are consistent with QComboBox.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – name of set list, options include <code class="docutils literal notranslate"><span class="pre">Analyte</span></code>, <code class="docutils literal notranslate"><span class="pre">Analyte</span> <span class="pre">(normalized)</span></code>, <code class="docutils literal notranslate"><span class="pre">Ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">Calcualated</span> <span class="pre">Field</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PCA</span> <span class="pre">Score</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Score</span></code>, <code class="docutils literal notranslate"><span class="pre">Special</span></code>, Defaults to <code class="docutils literal notranslate"><span class="pre">Analyte</span></code></p></li>
+<li><p><strong>filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Optionally filters data to columns selected for analysis, options are <code class="docutils literal notranslate"><span class="pre">'all'</span></code> and <code class="docutils literal notranslate"><span class="pre">'used'</span></code>,
+by default <cite>‘all’</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set_fields, a list of fields within the input set</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.profile_state_changed">
+<span class="sig-name descname"><span class="pre">profile_state_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#ProfileDock.profile_state_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.ProfileDock.profile_state_changed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.toggle_profile_actions">
+<span class="sig-name descname"><span class="pre">toggle_profile_actions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#ProfileDock.toggle_profile_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.ProfileDock.toggle_profile_actions" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.update_data">
+<span class="sig-name descname"><span class="pre">update_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.Profile.ProfileDock.update_data" title="Link to this definition">#</a></dt>
+<dd><p>Updates the data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference internal" href="common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame"><em>AttributeDataFrame</em></a>) – New data frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.update_dock_visibility">
+<span class="sig-name descname"><span class="pre">update_dock_visibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#ProfileDock.update_dock_visibility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.ProfileDock.update_dock_visibility" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.update_field_combobox">
+<span class="sig-name descname"><span class="pre">update_field_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parentBox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">childBox</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.Profile.ProfileDock.update_field_combobox" title="Link to this definition">#</a></dt>
+<dd><p>Updates comboBoxes with fields for plots or analysis</p>
+<p>Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
+Calls <code class="docutils literal notranslate"><span class="pre">MainWindow.get_field_list()</span></code> to construct the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parentBox</strong> (<em>QComboBox</em><em>, </em><em>None</em>) – ComboBox used to select field type (‘Analyte’, ‘Analyte (normalized)’, ‘Ratio’, etc.), if None, then ‘Analyte’</p></li>
+<li><p><strong>childBox</strong> (<em>QComboBox</em>) – ComboBox with list of field values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.update_field_type_combobox">
+<span class="sig-name descname"><span class="pre">update_field_type_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comboBox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addNone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.Profile.ProfileDock.update_field_type_combobox" title="Link to this definition">#</a></dt>
+<dd><p>Updates field type combobox</p>
+<p>Used to update <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxHistFieldType</span></code>, <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFilterFieldType</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldTypeX</span></code>, <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldTypeY</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldTypeZ</span></code>, and <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxColorByField</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>combobox</strong> (<em>QComboBox</em>) – The combobox to update.</p></li>
+<li><p><strong>addNone</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Adds <code class="docutils literal notranslate"><span class="pre">None</span></code> to the top of the <code class="docutils literal notranslate"><span class="pre">combobox</span></code> list</p></li>
+<li><p><strong>plot_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The plot type helps to define the set of field types available, by default <code class="docutils literal notranslate"><span class="pre">''</span></code> (no change)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.ProfileDock.update_profile_spinbox">
+<span class="sig-name descname"><span class="pre">update_profile_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#ProfileDock.update_profile_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.ProfileDock.update_profile_spinbox" title="Link to this definition">#</a></dt>
+<dd><p>Updates the maximum number of subplots that can be selected.</p>
+<p>Updates <a href="#id1"><span class="problematic" id="id2">``</span></a>MainWindow.spinBoxProfileSelectedSubplot.setMaximum()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="app.Profile.Profiling">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.Profile.</span></span><span class="sig-name descname"><span class="pre">Profiling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Initialize the Profiling class.</p>
+<p>Sets up the profiling functionality, initializing necessary attributes and states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parent</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – The main window object that the profiling class interacts with.</p>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.add_field_to_listview" title="app.Profile.Profiling.add_field_to_listview"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_field_to_listview</span></code></a>([field, update])</p></td>
+<td><p>Add selected fields to the profile list view and update the fields per subplot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.add_samples" title="app.Profile.Profiling.add_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_samples</span></code></a>()</p></td>
+<td><p>Add sample IDs to the profiles dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.calculate_distance" title="app.Profile.Profiling.calculate_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_distance</span></code></a>(point1, point2)</p></td>
+<td><p>Calculate the Euclidean distance between two points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.cart_to_dist" title="app.Profile.Profiling.cart_to_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cart_to_dist</span></code></a>(pixel[, direction])</p></td>
+<td><p>Convert pixel units to distance units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.clear_interpolation" title="app.Profile.Profiling.clear_interpolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_interpolation</span></code></a>()</p></td>
+<td><p>Clear all interpolated points from the plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.clear_plot" title="app.Profile.Profiling.clear_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_plot</span></code></a>()</p></td>
+<td><p>Clear all existing profiles from the plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.clear_profiles" title="app.Profile.Profiling.clear_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_profiles</span></code></a>()</p></td>
+<td><p>Clear profile data and plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.compute_profile_points" title="app.Profile.Profiling.compute_profile_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_profile_points</span></code></a>(profile_points, ...)</p></td>
+<td><p>Compute profile points by averaging values within a radius.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.dist_to_cart" title="app.Profile.Profiling.dist_to_cart"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dist_to_cart</span></code></a>(dist[, direction])</p></td>
+<td><p>Convert distance units to pixel units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.extract_scatter_plot_state" title="app.Profile.Profiling.extract_scatter_plot_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_scatter_plot_state</span></code></a>(scatter)</p></td>
+<td><p>Extract the state of a ScatterPlotItem for serialization.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.get_scatter_errorbar_by_gid" title="app.Profile.Profiling.get_scatter_errorbar_by_gid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scatter_errorbar_by_gid</span></code></a>(gid)</p></td>
+<td><p>Retrieve scatter and errorbar objects by group ID.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.interpolate_points" title="app.Profile.Profiling.interpolate_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_points</span></code></a>(interpolation_distance, ...)</p></td>
+<td><p>Interpolate points between existing profile points.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.load_profiles" title="app.Profile.Profiling.load_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_profiles</span></code></a>(project_dir, sample_id)</p></td>
+<td><p>Load saved profiles from files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.load_profiles_from_directory" title="app.Profile.Profiling.load_profiles_from_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_profiles_from_directory</span></code></a>(project_dir, ...)</p></td>
+<td><p>Load all profiles from a directory for a sample.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.on_pick" title="app.Profile.Profiling.on_pick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_pick</span></code></a>(event)</p></td>
+<td><p>Handle pick events on the profile plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.on_profile_selected" title="app.Profile.Profiling.on_profile_selected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_profile_selected</span></code></a>(profile_name)</p></td>
+<td><p>Handle profile selection from the combobox.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.plot_existing_profile" title="app.Profile.Profiling.plot_existing_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_existing_profile</span></code></a>(plot)</p></td>
+<td><p>Plot existing profile points on the plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.plot_profile_scatter" title="app.Profile.Profiling.plot_profile_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profile_scatter</span></code></a>(event, field, view, ...)</p></td>
+<td><p>Plot/move a scatter point for profile at the clicked position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.plot_profiles" title="app.Profile.Profiling.plot_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profiles</span></code></a>([fields, num_subplots, ...])</p></td>
+<td><p>Plot averaged profile values with error bars.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.plot_scatter_points" title="app.Profile.Profiling.plot_scatter_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_scatter_points</span></code></a>(scatter_points, x, y[, ...])</p></td>
+<td><p>Plots scatter point in all plots in canvas (Single view/ Multi view)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.populate_combobox" title="app.Profile.Profiling.populate_combobox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_combobox</span></code></a>()</p></td>
+<td><p>Populate the profile selection combobox.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.process_points" title="app.Profile.Profiling.process_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_points</span></code></a>(x, y, circ_values, sort_axis)</p></td>
+<td><p>Process profile points to compute statistics and distances.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.reconstruct_profile" title="app.Profile.Profiling.reconstruct_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reconstruct_profile</span></code></a>(serializable_profile)</p></td>
+<td><p>Reconstruct a Profile object from its serialized form.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.recreate_scatter_plot" title="app.Profile.Profiling.recreate_scatter_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recreate_scatter_plot</span></code></a>(state)</p></td>
+<td><p>Recreate a ScatterPlotItem from its saved state.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.remove_field_from_listview" title="app.Profile.Profiling.remove_field_from_listview"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_field_from_listview</span></code></a>()</p></td>
+<td><p>Remove selected fields from the profile list view and update the fields per subplot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.save_profiles" title="app.Profile.Profiling.save_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_profiles</span></code></a>(project_dir, sample_id)</p></td>
+<td><p>Save profiles to files with <a href="#id3"><span class="problematic" id="id4">*</span></a>.prfl extension.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.toggle_buttons" title="app.Profile.Profiling.toggle_buttons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_buttons</span></code></a>(enable)</p></td>
+<td><p>Enable or disable profile point editing buttons.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.toggle_edit_mode" title="app.Profile.Profiling.toggle_edit_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_edit_mode</span></code></a>()</p></td>
+<td><p>Toggle the profile editing mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.toggle_point_visibility" title="app.Profile.Profiling.toggle_point_visibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_point_visibility</span></code></a>()</p></td>
+<td><p>Toggle visibility of selected profile points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.transform_profile_for_pickling" title="app.Profile.Profiling.transform_profile_for_pickling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_profile_for_pickling</span></code></a>(profile)</p></td>
+<td><p>Convert profile object into a serializable format for pickling.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.Profile.Profiling.update_listview_with_fields" title="app.Profile.Profiling.update_listview_with_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_listview_with_fields</span></code></a>(fields)</p></td>
+<td><p>Update the list view with the given list of fields.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.Profile.Profiling.update_table_widget" title="app.Profile.Profiling.update_table_widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_table_widget</span></code></a>([update])</p></td>
+<td><p>Update the profile points table widget.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><strong>plot_profile_and_table</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>update_num_subplots</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.add_field_to_listview">
+<span class="sig-name descname"><span class="pre">add_field_to_listview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.add_field_to_listview"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.add_field_to_listview" title="Link to this definition">#</a></dt>
+<dd><p>Add selected fields to the profile list view and update the fields per subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.add_samples">
+<span class="sig-name descname"><span class="pre">add_samples</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.add_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.add_samples" title="Link to this definition">#</a></dt>
+<dd><p>Add sample IDs to the profiles dictionary.</p>
+<p>Initializes an empty dictionary for each sample ID to store profiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.calculate_distance">
+<span class="sig-name descname"><span class="pre">calculate_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.calculate_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.calculate_distance" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the Euclidean distance between two points.</p>
+<p>Computes the Euclidean distance between two 2D points or from the origin if scalar values are given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The first point or coordinate.</p></li>
+<li><p><strong>point2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The second point or coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>distance</strong> – The Euclidean distance between the two points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.cart_to_dist">
+<span class="sig-name descname"><span class="pre">cart_to_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pixel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'y'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.cart_to_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.cart_to_dist" title="Link to this definition">#</a></dt>
+<dd><p>Convert pixel units to distance units.</p>
+<p>Converts pixel coordinates to physical distance based on the array size and range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pixel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The pixel value to convert.</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The axis direction (‘x’ or ‘y’), default is ‘y’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>distance</strong> – The physical distance corresponding to the pixel value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.clear_interpolation">
+<span class="sig-name descname"><span class="pre">clear_interpolation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.clear_interpolation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.clear_interpolation" title="Link to this definition">#</a></dt>
+<dd><p>Clear all interpolated points from the plot.</p>
+<p>Removes all interpolated profile points from the plot for the current profile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.clear_plot">
+<span class="sig-name descname"><span class="pre">clear_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.clear_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.clear_plot" title="Link to this definition">#</a></dt>
+<dd><p>Clear all existing profiles from the plot.</p>
+<p>Removes all profile points and interpolated points from the plot for the current sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.clear_profiles">
+<span class="sig-name descname"><span class="pre">clear_profiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.clear_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.clear_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Clear profile data and plots.</p>
+<p>Removes all profile scatter points from the plots and clears profile data from the table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.compute_profile_points">
+<span class="sig-name descname"><span class="pre">compute_profile_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.compute_profile_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.compute_profile_points" title="Link to this definition">#</a></dt>
+<dd><p>Compute profile points by averaging values within a radius.</p>
+<p>Calculates the mean values within a specified radius around a point and updates the profile points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>profile_points</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary to store computed profile points. in format {x: [], y:[], field: [circ_values]}</p></li>
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The radius around the point to consider for averaging.</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The x-coordinate of the point.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The y-coordinate of the point.</p></li>
+<li><p><strong>x_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The index of the x-coordinate in the array.</p></li>
+<li><p><strong>y_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The index of the y-coordinate in the array.</p></li>
+<li><p><strong>point_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The index of the point if updating an existing point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.dist_to_cart">
+<span class="sig-name descname"><span class="pre">dist_to_cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'y'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.dist_to_cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.dist_to_cart" title="Link to this definition">#</a></dt>
+<dd><p>Convert distance units to pixel units.</p>
+<p>Converts physical distance to pixel coordinates based on the array size and range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dist</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The physical distance to convert.</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The axis direction (‘x’ or ‘y’), default is ‘y’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pixel</strong> – The pixel value corresponding to the physical distance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.extract_scatter_plot_state">
+<span class="sig-name descname"><span class="pre">extract_scatter_plot_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scatter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.extract_scatter_plot_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.extract_scatter_plot_state" title="Link to this definition">#</a></dt>
+<dd><p>Extract the state of a ScatterPlotItem for serialization.</p>
+<p>Collects data and properties from a ScatterPlotItem to create a serializable representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scatter</strong> (<em>ScatterPlotItem</em>) – The scatter plot item to extract the state from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>state</strong> – A dictionary containing data necessary to recreate the scatter plot item.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.get_scatter_errorbar_by_gid">
+<span class="sig-name descname"><span class="pre">get_scatter_errorbar_by_gid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.get_scatter_errorbar_by_gid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.get_scatter_errorbar_by_gid" title="Link to this definition">#</a></dt>
+<dd><p>Retrieve scatter and errorbar objects by group ID.</p>
+<p>Finds and returns the scatter and errorbar plot items corresponding to a given group ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The group ID of the scatter plot.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the scatter and errorbar plot items, or None if not found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.interpolate_points">
+<span class="sig-name descname"><span class="pre">interpolate_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interpolation_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.interpolate_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.interpolate_points" title="Link to this definition">#</a></dt>
+<dd><p>Interpolate points between existing profile points.</p>
+<p>Generates interpolated points between profile points and updates the plot accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interpolation_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The distance between interpolated points.</p></li>
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The radius to use when computing values for interpolated points.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.load_profiles">
+<span class="sig-name descname"><span class="pre">load_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.load_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.load_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Load saved profiles from files.</p>
+<p>Deserializes and loads profile data for a given sample from the specified project directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The directory from which to load profile data.</p></li>
+<li><p><strong>sample_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The sample ID whose profiles are to be loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.load_profiles_from_directory">
+<span class="sig-name descname"><span class="pre">load_profiles_from_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.load_profiles_from_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.load_profiles_from_directory" title="Link to this definition">#</a></dt>
+<dd><p>Load all profiles from a directory for a sample.</p>
+<p>Iterates over .prfl files in the specified directory and loads profiles for the given sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The directory containing the profiles.</p></li>
+<li><p><strong>sample_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The sample ID whose profiles are to be loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.on_pick">
+<span class="sig-name descname"><span class="pre">on_pick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.on_pick"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.on_pick" title="Link to this definition">#</a></dt>
+<dd><p>Handle pick events on the profile plot.</p>
+<p>Processes user interactions with profile points on the plot when in edit mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – The pick event object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.on_profile_selected">
+<span class="sig-name descname"><span class="pre">on_profile_selected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.on_profile_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.on_profile_selected" title="Link to this definition">#</a></dt>
+<dd><p>Handle profile selection from the combobox.</p>
+<p>Loads existing profile data or creates a new profile based on the user’s selection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>profile_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the selected profile.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.plot_existing_profile">
+<span class="sig-name descname"><span class="pre">plot_existing_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.plot_existing_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.plot_existing_profile" title="Link to this definition">#</a></dt>
+<dd><p>Plot existing profile points on the plot.</p>
+<p>Clears existing plot and plots all profile points for the selected profile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>plot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – The plot window where the profile points will be plotted.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.plot_profile_and_table">
+<span class="sig-name descname"><span class="pre">plot_profile_and_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.plot_profile_and_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.plot_profile_and_table" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.plot_profile_scatter">
+<span class="sig-name descname"><span class="pre">plot_profile_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.plot_profile_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.plot_profile_scatter" title="Link to this definition">#</a></dt>
+<dd><p>Plot/move a scatter point for profile at the clicked position.</p>
+<p>Computes the profile value by averaging concentrations over a specified radius around the clicked point and plots it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – The mouse event recorded on the canvas.</p></li>
+<li><p><strong>field</strong> (<em>'str'</em>) – Field name of map</p></li>
+<li><p><strong>view</strong> (<em>'int'</em>) – : <a href="#id5"><span class="problematic" id="id6">``</span></a>self.canvasWindow.currentIndex() ``</p></li>
+<li><p><strong>plot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – The plot window where the scatter point will be added.</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The x-coordinate of the click position.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The y-coordinate of the click position.</p></li>
+<li><p><strong>x_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The index of the x-coordinate in the array.</p></li>
+<li><p><strong>y_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The index of the y-coordinate in the array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.plot_profiles">
+<span class="sig-name descname"><span class="pre">plot_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_subplots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.plot_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.plot_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Plot averaged profile values with error bars.</p>
+<p>Plots the profile values stored in self.profiles with error bars on the specified subplot(s),
+using fields assigned to each subplot stored in self.fields_per_subplot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – List of fields to plot. If None, fields are obtained from self.fields_per_subplot.</p></li>
+<li><p><strong>num_subplots</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of subplots to create. If None, value is obtained from self.profile_dock.spinBoxProfileNumSubplots.</p></li>
+<li><p><strong>selected_subplot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Index of the selected subplot to plot on (1-based). If None, value is obtained from self.profile_dock.spinBoxProfileSelectedSubplot.</p></li>
+<li><p><strong>interpolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to use interpolated points. Default is None, which checks the UI state.</p></li>
+<li><p><strong>sort_axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Axis to sort the profile points by (‘x’ or ‘y’). If None, obtained from self.profile_dock.comboBoxProfileSort.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.plot_scatter_points">
+<span class="sig-name descname"><span class="pre">plot_scatter_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scatter_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'+'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.plot_scatter_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.plot_scatter_points" title="Link to this definition">#</a></dt>
+<dd><p>Plots scatter point in all plots in canvas (Single view/ Multi view)</p>
+<p>Determines iterates through all plot items in self.lasermaps and add scatter points to the plots in the current view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scatter_points</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary to store scatter points.</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The x-coordinate of the point.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The y-coordinate of the point.</p></li>
+<li><p><strong>point_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The index of the point if updating an existing point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.populate_combobox">
+<span class="sig-name descname"><span class="pre">populate_combobox</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.populate_combobox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.populate_combobox" title="Link to this definition">#</a></dt>
+<dd><p>Populate the profile selection combobox.</p>
+<p>Clears and repopulates the combobox with the list of profile names for the current sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.process_points">
+<span class="sig-name descname"><span class="pre">process_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circ_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_axis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.process_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.process_points" title="Link to this definition">#</a></dt>
+<dd><p>Process profile points to compute statistics and distances.</p>
+<p>Calculates distances and statistical measures (median, mean, quartiles, standard errors) for profile points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – List of x-coordinates.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – List of y-coordinates.</p></li>
+<li><p><strong>circ_values</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>lists</em>) – List where each element is a list of values within the radius around the corresponding point.</p></li>
+<li><p><strong>sort_axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Axis to sort the points by (‘x’ or ‘y’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>distances</strong> (<em>list of float</em>) – Cumulative distances along the profile.</p></li>
+<li><p><strong>median_values</strong> (<em>list of float</em>) – Median values at each point.</p></li>
+<li><p><strong>lower_quantiles</strong> (<em>list of float</em>) – Lower quartile (25th percentile) at each point.</p></li>
+<li><p><strong>upper_quantiles</strong> (<em>list of float</em>) – Upper quartile (75th percentile) at each point.</p></li>
+<li><p><strong>mean_values</strong> (<em>list of float</em>) – Mean values at each point.</p></li>
+<li><p><strong>standard_errors</strong> (<em>list of float</em>) – Standard errors at each point.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.reconstruct_profile">
+<span class="sig-name descname"><span class="pre">reconstruct_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serializable_profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.reconstruct_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.reconstruct_profile" title="Link to this definition">#</a></dt>
+<dd><p>Reconstruct a Profile object from its serialized form.</p>
+<p>Deserializes and rebuilds a Profile object using the data from a serialized profile dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>serializable_profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – The dictionary containing serialized profile data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>profile</strong> – The reconstructed Profile object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#app.Profile.Profile" title="app.Profile.Profile">Profile</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.recreate_scatter_plot">
+<span class="sig-name descname"><span class="pre">recreate_scatter_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.recreate_scatter_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.recreate_scatter_plot" title="Link to this definition">#</a></dt>
+<dd><p>Recreate a ScatterPlotItem from its saved state.</p>
+<p>Uses the serialized state to reconstruct a ScatterPlotItem instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – The dictionary containing scatter plot data and properties.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>scatter</strong> – The reconstructed scatter plot item.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ScatterPlotItem</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.remove_field_from_listview">
+<span class="sig-name descname"><span class="pre">remove_field_from_listview</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.remove_field_from_listview"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.remove_field_from_listview" title="Link to this definition">#</a></dt>
+<dd><p>Remove selected fields from the profile list view and update the fields per subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.save_profiles">
+<span class="sig-name descname"><span class="pre">save_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.save_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.save_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Save profiles to files with <a href="#id7"><span class="problematic" id="id8">*</span></a>.prfl extension.</p>
+<p>Serializes and saves profile data for a given sample into the specified project directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The directory where profile data will be stored.</p></li>
+<li><p><strong>sample_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The sample ID whose profiles are to be saved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.toggle_buttons">
+<span class="sig-name descname"><span class="pre">toggle_buttons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.toggle_buttons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.toggle_buttons" title="Link to this definition">#</a></dt>
+<dd><p>Enable or disable profile point editing buttons.</p>
+<p>Enables or disables buttons based on the presence of profile points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>enable</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to enable or disable the buttons.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.toggle_edit_mode">
+<span class="sig-name descname"><span class="pre">toggle_edit_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.toggle_edit_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.toggle_edit_mode" title="Link to this definition">#</a></dt>
+<dd><p>Toggle the profile editing mode.</p>
+<p>Enables or disables profile editing mode based on the state of the edit mode toggle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.toggle_point_visibility">
+<span class="sig-name descname"><span class="pre">toggle_point_visibility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.toggle_point_visibility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.toggle_point_visibility" title="Link to this definition">#</a></dt>
+<dd><p>Toggle visibility of selected profile points.</p>
+<p>Hides or shows selected profile points on the plot without removing them from the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.transform_profile_for_pickling">
+<span class="sig-name descname"><span class="pre">transform_profile_for_pickling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.transform_profile_for_pickling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.transform_profile_for_pickling" title="Link to this definition">#</a></dt>
+<dd><p>Convert profile object into a serializable format for pickling.</p>
+<p>Transforms profile attributes into basic data types to enable serialization using pickle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>profile</strong> (<a class="reference internal" href="#app.Profile.Profile" title="app.Profile.Profile"><em>Profile</em></a>) – The Profile object to be transformed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>serializable_profile</strong> – A dictionary containing the transformed profile data suitable for pickling.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.update_listview_with_fields">
+<span class="sig-name descname"><span class="pre">update_listview_with_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.update_listview_with_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.update_listview_with_fields" title="Link to this definition">#</a></dt>
+<dd><p>Update the list view with the given list of fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The list of field names to display in the list view.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.update_num_subplots">
+<span class="sig-name descname"><span class="pre">update_num_subplots</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.update_num_subplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.update_num_subplots" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.Profile.Profiling.update_table_widget">
+<span class="sig-name descname"><span class="pre">update_table_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Profile.html#Profiling.update_table_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Profile.Profiling.update_table_widget" title="Link to this definition">#</a></dt>
+<dd><p>Update the profile points table widget.</p>
+<p>Refreshes the table widget to display the current profile points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>update</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Indicates whether to perform an update, default is False.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="app.PlotViewerWindow.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">app.PlotViewerWindow</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="app.ProfileNew.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">app.ProfileNew</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profile"><code class="docutils literal notranslate"><span class="pre">Profile</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock"><code class="docutils literal notranslate"><span class="pre">ProfileDock</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.closeEvent"><code class="docutils literal notranslate"><span class="pre">ProfileDock.closeEvent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.get_field_list"><code class="docutils literal notranslate"><span class="pre">ProfileDock.get_field_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.profile_state_changed"><code class="docutils literal notranslate"><span class="pre">ProfileDock.profile_state_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.toggle_profile_actions"><code class="docutils literal notranslate"><span class="pre">ProfileDock.toggle_profile_actions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.update_data"><code class="docutils literal notranslate"><span class="pre">ProfileDock.update_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.update_dock_visibility"><code class="docutils literal notranslate"><span class="pre">ProfileDock.update_dock_visibility()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.update_field_combobox"><code class="docutils literal notranslate"><span class="pre">ProfileDock.update_field_combobox()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.update_field_type_combobox"><code class="docutils literal notranslate"><span class="pre">ProfileDock.update_field_type_combobox()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.ProfileDock.update_profile_spinbox"><code class="docutils literal notranslate"><span class="pre">ProfileDock.update_profile_spinbox()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling"><code class="docutils literal notranslate"><span class="pre">Profiling</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.add_field_to_listview"><code class="docutils literal notranslate"><span class="pre">Profiling.add_field_to_listview()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.add_samples"><code class="docutils literal notranslate"><span class="pre">Profiling.add_samples()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.calculate_distance"><code class="docutils literal notranslate"><span class="pre">Profiling.calculate_distance()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.cart_to_dist"><code class="docutils literal notranslate"><span class="pre">Profiling.cart_to_dist()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.clear_interpolation"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_interpolation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.clear_plot"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_plot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.clear_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.clear_profiles()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.compute_profile_points"><code class="docutils literal notranslate"><span class="pre">Profiling.compute_profile_points()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.dist_to_cart"><code class="docutils literal notranslate"><span class="pre">Profiling.dist_to_cart()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.extract_scatter_plot_state"><code class="docutils literal notranslate"><span class="pre">Profiling.extract_scatter_plot_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.get_scatter_errorbar_by_gid"><code class="docutils literal notranslate"><span class="pre">Profiling.get_scatter_errorbar_by_gid()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.interpolate_points"><code class="docutils literal notranslate"><span class="pre">Profiling.interpolate_points()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.load_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.load_profiles()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.load_profiles_from_directory"><code class="docutils literal notranslate"><span class="pre">Profiling.load_profiles_from_directory()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.on_pick"><code class="docutils literal notranslate"><span class="pre">Profiling.on_pick()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.on_profile_selected"><code class="docutils literal notranslate"><span class="pre">Profiling.on_profile_selected()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.plot_existing_profile"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_existing_profile()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.plot_profile_and_table"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profile_and_table()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.plot_profile_scatter"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profile_scatter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.plot_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_profiles()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.plot_scatter_points"><code class="docutils literal notranslate"><span class="pre">Profiling.plot_scatter_points()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.populate_combobox"><code class="docutils literal notranslate"><span class="pre">Profiling.populate_combobox()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.process_points"><code class="docutils literal notranslate"><span class="pre">Profiling.process_points()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.reconstruct_profile"><code class="docutils literal notranslate"><span class="pre">Profiling.reconstruct_profile()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.recreate_scatter_plot"><code class="docutils literal notranslate"><span class="pre">Profiling.recreate_scatter_plot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.remove_field_from_listview"><code class="docutils literal notranslate"><span class="pre">Profiling.remove_field_from_listview()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.save_profiles"><code class="docutils literal notranslate"><span class="pre">Profiling.save_profiles()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.toggle_buttons"><code class="docutils literal notranslate"><span class="pre">Profiling.toggle_buttons()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.toggle_edit_mode"><code class="docutils literal notranslate"><span class="pre">Profiling.toggle_edit_mode()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.toggle_point_visibility"><code class="docutils literal notranslate"><span class="pre">Profiling.toggle_point_visibility()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.transform_profile_for_pickling"><code class="docutils literal notranslate"><span class="pre">Profiling.transform_profile_for_pickling()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.update_listview_with_fields"><code class="docutils literal notranslate"><span class="pre">Profiling.update_listview_with_fields()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.update_num_subplots"><code class="docutils literal notranslate"><span class="pre">Profiling.update_num_subplots()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Profile.Profiling.update_table_widget"><code class="docutils literal notranslate"><span class="pre">Profiling.update_table_widget()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/app.Profile.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

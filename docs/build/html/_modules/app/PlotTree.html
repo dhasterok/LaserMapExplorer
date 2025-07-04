@@ -1,0 +1,1086 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app.PlotTree &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/app/PlotTree';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.PlotTree</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for app.PlotTree</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QBrush</span><span class="p">,</span> <span class="n">QStandardItemModel</span><span class="p">,</span> <span class="n">QStandardItem</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QMenu</span> <span class="p">)</span> 
+<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">StandardItem</span><span class="p">,</span> <span class="n">CustomTreeView</span>
+<span class="kn">from</span> <span class="nn">src.common.SortAnalytes</span> <span class="kn">import</span> <span class="n">sort_analytes</span>
+
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
+
+<span class="c1"># -------------------------------</span>
+<span class="c1"># Plot Selector (tree) functions</span>
+<span class="c1"># -------------------------------</span>
+<div class="viewcode-block" id="PlotTree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree">[docs]</a>
+<span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Tree&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PlotTree</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Tree&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="c1">#create plot tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_tree</span><span class="p">()</span>
+
+        <span class="c1"># create analyte sort menu</span>
+        <span class="n">sortmenu_items</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;alphabetical&#39;</span><span class="p">,</span> <span class="s1">&#39;atomic number&#39;</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">,</span> <span class="s1">&#39;compatibility&#39;</span><span class="p">,</span> <span class="s1">&#39;radius&#39;</span><span class="p">]</span>
+        <span class="n">SortMenu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">()</span>
+        <span class="n">SortMenu</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_tree</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSortAnalyte</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="n">SortMenu</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sortmenu_items</span><span class="p">:</span>
+            <span class="n">SortMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PlotTree.initialize_tree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.initialize_tree">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialize_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ``self.parent.treeView`` with the top level items.&quot;&quot;&quot;</span>        
+        <span class="c1"># create tree</span>
+        <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span>
+        <span class="c1"># hide the header row</span>
+        <span class="n">treeView</span><span class="o">.</span><span class="n">setHeaderHidden</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Top level branches</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Histogram&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Histogram&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Correlation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Correlation&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Geochemistry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Multidimensional Analysis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Multidimensional Analysis&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Calculated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">root_node</span><span class="p">,</span> <span class="s1">&#39;Calculated&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Set the model to the view and expand the tree</span>
+        <span class="n">treeView</span><span class="o">.</span><span class="n">expandAll</span><span class="p">()</span>
+        
+        <span class="c1"># Connect double-click event</span>
+        <span class="c1">#self.parent.treeView.doubleClicked.connect(treeView.on_double_click)</span>
+        <span class="n">treeView</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_double_click</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="PlotTree.add_sample">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.add_sample">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create plot selector tree</span>
+
+<span class="sd">        Initializes ``MainWindow.treeView``.  The ``tree`` is intialized for each of the plot groups.</span>
+<span class="sd">        ``Analyte`` its normalized counterpart are initialized with the full list of analytes.  Table</span>
+<span class="sd">        data are stored in ``MainWindow.treeModel``.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sample_id : str</span>
+<span class="sd">            Sample name, Defaults to None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sample_id</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># assign the two objects needed from self.parent</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span>
+        <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span>
+
+        <span class="c1"># add sample_id to analyte branch</span>
+        <span class="n">analyte_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">analyte_branch</span><span class="p">:</span>
+            <span class="n">analyte_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># add sample_id to analyte (normalized) branch</span>
+        <span class="n">norm_analyte_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">norm_analyte_branch</span><span class="p">:</span>
+            <span class="n">norm_analyte_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># add leaves for analytes</span>
+        <span class="k">for</span> <span class="n">analyte</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">):</span>
+            <span class="n">leaf</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">analyte_branch</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">leaf</span><span class="p">:</span>
+                <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">analyte_branch</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+
+            <span class="n">leaf</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">norm_analyte_branch</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">leaf</span><span class="p">:</span>
+                <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">norm_analyte_branch</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Ratio&#39;</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c1"># add sample_id to ratio branch</span>
+        <span class="n">ratio_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ratio_branch</span><span class="p">:</span>
+            <span class="n">ratio_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># add sample_id to ratio (normalized) branch</span>
+        <span class="n">norm_ratio_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">norm_ratio_branch</span><span class="p">:</span>
+            <span class="n">norm_ratio_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># add leaves for ratios</span>
+        <span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Ratio&#39;</span><span class="p">):</span>
+            <span class="n">leaf</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">ratio_branch</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">leaf</span><span class="p">:</span>
+                <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">ratio_branch</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
+
+            <span class="n">leaf</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">norm_ratio_branch</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">leaf</span><span class="p">:</span>
+                <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">norm_ratio_branch</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.add_calculated_leaf">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.add_calculated_leaf">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_calculated_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+
+        <span class="c1"># assign the two objects needed from self.parent</span>
+        <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span>
+        <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span>
+
+        <span class="n">calculated_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Calculated&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">calculated_branch</span><span class="p">:</span>
+            <span class="n">sample_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Calculated&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">leaf</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">sample_branch</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">leaf</span><span class="p">:</span>
+            <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">sample_branch</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="PlotTree.sort_tree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.sort_tree">[docs]</a>
+    <span class="k">def</span> <span class="nf">sort_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        action : QAction</span>
+<span class="sd">            Menu selection defining sort type</span>
+<span class="sd">        method : str, optional</span>
+<span class="sd">            Method used for sorting the analytes. If `None`, defined by action, by default `None`</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sort_method</span> <span class="o">=</span> <span class="n">method</span>
+
+        <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span>
+
+        <span class="n">analyte_list</span><span class="p">,</span> <span class="n">sorted_analyte_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">sort_data</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+         
+        <span class="c1"># Reorder tree items according to the new analyte list</span>
+        <span class="c1"># Sort the tree branches associated with analytes</span>
+        <span class="k">for</span> <span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_list</span><span class="p">:</span>
+            <span class="n">sample_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sample_branch</span><span class="p">:</span>
+                <span class="n">treeView</span><span class="o">.</span><span class="n">sort_branch</span><span class="p">(</span><span class="n">sample_branch</span><span class="p">,</span> <span class="n">sorted_analyte_list</span><span class="p">)</span>
+
+            <span class="n">norm_sample_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sample_branch</span><span class="p">:</span>
+                <span class="n">treeView</span><span class="o">.</span><span class="n">sort_branch</span><span class="p">(</span><span class="n">norm_sample_branch</span><span class="p">,</span> <span class="n">sorted_analyte_list</span><span class="p">)</span></div>
+
+
+        <span class="c1"># Sort the tree branches associated with ratios</span>
+        <span class="c1"># maybe later</span>
+        <span class="c1"># sort by denominator and then numerator?</span>
+
+<div class="viewcode-block" id="PlotTree.retrieve_plotinfo_from_tree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.retrieve_plotinfo_from_tree">[docs]</a>
+    <span class="k">def</span> <span class="nf">retrieve_plotinfo_from_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">leaf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the plot_info associated with a tree location</span>
+<span class="sd">        </span>
+<span class="sd">        Can recall the plot info given the index into the tree (top level group in ``Plot Selector``), or by the tree, branch, leaf location.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tree_index : QModelIndex</span>
+<span class="sd">            Index into the ``Plot Selector`` tree items</span>
+<span class="sd">        tree : str</span>
+<span class="sd">            Top level of tree, categorized by the type of plots</span>
+<span class="sd">        branch : str</span>
+<span class="sd">            Associated with sample ID</span>
+<span class="sd">        leaf : str</span>
+<span class="sd">            Lowest level of tree, associated with an individual plot</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict, bool</span>
+<span class="sd">            Plot_info dictionary with plot widget and information about the plot construction, </span>
+<span class="sd">            returns True if the branch exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print(&#39;retrieve_table_data&#39;)</span>
+        <span class="k">if</span> <span class="n">tree_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">tree_index</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+            <span class="n">branch</span> <span class="o">=</span> <span class="n">tree_index</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+            <span class="n">leaf</span> <span class="o">=</span> <span class="n">tree_index</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+
+        <span class="n">item</span><span class="p">,</span><span class="n">item_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">leaf</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">item_flag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span>
+
+        <span class="c1"># ----start debugging----</span>
+        <span class="c1"># print(tree_index)</span>
+        <span class="c1"># print(&#39;item&#39;)</span>
+        <span class="c1"># print(tree+&#39;:&#39;+branch+&#39;:&#39;+leaf)</span>
+        <span class="c1"># ----end debugging----</span>
+
+        <span class="n">plot_info</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+
+        <span class="c1"># ----start debugging----</span>
+        <span class="c1"># print(plot_info)</span>
+        <span class="c1"># print(&#39;\nsuccessfully retrieved plot info\n&#39;)</span>
+        <span class="c1"># ----end debugging----</span>
+
+        <span class="k">return</span> <span class="n">plot_info</span><span class="p">,</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.tree_double_click">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.tree_double_click">[docs]</a>
+    <span class="k">def</span> <span class="nf">tree_double_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tree_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Double-click on plot selector</span>
+<span class="sd">        </span>
+<span class="sd">        When the user double-clicks on the ``Plot Selector``, the stored plot is placed on the current canvas.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        val : PyQt5.QtCore.QModelIndex</span>
+<span class="sd">            Item selected in ``Plot Selector``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get double-click result</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="p">,</span> <span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_plotinfo_from_tree</span><span class="p">(</span><span class="n">tree_index</span><span class="o">=</span><span class="n">tree_index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">tree_index</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+        <span class="n">branch</span> <span class="o">=</span> <span class="n">tree_index</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+        <span class="n">leaf</span> <span class="o">=</span> <span class="n">tree_index</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">tree</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">,</span> <span class="s1">&#39;Calculated&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">initialize_axis_values</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">leaf</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">set_style_widgets</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
+                <span class="n">log</span><span class="p">(</span><span class="s2">&quot;plot_info exists, adding to canvas&quot;</span><span class="p">,</span> <span class="s2">&quot;NOTE&quot;</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">add_plotwidget_to_canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span>
+                <span class="c1"># updates comboBoxColorByField and comboBoxColorField comboboxes </span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_fields</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;sample_id&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;field_type&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">])</span>
+                <span class="c1">#update UI with auto scale and neg handling parameters from &#39;Analyte/Ratio Info&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_spinboxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;field_type&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="p">(</span><span class="s2">&quot;plot_info does not exist, creating map&quot;</span><span class="p">,</span> <span class="s2">&quot;NOTE&quot;</span><span class="p">)</span>
+
+                <span class="c1"># print(&#39;tree_double_click: plot_map_pg&#39;)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;process&#39;</span><span class="p">]]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">])</span>
+
+                <span class="c1"># updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_fields</span><span class="p">(</span><span class="n">branch</span><span class="p">,</span><span class="s1">&#39;field map&#39;</span><span class="p">,</span><span class="n">tree</span><span class="p">,</span> <span class="n">leaf</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1">#update UI with auto scale and neg handling parameters from &#39;Analyte/Ratio Info&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_spinboxes</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="n">leaf</span><span class="p">,</span> <span class="n">field_type</span><span class="o">=</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">tree</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Histogram&#39;</span><span class="p">,</span> <span class="s1">&#39;Correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span> <span class="s1">&#39;Multidimensional Analysis&#39;</span><span class="p">]:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">add_plotwidget_to_canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="o">.</span><span class="n">plot_type</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="o">.</span><span class="n">style</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span><span class="o">.</span><span class="n">plot_type</span>
+                <span class="c1"># updates comboBoxColorByField and comboBoxColorField comboboxes </span>
+                <span class="c1">#self.parent.update_fields(self.parent.plot_info[&#39;sample_id&#39;], self.parent.plot_info[&#39;plot_type&#39;],self.parent.plot_info[&#39;field_type&#39;], self.parent.plot_info[&#39;field&#39;])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown tree type </span><span class="si">{</span><span class="n">tree</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.update_tree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.update_tree">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm_update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates plot selector list and data</span>
+
+<span class="sd">        Updates the tree with the list of analytes in ``MainWindow.data[sample_id][&#39;norm&#39;]`` and background color</span>
+<span class="sd">        to light yellow for analytes used in analyses.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        analyte_df : pandas.DataFrame</span>
+<span class="sd">            Data frame with information about analytes, scales, limits and use in analysis</span>
+<span class="sd">        norm_update : bool</span>
+<span class="sd">            Flag for updating norm list. Defaults to False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span>
+        <span class="k">if</span> <span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="n">hexcolor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">theme</span><span class="o">.</span><span class="n">highlight_color_dark</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hexcolor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">theme</span><span class="o">.</span><span class="n">highlight_color_light</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">sample_id</span><span class="p">]</span>
+        <span class="n">ref_chem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">ref_chem</span>
+
+        <span class="c1"># Un-highlight all leaf in the trees</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">])</span>
+
+        <span class="n">analytes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
+        <span class="n">ratios</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analytes</span><span class="p">,</span><span class="s1">&#39;use&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span>
+
+        <span class="k">for</span> <span class="n">analyte</span> <span class="ow">in</span> <span class="n">analytes</span> <span class="o">+</span> <span class="n">ratios</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">analyte</span><span class="p">,</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">analyte</span><span class="p">:</span>
+                <span class="n">analyte_1</span><span class="p">,</span> <span class="n">analyte_2</span> <span class="o">=</span> <span class="n">analyte</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; / &#39;</span><span class="p">)</span>
+
+                <span class="c1"># find sample_id (branch) in ratio (tree), if it does not exist, create it</span>
+                <span class="n">sample_branch</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">],</span><span class="n">sample_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">sample_branch</span><span class="p">:</span>
+                    <span class="n">sample_branch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+
+                <span class="c1"># find sample_id (branch) in ratio normalized (tree), if it does not exist, create it</span>
+                <span class="n">sample_branch_norm</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">sample_branch_norm</span><span class="p">:</span>
+                    <span class="n">sample_branch_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">)</span>
+
+                <span class="c1"># check if ratio (leaf) exists in sample_id (branch) and create if necessesary</span>
+                <span class="n">leaf_item_norm</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">sample_branch</span><span class="p">,</span> <span class="n">analyte</span><span class="p">):</span>
+                    <span class="c1"># add ratio (leaf) item to sample_id (branch)</span>
+                    <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">sample_branch</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+
+                    <span class="c1"># add ratio normalized (leaf) item to sample_id (branch)</span>
+                    <span class="n">leaf_item_norm</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">add_leaf</span><span class="p">(</span><span class="n">sample_branch_norm</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">leaf_item_norm</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">sample_branch_norm</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span>
+
+                <span class="c1"># check if ratio can be normalized (note: normalization is not handled here)</span>
+                <span class="n">refval_1</span> <span class="o">=</span> <span class="n">ref_chem</span><span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">analyte_1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+                <span class="n">refval_2</span> <span class="o">=</span> <span class="n">ref_chem</span><span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">analyte_2</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+                <span class="n">ratio_flag</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">refval_1</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">refval_2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">ratio_flag</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1">#print([analyte, refval_1, refval_2, ratio_flag])</span>
+
+                <span class="c1"># if normalization cannot be done, make text italic and disable item</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ratio_flag</span><span class="p">:</span>
+                    <span class="n">font</span> <span class="o">=</span> <span class="n">leaf_item_norm</span><span class="o">.</span><span class="n">font</span><span class="p">()</span>
+                    <span class="n">font</span><span class="o">.</span><span class="n">setItalic</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">leaf_item_norm</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+                    <span class="n">leaf_item_norm</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analyte</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span> <span class="c1">#single analyte</span>
+
+                <span class="n">leaf_item</span> <span class="o">=</span> <span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">treeView</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">],</span> <span class="n">sample_id</span><span class="p">),</span> <span class="n">analyte</span><span class="p">)</span>
+                <span class="c1"># if norm_update:</span>
+                <span class="c1">#     item,check = self.find_leaf(&#39;Analyte (normalized)&#39;, branch = sample_id, leaf = analyte)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     item,check = self.find_leaf(&#39;Analyte&#39;, branch = sample_id, leaf = analyte)</span>
+
+                <span class="n">leaf_item</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="n">hexcolor</span><span class="p">)))</span>
+
+                <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analytes</span><span class="p">,</span><span class="s1">&#39;use&#39;</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">norm_update</span><span class="p">:</span> <span class="c1">#update if analytes are returned from analyte selection window</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">update_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.add_tree_item">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.add_tree_item">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_tree_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates plot selector list and adds plot information data to tree item</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        plot_info : dict</span>
+<span class="sd">            Plot related data (including plot widget) to tree item associated with the plot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">plot_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1">#print(&#39;add_tree_item&#39;)</span>
+        <span class="n">sample_id</span> <span class="o">=</span> <span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;sample_id&#39;</span><span class="p">]</span>
+        <span class="n">leaf</span> <span class="o">=</span> <span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;plot_name&#39;</span><span class="p">]</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;tree&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tree</span> <span class="o">==</span> <span class="s1">&#39;Calculated&#39;</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="s1">&#39;Calculated Map&#39;</span>
+
+        <span class="n">tree_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tree_items</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        
+        
+        <span class="c1"># Ensure there&#39;s a persistent reference to items.</span>
+        <span class="c1"># if not hasattr(self, &#39;item_refs&#39;):</span>
+        <span class="c1">#     self.item_refs = {}  # Initialize once</span>
+        
+        <span class="c1">#check if leaf is in tree</span>
+        <span class="n">item</span><span class="p">,</span><span class="n">check</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_leaf</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">sample_id</span><span class="p">,</span> <span class="n">leaf</span><span class="o">=</span><span class="n">leaf</span><span class="p">)</span>
+        <span class="c1"># sample id item and plot item both dont exist</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">check</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># create new branch for sample id</span>
+            <span class="n">sample_id_item</span> <span class="o">=</span> <span class="n">StandardItem</span><span class="p">(</span><span class="n">sample_id</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+
+            <span class="c1"># create new leaf item</span>
+            <span class="n">plot_item</span> <span class="o">=</span> <span class="n">StandardItem</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+
+            <span class="c1"># store plot dictionary in leaf</span>
+            <span class="n">plot_item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">plot_info</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+
+            <span class="n">sample_id_item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">plot_item</span><span class="p">)</span>
+            <span class="n">tree_items</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">sample_id_item</span><span class="p">)</span>
+            
+            <span class="c1"># Store references</span>
+            <span class="c1"># self.item_refs[(tree, sample_id)] = sample_id_item</span>
+            <span class="c1"># self.item_refs[(tree, sample_id, leaf)] = plot_item</span>
+            
+        <span class="c1"># sample id item exists plot item doesnt exist</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="c1"># create new leaf item</span>
+            <span class="n">plot_item</span> <span class="o">=</span> <span class="n">StandardItem</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+
+            <span class="c1"># store plot dictionary in leaf</span>
+            <span class="n">plot_item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">plot_info</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+
+            <span class="c1">#item is sample id item (branch)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">plot_item</span><span class="p">)</span>
+            
+            <span class="c1"># Update reference</span>
+            <span class="c1"># self.item_refs[(tree, sample_id, leaf)] = plot_item</span>
+
+        <span class="c1"># sample id item exists and plot item exists</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">check</span><span class="p">:</span> 
+            <span class="c1"># store plot dictionary in tree</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">plot_info</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span></div>
+
+            
+            <span class="c1"># self.item_refs[(tree, sample_id, leaf)] = item</span>
+ 
+<div class="viewcode-block" id="PlotTree.unhighlight_tree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.unhighlight_tree">[docs]</a>
+    <span class="k">def</span> <span class="nf">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the highlight of all items in the tree.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tree : str</span>
+<span class="sd">            Highest level of tree with branches to unhighlight</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#bgcolor = tree.background().color()</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="n">bgcolor</span> <span class="o">=</span> <span class="s1">&#39;#1e1e1e&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bgcolor</span> <span class="o">=</span> <span class="s1">&#39;#ffffff&#39;</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="n">branch_item</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1"># branch_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">branch_item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+                <span class="n">leaf_item</span> <span class="o">=</span> <span class="n">branch_item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">leaf_item</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="n">bgcolor</span><span class="p">)))</span>  <span class="c1"># white or any default background color</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.get_tree_items">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.get_tree_items">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_tree_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns items associated with the specified tree</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tree : str</span>
+<span class="sd">            Name of tree in ``MainWindow.treeView``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Qt.AbstractModelItem</span>
+<span class="sd">            The set of items under *tree*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">tree</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.find_leaf">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.find_leaf">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">leaf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a branch or leaf item from treeView</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tree : str</span>
+<span class="sd">            Highest level of tree, ``plot_info[&#39;tree&#39;]``</span>
+<span class="sd">        branch : str</span>
+<span class="sd">            Middle tree level, ``plot_info[&#39;sample_id&#39;]``</span>
+<span class="sd">        leaf : str</span>
+<span class="sd">            Lowest level of tree, ``plot_info[&#39;plot_name&#39;]``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            (item, flag), item is a branch (``flag==False``) or leaf (``flag==True``), if item neither return is ``(None, None)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print(&#39;find_leaf&#39;)</span>
+        <span class="c1">#print(f&#39;{tree} : {branch} : {leaf}&#39;)</span>
+        <span class="n">tree_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tree_items</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="c1">#Returns leaf_item &amp; True if leaf exists, else returns branch_item, False</span>
+        <span class="k">if</span> <span class="n">tree_items</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tree_items</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+                <span class="n">branch_item</span> <span class="o">=</span> <span class="n">tree_items</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">branch_item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">branch</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">branch_item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+                        <span class="n">leaf_item</span> <span class="o">=</span> <span class="n">branch_item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">leaf_item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">leaf</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="p">(</span><span class="n">leaf_item</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">branch_item</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.clear_tree_data">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.clear_tree_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_tree_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes item data from all items in a given tree</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tree : str</span>
+<span class="sd">            Name of tree in ``MainWindow.treeView``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tree_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tree_items</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">clear_item_data</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Recursively clear data from the item and its children&quot;&quot;&quot;</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+                <span class="n">child_item</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">clear_item_data</span><span class="p">(</span><span class="n">child_item</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tree_items</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="n">branch_item</span> <span class="o">=</span> <span class="n">tree_items</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">clear_item_data</span><span class="p">(</span><span class="n">branch_item</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.get_plot_info_from_tree">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.get_plot_info_from_tree">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_plot_info_from_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract plot_info data from the root of QStandardItemModel as a flat list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Reset the list each time this method is called</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extract_plot_info</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_list</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.extract_plot_info">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.extract_plot_info">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_plot_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively extract plot_info from QStandardItem and append to a flat list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Retrieve the plot_info from the UserRole data</span>
+        <span class="n">plot_info</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plot_info</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;figure&#39;</span> <span class="ow">in</span> <span class="n">plot_info</span><span class="p">:</span>
+            <span class="c1"># Check if it contains an mplc.MplCanvas object</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;figure&#39;</span><span class="p">],</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">):</span>
+                <span class="c1"># Create a copy of plot_info and replace the mplc.MplCanvas object with its Figure</span>
+                <span class="n">plot_info_copy</span> <span class="o">=</span> <span class="n">plot_info</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">plot_info_copy</span><span class="p">[</span><span class="s1">&#39;figure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;figure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fig</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot_info_copy</span><span class="p">)</span>
+
+        <span class="c1"># Recursively process each child of this item</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">child</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extract_plot_info</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>  <span class="c1"># Process child recursively</span></div>
+
+
+<div class="viewcode-block" id="PlotTree.create_item_from_data">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.create_item_from_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_item_from_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively create QStandardItem from data.&quot;&quot;&quot;</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QStandardItem</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s1">&#39;plot_info&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1">#create new matplotlib canvas and save fig</span>
+            <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">fig</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;plot_info&#39;</span><span class="p">][</span><span class="s1">&#39;figure&#39;</span><span class="p">])</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;plot_info&#39;</span><span class="p">][</span><span class="s1">&#39;figure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">canvas</span>
+            <span class="c1">#store plot dictionary in tree</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;plot_info&#39;</span><span class="p">],</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child_data</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;children&#39;</span><span class="p">]:</span>
+            <span class="n">child_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_item_from_data</span><span class="p">(</span><span class="n">child_data</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">child_item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">item</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

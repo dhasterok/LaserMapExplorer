@@ -21,7 +21,7 @@ class QuickView(QDialog, Ui_QuickViewDialog):
         
     Ui_QuickViewDialog : QuickViewDialog
         User interface design.
-    """    
+    """
     def __init__(self, parent=None):
         """Initializes quickView
 
@@ -44,7 +44,8 @@ class QuickView(QDialog, Ui_QuickViewDialog):
             self.toolButtonSort.setIcon(QIcon(os.path.join(lamepath.ICONPATH,'icon-sort-dark-64.svg')))
             self.toolButtonSave.setIcon(QIcon(os.path.join(lamepath.ICONPATH,'icon-save-dark-64.svg')))
 
-        self.tableWidget = TW.TableWidgetDragRows()  # Assuming TableWidgetDragRows is defined elsewhere
+        # Assuming TableWidgetDragRows is defined elsewhere
+        self.tableWidget = TW.TableWidgetDragRows()  
         self.setup_table()
         
         # Setup sort menu and associated toolButton
@@ -103,15 +104,18 @@ class QuickView(QDialog, Ui_QuickViewDialog):
         self.populate_table()  # Refresh table with sorted data
 
     def save_selected_analytes(self):
-        """Gets list of analytes and group name when Save button is clicked
+        """Gets list of analytes and group name when Save button is clicked.
 
-        #     Retrieves the user defined name from ``quickView.lineEditViewName`` and list of analytes using ``quickView.column_to_list()``
-        #     and adds them to a dictionary item with the name defined as the key.
+        Retrieves the user-defined name from ``quickView.lineEditViewName`` and list of analytes
+        using ``quickView.column_to_list()``, and adds them to a dictionary item with the name
+        defined as the key.
 
-        #     Raises
-        #     ------
-        #         A warning is raised if the user does not provide a name.  The list is not added to the dictionary in this case.
-        #     """        
+        Raises
+        ------
+        QMessageBox
+            A warning is raised if the user does not provide a name. The list is not added to
+            the dictionary in this case.
+        """        
         self.view_name = self.lineEditViewName.text().strip()
         if not self.view_name:
             QMessageBox.warning(self, "Invalid Input", "Please enter a valid view name.")

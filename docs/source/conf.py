@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../../src/ui/'))
 print("sys.path:", sys.path)
 
 project = 'Laser Map Explorer'
-copyright = '2024, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li'
+copyright = '2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li'
 author = 'Shavin Kaluthantri,  Derrick Hasterok and Maggie Li'
 release = '0.1'
 
@@ -40,7 +40,7 @@ extensions = [
 autosummary_generate = True
 autosummary_imported_members = True  # Include members imported in modules
 templates_path = ['_templates']
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "**/__pycache__/**", "**/.venv/**", "**/venv/**"]
 
 
 # -- Options for HTML output -------------------------------------------------

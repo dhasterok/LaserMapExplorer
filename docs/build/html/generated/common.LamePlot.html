@@ -1,0 +1,1066 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>common.LamePlot &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/common.LamePlot';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="common.Logger" href="common.Logger.html" />
+    <link rel="prev" title="common.ExtendedDF" href="common.ExtendedDF.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules.html">src Modules</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../app.html">app package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../common.html">common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui.html">ui package</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules Summary</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="app.html">app</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="app.AnalyteSelectionWindow.html">app.AnalyteSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.AppData.html">app.AppData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.BlocklyModules.html">app.BlocklyModules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.CropImage.html">app.CropImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.CustomTableWidget.html">app.CustomTableWidget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.FieldSelectionWindow.html">app.FieldSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.ImageProcessing.html">app.ImageProcessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.InfoViewer.html">app.InfoViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.LameIO.html">app.LameIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.MapImporter.html">app.MapImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.PlotTree.html">app.PlotTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.PlotViewerWindow.html">app.PlotViewerWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.Profile.html">app.Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.ProfileNew.html">app.ProfileNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.QuickView.html">app.QuickView</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpecialTools.html">app.SpecialTools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpotImporter.html">app.SpotImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpotTools.html">app.SpotTools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.StyleToolbox.html">app.StyleToolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.UIControl.html">app.UIControl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.UITheme.html">app.UITheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.Workflow.html">app.Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.config.html">app.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.help_mapping.html">app.help_mapping</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ui.html">ui</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ui.AnalyteSelectionDialog.html">ui.AnalyteSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.FieldSelectionDialog.html">ui.FieldSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.FileSelectorDialog.html">ui.FileSelectorDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.IsotopeSelectionDialog.html">ui.IsotopeSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.MainWindow.html">ui.MainWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.MapImportDialog.html">ui.MapImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.PlotViewer.html">ui.PlotViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.PreferencesWindow.html">ui.PreferencesWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.QuickViewDialog.html">ui.QuickViewDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.SpotImportDialog.html">ui.SpotImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.resources_rc.html">ui.resources_rc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="common.html">common</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="common.Browser.html">common.Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Calculator.html">common.Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.CustomMplCanvas.html">common.CustomMplCanvas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.CustomWidgets.html">common.CustomWidgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.DataAnalysis.html">common.DataAnalysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.DataHandling.html">common.DataHandling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ExtendedDF.html">common.ExtendedDF</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">common.LamePlot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Logger.html">common.Logger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Masking.html">common.Masking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.MolecularWeightCalculator.html">common.MolecularWeightCalculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.NoteTaking.html">common.NoteTaking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Observable.html">common.Observable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Polygon.html">common.Polygon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.PolygonMatplotlib.html">common.PolygonMatplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.PolygonNew.html">common.PolygonNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ScheduleTimer.html">common.ScheduleTimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.SearchTool.html">common.SearchTool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.SortAnalytes.html">common.SortAnalytes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Status.html">common.Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.TableFunctions.html">common.TableFunctions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.colorfunc.html">common.colorfunc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.csvdict.html">common.csvdict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.format.html">common.format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.gausscensor.html">common.gausscensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.outliers.html">common.outliers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.plot_spider.html">common.plot_spider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.radar.html">common.radar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.radar_factory.html">common.radar_factory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.scalebar.html">common.scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ternary_plot.html">common.ternary_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.varfunc.html">common.varfunc</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../documentation.html" class="nav-link">Documentation</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="common.html" class="nav-link">common</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.LamePlot</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-common.LamePlot">
+<span id="common-lameplot"></span><h1>common.LamePlot<a class="headerlink" href="#module-common.LamePlot" title="Link to this heading">#</a></h1>
+<p class="rubric">Functions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.add_colorbar" title="common.LamePlot.add_colorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_colorbar</span></code></a>(plot_style, canvas, cax[, ...])</p></td>
+<td><p>Adds a colorbar to a MPL figure</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.add_scalebar" title="common.LamePlot.add_scalebar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_scalebar</span></code></a>(app_data, plot_style, ax)</p></td>
+<td><p>Add a scalebar to a map</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.biplot" title="common.LamePlot.biplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">biplot</span></code></a>(canvas, data, app_data, plot_style, ...)</p></td>
+<td><p>Creates scatter bi-plots</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.cluster_performance_plot" title="common.LamePlot.cluster_performance_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_performance_plot</span></code></a>(parent, data, ...)</p></td>
+<td><p>Plots used to estimate the optimal number of clusters</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_hex_color</span></code>(color)</p></td>
+<td><p>Converts QColor to hex-rgb format</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_rgb_color</span></code>(color)</p></td>
+<td><p>Convert from hex to RGB formatted color</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.get_scatter_data" title="common.LamePlot.get_scatter_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scatter_data</span></code></a>(data, app_data, plot_style)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.hist2dbiplot" title="common.LamePlot.hist2dbiplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist2dbiplot</span></code></a>(canvas, data, app_data, ...)</p></td>
+<td><p>Creates 2D histogram figure</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.hist2dternplot" title="common.LamePlot.hist2dternplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist2dternplot</span></code></a>(canvas, data, app_data, ...)</p></td>
+<td><p>Creates a ternary histogram figure</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code>(msg[, prefix])</p></td>
+<td><p>Write a log message using the global logger, respecting pause state and formatting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_call</span></code>([logger_key])</p></td>
+<td><p>Method decorator to log function whenever it is called</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.logax" title="common.LamePlot.logax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logax</span></code></a>(ax, lim[, axis, label, ...])</p></td>
+<td><p>Produces log-axes limits and labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_cluster_map" title="common.LamePlot.plot_cluster_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_cluster_map</span></code></a>(parent, data, app_data, ...)</p></td>
+<td><p>Produces a map of cluster categories</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_clusters" title="common.LamePlot.plot_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_clusters</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<td><p>Plot maps associated with clustering</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_correlation" title="common.LamePlot.plot_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correlation</span></code></a>(parent, data, app_data, ...)</p></td>
+<td><p>Creates an image of the correlation matrix</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_histogram" title="common.LamePlot.plot_histogram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_histogram</span></code></a>(parent, data, app_data, ...)</p></td>
+<td><p>Plots a histogramn in the canvas window</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_map_mpl" title="common.LamePlot.plot_map_mpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_map_mpl</span></code></a>(parent, data, app_data, ...[, ...])</p></td>
+<td><p>Create a matplotlib canvas for plotting a map</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_map_pg" title="common.LamePlot.plot_map_pg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_map_pg</span></code></a>(self, sample_id, field_type, field)</p></td>
+<td><p>Create a graphic widget for plotting a map</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_ndim" title="common.LamePlot.plot_ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ndim</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<td><p>Produces trace element compatibility (TEC) and Radar plots</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca" title="common.LamePlot.plot_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<td><p>Plot principal component analysis (PCA)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca_components" title="common.LamePlot.plot_pca_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca_components</span></code></a>(pca_results, data, ...)</p></td>
+<td><p>Adds vector components to PCA scatter and heatmaps</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca_variance" title="common.LamePlot.plot_pca_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca_variance</span></code></a>(parent, pca_results, ...)</p></td>
+<td><p>Creates a plot of explained variance, individual and cumulative, for PCA</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca_vectors" title="common.LamePlot.plot_pca_vectors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca_vectors</span></code></a>(parent, pca_results, data, ...)</p></td>
+<td><p>Displays a heat map of PCA vector components</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_scatter" title="common.LamePlot.plot_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_scatter</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<td><p>Creates a plots from self.toolBox Scatter page.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_score_map" title="common.LamePlot.plot_score_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_score_map</span></code></a>(parent, data, app_data, ...)</p></td>
+<td><p>Plots score maps</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_small_histogram" title="common.LamePlot.plot_small_histogram"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_small_histogram</span></code></a>(parent, data, app_data, ...)</p></td>
+<td><p>Creates a small histogram on the Samples and Fields tab associated with the selected map</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_spider_norm</span></code>(data, ref_data, ...[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_ternary_map" title="common.LamePlot.plot_ternary_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ternary_map</span></code></a>(parent, data, app_data, ...)</p></td>
+<td><p>Creates map colored by ternary coordinate positions</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.ternary_scatter" title="common.LamePlot.ternary_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_scatter</span></code></a>(canvas, data, app_data, ...)</p></td>
+<td><p>Creates ternary scatter plots</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code>()</p></td>
+<td><p>Central configuration manager for logging behavior within the application.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NavigationToolbar</span></code></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">NavigationToolbar2QT</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(*[, edgecolor, facecolor, color, ...])</p></td>
+<td><p>A patch is a 2D artist with a face color and an edge color.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code>(vertices[, codes, ...])</p></td>
+<td><p>A series of possibly disconnected, possibly closed, line and curve segments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Radar</span></code>(ax, data, fields[, fieldlabels, ...])</p></td>
+<td><p>Prepares a DataFrame for a radar plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalebar</span></code>(width, pixel_width[, units, ...])</p></td>
+<td><p>Produces a scalebar on x,y maps</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary</span></code>(ax[, labels, plot_type, style, ...])</p></td>
+<td><p>Ternary plotting class, produces ternary axes and creates various plot types.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.add_colorbar">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">add_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbartype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'continuous'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouplabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupcolors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#add_colorbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.add_colorbar" title="Link to this definition">#</a></dt>
+<dd><p>Adds a colorbar to a MPL figure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (<em>mplc.MplCanvas</em>) – canvas object</p></li>
+<li><p><strong>cax</strong> (<em>axes</em>) – color axes object</p></li>
+<li><p><strong>cbartype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Type of colorbar, <code class="docutils literal notranslate"><span class="pre">dicrete</span></code> or <code class="docutils literal notranslate"><span class="pre">continuous</span></code>, Defaults to continuous</p></li>
+<li><p><strong>grouplabels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – category/group labels for tick marks</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.add_scalebar">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">add_scalebar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#add_scalebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.add_scalebar" title="Link to this definition">#</a></dt>
+<dd><p>Add a scalebar to a map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ax</strong> – Axes to place scalebar on.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.biplot">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">biplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#biplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.biplot" title="Link to this definition">#</a></dt>
+<dd><p>Creates scatter bi-plots</p>
+<p>A general function for creating scatter plots of 2-dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas to be added to main window</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldX.currentText()</span></code> as x coordinate</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldX.currentText()</span></code> as y coordinate</p></li>
+<li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxColorField.currentText()</span></code> as marker colors</p></li>
+<li><p><strong>style</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Style parameters</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.cluster_performance_plot">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">cluster_performance_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#cluster_performance_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.cluster_performance_plot" title="Link to this definition">#</a></dt>
+<dd><p>Plots used to estimate the optimal number of clusters</p>
+<p>1. Elbow Method
+The elbow method looks at the variance (or inertia) within clusters as the number
+of clusters increases. The idea is to plot the sum of squared distances between
+each point and its assigned cluster’s centroid, known as the within-cluster sum
+of squares (WCSS) or inertia, for different values of k (number of clusters).</p>
+<p>Process:
+* Run KMeans for a range of cluster numbers (k).
+* Plot the inertia (WCSS) vs. the number of clusters.
+* Look for the “elbow” point, where the rate of decrease sharply slows down,
+indicating that adding more clusters does not significantly reduce the inertia.</p>
+<p>2. Silhouette Score
+The silhouette score measures how similar an object is to its own cluster compared
+to other clusters. The score ranges from -1 to 1, where:</p>
+<ul class="simple">
+<li><p>A score close to 1 means the sample is well clustered.</p></li>
+<li><p>A score close to 0 means the sample lies on the boundary between clusters.</p></li>
+<li><p>A score close to -1 means the sample is assigned to the wrong cluster.</p></li>
+</ul>
+<p>In cases where clusters have widely varying sizes or densities, Silhouette Score may provide the best result.</p>
+<p>Process:
+* Run KMeans for a range of cluster numbers (k).
+* Calculate the silhouette score for each k.
+* Choose the k with the highest silhouette score.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.get_scatter_data">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">get_scatter_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#get_scatter_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.get_scatter_data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.hist2dbiplot">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">hist2dbiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#hist2dbiplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.hist2dbiplot" title="Link to this definition">#</a></dt>
+<dd><p>Creates 2D histogram figure</p>
+<p>A general function for creating 2D histograms (heatmaps).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – plotting canvas</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – X-axis dictionary</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Y-axis dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.hist2dternplot">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">hist2dternplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#hist2dternplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.hist2dternplot" title="Link to this definition">#</a></dt>
+<dd><p>Creates a ternary histogram figure</p>
+<p>A general function for creating scatter plots of 2-dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure</em>) – Figure object</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
+<li><p><strong>style</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Style parameters</p></li>
+<li><p><strong>save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Saves figure widget to plot tree</p></li>
+<li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Display, mean, median, standard deviation plots for a fourth dimension in
+addition to histogram map. Default is None, which produces a histogram.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.logax">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">logax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_label_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#logax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.logax" title="Link to this definition">#</a></dt>
+<dd><p>Produces log-axes limits and labels.</p>
+<p>Parameters:
+ax (matplotlib.axes.Axes): The axes to modify.
+lim (list): The log10 values of the axes limits.
+axis (str): ‘x’ or ‘y’ to add ticks to x- or y-axis, default is ‘y’.
+label (str): Label for the axis.
+tick_label_rotation (float): Angle of text rotation, default is 0.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_cluster_map">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_cluster_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_cluster_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_cluster_map" title="Link to this definition">#</a></dt>
+<dd><p>Produces a map of cluster categories</p>
+<p>Creates the map on an <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.  Each cluster category is assigned a unique color.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_clusters">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_clusters" title="Link to this definition">#</a></dt>
+<dd><p>Plot maps associated with clustering</p>
+<p>Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_correlation">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_correlation" title="Link to this definition">#</a></dt>
+<dd><p>Creates an image of the correlation matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_histogram">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_histogram" title="Link to this definition">#</a></dt>
+<dd><p>Plots a histogramn in the canvas window</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_map_mpl">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_mpl" title="Link to this definition">#</a></dt>
+<dd><p>Create a matplotlib canvas for plotting a map</p>
+<p>Create a map using <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sample identifier</p></li>
+<li><p><strong>field_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Type of field for plotting</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Field for plotting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_map_pg">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_pg" title="Link to this definition">#</a></dt>
+<dd><p>Create a graphic widget for plotting a map</p>
+<p>Create a map using pyqtgraph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sample identifier</p></li>
+<li><p><strong>field_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Type of field for plotting</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Field for plotting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_ndim">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_ndim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_ndim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_ndim" title="Link to this definition">#</a></dt>
+<dd><p>Produces trace element compatibility (TEC) and Radar plots</p>
+<p>Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider diagrams, which display a set of elements
+arranged by compatibility.  Radar plots show data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
+or spider web.</p>
+<p>The function updates <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_info</span></code> with the displayed plot metadata and figure <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code> for display in the centralWidget views.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_pca">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca" title="Link to this definition">#</a></dt>
+<dd><p>Plot principal component analysis (PCA)</p>
+<p>Wrapper for one of four types of PCA plots:
+* <code class="docutils literal notranslate"><span class="pre">plot_pca_variance()</span></code> a plot of explained variances
+* <code class="docutils literal notranslate"><span class="pre">plot_pca_vectors()</span></code> a plot of PCA vector components as a heatmap
+* uses <code class="docutils literal notranslate"><span class="pre">plot_scatter()</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_pca_components</span></code> to produce both scatter and heatmaps of PCA scores with vector components.
+* <code class="docutils literal notranslate"><span class="pre">plot_score_map()</span></code> produces a plot of PCA scores for a single component as a map</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="docutils literal notranslate"><span class="pre">MainWindow.plot_scatter</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_pca_components">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_components" title="Link to this definition">#</a></dt>
+<dd><p>Adds vector components to PCA scatter and heatmaps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (<em>mplc.MplCanvas</em>) – Canvas object for plotting</p></li>
+<li><p><strong>seealso::</strong> (<em>..</em>) – <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_pca_vectors</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_pca_variance">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_variance" title="Link to this definition">#</a></dt>
+<dd><p>Creates a plot of explained variance, individual and cumulative, for PCA</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mplc.MplCanvas</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_pca_vectors">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_vectors" title="Link to this definition">#</a></dt>
+<dd><p>Displays a heat map of PCA vector components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Creates figure on mplc.MplCanvas</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>mplc.MplCanvas</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_scatter">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_scatter" title="Link to this definition">#</a></dt>
+<dd><p>Creates a plots from self.toolBox Scatter page.</p>
+<p>Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – canvas within gui for plotting, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_score_map">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_score_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_score_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_score_map" title="Link to this definition">#</a></dt>
+<dd><p>Plots score maps</p>
+<p>Creates a score map for PCA and clusters.  Maps are displayed on an <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_small_histogram">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_small_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_small_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_small_histogram" title="Link to this definition">#</a></dt>
+<dd><p>Creates a small histogram on the Samples and Fields tab associated with the selected map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_plot_df</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Current data for plotting</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of field to plot</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.plot_ternary_map">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_ternary_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_ternary_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_ternary_map" title="Link to this definition">#</a></dt>
+<dd><p>Creates map colored by ternary coordinate positions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.ternary_scatter">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">ternary_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#ternary_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.ternary_scatter" title="Link to this definition">#</a></dt>
+<dd><p>Creates ternary scatter plots</p>
+<p>A general function for creating ternary scatter plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with top vertex</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with left vertex</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with right vertex</p></li>
+<li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – color dimension</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="common.ExtendedDF.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">common.ExtendedDF</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="common.Logger.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">common.Logger</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.add_colorbar"><code class="docutils literal notranslate"><span class="pre">add_colorbar()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.add_scalebar"><code class="docutils literal notranslate"><span class="pre">add_scalebar()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.biplot"><code class="docutils literal notranslate"><span class="pre">biplot()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.cluster_performance_plot"><code class="docutils literal notranslate"><span class="pre">cluster_performance_plot()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.get_scatter_data"><code class="docutils literal notranslate"><span class="pre">get_scatter_data()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.hist2dbiplot"><code class="docutils literal notranslate"><span class="pre">hist2dbiplot()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.hist2dternplot"><code class="docutils literal notranslate"><span class="pre">hist2dternplot()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.logax"><code class="docutils literal notranslate"><span class="pre">logax()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_cluster_map"><code class="docutils literal notranslate"><span class="pre">plot_cluster_map()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_clusters"><code class="docutils literal notranslate"><span class="pre">plot_clusters()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_correlation"><code class="docutils literal notranslate"><span class="pre">plot_correlation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_histogram"><code class="docutils literal notranslate"><span class="pre">plot_histogram()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_map_mpl"><code class="docutils literal notranslate"><span class="pre">plot_map_mpl()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_map_pg"><code class="docutils literal notranslate"><span class="pre">plot_map_pg()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_ndim"><code class="docutils literal notranslate"><span class="pre">plot_ndim()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_pca"><code class="docutils literal notranslate"><span class="pre">plot_pca()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_pca_components"><code class="docutils literal notranslate"><span class="pre">plot_pca_components()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_pca_variance"><code class="docutils literal notranslate"><span class="pre">plot_pca_variance()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_pca_vectors"><code class="docutils literal notranslate"><span class="pre">plot_pca_vectors()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_scatter"><code class="docutils literal notranslate"><span class="pre">plot_scatter()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_score_map"><code class="docutils literal notranslate"><span class="pre">plot_score_map()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_small_histogram"><code class="docutils literal notranslate"><span class="pre">plot_small_histogram()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_ternary_map"><code class="docutils literal notranslate"><span class="pre">plot_ternary_map()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.ternary_scatter"><code class="docutils literal notranslate"><span class="pre">ternary_scatter()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/common.LamePlot.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

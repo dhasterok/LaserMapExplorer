@@ -2,7 +2,7 @@ Multidimensional Methods
 ************************
 
 Principal Component Analysis
-===========================
+============================
 
 Principal Component Analysis (PCA) in *LaME* reduces the dimensionality of complex datasets while preserving important variations. This tool is particularly valuable for identifying dominant compositional trends and relationships between elements.
 
@@ -14,12 +14,12 @@ Principal Component Analysis (PCA) in *LaME* reduces the dimensionality of compl
     PCA Variance plot. 
     
 Computing PCA
-------------
+-------------
 
 PCA analysis is automatically computed when you select the *Dimensional Reduction* tab in the *Control Toolbox*. The software displays the explained variance plot by default, showing the proportion of variance captured by each principal component.
 
 Visualization Options
--------------------
+---------------------
 
 *LaME* offers five complementary ways to visualize PCA results:
 
@@ -30,17 +30,17 @@ Visualization Options
 - PCA score: Maps principal component values back to sample space
 
 Plot Controls
-------------
+-------------
 
 For scatter plots and heatmaps, use the PC X and PC Y spinboxes to select which principal components to compare. The first principal component (PC1) explains the most variance, with subsequent components capturing progressively less variation.
 
 Clustering
-=========
+==========
 
 Clustering in *LaME* helps identify natural groupings within your data based on compositional similarities. The software offers two clustering methods, each suited to different analytical needs.
 
 K-Means Clustering
-----------------
+------------------
 
 K-means clustering divides data into a specified number of groups by minimizing the distance between points and their cluster centers:
 
@@ -52,7 +52,7 @@ K-means clustering divides data into a specified number of groups by minimizing 
     K-means Clustering plot.
 
 Fuzzy C-Means Clustering
-----------------------
+------------------------
 
 Fuzzy c-means allows points to belong partially to multiple clusters, providing membership scores for each cluster:
 
@@ -74,7 +74,7 @@ Settings
 - Number of bias: Set the number of bias points
 
 Visualization Options
-------------------
+---------------------
 
 - Cluster Map: Spatial distribution of clusters
 - Cluster Scores: Degree of membership in each cluster

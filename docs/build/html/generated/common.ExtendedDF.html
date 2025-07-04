@@ -1,0 +1,1657 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>common.ExtendedDF &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/common.ExtendedDF';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="common.LamePlot" href="common.LamePlot.html" />
+    <link rel="prev" title="common.DataHandling" href="common.DataHandling.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modules.html">src Modules</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../app.html">app package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../common.html">common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui.html">ui package</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules Summary</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="app.html">app</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="app.AnalyteSelectionWindow.html">app.AnalyteSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.AppData.html">app.AppData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.BlocklyModules.html">app.BlocklyModules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.CropImage.html">app.CropImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.CustomTableWidget.html">app.CustomTableWidget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.FieldSelectionWindow.html">app.FieldSelectionWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.ImageProcessing.html">app.ImageProcessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.InfoViewer.html">app.InfoViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.LameIO.html">app.LameIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.MapImporter.html">app.MapImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.PlotTree.html">app.PlotTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.PlotViewerWindow.html">app.PlotViewerWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.Profile.html">app.Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.ProfileNew.html">app.ProfileNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.QuickView.html">app.QuickView</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpecialTools.html">app.SpecialTools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpotImporter.html">app.SpotImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.SpotTools.html">app.SpotTools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.StyleToolbox.html">app.StyleToolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.UIControl.html">app.UIControl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.UITheme.html">app.UITheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.Workflow.html">app.Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.config.html">app.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.help_mapping.html">app.help_mapping</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ui.html">ui</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ui.AnalyteSelectionDialog.html">ui.AnalyteSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.FieldSelectionDialog.html">ui.FieldSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.FileSelectorDialog.html">ui.FileSelectorDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.IsotopeSelectionDialog.html">ui.IsotopeSelectionDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.MainWindow.html">ui.MainWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.MapImportDialog.html">ui.MapImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.PlotViewer.html">ui.PlotViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.PreferencesWindow.html">ui.PreferencesWindow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.QuickViewDialog.html">ui.QuickViewDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.SpotImportDialog.html">ui.SpotImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.resources_rc.html">ui.resources_rc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="common.html">common</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="common.Browser.html">common.Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Calculator.html">common.Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.CustomMplCanvas.html">common.CustomMplCanvas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.CustomWidgets.html">common.CustomWidgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.DataAnalysis.html">common.DataAnalysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.DataHandling.html">common.DataHandling</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">common.ExtendedDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.LamePlot.html">common.LamePlot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Logger.html">common.Logger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Masking.html">common.Masking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.MolecularWeightCalculator.html">common.MolecularWeightCalculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.NoteTaking.html">common.NoteTaking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Observable.html">common.Observable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Polygon.html">common.Polygon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.PolygonMatplotlib.html">common.PolygonMatplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.PolygonNew.html">common.PolygonNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ScheduleTimer.html">common.ScheduleTimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.SearchTool.html">common.SearchTool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.SortAnalytes.html">common.SortAnalytes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.Status.html">common.Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.TableFunctions.html">common.TableFunctions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.colorfunc.html">common.colorfunc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.csvdict.html">common.csvdict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.format.html">common.format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.gausscensor.html">common.gausscensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.outliers.html">common.outliers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.plot_spider.html">common.plot_spider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.radar.html">common.radar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.radar_factory.html">common.radar_factory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.scalebar.html">common.scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.ternary_plot.html">common.ternary_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.varfunc.html">common.varfunc</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../documentation.html" class="nav-link">Documentation</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="common.html" class="nav-link">common</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.ExtendedDF</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-common.ExtendedDF">
+<span id="common-extendeddf"></span><h1>common.ExtendedDF<a class="headerlink" href="#module-common.ExtendedDF" title="Link to this heading">#</a></h1>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a>([data])</p></td>
+<td><p>Creates a pandas DataFrame with custom attributes stored with each column.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.ExtendedDF.</span></span><span class="sig-name descname"><span class="pre">AttributeDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
+<p>Creates a pandas DataFrame with custom attributes stored with each column.</p>
+<p>Create a dataframe with column attributes or add attributes to existing columns of a
+dataframe and methods to get and set them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><em>pandas.DataFrame</em></a>) – Input dataframe, if none provided an empty dataframe can be created, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">attributes_to_dataframe</span> <span class="pre">:</span></span></dt>
+<dd><p>Return selected attributes of all columns in the AttributeDataFrame as a new DataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">copy_columns</span> <span class="pre">:</span></span></dt>
+<dd><p>Extract specified columns into a new AttributeDataFrame, preserving their attributes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">match_attribute</span> <span class="pre">:</span></span></dt>
+<dd><p>Returns a list of columns where a specific attribute matches the given value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">match_attributes</span> <span class="pre">:</span></span></dt>
+<dd><p>Returns a list of columns where each attribute matches its corresponding value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_attribute</span> <span class="pre">:</span></span></dt>
+<dd><p>Get an attribute from an AttributeDataFrame given a column or set of columns</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_attribute_dict</span> <span class="pre">:</span></span></dt>
+<dd><p>Creates a dictionary from an attribute where the unique values of the attribute becomes the
+keys and the items are lists with the column names that match each attribute_name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">is_attribute</span> <span class="pre">:</span></span></dt>
+<dd><p>Checks to see if an attribute exists</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_attribute</span> <span class="pre">:</span></span></dt>
+<dd><p>Set one or more values for columns of an attribute in an AttributeDataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">_set_attribute</span> <span class="pre">:</span></span></dt>
+<dd><p>Set a single attribute in a column of an AttributeDataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">show_attributes</span> <span class="pre">:</span></span></dt>
+<dd><p>Prints the attributes stored in the dataframe</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">sort_columns</span> <span class="pre">:</span></span></dt>
+<dd><p>Sorts columns and attributes of an AttributeDataFrame object.</p>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Adds a dictionary <code class="docutils literal notranslate"><span class="pre">column_attributes</span></code> to a dataframe and the methods to add, set, and get column attributes and their values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Example 1: Creating the DataFrame with no initial data
+df = AttributeDataFrame()
+print(df)  # Output: Empty DataFrame</p>
+<p># Adding data and attributes
+df[‘Temperature’] = [22, 23, 21]
+df.set_attribute(‘Temperature’, ‘units’, ‘Celsius’)
+df.set_attribute(‘Temperature’, ‘average’, 22)
+df.set_attribute(‘Temperature’, ‘uncertainty’, 1)</p>
+<p>print(df)
+print(df.get_attribute(‘Temperature’, ‘units’))         # Output: Celsius
+print(df.get_attribute(‘Temperature’, ‘average’))       # Output: 22
+print(df.get_attribute(‘Temperature’, ‘uncertainty’))   # Output: 1</p>
+<p>Example 2: Creating the DataFrame from an existing dataframe</p>
+<p>#df = AttributeDataFrame(data, column_attributes=column_attributes)</p>
+<p># Accessing attributes using methods
+#print(df.get_attribute(‘Temperature’, ‘units’))         # Output: Celsius
+#print(df.get_attribute(‘Pressure’, ‘average’))          # Output: 101</p>
+<p># Setting new attributes
+#df.set_attribute(‘Temperature’, ‘range’, (20, 25))
+#print(df.get_attribute(‘Temperature’, ‘range’))         # Output: (20, 25)</p>
+<dl class="field-list">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></dt><dd><p>The transpose of the DataFrame.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">at</span></code></dt><dd><p>Access a single value for a row/column label pair.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code></dt><dd><p>Dictionary of global attributes of this dataset.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes</span></code></dt><dd><p>Return a list representing the axes of the DataFrame.</p>
+</dd>
+<dt><strong>columns</strong></dt><dd><p>The column labels of the DataFrame.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">     A  B</span>
+<span class="go">0    1  3</span>
+<span class="go">1    2  4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+<span class="go">Index([&#39;A&#39;, &#39;B&#39;], dtype=&#39;object&#39;)</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtypes</span></code></dt><dd><p>Return the dtypes in the DataFrame.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></dt><dd><p>Indicator whether Series/DataFrame is empty.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">flags</span></code></dt><dd><p>Get the properties associated with this pandas object.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">iat</span></code></dt><dd><p>Access a single value for a row/column pair by integer position.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">iloc</span></code></dt><dd><p>Purely integer-location based indexing for selection by position.</p>
+</dd>
+<dt><strong>index</strong></dt><dd><p>The index (row labels) of the DataFrame.</p>
+<p>The index of a DataFrame is a series of labels that identify each row.
+The labels can be integers, strings, or any other hashable type. The index
+is used for label-based access and alignment, and can be accessed or
+modified using this attribute.</p>
+<dl class="simple">
+<dt>pandas.Index</dt><dd><p>The index labels of the DataFrame.</p>
+</dd>
+</dl>
+<p>DataFrame.columns : The column labels of the DataFrame.
+DataFrame.to_numpy : Convert the DataFrame to a NumPy array.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Alice&#39;</span><span class="p">,</span> <span class="s1">&#39;Bob&#39;</span><span class="p">,</span> <span class="s1">&#39;Aritra&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                   <span class="s1">&#39;Age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">35</span><span class="p">],</span>
+<span class="gp">... </span>                   <span class="s1">&#39;Location&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Seattle&#39;</span><span class="p">,</span> <span class="s1">&#39;New York&#39;</span><span class="p">,</span> <span class="s1">&#39;Kona&#39;</span><span class="p">]},</span>
+<span class="gp">... </span>                  <span class="n">index</span><span class="o">=</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">index</span>
+<span class="go">Index([10, 20, 30], dtype=&#39;int64&#39;)</span>
+</pre></div>
+</div>
+<p>In this example, we create a DataFrame with 3 rows and 3 columns,
+including Name, Age, and Location information. We set the index labels to
+be the integers 10, 20, and 30. We then access the <cite>index</cite> attribute of the
+DataFrame, which returns an <cite>Index</cite> object containing the index labels.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">    Name  Age Location</span>
+<span class="go">100  Alice   25  Seattle</span>
+<span class="go">200    Bob   30 New York</span>
+<span class="go">300  Aritra  35    Kona</span>
+</pre></div>
+</div>
+<p>In this example, we modify the index labels of the DataFrame by assigning
+a new list of labels to the <cite>index</cite> attribute. The DataFrame is then
+updated with the new labels, and the output shows the modified DataFrame.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">loc</span></code></dt><dd><p>Access a group of rows and columns by label(s) or a boolean array.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></dt><dd><p>Return an int representing the number of axes / array dimensions.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></dt><dd><p>Return a tuple representing the dimensionality of the DataFrame.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></dt><dd><p>Return an int representing the number of elements in this object.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">style</span></code></dt><dd><p>Returns a Styler object.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></dt><dd><p>Return a Numpy representation of the DataFrame.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">abs</span></code>()</p></td>
+<td><p>Return a Series/DataFrame with absolute numeric value of each element.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Addition of dataframe and other, element-wise (binary operator <cite>add</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_prefix</span></code>(prefix[, axis])</p></td>
+<td><p>Prefix labels with string <cite>prefix</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_suffix</span></code>(suffix[, axis])</p></td>
+<td><p>Suffix labels with string <cite>suffix</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">agg</span></code>([func, axis])</p></td>
+<td><p>Aggregate using one or more operations over the specified axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">aggregate</span></code>([func, axis])</p></td>
+<td><p>Aggregate using one or more operations over the specified axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">align</span></code>(other[, join, axis, level, copy, ...])</p></td>
+<td><p>Align two objects on their axes with the specified join method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span></code>([axis, bool_only, skipna])</p></td>
+<td><p>Return whether all elements are True, potentially over an axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">any</span></code>(*[, axis, bool_only, skipna])</p></td>
+<td><p>Return whether any element is True, potentially over an axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code>(func[, axis, raw, result_type, args, ...])</p></td>
+<td><p>Apply a function along an axis of the DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">applymap</span></code>(func[, na_action])</p></td>
+<td><p>Apply a function to a Dataframe elementwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">asfreq</span></code>(freq[, method, how, normalize, ...])</p></td>
+<td><p>Convert time series to specified frequency.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">asof</span></code>(where[, subset])</p></td>
+<td><p>Return the last row(s) without any NaNs before <cite>where</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign</span></code>(**kwargs)</p></td>
+<td><p>Assign new columns to a DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">astype</span></code>(dtype[, copy, errors])</p></td>
+<td><p>Cast a pandas object to a specified dtype <code class="docutils literal notranslate"><span class="pre">dtype</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at_time</span></code>(time[, asof, axis])</p></td>
+<td><p>Select values at particular time of day (e.g., 9:30AM).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe" title="common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attributes_to_dataframe</span></code></a>([attributes])</p></td>
+<td><p>Return selected attributes of all columns in the AttributeDataFrame as a new DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backfill</span></code>(*[, axis, inplace, limit, downcast])</p></td>
+<td><p>Fill NA/NaN values by using the next valid observation to fill the gap.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">between_time</span></code>(start_time, end_time[, ...])</p></td>
+<td><p>Select values between particular times of the day (e.g., 9:00-9:30 AM).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bfill</span></code>(*[, axis, inplace, limit, limit_area, ...])</p></td>
+<td><p>Fill NA/NaN values by using the next valid observation to fill the gap.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>()</p></td>
+<td><p>Return the bool of a single element Series or DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxplot</span></code>([column, by, ax, fontsize, rot, ...])</p></td>
+<td><p>Make a box plot from DataFrame columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code>([lower, upper, axis, inplace])</p></td>
+<td><p>Trim values at input threshold(s).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine</span></code>(other, func[, fill_value, overwrite])</p></td>
+<td><p>Perform column-wise combine with another DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine_first</span></code>(other)</p></td>
+<td><p>Update null elements with value in the same location in <cite>other</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compare</span></code>(other[, align_axis, keep_shape, ...])</p></td>
+<td><p>Compare to another DataFrame and show the differences.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_dtypes</span></code>([infer_objects, ...])</p></td>
+<td><p>Convert columns to the best possible dtypes using dtypes supporting <code class="docutils literal notranslate"><span class="pre">pd.NA</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>([deep])</p></td>
+<td><p>Make a copy of this object's indices and data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.copy_columns" title="common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_columns</span></code></a>([columns])</p></td>
+<td><p>Extract specified columns into a new AttributeDataFrame, preserving their attributes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code>([method, min_periods, numeric_only])</p></td>
+<td><p>Compute pairwise correlation of columns, excluding NA/null values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrwith</span></code>(other[, axis, drop, method, ...])</p></td>
+<td><p>Compute pairwise correlation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">count</span></code>([axis, numeric_only])</p></td>
+<td><p>Count non-NA cells for each column or row.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov</span></code>([min_periods, ddof, numeric_only])</p></td>
+<td><p>Compute pairwise covariance of columns, excluding NA/null values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cummax</span></code>([axis, skipna])</p></td>
+<td><p>Return cumulative maximum over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cummin</span></code>([axis, skipna])</p></td>
+<td><p>Return cumulative minimum over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumprod</span></code>([axis, skipna])</p></td>
+<td><p>Return cumulative product over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumsum</span></code>([axis, skipna])</p></td>
+<td><p>Return cumulative sum over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">describe</span></code>([percentiles, include, exclude])</p></td>
+<td><p>Generate descriptive statistics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">diff</span></code>([periods, axis])</p></td>
+<td><p>First discrete difference of element.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">div</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">divide</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dot</span></code>(other)</p></td>
+<td><p>Compute the matrix multiplication between the DataFrame and other.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop</span></code>([labels, axis, index, columns, level, ...])</p></td>
+<td><p>Drop specified labels from rows or columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_duplicates</span></code>([subset, keep, inplace, ...])</p></td>
+<td><p>Return DataFrame with duplicate rows removed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">droplevel</span></code>(level[, axis])</p></td>
+<td><p>Return Series/DataFrame with requested index / column level(s) removed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dropna</span></code>(*[, axis, how, thresh, subset, ...])</p></td>
+<td><p>Remove missing values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">duplicated</span></code>([subset, keep])</p></td>
+<td><p>Return boolean Series denoting duplicate rows.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eq</span></code>(other[, axis, level])</p></td>
+<td><p>Get Equal to of dataframe and other, element-wise (binary operator <cite>eq</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">equals</span></code>(other)</p></td>
+<td><p>Test whether two objects contain the same elements.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code>(expr, *[, inplace])</p></td>
+<td><p>Evaluate a string describing operations on DataFrame columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ewm</span></code>([com, span, halflife, alpha, ...])</p></td>
+<td><p>Provide exponentially weighted (EW) calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">expanding</span></code>([min_periods, axis, method])</p></td>
+<td><p>Provide expanding window calculations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">explode</span></code>(column[, ignore_index])</p></td>
+<td><p>Transform each element of a list-like to a row, replicating index values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ffill</span></code>(*[, axis, inplace, limit, limit_area, ...])</p></td>
+<td><p>Fill NA/NaN values by propagating the last valid observation to next valid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fillna</span></code>([value, method, axis, inplace, ...])</p></td>
+<td><p>Fill NA/NaN values using the specified method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code>([items, like, regex, axis])</p></td>
+<td><p>Subset the dataframe rows or columns according to the specified index labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">first</span></code>(offset)</p></td>
+<td><p>Select initial periods of time series data based on a date offset.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">first_valid_index</span></code>()</p></td>
+<td><p>Return index for first non-NA value or None, if no non-NA value is found.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">floordiv</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Integer division of dataframe and other, element-wise (binary operator <cite>floordiv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_dict</span></code>(data[, orient, dtype, columns])</p></td>
+<td><p>Construct DataFrame from dict of array-like or dicts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_records</span></code>(data[, index, exclude, ...])</p></td>
+<td><p>Convert structured or record ndarray to DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ge</span></code>(other[, axis, level])</p></td>
+<td><p>Get Greater than or equal to of dataframe and other, element-wise (binary operator <cite>ge</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(key[, default])</p></td>
+<td><p>Get item from object for given key (ex: DataFrame column).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.get_attribute" title="common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute</span></code></a>(columns, attribute)</p></td>
+<td><p>Get a single attribute from an AttributeDataFrame for one or more columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.get_attribute_dict" title="common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute_dict</span></code></a>(attribute_name)</p></td>
+<td><p>Creates a dictionary from an attribute where the unique values of the attribute becomes the keys and the items are lists with the column names that match each attribute_name.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groupby</span></code>([by, axis, level, as_index, sort, ...])</p></td>
+<td><p>Group DataFrame using a mapper or by a Series of columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gt</span></code>(other[, axis, level])</p></td>
+<td><p>Get Greater than of dataframe and other, element-wise (binary operator <cite>gt</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">head</span></code>([n])</p></td>
+<td><p>Return the first <cite>n</cite> rows.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist</span></code>([column, by, grid, xlabelsize, xrot, ...])</p></td>
+<td><p>Make a histogram of the DataFrame's columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxmax</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return index of first occurrence of maximum over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxmin</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return index of first occurrence of minimum over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">infer_objects</span></code>([copy])</p></td>
+<td><p>Attempt to infer better dtypes for object columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">info</span></code>([verbose, buf, max_cols, memory_usage, ...])</p></td>
+<td><p>Print a concise summary of a DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert</span></code>(loc, column, value[, allow_duplicates])</p></td>
+<td><p>Insert column into DataFrame at specified location.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate</span></code>([method, axis, limit, inplace, ...])</p></td>
+<td><p>Fill NaN values using an interpolation method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.is_attribute" title="common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_attribute</span></code></a>(column, attribute)</p></td>
+<td><p>Check if a given attribute exists for the specified column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isetitem</span></code>(loc, value)</p></td>
+<td><p>Set the given value in the column with position <cite>loc</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isin</span></code>(values)</p></td>
+<td><p>Whether each element in the DataFrame is contained in values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isna</span></code>()</p></td>
+<td><p>Detect missing values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isnull</span></code>()</p></td>
+<td><p>DataFrame.isnull is an alias for DataFrame.isna.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>()</p></td>
+<td><p>Iterate over (column name, Series) pairs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterrows</span></code>()</p></td>
+<td><p>Iterate over DataFrame rows as (index, Series) pairs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">itertuples</span></code>([index, name])</p></td>
+<td><p>Iterate over DataFrame rows as namedtuples.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">join</span></code>(other[, on, how, lsuffix, rsuffix, ...])</p></td>
+<td><p>Join columns of another DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code>()</p></td>
+<td><p>Get the 'info axis' (see Indexing for more).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kurt</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return unbiased kurtosis over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kurtosis</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return unbiased kurtosis over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">last</span></code>(offset)</p></td>
+<td><p>Select final periods of time series data based on a date offset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_valid_index</span></code>()</p></td>
+<td><p>Return index for last non-NA value or None, if no non-NA value is found.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">le</span></code>(other[, axis, level])</p></td>
+<td><p>Get Less than or equal to of dataframe and other, element-wise (binary operator <cite>le</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lt</span></code>(other[, axis, level])</p></td>
+<td><p>Get Less than of dataframe and other, element-wise (binary operator <cite>lt</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">map</span></code>(func[, na_action])</p></td>
+<td><p>Apply a function to a Dataframe elementwise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code>(cond[, other, inplace, axis, level])</p></td>
+<td><p>Replace values where the condition is True.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.match_attribute" title="common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attribute</span></code></a>(attribute, value)</p></td>
+<td><p>Returns a list of columns where a specific attribute matches the given value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.match_attributes" title="common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attributes</span></code></a>(attributes_dict)</p></td>
+<td><p>Returns a list of columns where each attribute matches its corresponding value.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return the maximum of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return the mean of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return the median of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">melt</span></code>([id_vars, value_vars, var_name, ...])</p></td>
+<td><p>Unpivot a DataFrame from wide to long format, optionally leaving identifiers set.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">memory_usage</span></code>([index, deep])</p></td>
+<td><p>Return the memory usage of each column in bytes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code>(right[, how, on, left_on, right_on, ...])</p></td>
+<td><p>Merge DataFrame or named Series objects with a database-style join.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return the minimum of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mod</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Modulo of dataframe and other, element-wise (binary operator <cite>mod</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code>([axis, numeric_only, dropna])</p></td>
+<td><p>Get the mode(s) of each element along the selected axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Multiplication of dataframe and other, element-wise (binary operator <cite>mul</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiply</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Multiplication of dataframe and other, element-wise (binary operator <cite>mul</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ne</span></code>(other[, axis, level])</p></td>
+<td><p>Get Not equal to of dataframe and other, element-wise (binary operator <cite>ne</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nlargest</span></code>(n, columns[, keep])</p></td>
+<td><p>Return the first <cite>n</cite> rows ordered by <cite>columns</cite> in descending order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">notna</span></code>()</p></td>
+<td><p>Detect existing (non-missing) values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">notnull</span></code>()</p></td>
+<td><p>DataFrame.notnull is an alias for DataFrame.notna.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nsmallest</span></code>(n, columns[, keep])</p></td>
+<td><p>Return the first <cite>n</cite> rows ordered by <cite>columns</cite> in ascending order.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nunique</span></code>([axis, dropna])</p></td>
+<td><p>Count number of distinct elements in specified axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pad</span></code>(*[, axis, inplace, limit, downcast])</p></td>
+<td><p>Fill NA/NaN values by propagating the last valid observation to next valid.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pct_change</span></code>([periods, fill_method, limit, freq])</p></td>
+<td><p>Fractional change between the current and a prior element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipe</span></code>(func, *args, **kwargs)</p></td>
+<td><p>Apply chainable functions that expect Series or DataFrames.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot</span></code>(*, columns[, index, values])</p></td>
+<td><p>Return reshaped DataFrame organized by given index / column values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_table</span></code>([values, index, columns, ...])</p></td>
+<td><p>Create a spreadsheet-style pivot table as a DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">PlotAccessor</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code>(item)</p></td>
+<td><p>Return item and drop from frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pow</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Exponential power of dataframe and other, element-wise (binary operator <cite>pow</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code>([axis, skipna, numeric_only, min_count])</p></td>
+<td><p>Return the product of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">product</span></code>([axis, skipna, numeric_only, min_count])</p></td>
+<td><p>Return the product of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantile</span></code>([q, axis, numeric_only, ...])</p></td>
+<td><p>Return values at the given quantile over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">query</span></code>(expr, *[, inplace])</p></td>
+<td><p>Query the columns of a DataFrame with a boolean expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">radd</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Addition of dataframe and other, element-wise (binary operator <cite>radd</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rank</span></code>([axis, method, numeric_only, ...])</p></td>
+<td><p>Compute numerical data ranks (1 through n) along axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rdiv</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>rtruediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reindex</span></code>([labels, index, columns, axis, ...])</p></td>
+<td><p>Conform DataFrame to new index with optional filling logic.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reindex_like</span></code>(other[, method, copy, limit, ...])</p></td>
+<td><p>Return an object with matching indices as other object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename</span></code>([mapper, index, columns, axis, copy, ...])</p></td>
+<td><p>Rename columns or index labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename_axis</span></code>([mapper, index, columns, axis, ...])</p></td>
+<td><p>Set the name of the axis for the index or columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reorder_levels</span></code>(order[, axis])</p></td>
+<td><p>Rearrange index levels using input order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace</span></code>([to_replace, value, inplace, limit, ...])</p></td>
+<td><p>Replace values given in <cite>to_replace</cite> with <cite>value</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample</span></code>(rule[, axis, closed, label, ...])</p></td>
+<td><p>Resample time-series data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_index</span></code>([level, drop, inplace, ...])</p></td>
+<td><p>Reset the index, or a level of it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rfloordiv</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Integer division of dataframe and other, element-wise (binary operator <cite>rfloordiv</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmod</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Modulo of dataframe and other, element-wise (binary operator <cite>rmod</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmul</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Multiplication of dataframe and other, element-wise (binary operator <cite>rmul</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rolling</span></code>(window[, min_periods, center, ...])</p></td>
+<td><p>Provide rolling window calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">round</span></code>([decimals])</p></td>
+<td><p>Round a DataFrame to a variable number of decimal places.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rpow</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Exponential power of dataframe and other, element-wise (binary operator <cite>rpow</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsub</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Subtraction of dataframe and other, element-wise (binary operator <cite>rsub</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rtruediv</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>rtruediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample</span></code>([n, frac, replace, weights, ...])</p></td>
+<td><p>Return a random sample of items from an axis of object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_dtypes</span></code>([include, exclude])</p></td>
+<td><p>Return a subset of the DataFrame's columns based on the column dtypes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sem</span></code>([axis, skipna, ddof, numeric_only])</p></td>
+<td><p>Return unbiased standard error of the mean over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.set_attribute" title="common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attribute</span></code></a>(columns, attribute, values)</p></td>
+<td><p>Set an attribute for one or more columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axis</span></code>(labels, *[, axis, copy])</p></td>
+<td><p>Assign desired index to given axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_flags</span></code>(*[, copy, allows_duplicate_labels])</p></td>
+<td><p>Return a new object with updated flags.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_index</span></code>(keys, *[, drop, append, inplace, ...])</p></td>
+<td><p>Set the DataFrame index using existing columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift</span></code>([periods, freq, axis, fill_value, suffix])</p></td>
+<td><p>Shift index by desired number of periods with an optional time <cite>freq</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.show_attributes" title="common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_attributes</span></code></a>([column])</p></td>
+<td><p>Displays all attributes for a specific column or for the entire DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skew</span></code>([axis, skipna, numeric_only])</p></td>
+<td><p>Return unbiased skew over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.sort_columns" title="common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_columns</span></code></a>(sorted_columns)</p></td>
+<td><p>Sorts columns and attributes of an AttributeDataFrame object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_index</span></code>(*[, axis, level, ascending, ...])</p></td>
+<td><p>Sort object by labels (along an axis).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_values</span></code>(by, *[, axis, ascending, ...])</p></td>
+<td><p>Sort by the values along either axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sparse</span></code></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">SparseFrameAccessor</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code>([axis])</p></td>
+<td><p>Squeeze 1 dimensional axis objects into scalars.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack</span></code>([level, dropna, sort, future_stack])</p></td>
+<td><p>Stack the prescribed level(s) from columns to index.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>([axis, skipna, ddof, numeric_only])</p></td>
+<td><p>Return sample standard deviation over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sub</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Subtraction of dataframe and other, element-wise (binary operator <cite>sub</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subtract</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Subtraction of dataframe and other, element-wise (binary operator <cite>sub</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>([axis, skipna, numeric_only, min_count])</p></td>
+<td><p>Return the sum of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapaxes</span></code>(axis1, axis2[, copy])</p></td>
+<td><p>Interchange axes and swap values axes appropriately.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swaplevel</span></code>([i, j, axis])</p></td>
+<td><p>Swap levels i and j in a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tail</span></code>([n])</p></td>
+<td><p>Return the last <cite>n</cite> rows.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">take</span></code>(indices[, axis])</p></td>
+<td><p>Return the elements in the given <em>positional</em> indices along an axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_clipboard</span></code>(*[, excel, sep])</p></td>
+<td><p>Copy object to the system clipboard.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_csv</span></code>([path_or_buf, sep, na_rep, ...])</p></td>
+<td><p>Write object to a comma-separated values (csv) file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict</span></code>([orient, into, index])</p></td>
+<td><p>Convert the DataFrame to a dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_excel</span></code>(excel_writer, *[, sheet_name, ...])</p></td>
+<td><p>Write object to an Excel sheet.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_feather</span></code>(path, **kwargs)</p></td>
+<td><p>Write a DataFrame to the binary Feather format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_gbq</span></code>(destination_table, *[, project_id, ...])</p></td>
+<td><p>Write a DataFrame to a Google BigQuery table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_hdf</span></code>(path_or_buf, *, key[, mode, ...])</p></td>
+<td><p>Write the contained data to an HDF5 file using HDFStore.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_html</span></code>([buf, columns, col_space, header, ...])</p></td>
+<td><p>Render a DataFrame as an HTML table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json</span></code>([path_or_buf, orient, date_format, ...])</p></td>
+<td><p>Convert the object to a JSON string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_latex</span></code>([buf, columns, header, index, ...])</p></td>
+<td><p>Render object to a LaTeX tabular, longtable, or nested table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_markdown</span></code>([buf, mode, index, storage_options])</p></td>
+<td><p>Print DataFrame in Markdown-friendly format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_numpy</span></code>([dtype, copy, na_value])</p></td>
+<td><p>Convert the DataFrame to a NumPy array.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_orc</span></code>([path, engine, index, engine_kwargs])</p></td>
+<td><p>Write a DataFrame to the ORC format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_parquet</span></code>([path, engine, compression, ...])</p></td>
+<td><p>Write a DataFrame to the binary parquet format.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_period</span></code>([freq, axis, copy])</p></td>
+<td><p>Convert DataFrame from DatetimeIndex to PeriodIndex.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pickle</span></code>(path, *[, compression, protocol, ...])</p></td>
+<td><p>Pickle (serialize) object to file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_records</span></code>([index, column_dtypes, index_dtypes])</p></td>
+<td><p>Convert DataFrame to a NumPy record array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_sql</span></code>(name, con, *[, schema, if_exists, ...])</p></td>
+<td><p>Write records stored in a DataFrame to a SQL database.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_stata</span></code>(path, *[, convert_dates, ...])</p></td>
+<td><p>Export DataFrame object to Stata dta format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code>([buf, columns, col_space, header, ...])</p></td>
+<td><p>Render a DataFrame to a console-friendly tabular output.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_timestamp</span></code>([freq, how, axis, copy])</p></td>
+<td><p>Cast to DatetimeIndex of timestamps, at <em>beginning</em> of period.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_xarray</span></code>()</p></td>
+<td><p>Return an xarray object from the pandas object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_xml</span></code>([path_or_buffer, index, root_name, ...])</p></td>
+<td><p>Render a DataFrame to an XML document.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code>(func[, axis])</p></td>
+<td><p>Call <code class="docutils literal notranslate"><span class="pre">func</span></code> on self producing a DataFrame with the same axis shape as self.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose</span></code>(*args[, copy])</p></td>
+<td><p>Transpose index and columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">truediv</span></code>(other[, axis, level, fill_value])</p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">truncate</span></code>([before, after, axis, copy])</p></td>
+<td><p>Truncate a Series or DataFrame before and after some index value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tz_convert</span></code>(tz[, axis, level, copy])</p></td>
+<td><p>Convert tz-aware axis to target time zone.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tz_localize</span></code>(tz[, axis, level, copy, ...])</p></td>
+<td><p>Localize tz-naive index of a Series or DataFrame to target time zone.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unstack</span></code>([level, fill_value, sort])</p></td>
+<td><p>Pivot a level of the (necessarily hierarchical) index labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code>(other[, join, overwrite, ...])</p></td>
+<td><p>Modify in place using non-NA values from another DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_counts</span></code>([subset, normalize, sort, ...])</p></td>
+<td><p>Return a Series containing the frequency of each distinct row in the Dataframe.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code>([axis, skipna, ddof, numeric_only])</p></td>
+<td><p>Return unbiased variance over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">where</span></code>(cond[, other, inplace, axis, level])</p></td>
+<td><p>Replace values where the condition is False.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xs</span></code>(key[, axis, level, drop_level])</p></td>
+<td><p>Return cross-section from the Series/DataFrame.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe">
+<span class="sig-name descname"><span class="pre">attributes_to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.attributes_to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe" title="Link to this definition">#</a></dt>
+<dd><p>Return selected attributes of all columns in the AttributeDataFrame as a new DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attributes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of attributes to include in the resulting DataFrame. If None, all attributes
+will be included.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame where each column corresponds to an original column in the
+AttributeDataFrame and each row corresponds to an attribute.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>df = AttributeDataFrame({‘Temperature’: [22, 23, 21], ‘Pressure’: [101, 102, 100]})
+df.set_attribute(‘Temperature’, ‘units’, ‘Celsius’)
+df.set_attribute(‘Pressure’, ‘units’, ‘Pascal’)
+df.set_attribute(‘Temperature’, ‘average’, 22)
+df.set_attribute(‘Pressure’, ‘average’, 101)</p>
+<p># Get only the ‘units’ attribute
+attribute_df_units = df.attributes_to_dataframe(attributes=[‘units’])
+print(attribute_df_units)</p>
+<p># Get both ‘units’ and ‘average’ attributes
+attribute_df_units_avg = df.attributes_to_dataframe(attributes=[‘units’, ‘average’])
+print(attribute_df_units_avg)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.copy_columns">
+<span class="sig-name descname"><span class="pre">copy_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.copy_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.copy_columns" title="Link to this definition">#</a></dt>
+<dd><p>Extract specified columns into a new AttributeDataFrame, preserving their attributes.
+If no columns are specified, all columns will be copied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of column names to extract. If None or empty, all columns are extracted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new AttributeDataFrame containing the selected columns and their attributes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p># Initialize an AttributeDataFrame
+df = AttributeDataFrame({‘Temperature’: [22, 23, 21], ‘Pressure’: [101, 102, 100]})
+df.set_attribute(‘Temperature’, ‘units’, ‘Celsius’)
+df.set_attribute(‘Pressure’, ‘units’, ‘Pascal’)
+df.set_attribute(‘Temperature’, ‘average’, 22)
+df.set_attribute(‘Pressure’, ‘average’, 101)</p>
+<p># Extract all columns if no columns are specified
+new_df_all = df.copy_columns()
+print(new_df_all)
+print(new_df_all.get_attribute(‘Temperature’, ‘units’))   # Output: Celsius
+print(new_df_all.get_attribute(‘Pressure’, ‘units’))      # Output: Pascal</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.get_attribute">
+<span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.get_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.get_attribute" title="Link to this definition">#</a></dt>
+<dd><p>Get a single attribute from an AttributeDataFrame for one or more columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name or list of column names.</p></li>
+<li><p><strong>attribute</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the attribute to retrieve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Attribute value(s). Returns a single value if one column is provided,
+otherwise returns a list of attribute values for multiple columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>df = AttributeDataFrame()
+df[‘Temperature’] = [22, 23, 21]
+df[‘Pressure’] = [101, 100, 102]
+df.set_attribute(‘Temperature’, ‘units’, ‘Celsius’)
+df.set_attribute(‘Pressure’, ‘units’, ‘Pascal’)</p>
+<p># Single column
+print(df.get_attribute(‘Temperature’, ‘units’))  # Output: ‘Celsius’</p>
+<p># Multiple columns
+print(df.get_attribute([‘Temperature’, ‘Pressure’], ‘units’))
+# Output: [‘Celsius’, ‘Pascal’]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.get_attribute_dict">
+<span class="sig-name descname"><span class="pre">get_attribute_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.get_attribute_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.get_attribute_dict" title="Link to this definition">#</a></dt>
+<dd><p>Creates a dictionary from an attribute where the unique values of the attribute becomes the
+keys and the items are lists with the column names that match each attribute_name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attribute_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of attribute within the <cite>edf.column_attributes</cite> dictionary.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary with attribute_values and columns that match.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.is_attribute">
+<span class="sig-name descname"><span class="pre">is_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.is_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.is_attribute" title="Link to this definition">#</a></dt>
+<dd><p>Check if a given attribute exists for the specified column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the column.</p></li>
+<li><p><strong>attribute</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The attribute to check for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the attribute exists for the column, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.match_attribute">
+<span class="sig-name descname"><span class="pre">match_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.match_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.match_attribute" title="Link to this definition">#</a></dt>
+<dd><p>Returns a list of columns where a specific attribute matches the given value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The attribute to search for.</p></li>
+<li><p><strong>value</strong> (<em>any</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – The value(s) to match.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of column names that have the attribute set to the specified value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.match_attributes">
+<span class="sig-name descname"><span class="pre">match_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.match_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.match_attributes" title="Link to this definition">#</a></dt>
+<dd><p>Returns a list of columns where each attribute matches its corresponding value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attributes_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – A dictionary where keys are attribute names and values are the corresponding values to match.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of column names where each attribute matches its corresponding value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.set_attribute">
+<span class="sig-name descname"><span class="pre">set_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.set_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.set_attribute" title="Link to this definition">#</a></dt>
+<dd><p>Set an attribute for one or more columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – A single column name or a list of column names.</p></li>
+<li><p><strong>attribute</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the attribute to set.</p></li>
+<li><p><strong>values</strong> (<em>any</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – A single value to apply to all columns or a list of values for each column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the length of <cite>columns</cite> and <cite>values</cite> don’t match when <cite>values</cite> is a list.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p># Single column, single attribute value
+df.set_attribute(‘Temperature’, ‘units’, ‘Celsius’)</p>
+<p># Multiple columns, same attribute value
+df.set_attribute([‘Temperature’, ‘Pressure’], ‘source’, ‘Sensor’)</p>
+<p># Multiple columns, different attribute values
+df.set_attribute([‘Temperature’, ‘Pressure’], ‘units’, [‘Celsius’, ‘Pascal’])</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.show_attributes">
+<span class="sig-name descname"><span class="pre">show_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.show_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.show_attributes" title="Link to this definition">#</a></dt>
+<dd><p>Displays all attributes for a specific column or for the entire DataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame.sort_columns">
+<span class="sig-name descname"><span class="pre">sort_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sorted_columns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame.sort_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame.sort_columns" title="Link to this definition">#</a></dt>
+<dd><p>Sorts columns and attributes of an AttributeDataFrame object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sorted_columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – List of selected new column order</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>For chaining methods.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="common.DataHandling.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">common.DataHandling</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="common.LamePlot.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">common.LamePlot</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.attributes_to_dataframe()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.copy_columns()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.get_attribute()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.get_attribute_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.is_attribute()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.match_attribute()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.match_attributes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.set_attribute()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.show_attributes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="docutils literal notranslate"><span class="pre">AttributeDataFrame.sort_columns()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/common.ExtendedDF.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

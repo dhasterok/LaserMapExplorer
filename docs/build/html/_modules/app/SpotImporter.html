@@ -1,0 +1,840 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app.SpotImporter &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/app/SpotImporter';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.SpotImporter</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for app.SpotImporter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QDialog</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QMenu</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> 
+    <span class="n">QMessageBox</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QAction</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">src.ui.SpotImportDialog</span> <span class="kn">import</span> <span class="n">Ui_SpotImportDialog</span>
+<span class="kn">from</span> <span class="nn">src.common.ExtendedDF</span> <span class="kn">import</span> <span class="n">AttributeDataFrame</span>
+
+<div class="viewcode-block" id="SpotImporter">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter">[docs]</a>
+<span class="k">class</span> <span class="nc">SpotImporter</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_SpotImportDialog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dialog for importing spot data into LaME</span>
+
+<span class="sd">    Import spot data.  Import format requires csv file(s) with one row per spot and columns with metadata and analyses.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    main_window : MainWindow</span>
+<span class="sd">        See parent below.</span>
+<span class="sd">    ok : bool</span>
+<span class="sd">        Flag indicating successful import.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : MainWindow</span>
+<span class="sd">        Parent window</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span> <span class="o">=</span> <span class="n">parent</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s1">&#39;Spot Importer&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># context menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_context_menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_context_menu</span><span class="p">)</span>
+
+        <span class="c1"># drag and drop columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setSectionsMovable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setDragDropMode</span><span class="p">(</span><span class="n">QHeaderView</span><span class="o">.</span><span class="n">InternalMove</span><span class="p">)</span>
+        <span class="c1">#self.tableWidgetSpotData.setDragDropMode(QTableWidget.InternalMove)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonOpenSpotFile</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_spot_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonCancel</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonImport</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">import_spot_table</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonImport</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="SpotImporter.load_spot_data">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.load_spot_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_spot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load spot data file(s) when ``toolButtonOpenSpotFile``</span>
+
+<span class="sd">        Loads csv data into ``tableWidgetSpotData`` for the user to view and update before importing.  A row of comboboxes are added to the</span>
+<span class="sd">        first row that defines the type of column data.  An attempt is made to determine the type, but the user will need to verify.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="p">()</span>
+        <span class="n">dialog</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">ExistingFiles</span><span class="p">)</span>
+        <span class="n">dialog</span><span class="o">.</span><span class="n">setNameFilter</span><span class="p">(</span><span class="s2">&quot;CSV (*.csv *.xls *.xlsx)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">():</span>
+            <span class="n">file_list</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+            <span class="n">csv_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span> <span class="k">if</span> <span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xls&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">))]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">csv_files</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+            
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">csv_files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+                <span class="n">tempdata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span><span class="n">filename</span><span class="p">),</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xls&#39;</span><span class="p">):</span>
+                <span class="n">tempdata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span><span class="n">filename</span><span class="p">),</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="s1">&#39;Sample&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tempdata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">tempdata</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Sample&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="p">,</span> <span class="n">tempdata</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span><span class="s1">&#39;One or more spot files could not load. Files must be a *.csv, *.xls, or *.xlsx.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># clean the spot data column names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(int)&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(prop)&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_ &#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; _&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+        <span class="c1"># update directory/filename</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">csv_files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># show directory if multiple files</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labelSpotFile</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Root directory&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEditSpotFile</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># show filename+path if single file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labelSpotFile</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Spot file&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEditSpotFile</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_spot_table</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SpotImporter.update_spot_table">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.update_spot_table">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the ``tableWidgetSpotData`` with data from csv file(s) now in ``spot_data``.&quot;&quot;&quot;</span>        
+        <span class="c1"># initialize table (add row for combobox in row 1)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setColumnCount</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># set header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="p">)):</span>
+            <span class="c1"># add combobox to column</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_combobox</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        
+            <span class="c1"># add spot_data column to tableWidgetSpotData</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="p">])))</span>
+
+        <span class="c1"># enable importing of data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonImport</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SpotImporter.add_combobox">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.add_combobox">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">col</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a combobox with column data types to the first row.</span>
+
+<span class="sd">        The user can use the combobox to select the type of data given column.  These types are used to develop a standard format for importing into *LaME*.</span>
+<span class="sd">        An attempt is made to determine the type, but the user will need to verify.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col : int</span>
+<span class="sd">            Column to add the combobox to</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">combobox</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
+        <span class="n">combobox</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s1">&#39;analyte&#39;</span><span class="p">,</span> <span class="s1">&#39;annotation&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;sample id&#39;</span><span class="p">,</span> <span class="s1">&#39;spot size&#39;</span><span class="p">,</span> <span class="s1">&#39;spot id&#39;</span><span class="p">,</span> <span class="s1">&#39;x coordinate&#39;</span><span class="p">,</span> <span class="s1">&#39;y coordinate&#39;</span><span class="p">,</span> <span class="s1">&#39;uncertainty&#39;</span><span class="p">,</span> <span class="s1">&#39;units&#39;</span><span class="p">])</span>
+
+        <span class="c1"># check column data type</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeaderItem</span><span class="p">(</span><span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="c1"># initialize unknown columns as metadata</span>
+            <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;metadata&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">col_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spotdata</span><span class="p">[</span><span class="n">header</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="k">if</span> <span class="n">col_dtype</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span><span class="p">:</span>
+                <span class="c1"># initalize str columns</span>
+                <span class="k">if</span> <span class="s1">&#39;sample&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;sample id&#39;</span>
+                <span class="k">elif</span> <span class="s1">&#39;analysis&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;spot id&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;metadata&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># initialize numeric columns</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="o">==</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;x coordinate&#39;</span>
+                <span class="k">elif</span> <span class="s1">&#39;y&#39;</span> <span class="o">==</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;y coordinate&#39;</span>
+                <span class="k">elif</span> <span class="p">((</span><span class="s1">&#39;sd&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;se&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;sigma&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;Se&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">):</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;uncertainty&#39;</span>
+                <span class="k">elif</span> <span class="s1">&#39;spot size&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;spot size&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">col_type</span> <span class="o">=</span> <span class="s1">&#39;analyte&#39;</span>
+        <span class="n">combobox</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">col_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setCellWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">combobox</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="SpotImporter.open_context_menu">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.open_context_menu">[docs]</a>
+    <span class="k">def</span> <span class="nf">open_context_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context menu for header functions</span>
+
+<span class="sd">        Adds a context menu for adding, removing and deleting columns from ``tableWidgetSpotData``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        position : QPoint</span>
+<span class="sd">            Location into ``tableWidgetSpotData``</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">indexAt</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="n">context_menu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">()</span>
+        
+        <span class="n">actionInsertColumn</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s1">&#39;Insert column&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionRenameColumn</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s1">&#39;Rename column&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionDeleteColumn</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s1">&#39;Delete column&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        
+        <span class="n">currentColumn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">currentColumn</span><span class="p">()</span>
+        <span class="n">actionInsertColumn</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">insert_column</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">))</span>
+        <span class="n">actionRenameColumn</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename_column</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">))</span>
+        <span class="n">actionDeleteColumn</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">removeColumn</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">))</span>
+        
+        <span class="n">context_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">actionInsertColumn</span><span class="p">)</span>
+        <span class="n">context_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">actionRenameColumn</span><span class="p">)</span>
+        <span class="n">context_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">actionDeleteColumn</span><span class="p">)</span>
+        
+        <span class="n">context_menu</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="n">position</span><span class="p">))</span></div>
+
+    
+<div class="viewcode-block" id="SpotImporter.insert_column">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.insert_column">[docs]</a>
+    <span class="k">def</span> <span class="nf">insert_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Insert a column into ``tableWidgetSpotData``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        currentColumn : int</span>
+<span class="sd">            Column to rename</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># insert column and set new column header text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">insertColumn</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setHorizontalHeaderItem</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">,</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="s1">&#39;New Column&#39;</span><span class="p">))</span>
+
+        <span class="c1"># add combobox to first row</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_combobox</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="SpotImporter.rename_column">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.rename_column">[docs]</a>
+    <span class="k">def</span> <span class="nf">rename_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rename a column in ``tableWidgetSpotData``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        currentColumn : int</span>
+<span class="sd">            Column to rename</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeaderItem</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="n">newName</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Rename Column&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter new column name:&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">newName</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">setHorizontalHeaderItem</span><span class="p">(</span><span class="n">currentColumn</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">newName</span><span class="p">))</span></div>
+
+    
+    
+
+<div class="viewcode-block" id="SpotImporter.import_spot_table">
+<a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.import_spot_table">[docs]</a>
+    <span class="k">def</span> <span class="nf">import_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the ``MainWindow.tableWidgetSpots`` and update ``MainWindow.spot_data``</span>
+
+<span class="sd">        Add spot data to *LaME* when pushButtonImport is clicked.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># need to tweak header names, put into AttributeDataFrame</span>
+        <span class="c1"># separate units from names, determine analytes, statistic, set column types etc.</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">horizontalHeaderItem</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">columnCount</span><span class="p">())]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># combobox column types</span>
+        <span class="c1"># &#39;analyte&#39;, &#39;annotation&#39;, &#39;ignore&#39;, &#39;metadata&#39;, &#39;sample id&#39;, &#39;spot size&#39;, &#39;spot id&#39;, &#39;x coordinate&#39;, &#39;y coordinate&#39;, &#39;uncertainty&#39;, &#39;units&#39;</span>
+        
+        <span class="n">ignore</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ianalyte</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">iuncertainty</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">row_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="n">row</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># read combobox</span>
+                    <span class="n">widget_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">cellWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+
+                    <span class="k">match</span> <span class="n">widget_text</span><span class="p">:</span>
+                        <span class="k">case</span> <span class="s1">&#39;analyte&#39;</span><span class="p">:</span>
+                            <span class="n">ianalyte</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+                        <span class="k">case</span> <span class="s1">&#39;annotation&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;display_text&#39;</span>
+                        <span class="k">case</span> <span class="s1">&#39;ignore&#39;</span><span class="p">:</span>
+                            <span class="n">ignore</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+                        <span class="k">case</span> <span class="s1">&#39;metadata&#39;</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                        <span class="k">case</span> <span class="s1">&#39;sample id&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;sample_id&#39;</span>
+                        <span class="k">case</span> <span class="s1">&#39;spot id&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;spot_id&#39;</span>
+                        <span class="k">case</span> <span class="s1">&#39;spot size&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;spot_size&#39;</span>
+                        <span class="k">case</span> <span class="s1">&#39;x coordinate&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;X&#39;</span>
+                        <span class="k">case</span> <span class="s1">&#39;y coordinate&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Y&#39;</span>
+                        <span class="k">case</span> <span class="s1">&#39;uncertainty&#39;</span><span class="p">:</span>
+                            <span class="n">iuncertainty</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+                        <span class="k">case</span> <span class="s1">&#39;units&#39;</span><span class="p">:</span>
+                            <span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;units&#39;</span>
+
+                <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+                <span class="n">row_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_data</span><span class="p">)</span>
+
+        <span class="c1">#columns = list(self.spotdata.columns)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span> <span class="o">=</span> <span class="n">AttributeDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+
+        <span class="c1"># insert missing columns</span>
+        <span class="k">if</span> <span class="s1">&#39;X&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;Y&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;visible&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s1">&#39;display_text&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;spot_id&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="p">[</span><span class="s1">&#39;display_text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="p">[</span><span class="s1">&#39;spot_id&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="p">[</span><span class="s1">&#39;display_text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ianalyte</span> <span class="o">+</span> <span class="n">iuncertainty</span><span class="p">:</span>
+            <span class="n">analyte</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[ _]&#39;</span><span class="p">,</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s1">&#39;cps&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">unit_text</span> <span class="o">=</span> <span class="s1">&#39;cps&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;ppm&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">unit_text</span> <span class="o">=</span> <span class="s1">&#39;ppm&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;ppb&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">unit_text</span> <span class="o">=</span> <span class="s1">&#39;ppb&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;ppt&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">unit_text</span> <span class="o">=</span> <span class="s1">&#39;ppt&#39;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="n">unit_text</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ianalyte</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;mean&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s1">&#39;median&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;median&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">iuncertainty</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;sd&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;uncertainty&#39;</span><span class="p">,</span> <span class="s1">&#39;sd&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s1">&#39;se&#39;</span> <span class="o">==</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;uncertainty&#39;</span><span class="p">,</span> <span class="s1">&#39;se&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;analyte&#39;</span><span class="p">,</span> <span class="n">analyte</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">spotdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_df</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

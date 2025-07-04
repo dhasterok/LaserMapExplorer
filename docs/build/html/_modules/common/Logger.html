@@ -1,0 +1,1164 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>common.Logger &#8212; Laser Map Explorer 0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/custom.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/Logger';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">LaME v.0.0 beta</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../userguide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../documentation.html">
+    Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contact.html">
+    Contact
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../labels.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/dhasterok/LaserMapExplorer" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.Logger</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for common.Logger</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">functools</span><span class="o">,</span> <span class="nn">inspect</span><span class="o">,</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span> <span class="n">QGroupBox</span><span class="p">,</span>
+        <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QWidgetAction</span>
+    <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QAction</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QTextCursor</span><span class="p">,</span> <span class="n">QTextCharFormat</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QTextDocument</span>
+
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">ToggleSwitch</span>
+<span class="kn">from</span> <span class="nn">src.common.SearchTool</span> <span class="kn">import</span> <span class="n">SearchWidget</span>
+
+<span class="n">_global_logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="set_global_logger">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.set_global_logger">[docs]</a>
+<span class="k">def</span> <span class="nf">set_global_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the global logger instance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    logger : object</span>
+<span class="sd">        An object with a `write(str)` method used to handle log output.</span>
+<span class="sd">        Typically, this could be a file-like object or a custom logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_global_logger</span>
+    <span class="n">_global_logger</span> <span class="o">=</span> <span class="n">logger</span></div>
+
+
+<div class="viewcode-block" id="get_global_logger">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.get_global_logger">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_logger</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the global logger instance.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    object</span>
+<span class="sd">        The global logger previously set by `set_global_logger()`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_global_logger</span></div>
+
+
+<div class="viewcode-block" id="log">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.log">[docs]</a>
+<span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a log message using the global logger, respecting pause state and formatting.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    msg : str</span>
+<span class="sd">        The message to be logged.</span>
+
+<span class="sd">    prefix : str, optional</span>
+<span class="sd">        A label to prepend to the message, typically representing a module or category.</span>
+<span class="sd">        If provided, it is formatted as &#39;PREFIX: &#39;.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If logging is paused (via `LoggerConfig.set_paused(True)`), no output is produced.</span>
+<span class="sd">    If no global logger is set, output falls back to standard output using `print`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">is_paused</span><span class="p">():</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_global_logger</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">: &quot;</span>
+    <span class="k">if</span> <span class="n">logger</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="s1">&#39;write&#39;</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log_call">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.log_call">[docs]</a>
+<span class="k">def</span> <span class="nf">log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Method decorator to log function whenever it is called</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    logger_key : str, optional</span>
+<span class="sd">        key into dict logger_options, by default None</span>
+<span class="sd">    show_args : bool, optional</span>
+<span class="sd">        If True will print method arguments in the log, by default False</span>
+<span class="sd">    show_call_chain : bool, optional</span>
+<span class="sd">        If True will give the supply chain, by default False</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c1"># Determine if &#39;self&#39; exists (bound method)</span>
+            <span class="n">self_obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">logger_key</span> <span class="ow">and</span> <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">get_option</span><span class="p">(</span><span class="n">logger_key</span><span class="p">):</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">logger_key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                <span class="k">if</span> <span class="n">self_obj</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">self_obj</span><span class="p">,</span> <span class="s1">&#39;logger_options&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">self_obj</span><span class="o">.</span><span class="n">logger_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">logger_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="c1"># Build message</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__qualname__</span>
+            <span class="n">caller</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">function</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">: [</span><span class="si">{</span><span class="n">caller</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">get_show_args</span><span class="p">():</span>
+                <span class="n">arg_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">describe_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+                <span class="n">kwarg_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">describe_arg</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;args=[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_list</span> <span class="o">+</span> <span class="n">kwarg_list</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">get_show_call_chain</span><span class="p">():</span>
+                <span class="n">chain</span> <span class="o">=</span> <span class="s2">&quot; → &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">function</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]))</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;chain:/ </span><span class="si">{</span><span class="n">chain</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">log</span><span class="p">(</span><span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<div class="viewcode-block" id="describe_arg">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.describe_arg">[docs]</a>
+<span class="k">def</span> <span class="nf">describe_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string description of the argument.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="s1">&#39;objectName&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">objectName</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">objectName</span><span class="p">()</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> name=&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&gt;&quot;</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;unprintable&gt;&quot;</span></div>
+
+
+<div class="viewcode-block" id="auto_log_methods">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.auto_log_methods">[docs]</a>
+<span class="k">def</span> <span class="nf">auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">log_options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator that wraps all methods in a class   </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    logger_key : str, optional</span>
+<span class="sd">        key into dict logger_options, by default None</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] Wrapping methods for: </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># Skip non-function attributes</span>
+
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="s2">&quot;_no_log&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Skipping method (no_log): </span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Wrapping method: </span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">wrapped</span> <span class="o">=</span> <span class="n">log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="n">logger_key</span><span class="p">,</span> <span class="o">**</span><span class="n">log_options</span><span class="p">)(</span><span class="n">attr</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">wrapped</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<div class="viewcode-block" id="no_log">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.no_log">[docs]</a>
+<span class="k">def</span> <span class="nf">no_log</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A decorator to skip logging a function</span>
+
+<span class="sd">    Use the decorator @no_log before the function defininition to prevent logging the function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    func : _type_</span>
+<span class="sd">        Function not to log</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        sets func._no_log flag to True to skip logging</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">_no_log</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig">[docs]</a>
+<span class="k">class</span> <span class="nc">LoggerConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Central configuration manager for logging behavior within the application.</span>
+
+<span class="sd">    This class provides global settings for controlling what gets logged and how logging is displayed.</span>
+<span class="sd">    It includes toggles for enabling or disabling logging for specific keys (e.g., class or method names),</span>
+<span class="sd">    as well as global flags for displaying method arguments, call chains, and for pausing logging entirely.</span>
+
+<span class="sd">    Class Attributes</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    _options : dict</span>
+<span class="sd">        A dictionary mapping logger keys (typically strings identifying classes or methods)</span>
+<span class="sd">        to booleans indicating whether logging is enabled for that key.</span>
+<span class="sd">    _show_args : bool</span>
+<span class="sd">        Flag indicating whether function arguments should be printed in logs.</span>
+<span class="sd">    _show_call_chain : bool</span>
+<span class="sd">        Flag indicating whether to include the call chain (stack trace) in log messages.</span>
+<span class="sd">    _paused : bool</span>
+<span class="sd">        If True, logging is globally paused.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    set_options(options_dict: dict)</span>
+<span class="sd">        Set the entire logging options dictionary.</span>
+<span class="sd">    </span>
+<span class="sd">    get_option(key: str) -&gt; bool</span>
+<span class="sd">        Retrieve whether logging is enabled for the given key.</span>
+<span class="sd">    </span>
+<span class="sd">    get_all() -&gt; dict</span>
+<span class="sd">        Return the entire logging options dictionary.</span>
+<span class="sd">    </span>
+<span class="sd">    set_show_args(value: bool)</span>
+<span class="sd">        Enable or disable logging of function arguments.</span>
+<span class="sd">    </span>
+<span class="sd">    get_show_args() -&gt; bool</span>
+<span class="sd">        Return whether function arguments will be logged.</span>
+<span class="sd">    </span>
+<span class="sd">    set_show_call_chain(value: bool)</span>
+<span class="sd">        Enable or disable logging of call chains.</span>
+<span class="sd">    </span>
+<span class="sd">    get_show_call_chain() -&gt; bool</span>
+<span class="sd">        Return whether call chains will be logged.</span>
+<span class="sd">    </span>
+<span class="sd">    set_paused(value: bool)</span>
+<span class="sd">        Pause or resume all logging globally.</span>
+<span class="sd">    </span>
+<span class="sd">    is_paused() -&gt; bool</span>
+<span class="sd">        Return whether logging is currently paused.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># _options is used to set flags for the logged items (classes/methods)</span>
+    <span class="n">_options</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># log arguments/call chain</span>
+    <span class="n">_show_args</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_show_call_chain</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># to pause the logging</span>
+    <span class="n">_paused</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="LoggerConfig.set_options">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.set_options">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_options</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">options_dict</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">options_dict</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.get_option">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.get_option">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.get_all">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.get_all">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_all</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_options</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.set_show_args">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.set_show_args">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_show_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_show_args</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.get_show_args">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.get_show_args">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_show_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_show_args</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.set_show_call_chain">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.set_show_call_chain">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_show_call_chain</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_show_call_chain</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.get_show_call_chain">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.get_show_call_chain">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_show_call_chain</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_show_call_chain</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.is_paused">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.is_paused">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">is_paused</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_paused</span></div>
+
+
+<div class="viewcode-block" id="LoggerConfig.set_paused">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerConfig.set_paused">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_paused</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_paused</span> <span class="o">=</span> <span class="n">value</span></div>
+</div>
+
+
+<div class="viewcode-block" id="LoggerDock">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock">[docs]</a>
+<span class="k">class</span> <span class="nc">LoggerDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dock widget that contains a logging display.</span>
+
+<span class="sd">    A logging dock widget useful for debugging and recording actions.  Requires the parent to have</span>
+<span class="sd">    an attribute parent.logger_options, which is a dictionary with keys being the logger prefixes and</span>
+<span class="sd">    an associated boolean value for each indicating to log (True) or skip logging (False) given actions.</span>
+
+<span class="sd">    The logger will produce default color text for default prefixes:</span>
+<span class="sd">        Error - red</span>
+<span class="sd">        Warning - orange</span>
+<span class="sd">        UI - blue</span>
+<span class="sd">        data - green</span>
+<span class="sd">    These can be extended or changed if the a parent.log_colors exists.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QObject</span>
+<span class="sd">        Calling window.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;temp.log&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parent must be an instance of QMainWindow.&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_colors</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Error&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Warning&quot;</span><span class="p">:</span> <span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;UI&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;log_colors&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_colors</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">log_colors</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">match_cursors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_match_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1">#self.logger = LogCounter()</span>
+        <span class="n">set_global_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Create container</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+        <span class="n">logger_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+
+        <span class="c1"># Create toolbar</span>
+        <span class="n">toolbar</span> <span class="o">=</span> <span class="n">QToolBar</span><span class="p">(</span><span class="s2">&quot;Notes Toolbar&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">setMovable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Optional: Prevent toolbar from being dragged out</span>
+
+        <span class="c1"># log toggle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_toggle</span> <span class="o">=</span> <span class="n">ToggleSwitch</span><span class="p">(</span><span class="n">toolbar</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">bg_left_color</span><span class="o">=</span><span class="s2">&quot;#D8ADAB&quot;</span><span class="p">,</span> <span class="n">bg_right_color</span><span class="o">=</span><span class="s2">&quot;#A8B078&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_toggle</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_toggle</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Pause/resume logging&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionLogToggle</span> <span class="o">=</span> <span class="n">QWidgetAction</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionLogToggle</span><span class="o">.</span><span class="n">setDefaultWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_toggle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_toggle</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">set_paused</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_toggle</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()))</span>
+
+        <span class="c1"># Export button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_save</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
+        <span class="n">save_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-save-file-64.svg&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">save_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_save</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">save_icon</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_save</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_save</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Save log to file&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add spacer</span>
+        <span class="n">spacer</span> <span class="o">=</span> <span class="n">QSpacerItem</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;logger_options&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_settings</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
+            <span class="n">settings_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-gear-64.svg&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">settings_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">action_settings</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">settings_icon</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">action_settings</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Settings&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_settings</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Logger settings&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_clear</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
+        <span class="n">clear_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-delete-64.svg&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">clear_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_clear</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">clear_icon</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_clear</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Clear&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_clear</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Clear log&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create QTextEdit for logging</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="n">QTextEdit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QFont</span><span class="p">(</span><span class="s2">&quot;Monaco&quot;</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+
+        <span class="c1"># Create search bar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="n">QTextEdit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QFont</span><span class="p">(</span><span class="s2">&quot;Monaco&quot;</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span> <span class="o">=</span> <span class="n">SearchWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">enable_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">realtime</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionLogToggle</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_settings</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_save</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_clear</span><span class="p">)</span>
+
+        <span class="n">logger_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
+        <span class="n">logger_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="p">)</span>
+
+        <span class="c1"># handle actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_save</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">export_log</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;action_settings&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_settings</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_logger_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_clear</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">clear</span><span class="p">)</span>
+
+        <span class="c1"># Set layout to the container</span>
+        <span class="n">container</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">logger_layout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFloating</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;LaME Logger&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowType</span><span class="o">.</span><span class="n">Window</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">WindowType</span><span class="o">.</span><span class="n">CustomizeWindowHint</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">WindowType</span><span class="o">.</span><span class="n">WindowMinMaxButtonsHint</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">WindowType</span><span class="o">.</span><span class="n">WindowCloseButtonHint</span><span class="p">)</span>
+
+        <span class="n">parent</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">DockWidgetArea</span><span class="o">.</span><span class="n">RightDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visibilityChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_visibility_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_visibility_change</span><span class="p">()</span>
+
+        <span class="c1"># Example print statements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_file</span> <span class="o">=</span> <span class="n">file</span> 
+
+<div class="viewcode-block" id="LoggerDock.closeEvent">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.closeEvent">[docs]</a>
+    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;When closed stdout is restored to ``sys.__stdout__``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Executed on a close event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># Restore sys.stdout to its original state when the application closes</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">closeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LoggerDock.write">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.write">[docs]</a>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds message to logger</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        message : str</span>
+<span class="sd">            Message to display in logger</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># check and change text color if necessary</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_color_from_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="n">color</span><span class="p">))</span>
+
+        <span class="c1"># add message to to text_edit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="c1"># reset default color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;black&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="LoggerDock.detect_color_from_message">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.detect_color_from_message">[docs]</a>
+    <span class="k">def</span> <span class="nf">detect_color_from_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines the color for the message text</span>
+
+<span class="sd">        Determines the message color from the prefix.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        message : str</span>
+<span class="sd">            Log message with prefix.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Returns a hex string with the color</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>  <span class="c1"># Extract prefix like &quot;UI&quot;, &quot;DATA&quot;, etc.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_colors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">color</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_color</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LoggerDock.default_color">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.default_color">[docs]</a>
+    <span class="k">def</span> <span class="nf">default_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets default color for text in the LoggerDock&quot;&quot;&quot;</span>
+        <span class="n">palette</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+        <span class="n">bg</span> <span class="o">=</span> <span class="n">palette</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">backgroundRole</span><span class="p">())</span><span class="o">.</span><span class="n">lightness</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">&quot;lightgray&quot;</span> <span class="k">if</span> <span class="n">bg</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span></div>
+
+
+<div class="viewcode-block" id="LoggerDock.flush">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.flush">[docs]</a>
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flushes the write buffer.</span>
+
+<span class="sd">        Currently doesn&#39;t do anything.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">pass</span>  <span class="c1"># Required to implement flush for compatibility</span></div>
+
+
+<div class="viewcode-block" id="LoggerDock.export_log">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.export_log">[docs]</a>
+    <span class="k">def</span> <span class="nf">export_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the contents of the text edit to lame.log.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log_contents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">log_contents</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">log_file</span><span class="p">:</span>
+                    <span class="n">log_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">log_contents</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Log exported to: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">log_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to export log: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No log contents to export.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LoggerDock.set_logger_options">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.set_logger_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_logger_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Opens a dialog to edit logger options.&quot;&quot;&quot;</span>
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">LoggerOptionsDialog</span><span class="p">(</span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">_options</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">DialogCode</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+            <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">dialog</span><span class="o">.</span><span class="n">get_updated_options</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="LoggerDock.logger_visibility_change">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock.logger_visibility_change">[docs]</a>
+    <span class="k">def</span> <span class="nf">logger_visibility_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Redirect stdout based on the visibility of the logger dock.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="bp">self</span>   <span class="c1"># Redirect stdout to logger</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">self</span>   <span class="c1"># Redirect stderr to logger</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>  <span class="c1"># Restore to default stdout    </span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>  <span class="c1"># Restore to default stderr    </span></div>
+</div>
+
+    
+
+<div class="viewcode-block" id="LoggerOptionsDialog">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerOptionsDialog">[docs]</a>
+<span class="k">class</span> <span class="nc">LoggerOptionsDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Allows the user to set logger options.</span>
+
+<span class="sd">    The use of these options is determined by the main program, not the logger,</span>
+<span class="sd">    this is simply a place to view and change them.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    options_dict : dict</span>
+<span class="sd">        A dictionary of options with key values displayed as the labels and values</span>
+<span class="sd">        are bool indicating a set option for logging.</span>
+<span class="sd">    parent : LoggerDock, optional</span>
+<span class="sd">        Parent logger, by default None</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options_dict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Customize Logger&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QVBoxLayout</span><span class="p">())</span>
+
+        <span class="c1"># Store references to checkboxes and the dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_dict</span> <span class="o">=</span> <span class="n">options_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkboxes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Create checkboxes based on the dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QGridLayout</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;Toggle items&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span><span class="p">)</span>
+
+        <span class="n">num_options</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options_dict</span><span class="p">)</span>
+        <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">num_options</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">ncol</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_options</span> <span class="o">+</span> <span class="n">nrow</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">nrow</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nrow</span> <span class="o">&gt;</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">ncol</span><span class="p">:</span>
+            <span class="n">ncol</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">nrow</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_options</span> <span class="o">+</span> <span class="n">ncol</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">ncol</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">checkbox</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># The label is set directly here</span>
+            <span class="n">checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># Set initial state from the dictionary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkboxes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkbox</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger_item_box</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">checkbox</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">nrow</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+
+        <span class="n">button_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="n">button_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_all</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_all</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;✓ All&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_all</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select all options&quot;</span><span class="p">)</span>
+        <span class="n">button_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">button_select_all</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_none</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_none</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;✗ None&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_none</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Deselect all options&quot;</span><span class="p">)</span>
+        <span class="n">button_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">button_select_none</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">button_layout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_all</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_all_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_select_none</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_none_options</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addSpacing</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QGridLayout</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;Toggle options&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_args_checkbox</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Show arguments&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_args_checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">get_show_args</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_args_checkbox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">set_show_args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">show_args_checkbox</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_chain_checkbox</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Show call chain&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_chain_checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">get_show_call_chain</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_chain_checkbox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">set_show_call_chain</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_box</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">show_chain_checkbox</span><span class="p">)</span>
+
+        <span class="c1"># Add OK button</span>
+        <span class="n">button_box</span> <span class="o">=</span> <span class="n">QDialogButtonBox</span><span class="p">(</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">StandardButton</span><span class="o">.</span><span class="n">Ok</span><span class="p">)</span>
+        <span class="n">button_box</span><span class="o">.</span><span class="n">accepted</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button_box</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="LoggerOptionsDialog.select_all_options">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerOptionsDialog.select_all_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_all_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select all checkboxes for logger options&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkboxes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LoggerOptionsDialog.select_none_options">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerOptionsDialog.select_none_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_none_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deselect all checkboxes for logger options&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkboxes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LoggerOptionsDialog.get_updated_options">
+<a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerOptionsDialog.get_updated_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_updated_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the dictionary with the current state of checkboxes and returns it.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Returns the dictionary of boolean logger options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkboxes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">options_dict</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

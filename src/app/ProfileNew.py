@@ -108,6 +108,7 @@ class Profiling:
     def handle_profile_click(self, event, axes, is_moving=False):
         """
         Called from MplCanvas when user clicks in profile mode.
+
         - If not moving => creation logic (left-click adds a point, right-click finalize)
         - If moving => pick up or place a profile point
         """
@@ -258,8 +259,9 @@ class Profiling:
     def handle_profile_move_click(self, event, axes):
         """
         If user is in "move profile point" mode:
-        1) If no point picked => find nearest point
-        2) Otherwise => place it
+
+        1. If no point picked => find nearest point
+        2. Otherwise => place it
         """
         if not self.moving_point_picked:
             found_sample, found_profile, found_idx = self.find_nearest_profile_point(
@@ -355,17 +357,22 @@ class Profiling:
     def save_profiles(self, filepath):
         """
         Save the current profiles to a file (using pickle).
-        We'll store a structure like:
-        {
-          sample_id: {
-            profile_name: {
-              'x': [...], 'y': [...], 'radius': float, 'stats': [...],
-              # add any other fields you need
-            },
-            ...
-          },
-          ...
-        }
+
+        We'll store a structure like::
+
+            {
+                sample_id: {
+                    profile_name: {
+                        'x': [...],
+                        'y': [...],
+                        'radius': float,
+                        'stats': [...],
+                        # add any other fields you need
+                    },
+                    ...
+                },
+                ...
+            }
         """
         data = {}
 

@@ -9,30 +9,19 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
 from src.common.CustomWidgets import CustomCheckButton
 from src.app.UITheme import UIThemes
-
-#from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-# import pyqtgraph as pg
-# from pyqtgraph.GraphicsScene import exportDialog
-# from pyqtgraph import (
-#     setConfigOption, colormap, ColorBarItem,ViewBox, TargetItem, ImageItem,
-#     GraphicsLayoutWidget, ScatterPlotItem, AxisItem, PlotDataItem
-# )
-#from datetime import datetimec
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import cmcrameri as cmc
 from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
-#import src.radar_factory
 from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
-#from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -62,6 +51,9 @@ from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, Logge
 from src.common.Calculator import CalculatorDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
+#import src.radar_factory
+#from src.ui.PreferencesWindow import Ui_PreferencesWindow
+#from datetime import datetimec
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"

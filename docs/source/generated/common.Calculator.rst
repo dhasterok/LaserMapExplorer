@@ -1,23 +1,14 @@
-﻿common.Calculator
+common.Calculator
 =================
 
 .. automodule:: common.Calculator
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
    .. autosummary::
    
       calc_error
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -26,11 +17,3 @@
       CalculatorDock
       CustomFieldCalculator
    
-   
-
-   
-   
-   
-
-
-

@@ -4,11 +4,6 @@ common.format
 .. automodule:: common.format
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -19,15 +14,3 @@ common.format
       oround_matrix
       symlog
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

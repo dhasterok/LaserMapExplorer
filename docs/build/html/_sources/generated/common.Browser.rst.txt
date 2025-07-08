@@ -1,17 +1,8 @@
-﻿common.Browser
+common.Browser
 ==============
 
 .. automodule:: common.Browser
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       Browser
       WebEngineView
    
-   
-
-   
-   
-   
-
-
-

@@ -1,17 +1,8 @@
-﻿app.SpecialTools
+app.SpecialTools
 ================
 
 .. automodule:: app.SpecialTools
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       SpecialFunctions
       SpecialPage
    
-   
-
-   
-   
-   
-
-
-

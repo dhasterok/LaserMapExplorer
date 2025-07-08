@@ -60,7 +60,13 @@ function refreshListsDropdown(type) {
     });
 }
 
-// Common handler for dropdown changes (Analyzer/Field selector)
+/**
+ * Common handler for dropdown changes (Analyzer/Field selector)
+ * @param {*} newValue 
+ * @param {*} block 
+ * @param {*} type 
+ * @returns {*} newValue
+ */
 export function listSelectorChanged(newValue, block, type) {
     // Show or hide the “Saved list” dropdown
     const savedListsInput = block.getInput('SAVED_LISTS');
@@ -78,7 +84,12 @@ export function listSelectorChanged(newValue, block, type) {
     return newValue;
 }
 
-// Common function to update the “Saved lists” dropdown
+/**
+ * Common function to update the “Saved lists” dropdown
+ * @param {*} selectedValue 
+ * @param {*} block 
+ * @param {*} type 
+ */
 function updateSavedListsDropdown(selectedValue, block, type) {
     // Example: pass 'analyte' or 'field' as an argument
     window.blocklyBridge.getSavedLists(type)
@@ -108,7 +119,9 @@ window.updateSavedListsDropdown = updateSavedListsDropdown;
 
 
 
-// Global function to refresh the analyteSavedListsDropdown
+/**
+ * Global function to refresh the analyteSavedListsDropdown
+ */
 function refreshCustomFieldListsDropdown() {
     // Iterate through all blocks to find 'select_analytes' blocks
     Blockly.getMainWorkspace().getAllBlocks().forEach(function(block) {
@@ -127,6 +140,10 @@ function refreshCustomFieldListsDropdown() {
 
 window.refreshCustomFieldListsDropdown = refreshCustomFieldListsDropdown;
 
+/**
+ * Updates the field type list
+ * @param {*} newFieldTypeList 
+ */
 function updateFieldTypeList(newFieldTypeList) {
     // Clear the existing array
     fieldTypeList.length = 0;
@@ -158,7 +175,11 @@ function updateFieldTypeList(newFieldTypeList) {
 window.updateFieldTypeList = updateFieldTypeList;
 
 
-// Function to update the Field dropdown
+/**
+ * Function to update the Field dropdown
+ * @param {*} block 
+ * @param {*} newValue 
+ */
 export function updateFieldDropdown(block, newValue) {
     const fieldTypeValue = newValue || block.getFieldValue('fieldType');
     window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
@@ -182,7 +203,12 @@ export function updateFieldDropdown(block, newValue) {
 }
 
 
-// Function to add default styling blocks
+/**
+ * Function to add default styling blocks
+ * @param {*} block 
+ * @param {*} workspace 
+ * @param {*} defaultBlocks 
+ */
 export function addDefaultStylingBlocks(block, workspace, defaultBlocks) {
 
     let lastConnection = block.getInput('styling').connection;
@@ -251,6 +277,10 @@ export function isBlockInChain(chainRoot, blockId) {
     return false;
   }
 
+/**
+ * 
+ * @param {*} plotBlock 
+ */
 export function updateHistogramOptions(plotBlock) {
     // 1) Get the first block connected to "histogramOptions".
     const histogramOptions = getConnectedBlocks(plotBlock, 'histogramOptions');
@@ -277,7 +307,11 @@ export function updateHistogramOptions(plotBlock) {
     }
 }
   
-
+/**
+ * 
+ * @param {*} block 
+ * @param {*} range 
+ */
 function updateBinWidthAndNBins(block, range) {
     if (range <= 0) {
       console.warn("Histogram range is invalid or zero in size:", range);
@@ -307,7 +341,6 @@ function updateBinWidthAndNBins(block, range) {
  * Retrieve and update all blocks connected to the "Styling" input.
  * @param {Blockly.Block} plotMapBlock - The plot_map block instance.
  */
-
 export function updateStylingChain(plotBlock) {
     // 1) Get the first block connected to "Styling".
     const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
@@ -389,7 +422,11 @@ export function updateStylingChain(plotBlock) {
     });
 }
   
-  
+/**
+ * 
+ * @param {*} block 
+ * @param {*} style 
+ */ 
 function updateXAxisBlock(block, style) {
 // e.g. style might contain:
 // {
@@ -410,6 +447,11 @@ if (style['XScale'] !== undefined) {
 block.render();
 }
 
+/**
+ * 
+ * @param {*} block 
+ * @param {*} style 
+ */
 function updateYAxisBlock(block, style) {
 // e.g. style might contain:
 // {
@@ -430,7 +472,11 @@ if (style['YScale'] !== undefined) {
 block.render();
 }
 
-
+/**
+ * 
+ * @param {*} block 
+ * @param {*} style 
+ */
 function updateZAxisBlock(block, style) {
 // e.g. style might contain:
 // {
@@ -451,8 +497,11 @@ if (style['ZScale'] !== undefined) {
 block.render();
 }
 
-
-
+/**
+ * 
+ * @param {*} block 
+ * @param {*} style 
+ */
 function updateCAxisBlock(block, style) {
 // e.g. style might contain:
 // {

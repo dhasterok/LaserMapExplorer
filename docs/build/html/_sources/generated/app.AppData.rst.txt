@@ -1,17 +1,8 @@
-﻿app.AppData
+app.AppData
 ===========
 
 .. automodule:: app.AppData
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       AppData
    
-   
-
-   
-   
-   
-
-
-

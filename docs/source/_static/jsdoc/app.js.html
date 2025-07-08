@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Import Blockly core.
+import * as Blockly from 'blockly/core';
+import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
+// Import a message file.
+import * as En from 'blockly/msg/en';
+import 'blockly/blocks';  // Import default blocks
+import {pythonGenerator} from 'blockly/python';
+import { sample_ids, setBaseDir } from './globals';
+import './custom_blocks';  // Import custom blocks
+import './python_generators';  // Import python generators
+import './helper_functions';  // Import helper functions
+
+Blockly.setLocale(En);  // Set the locale to English
+
+/** 
+ * Inject the Blockly workspace and configure it with the dynamic connection plugin 
+ */
+const workspace = Blockly.inject('blocklyDiv', {
+    toolbox: document.getElementById('toolbox'),
+    grid: {
+        spacing: 20,
+        length: 3,
+        colour: '#ccc',
+        snap: true,
+    },
+    zoom: {
+        controls: true,
+        wheel: false,
+        startScale: 1,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2,
+    },
+    trashcan: true,
+    collapse: true,
+    comments: true,  // Allow comments
+    disable: false,
+    sounds: true,
+    rtl: false,
+});
+
+// Add a change listener to finalize connections dynamically when blocks are removed or rearranged
+workspace.addChangeListener(BlockDynamicConnection.finalizeConnections);
+
+window.workspace = workspace;
+window.Blockly = Blockly
+/**
+ * Creates a bridge between blockly and the python UI
+ */
+new QWebChannel(qt.webChannelTransport, function(channel) {
+    window.blocklyBridge = channel.objects.blocklyBridge;
+      // Set baseDir from Python by calling a method
+    window.blocklyBridge.getBaseDir().then((dir) => {
+        setBaseDir(dir);
+    });
+    window.blocklyBridge.callSetStyleWidgets = function(plotType, callback) {
+        window.blocklyBridge.invokeSetStyleWidgets(plotType, function(response) {
+            callback(JSON.parse(response));  // Parse the response from Python as a JSON object
+        });
+    };
+
+    /**
+     * Sends code back to python to execute
+     */
+    function sendCodeToPython() {
+        // Generate Python code from Blockly
+        var code = pythonGenerator.workspaceToCode(workspace);
+        
+        // Send the code to Python via WebChannel
+        if (window.blocklyBridge) {
+            window.blocklyBridge.runCode(code);
+        } else {
+            console.log("No blocklyBridge available.");
+        }
+    }
+
+    /**
+     * Executes blockly elements
+     * @param {*} startBlock 
+     * @returns 
+     */
+    function executeBlocks(startBlock) {
+        let block = startBlock;
+        let code = '';
+        //while (block) {
+            // Ensure the Python generator is initialized for this workspace
+            pythonGenerator.init(workspace);
+            // Generate code for the block
+            code = pythonGenerator.blockToCode(block) ;
+            //block = block.getNextBlock();  // Move to the next block
+        //}
+        return code;
+    }
+    /** 
+     * Add a double-click listener for executing blocks
+     */ 
+    workspace.addChangeListener(function(event) {
+            if (event instanceof Blockly.Events.Click) {
+                // Detect double click
+                if (workspace.doubleClickPid_) {
+                    clearTimeout(workspace.doubleClickPid_);
+                    workspace.doubleClickPid_ = undefined;
+
+                    // If the same block is clicked twice
+                    if (event.blockId === workspace.doubleClickBlock_) {
+                        var block = workspace.getBlockById(workspace.doubleClickBlock_);
+                        if (block) {
+                            // Execute the block and connected blocks
+                            const code = executeBlocks(block);
+
+                            // Send the generated code to Python
+                            if (window.blocklyBridge) {
+                                window.blocklyBridge.executeCode(code);
+                            } else {
+                                console.log("No blocklyBridge available.");
+                            }
+                        }
+                        return;
+                    }
+                }
+
+                // If this is the first click
+                if (!workspace.doubleClickPid_) {
+                    workspace.doubleClickBlock_ = event.blockId;
+                    workspace.doubleClickPid_ = setTimeout(function() {
+                        workspace.doubleClickPid_ = undefined;
+                    }.bind(workspace), 500);  // Wait 500ms to detect a second click
+                }
+            }
+        });
+    workspace.addChangeListener(sendCodeToPython);
+    
+});
+
+/**
+ * Handles resizing blockly workspace
+ */
+function resizeBlocklyWorkspace() {
+    const blocklyDiv = document.getElementById('blocklyDiv');
+    Blockly.svgResize(window.workspace);
+}
+
+resizeBlocklyWorkspace();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Jul 08 2025 15:33:55 GMT+0930 (Australian Central Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

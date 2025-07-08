@@ -1,17 +1,8 @@
-﻿app.PlotViewerWindow
+app.PlotViewerWindow
 ====================
 
 .. automodule:: app.PlotViewerWindow
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       PlotViewer
    
-   
-
-   
-   
-   
-
-
-

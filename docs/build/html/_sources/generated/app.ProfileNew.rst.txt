@@ -1,17 +1,8 @@
-﻿app.ProfileNew
+app.ProfileNew
 ==============
 
 .. automodule:: app.ProfileNew
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       Profile
       Profiling
    
-   
-
-   
-   
-   
-
-
-

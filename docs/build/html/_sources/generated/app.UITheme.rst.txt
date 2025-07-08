@@ -1,13 +1,8 @@
-﻿app.UITheme
+app.UITheme
 ===========
 
 .. automodule:: app.UITheme
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
@@ -15,21 +10,9 @@
    
       default_font
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       UIThemes
    
-   
-
-   
-   
-   
-
-
-

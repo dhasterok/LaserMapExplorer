@@ -1,13 +1,8 @@
-﻿common.LamePlot
+common.LamePlot
 ===============
 
 .. automodule:: common.LamePlot
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
@@ -38,15 +33,3 @@
       plot_ternary_map
       ternary_scatter
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

@@ -1,17 +1,8 @@
-﻿common.Masking
+common.Masking
 ==============
 
 .. automodule:: common.Masking
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -23,11 +14,3 @@
       MaskObj
       PolygonTab
    
-   
-
-   
-   
-   
-
-
-

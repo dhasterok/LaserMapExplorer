@@ -1,17 +1,8 @@
-﻿app.FieldSelectionWindow
+app.FieldSelectionWindow
 ========================
 
 .. automodule:: app.FieldSelectionWindow
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       FieldDialog
    
-   
-
-   
-   
-   
-
-
-

@@ -1,17 +1,8 @@
-﻿common.PolygonNew
+common.PolygonNew
 =================
 
 .. automodule:: common.PolygonNew
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       Polygon
       PolygonManager
    
-   
-
-   
-   
-   
-
-
-

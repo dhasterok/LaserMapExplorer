@@ -12,7 +12,9 @@ import './helper_functions';  // Import helper functions
 
 Blockly.setLocale(En);  // Set the locale to English
 
-// Inject the Blockly workspace and configure it with the dynamic connection plugin
+/** 
+ * Inject the Blockly workspace and configure it with the dynamic connection plugin 
+ */
 const workspace = Blockly.inject('blocklyDiv', {
     toolbox: document.getElementById('toolbox'),
     grid: {
@@ -42,6 +44,9 @@ workspace.addChangeListener(BlockDynamicConnection.finalizeConnections);
 
 window.workspace = workspace;
 window.Blockly = Blockly
+/**
+ * Creates a bridge between blockly and the python UI
+ */
 new QWebChannel(qt.webChannelTransport, function(channel) {
     window.blocklyBridge = channel.objects.blocklyBridge;
       // Set baseDir from Python by calling a method
@@ -53,6 +58,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
             callback(JSON.parse(response));  // Parse the response from Python as a JSON object
         });
     };
+
+    /**
+     * Sends code back to python to execute
+     */
     function sendCodeToPython() {
         // Generate Python code from Blockly
         var code = pythonGenerator.workspaceToCode(workspace);
@@ -65,6 +74,11 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         }
     }
 
+    /**
+     * Executes blockly elements
+     * @param {*} startBlock 
+     * @returns 
+     */
     function executeBlocks(startBlock) {
         let block = startBlock;
         let code = '';
@@ -77,7 +91,9 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         //}
         return code;
     }
-    // Add a double-click listener for executing blocks
+    /** 
+     * Add a double-click listener for executing blocks
+     */ 
     workspace.addChangeListener(function(event) {
             if (event instanceof Blockly.Events.Click) {
                 // Detect double click
@@ -116,6 +132,9 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     
 });
 
+/**
+ * Handles resizing blockly workspace
+ */
 function resizeBlocklyWorkspace() {
     const blocklyDiv = document.getElementById('blocklyDiv');
     Blockly.svgResize(window.workspace);

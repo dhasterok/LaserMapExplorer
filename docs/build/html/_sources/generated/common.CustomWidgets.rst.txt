@@ -1,17 +1,8 @@
-﻿common.CustomWidgets
+common.CustomWidgets
 ====================
 
 .. automodule:: common.CustomWidgets
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -30,11 +21,3 @@
       StandardItem
       ToggleSwitch
    
-   
-
-   
-   
-   
-
-
-

@@ -1,17 +1,8 @@
-﻿app.StyleToolbox
+app.StyleToolbox
 ================
 
 .. automodule:: app.StyleToolbox
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -22,11 +13,3 @@
       Styling
       StylingDock
    
-   
-
-   
-   
-   
-
-
-

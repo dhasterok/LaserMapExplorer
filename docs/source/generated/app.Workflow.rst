@@ -1,17 +1,8 @@
-﻿app.Workflow
+app.Workflow
 ============
 
 .. automodule:: app.Workflow
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       BlocklyBridge
       Workflow
    
-   
-
-   
-   
-   
-
-
-

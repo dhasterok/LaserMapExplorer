@@ -1,17 +1,8 @@
-﻿common.DataAnalysis
+common.DataAnalysis
 ===================
 
 .. automodule:: common.DataAnalysis
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       Clustering
       DimensionalReduction
    
-   
-
-   
-   
-   
-
-
-

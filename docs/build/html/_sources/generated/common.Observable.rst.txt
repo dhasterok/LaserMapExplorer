@@ -1,17 +1,8 @@
-﻿common.Observable
+common.Observable
 =================
 
 .. automodule:: common.Observable
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       Observable
    
-   
-
-   
-   
-   
-
-
-

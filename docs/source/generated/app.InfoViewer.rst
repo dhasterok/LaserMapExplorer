@@ -1,13 +1,8 @@
-﻿app.InfoViewer
+app.InfoViewer
 ==============
 
 .. automodule:: app.InfoViewer
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
@@ -19,10 +14,6 @@
       update_dataframe
       update_numpy_array
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -33,11 +24,3 @@
       MetadataTab
       PlotInfoTab
    
-   
-
-   
-   
-   
-
-
-

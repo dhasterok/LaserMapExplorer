@@ -1,17 +1,8 @@
-﻿app.CustomTableWidget
+app.CustomTableWidget
 =====================
 
 .. automodule:: app.CustomTableWidget
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       TableWidgetDragRows
    
-   
-
-   
-   
-   
-
-
-

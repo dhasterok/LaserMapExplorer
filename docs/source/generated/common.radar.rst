@@ -1,17 +1,8 @@
-﻿common.radar
+common.radar
 ============
 
 .. automodule:: common.radar
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       Radar
    
-   
-
-   
-   
-   
-
-
-

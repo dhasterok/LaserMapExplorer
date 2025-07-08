@@ -34,7 +34,8 @@ extensions = [
         'sphinx.ext.intersphinx',
         'sphinx.ext.autosectionlabel',
         'sphinx.ext.viewcode',
-        'numpydoc'
+        'numpydoc',
+        'sphinx_js'
     ]
 
 napoleon_custom_sections = [('Signals', 'params_style')]
@@ -43,6 +44,7 @@ autosummary_generate = True
 autosummary_imported_members = False  # Include members imported in modules
 templates_path = ['_templates']
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "**/__pycache__/**", "**/.venv/**", "**/venv/**"]
+js_source_path = '../../blockly/src'
 
 
 # -- Options for HTML output -------------------------------------------------

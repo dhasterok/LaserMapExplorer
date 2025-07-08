@@ -1,17 +1,8 @@
-﻿app.QuickView
+app.QuickView
 =============
 
 .. automodule:: app.QuickView
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       QuickView
    
-   
-
-   
-   
-   
-
-
-

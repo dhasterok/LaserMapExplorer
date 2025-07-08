@@ -1,17 +1,8 @@
-﻿app.AnalyteSelectionWindow
+app.AnalyteSelectionWindow
 ==========================
 
 .. automodule:: app.AnalyteSelectionWindow
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       AnalyteDialog
    
-   
-
-   
-   
-   
-
-
-

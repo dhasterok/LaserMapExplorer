@@ -1,13 +1,8 @@
-﻿common.gausscensor
+common.gausscensor
 ==================
 
 .. automodule:: common.gausscensor
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
@@ -15,15 +10,3 @@
    
       gausscensor
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

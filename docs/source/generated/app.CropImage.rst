@@ -1,17 +1,8 @@
-﻿app.CropImage
+app.CropImage
 =============
 
 .. automodule:: app.CropImage
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       CropTool
       ResizableRectItem
    
-   
-
-   
-   
-   
-
-
-

@@ -1,17 +1,8 @@
-﻿common.DataHandling
+common.DataHandling
 ===================
 
 .. automodule:: common.DataHandling
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       SampleObj
    
-   
-
-   
-   
-   
-
-
-

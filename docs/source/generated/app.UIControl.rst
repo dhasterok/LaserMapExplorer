@@ -1,17 +1,8 @@
-﻿app.UIControl
+app.UIControl
 =============
 
 .. automodule:: app.UIControl
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       UIFieldLogic
    
-   
-
-   
-   
-   
-
-
-

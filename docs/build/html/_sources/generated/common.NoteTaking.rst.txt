@@ -1,17 +1,8 @@
-﻿common.NoteTaking
+common.NoteTaking
 =================
 
 .. automodule:: common.NoteTaking
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -20,11 +11,3 @@
       NoteOptionsDialog
       Notes
    
-   
-
-   
-   
-   
-
-
-

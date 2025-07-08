@@ -1,13 +1,8 @@
-﻿common.Logger
+common.Logger
 =============
 
 .. automodule:: common.Logger
 
-   
-   
-   
-
-   
    
    .. rubric:: Functions
 
@@ -21,10 +16,6 @@
       no_log
       set_global_logger
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -33,11 +24,3 @@
       LoggerDock
       LoggerOptionsDialog
    
-   
-
-   
-   
-   
-
-
-

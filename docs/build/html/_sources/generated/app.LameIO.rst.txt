@@ -1,17 +1,8 @@
-﻿app.LameIO
+app.LameIO
 ==========
 
 .. automodule:: app.LameIO
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       LameIO
    
-   
-
-   
-   
-   
-
-
-

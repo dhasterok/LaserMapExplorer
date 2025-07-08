@@ -1,17 +1,8 @@
-﻿common.SearchTool
+common.SearchTool
 =================
 
 .. automodule:: common.SearchTool
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       SearchWidget
    
-   
-
-   
-   
-   
-
-
-

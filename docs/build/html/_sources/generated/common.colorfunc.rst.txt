@@ -4,11 +4,6 @@ common.colorfunc
 .. automodule:: common.colorfunc
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -17,15 +12,3 @@ common.colorfunc
       get_rgb_color
       is_valid_hex_color
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

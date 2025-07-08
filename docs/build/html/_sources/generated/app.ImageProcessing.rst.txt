@@ -1,17 +1,8 @@
-﻿app.ImageProcessing
+app.ImageProcessing
 ===================
 
 .. automodule:: app.ImageProcessing
 
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -19,11 +10,3 @@
    
       ImageProcessing
    
-   
-
-   
-   
-   
-
-
-

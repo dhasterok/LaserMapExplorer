@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "jsdoc": "^4.0.4"
   }
 }

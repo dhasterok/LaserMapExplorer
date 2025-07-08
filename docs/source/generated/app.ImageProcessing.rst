@@ -1,23 +1,29 @@
-app.ImageProcessing
+﻿app.ImageProcessing
 ===================
 
 .. automodule:: app.ImageProcessing
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      convolve2d
-      decimate
-      wiener
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      ImageItem
       ImageProcessing
-      LoggerConfig
    
+   
+
+   
+   
+   
+
+
+

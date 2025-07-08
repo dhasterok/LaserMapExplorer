@@ -16,35 +16,33 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'modules';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -52,7 +50,6 @@
     <link rel="prev" title="Documentation" href="documentation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -68,8 +65,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -77,6 +85,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -84,8 +93,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -119,7 +128,7 @@
     
     
     <img src="_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -181,11 +190,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -223,11 +236,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -246,8 +263,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -436,14 +452,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -461,6 +472,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -472,7 +485,7 @@
     
     <li class="breadcrumb-item"><a href="documentation.html" class="nav-link">Documentation</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">src Modules</span></li>
+    <li class="breadcrumb-item active" aria-current="page">src Modules</li>
   </ul>
 </nav>
 </div>
@@ -974,6 +987,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.CustomCheckButton"><code class="docutils literal notranslate"><span class="pre">CustomCheckButton</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomCheckButton.update_icon"><code class="docutils literal notranslate"><span class="pre">CustomCheckButton.update_icon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id0"><code class="docutils literal notranslate"><span class="pre">CustomCheckButton.update_icon()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.CustomComboBox"><code class="docutils literal notranslate"><span class="pre">CustomComboBox</span></code></a><ul>
@@ -1012,6 +1026,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView"><code class="docutils literal notranslate"><span class="pre">CustomTreeView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.treeModel"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.treeModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.root_node"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.root_node</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.add_branch"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.add_branch()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.add_leaf"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.add_leaf()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.CustomTreeView.branch_exists"><code class="docutils literal notranslate"><span class="pre">CustomTreeView.branch_exists()</span></code></a></li>
@@ -1047,16 +1063,20 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.StandardItem"><code class="docutils literal notranslate"><span class="pre">StandardItem</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.get_thumb_pos"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.get_thumb_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.thumb_pos"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.thumb_pos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.toggle"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.toggle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.setChecked"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.setChecked()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.isChecked"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.isChecked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.get_thumb_pos"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.get_thumb_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id21"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.isChecked()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.mousePressEvent"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.mousePressEvent()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.paintEvent"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.paintEvent()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.setChecked"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.setChecked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id22"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.setChecked()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.set_thumb_pos"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.set_thumb_pos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.sizeHint"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.sizeHint()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.stateChanged"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.stateChanged</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.thumb_pos"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.thumb_pos</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="common.html#common.CustomWidgets.ToggleSwitch.toggle"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.toggle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id25"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.thumb_pos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id26"><code class="docutils literal notranslate"><span class="pre">ToggleSwitch.toggle()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1102,7 +1122,7 @@
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.prep_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.prep_data()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.ref_chem"><code class="docutils literal notranslate"><span class="pre">SampleObj.ref_chem</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.remove_observer"><code class="docutils literal notranslate"><span class="pre">SampleObj.remove_observer()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="common.html#id0"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_crop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id29"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_crop()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.reset_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_data()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.reset_data_handling"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_data_handling()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.DataHandling.SampleObj.reset_resolution"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_resolution()</span></code></a></li>
@@ -1138,6 +1158,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#common-logger-module">common.Logger module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="common.html#module-common.Masking">common.Masking module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="common.html#common.Masking.ClusterTab"><code class="docutils literal notranslate"><span class="pre">ClusterTab</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Masking.ClusterTab.cluster_color_callback"><code class="docutils literal notranslate"><span class="pre">ClusterTab.cluster_color_callback()</span></code></a></li>
@@ -1236,7 +1257,7 @@
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.clear_polygons"><code class="docutils literal notranslate"><span class="pre">PolygonManager.clear_polygons()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.distance_to_line_segment"><code class="docutils literal notranslate"><span class="pre">PolygonManager.distance_to_line_segment()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.extract_scatter_plot_state"><code class="docutils literal notranslate"><span class="pre">PolygonManager.extract_scatter_plot_state()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="common.html#id39"><code class="docutils literal notranslate"><span class="pre">PolygonManager.increment_pid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id44"><code class="docutils literal notranslate"><span class="pre">PolygonManager.increment_pid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.load_polygons"><code class="docutils literal notranslate"><span class="pre">PolygonManager.load_polygons()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.plot_existing_polygon"><code class="docutils literal notranslate"><span class="pre">PolygonManager.plot_existing_polygon()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.Polygon.PolygonManager.plot_polygon_scatter"><code class="docutils literal notranslate"><span class="pre">PolygonManager.plot_polygon_scatter()</span></code></a></li>
@@ -1260,7 +1281,21 @@
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.ScheduleTimer.Scheduler.schedule_update"><code class="docutils literal notranslate"><span class="pre">Scheduler.schedule_update()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.ScheduleTimer.Scheduler.set_delay"><code class="docutils literal notranslate"><span class="pre">Scheduler.set_delay()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="common.html#common.ScheduleTimer.Scheduler.stop"><code class="docutils literal notranslate"><span class="pre">Scheduler.stop()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="common.html#id40"><code class="docutils literal notranslate"><span class="pre">Scheduler.timeout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#id45"><code class="docutils literal notranslate"><span class="pre">Scheduler.timeout</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#module-common.SearchTool">common.SearchTool module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget"><code class="docutils literal notranslate"><span class="pre">SearchWidget</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.clear_search"><code class="docutils literal notranslate"><span class="pre">SearchWidget.clear_search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.highlight_matches"><code class="docutils literal notranslate"><span class="pre">SearchWidget.highlight_matches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.navigate_match"><code class="docutils literal notranslate"><span class="pre">SearchWidget.navigate_match()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.replace_all"><code class="docutils literal notranslate"><span class="pre">SearchWidget.replace_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.replace_current"><code class="docutils literal notranslate"><span class="pre">SearchWidget.replace_current()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.select_current"><code class="docutils literal notranslate"><span class="pre">SearchWidget.select_current()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.toggle_replace_fields"><code class="docutils literal notranslate"><span class="pre">SearchWidget.toggle_replace_fields()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html#common.SearchTool.SearchWidget.update_match_label"><code class="docutils literal notranslate"><span class="pre">SearchWidget.update_match_label()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1471,18 +1506,17 @@
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/modules.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/modules.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1497,8 +1531,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1518,7 +1552,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1531,8 +1565,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

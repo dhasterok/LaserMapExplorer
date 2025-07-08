@@ -13,29 +13,29 @@ import pandas as pd
 from src.common.colorfunc import is_valid_hex_color
 
 class CustomLineEdit(QLineEdit):
+    """Custom line edit widget, when the only input should be of type float
+
+    Adds additional functionality to QLineEdit by installing a validator and methods for limiting the
+    precision of the displayed value in the UI.  Note that full precision of the value is stored in
+    self.value, only a 'pretty' number is displayed.
+
+    Parameters
+    ----------
+    parent : _type_, optional
+        _description_, by default None
+    value : float, optional
+        _description_, by default 0.0
+    precision : int, optional
+        _description_, by default 4
+    threshold : _type_, optional
+        _description_, by default 1e4
+    toward : int, optional
+        _description_, by default None
+    validator : QValidator, optional
+        Provide a validator to automatically text inputs for appropriate type and
+        ranges, by default QDoubleValidator
+    """        
     def __init__(self, parent=None, value=0.0, precision=4, threshold=1e4, toward=None, validator=QDoubleValidator()):
-        """Custom line edit widget, when the only input should be of type float
-
-        Adds additional functionality to QLineEdit by installing a validator and methods for limiting the
-        precision of the displayed value in the UI.  Note that full precision of the value is stored in
-        self.value, only a 'pretty' number is displayed.
-
-        Parameters
-        ----------
-        parent : _type_, optional
-            _description_, by default None
-        value : float, optional
-            _description_, by default 0.0
-        precision : int, optional
-            _description_, by default 4
-        threshold : _type_, optional
-            _description_, by default 1e4
-        toward : int, optional
-            _description_, by default None
-        validator : QValidator, optional
-            Provide a validator to automatically text inputs for appropriate type and
-            ranges, by default QDoubleValidator
-        """        
         super().__init__(parent)
         self._value = value
         self._precision = precision
@@ -47,43 +47,93 @@ class CustomLineEdit(QLineEdit):
 
     @property
     def value(self):
+        """
+        float: The current internal numeric value stored in the widget.
+        """
         return self._value
 
     @value.setter
     def value(self, new_value):
+        """
+        Set the internal value and update the displayed text accordingly.
+
+        Parameters
+        ----------
+        new_value : float
+            The new value to store and display.
+        """
         # ensure value is a float rather than integer
         self._value = new_value
         self._update_text_from_value()
 
     @property
     def precision(self):
+        """
+        int: The number of significant digits to display in the line edit.
+        """
         return self._precision 
 
     @precision.setter
     def precision(self, new_precision):
+        """
+        Set the display precision and update the text accordingly.
+
+        Parameters
+        ----------
+        new_precision : int
+            New number of significant digits to display.
+        """
         self._precision = new_precision
         self._update_text_from_value
     
     @property
     def threshold(self):
+        """
+        float: Threshold above which scientific notation is used.
+        """
         return self._threshold
     
     @threshold.setter
     def threshold(self, new_threshold):
+        """
+        Set the threshold for scientific notation and update the text.
+
+        Parameters
+        ----------
+        new_threshold : float
+            Value above which to switch to scientific notation.
+        """
         self._threshold = new_threshold
         self._update_text_from_value
 
     @property
     def toward(self):
-        """int | float: sets whether to round towards 0, 1, or nearest integer"""
+        """
+        int | float | None: Determines rounding direction in formatting.
+
+        * 0 = round toward zero
+        * 1 = round away from zero
+        * None = standard rounding
+        """
         return self._toward
     
     @toward.setter
     def toward(self, val):
+        """
+        Set the rounding direction and update the display.
+
+        Parameters
+        ----------
+        val : int, float, or None
+            Rounding mode to apply in formatting.
+        """
         self._toward = val
         self._update_text_from_value
 
     def _update_text_from_value(self):
+        """
+        Update the displayed text based on internal value and formatting rules.
+        """
         if self._value is None:
             self.setText('')
         elif self._precision is None:
@@ -93,30 +143,56 @@ class CustomLineEdit(QLineEdit):
             #self.setText(f"{self._value:.{self._precision}f}")
 
     def _update_value_from_text(self):
+        """
+        Update the internal value from the current text, if valid.
+        """
         try:
             self._value = float(self.text())
         except ValueError:
             pass
 
 class CustomTableWidget(QTableWidget):
+    """
+    A QTableWidget subclass with extended utility functions for data extraction and conversion.
+
+    This widget supports conversion of table contents (including embedded widgets such as 
+    QLineEdit, QComboBox, QCheckBox, etc.) to a pandas DataFrame, and provides convenience 
+    methods for column-based data access. It is designed for integration with tools that 
+    dynamically populate cells with interactive widgets.
+
+    Examples
+    --------
+    >>> widget = CustomTableWidget()
+    >>> widget.to_dataframe()
+    >>> widget.column_to_list(0)
+    >>> widget.column_to_list("Sample Name")
+
+    Notes
+    -----
+    - Embedded widgets are interpreted based on their type (e.g., `QLineEdit.text()`, 
+      `QCheckBox.isChecked()`).
+    - Additional widget types can be handled by extending `extract_widget_data()`.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
 
     def extract_widget_data(self, widget: QWidget):
-        """Extracts relevant information from a widget for placing in a DataFrame
+        """
+        Extracts relevant data from a widget embedded in the table.
 
-        _extended_summary_
+        This method is used to obtain the appropriate value representation of a widget 
+        for export (e.g., into a DataFrame).
 
         Parameters
         ----------
         widget : QWidget
-            A widget stored in ``ImportTool.tableWidgetMetadata``
+            A widget stored in a table cell.
 
         Returns
         -------
-        str or bool
-            Returns key value of widget item to be added to a DataFrame
-        """        
+        str or bool or float or None
+            The value extracted from the widget, depending on its type.
+        """   
         if isinstance(widget, QCheckBox):
             return widget.isChecked()
         elif isinstance(widget, QComboBox):
@@ -132,12 +208,13 @@ class CustomTableWidget(QTableWidget):
             return None
 
     def to_dataframe(self) -> pd.DataFrame:
-        """Converts the table data to a pandas DataFrame.
+        """
+        Converts the table content (including widgets) to a pandas DataFrame.
 
         Returns
         -------
         pd.DataFrame
-            Data frame with data from the CustomTableWidget.
+            A DataFrame with rows and columns matching the table content.
         """
         # Get the number of rows and columns in the QTableWidget
         row_count = self.rowCount()
@@ -177,22 +254,23 @@ class CustomTableWidget(QTableWidget):
         return df
 
     def column_to_list(self, column):
-        """Extract data from a column of a CustomTableWidget into a list.
+        """
+        Extracts data from a specified column into a list.
 
         Parameters
         ----------
-        column : int, str
-            Column index or column name.
+        column : int or str
+            Column index (int) or column header name (str).
 
         Returns
         -------
         list
-            Data from ``column`` is placed into a list.
+            A list of cell values from the specified column.
 
         Raises
         ------
         ValueError
-            Column was not found.
+            If the specified column name or index is not found.
         """
         column_index = None
         if isinstance(column, int):
@@ -254,18 +332,18 @@ class RotatedHeaderView(QHeaderView):
         return size
     
 class StandardItem(QStandardItem):
-    def __init__(self, txt='', font_size=10, set_bold=False, data=None):
-        """Extends properties of QStandardItem for QTreeView and QList items.
+    """Extends properties of QStandardItem for QTreeView and QList items.
 
-        Parameters
-        ----------
-        txt : str, optional
-            Text displayed in tree or list, by default ``''``
-        font_size : int, optional
-            fontsize, by default ``10``
-        set_bold : bool, optional
-            Bold tree font when ``True``, by default ``False``
-        """    
+    Parameters
+    ----------
+    txt : str, optional
+        Text displayed in tree or list, by default ``''``
+    font_size : int, optional
+        fontsize, by default ``10``
+    set_bold : bool, optional
+        Bold tree font when ``True``, by default ``False``
+    """    
+    def __init__(self, txt='', font_size=10, set_bold=False, data=None):
         super().__init__()
 
         # Set item font
@@ -280,6 +358,24 @@ class StandardItem(QStandardItem):
             self.setData(data)
 
 class CustomTreeView(QTreeView):
+    """
+    A customized QTreeView widget for managing a hierarchical tree structure.
+
+    Provides functionality to create branches and leaves in a QStandardItemModel-based tree,
+    search for items, retrieve paths and associated data, sort branches, and handle UI events.
+    
+    Attributes
+    ----------
+    treeModel : QStandardItemModel
+        The data model used for the tree.
+    root_node : QStandardItem
+        The invisible root node of the tree model.
+
+    Parameters
+    ----------
+    parent : QWidget, optional
+        The parent widget, by default None.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.treeModel = QStandardItemModel()
@@ -287,7 +383,21 @@ class CustomTreeView(QTreeView):
         self.setModel(self.treeModel)
     
     def branch_exists(self, parent_item, branch_name):
-        """Check if a branch exists under the given parent."""
+        """
+        Check if a branch with a given name exists under the specified parent item.
+
+        Parameters
+        ----------
+        parent_item : QStandardItem
+            The item to search under.
+        branch_name : str
+            The name of the branch to look for.
+
+        Returns
+        -------
+        QStandardItem or None
+            The branch item if found, otherwise None.
+        """
         for row in range(parent_item.rowCount()):
             item = parent_item.child(row)
             if item.text() == branch_name:
@@ -295,19 +405,63 @@ class CustomTreeView(QTreeView):
         return None  # Branch not found
     
     def add_branch(self, parent_item, branch_name, data=None):
-        """Add a branch to the tree under the given parent item."""
+        """
+        Add a new branch to the tree under the specified parent.
+
+        Parameters
+        ----------
+        parent_item : QStandardItem
+            The parent item to add the branch to.
+        branch_name : str
+            The name of the new branch.
+        data : any, optional
+            Optional data to associate with the branch.
+
+        Returns
+        -------
+        QStandardItem
+            The created branch item.
+        """
         branch_item = StandardItem(branch_name, 10, True, data)
         parent_item.appendRow(branch_item)
         return branch_item
     
     def add_leaf(self, branch_item, leaf_name, data=None):
-        """Add a leaf to the tree under the given parent branch."""
+        """
+        Add a new leaf to a branch.
+
+        Parameters
+        ----------
+        branch_item : QStandardItem
+            The branch item to which the leaf will be added.
+        leaf_name : str
+            The name of the new leaf.
+        data : any, optional
+            Optional data to associate with the leaf.
+
+        Returns
+        -------
+        QStandardItem
+            The created leaf item.
+        """
         leaf_item = StandardItem(leaf_name, 10, False, data)
         branch_item.appendRow(leaf_item)
         return leaf_item
 
     def get_item_path(self, item):
-        """Return the path of the given item as (tree, branch, leaf)."""
+        """
+        Return the full path of an item as a list from root to the given item.
+
+        Parameters
+        ----------
+        item : QStandardItem
+            The item whose path is to be retrieved.
+
+        Returns
+        -------
+        list of str
+            A list representing the hierarchy from root to the item.
+        """
         path = []
         while item is not None:
             path.insert(0, item.text())
@@ -315,11 +469,37 @@ class CustomTreeView(QTreeView):
         return path
     
     def get_leaf_data(self, parent_item, branch_name, leaf_name):
-        """Get the data associated with a leaf."""
+        """
+        Return the full path of an item as a list from root to the given item.
+
+        Parameters
+        ----------
+        item : QStandardItem
+            The item whose path is to be retrieved.
+
+        Returns
+        -------
+        list of str
+            A list representing the hierarchy from root to the item.
+        """
         return leaf_item.data()
     
     def find_leaf(self, branch_item, leaf_name):
-        """Find a leaf by name under a branch."""
+        """
+        Find a leaf under a branch by its name.
+
+        Parameters
+        ----------
+        branch_item : QStandardItem
+            The branch item to search within.
+        leaf_name : str
+            The name of the leaf to find.
+
+        Returns
+        -------
+        QStandardItem or None
+            The leaf item if found, otherwise None.
+        """
         for row in range(branch_item.rowCount()):
             leaf = branch_item.child(row)
             if leaf.text() == leaf_name:
@@ -354,13 +534,23 @@ class CustomTreeView(QTreeView):
             branch.insertRow(i, leaf)
 
     def on_double_click(self, index):
-        """Handle double-click events in the tree view."""
+        """
+        Handle a double-click event on an item in the tree.
+
+        Parameters
+        ----------
+        index : QModelIndex
+            Index of the clicked item.
+        """
         item = self.treeModel.itemFromIndex(index)
         item_path = self.get_item_path(item)
         leaf_data = self.get_leaf_data(item)
         print(f"Double-clicked on: {item_path}, Data: {leaf_data}")
 
     def clear_tree(self):
+        """
+        Clears all items from the tree model.
+        """
         try:
             self.treeModel.clear()
         except Exception as e:
@@ -441,6 +631,15 @@ class CustomComboBox(QComboBox):
         super().showPopup()
 
 class CustomDockWidget(QDockWidget):
+    """_summary_
+
+    _extended_summary_
+
+    Methods
+    -------
+    closeEvent(event: QEvent) : 
+        Hides the dock when the close button is clicked by the user.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -449,11 +648,58 @@ class CustomDockWidget(QDockWidget):
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
     def closeEvent(self, event):
-        """Override the close event to hide the dock widget instead of closing it."""
+        """Hides the dock widget when the close button is clicked by the user.
+        
+        Parameters
+        ----------
+        event : QEvent
+            Event signal when close is clicked by the user
+        """
         self.hide()
         event.ignore()  # Ignore the close event to prevent the widget from being removed.
 
 class ToggleSwitch(QWidget):
+    """
+    A custom toggle switch widget with animated transitions and customizable colors.
+
+    This widget mimics a modern on/off switch, commonly used in mobile and web UIs. It supports 
+    smooth animated transitions between the "on" and "off" states, emits a signal when toggled, 
+    and provides optional customization for height, animation duration, and colors.
+
+    Parameters
+    ----------
+    parent : QWidget, optional
+        The parent widget, by default None.
+    height : int, optional
+        Height of the toggle switch. The width is automatically set to twice the height. Default is 24.
+    duration : int, optional
+        Duration of the toggle animation in milliseconds. Default is 100.
+    fg_color : str, optional
+        Foreground color (thumb/slider) in hex format. Default is "#f0f0f0".
+    bg_left_color : str, optional
+        Background color when the switch is in the "off" position. Default is "#ffffff".
+    bg_right_color : str, optional
+        Background color when the switch is in the "on" position. Default is "#478ae4".
+
+    Signals
+    -------
+    stateChanged : bool
+        Emitted when the switch state changes.
+
+    Attributes
+    ----------
+    thumb_pos : float
+        Position of the thumb (used for animation).
+    
+    Methods
+    -------
+    toggle()
+        Toggles the switch state and emits the `stateChanged` signal.
+    setChecked(checked)
+        Sets the checked state and animates the thumb.
+    isChecked() -> bool
+        Returns the current checked state.
+    """
     stateChanged = pyqtSignal(bool)  # Signal emitted when the state changes
 
     def __init__(self, parent=None, height=24, duration=100, fg_color="#f0f0f0", bg_left_color="#ffffff", bg_right_color="#478ae4"):
@@ -495,6 +741,13 @@ class ToggleSwitch(QWidget):
         self.stateChanged.emit(self._checked)  # Emit signal
 
     def setChecked(self, checked: bool):
+        """Sets the checked state of the toggle switch and triggers the animation
+
+        Parameters
+        ----------
+        checked : bool
+            New check state of the toggle switch.
+        """
         if self._checked != checked:
             self._checked = checked
             start = self._thumb_pos
@@ -511,15 +764,16 @@ class ToggleSwitch(QWidget):
         return self._checked
 
     def mousePressEvent(self, event):
-        """Toggle switch on click"""
+        """Toggle switch on click."""
         if event.button() == Qt.MouseButton.LeftButton:
             self.setChecked(not self._checked)
 
     def sizeHint(self):
+        """Returns the size of the toggle switch."""
         return self.size()
 
     def paintEvent(self, event):
-        """Draw switch"""
+        """Draw the toggle switch."""
         painter = QPainter(self)
         try:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -540,9 +794,11 @@ class ToggleSwitch(QWidget):
             painter.end()
 
     def get_thumb_pos(self):
+        """Returns the thumb position."""
         return self._thumb_pos
 
     def set_thumb_pos(self, pos):
+        """Sets the thumb position."""
         self._thumb_pos = pos
         self.update()  # Redraw switch
 
@@ -551,9 +807,20 @@ class ToggleSwitch(QWidget):
 
 class CustomCheckButton(QToolButton):
     """A button that changes icons when checked
-    
-    Properties
+
+    Parameters
     ----------
+    icon_unchecked : QIcon
+        Unchecked icon.
+    icon_checked : QIcon
+        Checked icon.
+    parent : QToolButton
+        Tool button to set icons.
+
+    Methods
+    -------
+    update_icon()
+        Update the icon based on the button's checked state.
     """
     def __init__(self, icon_unchecked: QIcon, icon_checked: QIcon, parent=None):
         super().__init__(parent)
@@ -579,23 +846,36 @@ class CustomCheckButton(QToolButton):
             self.setIcon(self.icon_unchecked)
 
 class CustomSlider(QWidget):
-    """A custom slider with a label.
+    """
+    A custom slider widget that combines a horizontal QSlider and a QLabel.
 
-    The slider range, step and position can be initialized using the paramters below, or be set/changed using
-    QSlider equivalent methods.
-    
+    This widget displays the current slider value in a label and emits custom signals
+    for common slider events. It supports setting initial value, range, and step size.
+
     Parameters
     ----------
-    min_value : float (optional)
-        Minimum value of slider range
-    max_value : float (optional)
-        Maximum value of slider range
-    step: float (optional)
-        Step size for slider position
-    initial_value : float (optional)
-        Initial position of slider handle
-    parent : (optional)
-        Parent object"""
+    min_value : float, optional
+        Minimum value of the slider range (default is 0).
+    max_value : float, optional
+        Maximum value of the slider range (default is 100).
+    step : float, optional
+        Increment between values (default is 1).
+    initial_value : float, optional
+        Initial slider value (default is 50).
+    parent : QWidget, optional
+        Parent widget (default is None).
+
+    Signals
+    -------
+    valueChanged(int)
+        Emitted when the slider's value changes.
+    sliderMoved(int)
+        Emitted while the slider is being dragged.
+    sliderReleased(int)
+        Emitted when the slider handle is released.
+    sliderPressed(int)
+        Emitted when the slider handle is pressed.
+    """
     valueChanged = pyqtSignal(int)
     sliderMoved = pyqtSignal(int)
     sliderReleased = pyqtSignal(int)
@@ -633,28 +913,117 @@ class CustomSlider(QWidget):
         self.setLayout(self.layout)
     
     def update_label(self, value):
+        """
+        Updates the label text to display the current slider value.
+
+        Parameters
+        ----------
+        value : int
+            Current value of the slider.
+        """
         self.label.setText(f"{value}")
     
     def setMinimum(self, value):
+        """
+        Sets the minimum value of the slider.
+
+        Parameters
+        ----------
+        value : int
+            Minimum value.
+        """
         self.slider.setMinimum(value)
     
     def setMaximum(self, value):
+        """
+        Sets the maximum value of the slider.
+
+        Parameters
+        ----------
+        value : int
+            Maximum value.
+        """
         self.slider.setMaximum(value)
     
     def setStep(self, value):
+        """
+        Sets the step size of the slider.
+
+        Parameters
+        ----------
+        value : int
+            Step size.
+        """
         self.slider.setSingleStep(value)
     
     def setValue(self, value):
+        """
+        Sets the slider value.
+
+        Parameters
+        ----------
+        value : int
+            Desired slider value.
+        """
         self.slider.setValue(value)
     
     def value(self):
+        """
+        Returns the current value of the slider.
+
+        Returns
+        -------
+        int
+            Current slider value.
+        """
         return self.slider.value()
 
     def slider(self):
+        """
+        Returns the QSlider instance.
+
+        Returns
+        -------
+        QSlider
+            The underlying slider widget.
+        """
         return self.slider
 
 
 class DoubleSlider(QWidget):
+    """
+    A dual-slider widget with editable input fields for setting a value range.
+
+    This widget features two horizontal QSliders for setting a minimum and maximum value,
+    along with associated QLineEdits to allow manual text input. It emits combined signals
+    when either slider changes, is moved, or released.
+
+    Parameters
+    ----------
+    min_value : int, optional
+        Minimum allowed slider value (default is 0).
+    max_value : int, optional
+        Maximum allowed slider value (default is 100).
+    step : int, optional
+        Step size between values (default is 1).
+    initial_left : int, optional
+        Initial value for the left (lower) slider (default is 25).
+    initial_right : int, optional
+        Initial value for the right (upper) slider (default is 75).
+    parent : QWidget, optional
+        Parent widget (default is None).
+
+    Signals
+    -------
+    valueChanged(int, int)
+        Emitted when either slider value changes.
+    sliderMoved(int, int)
+        Emitted while either slider is being dragged.
+    sliderReleased(int, int)
+        Emitted when either slider handle is released.
+    sliderPressed(int, int)
+        Emitted when either slider handle is pressed.
+    """
     valueChanged = pyqtSignal(int, int)  # Signal emitting both slider values
     sliderMoved = pyqtSignal(int, int)  # Signal emitting both slider values
     sliderReleased = pyqtSignal(int, int)  # Signal emitting both slider values
@@ -729,6 +1098,9 @@ class DoubleSlider(QWidget):
         self.setLayout(self.layout)
     
     def update_values(self):
+        """
+        Updates the line edits to reflect the slider values and emits the `valueChanged` signal.
+        """
         left_value = self.left_slider.value()
         right_value = self.right_slider.value()
         
@@ -738,6 +1110,9 @@ class DoubleSlider(QWidget):
         self.valueChanged.emit(left_value, right_value)
     
     def update_sliders(self):
+        """
+        Updates slider values based on text input in the line edits. Invalid input is ignored.
+        """
         try:
             left_value = int(self.left_input.text())
             right_value = int(self.right_input.text())
@@ -747,26 +1122,82 @@ class DoubleSlider(QWidget):
             pass
     
     def setMinimum(self, value):
+        """
+        Sets the minimum value for both sliders.
+
+        Parameters
+        ----------
+        value : int
+            Minimum value.
+        """
         self.left_slider.setMinimum(value)
         self.right_slider.setMinimum(value)
     
     def setMaximum(self, value):
+        """
+        Sets the maximum value for both sliders.
+
+        Parameters
+        ----------
+        value : int
+            Maximum value.
+        """
         self.left_slider.setMaximum(value)
         self.right_slider.setMaximum(value)
     
     def setStep(self, value):
+        """
+        Sets the step size for both sliders.
+
+        Parameters
+        ----------
+        value : int
+            Step size.
+        """
         self.left_slider.setSingleStep(value)
         self.right_slider.setSingleStep(value)
 
     def setLeftValue(self, value):
+        """
+        Sets the value of the left slider.
+
+        Parameters
+        ----------
+        value : int
+            Desired value for the left slider.
+        """
         self.left_slider.setValue(value)
 
     def setRightValue(self, value):
+        """
+        Sets the value of the right slider.
+
+        Parameters
+        ----------
+        value : int
+            Desired value for the right slider.
+        """
         self.right_slider.setValue(value)
 
     def setValues(self, values):
+        """
+        Sets values for both sliders.
+
+        Parameters
+        ----------
+        values : tuple of int
+            Tuple containing (left_value, right_value).
+        """
         self.left_slider.setValue(values[0])
         self.right_slider.setValue(values[1])
     
     def values(self):
+        """
+        Returns the current values of both sliders.
+
+        Returns
+        -------
+        tuple of int
+            (left_value, right_value)
+        """
         return self.left_slider.value(), self.right_slider.value()

@@ -1,30 +1,29 @@
-common.DataHandling
+﻿common.DataHandling
 ===================
 
 .. automodule:: common.DataHandling
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      chauvenet_criterion
-      quantile_and_difference
-      sort_analytes
-      symlog
-      yeojohnson
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      AttributeDataFrame
-      KMeans
-      LoggerConfig
-      Observable
-      QMessageBox
       SampleObj
-      StandardScaler
-      StatusMessageManager
    
+   
+
+   
+   
+   
+
+
+

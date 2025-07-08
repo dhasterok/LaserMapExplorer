@@ -8,6 +8,23 @@ from PyQt6.QtCore import Qt
 import re
 
 class SearchWidget(QWidget):
+    """
+    A search and replace toolbar for use with QTextEdit widgets.
+
+    Provides inline controls for real-time or return-triggered searching, case sensitivity,
+    regex support, navigation through matches, and optional text replacement.
+
+    Parameters
+    ----------
+    text_edit : QTextEdit
+        The QTextEdit instance this widget will operate on.
+    parent : QWidget, optional
+        Parent widget, by default None.
+    enable_replace : bool, optional
+        If True, adds replacement input fields and buttons (default is True).
+    realtime : bool, optional
+        If True, triggers search on every keypress; otherwise, search activates on Return (default is False).
+    """
     def __init__(self, text_edit, parent=None, enable_replace=True, realtime=False):
         super().__init__(parent)
         self.text_edit = text_edit
@@ -20,6 +37,10 @@ class SearchWidget(QWidget):
         self._connect_signals()
 
     def _build_ui(self):
+        """
+        Initializes the layout and widgets for the search interface,
+        including search input, toggle buttons, and navigation controls.
+        """
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -90,6 +111,10 @@ class SearchWidget(QWidget):
             self.toggle_replace_button.setChecked(False)
 
     def _connect_signals(self):
+        """
+        Connects internal UI signals to their corresponding slots.
+        Handles text change, toggle buttons, navigation, and replace actions.
+        """
         if self.realtime:
             self.search_input.textChanged.connect(self.highlight_matches)
         else:
@@ -108,6 +133,9 @@ class SearchWidget(QWidget):
             self.replace_all_button.clicked.connect(self.replace_all)
 
     def toggle_replace_fields(self):
+        """
+        Shows or hides the replace input and buttons based on the toggle state.
+        """
         visible = self.toggle_replace_button.isChecked()
 
         if self.replace_input:
@@ -116,6 +144,14 @@ class SearchWidget(QWidget):
             self.replace_all_button.setVisible(visible)
 
     def highlight_matches(self):
+        """
+        Searches the text_edit for the current search term and highlights all matches.
+
+        Handles both regex and plain text search with optional case sensitivity.
+        Highlights all matches in yellow and the current match in cyan.
+
+        Updates the match counter label and prepares match positions for navigation.
+        """
         query = self.search_input.text()
         self.match_positions = []
         self.current_index = -1
@@ -191,6 +227,14 @@ class SearchWidget(QWidget):
             self.select_current(match_lengths[self.current_index])
 
     def select_current(self, length):
+        """
+        Moves the cursor to the currently selected match and applies highlight.
+
+        Parameters
+        ----------
+        length : int
+            The length of the matched text (used to create the cursor range).
+        """
         cursor = self.text_edit.textCursor()
         pos = self.match_positions[self.current_index]
         cursor.setPosition(pos)
@@ -206,12 +250,24 @@ class SearchWidget(QWidget):
         self.text_edit.setExtraSelections([selection])
 
     def update_match_label(self):
+        """
+        Updates the display label that shows current match index and total matches.
+        e.g., '3 / 7'
+        """
         if self.total_matches == 0:
             self.match_label.setText("0 / 0")
         else:
             self.match_label.setText(f"{self.current_index + 1} / {self.total_matches}")
 
     def navigate_match(self, forward=True):
+        """
+        Navigates to the next or previous search match in the document.
+
+        Parameters
+        ----------
+        forward : bool, optional
+            If True, goes to the next match; if False, goes to the previous (default is True).
+        """
         if not self.match_positions:
             return
         if forward:
@@ -224,6 +280,10 @@ class SearchWidget(QWidget):
         self.select_current(match_length)
 
     def clear_search(self):
+        """
+        Clears the search and replace fields, removes all highlights,
+        and resets internal state (matches, positions, cursor).
+        """
         self.search_input.setText("")
         if self.replace_input:
             self.replace_input.setText("")
@@ -239,6 +299,10 @@ class SearchWidget(QWidget):
         cursor.setCharFormat(QTextCharFormat())
 
     def replace_current(self):
+        """
+        Replaces the currently selected match in the text_edit with the replacement text.
+        After replacing, it re-highlights all matches to update positions.
+        """
         if self.current_index < 0 or not self.replace_input:
             return
 
@@ -256,6 +320,12 @@ class SearchWidget(QWidget):
         self.highlight_matches()
 
     def replace_all(self):
+        """
+        Replaces all matches in the document with the replacement text.
+
+        Handles both regex and plain text replacement with optional case sensitivity.
+        Validates regex patterns before execution and warns if invalid.
+        """
         if not self.match_positions or not self.replace_input:
             return
 

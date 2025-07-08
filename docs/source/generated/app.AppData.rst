@@ -1,21 +1,29 @@
-app.AppData
+﻿app.AppData
 ===========
 
 .. automodule:: app.AppData
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      log
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
       AppData
-      LoggerConfig
-      Observable
    
+   
+
+   
+   
+   
+
+
+

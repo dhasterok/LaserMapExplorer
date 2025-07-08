@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'py-modindex';</script>
@@ -50,7 +47,6 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
 
 
   </head>
@@ -68,8 +64,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -77,6 +84,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -84,8 +92,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -119,7 +127,7 @@
     
     
     <img src="_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -181,11 +189,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -223,11 +235,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -244,8 +260,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -337,14 +352,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -381,12 +391,12 @@
        <td><img src="_static/minus.png" class="toggler"
               id="toggle-1" style="display: none" alt="-" /></td>
        <td>
-       <a href="app.html#module-app"><code class="xref">app</code></a></td><td>
+       <a href="generated/app.html#module-app"><code class="xref">app</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.AnalyteSelectionWindow"><code class="xref">app.AnalyteSelectionWindow</code></a></td><td>
+       <a href="generated/app.AnalyteSelectionWindow.html#module-app.AnalyteSelectionWindow"><code class="xref">app.AnalyteSelectionWindow</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -401,17 +411,17 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.config"><code class="xref">app.config</code></a></td><td>
+       <a href="generated/app.config.html#module-app.config"><code class="xref">app.config</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.CropImage"><code class="xref">app.CropImage</code></a></td><td>
+       <a href="generated/app.CropImage.html#module-app.CropImage"><code class="xref">app.CropImage</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.CustomTableWidget"><code class="xref">app.CustomTableWidget</code></a></td><td>
+       <a href="generated/app.CustomTableWidget.html#module-app.CustomTableWidget"><code class="xref">app.CustomTableWidget</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -426,7 +436,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.ImageProcessing"><code class="xref">app.ImageProcessing</code></a></td><td>
+       <a href="generated/app.ImageProcessing.html#module-app.ImageProcessing"><code class="xref">app.ImageProcessing</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -441,12 +451,12 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.MapImporter"><code class="xref">app.MapImporter</code></a></td><td>
+       <a href="generated/app.MapImporter.html#module-app.MapImporter"><code class="xref">app.MapImporter</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.PlotTree"><code class="xref">app.PlotTree</code></a></td><td>
+       <a href="generated/app.PlotTree.html#module-app.PlotTree"><code class="xref">app.PlotTree</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -456,7 +466,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.Profile"><code class="xref">app.Profile</code></a></td><td>
+       <a href="generated/app.Profile.html#module-app.Profile"><code class="xref">app.Profile</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -466,7 +476,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.QuickView"><code class="xref">app.QuickView</code></a></td><td>
+       <a href="generated/app.QuickView.html#module-app.QuickView"><code class="xref">app.QuickView</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -476,7 +486,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.SpotImporter"><code class="xref">app.SpotImporter</code></a></td><td>
+       <a href="generated/app.SpotImporter.html#module-app.SpotImporter"><code class="xref">app.SpotImporter</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -486,7 +496,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.StyleToolbox"><code class="xref">app.StyleToolbox</code></a></td><td>
+       <a href="generated/app.StyleToolbox.html#module-app.StyleToolbox"><code class="xref">app.StyleToolbox</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -496,12 +506,12 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.UITheme"><code class="xref">app.UITheme</code></a></td><td>
+       <a href="generated/app.UITheme.html#module-app.UITheme"><code class="xref">app.UITheme</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="app.html#module-app.Workflow"><code class="xref">app.Workflow</code></a></td><td>
+       <a href="generated/app.Workflow.html#module-app.Workflow"><code class="xref">app.Workflow</code></a></td><td>
        <em></em></td></tr>
      <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
      <tr class="cap" id="cap-c"><td></td><td>
@@ -510,7 +520,7 @@
        <td><img src="_static/minus.png" class="toggler"
               id="toggle-2" style="display: none" alt="-" /></td>
        <td>
-       <a href="common.html#module-common"><code class="xref">common</code></a></td><td>
+       <a href="generated/common.html#module-common"><code class="xref">common</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -525,22 +535,22 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.colorfunc"><code class="xref">common.colorfunc</code></a></td><td>
+       <a href="generated/common.colorfunc.html#module-common.colorfunc"><code class="xref">common.colorfunc</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.csvdict"><code class="xref">common.csvdict</code></a></td><td>
+       <a href="generated/common.csvdict.html#module-common.csvdict"><code class="xref">common.csvdict</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.CustomMplCanvas"><code class="xref">common.CustomMplCanvas</code></a></td><td>
+       <a href="generated/common.CustomMplCanvas.html#module-common.CustomMplCanvas"><code class="xref">common.CustomMplCanvas</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.CustomWidgets"><code class="xref">common.CustomWidgets</code></a></td><td>
+       <a href="generated/common.CustomWidgets.html#module-common.CustomWidgets"><code class="xref">common.CustomWidgets</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -555,17 +565,17 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.ExtendedDF"><code class="xref">common.ExtendedDF</code></a></td><td>
+       <a href="generated/common.ExtendedDF.html#module-common.ExtendedDF"><code class="xref">common.ExtendedDF</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.format"><code class="xref">common.format</code></a></td><td>
+       <a href="generated/common.format.html#module-common.format"><code class="xref">common.format</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.gausscensor"><code class="xref">common.gausscensor</code></a></td><td>
+       <a href="generated/common.gausscensor.html#module-common.gausscensor"><code class="xref">common.gausscensor</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -580,17 +590,17 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.Masking"><code class="xref">common.Masking</code></a></td><td>
+       <a href="generated/common.Masking.html#module-common.Masking"><code class="xref">common.Masking</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.MolecularWeightCalculator"><code class="xref">common.MolecularWeightCalculator</code></a></td><td>
+       <a href="generated/common.MolecularWeightCalculator.html#module-common.MolecularWeightCalculator"><code class="xref">common.MolecularWeightCalculator</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.NoteTaking"><code class="xref">common.NoteTaking</code></a></td><td>
+       <a href="generated/common.NoteTaking.html#module-common.NoteTaking"><code class="xref">common.NoteTaking</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -600,17 +610,17 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.outliers"><code class="xref">common.outliers</code></a></td><td>
+       <a href="generated/common.outliers.html#module-common.outliers"><code class="xref">common.outliers</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.plot_spider"><code class="xref">common.plot_spider</code></a></td><td>
+       <a href="generated/common.plot_spider.html#module-common.plot_spider"><code class="xref">common.plot_spider</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.Polygon"><code class="xref">common.Polygon</code></a></td><td>
+       <a href="generated/common.Polygon.html#module-common.Polygon"><code class="xref">common.Polygon</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -625,22 +635,22 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.radar"><code class="xref">common.radar</code></a></td><td>
+       <a href="generated/common.radar.html#module-common.radar"><code class="xref">common.radar</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.radar_factory"><code class="xref">common.radar_factory</code></a></td><td>
+       <a href="generated/common.radar_factory.html#module-common.radar_factory"><code class="xref">common.radar_factory</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.scalebar"><code class="xref">common.scalebar</code></a></td><td>
+       <a href="generated/common.scalebar.html#module-common.scalebar"><code class="xref">common.scalebar</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.ScheduleTimer"><code class="xref">common.ScheduleTimer</code></a></td><td>
+       <a href="generated/common.ScheduleTimer.html#module-common.ScheduleTimer"><code class="xref">common.ScheduleTimer</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -650,7 +660,7 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.SortAnalytes"><code class="xref">common.SortAnalytes</code></a></td><td>
+       <a href="generated/common.SortAnalytes.html#module-common.SortAnalytes"><code class="xref">common.SortAnalytes</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
@@ -660,17 +670,17 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.TableFunctions"><code class="xref">common.TableFunctions</code></a></td><td>
+       <a href="generated/common.TableFunctions.html#module-common.TableFunctions"><code class="xref">common.TableFunctions</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.ternary_plot"><code class="xref">common.ternary_plot</code></a></td><td>
+       <a href="generated/common.ternary_plot.html#module-common.ternary_plot"><code class="xref">common.ternary_plot</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="common.html#module-common.varfunc"><code class="xref">common.varfunc</code></a></td><td>
+       <a href="generated/common.varfunc.html#module-common.varfunc"><code class="xref">common.varfunc</code></a></td><td>
        <em></em></td></tr>
      <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
      <tr class="cap" id="cap-s"><td></td><td>
@@ -774,8 +784,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -795,7 +805,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -808,8 +818,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

@@ -23,6 +23,12 @@ from src.common.CustomMplCanvas import MplCanvas
 PRECISION = 5
 
 def increase_precision():
+    """
+    Increase the global display precision for numeric formatting.
+
+    Increments the global PRECISION variable by 1, 
+    up to a maximum of 16 significant figures.
+    """
     global PRECISION
 
     if PRECISION == 16:
@@ -30,6 +36,12 @@ def increase_precision():
     PRECISION += 1
     
 def decrease_precision():
+    """
+    Decrease the global display precision for numeric formatting.
+
+    Decrements the global PRECISION variable by 1,
+    but will not go below 1 significant figure.
+    """
     global PRECISION
 
     if PRECISION == 1:
@@ -37,6 +49,24 @@ def decrease_precision():
     PRECISION -= 1
 
 def create_checkbox(is_checked, callback, key):
+    """
+    Create a QCheckBox widget with an initial state and a bound callback.
+
+    Parameters
+    ----------
+    is_checked : bool
+        Whether the checkbox should be initially checked.
+    callback : callable
+        Function to call when the checkbox state changes. Will receive
+        the new state and the key as arguments.
+    key : any
+        Identifier passed to the callback when the checkbox state changes.
+
+    Returns
+    -------
+    QCheckBox
+        The configured checkbox widget.
+    """
     checkbox = QCheckBox()
     checkbox.setChecked(is_checked)
     checkbox.stateChanged.connect(lambda state: callback(state, key))
@@ -44,8 +74,20 @@ def create_checkbox(is_checked, callback, key):
 
 def update_dataframe(dataframe, table_widget):
     global PRECISION
+    """
+    Populate a QTableWidget with the contents of a pandas DataFrame.
 
-    """Load the DataFrame data into the QTableWidget."""
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
+        The data to populate the table with.
+    table_widget : QTableWidget
+        The widget to display the DataFrame content.
+
+    Notes
+    -----
+    Each numeric value is formatted using the current global PRECISION.
+    """
     # Set the row and column count
     table_widget.setRowCount(len(dataframe))
     table_widget.setColumnCount(len(dataframe.columns))
@@ -61,8 +103,26 @@ def update_dataframe(dataframe, table_widget):
 
 def update_numpy_array(array, table_widget):
     global PRECISION
+    """
+    Populate a QTableWidget with the contents of a NumPy array.
 
-    """Load numpy.ndarray data into the QTableWidget."""
+    Parameters
+    ----------
+    array : np.ndarray
+        The array to display in the table. Must be 2D.
+    table_widget : QTableWidget
+        The widget to populate with the array data.
+
+    Raises
+    ------
+    TypeError
+        If the input is not a NumPy ndarray.
+
+    Notes
+    -----
+    Data is formatted using the global PRECISION setting.
+    Cells are made read-only.
+    """
     if not isinstance(array, np.ndarray):
         raise TypeError("Input must be a numpy.ndarray")
 
@@ -82,25 +142,32 @@ def update_numpy_array(array, table_widget):
             table_widget.setItem(row_idx, col_idx, item)
 
 class InfoDock(CustomDockWidget, UIFieldLogic):
-    """Creates a dock widget with a various tools to view the data, metadata, and plot information
+    """
+    Dockable widget providing data insight tools through multiple interactive tabs.
 
-    Creates a tab widget within a dock widget with tabs for metadata, the full dataframe,
-    selected fields (in map form), and plot information.  Each tab and the methods for it are
-    contained within their own class.
+    This widget embeds a tabbed interface within a dockable container, giving users access
+    to key information and visualization tools related to the dataset and current plot.
+    It includes:
+
+    - **Metadata**: Displays detailed descriptions and stats of dataset fields.
+    - **Dataframe**: Shows the full data table in a view-only format.
+    - **Field Map**: Displays selected field data spatially (map representation).
+    - **Plot Info**: Contains current plot settings, selections, and summaries.
 
     Parameters
     ----------
-    parent : QMainWindow, optional
-        The parent window, by default None
+    parent : QMainWindow
+        The main application window to which this dock is attached.
     title : str, optional
-        Window title, by default "Info Tools"
+        The title displayed on the dock widget window (default is "Info Tools").
 
-    :see also:
-        metadata_tab : A tab displaying metadata for each column of the dataframe
-        dataframe_tab : A tab that displays the entire dataframe
-        field_tab : A tab that displays each field in map form (as displayed in a map plot)
-        plot_info_tab : A tab that displays information about the current plot
-    """        
+    See Also
+    --------
+    MetadataTab : Displays metadata for columns in the current dataset.
+    DataFrameTab : Shows the entire dataset as a table.
+    FieldTab : Provides a map-based visualization for selected fields.
+    PlotInfoTab : Displays configuration and summary information for the current plot.
+    """
     def __init__(self, parent, title="Info Tools"):
         super().__init__(parent)
 
@@ -147,6 +214,23 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
         self.tabWidgetInfo.currentChanged.connect(self.update_tab_widget)
 
     def update_tab_widget(self):
+        """
+        Updates the content of the currently active tab.
+
+        This method is called automatically when the user switches between tabs or
+        when the dock's visibility changes. It ensures that the tab contents are
+        refreshed with up-to-date data:
+
+        - **Metadata**: Refreshes statistics from `processed_data`.
+        - **Data**: Loads the full `processed_data` DataFrame into the table widget.
+        - **Field**: Updates the map table for the selected field.
+        - **Plot Info**: Refreshes plot configuration and status data.
+
+        Notes
+        -----
+        Assumes that `self.data.processed_data` and `self.plot_info` are already populated.
+        Fields are not updated if none are selected.
+        """
         idx = self.tabWidgetInfo.currentIndex()
         match self.tabWidgetInfo.tabText(idx).lower():
             case "metadata":
@@ -164,12 +248,21 @@ class InfoDock(CustomDockWidget, UIFieldLogic):
 # Plot Info Tab functions
 # -------------------------------
 class PlotInfoTab():
-    """Creates the plot info tab for plots and annotations.
+    """
+    Plot Info Tab UI for displaying plot metadata and managing annotations.
+
+    This tab provides a read-only display of the current plot's metadata and a table for managing
+    user-added annotations, including their type, value, and visibility.
+
+    The tab contains:
+    - A toolbar with actions to select all annotations, toggle visibility, and delete them.
+    - A read-only QTextEdit for displaying plot metadata.
+    - A QTableWidget for interacting with annotations.
 
     Parameters
     ----------
-    parent : QTabWidget, optional
-        Tab widget to add this tab to.
+    parent : QTabWidget
+        The parent tab widget to which this tab will be added.
     """
     def __init__(self, parent):
         self.parent = parent
@@ -248,27 +341,30 @@ class PlotInfoTab():
             self.update_annotation_table()
 
     def update_plot_info_tab(self, plot_info, write_info=True, level=0):
-        """Prints plot info in the information tab
-        
-        Prints ``plot_info`` into the bottom information tab ``MainWindow.textEditPlotInfo``.
+        """
+        Recursively display plot metadata as HTML in the info panel.
+
+        This method traverses the nested `plot_info` dictionary and generates a formatted HTML
+        string that is either inserted into the `plot_info_text_edit` display or returned.
 
         Parameters
         ----------
         plot_info : dict
-            Plot information dictionary.
-        write_info : bool
-            Flag to write dictionary contents when ``True``. When calling ``update_plot_info`` is used
-            recursively to handle dictionaries within dictionaries, the flag is set to ``False``. By default ``True``
-        level : int
-            Indent level, by default ``0``
+            Dictionary of plot metadata (can be nested).
+        write_info : bool, optional
+            If True, the formatted HTML will be displayed directly in the UI.
+            If False, the method will return the formatted HTML string instead.
+            Default is True.
+        level : int, optional
+            Current indentation level for recursive formatting. Default is 0.
 
         Returns
         -------
         str
-            When called recursively, a string is returned
+            A formatted HTML string if `write_info` is False. Otherwise, None.
         """
         if plot_info is None:
-            return
+            return ''
 
         content = ''
         if level > 0:
@@ -299,6 +395,18 @@ class PlotInfoTab():
             return content
 
     def update_annotation_table(self):
+        """
+        Populate the annotation table with data from the current plot.
+
+        Reads annotation data from the current `MplCanvas` instance in `plot_info['figure']` and
+        populates the QTableWidget. Each row includes:
+
+        - Annotation type (non-editable)
+        - Editable annotation value
+        - A checkbox for visibility control
+
+        If the figure or its annotations are not available, the method returns silently.
+        """
         if not self.parent.plot_info['figure'] or not isinstance(self.parent.plot_info['figure'], MplCanvas):
             return
 
@@ -324,12 +432,35 @@ class PlotInfoTab():
         self.annotations_table.itemChanged.connect(self.update_annotation_from_table)
 
     def toggle_annotation(self, state, annotation):
+        """
+        Callback function to toggle annotation visibility.
+
+        Updates both the internal state and visual visibility of the selected annotation.
+
+        Parameters
+        ----------
+        state : int
+            The checkbox state (0 for unchecked, 2 for checked).
+        annotation : matplotlib.text.Annotation
+            The annotation object to be toggled.
+        """
         # Show or hide the annotation
         self.parent.plot_info['figure'].annotations[annotation]["visible"] = bool(state)
         annotation.set_visible(bool(state))
         self.parent.canvas.draw()
 
     def update_annotation_from_table(self, item):
+        """
+        Handle edits made directly to the annotation table.
+
+        Specifically updates the "Value" of the annotation in the canvas and triggers
+        a redraw of the plot.
+
+        Parameters
+        ----------
+        item : QTableWidgetItem
+            The item in the annotation table that was changed.
+        """
         # Update the annotation from the table
         row = item.row()
         canvas = self.parent.plot_info['figure']
@@ -735,7 +866,7 @@ class DataFrameTab():
     Parameters
     ----------
     parent : QTabWidget, optional
-        Tab widget to add this tab to.
+        Parent tab widget that will contain this tab.
     """
     def __init__(self, parent):
         self.parent = parent
@@ -794,7 +925,7 @@ class FieldTab(UIFieldLogic):
     Parameters
     ----------
     parent : QTabWidget
-        Tab widget to add this tab to.
+        Parent tab widget that will contain this tab.
     """
     def __init__(self, parent):
         super().__init__(parent)

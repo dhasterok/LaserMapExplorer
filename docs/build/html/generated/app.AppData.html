@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/app.AppData';</script>
@@ -52,7 +49,6 @@
     <link rel="prev" title="app.AnalyteSelectionWindow" href="app.AnalyteSelectionWindow.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -68,8 +64,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -77,6 +84,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -84,8 +92,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -119,7 +127,7 @@
     
     
     <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -181,11 +189,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -223,11 +235,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -246,8 +262,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -436,14 +451,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -461,6 +471,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -475,7 +487,7 @@
     
     <li class="breadcrumb-item"><a href="app.html" class="nav-link">app</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.AppData</span></li>
+    <li class="breadcrumb-item active" aria-current="page">app.AppData</li>
   </ul>
 </nav>
 </div>
@@ -494,36 +506,22 @@
                   
   <section id="module-app.AppData">
 <span id="app-appdata"></span><h1>app.AppData<a class="headerlink" href="#module-app.AppData" title="Link to this heading">#</a></h1>
-<p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_log_methods</span></code>([logger_key])</p></td>
-<td><p>Decorator that wraps all methods in a class</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code>(msg[, prefix])</p></td>
-<td><p>Write a log message using the global logger, respecting pause state and formatting.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <p class="rubric">Classes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData" title="app.AppData.AppData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AppData</span></code></a>(data)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code>()</p></td>
-<td><p>Central configuration manager for logging behavior within the application.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Observable</span></code>()</p></td>
-<td><p>Class for observing changes to properties or other events and notifying the observers.</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="app.AppData.AppData">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.AppData.</span></span><span class="sig-name descname"><span class="pre">AppData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.AppData.</span></span><span class="sig-name descname"><span class="pre">AppData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Observable</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
@@ -597,7 +595,7 @@
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.add_observer" title="app.AppData.AppData.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Register a callback function to be called when a property changes.</p></td>
@@ -660,29 +658,29 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.apply_noise_red">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_noise_red</span></span><a class="headerlink" href="#app.AppData.AppData.apply_noise_red" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_noise_red</span></span><a class="headerlink" href="#app.AppData.AppData.apply_noise_red" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.c_field">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_field</span></span><a class="headerlink" href="#app.AppData.AppData.c_field" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_field</span></span><a class="headerlink" href="#app.AppData.AppData.c_field" title="Link to this definition">#</a></dt>
 <dd><p>(str) Field associated with colors or a histrogram</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.c_field_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.c_field_type" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.c_field_type" title="Link to this definition">#</a></dt>
 <dd><p>(str) Field type associated with colors or a histrogram</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.cluster_distance">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_distance</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_distance" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_distance</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_distance" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.cluster_exponent">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_exponent</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_exponent" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_exponent</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_exponent" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -708,78 +706,78 @@ it is separately handled and assigned the last color.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.cluster_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_method</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_method</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_method" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.cluster_seed">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_seed</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_seed" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_seed</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_seed" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.corr_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_method</span></span><a class="headerlink" href="#app.AppData.AppData.corr_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_method</span></span><a class="headerlink" href="#app.AppData.AppData.corr_method" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.corr_squared">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_squared</span></span><a class="headerlink" href="#app.AppData.AppData.corr_squared" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_squared</span></span><a class="headerlink" href="#app.AppData.AppData.corr_squared" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.default_hist_num_bins">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.default_hist_num_bins" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.default_hist_num_bins" title="Link to this definition">#</a></dt>
 <dd><p>Default bin width for histograms.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_method" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_precondition">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_precondition" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_precondition" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_x_max">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x_max</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x_max" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x_max</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x_max" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_x_min">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x_min" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x_min" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y_max">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_max</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_max" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_max</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_max" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y_min">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_min" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_min" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.equalize_color_scale">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equalize_color_scale</span></span><a class="headerlink" href="#app.AppData.AppData.equalize_color_scale" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equalize_color_scale</span></span><a class="headerlink" href="#app.AppData.AppData.equalize_color_scale" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.field_dict">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">field_dict</span></span><a class="headerlink" href="#app.AppData.AppData.field_dict" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">field_dict</span></span><a class="headerlink" href="#app.AppData.AppData.field_dict" title="Link to this definition">#</a></dt>
 <dd><p>A dictionary of the field_types in the self.data[sample_id].processed_data dataframe, with “coord” excluded.</p>
 </dd></dl>
 
@@ -825,27 +823,27 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.gradient_flag">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient_flag</span></span><a class="headerlink" href="#app.AppData.AppData.gradient_flag" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient_flag</span></span><a class="headerlink" href="#app.AppData.AppData.gradient_flag" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.heatmap_style">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">heatmap_style</span></span><a class="headerlink" href="#app.AppData.AppData.heatmap_style" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">heatmap_style</span></span><a class="headerlink" href="#app.AppData.AppData.heatmap_style" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.hist_bin_width">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_bin_width</span></span><a class="headerlink" href="#app.AppData.AppData.hist_bin_width" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_bin_width</span></span><a class="headerlink" href="#app.AppData.AppData.hist_bin_width" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.hist_num_bins">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.hist_num_bins" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.hist_num_bins" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.hist_plot_style">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_plot_style</span></span><a class="headerlink" href="#app.AppData.AppData.hist_plot_style" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_plot_style</span></span><a class="headerlink" href="#app.AppData.AppData.hist_plot_style" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -856,43 +854,43 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.max_clusters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.max_clusters" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.max_clusters" title="Link to this definition">#</a></dt>
 <dd><p>The maximum number of clusters to test when producing estimates of the optimal number of clusters</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ndim_analyte_set">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_analyte_set</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_analyte_set" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_analyte_set</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_analyte_set" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ndim_list">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_list</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_list" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_list</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_list" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ndim_quantile_index">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_quantile_index</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_quantile_index" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_quantile_index</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_quantile_index" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.noise_red_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_method" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.noise_red_option1">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option1</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option1" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option1</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option1" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.noise_red_option2">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option2</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option2" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option2</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option2" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.norm_reference">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm_reference</span></span><a class="headerlink" href="#app.AppData.AppData.norm_reference" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm_reference</span></span><a class="headerlink" href="#app.AppData.AppData.norm_reference" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -903,23 +901,23 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.num_basis_for_precondition">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_basis_for_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.num_basis_for_precondition" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_basis_for_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.num_basis_for_precondition" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.num_clusters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.num_clusters" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.num_clusters" title="Link to this definition">#</a></dt>
 <dd><p>The number of clusters used to classify the data</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ref_chem">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#app.AppData.AppData.ref_chem" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#app.AppData.AppData.ref_chem" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ref_index">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_index</span></span><a class="headerlink" href="#app.AppData.AppData.ref_index" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_index</span></span><a class="headerlink" href="#app.AppData.AppData.ref_index" title="Link to this definition">#</a></dt>
 <dd><p>Index into reference chemistry database</p>
 </dd></dl>
 
@@ -931,28 +929,28 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.sample_id">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_id</span></span><a class="headerlink" href="#app.AppData.AppData.sample_id" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_id</span></span><a class="headerlink" href="#app.AppData.AppData.sample_id" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.sample_list">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_list</span></span><a class="headerlink" href="#app.AppData.AppData.sample_list" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_list</span></span><a class="headerlink" href="#app.AppData.AppData.sample_list" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.scatter_preset">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scatter_preset</span></span><a class="headerlink" href="#app.AppData.AppData.scatter_preset" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scatter_preset</span></span><a class="headerlink" href="#app.AppData.AppData.scatter_preset" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.selected_analytes">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_analytes</span></span><a class="headerlink" href="#app.AppData.AppData.selected_analytes" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_analytes</span></span><a class="headerlink" href="#app.AppData.AppData.selected_analytes" title="Link to this definition">#</a></dt>
 <dd><p>Gets the list of selected analytes for use in analyses.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.selected_clusters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.selected_clusters" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.selected_clusters" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -967,32 +965,32 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.sort_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_method</span></span><a class="headerlink" href="#app.AppData.AppData.sort_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_method</span></span><a class="headerlink" href="#app.AppData.AppData.sort_method" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_m">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_m</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_m" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_m</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_m" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_x</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_x" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_x</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_x" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_y</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_y" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_y</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_y" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_z">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_z</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_z" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_z</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_z" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_colormap">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_colormap" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_colormap" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1021,12 +1019,12 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.x_field">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_field</span></span><a class="headerlink" href="#app.AppData.AppData.x_field" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_field</span></span><a class="headerlink" href="#app.AppData.AppData.x_field" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.x_field_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.x_field_type" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.x_field_type" title="Link to this definition">#</a></dt>
 <dd><p>Plot type used to determine plot method and associated style settings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1037,12 +1035,12 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.y_field">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_field</span></span><a class="headerlink" href="#app.AppData.AppData.y_field" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_field</span></span><a class="headerlink" href="#app.AppData.AppData.y_field" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.y_field_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.y_field_type" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.y_field_type" title="Link to this definition">#</a></dt>
 <dd><p>Plot type used to determine plot method and associated style settings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1053,12 +1051,12 @@ by default <cite>‘all’</cite></p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.z_field">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_field</span></span><a class="headerlink" href="#app.AppData.AppData.z_field" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_field</span></span><a class="headerlink" href="#app.AppData.AppData.z_field" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.z_field_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.z_field_type" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.z_field_type" title="Link to this definition">#</a></dt>
 <dd><p>Plot type used to determine plot method and associated style settings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1106,8 +1104,7 @@ by default <cite>‘all’</cite></p></li>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1194,13 +1191,13 @@ by default <cite>‘all’</cite></p></li>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/generated/app.AppData.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/app.AppData.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1215,8 +1212,8 @@ by default <cite>‘all’</cite></p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1236,7 +1233,7 @@ by default <cite>‘all’</cite></p></li>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1249,8 +1246,7 @@ by default <cite>‘all’</cite></p></li>
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

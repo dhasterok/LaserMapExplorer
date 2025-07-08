@@ -36,6 +36,15 @@ common.ExtendedDF module
    :undoc-members:
    :show-inheritance:
 
+common.Logger module
+--------------------
+
+.. automodule:: common.Logger
+   :members:
+   :undoc-members:
+   :no-inherited-members:
+   .. :show-inheritance:
+
 common.Masking module
 ---------------------
 
@@ -80,6 +89,14 @@ common.ScheduleTimer module
 ---------------------------
 
 .. automodule:: common.ScheduleTimer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.SearchTool module
+---------------------------
+
+.. automodule:: common.SearchTool
    :members:
    :undoc-members:
    :show-inheritance:

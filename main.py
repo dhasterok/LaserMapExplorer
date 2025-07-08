@@ -1265,7 +1265,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data.add_observer("outlier_method", self.update_negative_handling_method)
 
 
-    def toggle_spot_tab(self):
+    def toggle_spot_tab(self, *args, **kwargs):
         #self.actionSpotTools.toggle()
         if self.actionSpotTools.isChecked():
             # add spot page to MainWindow.toolBox
@@ -1276,14 +1276,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.actionImportSpots.setVisible(False)
         self.reindex_left_tab()
 
-    def toggle_special_tab(self):
+    def toggle_special_tab(self, *args, **kwargs):
         if self.actionSpecialTools.isChecked():
             self.special_tools = SpecialPage(self.left_tab['cluster'], self)
         else:
             self.toolBox.removeItem(self.left_tab['special'])
         self.reindex_left_tab()
 
-    def toggle_regression_tab(self):
+    def toggle_regression_tab(self, *args, **kwargs):
         if self.actionRegression.isChecked():
             pass
             #self.regression_tools = RegressionPage(self.right_tab['stylecolors'], self)

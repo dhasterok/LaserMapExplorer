@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/Logger';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.Logger</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.Logger</li>
   </ul>
 </nav>
 </div>
@@ -399,6 +411,119 @@
 
 <span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">ToggleSwitch</span>
 <span class="kn">from</span> <span class="nn">src.common.SearchTool</span> <span class="kn">import</span> <span class="n">SearchWidget</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Logger Module for PyQt6 Applications</span>
+<span class="sd">=====================================</span>
+
+<span class="sd">This module provides a flexible logging system for PyQt6 GUI applications, featuring:</span>
+
+<span class="sd">- A dockable logger UI (`LoggerDock`)</span>
+<span class="sd">- Function and class decorators for automatic logging</span>
+<span class="sd">- Optional logging of function arguments and call chains</span>
+<span class="sd">- Toggle switches and UI controls for filtering and managing output</span>
+<span class="sd">- Customizable color-coded prefixes (e.g., &#39;UI&#39;, &#39;Error&#39;, &#39;Warning&#39;)</span>
+<span class="sd">- Runtime log control through a `LoggerOptionsDialog`</span>
+
+<span class="sd">---------------------</span>
+<span class="sd">BASIC USAGE EXAMPLES</span>
+<span class="sd">---------------------</span>
+
+<span class="sd">**1. Log Function Calls with Arguments:**</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from src.common.Logger import log_call</span>
+
+<span class="sd">        @log_call(&quot;UI&quot;)</span>
+<span class="sd">        def button_clicked():</span>
+<span class="sd">            print(&quot;Button was clicked&quot;)</span>
+
+<span class="sd">**2. Log All Methods in a Class:**</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">        </span>
+<span class="sd">        from src.common.Logger import auto_log_methods</span>
+
+<span class="sd">        @auto_log_methods(&quot;Data&quot;)</span>
+<span class="sd">        class MyModel:</span>
+<span class="sd">            def load_data(self):</span>
+<span class="sd">                pass</span>
+
+<span class="sd">            def save_data(self):</span>
+<span class="sd">                pass</span>
+<span class="sd">        </span>
+<span class="sd">**3. Exclude Specific Methods:**</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from src.common.Logger import no_log</span>
+
+<span class="sd">        class MyClass:</span>
+<span class="sd">            @no_log</span>
+<span class="sd">            def helper(self):</span>
+<span class="sd">                pass</span>
+
+<span class="sd">**4. Add LoggerDock in Your QMainWindow:**</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        self.logger_options = {&quot;UI&quot;: True, &quot;Data&quot;: False}</span>
+<span class="sd">        self.logger_dock = LoggerDock(parent=self)</span>
+
+<span class="sd">**5. Customize Log Colors (optional):**</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        self.log_colors = {&quot;Data&quot;: &quot;teal&quot;, &quot;CustomTag&quot;: &quot;#ffaa00&quot;}</span>
+
+<span class="sd">LOGGER OPTIONS / DOCK USER INTERFACE</span>
+<span class="sd">------------------------------------</span>
+
+<span class="sd">- Pause/resume toggle: Temporarily stop or resume log output.</span>
+<span class="sd">- Search bar: Filter visible log messages.</span>
+<span class="sd">- Gear icon: Opens LoggerOptionsDialog to enable/disable log keys and options.</span>
+<span class="sd">- Save icon: Exports log to file (default &quot;temp.log&quot;).</span>
+<span class="sd">- Clear icon: Clears current log view.</span>
+
+<span class="sd">LOGGERCONFIG OPTIONS (GLOBAL FLAGS)</span>
+<span class="sd">-----------------------------------</span>
+
+<span class="sd">- `LoggerConfig` stores persistent settings accessible globally across the app.</span>
+<span class="sd">- `LoggerConfig.set_show_args(True)`: Print function arguments</span>
+<span class="sd">- `LoggerConfig.set_show_call_chain(True)`: Show simplified call stack</span>
+<span class="sd">- `LoggerConfig.set_paused(True)`: Suppress all logging output</span>
+
+<span class="sd">To update all logger keys at runtime::</span>
+
+<span class="sd">    LoggerConfig.set_options({&quot;UI&quot;: True, &quot;Data&quot;: False, &quot;Custom&quot;: True})</span>
+
+<span class="sd">COMMON ERROR: Missing `*args`/`**kwargs`</span>
+<span class="sd">------------------------------------</span>
+<span class="sd">- If a decorated function causes a crash like:</span>
+<span class="sd">    `TypeError: wrapper() takes N positional arguments but M were given`</span>
+<span class="sd">- Ensure the original function accepts *args and **kwargs::</span>
+
+<span class="sd">    @log_call(&quot;UI&quot;)</span>
+<span class="sd">    def your_function(*args, **kwargs):</span>
+<span class="sd">        ...</span>
+
+<span class="sd">EXTENDING LOGGER BEHAVIOR</span>
+<span class="sd">-------------------------</span>
+<span class="sd">To support more complex behaviors (e.g. conditional prefixes, advanced color mapping),</span>
+<span class="sd">subclass LoggerDock or modify:</span>
+<span class="sd">- `LoggerDock.detect_color_from_message(msg)`</span>
+<span class="sd">- `LoggerConfig` to store more global flags</span>
+<span class="sd">- `auto_log_methods()` to wrap only specific method names</span>
+
+<span class="sd">RECOMMENDED STRUCTURE</span>
+<span class="sd">---------------------</span>
+<span class="sd">- Attach LoggerDock to your QMainWindow</span>
+<span class="sd">- Set `self.logger_options` and optionally `self.log_colors`</span>
+<span class="sd">- Use `@log_call` or `@auto_log_methods` on key components, skipping any functions with `@no_log`</span>
+<span class="sd">- Enable/disable features at runtime with `LoggerConfig`</span>
+<span class="sd">- Export or clear logs using the built-in toolbar</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">_global_logger</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -477,6 +602,18 @@
 <span class="sd">        If True will print method arguments in the log, by default False</span>
 <span class="sd">    show_call_chain : bool, optional</span>
 <span class="sd">        If True will give the supply chain, by default False</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from src.common.Logger import log_call</span>
+
+<span class="sd">        @log_call(&quot;UI&quot;)</span>
+<span class="sd">        def button_clicked():</span>
+<span class="sd">            print(&quot;Button was clicked&quot;)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
@@ -535,6 +672,22 @@
 <span class="sd">    ----------</span>
 <span class="sd">    logger_key : str, optional</span>
 <span class="sd">        key into dict logger_options, by default None</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">        </span>
+<span class="sd">        from src.common.Logger import auto_log_methods</span>
+
+<span class="sd">        @auto_log_methods(&quot;Data&quot;)</span>
+<span class="sd">        class MyModel:</span>
+<span class="sd">            def load_data(self):</span>
+<span class="sd">                pass</span>
+
+<span class="sd">            def save_data(self):</span>
+<span class="sd">                pass</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] Wrapping methods for: </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -573,6 +726,18 @@
 <span class="sd">    -------</span>
 <span class="sd">    bool</span>
 <span class="sd">        sets func._no_log flag to True to skip logging</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from src.common.Logger import no_log</span>
+
+<span class="sd">        class MyClass:</span>
+<span class="sd">            @no_log</span>
+<span class="sd">            def helper(self):</span>
+<span class="sd">                pass        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">func</span><span class="o">.</span><span class="n">_no_log</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">func</span></div>
@@ -706,24 +871,38 @@
 <div class="viewcode-block" id="LoggerDock">
 <a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerDock">[docs]</a>
 <span class="k">class</span> <span class="nc">LoggerDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dock widget that contains a logging display.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dockable widget that displays logging messages for debugging and runtime diagnostics.</span>
 
-<span class="sd">    A logging dock widget useful for debugging and recording actions.  Requires the parent to have</span>
-<span class="sd">    an attribute parent.logger_options, which is a dictionary with keys being the logger prefixes and</span>
-<span class="sd">    an associated boolean value for each indicating to log (True) or skip logging (False) given actions.</span>
+<span class="sd">    This dock is designed to be embedded in a `QMainWindow` and provides:</span>
+<span class="sd">      - A read-only, color-coded log display</span>
+<span class="sd">      - A toolbar with controls for search, pause/resume, export, and clear actions</span>
+<span class="sd">      - Integration with the `LoggerConfig` system for customizable output</span>
+<span class="sd">      - Optional settings dialog to toggle which keys/categories are logged</span>
 
-<span class="sd">    The logger will produce default color text for default prefixes:</span>
-<span class="sd">        Error - red</span>
-<span class="sd">        Warning - orange</span>
-<span class="sd">        UI - blue</span>
-<span class="sd">        data - green</span>
-<span class="sd">    These can be extended or changed if the a parent.log_colors exists.</span>
+<span class="sd">    It expects the parent QMainWindow to provide:</span>
+<span class="sd">      - `logger_options` (dict[str, bool]): Key-based toggles for logging categories.</span>
+<span class="sd">      - Optionally `log_colors` (dict[str, str]): Hex or named color values for message prefixes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    parent : QObject</span>
-<span class="sd">        Calling window.</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    file : str</span>
+<span class="sd">        The filename to which the log is saved when exported (default: &#39;temp.log&#39;).</span>
+<span class="sd">    parent : QMainWindow</span>
+<span class="sd">        The main window instance that this logger is attached to. Must be a `QMainWindow`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        self.logger_options = {&quot;UI&quot;: True, &quot;Data&quot;: False}</span>
+<span class="sd">        self.logger_dock = LoggerDock(file=&quot;session.log&quot;, parent=self)</span>
+<span class="sd">        self.logger_dock.log_colors = {&quot;Data&quot;: &quot;teal&quot;, &quot;CustomTag&quot;: &quot;#ffaa00&quot;}</span>
+
+<span class="sd">    :see also: SearchTool : Adds text search widget to the dock</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;temp.log&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parent must be an instance of QMainWindow.&quot;</span><span class="p">)</span>
@@ -962,19 +1141,40 @@
 <div class="viewcode-block" id="LoggerOptionsDialog">
 <a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerOptionsDialog">[docs]</a>
 <span class="k">class</span> <span class="nc">LoggerOptionsDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Allows the user to set logger options.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dialog that allows users to enable or disable individual logging keys</span>
+<span class="sd">    and adjust logging behavior options.</span>
 
-<span class="sd">    The use of these options is determined by the main program, not the logger,</span>
-<span class="sd">    this is simply a place to view and change them.</span>
+<span class="sd">    This dialog supports:</span>
+<span class="sd">    - Displaying checkboxes for all logger keys passed via `options_dict`</span>
+<span class="sd">    - Selecting or deselecting all options with tool buttons</span>
+<span class="sd">    - Toggles for global logger behaviors:</span>
+<span class="sd">        * Show method/function arguments in logs</span>
+<span class="sd">        * Show call chain (stack trace context)</span>
+
+<span class="sd">    Typically invoked from the logger toolbar via the gear/settings icon.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    options_dict : dict</span>
-<span class="sd">        A dictionary of options with key values displayed as the labels and values</span>
-<span class="sd">        are bool indicating a set option for logging.</span>
-<span class="sd">    parent : LoggerDock, optional</span>
-<span class="sd">        Parent logger, by default None</span>
-<span class="sd">    &quot;&quot;&quot;</span>        
+<span class="sd">    options_dict : dict[str, bool]</span>
+<span class="sd">        Dictionary of logger keys and their current enabled/disabled state.</span>
+<span class="sd">    parent : QWidget or LoggerDock, optional</span>
+<span class="sd">        Parent widget for the dialog.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">    </span>
+<span class="sd">        dialog = LoggerOptionsDialog(LoggerConfig.get_all(), self)</span>
+<span class="sd">        if dialog.exec() == QDialog.DialogCode.Accepted:</span>
+<span class="sd">            LoggerConfig.set_options(dialog.get_updated_options())</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    LoggerConfig : Stores and retrieves global logging configuration.</span>
+<span class="sd">    LoggerDock : The main dockable UI that displays logs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>      
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options_dict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
@@ -1075,8 +1275,7 @@
 <div class="viewcode-block" id="LoggerOptionsDialog.get_updated_options">
 <a class="viewcode-back" href="../../generated/common.Logger.html#common.Logger.LoggerOptionsDialog.get_updated_options">[docs]</a>
     <span class="k">def</span> <span class="nf">get_updated_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Updates the dictionary with the current state of checkboxes and returns it.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the dictionary with the current state of checkboxes and returns it.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1117,8 +1316,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1138,7 +1337,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1151,8 +1350,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

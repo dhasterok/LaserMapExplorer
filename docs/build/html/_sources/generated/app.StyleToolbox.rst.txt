@@ -1,34 +1,32 @@
-app.StyleToolbox
+﻿app.StyleToolbox
 ================
 
 .. automodule:: app.StyleToolbox
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      get_hex_color
-      get_rgb_color
-      log
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      LoggerConfig
-      Observable
-      QColorDialog
-      QDoubleValidator
-      QFont
-      QFontDatabase
-      QInputDialog
-      QMessageBox
-      QTableWidgetItem
-      Scheduler
       StyleObj
       StyleTheme
       Styling
       StylingDock
    
+   
+
+   
+   
+   
+
+
+

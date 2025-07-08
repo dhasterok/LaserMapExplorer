@@ -1,5 +1,5 @@
 User Guide
-***********
+**********
 
 *LaME* is built in `Python3.11 <https://www.python.org/downloads/>`_ using `PyQt5 <https://pypi.org/project/PyQt5/>`_ for the user interface.  Most of the plotting is handled by `matplotlib <https://matplotlib.org>`_, with some of the more dynamic plots using `pyqtgraph <https://www.pyqtgraph.org>`_.
 
@@ -15,7 +15,7 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
 
 .. toctree::
     :maxdepth: 2
-    :caption: The Basic Interface
+    :caption: The Interface
 
     top_toolbar
     left_toolbox
@@ -40,7 +40,8 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
     :caption: Docks
 
     calculator
+    cluster_dock
     notes
-    logger
+    logging_tool
     workflow
     workflow_reference

@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/CustomWidgets';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.CustomWidgets</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.CustomWidgets</li>
   </ul>
 </nav>
 </div>
@@ -405,29 +417,29 @@
 <div class="viewcode-block" id="CustomLineEdit">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomLineEdit">[docs]</a>
 <span class="k">class</span> <span class="nc">CustomLineEdit</span><span class="p">(</span><span class="n">QLineEdit</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom line edit widget, when the only input should be of type float</span>
+
+<span class="sd">    Adds additional functionality to QLineEdit by installing a validator and methods for limiting the</span>
+<span class="sd">    precision of the displayed value in the UI.  Note that full precision of the value is stored in</span>
+<span class="sd">    self.value, only a &#39;pretty&#39; number is displayed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    value : float, optional</span>
+<span class="sd">        _description_, by default 0.0</span>
+<span class="sd">    precision : int, optional</span>
+<span class="sd">        _description_, by default 4</span>
+<span class="sd">    threshold : _type_, optional</span>
+<span class="sd">        _description_, by default 1e4</span>
+<span class="sd">    toward : int, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    validator : QValidator, optional</span>
+<span class="sd">        Provide a validator to automatically text inputs for appropriate type and</span>
+<span class="sd">        ranges, by default QDoubleValidator</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">QDoubleValidator</span><span class="p">()):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom line edit widget, when the only input should be of type float</span>
-
-<span class="sd">        Adds additional functionality to QLineEdit by installing a validator and methods for limiting the</span>
-<span class="sd">        precision of the displayed value in the UI.  Note that full precision of the value is stored in</span>
-<span class="sd">        self.value, only a &#39;pretty&#39; number is displayed.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        parent : _type_, optional</span>
-<span class="sd">            _description_, by default None</span>
-<span class="sd">        value : float, optional</span>
-<span class="sd">            _description_, by default 0.0</span>
-<span class="sd">        precision : int, optional</span>
-<span class="sd">            _description_, by default 4</span>
-<span class="sd">        threshold : _type_, optional</span>
-<span class="sd">            _description_, by default 1e4</span>
-<span class="sd">        toward : int, optional</span>
-<span class="sd">            _description_, by default None</span>
-<span class="sd">        validator : QValidator, optional</span>
-<span class="sd">            Provide a validator to automatically text inputs for appropriate type and</span>
-<span class="sd">            ranges, by default QDoubleValidator</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">precision</span>
@@ -439,43 +451,93 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        float: The current internal numeric value stored in the widget.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
 
     <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the internal value and update the displayed text accordingly.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_value : float</span>
+<span class="sd">            The new value to store and display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># ensure value is a float rather than integer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">new_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_text_from_value</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        int: The number of significant digits to display in the line edit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> 
 
     <span class="nd">@precision</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_precision</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the display precision and update the text accordingly.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_precision : int</span>
+<span class="sd">            New number of significant digits to display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">new_precision</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_text_from_value</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        float: Threshold above which scientific notation is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span>
     
     <span class="nd">@threshold</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_threshold</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the threshold for scientific notation and update the text.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_threshold : float</span>
+<span class="sd">            Value above which to switch to scientific notation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span> <span class="o">=</span> <span class="n">new_threshold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_text_from_value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">toward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;int | float: sets whether to round towards 0, 1, or nearest integer&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        int | float | None: Determines rounding direction in formatting.</span>
+
+<span class="sd">        * 0 = round toward zero</span>
+<span class="sd">        * 1 = round away from zero</span>
+<span class="sd">        * None = standard rounding</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toward</span>
     
     <span class="nd">@toward</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">toward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the rounding direction and update the display.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        val : int, float, or None</span>
+<span class="sd">            Rounding mode to apply in formatting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_toward</span> <span class="o">=</span> <span class="n">val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_text_from_value</span>
 
     <span class="k">def</span> <span class="nf">_update_text_from_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the displayed text based on internal value and formatting rules.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -485,6 +547,9 @@
             <span class="c1">#self.setText(f&quot;{self._value:.{self._precision}f}&quot;)</span>
 
     <span class="k">def</span> <span class="nf">_update_value_from_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the internal value from the current text, if valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -494,26 +559,49 @@
 <div class="viewcode-block" id="CustomTableWidget">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTableWidget">[docs]</a>
 <span class="k">class</span> <span class="nc">CustomTableWidget</span><span class="p">(</span><span class="n">QTableWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A QTableWidget subclass with extended utility functions for data extraction and conversion.</span>
+
+<span class="sd">    This widget supports conversion of table contents (including embedded widgets such as </span>
+<span class="sd">    QLineEdit, QComboBox, QCheckBox, etc.) to a pandas DataFrame, and provides convenience </span>
+<span class="sd">    methods for column-based data access. It is designed for integration with tools that </span>
+<span class="sd">    dynamically populate cells with interactive widgets.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; widget = CustomTableWidget()</span>
+<span class="sd">    &gt;&gt;&gt; widget.to_dataframe()</span>
+<span class="sd">    &gt;&gt;&gt; widget.column_to_list(0)</span>
+<span class="sd">    &gt;&gt;&gt; widget.column_to_list(&quot;Sample Name&quot;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Embedded widgets are interpreted based on their type (e.g., `QLineEdit.text()`, </span>
+<span class="sd">      `QCheckBox.isChecked()`).</span>
+<span class="sd">    - Additional widget types can be handled by extending `extract_widget_data()`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CustomTableWidget.extract_widget_data">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTableWidget.extract_widget_data">[docs]</a>
     <span class="k">def</span> <span class="nf">extract_widget_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">:</span> <span class="n">QWidget</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracts relevant information from a widget for placing in a DataFrame</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts relevant data from a widget embedded in the table.</span>
 
-<span class="sd">        _extended_summary_</span>
+<span class="sd">        This method is used to obtain the appropriate value representation of a widget </span>
+<span class="sd">        for export (e.g., into a DataFrame).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        widget : QWidget</span>
-<span class="sd">            A widget stored in ``ImportTool.tableWidgetMetadata``</span>
+<span class="sd">            A widget stored in a table cell.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        str or bool</span>
-<span class="sd">            Returns key value of widget item to be added to a DataFrame</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        str or bool or float or None</span>
+<span class="sd">            The value extracted from the widget, depending on its type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">widget</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">):</span>
@@ -532,12 +620,13 @@
 <div class="viewcode-block" id="CustomTableWidget.to_dataframe">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTableWidget.to_dataframe">[docs]</a>
     <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts the table data to a pandas DataFrame.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the table content (including widgets) to a pandas DataFrame.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.DataFrame</span>
-<span class="sd">            Data frame with data from the CustomTableWidget.</span>
+<span class="sd">            A DataFrame with rows and columns matching the table content.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get the number of rows and columns in the QTableWidget</span>
         <span class="n">row_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
@@ -580,22 +669,23 @@
 <div class="viewcode-block" id="CustomTableWidget.column_to_list">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTableWidget.column_to_list">[docs]</a>
     <span class="k">def</span> <span class="nf">column_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract data from a column of a CustomTableWidget into a list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts data from a specified column into a list.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        column : int, str</span>
-<span class="sd">            Column index or column name.</span>
+<span class="sd">        column : int or str</span>
+<span class="sd">            Column index (int) or column header name (str).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
-<span class="sd">            Data from ``column`` is placed into a list.</span>
+<span class="sd">            A list of cell values from the specified column.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
-<span class="sd">            Column was not found.</span>
+<span class="sd">            If the specified column name or index is not found.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">column_index</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -673,18 +763,18 @@
 <div class="viewcode-block" id="StandardItem">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.StandardItem">[docs]</a>
 <span class="k">class</span> <span class="nc">StandardItem</span><span class="p">(</span><span class="n">QStandardItem</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">set_bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extends properties of QStandardItem for QTreeView and QList items.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extends properties of QStandardItem for QTreeView and QList items.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        txt : str, optional</span>
-<span class="sd">            Text displayed in tree or list, by default ``&#39;&#39;``</span>
-<span class="sd">        font_size : int, optional</span>
-<span class="sd">            fontsize, by default ``10``</span>
-<span class="sd">        set_bold : bool, optional</span>
-<span class="sd">            Bold tree font when ``True``, by default ``False``</span>
-<span class="sd">        &quot;&quot;&quot;</span>    
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    txt : str, optional</span>
+<span class="sd">        Text displayed in tree or list, by default ``&#39;&#39;``</span>
+<span class="sd">    font_size : int, optional</span>
+<span class="sd">        fontsize, by default ``10``</span>
+<span class="sd">    set_bold : bool, optional</span>
+<span class="sd">        Bold tree font when ``True``, by default ``False``</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">set_bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="c1"># Set item font</span>
@@ -702,6 +792,24 @@
 <div class="viewcode-block" id="CustomTreeView">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView">[docs]</a>
 <span class="k">class</span> <span class="nc">CustomTreeView</span><span class="p">(</span><span class="n">QTreeView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A customized QTreeView widget for managing a hierarchical tree structure.</span>
+
+<span class="sd">    Provides functionality to create branches and leaves in a QStandardItemModel-based tree,</span>
+<span class="sd">    search for items, retrieve paths and associated data, sort branches, and handle UI events.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    treeModel : QStandardItemModel</span>
+<span class="sd">        The data model used for the tree.</span>
+<span class="sd">    root_node : QStandardItem</span>
+<span class="sd">        The invisible root node of the tree model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget, optional</span>
+<span class="sd">        The parent widget, by default None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">treeModel</span> <span class="o">=</span> <span class="n">QStandardItemModel</span><span class="p">()</span>
@@ -711,7 +819,21 @@
 <div class="viewcode-block" id="CustomTreeView.branch_exists">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.branch_exists">[docs]</a>
     <span class="k">def</span> <span class="nf">branch_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_item</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a branch exists under the given parent.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a branch with a given name exists under the specified parent item.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parent_item : QStandardItem</span>
+<span class="sd">            The item to search under.</span>
+<span class="sd">        branch_name : str</span>
+<span class="sd">            The name of the branch to look for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QStandardItem or None</span>
+<span class="sd">            The branch item if found, otherwise None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">parent_item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">parent_item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">branch_name</span><span class="p">:</span>
@@ -722,7 +844,23 @@
 <div class="viewcode-block" id="CustomTreeView.add_branch">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.add_branch">[docs]</a>
     <span class="k">def</span> <span class="nf">add_branch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_item</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a branch to the tree under the given parent item.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new branch to the tree under the specified parent.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parent_item : QStandardItem</span>
+<span class="sd">            The parent item to add the branch to.</span>
+<span class="sd">        branch_name : str</span>
+<span class="sd">            The name of the new branch.</span>
+<span class="sd">        data : any, optional</span>
+<span class="sd">            Optional data to associate with the branch.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QStandardItem</span>
+<span class="sd">            The created branch item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">branch_item</span> <span class="o">=</span> <span class="n">StandardItem</span><span class="p">(</span><span class="n">branch_name</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="n">parent_item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">branch_item</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">branch_item</span></div>
@@ -731,7 +869,23 @@
 <div class="viewcode-block" id="CustomTreeView.add_leaf">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.add_leaf">[docs]</a>
     <span class="k">def</span> <span class="nf">add_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branch_item</span><span class="p">,</span> <span class="n">leaf_name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a leaf to the tree under the given parent branch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new leaf to a branch.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        branch_item : QStandardItem</span>
+<span class="sd">            The branch item to which the leaf will be added.</span>
+<span class="sd">        leaf_name : str</span>
+<span class="sd">            The name of the new leaf.</span>
+<span class="sd">        data : any, optional</span>
+<span class="sd">            Optional data to associate with the leaf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QStandardItem</span>
+<span class="sd">            The created leaf item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">leaf_item</span> <span class="o">=</span> <span class="n">StandardItem</span><span class="p">(</span><span class="n">leaf_name</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="n">branch_item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">leaf_item</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">leaf_item</span></div>
@@ -740,7 +894,19 @@
 <div class="viewcode-block" id="CustomTreeView.get_item_path">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.get_item_path">[docs]</a>
     <span class="k">def</span> <span class="nf">get_item_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the path of the given item as (tree, branch, leaf).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the full path of an item as a list from root to the given item.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        item : QStandardItem</span>
+<span class="sd">            The item whose path is to be retrieved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of str</span>
+<span class="sd">            A list representing the hierarchy from root to the item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">while</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
@@ -751,14 +917,40 @@
 <div class="viewcode-block" id="CustomTreeView.get_leaf_data">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.get_leaf_data">[docs]</a>
     <span class="k">def</span> <span class="nf">get_leaf_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_item</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">,</span> <span class="n">leaf_name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the data associated with a leaf.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the full path of an item as a list from root to the given item.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        item : QStandardItem</span>
+<span class="sd">            The item whose path is to be retrieved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of str</span>
+<span class="sd">            A list representing the hierarchy from root to the item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">leaf_item</span><span class="o">.</span><span class="n">data</span><span class="p">()</span></div>
 
     
 <div class="viewcode-block" id="CustomTreeView.find_leaf">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.find_leaf">[docs]</a>
     <span class="k">def</span> <span class="nf">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branch_item</span><span class="p">,</span> <span class="n">leaf_name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find a leaf by name under a branch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find a leaf under a branch by its name.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        branch_item : QStandardItem</span>
+<span class="sd">            The branch item to search within.</span>
+<span class="sd">        leaf_name : str</span>
+<span class="sd">            The name of the leaf to find.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QStandardItem or None</span>
+<span class="sd">            The leaf item if found, otherwise None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">branch_item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
             <span class="n">leaf</span> <span class="o">=</span> <span class="n">branch_item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">leaf</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">leaf_name</span><span class="p">:</span>
@@ -799,7 +991,14 @@
 <div class="viewcode-block" id="CustomTreeView.on_double_click">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.on_double_click">[docs]</a>
     <span class="k">def</span> <span class="nf">on_double_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle double-click events in the tree view.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle a double-click event on an item in the tree.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        index : QModelIndex</span>
+<span class="sd">            Index of the clicked item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeModel</span><span class="o">.</span><span class="n">itemFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="n">item_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_item_path</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="n">leaf_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_leaf_data</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
@@ -809,6 +1008,9 @@
 <div class="viewcode-block" id="CustomTreeView.clear_tree">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.clear_tree">[docs]</a>
     <span class="k">def</span> <span class="nf">clear_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears all items from the tree model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">treeModel</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -905,6 +1107,15 @@
 <div class="viewcode-block" id="CustomDockWidget">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomDockWidget">[docs]</a>
 <span class="k">class</span> <span class="nc">CustomDockWidget</span><span class="p">(</span><span class="n">QDockWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">    _extended_summary_</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    closeEvent(event: QEvent) : </span>
+<span class="sd">        Hides the dock when the close button is clicked by the user.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
@@ -915,7 +1126,13 @@
 <div class="viewcode-block" id="CustomDockWidget.closeEvent">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomDockWidget.closeEvent">[docs]</a>
     <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override the close event to hide the dock widget instead of closing it.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hides the dock widget when the close button is clicked by the user.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">            Event signal when close is clicked by the user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>  <span class="c1"># Ignore the close event to prevent the widget from being removed.</span></div>
 </div>
@@ -924,6 +1141,47 @@
 <div class="viewcode-block" id="ToggleSwitch">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch">[docs]</a>
 <span class="k">class</span> <span class="nc">ToggleSwitch</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom toggle switch widget with animated transitions and customizable colors.</span>
+
+<span class="sd">    This widget mimics a modern on/off switch, commonly used in mobile and web UIs. It supports </span>
+<span class="sd">    smooth animated transitions between the &quot;on&quot; and &quot;off&quot; states, emits a signal when toggled, </span>
+<span class="sd">    and provides optional customization for height, animation duration, and colors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget, optional</span>
+<span class="sd">        The parent widget, by default None.</span>
+<span class="sd">    height : int, optional</span>
+<span class="sd">        Height of the toggle switch. The width is automatically set to twice the height. Default is 24.</span>
+<span class="sd">    duration : int, optional</span>
+<span class="sd">        Duration of the toggle animation in milliseconds. Default is 100.</span>
+<span class="sd">    fg_color : str, optional</span>
+<span class="sd">        Foreground color (thumb/slider) in hex format. Default is &quot;#f0f0f0&quot;.</span>
+<span class="sd">    bg_left_color : str, optional</span>
+<span class="sd">        Background color when the switch is in the &quot;off&quot; position. Default is &quot;#ffffff&quot;.</span>
+<span class="sd">    bg_right_color : str, optional</span>
+<span class="sd">        Background color when the switch is in the &quot;on&quot; position. Default is &quot;#478ae4&quot;.</span>
+
+<span class="sd">    Signals</span>
+<span class="sd">    -------</span>
+<span class="sd">    stateChanged : bool</span>
+<span class="sd">        Emitted when the switch state changes.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    thumb_pos : float</span>
+<span class="sd">        Position of the thumb (used for animation).</span>
+<span class="sd">    </span>
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    toggle()</span>
+<span class="sd">        Toggles the switch state and emits the `stateChanged` signal.</span>
+<span class="sd">    setChecked(checked)</span>
+<span class="sd">        Sets the checked state and animates the thumb.</span>
+<span class="sd">    isChecked() -&gt; bool</span>
+<span class="sd">        Returns the current checked state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stateChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>  <span class="c1"># Signal emitted when the state changes</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">fg_color</span><span class="o">=</span><span class="s2">&quot;#f0f0f0&quot;</span><span class="p">,</span> <span class="n">bg_left_color</span><span class="o">=</span><span class="s2">&quot;#ffffff&quot;</span><span class="p">,</span> <span class="n">bg_right_color</span><span class="o">=</span><span class="s2">&quot;#478ae4&quot;</span><span class="p">):</span>
@@ -970,6 +1228,13 @@
 <div class="viewcode-block" id="ToggleSwitch.setChecked">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.setChecked">[docs]</a>
     <span class="k">def</span> <span class="nf">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the checked state of the toggle switch and triggers the animation</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        checked : bool</span>
+<span class="sd">            New check state of the toggle switch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="o">!=</span> <span class="n">checked</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="o">=</span> <span class="n">checked</span>
             <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_pos</span>
@@ -992,7 +1257,7 @@
 <div class="viewcode-block" id="ToggleSwitch.mousePressEvent">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.mousePressEvent">[docs]</a>
     <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle switch on click&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle switch on click.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">MouseButton</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span><span class="p">)</span></div>
 
@@ -1000,13 +1265,14 @@
 <div class="viewcode-block" id="ToggleSwitch.sizeHint">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.sizeHint">[docs]</a>
     <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the size of the toggle switch.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ToggleSwitch.paintEvent">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.paintEvent">[docs]</a>
     <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw switch&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw the toggle switch.&quot;&quot;&quot;</span>
         <span class="n">painter</span> <span class="o">=</span> <span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
@@ -1030,12 +1296,14 @@
 <div class="viewcode-block" id="ToggleSwitch.get_thumb_pos">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.get_thumb_pos">[docs]</a>
     <span class="k">def</span> <span class="nf">get_thumb_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the thumb position.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_pos</span></div>
 
 
 <div class="viewcode-block" id="ToggleSwitch.set_thumb_pos">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.set_thumb_pos">[docs]</a>
     <span class="k">def</span> <span class="nf">set_thumb_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the thumb position.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_pos</span> <span class="o">=</span> <span class="n">pos</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>  <span class="c1"># Redraw switch</span></div>
 
@@ -1048,9 +1316,20 @@
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomCheckButton">[docs]</a>
 <span class="k">class</span> <span class="nc">CustomCheckButton</span><span class="p">(</span><span class="n">QToolButton</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A button that changes icons when checked</span>
-<span class="sd">    </span>
-<span class="sd">    Properties</span>
+
+<span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    icon_unchecked : QIcon</span>
+<span class="sd">        Unchecked icon.</span>
+<span class="sd">    icon_checked : QIcon</span>
+<span class="sd">        Checked icon.</span>
+<span class="sd">    parent : QToolButton</span>
+<span class="sd">        Tool button to set icons.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    update_icon()</span>
+<span class="sd">        Update the icon based on the button&#39;s checked state.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon_unchecked</span><span class="p">:</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">icon_checked</span><span class="p">:</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
@@ -1082,23 +1361,36 @@
 <div class="viewcode-block" id="CustomSlider">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider">[docs]</a>
 <span class="k">class</span> <span class="nc">CustomSlider</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom slider with a label.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom slider widget that combines a horizontal QSlider and a QLabel.</span>
 
-<span class="sd">    The slider range, step and position can be initialized using the paramters below, or be set/changed using</span>
-<span class="sd">    QSlider equivalent methods.</span>
-<span class="sd">    </span>
+<span class="sd">    This widget displays the current slider value in a label and emits custom signals</span>
+<span class="sd">    for common slider events. It supports setting initial value, range, and step size.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    min_value : float (optional)</span>
-<span class="sd">        Minimum value of slider range</span>
-<span class="sd">    max_value : float (optional)</span>
-<span class="sd">        Maximum value of slider range</span>
-<span class="sd">    step: float (optional)</span>
-<span class="sd">        Step size for slider position</span>
-<span class="sd">    initial_value : float (optional)</span>
-<span class="sd">        Initial position of slider handle</span>
-<span class="sd">    parent : (optional)</span>
-<span class="sd">        Parent object&quot;&quot;&quot;</span>
+<span class="sd">    min_value : float, optional</span>
+<span class="sd">        Minimum value of the slider range (default is 0).</span>
+<span class="sd">    max_value : float, optional</span>
+<span class="sd">        Maximum value of the slider range (default is 100).</span>
+<span class="sd">    step : float, optional</span>
+<span class="sd">        Increment between values (default is 1).</span>
+<span class="sd">    initial_value : float, optional</span>
+<span class="sd">        Initial slider value (default is 50).</span>
+<span class="sd">    parent : QWidget, optional</span>
+<span class="sd">        Parent widget (default is None).</span>
+
+<span class="sd">    Signals</span>
+<span class="sd">    -------</span>
+<span class="sd">    valueChanged(int)</span>
+<span class="sd">        Emitted when the slider&#39;s value changes.</span>
+<span class="sd">    sliderMoved(int)</span>
+<span class="sd">        Emitted while the slider is being dragged.</span>
+<span class="sd">    sliderReleased(int)</span>
+<span class="sd">        Emitted when the slider handle is released.</span>
+<span class="sd">    sliderPressed(int)</span>
+<span class="sd">        Emitted when the slider handle is pressed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">sliderMoved</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">sliderReleased</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -1138,42 +1430,98 @@
 <div class="viewcode-block" id="CustomSlider.update_label">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.update_label">[docs]</a>
     <span class="k">def</span> <span class="nf">update_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the label text to display the current slider value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Current value of the slider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="CustomSlider.setMinimum">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setMinimum">[docs]</a>
     <span class="k">def</span> <span class="nf">setMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the minimum value of the slider.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Minimum value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="CustomSlider.setMaximum">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setMaximum">[docs]</a>
     <span class="k">def</span> <span class="nf">setMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the maximum value of the slider.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Maximum value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="CustomSlider.setStep">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setStep">[docs]</a>
     <span class="k">def</span> <span class="nf">setStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the step size of the slider.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Step size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="CustomSlider.setValue">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setValue">[docs]</a>
     <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the slider value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Desired slider value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="CustomSlider.value">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.value">[docs]</a>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current value of the slider.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            Current slider value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="CustomSlider.slider">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.slider">[docs]</a>
     <span class="k">def</span> <span class="nf">slider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the QSlider instance.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QSlider</span>
+<span class="sd">            The underlying slider widget.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span></div>
 </div>
 
@@ -1182,6 +1530,39 @@
 <div class="viewcode-block" id="DoubleSlider">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider">[docs]</a>
 <span class="k">class</span> <span class="nc">DoubleSlider</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dual-slider widget with editable input fields for setting a value range.</span>
+
+<span class="sd">    This widget features two horizontal QSliders for setting a minimum and maximum value,</span>
+<span class="sd">    along with associated QLineEdits to allow manual text input. It emits combined signals</span>
+<span class="sd">    when either slider changes, is moved, or released.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_value : int, optional</span>
+<span class="sd">        Minimum allowed slider value (default is 0).</span>
+<span class="sd">    max_value : int, optional</span>
+<span class="sd">        Maximum allowed slider value (default is 100).</span>
+<span class="sd">    step : int, optional</span>
+<span class="sd">        Step size between values (default is 1).</span>
+<span class="sd">    initial_left : int, optional</span>
+<span class="sd">        Initial value for the left (lower) slider (default is 25).</span>
+<span class="sd">    initial_right : int, optional</span>
+<span class="sd">        Initial value for the right (upper) slider (default is 75).</span>
+<span class="sd">    parent : QWidget, optional</span>
+<span class="sd">        Parent widget (default is None).</span>
+
+<span class="sd">    Signals</span>
+<span class="sd">    -------</span>
+<span class="sd">    valueChanged(int, int)</span>
+<span class="sd">        Emitted when either slider value changes.</span>
+<span class="sd">    sliderMoved(int, int)</span>
+<span class="sd">        Emitted while either slider is being dragged.</span>
+<span class="sd">    sliderReleased(int, int)</span>
+<span class="sd">        Emitted when either slider handle is released.</span>
+<span class="sd">    sliderPressed(int, int)</span>
+<span class="sd">        Emitted when either slider handle is pressed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>  <span class="c1"># Signal emitting both slider values</span>
     <span class="n">sliderMoved</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>  <span class="c1"># Signal emitting both slider values</span>
     <span class="n">sliderReleased</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>  <span class="c1"># Signal emitting both slider values</span>
@@ -1258,6 +1639,9 @@
 <div class="viewcode-block" id="DoubleSlider.update_values">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.update_values">[docs]</a>
     <span class="k">def</span> <span class="nf">update_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the line edits to reflect the slider values and emits the `valueChanged` signal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">left_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         <span class="n">right_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         
@@ -1270,6 +1654,9 @@
 <div class="viewcode-block" id="DoubleSlider.update_sliders">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.update_sliders">[docs]</a>
     <span class="k">def</span> <span class="nf">update_sliders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates slider values based on text input in the line edits. Invalid input is ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">left_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left_input</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
             <span class="n">right_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_input</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
@@ -1282,6 +1669,14 @@
 <div class="viewcode-block" id="DoubleSlider.setMinimum">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.setMinimum">[docs]</a>
     <span class="k">def</span> <span class="nf">setMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the minimum value for both sliders.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Minimum value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
@@ -1289,6 +1684,14 @@
 <div class="viewcode-block" id="DoubleSlider.setMaximum">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.setMaximum">[docs]</a>
     <span class="k">def</span> <span class="nf">setMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the maximum value for both sliders.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Maximum value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
@@ -1296,6 +1699,14 @@
 <div class="viewcode-block" id="DoubleSlider.setStep">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.setStep">[docs]</a>
     <span class="k">def</span> <span class="nf">setStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the step size for both sliders.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Step size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
@@ -1303,18 +1714,42 @@
 <div class="viewcode-block" id="DoubleSlider.setLeftValue">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.setLeftValue">[docs]</a>
     <span class="k">def</span> <span class="nf">setLeftValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the value of the left slider.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Desired value for the left slider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DoubleSlider.setRightValue">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.setRightValue">[docs]</a>
     <span class="k">def</span> <span class="nf">setRightValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the value of the right slider.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        value : int</span>
+<span class="sd">            Desired value for the right slider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DoubleSlider.setValues">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.setValues">[docs]</a>
     <span class="k">def</span> <span class="nf">setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets values for both sliders.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        values : tuple of int</span>
+<span class="sd">            Tuple containing (left_value, right_value).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
@@ -1322,6 +1757,14 @@
 <div class="viewcode-block" id="DoubleSlider.values">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.values">[docs]</a>
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current values of both sliders.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple of int</span>
+<span class="sd">            (left_value, right_value)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span></div>
 </div>
 
@@ -1354,8 +1797,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1375,7 +1818,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1388,8 +1831,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

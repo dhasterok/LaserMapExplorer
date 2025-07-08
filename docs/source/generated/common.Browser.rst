@@ -1,40 +1,30 @@
-common.Browser
+﻿common.Browser
 ==============
 
 .. automodule:: common.Browser
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      pyqtSlot
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
       Browser
-      LoggerConfig
-      QDockWidget
-      QEvent
-      QGroupBox
-      QHBoxLayout
-      QIcon
-      QLabel
-      QLineEdit
-      QMainWindow
-      QMouseEvent
-      QSize
-      QSizePolicy
-      QToolButton
-      QUrl
-      QVBoxLayout
-      QWebEnginePage
-      QWebEngineProfile
-      QWebEngineView
-      QWidget
-      Qt
       WebEngineView
    
+   
+
+   
+   
+   
+
+
+

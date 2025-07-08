@@ -1,8 +1,17 @@
-app.MapImporter
+﻿app.MapImporter
 ===============
 
 .. automodule:: app.MapImporter
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,28 +19,12 @@ app.MapImporter
    
       FileSelectData
       MapImporter
-      QAction
-      QApplication
-      QCheckBox
-      QComboBox
-      QDialog
-      QFileDialog
-      QHBoxLayout
-      QHeaderView
-      QIcon
-      QInputDialog
-      QLineEdit
-      QMessageBox
-      QProgressBar
-      QPushButton
-      QTableWidget
-      QTableWidgetItem
-      QToolBar
-      QUrl
-      QVBoxLayout
-      QWidget
-      Qt
-      Ui_FileSelectorDialog
-      Ui_MapImportDialog
-      defaultdict
    
+   
+
+   
+   
+   
+
+
+

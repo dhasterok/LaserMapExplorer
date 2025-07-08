@@ -1,59 +1,31 @@
-app.Profile
+﻿app.Profile
 ===========
 
 .. automodule:: app.Profile
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      CustomComboBox
-      CustomDockWidget
-      CustomLineEdit
-      Figure
-      FigureCanvas
-      LoggerConfig
-      PathCollection
       Profile
       ProfileDock
       Profiling
-      QAbstractItemView
-      QAction
-      QComboBox
-      QFont
-      QFormLayout
-      QGroupBox
-      QHBoxLayout
-      QHeaderView
-      QIcon
-      QInputDialog
-      QIntValidator
-      QLabel
-      QListView
-      QMainWindow
-      QMessageBox
-      QScrollArea
-      QSize
-      QSizePolicy
-      QSpinBox
-      QStandardItem
-      QStandardItemModel
-      QTableWidget
-      QTableWidgetItem
-      QToolBar
-      QToolButton
-      QVBoxLayout
-      QWidget
-      QWidgetAction
-      Qt
-      ScatterPlotItem
-      ToggleSwitch
-      UIFieldLogic
    
+   
+
+   
+   
+   
+
+
+

@@ -1,19 +1,29 @@
-app.FieldSelectionWindow
+﻿app.FieldSelectionWindow
 ========================
 
 .. automodule:: app.FieldSelectionWindow
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
       FieldDialog
-      QAbstractItemView
-      QDialog
-      QFileDialog
-      QHeaderView
-      QMessageBox
-      QTableWidgetItem
-      Ui_FieldDialog
    
+   
+
+   
+   
+   
+
+
+

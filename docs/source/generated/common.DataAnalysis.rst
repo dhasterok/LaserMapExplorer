@@ -1,17 +1,17 @@
-common.DataAnalysis
+﻿common.DataAnalysis
 ===================
 
 .. automodule:: common.DataAnalysis
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      percentileofscore
-      silhouette_score
-      yeojohnson
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -19,8 +19,12 @@ common.DataAnalysis
    
       Clustering
       DimensionalReduction
-      KMeans
-      LoggerConfig
-      PCA
-      StandardScaler
    
+   
+
+   
+   
+   
+
+
+

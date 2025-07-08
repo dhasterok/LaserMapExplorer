@@ -10,6 +10,119 @@ from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QCo
 from src.common.CustomWidgets import CustomDockWidget, ToggleSwitch
 from src.common.SearchTool import SearchWidget
 
+"""
+Logger Module for PyQt6 Applications
+=====================================
+
+This module provides a flexible logging system for PyQt6 GUI applications, featuring:
+
+- A dockable logger UI (`LoggerDock`)
+- Function and class decorators for automatic logging
+- Optional logging of function arguments and call chains
+- Toggle switches and UI controls for filtering and managing output
+- Customizable color-coded prefixes (e.g., 'UI', 'Error', 'Warning')
+- Runtime log control through a `LoggerOptionsDialog`
+
+---------------------
+BASIC USAGE EXAMPLES
+---------------------
+
+**1. Log Function Calls with Arguments:**
+
+    .. code-block:: python
+
+        from src.common.Logger import log_call
+
+        @log_call("UI")
+        def button_clicked():
+            print("Button was clicked")
+
+**2. Log All Methods in a Class:**
+
+    .. code-block:: python
+        
+        from src.common.Logger import auto_log_methods
+
+        @auto_log_methods("Data")
+        class MyModel:
+            def load_data(self):
+                pass
+
+            def save_data(self):
+                pass
+        
+**3. Exclude Specific Methods:**
+
+    .. code-block:: python
+
+        from src.common.Logger import no_log
+
+        class MyClass:
+            @no_log
+            def helper(self):
+                pass
+
+**4. Add LoggerDock in Your QMainWindow:**
+
+    .. code-block:: python
+
+        self.logger_options = {"UI": True, "Data": False}
+        self.logger_dock = LoggerDock(parent=self)
+
+**5. Customize Log Colors (optional):**
+
+    .. code-block:: python
+
+        self.log_colors = {"Data": "teal", "CustomTag": "#ffaa00"}
+
+LOGGER OPTIONS / DOCK USER INTERFACE
+------------------------------------
+
+- Pause/resume toggle: Temporarily stop or resume log output.
+- Search bar: Filter visible log messages.
+- Gear icon: Opens LoggerOptionsDialog to enable/disable log keys and options.
+- Save icon: Exports log to file (default "temp.log").
+- Clear icon: Clears current log view.
+
+LOGGERCONFIG OPTIONS (GLOBAL FLAGS)
+-----------------------------------
+
+- `LoggerConfig` stores persistent settings accessible globally across the app.
+- `LoggerConfig.set_show_args(True)`: Print function arguments
+- `LoggerConfig.set_show_call_chain(True)`: Show simplified call stack
+- `LoggerConfig.set_paused(True)`: Suppress all logging output
+
+To update all logger keys at runtime::
+
+    LoggerConfig.set_options({"UI": True, "Data": False, "Custom": True})
+
+COMMON ERROR: Missing `*args`/`**kwargs`
+------------------------------------
+- If a decorated function causes a crash like:
+    `TypeError: wrapper() takes N positional arguments but M were given`
+- Ensure the original function accepts *args and **kwargs::
+
+    @log_call("UI")
+    def your_function(*args, **kwargs):
+        ...
+
+EXTENDING LOGGER BEHAVIOR
+-------------------------
+To support more complex behaviors (e.g. conditional prefixes, advanced color mapping),
+subclass LoggerDock or modify:
+- `LoggerDock.detect_color_from_message(msg)`
+- `LoggerConfig` to store more global flags
+- `auto_log_methods()` to wrap only specific method names
+
+RECOMMENDED STRUCTURE
+---------------------
+- Attach LoggerDock to your QMainWindow
+- Set `self.logger_options` and optionally `self.log_colors`
+- Use `@log_call` or `@auto_log_methods` on key components, skipping any functions with `@no_log`
+- Enable/disable features at runtime with `LoggerConfig`
+- Export or clear logs using the built-in toolbar
+"""
+
 _global_logger = None
 
 def set_global_logger(logger):
@@ -76,6 +189,18 @@ def log_call(logger_key=None):
         If True will print method arguments in the log, by default False
     show_call_chain : bool, optional
         If True will give the supply chain, by default False
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        from src.common.Logger import log_call
+
+        @log_call("UI")
+        def button_clicked():
+            print("Button was clicked")
+
     """    
     def decorator(func):
         @functools.wraps(func)
@@ -128,6 +253,22 @@ def auto_log_methods(logger_key: str=None, **log_options):
     ----------
     logger_key : str, optional
         key into dict logger_options, by default None
+
+    Examples
+    --------
+
+    .. code-block:: python
+        
+        from src.common.Logger import auto_log_methods
+
+        @auto_log_methods("Data")
+        class MyModel:
+            def load_data(self):
+                pass
+
+            def save_data(self):
+                pass
+        
     """    
     def decorator(cls):
         print(f"[DEBUG] Wrapping methods for: {cls.__name__}")
@@ -163,6 +304,18 @@ def no_log(func):
     -------
     bool
         sets func._no_log flag to True to skip logging
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        from src.common.Logger import no_log
+
+        class MyClass:
+            @no_log
+            def helper(self):
+                pass        
     """
     func._no_log = True
     return func
@@ -263,24 +416,38 @@ class LoggerConfig:
         cls._paused = value
 
 class LoggerDock(CustomDockWidget):
-    """A dock widget that contains a logging display.
+    """
+    A dockable widget that displays logging messages for debugging and runtime diagnostics.
 
-    A logging dock widget useful for debugging and recording actions.  Requires the parent to have
-    an attribute parent.logger_options, which is a dictionary with keys being the logger prefixes and
-    an associated boolean value for each indicating to log (True) or skip logging (False) given actions.
+    This dock is designed to be embedded in a `QMainWindow` and provides:
+      - A read-only, color-coded log display
+      - A toolbar with controls for search, pause/resume, export, and clear actions
+      - Integration with the `LoggerConfig` system for customizable output
+      - Optional settings dialog to toggle which keys/categories are logged
 
-    The logger will produce default color text for default prefixes:
-        Error - red
-        Warning - orange
-        UI - blue
-        data - green
-    These can be extended or changed if the a parent.log_colors exists.
+    It expects the parent QMainWindow to provide:
+      - `logger_options` (dict[str, bool]): Key-based toggles for logging categories.
+      - Optionally `log_colors` (dict[str, str]): Hex or named color values for message prefixes.
 
     Parameters
     ----------
-    parent : QObject
-        Calling window.
-    """    
+    file : str
+        The filename to which the log is saved when exported (default: 'temp.log').
+    parent : QMainWindow
+        The main window instance that this logger is attached to. Must be a `QMainWindow`.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        self.logger_options = {"UI": True, "Data": False}
+        self.logger_dock = LoggerDock(file="session.log", parent=self)
+        self.logger_dock.log_colors = {"Data": "teal", "CustomTag": "#ffaa00"}
+
+    :see also: SearchTool : Adds text search widget to the dock
+    ```
+    """  
     def __init__(self, file='temp.log', parent=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
@@ -492,19 +659,40 @@ class LoggerDock(CustomDockWidget):
     
 
 class LoggerOptionsDialog(QDialog):
-    """Allows the user to set logger options.
+    """
+    A dialog that allows users to enable or disable individual logging keys
+    and adjust logging behavior options.
 
-    The use of these options is determined by the main program, not the logger,
-    this is simply a place to view and change them.
+    This dialog supports:
+    - Displaying checkboxes for all logger keys passed via `options_dict`
+    - Selecting or deselecting all options with tool buttons
+    - Toggles for global logger behaviors:
+        * Show method/function arguments in logs
+        * Show call chain (stack trace context)
+
+    Typically invoked from the logger toolbar via the gear/settings icon.
 
     Parameters
     ----------
-    options_dict : dict
-        A dictionary of options with key values displayed as the labels and values
-        are bool indicating a set option for logging.
-    parent : LoggerDock, optional
-        Parent logger, by default None
-    """        
+    options_dict : dict[str, bool]
+        Dictionary of logger keys and their current enabled/disabled state.
+    parent : QWidget or LoggerDock, optional
+        Parent widget for the dialog.
+
+    Examples
+    --------
+
+    .. code-block:: python
+    
+        dialog = LoggerOptionsDialog(LoggerConfig.get_all(), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            LoggerConfig.set_options(dialog.get_updated_options())
+
+    See Also
+    --------
+    LoggerConfig : Stores and retrieves global logging configuration.
+    LoggerDock : The main dockable UI that displays logs.
+    """      
     def __init__(self, options_dict, parent=None):
         super().__init__(parent)
 
@@ -597,8 +785,7 @@ class LoggerOptionsDialog(QDialog):
 
 
     def get_updated_options(self):
-        """
-        Updates the dictionary with the current state of checkboxes and returns it.
+        """Updates the dictionary with the current state of checkboxes and returns it.
 
         Returns
         -------

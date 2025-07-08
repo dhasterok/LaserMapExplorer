@@ -1,25 +1,30 @@
-common.Polygon
+﻿common.Polygon
 ==============
 
 .. automodule:: common.Polygon
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      PlotDataItem
       Polygon
       PolygonManager
-      QCheckBox
-      QGraphicsPolygonItem
-      QMessageBox
-      QTableWidgetItem
-      ScatterPlotItem
    
+   
+
+   
+   
+   
+
+
+

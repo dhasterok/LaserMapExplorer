@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -53,7 +50,6 @@
     <link rel="prev" title="common.DataAnalysis" href="common.DataAnalysis.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -69,8 +65,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -78,6 +85,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -85,8 +93,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -120,7 +128,7 @@
     
     
     <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -182,11 +190,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -224,11 +236,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -247,8 +263,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -437,14 +452,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -462,6 +472,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -476,7 +488,7 @@
     
     <li class="breadcrumb-item"><a href="common.html" class="nav-link">common</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.DataHandling</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.DataHandling</li>
   </ul>
 </nav>
 </div>
@@ -495,63 +507,18 @@
                   
   <section id="module-common.DataHandling">
 <span id="common-datahandling"></span><h1>common.DataHandling<a class="headerlink" href="#module-common.DataHandling" title="Link to this heading">#</a></h1>
-<p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_log_methods</span></code>([logger_key])</p></td>
-<td><p>Decorator that wraps all methods in a class</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">chauvenet_criterion</span></code>(array[, threshold])</p></td>
-<td><p>Apply Chauvenet's criterion for outlier detection.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantile_and_difference</span></code>(array, pl, pu, dpl, ...)</p></td>
-<td><p>Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_analytes</span></code>(method, analytes[, order])</p></td>
-<td><p>Sort the analyte list</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">symlog</span></code>(x[, linear_threshold])</p></td>
-<td><p>Transforms data from linear to symlog space</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">yeojohnson</span></code>(x[, lmbda])</p></td>
-<td><p>Return a dataset transformed by a Yeo-Johnson power transformation.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <p class="rubric">Classes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code>([data])</p></td>
-<td><p>Creates a pandas DataFrame with custom attributes stored with each column.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">KMeans</span></code>([n_clusters, init, n_init, max_iter, ...])</p></td>
-<td><p>K-Means clustering.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code>()</p></td>
-<td><p>Central configuration manager for logging behavior within the application.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Observable</span></code>()</p></td>
-<td><p>Class for observing changes to properties or other events and notifying the observers.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QMessageBox</span></code>(QMessageBox)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
 <td><p>Creates a sample object to store and manipulate geochemical data in map form</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">StandardScaler</span></code>(*[, copy, with_mean, with_std])</p></td>
-<td><p>Standardize features by removing the mean and scaling to unit variance.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">StatusMessageManager</span></code>(parent)</p></td>
-<td><p>A class to manage status messages in a GUI application.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataHandling.</span></span><span class="sig-name descname"><span class="pre">SampleObj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlier_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">negative_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_chem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataHandling.</span></span><span class="sig-name descname"><span class="pre">SampleObj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlier_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">negative_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_chem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Observable</span></code></p>
 <p>Creates a sample object to store and manipulate geochemical data in map form</p>
 <p>The sample object is initially constructed from the data within a <a href="#id1"><span class="problematic" id="id2">*</span></a>.lame.csv file and loaded into
@@ -743,7 +710,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <span class="sig-name descname"><span class="pre">'crop_mask'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference internal" href="../common.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from cropped axes.</p>
+<dd class="field-odd"><p>(<a class="reference internal" href="common.Masking.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from cropped axes.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -763,7 +730,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <span class="sig-name descname"><span class="pre">'polygon_mask'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference internal" href="../common.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from selected polygons.</p>
+<dd class="field-odd"><p>(<a class="reference internal" href="common.Masking.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from selected polygons.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -773,7 +740,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <span class="sig-name descname"><span class="pre">'cluster_mask'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference internal" href="../common.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.</p>
+<dd class="field-odd"><p>(<a class="reference internal" href="common.Masking.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -832,7 +799,7 @@ keys and the items are lists with the column names that match each attribute_nam
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.add_columns" title="common.DataHandling.SampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
 <td><p>Add one or more columns to the sample object.</p></td>
@@ -976,12 +943,12 @@ in the mask must match the number of rows in <cite>array</cite>.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.apply_outlier_to_all">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_outlier_to_all</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.apply_outlier_to_all" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_outlier_to_all</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.apply_outlier_to_all" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.array_size">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">array_size</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.array_size" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">array_size</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.array_size" title="Link to this definition">#</a></dt>
 <dd><p>(int, int) Size of map in pixels</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -992,7 +959,7 @@ in the mask must match the number of rows in <cite>array</cite>.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.aspect_ratio">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aspect_ratio</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.aspect_ratio" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aspect_ratio</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.aspect_ratio" title="Link to this definition">#</a></dt>
 <dd><p>Aspect ratio of maps (dy / dx).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1020,7 +987,7 @@ high or low (even negative) values.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.auto_scale_value">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">auto_scale_value</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.auto_scale_value" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">auto_scale_value</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.auto_scale_value" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1097,7 +1064,7 @@ high or low (even negative) values.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.crop_mask">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crop_mask</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.crop_mask" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crop_mask</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.crop_mask" title="Link to this definition">#</a></dt>
 <dd><p>Boolean mask used to crop the raw data. True values will be used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1108,27 +1075,27 @@ high or low (even negative) values.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.current_field">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_field</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.current_field" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_field</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.current_field" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.data_max_diff_quantile">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_max_diff_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_max_diff_quantile" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_max_diff_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_max_diff_quantile" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.data_max_quantile">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_max_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_max_quantile" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_max_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_max_quantile" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.data_min_diff_quantile">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_min_diff_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_min_diff_quantile" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_min_diff_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_min_diff_quantile" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.data_min_quantile">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_min_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_min_quantile" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_min_quantile</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.data_min_quantile" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1147,7 +1114,7 @@ high or low (even negative) values.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.dx">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.dx" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.dx" title="Link to this definition">#</a></dt>
 <dd><p>Width of pixels in x-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1158,7 +1125,7 @@ high or low (even negative) values.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.dy">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.dy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.dy" title="Link to this definition">#</a></dt>
 <dd><p>Width of pixels in y-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1248,7 +1215,7 @@ data are returned with a linear scale.  By default <cite>False</cite>.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.negative_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negative_method</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.negative_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negative_method</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.negative_method" title="Link to this definition">#</a></dt>
 <dd><p>Method for negative handling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1265,17 +1232,17 @@ data are returned with a linear scale.  By default <cite>False</cite>.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.nx">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.nx" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.nx" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.ny">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.ny" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.ny" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.outlier_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outlier_method</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.outlier_method" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outlier_method</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.outlier_method" title="Link to this definition">#</a></dt>
 <dd><p>Method for predicting and clipping outliers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1324,7 +1291,7 @@ run for the first time.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.ref_chem">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.ref_chem" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.ref_chem" title="Link to this definition">#</a></dt>
 <dd><p>Reference chemistry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1431,7 +1398,7 @@ pixel dimensions Dx or Dy</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.x" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.x" title="Link to this definition">#</a></dt>
 <dd><p>Value of x-coordinate associated with map data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1442,7 +1409,7 @@ pixel dimensions Dx or Dy</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.x_range">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_range</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.x_range" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_range</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.x_range" title="Link to this definition">#</a></dt>
 <dd><p>Range of pixels in x-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1453,7 +1420,7 @@ pixel dimensions Dx or Dy</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.xlim">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlim</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.xlim" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlim</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.xlim" title="Link to this definition">#</a></dt>
 <dd><p>(float, float) Limits of pixels in x-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1464,7 +1431,7 @@ pixel dimensions Dx or Dy</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.y" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.y" title="Link to this definition">#</a></dt>
 <dd><p>Value of y-coordinate associated with map data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1475,7 +1442,7 @@ pixel dimensions Dx or Dy</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.y_range">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_range</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.y_range" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_range</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.y_range" title="Link to this definition">#</a></dt>
 <dd><p>Range of pixels in y-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1486,7 +1453,7 @@ pixel dimensions Dx or Dy</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.ylim">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylim</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.ylim" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylim</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.ylim" title="Link to this definition">#</a></dt>
 <dd><p>(float, float) Limits of pixels in y-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1534,8 +1501,7 @@ pixel dimensions Dx or Dy</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1608,13 +1574,13 @@ pixel dimensions Dx or Dy</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/generated/common.DataHandling.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/common.DataHandling.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1629,8 +1595,8 @@ pixel dimensions Dx or Dy</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1650,7 +1616,7 @@ pixel dimensions Dx or Dy</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1663,8 +1629,7 @@ pixel dimensions Dx or Dy</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

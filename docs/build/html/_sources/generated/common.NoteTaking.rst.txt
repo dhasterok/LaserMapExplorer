@@ -1,51 +1,30 @@
-common.NoteTaking
+﻿common.NoteTaking
 =================
 
 .. automodule:: common.NoteTaking
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      publish_string
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      CustomActionMenu
-      CustomDockWidget
-      CustomLineEdit
-      LoggerConfig
       NoteOptionsDialog
       Notes
-      QAction
-      QCursor
-      QDialog
-      QDialogButtonBox
-      QDoubleValidator
-      QFileDialog
-      QFont
-      QFormLayout
-      QHBoxLayout
-      QIcon
-      QLabel
-      QMainWindow
-      QMessageBox
-      QSize
-      QSizePolicy
-      QTextCursor
-      QTextEdit
-      QTimer
-      QToolBar
-      QUrl
-      QVBoxLayout
-      QWebEngineView
-      QWidget
-      Qt
-      RstToPdf
-      SearchWidget
-      datetime
    
+   
+
+   
+   
+   
+
+
+

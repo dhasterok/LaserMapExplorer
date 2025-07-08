@@ -1,8 +1,13 @@
-﻿ui.resources\_rc
+ui.resources\_rc
 ================
 
 .. automodule:: ui.resources_rc
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -11,3 +16,15 @@
       qCleanupResources
       qInitResources
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

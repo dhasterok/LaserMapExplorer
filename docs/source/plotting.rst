@@ -4,56 +4,59 @@ Plotting
 There are a number of plots that are possible within *LaME*.  A list of plot types and where they are generated is given below.  If you would like a new type of plot or additional options, file a feature request on the GitHub page or contact us (:doc:`contact`).
 
 .. table:: 
-+---------------------------+---------------------------+
-| Plot type                 | Tab                       |
-+===========================+===========================+
-| map                       |                           |
-+---------------------------+---------------------------+
-| - linear                  | *Samples and Fields*      |
-| - log                     |                           |
-| - normalized              |                           |
-| - gradient map            | *Preprocess*              |
-+---------------------------+---------------------------+
-| correlation               |                           |
-+---------------------------+---------------------------+
-| - Pearson                 | *Preprocess*              |
-| - Spearman                |                           |
-| - Kendall                 |                           |
-+---------------------------+---------------------------+
-| histogram                 |                           |
-+---------------------------+---------------------------+
-| - normal                  | *Preprocessing*           |
-| - KDE                     |                           |
-+---------------------------+---------------------------+
-| sctter and heatmaps       |                           |
-+---------------------------+---------------------------+
-| - scatter                 | *Scatter and Heatmaps*    |
-| - heatmap                 |                           |
-| - ternary colored map     |                           |
-+---------------------------+---------------------------+
-| multidimensional          |                           |
-+---------------------------+---------------------------+
-| - TEC (spider)            | *n-Dim*                   |
-| - radar                   |                           |
-+---------------------------+---------------------------+
-| PCA                       |                           |
-+---------------------------+---------------------------+
-| - variance                | *PCA*                     |
-| - vector                  |                           |
-| - PCA scatter             |                           |
-| - PCA score               |                           |
-| - PCA heatmap             |                           |
-+---------------------------+---------------------------+
-| clustering                |                           |
-+---------------------------+---------------------------+
-| - cluster map             | *Clustering*              |
-| - cluster scores          |                           |
-| - cluster performance     |                           |
-+---------------------------+---------------------------+
-| profile                   |                           |
-+---------------------------+---------------------------+
-| geochemistry profile      | *Profiling*               |
-+---------------------------+---------------------------+
++------------------------+-------------------------+
+| Plot type              | Tab                     |
++========================+=========================+
+| map                    |                         |
++------------------------+-------------------------+
+|| - linear              || *Samples and Fields*   |
+|| - log                 ||                        |
+|| - normalized          ||                        |
+|| - gradient map        || *Preprocess*           |
++------------------------+-------------------------+
+| correlation            |                         |
++------------------------+-------------------------+
+|| - Pearson             || *Preprocess*           |
+|| - Spearman            ||                        |
+|| - Kendall             ||                        |
++------------------------+-------------------------+
+| histogram              |                         |
++------------------------+-------------------------+
+|| - normal              || *Preprocessing*        |
+|| - KDE                 ||                        |
++------------------------+-------------------------+
+| scatter and heatmaps   |                         |
++------------------------+-------------------------+
+|| - scatter             || *Scatter and Heatmaps* |
+|| - heatmap             ||                        |
+|| - ternary colored map ||                        |
++------------------------+-------------------------+
+| multidimensional       |                         |
++------------------------+-------------------------+
+|| - TEC (spider)        || *n-Dim*                |
+|| - radar               ||                        |
++------------------------+-------------------------+
+| PCA                    |                         |
++------------------------+-------------------------+
+|| - variance            || *PCA*                  |
+|| - vector              ||                        |
+|| - PCA scatter         ||                        |
+|| - PCA score           ||                        |
+|| - PCA heatmap         ||                        |
++------------------------+-------------------------+
+| clustering             |                         |
++------------------------+-------------------------+
+|| - cluster map         || *Clustering*           |
+|| - cluster scores      ||                        |
+|| - cluster performance ||                        |
++------------------------+-------------------------+
+| profile                |                         |
++------------------------+-------------------------+
+| geochemistry profile   | *Profiling*             |
++------------------------+-------------------------+
+
+
+
 
 Map-form plots
 ==============
@@ -78,7 +81,7 @@ Histograms
 Histogram plots show the frequency distribution of concentration values (typically in ppm or wt%) for individual analytes within a sample. Available as standard histograms or kernel density estimation (KDE) plots for smoother distribution visualization.
 
 `Scatter and Heatmaps <analysis_visualization.html#scatters-and-heatmaps>`_
-===================
+===========================================================================
 
 This category includes three visualization types:
 
@@ -91,10 +94,12 @@ This category includes three visualization types:
 
 Trace element compatibility (TEC)
 ---------------------------------
+
 TEC diagrams (spider plots) display multiple elements normalized to a reference composition, arranged by geochemical compatibility.
 
 Radar
 -----
+
 Radar plots display multiple variables on radial axes, offering an alternative view of multidimensional relationships.
 
 `PCA <multidimensional.html#principal-component-analysis>`_
@@ -118,5 +123,6 @@ Three main clustering visualizations:
 - Cluster performance plots for optimizing cluster numbers
 
 `Profile <profiles.html>`_
-=======
+==========================
+
 Profile plots display variations in analyte concentrations along user-defined transects across the sample.

@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
 from src.app.UITheme import default_font
 
 class RegressionPage(CustomDockWidget):
+    """Regression"""
     def __init__(self, page_index, parent=None):
         super().__init__(parent)
 

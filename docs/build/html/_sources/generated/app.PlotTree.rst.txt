@@ -1,29 +1,29 @@
-app.PlotTree
+﻿app.PlotTree
 ============
 
 .. automodule:: app.PlotTree
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
-      log
-      sort_analytes
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      CustomTreeView
-      LoggerConfig
       PlotTree
-      QBrush
-      QColor
-      QMenu
-      QStandardItem
-      QStandardItemModel
-      Qt
-      StandardItem
    
+   
+
+   
+   
+   
+
+
+

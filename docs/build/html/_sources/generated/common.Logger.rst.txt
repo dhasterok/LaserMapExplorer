@@ -1,8 +1,13 @@
-common.Logger
+﻿common.Logger
 =============
 
 .. automodule:: common.Logger
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -16,39 +21,23 @@ common.Logger
       no_log
       set_global_logger
    
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
    
-      CustomDockWidget
       LoggerConfig
       LoggerDock
       LoggerOptionsDialog
-      QAction
-      QCheckBox
-      QColor
-      QDialog
-      QDialogButtonBox
-      QFont
-      QGridLayout
-      QGroupBox
-      QHBoxLayout
-      QIcon
-      QLineEdit
-      QMainWindow
-      QSize
-      QSizePolicy
-      QSpacerItem
-      QTextCharFormat
-      QTextCursor
-      QTextDocument
-      QTextEdit
-      QToolBar
-      QToolButton
-      QVBoxLayout
-      QWidget
-      QWidgetAction
-      Qt
-      SearchWidget
-      ToggleSwitch
    
+   
+
+   
+   
+   
+
+
+

@@ -1,27 +1,29 @@
-app.PlotViewerWindow
+﻿app.PlotViewerWindow
 ====================
 
 .. automodule:: app.PlotViewerWindow
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      GraphicsLayoutWidget
-      NavigationToolbar
       PlotViewer
-      QFileDialog
-      QMenu
-      QSizePolicy
-      QVBoxLayout
-      QWidget
-      Ui_widgetPlotViewer
-      ViewBox
    
+   
+
+   
+   
+   
+
+
+

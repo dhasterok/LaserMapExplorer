@@ -1,41 +1,30 @@
-app.Workflow
+﻿app.Workflow
 ============
 
 .. automodule:: app.Workflow
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      pyqtSlot
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
       BlocklyBridge
-      CustomDockWidget
-      LameBlockly
-      QAction
-      QDockWidget
-      QFile
-      QFont
-      QIODevice
-      QIcon
-      QLabel
-      QMainWindow
-      QObject
-      QSize
-      QSizePolicy
-      QStatusBar
-      QTextEdit
-      QToolBar
-      QUrl
-      QVBoxLayout
-      QWebChannel
-      QWebEngineView
-      QWidget
-      Qt
       Workflow
    
+   
+
+   
+   
+   
+
+
+

@@ -1,39 +1,29 @@
-app.AnalyteSelectionWindow
+﻿app.AnalyteSelectionWindow
 ==========================
 
 .. automodule:: app.AnalyteSelectionWindow
 
    
-   .. rubric:: Functions
-
-   .. autosummary::
    
-      auto_log_methods
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
    .. autosummary::
    
       AnalyteDialog
-      LoggerConfig
-      QBrush
-      QColor
-      QComboBox
-      QDialog
-      QEvent
-      QFileDialog
-      QFont
-      QHeaderView
-      QImage
-      QLabel
-      QMessageBox
-      QObject
-      QPainter
-      QPixmap
-      QTableWidget
-      QTableWidgetItem
-      Qt
-      RotatedHeaderView
-      Ui_Dialog
-      pyqtSignal
    
+   
+
+   
+   
+   
+
+
+

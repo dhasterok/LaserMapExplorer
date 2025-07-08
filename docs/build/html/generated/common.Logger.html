@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/common.Logger';</script>
@@ -52,7 +49,6 @@
     <link rel="prev" title="common.LamePlot" href="common.LamePlot.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -68,8 +64,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -77,6 +84,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -84,8 +92,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -119,7 +127,7 @@
     
     
     <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -181,11 +189,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -223,11 +235,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -246,8 +262,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -436,14 +451,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -461,6 +471,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -475,7 +487,7 @@
     
     <li class="breadcrumb-item"><a href="common.html" class="nav-link">common</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.Logger</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.Logger</li>
   </ul>
 </nav>
 </div>
@@ -495,7 +507,7 @@
   <section id="module-common.Logger">
 <span id="common-logger"></span><h1>common.Logger<a class="headerlink" href="#module-common.Logger" title="Link to this heading">#</a></h1>
 <p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.Logger.auto_log_methods" title="common.Logger.auto_log_methods"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_log_methods</span></code></a>([logger_key])</p></td>
 <td><p>Decorator that wraps all methods in a class</p></td>
@@ -522,107 +534,23 @@
 </table>
 </div>
 <p class="rubric">Classes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomDockWidget</span></code>([parent])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.Logger.LoggerConfig" title="common.Logger.LoggerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.Logger.LoggerConfig" title="common.Logger.LoggerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code></a>()</p></td>
 <td><p>Central configuration manager for logging behavior within the application.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.Logger.LoggerDock" title="common.Logger.LoggerDock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerDock</span></code></a>([file, parent])</p></td>
-<td><p>A dock widget that contains a logging display.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.Logger.LoggerDock" title="common.Logger.LoggerDock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerDock</span></code></a>([file, parent])</p></td>
+<td><p>A dockable widget that displays logging messages for debugging and runtime diagnostics.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.Logger.LoggerOptionsDialog" title="common.Logger.LoggerOptionsDialog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerOptionsDialog</span></code></a>(options_dict[, parent])</p></td>
-<td><p>Allows the user to set logger options.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QAction</span></code>(QAction QAction)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QCheckBox</span></code>(QCheckBox)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QColor</span></code>(...)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QDialog</span></code>([parent, flags])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QDialogButtonBox</span></code>(...)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QFont</span></code>(QFont QFont QFont QFont)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QGridLayout</span></code>([parent])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QGroupBox</span></code>(QGroupBox)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QHBoxLayout</span></code>(QHBoxLayout)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QIcon</span></code>(QIcon QIcon QIcon QIcon QIcon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QLineEdit</span></code>(QLineEdit)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QMainWindow</span></code>([parent, flags])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSize</span></code>(QSize QSize)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSizePolicy</span></code>(QSizePolicy QSizePolicy QSizePolicy)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSpacerItem</span></code>(QSpacerItem)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTextCharFormat</span></code>(QTextCharFormat)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTextCursor</span></code>(...)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTextDocument</span></code>(QTextDocument)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QTextEdit</span></code>(QTextEdit)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QToolBar</span></code>(QToolBar)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QToolButton</span></code>([parent])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QVBoxLayout</span></code>(QVBoxLayout)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QWidget</span></code>([parent, flags])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QWidgetAction</span></code>(parent)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Qt</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SearchWidget</span></code>(text_edit[, parent, ...])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ToggleSwitch</span></code>([parent, height, duration, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.Logger.LoggerOptionsDialog" title="common.Logger.LoggerOptionsDialog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerOptionsDialog</span></code></a>(options_dict[, parent])</p></td>
+<td><p>A dialog that allows users to enable or disable individual logging keys and adjust logging behavior options.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Logger.</span></span><span class="sig-name descname"><span class="pre">LoggerConfig</span></span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Logger.</span></span><span class="sig-name descname"><span class="pre">LoggerConfig</span></span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Central configuration manager for logging behavior within the application.</p>
 <p>This class provides global settings for controlling what gets logged and how logging is displayed.
@@ -663,74 +591,92 @@ as well as global flags for displaying method arguments, call chains, and for pa
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.get_all">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_all" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_all" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.get_option">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_option" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_option" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.get_show_args">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_show_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_show_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_show_args" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_show_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_show_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_show_args" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.get_show_call_chain">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_show_call_chain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_show_call_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_show_call_chain" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_show_call_chain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.get_show_call_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.get_show_call_chain" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.is_paused">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_paused</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.is_paused"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.is_paused" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_paused</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.is_paused"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.is_paused" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.set_options">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_options" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_options" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.set_paused">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_paused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_paused"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_paused" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_paused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_paused"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_paused" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.set_show_args">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_show_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_show_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_show_args" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_show_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_show_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_show_args" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Logger.LoggerConfig.set_show_call_chain">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_show_call_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_show_call_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_show_call_chain" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_show_call_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerConfig.set_show_call_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerConfig.set_show_call_chain" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="common.Logger.LoggerDock">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Logger.</span></span><span class="sig-name descname"><span class="pre">LoggerDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'temp.log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerDock" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Logger.</span></span><span class="sig-name descname"><span class="pre">LoggerDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'temp.log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerDock" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomDockWidget</span></code></p>
-<p>A dock widget that contains a logging display.</p>
-<p>A logging dock widget useful for debugging and recording actions.  Requires the parent to have
-an attribute parent.logger_options, which is a dictionary with keys being the logger prefixes and
-an associated boolean value for each indicating to log (True) or skip logging (False) given actions.</p>
+<p>A dockable widget that displays logging messages for debugging and runtime diagnostics.</p>
 <dl class="simple">
-<dt>The logger will produce default color text for default prefixes:</dt><dd><p>Error - red
-Warning - orange
-UI - blue
-data - green</p>
+<dt>This dock is designed to be embedded in a <cite>QMainWindow</cite> and provides:</dt><dd><ul class="simple">
+<li><p>A read-only, color-coded log display</p></li>
+<li><p>A toolbar with controls for search, pause/resume, export, and clear actions</p></li>
+<li><p>Integration with the <cite>LoggerConfig</cite> system for customizable output</p></li>
+<li><p>Optional settings dialog to toggle which keys/categories are logged</p></li>
+</ul>
+</dd>
+<dt>It expects the parent QMainWindow to provide:</dt><dd><ul class="simple">
+<li><p><cite>logger_options</cite> (dict[str, bool]): Key-based toggles for logging categories.</p></li>
+<li><p>Optionally <cite>log_colors</cite> (dict[str, str]): Hex or named color values for message prefixes.</p></li>
+</ul>
 </dd>
 </dl>
-<p>These can be extended or changed if the a parent.log_colors exists.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parent</strong> (<em>QObject</em>) – Calling window.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The filename to which the log is saved when exported (default: ‘temp.log’).</p></li>
+<li><p><strong>parent</strong> (<em>QMainWindow</em>) – The main window instance that this logger is attached to. Must be a <cite>QMainWindow</cite>.</p></li>
+</ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">logger_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;UI&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">logger_dock</span> <span class="o">=</span> <span class="n">LoggerDock</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;session.log&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">logger_dock</span><span class="o">.</span><span class="n">log_colors</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="s2">&quot;CustomTag&quot;</span><span class="p">:</span> <span class="s2">&quot;#ffaa00&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">See also<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SearchTool : Adds text search widget to the dock</p>
+</dd>
+</dl>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></p>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">acceptDrops</span></code>(self)</p></td>
 <td><p></p></td>
@@ -1834,22 +1780,46 @@ data - green</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="common.Logger.LoggerOptionsDialog">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Logger.</span></span><span class="sig-name descname"><span class="pre">LoggerOptionsDialog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerOptionsDialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerOptionsDialog" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Logger.</span></span><span class="sig-name descname"><span class="pre">LoggerOptionsDialog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Logger.html#LoggerOptionsDialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Logger.LoggerOptionsDialog" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QDialog</span></code></p>
-<p>Allows the user to set logger options.</p>
-<p>The use of these options is determined by the main program, not the logger,
-this is simply a place to view and change them.</p>
+<p>A dialog that allows users to enable or disable individual logging keys
+and adjust logging behavior options.</p>
+<p>This dialog supports:
+- Displaying checkboxes for all logger keys passed via <cite>options_dict</cite>
+- Selecting or deselecting all options with tool buttons
+- Toggles for global logger behaviors:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Show method/function arguments in logs</p></li>
+<li><p>Show call chain (stack trace context)</p></li>
+</ul>
+</div></blockquote>
+<p>Typically invoked from the logger toolbar via the gear/settings icon.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>options_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – A dictionary of options with key values displayed as the labels and values
-are bool indicating a set option for logging.</p></li>
-<li><p><strong>parent</strong> (<a class="reference internal" href="#common.Logger.LoggerDock" title="common.Logger.LoggerDock"><em>LoggerDock</em></a><em>, </em><em>optional</em>) – Parent logger, by default None</p></li>
+<li><p><strong>options_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>]</em>) – Dictionary of logger keys and their current enabled/disabled state.</p></li>
+<li><p><strong>parent</strong> (<em>QWidget</em><em> or </em><a class="reference internal" href="#common.Logger.LoggerDock" title="common.Logger.LoggerDock"><em>LoggerDock</em></a><em>, </em><em>optional</em>) – Parent widget for the dialog.</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dialog</span> <span class="o">=</span> <span class="n">LoggerOptionsDialog</span><span class="p">(</span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">get_all</span><span class="p">(),</span> <span class="bp">self</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span> <span class="o">==</span> <span class="n">QDialog</span><span class="o">.</span><span class="n">DialogCode</span><span class="o">.</span><span class="n">Accepted</span><span class="p">:</span>
+    <span class="n">LoggerConfig</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span><span class="n">dialog</span><span class="o">.</span><span class="n">get_updated_options</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#common.Logger.LoggerConfig" title="common.Logger.LoggerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerConfig</span></code></a></dt><dd><p>Stores and retrieves global logging configuration.</p>
+</dd>
+<dt><a class="reference internal" href="#common.Logger.LoggerDock" title="common.Logger.LoggerDock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerDock</span></code></a></dt><dd><p>The main dockable UI that displays logs.</p>
+</dd>
+</dl>
+</div>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accept</span></code>(self)</p></td>
 <td><p></p></td>
@@ -2888,6 +2858,18 @@ are bool indicating a set option for logging.</p></li>
 <dd class="field-odd"><p><strong>logger_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – key into dict logger_options, by default None</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span>
+
+<span class="nd">@auto_log_methods</span><span class="p">(</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -2941,6 +2923,14 @@ If no global logger is set, output falls back to standard output using <cite>pri
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">log_call</span>
+
+<span class="nd">@log_call</span><span class="p">(</span><span class="s2">&quot;UI&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">button_clicked</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Button was clicked&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -2959,6 +2949,15 @@ If no global logger is set, output falls back to standard output using <cite>pri
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">no_log</span>
+
+<span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
+    <span class="nd">@no_log</span>
+    <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -3010,8 +3009,7 @@ Typically, this could be a file-like object or a custom logger.</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -3062,13 +3060,13 @@ Typically, this could be a file-like object or a custom logger.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/generated/common.Logger.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/common.Logger.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -3083,8 +3081,8 @@ Typically, this could be a file-like object or a custom logger.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -3104,7 +3102,7 @@ Typically, this could be a file-like object or a custom logger.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -3117,8 +3115,7 @@ Typically, this could be a file-like object or a custom logger.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

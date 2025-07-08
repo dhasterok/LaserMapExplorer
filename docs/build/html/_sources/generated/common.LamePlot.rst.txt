@@ -1,8 +1,13 @@
-common.LamePlot
+﻿common.LamePlot
 ===============
 
 .. automodule:: common.LamePlot
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -12,13 +17,9 @@ common.LamePlot
       add_scalebar
       biplot
       cluster_performance_plot
-      get_hex_color
-      get_rgb_color
       get_scatter_data
       hist2dbiplot
       hist2dternplot
-      log
-      log_call
       logax
       plot_cluster_map
       plot_clusters
@@ -34,19 +35,18 @@ common.LamePlot
       plot_scatter
       plot_score_map
       plot_small_histogram
-      plot_spider_norm
       plot_ternary_map
       ternary_scatter
    
-   .. rubric:: Classes
+   
 
-   .. autosummary::
    
-      LoggerConfig
-      NavigationToolbar
-      Patch
-      Path
-      Radar
-      scalebar
-      ternary
    
+   
+
+   
+   
+   
+
+
+

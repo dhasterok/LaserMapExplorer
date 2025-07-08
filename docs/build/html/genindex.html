@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -837,7 +847,7 @@
         <li><a href="generated/app.ProfileNew.html#app.ProfileNew.Profiling.clear_profiles">(app.ProfileNew.Profiling method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.clear_search">clear_search() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.clear_search">clear_search() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.clear_search">[1]</a>
 </li>
       <li><a href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.clear_selections">clear_selections() (app.AnalyteSelectionWindow.AnalyteDialog method)</a>, <a href="generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.clear_selections">[1]</a>
 </li>
@@ -1110,7 +1120,7 @@
     common.SearchTool
 
       <ul>
-        <li><a href="generated/common.SearchTool.html#module-common.SearchTool">module</a>
+        <li><a href="common.html#module-common.SearchTool">module</a>, <a href="generated/common.SearchTool.html#module-common.SearchTool">[1]</a>
 </li>
       </ul></li>
       <li>
@@ -1636,7 +1646,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.ternary_plot.ternary.hexagon">hexagon() (common.ternary_plot.ternary method)</a>, <a href="generated/common.ternary_plot.html#common.ternary_plot.ternary.hexagon">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.highlight_matches">highlight_matches() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.highlight_matches">highlight_matches() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.highlight_matches">[1]</a>
 </li>
       <li><a href="generated/common.LamePlot.html#common.LamePlot.hist2dbiplot">hist2dbiplot() (in module common.LamePlot)</a>
 </li>
@@ -1680,7 +1690,7 @@
 </li>
       <li><a href="generated/app.InfoViewer.html#app.InfoViewer.increase_precision">increase_precision() (in module app.InfoViewer)</a>
 </li>
-      <li><a href="common.html#common.Polygon.PolygonManager.increment_pid">increment_pid() (common.Polygon.PolygonManager method)</a>, <a href="common.html#id39">[1]</a>, <a href="generated/common.Polygon.html#common.Polygon.PolygonManager.increment_pid">[2]</a>, <a href="generated/common.Polygon.html#id0">[3]</a>
+      <li><a href="common.html#common.Polygon.PolygonManager.increment_pid">increment_pid() (common.Polygon.PolygonManager method)</a>, <a href="common.html#id44">[1]</a>, <a href="generated/common.Polygon.html#common.Polygon.PolygonManager.increment_pid">[2]</a>, <a href="generated/common.Polygon.html#id0">[3]</a>
 
       <ul>
         <li><a href="generated/common.PolygonMatplotlib.html#common.PolygonMatplotlib.PolygonManager.increment_pid">(common.PolygonMatplotlib.PolygonManager method)</a>
@@ -1730,7 +1740,7 @@
 </li>
       <li><a href="common.html#common.colorfunc.is_valid_hex_color">is_valid_hex_color() (in module common.colorfunc)</a>, <a href="generated/common.colorfunc.html#common.colorfunc.is_valid_hex_color">[1]</a>
 </li>
-      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.isChecked">isChecked() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.isChecked">[1]</a>
+      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.isChecked">isChecked() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="common.html#id21">[1]</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.isChecked">[2]</a>, <a href="generated/common.CustomWidgets.html#id17">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2002,7 +2012,7 @@
 </li>
         <li><a href="common.html#module-common.ScheduleTimer">common.ScheduleTimer</a>, <a href="generated/common.ScheduleTimer.html#module-common.ScheduleTimer">[1]</a>
 </li>
-        <li><a href="generated/common.SearchTool.html#module-common.SearchTool">common.SearchTool</a>
+        <li><a href="common.html#module-common.SearchTool">common.SearchTool</a>, <a href="generated/common.SearchTool.html#module-common.SearchTool">[1]</a>
 </li>
         <li><a href="common.html#module-common.SortAnalytes">common.SortAnalytes</a>, <a href="generated/common.SortAnalytes.html#module-common.SortAnalytes">[1]</a>
 </li>
@@ -2077,7 +2087,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/app.ProfileNew.html#app.ProfileNew.Profile.name">name (app.ProfileNew.Profile attribute)</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.navigate_match">navigate_match() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.navigate_match">navigate_match() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.navigate_match">[1]</a>
 </li>
       <li><a href="generated/app.AppData.html#app.AppData.AppData.ndim_analyte_set">ndim_analyte_set (app.AppData.AppData property)</a>
 </li>
@@ -2481,15 +2491,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="app.html#app.SpotImporter.SpotImporter.rename_column">rename_column() (app.SpotImporter.SpotImporter method)</a>, <a href="generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.rename_column">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_all">replace_all() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.replace_all">replace_all() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_all">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_current">replace_current() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.replace_current">replace_current() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_current">[1]</a>
 </li>
       <li><a href="generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.reset_analysis">reset_analysis() (app.BlocklyModules.LameBlockly method)</a>
 </li>
       <li><a href="common.html#common.DataHandling.SampleObj.reset_crop">reset_crop (common.DataHandling.SampleObj attribute)</a>, <a href="generated/common.DataHandling.html#common.DataHandling.SampleObj.reset_crop">[1]</a>
 </li>
-      <li><a href="common.html#id0">reset_crop() (common.DataHandling.SampleObj method)</a>, <a href="generated/common.DataHandling.html#id0">[1]</a>
+      <li><a href="common.html#id29">reset_crop() (common.DataHandling.SampleObj method)</a>, <a href="generated/common.DataHandling.html#id0">[1]</a>
 </li>
       <li><a href="common.html#common.DataHandling.SampleObj.reset_data">reset_data() (common.DataHandling.SampleObj method)</a>, <a href="generated/common.DataHandling.html#common.DataHandling.SampleObj.reset_data">[1]</a>
 </li>
@@ -2538,6 +2548,8 @@
 </li>
       </ul></li>
       <li><a href="app.html#app.PlotTree.PlotTree.retrieve_plotinfo_from_tree">retrieve_plotinfo_from_tree() (app.PlotTree.PlotTree method)</a>, <a href="generated/app.PlotTree.html#app.PlotTree.PlotTree.retrieve_plotinfo_from_tree">[1]</a>
+</li>
+      <li><a href="common.html#common.CustomWidgets.CustomTreeView.root_node">root_node (common.CustomWidgets.CustomTreeView attribute)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.root_node">[1]</a>
 </li>
       <li><a href="common.html#common.CustomWidgets.RotatedHeaderView">RotatedHeaderView (class in common.CustomWidgets)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.RotatedHeaderView">[1]</a>
 </li>
@@ -2635,7 +2647,7 @@
       </ul></li>
       <li><a href="common.html#common.ScheduleTimer.Scheduler">Scheduler (class in common.ScheduleTimer)</a>, <a href="generated/common.ScheduleTimer.html#common.ScheduleTimer.Scheduler">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget">SearchWidget (class in common.SearchTool)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget">SearchWidget (class in common.SearchTool)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget">[1]</a>
 </li>
       <li><a href="common.html#common.CustomWidgets.RotatedHeaderView.sectionSizeFromContents">sectionSizeFromContents() (common.CustomWidgets.RotatedHeaderView method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.RotatedHeaderView.sectionSizeFromContents">[1]</a>
 </li>
@@ -2647,7 +2659,7 @@
 </li>
       <li><a href="common.html#common.Masking.ClusterTab.select_cluster_group_callback">select_cluster_group_callback() (common.Masking.ClusterTab method)</a>, <a href="generated/common.Masking.html#common.Masking.ClusterTab.select_cluster_group_callback">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.select_current">select_current() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.select_current">select_current() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.select_current">[1]</a>
 </li>
       <li><a href="app.html#app.MapImporter.FileSelectData.select_none">select_none() (app.MapImporter.FileSelectData method)</a>, <a href="generated/app.MapImporter.html#app.MapImporter.FileSelectData.select_none">[1]</a>
 </li>
@@ -2729,7 +2741,7 @@
 </li>
       <li><a href="common.html#common.CustomWidgets.ToggleSwitch.set_thumb_pos">set_thumb_pos() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.set_thumb_pos">[1]</a>
 </li>
-      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.setChecked">setChecked() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.setChecked">[1]</a>
+      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.setChecked">setChecked() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="common.html#id22">[1]</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.setChecked">[2]</a>, <a href="generated/common.CustomWidgets.html#id18">[3]</a>
 </li>
       <li><a href="common.html#common.CustomMplCanvas.MplCanvas.setCursorPosition">setCursorPosition() (common.CustomMplCanvas.MplCanvas method)</a>, <a href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.setCursorPosition">[1]</a>
 </li>
@@ -2932,7 +2944,7 @@
 </li>
       <li><a href="common.html#common.CustomWidgets.CustomLineEdit.threshold">threshold (common.CustomWidgets.CustomLineEdit property)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomLineEdit.threshold">[1]</a>
 </li>
-      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.thumb_pos">thumb_pos (common.CustomWidgets.ToggleSwitch attribute)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.thumb_pos">[1]</a>
+      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.thumb_pos">thumb_pos (common.CustomWidgets.ToggleSwitch attribute)</a>, <a href="common.html#id25">[1]</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.thumb_pos">[2]</a>, <a href="generated/common.CustomWidgets.html#id21">[3]</a>
 </li>
       <li><a href="app.html#app.StyleToolbox.Styling.tick_dir">tick_dir (app.StyleToolbox.Styling attribute)</a>, <a href="generated/app.StyleToolbox.html#app.StyleToolbox.Styling.tick_dir">[1]</a>
 
@@ -2942,18 +2954,18 @@
       </ul></li>
       <li><a href="app.html#app.StyleToolbox.StylingDock.tickdir_callback">tickdir_callback() (app.StyleToolbox.StylingDock method)</a>, <a href="generated/app.StyleToolbox.html#app.StyleToolbox.StylingDock.tickdir_callback">[1]</a>
 </li>
-      <li><a href="common.html#common.ScheduleTimer.Scheduler.timeout">timeout (common.ScheduleTimer.Scheduler attribute)</a>, <a href="common.html#id40">[1]</a>, <a href="generated/common.ScheduleTimer.html#common.ScheduleTimer.Scheduler.timeout">[2]</a>, <a href="generated/common.ScheduleTimer.html#id0">[3]</a>
+      <li><a href="common.html#common.ScheduleTimer.Scheduler.timeout">timeout (common.ScheduleTimer.Scheduler attribute)</a>, <a href="common.html#id45">[1]</a>, <a href="generated/common.ScheduleTimer.html#common.ScheduleTimer.Scheduler.timeout">[2]</a>, <a href="generated/common.ScheduleTimer.html#id0">[3]</a>
 </li>
       <li><a href="common.html#common.CustomWidgets.CustomTableWidget.to_dataframe">to_dataframe() (common.CustomWidgets.CustomTableWidget method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomTableWidget.to_dataframe">[1]</a>
 </li>
       <li><a href="common.html#common.NoteTaking.Notes.to_rst_table">to_rst_table() (common.NoteTaking.Notes method)</a>, <a href="generated/common.NoteTaking.html#common.NoteTaking.Notes.to_rst_table">[1]</a>
 </li>
-      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.toggle">toggle() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.toggle">[1]</a>
+      <li><a href="common.html#common.CustomWidgets.ToggleSwitch.toggle">toggle() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="common.html#id26">[1]</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.toggle">[2]</a>, <a href="generated/common.CustomWidgets.html#id22">[3]</a>
+</li>
+      <li><a href="generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_all_columns">toggle_all_columns() (app.InfoViewer.MetadataTab method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_all_columns">toggle_all_columns() (app.InfoViewer.MetadataTab method)</a>
-</li>
       <li><a href="generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_all_rows">toggle_all_rows() (app.InfoViewer.MetadataTab method)</a>
 </li>
       <li><a href="generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab.toggle_annotation">toggle_annotation() (app.InfoViewer.PlotInfoTab method)</a>
@@ -2980,7 +2992,7 @@
 </li>
       <li><a href="app.html#app.Profile.ProfileDock.toggle_profile_actions">toggle_profile_actions() (app.Profile.ProfileDock method)</a>, <a href="generated/app.Profile.html#app.Profile.ProfileDock.toggle_profile_actions">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.toggle_replace_fields">toggle_replace_fields() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.toggle_replace_fields">toggle_replace_fields() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.toggle_replace_fields">[1]</a>
 </li>
       <li><a href="generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_row_selection">toggle_row_selection() (app.InfoViewer.MetadataTab method)</a>
 </li>
@@ -3007,6 +3019,8 @@
       <li><a href="app.html#app.Profile.Profiling.transform_profile_for_pickling">transform_profile_for_pickling() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.transform_profile_for_pickling">[1]</a>
 </li>
       <li><a href="app.html#app.PlotTree.PlotTree.tree_double_click">tree_double_click() (app.PlotTree.PlotTree method)</a>, <a href="generated/app.PlotTree.html#app.PlotTree.PlotTree.tree_double_click">[1]</a>
+</li>
+      <li><a href="common.html#common.CustomWidgets.CustomTreeView.treeModel">treeModel (common.CustomWidgets.CustomTreeView attribute)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.treeModel">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -3224,7 +3238,7 @@
 </li>
       <li><a href="generated/app.AppData.html#app.AppData.AppData.update_hist_num_bins">update_hist_num_bins() (app.AppData.AppData method)</a>
 </li>
-      <li><a href="common.html#common.CustomWidgets.CustomCheckButton.update_icon">update_icon() (common.CustomWidgets.CustomCheckButton method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomCheckButton.update_icon">[1]</a>
+      <li><a href="common.html#common.CustomWidgets.CustomCheckButton.update_icon">update_icon() (common.CustomWidgets.CustomCheckButton method)</a>, <a href="common.html#id0">[1]</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomCheckButton.update_icon">[2]</a>, <a href="generated/common.CustomWidgets.html#id0">[3]</a>
 </li>
       <li><a href="common.html#common.CustomWidgets.CustomSlider.update_label">update_label() (common.CustomWidgets.CustomSlider method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.update_label">[1]</a>
 </li>
@@ -3232,7 +3246,7 @@
 </li>
       <li><a href="app.html#app.Profile.Profiling.update_listview_with_fields">update_listview_with_fields() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.update_listview_with_fields">[1]</a>
 </li>
-      <li><a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.update_match_label">update_match_label() (common.SearchTool.SearchWidget method)</a>
+      <li><a href="common.html#common.SearchTool.SearchWidget.update_match_label">update_match_label() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.update_match_label">[1]</a>
 </li>
       <li><a href="common.html#common.NoteTaking.NoteOptionsDialog.update_maxcolumns">update_maxcolumns() (common.NoteTaking.NoteOptionsDialog method)</a>, <a href="generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog.update_maxcolumns">[1]</a>
 </li>
@@ -3494,8 +3508,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -3515,7 +3529,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -3528,8 +3542,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

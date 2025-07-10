@@ -29,9 +29,8 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_js.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
@@ -389,11 +388,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.UIControl</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">src.common.ExtendedDF</span> <span class="kn">import</span> <span class="n">AttributeDataFrame</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ExtendedDF</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeDataFrame</span>
 
 <div class="viewcode-block" id="UIFieldLogic">
 <a class="viewcode-back" href="../../generated/app.UIControl.html#app.UIControl.UIFieldLogic">[docs]</a>
-<span class="k">class</span> <span class="nc">UIFieldLogic</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UIFieldLogic</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Methods associated with fields and field type, specifically comboboxes</span>
 
 <span class="sd">    Parameters</span>
@@ -401,12 +400,12 @@
 <span class="sd">    data : AttributeDataFrame, optional</span>
 <span class="sd">        Initializes data frame, defaults to None</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
 
 <div class="viewcode-block" id="UIFieldLogic.update_data">
 <a class="viewcode-back" href="../../generated/app.UIControl.html#app.UIControl.UIFieldLogic.update_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the data</span>
 
 <span class="sd">        Parameters</span>
@@ -425,7 +424,7 @@
     <span class="c1"># updates field type comboboxes for analyses and plotting</span>
 <div class="viewcode-block" id="UIFieldLogic.update_field_type_combobox">
 <a class="viewcode-back" href="../../generated/app.UIControl.html#app.UIControl.UIFieldLogic.update_field_type_combobox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_field_type_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">addNone</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_field_type_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">addNone</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates field type combobox</span>
 <span class="sd">        </span>
 <span class="sd">        Used to update ``MainWindow.comboBoxHistFieldType``, ``MainWindow.comboBoxFilterFieldType``,</span>
@@ -502,7 +501,7 @@
     <span class="c1"># updates field comboboxes for analysis and plotting</span>
 <div class="viewcode-block" id="UIFieldLogic.update_field_combobox">
 <a class="viewcode-back" href="../../generated/app.UIControl.html#app.UIControl.UIFieldLogic.update_field_combobox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentBox</span><span class="p">,</span> <span class="n">childBox</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentBox</span><span class="p">,</span> <span class="n">childBox</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates comboBoxes with fields for plots or analysis</span>
 
 <span class="sd">        Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.</span>
@@ -541,7 +540,7 @@
     <span class="c1"># gets the set of fields</span>
 <div class="viewcode-block" id="UIFieldLogic.get_field_list">
 <a class="viewcode-back" href="../../generated/app.UIControl.html#app.UIControl.UIFieldLogic.get_field_list">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the fields associated with a defined set</span>
 
 <span class="sd">        Set names are consistent with QComboBox.</span>

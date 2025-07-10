@@ -29,9 +29,8 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_js.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
@@ -389,17 +388,17 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.PolygonNew</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Polygon</span> <span class="k">as</span> <span class="n">MplPolygon</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span> <span class="k">as</span> <span class="n">MplPolygon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
 
 <div class="viewcode-block" id="Polygon">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.Polygon">[docs]</a>
-<span class="k">class</span> <span class="nc">Polygon</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Polygon</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stores data about one polygon and references to the drawn Patch.&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="o">=</span> <span class="n">p_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># list of (x, y)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">patch</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Matplotlib Patch reference</span></div>
@@ -408,12 +407,12 @@
 <div class="viewcode-block" id="PolygonManager">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Polygon&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">PolygonManager</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolygonManager</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Manages polygon creation, storage, and drawing on a Matplotlib axes.</span>
 <span class="sd">    Includes save/load methods using the `pickle` module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">logger_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">logger_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="c1"># For multi-sample usage, you might have {sample_id: {p_id: Polygon}}.</span>
         <span class="c1"># For simplicity, this snippet just uses a single dict of polygons:</span>
@@ -440,7 +439,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="PolygonManager.create_new_polygon">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.create_new_polygon">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_new_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_new_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Begin a new polygon by incrementing the ID and setting is_drawing=True.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span>
@@ -454,7 +453,7 @@
 
 <div class="viewcode-block" id="PolygonManager.handle_polygon_click">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_click">[docs]</a>
-    <span class="k">def</span> <span class="nf">handle_polygon_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">canvas</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">is_moving</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_polygon_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">canvas</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">is_moving</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called by MplCanvas on mouse click in polygon mode.</span>
 <span class="sd">          - If is_moving=False =&gt; creation logic</span>
@@ -474,7 +473,7 @@
 
 <div class="viewcode-block" id="PolygonManager.handle_polygon_add_point_click">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_add_point_click">[docs]</a>
-    <span class="k">def</span> <span class="nf">handle_polygon_add_point_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_polygon_add_point_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Insert a new vertex into the closest line segment of the selected polygon.</span>
 <span class="sd">        For simplicity, we pick *one* polygon as &#39;current&#39; or we loop over polygons </span>
@@ -518,7 +517,7 @@
     
 <div class="viewcode-block" id="PolygonManager.distance_to_line_segment">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.distance_to_line_segment">[docs]</a>
-    <span class="k">def</span> <span class="nf">distance_to_line_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">distance_to_line_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns min distance from (px,py) to line segment [ (x1,y1), (x2,y2) ].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -539,7 +538,7 @@
 
 <div class="viewcode-block" id="PolygonManager.update_polygon_patch">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.update_polygon_patch">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_polygon_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poly</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_polygon_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poly</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove the old patch if present, create a new patch from updated points, </span>
 <span class="sd">        and add it to axes.</span>
@@ -564,7 +563,7 @@
 
 <div class="viewcode-block" id="PolygonManager.handle_polygon_creation_click">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_creation_click">[docs]</a>
-    <span class="k">def</span> <span class="nf">handle_polygon_creation_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_polygon_creation_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;If we are in creation mode, left-click =&gt; add point, right-click =&gt; finalize.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_drawing</span><span class="p">:</span>
             <span class="k">return</span>
@@ -589,7 +588,7 @@
 
 <div class="viewcode-block" id="PolygonManager.finalize_polygon">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.finalize_polygon">[docs]</a>
-    <span class="k">def</span> <span class="nf">finalize_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finalize_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the polygon by adding a patch to the axes.&quot;&quot;&quot;</span>
         <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_p_id</span><span class="p">]</span>
         <span class="n">poly</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_points</span><span class="p">)</span>  <span class="c1"># store a copy</span>
@@ -610,7 +609,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="PolygonManager.handle_polygon_move_click">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.handle_polygon_move_click">[docs]</a>
-    <span class="k">def</span> <span class="nf">handle_polygon_move_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_polygon_move_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If user is in &quot;move polygon vertex&quot; mode:</span>
 <span class="sd">          1) If not picked up a vertex, find nearest vertex</span>
@@ -634,7 +633,7 @@
 
 <div class="viewcode-block" id="PolygonManager.find_nearest_vertex">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.find_nearest_vertex">[docs]</a>
-    <span class="k">def</span> <span class="nf">find_nearest_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">click_x</span><span class="p">,</span> <span class="n">click_y</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_nearest_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">click_x</span><span class="p">,</span> <span class="n">click_y</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return (polygon_id, vertex_index) for the nearest vertex if within max_dist,</span>
 <span class="sd">        otherwise (None, -1).</span>
@@ -659,7 +658,7 @@
 
 <div class="viewcode-block" id="PolygonManager.update_polygon_vertex">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.update_polygon_vertex">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_polygon_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_id</span><span class="p">,</span> <span class="n">vertex_idx</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_polygon_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon_id</span><span class="p">,</span> <span class="n">vertex_idx</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update a single vertex and re-draw the patch.&quot;&quot;&quot;</span>
         <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">polygon_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">poly</span><span class="p">:</span>
@@ -690,7 +689,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="PolygonManager.clear_polygons">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.clear_polygons">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all polygons from the plot.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">poly</span><span class="o">.</span><span class="n">patch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -701,7 +700,7 @@
 
 <div class="viewcode-block" id="PolygonManager.save_polygons">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.save_polygons">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the current polygons to a file (using pickle).</span>
 <span class="sd">        We&#39;ll store just the polygon points in a dict: {p_id: [ (x,y), (x,y), ... ]}.</span>
@@ -718,7 +717,7 @@
 
 <div class="viewcode-block" id="PolygonManager.load_polygons">
 <a class="viewcode-back" href="../../generated/common.PolygonNew.html#common.PolygonNew.PolygonManager.load_polygons">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load polygons from a file and re-draw them on the given axes.</span>
 <span class="sd">        Expects the same structure as produced by `save_polygons`.</span>

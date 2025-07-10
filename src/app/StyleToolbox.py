@@ -1400,12 +1400,103 @@ class StylingDock(Styling):
         #self.ui.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapZColor))
         #self.ui.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapMColor))
         #self.ui.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
+        self.connect_observer()
+        self.connect_logger()
+
         self.ternary_colormap_changed()
 
         self._signal_state = False
 
         self.set_style_widgets()
 
+    def connect_observer(self):
+        """Connects properties to observer functions."""
+        self.add_observer("plot_type", self.update_plot_type)
+        self.add_observer("xlim", self.update_xlim_lineedits)
+        self.add_observer("xlabel", self.update_xlabel_lineedit)
+        self.add_observer("xscale", self.update_xscale_combobox)
+        self.add_observer("ylim", self.update_ylim_lineedits)
+        self.add_observer("ylabel", self.update_ylabel_lineedit)
+        self.add_observer("yscale", self.update_yscale_combobox)
+        self.add_observer("zlim", self.update_zlim_lineedits)
+        self.add_observer("zlabel", self.update_zlabel_lineedit)
+        self.add_observer("zscale", self.update_zscale_combobox)
+        self.add_observer("aspect_ratio", self.update_aspect_ratio_lineedit)
+        self.add_observer("tick_dir", self.update_tick_dir_combobox)
+        self.add_observer("font_family", self.update_font_family_combobox)
+        self.add_observer("font_size", self.update_font_size_spinbox)
+        self.add_observer("scale_dir", self.update_scale_direction_combobox)
+        self.add_observer("scale_location", self.update_scale_location_combobox)
+        self.add_observer("scale_length", self.update_scale_length_lineedit)
+        self.add_observer("overlay_color", self.update_overlay_color_toolbutton)
+        self.add_observer("show_mass", self.update_show_mass_checkbox)
+        self.add_observer("marker_symbol", self.update_marker_symbol_combobox)
+        self.add_observer("marker_size", self.update_marker_size_spinbox)
+        self.add_observer("marker_color", self.update_marker_color_toolbutton)
+        self.add_observer("marker_alpha", self.update_marker_alpha_slider)
+        self.add_observer("line_width", self.update_line_width_combobox)
+        self.add_observer("line_multiplier", self.update_line_multiplier_lineedit)
+        self.add_observer("line_color", self.update_line_color_toolbutton)
+        self.add_observer("cmap", self.update_cmap_combobox)
+        self.add_observer("cbar_reverse", self.update_cbar_reverse_checkbox)
+        self.add_observer("cbar_direction", self.update_cbar_direction_combobox)
+        self.add_observer("clim", self.update_clim_lineedits)
+        self.add_observer("clabel", self.update_clabel_lineedit)
+        self.add_observer("cscale", self.update_cscale_combobox)
+        self.add_observer("resolution", self.update_resolution_spinbox)
+
+    def connect_logger(self):
+        """Connects widgets to logger."""
+        self.ui.comboBoxStyleTheme.activated.connect(lambda: log(f"comboBoxStyleTheme value=[{self.ui.comboBoxStyleTheme.currentText()}]", prefix="UI"))
+        self.ui.toolButtonSaveTheme.clicked.connect(lambda: log("toolButtonTheme", prefix="UI"))
+
+        # axes and labels
+        self.ui.lineEditXLabel.editingFinished.connect(lambda: log(f"lineEditXLabel value=[{self.ui.lineEditXLabel.text()}]", prefix="UI"))
+        self.ui.lineEditXLB.editingFinished.connect(lambda: log(f"lineEditXLB value=[{self.ui.lineEditXLB.value}]", prefix="UI"))
+        self.ui.lineEditXUB.editingFinished.connect(lambda: log(f"lineEditXUB value=[{self.ui.lineEditXUB.value}]", prefix="UI"))
+        self.ui.toolButtonXAxisReset.clicked.connect(lambda: log("toolButtonXAxisReset", prefix="UI"))
+        self.ui.comboBoxXScale.activated.connect(lambda: log(f"comboBoxXScale value=[{self.ui.comboBoxXScale.currentText()}]", prefix="UI"))
+        self.ui.lineEditYLabel.editingFinished.connect(lambda: log(f"lineEditYLabel value=[{self.ui.lineEditYLabel.text()}]", prefix="UI"))
+        self.ui.lineEditYLB.editingFinished.connect(lambda: log(f"lineEditYLB value=[{self.ui.lineEditYLB.value}]", prefix="UI"))
+        self.ui.lineEditYUB.editingFinished.connect(lambda: log(f"lineEditYUB value=[{self.ui.lineEditYUB.value}]", prefix="UI"))
+        self.ui.toolButtonYAxisReset.clicked.connect(lambda: log("toolButtonYAxisReset", prefix="UI"))
+        self.ui.comboBoxYScale.activated.connect(lambda: log(f"comboBoxYScale value=[{self.ui.comboBoxYScale.currentText()}]", prefix="UI"))
+        self.ui.lineEditZLabel.editingFinished.connect(lambda: log(f"lineEditZLabel value=[{self.ui.lineEditZLabel.text()}]", prefix="UI"))
+        self.ui.lineEditZLB.editingFinished.connect(lambda: log(f"lineEditZLB value=[{self.ui.lineEditZLB.value}]", prefix="UI"))
+        self.ui.lineEditZUB.editingFinished.connect(lambda: log(f"lineEditZUB value=[{self.ui.lineEditZUB.value}]", prefix="UI"))
+        self.ui.toolButtonZAxisReset.clicked.connect(lambda: log("toolButtonZAxisReset", prefix="UI"))
+        self.ui.comboBoxZScale.activated.connect(lambda: log(f"comboBoxZScale value=[{self.ui.comboBoxZScale.currentText()}]", prefix="UI"))
+        self.ui.lineEditAspectRatio.editingFinished.connect(lambda: log(f"lineEditAspectRatio value=[{self.ui.lineEditAspectRatio.text()}]", prefix="UI"))
+        self.ui.comboBoxTickDirection.activated.connect(lambda: log(f"comboBoxTickDirection value=[{self.ui.comboBoxTickDirection.currentText()}]", prefix="UI"))
+
+        # annotations and scale
+        self.ui.comboBoxScaleDirection.activated.connect(lambda: log(f"comboBoxScaleDirection value=[{self.ui.comboBoxScaleDirection.currentText()}]", prefix="UI"))
+        self.ui.comboBoxScaleLocation.activated.connect(lambda: log(f"comboBoxScaleLocation value=[{self.ui.comboBoxScaleLocation.currentText()}]", prefix="UI"))
+        self.ui.lineEditScaleLength.editingFinished.connect(lambda: log(f"lineEditScaleLength value=[{self.ui.lineEditScaleLength.value}]", prefix="UI"))
+        self.ui.toolButtonOverlayColor.clicked.connect(lambda: log("toolButtonOverlayColor", prefix="UI"))
+        self.ui.fontComboBox.activated.connect(lambda: log(f"fontComboBox value=[{self.ui.fontComboBox.currentText()}]", prefix="UI"))
+        self.ui.doubleSpinBoxFontSize.valueChanged.connect(lambda: log(f"doubleSpinBoxFontSize value=[{self.ui.doubleSpinBoxFontSize.value()}]", prefix="UI"))
+        self.ui.checkBoxShowMass.checkStateChanged.connect(lambda: log(f"checkBoxShowMass value=[{self.ui.checkBoxShowMass.isChecked()}]", prefix="UI"))
+
+        # markers and lines
+        self.ui.comboBoxMarker.activated.connect(lambda: log(f"comboBoxMarker value=[{self.ui.comboBoxMarker.currentText()}]", prefix="UI"))
+        self.ui.doubleSpinBoxMarkerSize.valueChanged.connect(lambda: log(f"doubleSpinBoxMarkerSize value=[{self.ui.doubleSpinBoxMarkerSize.value()}]", prefix="UI"))
+        self.ui.toolButtonMarkerColor.clicked.connect(lambda: log("toolButtonMarkerColor", prefix="UI"))
+        self.ui.horizontalSliderMarkerAlpha.valueChanged.connect(lambda: log(f"horizontalSliderMarkerAlpha value=[{self.ui.horizontalSliderMarkerAlpha.value()}]", prefix="UI"))
+        self.ui.doubleSpinBoxLineWidth.valueChanged.connect(lambda: log(f"doubleSpinBoxLineWidth value=[{self.ui.doubleSpinBoxLineWidth.value()}]", prefix="UI"))
+        self.ui.toolButtonLineColor.clicked.connect(lambda: log("toolButtonLineColor", prefix="UI"))
+        self.ui.lineEditLengthMultiplier.editingFinished.connect(lambda: log(f"lineEditLengthMultiplier value=[{self.ui.lineEditLengthMultiplier.value}]", prefix="UI"))
+
+        # coloring
+        self.ui.lineEditCLabel.editingFinished.connect(lambda: log(f"lineEditCLabel value=[{self.ui.lineEditCLabel.text()}]", prefix="UI"))
+        self.ui.lineEditCLB.editingFinished.connect(lambda: log(f"lineEditCLB value=[{self.ui.lineEditCLB.value}]", prefix="UI"))
+        self.ui.lineEditCUB.editingFinished.connect(lambda: log(f"lineEditCUB value=[{self.ui.lineEditCUB.value}]", prefix="UI"))
+        self.ui.toolButtonCAxisReset.clicked.connect(lambda: log("toolButtonCAxisReset", prefix="UI"))
+        self.ui.comboBoxCScale.activated.connect(lambda: log(f"comboBoxCScale value=[{self.ui.comboBoxCScale.currentText()}]", prefix="UI"))
+        self.ui.comboBoxFieldColormap.activated.connect(lambda: log(f"comboBoxFieldColormap value=[{self.ui.comboBoxFieldColormap.currentText()}]", prefix="UI"))
+        self.ui.comboBoxCbarDirection.activated.connect(lambda: log(f"comboBoxCbarDirection value=[{self.ui.comboBoxCbarDirection.currentText()}]", prefix="UI"))
+        self.ui.checkBoxReverseColormap.checkStateChanged.connect(lambda: log(f"checkBoxReverseColormap value=[{self.ui.checkBoxReverseColormap.isChecked()}]", prefix="UI"))
+        self.ui.spinBoxHeatmapResolution.valueChanged.connect(lambda: log(f"spinBoxHeatmapResolution value=[{self.ui.spinBoxHeatmapResolution.value()}]", prefix="UI"))
 
     @property
     def signal_state(self):
@@ -1496,6 +1587,137 @@ class StylingDock(Styling):
         ui.lineEditCLabel.blockSignals(self._signal_state)
         ui.comboBoxCbarDirection.blockSignals(self._signal_state)
 
+    # update functions
+    # -------------------------------------
+    def update_xlim_lineedits(self, new_xlim):
+        self.ui.lineEditXLB.value = new_xlim[0]
+        self.ui.lineEditXUB.value = new_xlim[1]
+        self.schedule_update()
+
+    def update_xlabel_lineedit(self, new_label):
+        self.ui.lineEditXLabel.setText(new_label)
+        self.schedule_update()
+        
+    def update_xscale_combobox(self, new_scale):
+        self.ui.comboBoxXScale.setCurrentText(new_scale)
+        self.schedule_update()
+
+    def update_ylim_lineedits(self, new_ylim):
+        self.ui.lineEditYLB.value = new_ylim[0]
+        self.ui.lineEditYUB.value = new_ylim[1]
+        self.schedule_update()
+
+    def update_ylabel_lineedit(self, new_label):
+        self.ui.lineEditYLabel.setText(new_label)
+        self.schedule_update()
+
+    def update_yscale_combobox(self, new_scale):
+        self.ui.comboBoxYScale.setCurrentText(new_scale)
+        self.schedule_update()
+
+    def update_zlim_lineedits(self, new_zlim):
+        self.ui.lineEditZLB.value = new_zlim[0]
+        self.ui.lineEditZUB.value = new_zlim[1]
+        self.schedule_update()
+
+    def update_zlabel_lineedit(self, new_label):
+        self.ui.lineEditZLabel.setText(new_label)
+        self.schedule_update()
+        
+    def update_zscale_combobox(self, new_scale):
+        self.ui.comboBoxZScale.setCurrentText(new_scale)
+        self.schedule_update()
+
+    def update_aspect_ratio_lineedit(self, new_aspect_ratio):
+        self.ui.lineEditAspectRatio.value = new_aspect_ratio
+        self.schedule_update()
+
+    def update_tick_dir_combobox(self, new_tick_dir):
+        self.ui.comboBoxTickDirection.setCurrentText(new_tick_dir)
+        self.schedule_update()
+
+    def update_scale_location_combobox(self, new_scale_location):
+        self.ui.comboBoxScaleLocation.setCurrentText(new_scale_location)
+        self.schedule_update()
+
+    def update_scale_length_lineedit(self, new_scale_length):
+        self.ui.lineEditScaleLength.value = new_scale_length
+        self.schedule_update()
+
+    def update_overlay_color_toolbutton(self, new_color):
+        self.ui.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % new_color)
+        self.schedule_update()
+
+    def update_show_mass_checkbox(self, new_value):
+        self.ui.checkBoxShowMass.setChecked(new_value)
+        self.schedule_update()
+
+    def update_marker_symbol_combobox(self, new_marker_symbol):
+        self.ui.comboBoxMarker.setCurrentText(new_marker_symbol)
+        self.schedule_update()
+
+    def update_marker_size_spinbox(self, new_marker_size):
+        self.ui.doubleSpinBoxMarkerSize.setValue(new_marker_size)
+        self.schedule_update()
+
+    def update_marker_color_toolbutton(self, new_color):
+        self.ui.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % new_color)
+        self.schedule_update()
+
+    def update_marker_alpha_slider(self, new_alpha):
+        self.ui.horizontalSliderMarkerAlpha.setValue(new_alpha)
+        self.schedule_update()
+
+    def update_line_width_combobox(self, new_line_width):
+        self.ui.doubleSpinBoxLineWidth.setValue(new_line_width)
+        self.schedule_update()
+
+    def update_line_multiplier_lineedit(self, new_multiplier):
+        self.ui.lineEditLengthMultiplier.value = new_multiplier
+        self.schedule_update()
+
+    def update_line_color_toolbutton(self, new_color):
+        self.ui.toolButtonLineColor.setStyleSheet("background-color: %s;" % new_color)
+        self.schedule_update()
+
+    def update_font_family_combobox(self, new_font_family):
+        self.ui.fontComboBox.setCurrentText(new_font_family)
+        self.schedule_update()
+
+    def update_font_size_spinbox(self, new_font_size):
+        self.ui.doubleSpinBoxFontSize.setValue(new_font_size)
+        self.schedule_update()
+
+    def update_cmap_combobox(self, new_colormap):
+        self.ui.comboBoxFieldColormap.setCurrentText(new_colormap)
+        self.schedule_update()
+
+    def update_cbar_reverse_checkbox(self, new_value):
+        self.ui.checkBoxReverseColormap.setChecked(new_value)
+        self.schedule_update()
+
+    def update_cbar_direction_combobox(self, new_cbar_direction):
+        self.ui.comboBoxCbarDirection.setCurrentText(new_cbar_direction)
+        self.schedule_update()
+
+    def update_clim_lineedits(self, new_xlim):
+        self.ui.lineEditCLB.value = new_xlim[0]
+        self.ui.lineEditCUB.value = new_xlim[1]
+        self.schedule_update()
+
+    def update_clabel_lineedit(self, new_label):
+        self.ui.lineEditCLabel.setText(new_label)
+        self.schedule_update()
+        
+    def update_cscale_combobox(self, new_scale):
+        self.ui.comboBoxCScale.setCurrentText(new_scale)
+        self.schedule_update()
+
+    def update_resolution_spinbox(self, new_resolution):
+        self.ui.spinBoxHeatmapResolution.setValue(new_resolution)
+
+        if self.plot_type == "heatmap":
+            self.schedule_update()
 
     # general style functions
     # -------------------------------------

@@ -29,9 +29,8 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_js.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
@@ -389,33 +388,33 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.InfoViewer</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">numexpr</span> <span class="k">as</span> <span class="nn">ne</span>
-<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">src.common.varfunc</span> <span class="kn">import</span> <span class="n">partial_match</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numexpr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ne</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.varfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial_match</span>
 
-<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QUrl</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QUrl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
         <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
         <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTabWidget</span><span class="p">,</span>
         <span class="n">QAbstractItemView</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QHeaderView</span>
     <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QAction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QAction</span>
 
-<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span>
-<span class="kn">from</span> <span class="nn">src.app.UIControl</span> <span class="kn">import</span> <span class="n">UIFieldLogic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.UIControl</span><span class="w"> </span><span class="kn">import</span> <span class="n">UIFieldLogic</span>
 
-<span class="kn">from</span> <span class="nn">src.app.UITheme</span> <span class="kn">import</span> <span class="n">default_font</span>
-<span class="kn">from</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="kn">import</span> <span class="n">MplCanvas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.UITheme</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_font</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">MplCanvas</span>
 
 <span class="n">PRECISION</span> <span class="o">=</span> <span class="mi">5</span>
 
 <div class="viewcode-block" id="increase_precision">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.increase_precision">[docs]</a>
-<span class="k">def</span> <span class="nf">increase_precision</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">increase_precision</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increase the global display precision for numeric formatting.</span>
 
@@ -431,7 +430,7 @@
     
 <div class="viewcode-block" id="decrease_precision">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.decrease_precision">[docs]</a>
-<span class="k">def</span> <span class="nf">decrease_precision</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">decrease_precision</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decrease the global display precision for numeric formatting.</span>
 
@@ -447,7 +446,7 @@
 
 <div class="viewcode-block" id="create_checkbox">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.create_checkbox">[docs]</a>
-<span class="k">def</span> <span class="nf">create_checkbox</span><span class="p">(</span><span class="n">is_checked</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_checkbox</span><span class="p">(</span><span class="n">is_checked</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a QCheckBox widget with an initial state and a bound callback.</span>
 
@@ -474,7 +473,7 @@
 
 <div class="viewcode-block" id="update_dataframe">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.update_dataframe">[docs]</a>
-<span class="k">def</span> <span class="nf">update_dataframe</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">table_widget</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_dataframe</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">table_widget</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">PRECISION</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Populate a QTableWidget with the contents of a pandas DataFrame.</span>
@@ -506,7 +505,7 @@
 
 <div class="viewcode-block" id="update_numpy_array">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.update_numpy_array">[docs]</a>
-<span class="k">def</span> <span class="nf">update_numpy_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">table_widget</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_numpy_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">table_widget</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">PRECISION</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Populate a QTableWidget with the contents of a NumPy array.</span>
@@ -549,7 +548,7 @@
 
 <div class="viewcode-block" id="InfoDock">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.InfoDock">[docs]</a>
-<span class="k">class</span> <span class="nc">InfoDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">UIFieldLogic</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InfoDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">UIFieldLogic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dockable widget providing data insight tools through multiple interactive tabs.</span>
 
@@ -576,7 +575,7 @@
 <span class="sd">    FieldTab : Provides a map-based visualization for selected fields.</span>
 <span class="sd">    PlotInfoTab : Displays configuration and summary information for the current plot.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Info Tools&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Info Tools&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -623,7 +622,7 @@
 
 <div class="viewcode-block" id="InfoDock.update_tab_widget">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.InfoDock.update_tab_widget">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_tab_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_tab_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the content of the currently active tab.</span>
 
@@ -661,7 +660,7 @@
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="PlotInfoTab">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab">[docs]</a>
-<span class="k">class</span> <span class="nc">PlotInfoTab</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlotInfoTab</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot Info Tab UI for displaying plot metadata and managing annotations.</span>
 
@@ -678,7 +677,7 @@
 <span class="sd">    parent : QTabWidget</span>
 <span class="sd">        The parent tab widget to which this tab will be added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
@@ -756,7 +755,7 @@
 
 <div class="viewcode-block" id="PlotInfoTab.update_plot_info_tab">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab.update_plot_info_tab">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_plot_info_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="p">,</span> <span class="n">write_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_plot_info_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="p">,</span> <span class="n">write_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively display plot metadata as HTML in the info panel.</span>
 
@@ -813,7 +812,7 @@
 
 <div class="viewcode-block" id="PlotInfoTab.update_annotation_table">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab.update_annotation_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_annotation_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_annotation_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Populate the annotation table with data from the current plot.</span>
 
@@ -853,7 +852,7 @@
 
 <div class="viewcode-block" id="PlotInfoTab.toggle_annotation">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab.toggle_annotation">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">annotation</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">annotation</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Callback function to toggle annotation visibility.</span>
 
@@ -874,7 +873,7 @@
 
 <div class="viewcode-block" id="PlotInfoTab.update_annotation_from_table">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab.update_annotation_from_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_annotation_from_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_annotation_from_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Handle edits made directly to the annotation table.</span>
 
@@ -905,7 +904,7 @@
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="MetadataTab">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab">[docs]</a>
-<span class="k">class</span> <span class="nc">MetadataTab</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MetadataTab</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates the metadata tab for plots and annotations.</span>
 
 <span class="sd">    Parameters</span>
@@ -913,7 +912,7 @@
 <span class="sd">    parent : QTabWidget, optional</span>
 <span class="sd">        Tab widget to add this tab to.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span>
@@ -1046,13 +1045,13 @@
 
 <div class="viewcode-block" id="MetadataTab.toggle_view">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_view">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="MetadataTab.update_metadata">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.update_metadata">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the info dock with metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;sample_id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -1074,7 +1073,7 @@
 
 <div class="viewcode-block" id="MetadataTab.update_table">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.update_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">global</span> <span class="n">PRECISION</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_table</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
@@ -1175,7 +1174,7 @@
 
 <div class="viewcode-block" id="MetadataTab.toggle_row_selection">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_row_selection">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_row_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_row_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle selection of rows based on checkbox state.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selected_rows</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
@@ -1187,7 +1186,7 @@
 
 <div class="viewcode-block" id="MetadataTab.toggle_column_selection">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_column_selection">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_column_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_column_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle selection of columns based on checkbox state.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selected_columns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
@@ -1199,7 +1198,7 @@
 
 <div class="viewcode-block" id="MetadataTab.toggle_all_columns">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_all_columns">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_all_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_all_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle all columns based on toolbar action.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_flag</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selected_columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -1216,7 +1215,7 @@
 
 <div class="viewcode-block" id="MetadataTab.toggle_all_rows">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_all_rows">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_all_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_all_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle all rows based on toolbar action.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows_flag</span><span class="p">:</span>
             <span class="n">rows</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
@@ -1233,7 +1232,7 @@
 
 <div class="viewcode-block" id="MetadataTab.update_column_attributes_on_checkbox_state">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.update_column_attributes_on_checkbox_state">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_column_attributes_on_checkbox_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">col_key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_column_attributes_on_checkbox_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">col_key</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span>
         <span class="k">if</span> <span class="n">col_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">[</span><span class="n">col_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1243,7 +1242,7 @@
 
 <div class="viewcode-block" id="MetadataTab.update_column_attributes_on_combobox_change">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.update_column_attributes_on_combobox_change">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_column_attributes_on_combobox_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">col_key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_column_attributes_on_combobox_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">col_key</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">col_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">[</span><span class="n">col_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">[</span><span class="n">col_key</span><span class="p">][</span><span class="n">row_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
@@ -1252,7 +1251,7 @@
 
 <div class="viewcode-block" id="MetadataTab.update_column_attributes_on_cell_change">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.update_column_attributes_on_cell_change">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_column_attributes_on_cell_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_column_attributes_on_cell_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
         <span class="n">col</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
 
@@ -1277,7 +1276,7 @@
 
 <div class="viewcode-block" id="MetadataTab.on_attribute_batch_changed">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.on_attribute_batch_changed">[docs]</a>
-    <span class="k">def</span> <span class="nf">on_attribute_batch_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_attribute_batch_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="c1"># Map row keys and column keys to indices</span>
         <span class="n">row_map</span> <span class="o">=</span> <span class="p">{</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metadata_table</span><span class="o">.</span><span class="n">verticalHeaderItem</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">():</span> <span class="n">i</span>
@@ -1318,7 +1317,7 @@
 
 <div class="viewcode-block" id="MetadataTab.export_metadata">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.export_metadata">[docs]</a>
-    <span class="k">def</span> <span class="nf">export_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 </div>
 
@@ -1328,7 +1327,7 @@
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="DataFrameTab">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.DataFrameTab">[docs]</a>
-<span class="k">class</span> <span class="nc">DataFrameTab</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataFrameTab</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates the data info tab for plots and annotations.</span>
 
 <span class="sd">    Parameters</span>
@@ -1336,7 +1335,7 @@
 <span class="sd">    parent : QTabWidget, optional</span>
 <span class="sd">        Parent tab widget that will contain this tab.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span>
@@ -1390,7 +1389,7 @@
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="FieldTab">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.FieldTab">[docs]</a>
-<span class="k">class</span> <span class="nc">FieldTab</span><span class="p">(</span><span class="n">UIFieldLogic</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FieldTab</span><span class="p">(</span><span class="n">UIFieldLogic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates the field info tab for plots and annotations.</span>
 
 <span class="sd">    Parameters</span>
@@ -1398,7 +1397,7 @@
 <span class="sd">    parent : QTabWidget</span>
 <span class="sd">        Parent tab widget that will contain this tab.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
@@ -1472,7 +1471,7 @@
 
 <div class="viewcode-block" id="FieldTab.update_field_table">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.FieldTab.update_field_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_field_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_field_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_type_combobox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="k">return</span>
 

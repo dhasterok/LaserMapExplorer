@@ -12,9 +12,3 @@
       main
       show_splash
    
-   .. rubric:: Classes
-
-   .. autosummary::
-   
-      MainWindow
-   

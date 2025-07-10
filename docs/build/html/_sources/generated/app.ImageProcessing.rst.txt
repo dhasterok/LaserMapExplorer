@@ -1,4 +1,4 @@
-app.ImageProcessing
+﻿app.ImageProcessing
 ===================
 
 .. automodule:: app.ImageProcessing
@@ -9,4 +9,5 @@ app.ImageProcessing
    .. autosummary::
    
       ImageProcessing
+      ImageProcessingUI
    

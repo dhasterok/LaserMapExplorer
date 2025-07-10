@@ -1,4 +1,4 @@
-common.DataAnalysis
+﻿common.DataAnalysis
 ===================
 
 .. automodule:: common.DataAnalysis
@@ -9,5 +9,7 @@ common.DataAnalysis
    .. autosummary::
    
       Clustering
+      ClusteringUI
       DimensionalReduction
+      DimensionalReductionUI
    

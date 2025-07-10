@@ -33,14 +33,14 @@ If the UI is altered by QtCreator, then you will need to alter the UI files usin
 ===================
 
 .. autosummary::
-   :toctree: generated/
-   :caption: Modules Summary
-   :recursive:
+    :toctree: generated/
+    :caption: Modules Summary
+    :recursive:
 
-   main
-   app
-   ui
-   common
+    main
+    src.app
+    src.ui
+    src.common
 
 Blockly Workflow (js) API
 =========================

@@ -30,9 +30,8 @@
   <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinx_js.css" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
@@ -49,6 +48,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'info_tool';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workflow Method Design (WMD)" href="workflow.html" />
+    <link rel="prev" title="Logging Tool" href="logging_tool.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -135,7 +136,7 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="userguide.html">
     User Guide
   </a>
@@ -245,10 +246,8 @@
       
       
       
-        
-      
       <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -263,7 +262,7 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="userguide.html">
     User Guide
   </a>
@@ -338,6 +337,49 @@
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="import.html">Import Formats</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">The Interface</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="top_toolbar.html">Main Toolbar (Top)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="left_toolbox.html">Control Toolbox (Left)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="right_toolbox.html">Plot and Property Toolbox (Right)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="center_pane.html">Plot Window (Center)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lower_tabs.html">Lower Tabs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Figures &amp; Analyses</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="filtering.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profiles.html">Profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Analysis Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidimensional.html">Multidimensional Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional_functions.html">Additional Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export Formats</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Docks</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="calculator.html">Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster_dock.html">Cluster Dock</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging_tool.html">Logging Tool</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Info Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow Method Design (WMD)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_reference.html">Block Reference &amp; Interface</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
       <div class="sidebar-primary-item">
@@ -373,6 +415,9 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
+    
+    <li class="breadcrumb-item"><a href="userguide.html" class="nav-link">User Guide</a></li>
+    
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Info Tools</span></li>
   </ul>
 </nav>
@@ -392,13 +437,16 @@
                   
   <section id="info-tools">
 <h1>Info Tools<a class="headerlink" href="#info-tools" title="Link to this heading">#</a></h1>
+<p>The Info Tool is used to view the data and metadata.</p>
 <section id="plot-info-tab">
 <h2>Plot Info Tab<a class="headerlink" href="#plot-info-tab" title="Link to this heading">#</a></h2>
 <section id="plot-info">
 <h3>Plot Info<a class="headerlink" href="#plot-info" title="Link to this heading">#</a></h3>
+<p>Displays the properties, including styling, of the current plot.</p>
 </section>
 <section id="annotation-editor">
 <h3>Annotation Editor<a class="headerlink" href="#annotation-editor" title="Link to this heading">#</a></h3>
+<p>Edit or delete annotations.</p>
 </section>
 </section>
 <section id="metadata-tab">
@@ -422,6 +470,24 @@
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="logging_tool.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Logging Tool</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="workflow.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Workflow Method Design (WMD)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               

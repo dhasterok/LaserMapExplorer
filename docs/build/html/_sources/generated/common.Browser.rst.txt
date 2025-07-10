@@ -1,4 +1,4 @@
-common.Browser
+﻿common.Browser
 ==============
 
 .. automodule:: common.Browser

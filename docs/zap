@@ -1,0 +1,752 @@
+Running Sphinx v8.2.3
+sys.path: ['/Users/dhasterok/GitHub/LaserMapExplorer/src/ui', '/Users/dhasterok/GitHub/LaserMapExplorer/src/common', '/Users/dhasterok/GitHub/LaserMapExplorer/src/app', '/Users/dhasterok/GitHub/LaserMapExplorer/src', '/Users/dhasterok/GitHub/LaserMapExplorer', '/Users/dhasterok/GitHub/LaserMapExplorer', '/Users/dhasterok/GitHub/LaserMapExplorer/.venv/bin', '/Library/Frameworks/Python.framework/Versions/3.11/lib/python311.zip', '/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11', '/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/lib-dynload', '/Users/dhasterok/GitHub/LaserMapExplorer/.venv/lib/python3.11/site-packages']
+/Users/dhasterok/GitHub/LaserMapExplorer/.venv/bin/python3
+loading translations [en]... done
+loading pickled environment... The configuration has changed (3 options: 'html_css_files', 'html_permalinks_icon', 'templates_path')
+done
+[autosummary] generating autosummary for: 404.rst, additional_functions.rst, analysis_tools.rst, app.rst, basics.rst, calculator.rst, center_pane.rst, cluster_dock.rst, common.rst, compile_ui.rst, ..., right_toolbox.rst, src.rst, top_toolbar.rst, troubleshooting.rst, tutorials.rst, ui.rst, userguide.rst, visualization.rst, workflow.rst, workflow_reference.rst
+[DEBUG] Wrapping methods for: SampleObj
+  - Wrapping method: _is_valid_oulier_method
+  - Wrapping method: _swap_xy
+  - Wrapping method: add_columns
+  - Wrapping method: add_observer
+  - Wrapping method: apply_field_filters
+  - Wrapping method: auto_scale
+  - Wrapping method: clip_outliers
+  - Wrapping method: cluster_data
+  - Wrapping method: compute_ratio
+  - Wrapping method: confirm_reset
+  - Wrapping method: create_label
+  - Wrapping method: delete_column
+  - Wrapping method: get_map_data
+  - Wrapping method: get_processed_data
+  - Wrapping method: get_vector
+  - Wrapping method: k_optimal_clusters
+  - Wrapping method: notify_observers
+  - Wrapping method: parse_field
+  - Wrapping method: prep_data
+  - Wrapping method: remove_observer
+  - Wrapping method: reset_crop
+  - Wrapping method: reset_data
+  - Wrapping method: reset_data_handling
+  - Wrapping method: reset_resolution
+  - Wrapping method: sort_data
+  - Wrapping method: swap_resolution
+  - Wrapping method: swap_xy
+  - Wrapping method: transform_array
+  - Wrapping method: update_norm
+  - Wrapping method: update_resolution
+[DEBUG] Wrapping methods for: PolygonManager
+  - Wrapping method: clear_polygons
+  - Wrapping method: create_new_polygon
+  - Wrapping method: distance_to_line_segment
+  - Wrapping method: finalize_polygon
+  - Wrapping method: find_nearest_vertex
+  - Wrapping method: handle_polygon_add_point_click
+  - Wrapping method: handle_polygon_click
+  - Wrapping method: handle_polygon_creation_click
+  - Wrapping method: handle_polygon_move_click
+  - Wrapping method: load_polygons
+  - Wrapping method: save_polygons
+  - Wrapping method: update_polygon_patch
+  - Wrapping method: update_polygon_vertex
+[DEBUG] Wrapping methods for: PolygonManager
+  - Wrapping method: _draw_temp
+  - Wrapping method: _remove_temp
+  - Wrapping method: add_samples
+  - Wrapping method: clear_polygons
+  - Wrapping method: deselect_all
+  - Wrapping method: disconnect
+  - Wrapping method: enable_connections
+  - Wrapping method: finish_polygon
+  - Wrapping method: increment_pid
+  - Wrapping method: initiate_axes
+  - Wrapping method: load_polygons
+  - Wrapping method: onclick
+  - Wrapping method: onkey
+  - Wrapping method: onmove
+  - Wrapping method: onrelease
+  - Wrapping method: plot_existing_polygon
+  - Wrapping method: save_polygons
+  - Wrapping method: start_polygon
+[DEBUG] Wrapping methods for: MaskDock
+  - Wrapping method: closeEvent
+  - Wrapping method: get_field_list
+  - Wrapping method: update_data
+  - Wrapping method: update_field_combobox
+  - Wrapping method: update_field_type_combobox
+  - Wrapping method: update_tab_widget
+[DEBUG] Wrapping methods for: FilterTab
+  - Wrapping method: apply_field_filters_update_plot
+  - Wrapping method: callback_doubleSpinBoxFMaxQ
+  - Wrapping method: callback_doubleSpinBoxFMinQ
+  - Wrapping method: callback_lineEditFMax
+  - Wrapping method: callback_lineEditFMin
+  - Wrapping method: load_filter_tables
+  - Wrapping method: read_filter_table
+  - Wrapping method: remove_selected_rows
+  - Wrapping method: save_filter_table
+  - Wrapping method: update_filter_table
+  - Wrapping method: update_filter_values
+[DEBUG] Wrapping methods for: PolygonTab
+  - Wrapping method: apply_polygon_mask
+  - Wrapping method: polygon_state_changed
+  - Wrapping method: toggle_polygon_actions
+  - Wrapping method: update_table_widget
+  - Wrapping method: view_selected_polygon
+[DEBUG] Wrapping methods for: ClusterTab
+  - Wrapping method: cluster_color_callback
+  - Wrapping method: cluster_label_changed
+  - Wrapping method: select_cluster_group_callback
+  - Wrapping method: set_default_cluster_colors
+  - Wrapping method: toggle_cluster_actions
+  - Wrapping method: update_clusters
+  - Wrapping method: update_table_widget
+[DEBUG] Wrapping methods for: PolygonManager
+  - Wrapping method: add_samples
+  - Wrapping method: clear_lines
+  - Wrapping method: clear_plot
+  - Wrapping method: clear_polygons
+  - Wrapping method: distance_to_line_segment
+  - Wrapping method: extract_scatter_plot_state
+  - Wrapping method: increment_pid
+  - Wrapping method: load_polygons
+  - Wrapping method: plot_existing_polygon
+  - Wrapping method: plot_polygon_scatter
+  - Wrapping method: reconstruct_polygon
+  - Wrapping method: recreate_scatter_plot
+  - Wrapping method: save_polygons
+  - Wrapping method: show_polygon_lines
+  - Wrapping method: transform_polygon_for_pickling
+  - Wrapping method: update_table_widget
+  - Wrapping method: view_selected_polygon
+[DEBUG] Wrapping methods for: SampleObj
+  - Wrapping method: _is_valid_oulier_method
+  - Wrapping method: _swap_xy
+  - Wrapping method: add_columns
+  - Wrapping method: add_observer
+  - Wrapping method: apply_field_filters
+  - Wrapping method: auto_scale
+  - Wrapping method: clip_outliers
+  - Wrapping method: cluster_data
+  - Wrapping method: compute_ratio
+  - Wrapping method: confirm_reset
+  - Wrapping method: create_label
+  - Wrapping method: delete_column
+  - Wrapping method: get_map_data
+  - Wrapping method: get_processed_data
+  - Wrapping method: get_vector
+  - Wrapping method: k_optimal_clusters
+  - Wrapping method: notify_observers
+  - Wrapping method: parse_field
+  - Wrapping method: prep_data
+  - Wrapping method: remove_observer
+  - Wrapping method: reset_crop
+  - Wrapping method: reset_data
+  - Wrapping method: reset_data_handling
+  - Wrapping method: reset_resolution
+  - Wrapping method: sort_data
+  - Wrapping method: swap_resolution
+  - Wrapping method: swap_xy
+  - Wrapping method: transform_array
+  - Wrapping method: update_norm
+  - Wrapping method: update_resolution
+[DEBUG] Wrapping methods for: LameIO
+  - Wrapping method: images_to_dataframe
+  - Wrapping method: import_files
+  - Wrapping method: import_spots
+  - Wrapping method: initialize_sample_object
+  - Wrapping method: open_directory
+  - Wrapping method: open_project
+  - Wrapping method: open_sample
+  - Wrapping method: populate_spot_table
+  - Wrapping method: save_project
+[DEBUG] Wrapping methods for: PlotTree
+  - Wrapping method: add_calculated_leaf
+  - Wrapping method: add_sample
+  - Wrapping method: add_tree_item
+  - Wrapping method: clear_tree_data
+  - Wrapping method: create_item_from_data
+  - Wrapping method: extract_plot_info
+  - Wrapping method: find_leaf
+  - Wrapping method: get_plot_info_from_tree
+  - Wrapping method: get_tree_items
+  - Wrapping method: initialize_tree
+  - Wrapping method: retrieve_plotinfo_from_tree
+  - Wrapping method: sort_tree
+  - Wrapping method: tree_double_click
+  - Wrapping method: unhighlight_tree
+  - Wrapping method: update_tree
+[DEBUG] Wrapping methods for: PolygonManager
+  - Wrapping method: _draw_temp
+  - Wrapping method: _remove_temp
+  - Wrapping method: add_samples
+  - Wrapping method: clear_polygons
+  - Wrapping method: deselect_all
+  - Wrapping method: disconnect
+  - Wrapping method: enable_connections
+  - Wrapping method: finish_polygon
+  - Wrapping method: increment_pid
+  - Wrapping method: initiate_axes
+  - Wrapping method: load_polygons
+  - Wrapping method: onclick
+  - Wrapping method: onkey
+  - Wrapping method: onmove
+  - Wrapping method: onrelease
+  - Wrapping method: plot_existing_polygon
+  - Wrapping method: save_polygons
+  - Wrapping method: start_polygon
+[DEBUG] Wrapping methods for: AnalyteDialog
+  - Wrapping method: _set_col_font
+  - Wrapping method: _set_row_font
+  - Wrapping method: add_analyte_to_list
+  - Wrapping method: calculate_correlation
+  - Wrapping method: cancel_selection
+  - Wrapping method: clear_selections
+  - Wrapping method: closeEvent
+  - Wrapping method: color_cell
+  - Wrapping method: create_colorbar
+  - Wrapping method: done_selection
+  - Wrapping method: event_filter
+  - Wrapping method: generate_colorbar_image
+  - Wrapping method: get_color_for_correlation
+  - Wrapping method: get_selected_data
+  - Wrapping method: load_selection
+  - Wrapping method: populate_analyte_list
+  - Wrapping method: remove_analyte_from_list
+  - Wrapping method: retranslateUi
+  - Wrapping method: save_selection
+  - Wrapping method: setupUi
+  - Wrapping method: toggle_cell_selection
+  - Wrapping method: update_all_combos
+  - Wrapping method: update_list
+  - Wrapping method: update_scale
+  - Wrapping method: update_window_title
+[DEBUG] Wrapping methods for: LameIO
+  - Wrapping method: images_to_dataframe
+  - Wrapping method: import_files
+  - Wrapping method: import_spots
+  - Wrapping method: initialize_sample_object
+  - Wrapping method: open_directory
+  - Wrapping method: open_project
+  - Wrapping method: open_sample
+  - Wrapping method: populate_spot_table
+  - Wrapping method: save_project
+[DEBUG] Wrapping methods for: AnalyteDialog
+  - Wrapping method: _set_col_font
+  - Wrapping method: _set_row_font
+  - Wrapping method: add_analyte_to_list
+  - Wrapping method: calculate_correlation
+  - Wrapping method: cancel_selection
+  - Wrapping method: clear_selections
+  - Wrapping method: closeEvent
+  - Wrapping method: color_cell
+  - Wrapping method: create_colorbar
+  - Wrapping method: done_selection
+  - Wrapping method: event_filter
+  - Wrapping method: generate_colorbar_image
+  - Wrapping method: get_color_for_correlation
+  - Wrapping method: get_selected_data
+  - Wrapping method: load_selection
+  - Wrapping method: populate_analyte_list
+  - Wrapping method: remove_analyte_from_list
+  - Wrapping method: retranslateUi
+  - Wrapping method: save_selection
+  - Wrapping method: setupUi
+  - Wrapping method: toggle_cell_selection
+  - Wrapping method: update_all_combos
+  - Wrapping method: update_list
+  - Wrapping method: update_scale
+  - Wrapping method: update_window_title
+[DEBUG] Wrapping methods for: PlotTree
+  - Wrapping method: add_calculated_leaf
+  - Wrapping method: add_sample
+  - Wrapping method: add_tree_item
+  - Wrapping method: clear_tree_data
+  - Wrapping method: create_item_from_data
+  - Wrapping method: extract_plot_info
+  - Wrapping method: find_leaf
+  - Wrapping method: get_plot_info_from_tree
+  - Wrapping method: get_tree_items
+  - Wrapping method: initialize_tree
+  - Wrapping method: retrieve_plotinfo_from_tree
+  - Wrapping method: sort_tree
+  - Wrapping method: tree_double_click
+  - Wrapping method: unhighlight_tree
+  - Wrapping method: update_tree
+[DEBUG] Wrapping methods for: Clustering
+  - Wrapping method: compute_clusters
+[DEBUG] Wrapping methods for: MaskDock
+  - Wrapping method: closeEvent
+  - Wrapping method: get_field_list
+  - Wrapping method: update_data
+  - Wrapping method: update_field_combobox
+  - Wrapping method: update_field_type_combobox
+  - Wrapping method: update_tab_widget
+[DEBUG] Wrapping methods for: FilterTab
+  - Wrapping method: apply_field_filters_update_plot
+  - Wrapping method: callback_doubleSpinBoxFMaxQ
+  - Wrapping method: callback_doubleSpinBoxFMinQ
+  - Wrapping method: callback_lineEditFMax
+  - Wrapping method: callback_lineEditFMin
+  - Wrapping method: load_filter_tables
+  - Wrapping method: read_filter_table
+  - Wrapping method: remove_selected_rows
+  - Wrapping method: save_filter_table
+  - Wrapping method: update_filter_table
+  - Wrapping method: update_filter_values
+[DEBUG] Wrapping methods for: PolygonTab
+  - Wrapping method: apply_polygon_mask
+  - Wrapping method: polygon_state_changed
+  - Wrapping method: toggle_polygon_actions
+  - Wrapping method: update_table_widget
+  - Wrapping method: view_selected_polygon
+[DEBUG] Wrapping methods for: ClusterTab
+  - Wrapping method: cluster_color_callback
+  - Wrapping method: cluster_label_changed
+  - Wrapping method: select_cluster_group_callback
+  - Wrapping method: set_default_cluster_colors
+  - Wrapping method: toggle_cluster_actions
+  - Wrapping method: update_clusters
+  - Wrapping method: update_table_widget
+[DEBUG] Wrapping methods for: ImageProcessing
+  - Wrapping method: add_edge_detection
+  - Wrapping method: gaussian_sigma
+  - Wrapping method: gradient_checked_state_changed
+  - Wrapping method: noise_reduction
+  - Wrapping method: noise_reduction_method_callback
+  - Wrapping method: noise_reduction_option1_callback
+  - Wrapping method: noise_reduction_option2_callback
+  - Wrapping method: plot_gradient
+  - Wrapping method: run_noise_reduction
+  - Wrapping method: zero_crossing_laplacian
+[DEBUG] Wrapping methods for: Styling
+  - Wrapping method: _is_valid_bounds
+  - Wrapping method: _is_valid_hex_color
+  - Wrapping method: _is_valid_scale
+  - Wrapping method: add_observer
+  - Wrapping method: color_norm
+  - Wrapping method: create_custom_colormap
+  - Wrapping method: default_plot_axis_dict
+  - Wrapping method: default_scale_length
+  - Wrapping method: get_axis_label
+  - Wrapping method: get_axis_lim
+  - Wrapping method: get_axis_scale
+  - Wrapping method: get_axis_values
+  - Wrapping method: get_colormap
+  - Wrapping method: notify_observers
+  - Wrapping method: print_properties
+  - Wrapping method: remove_observer
+  - Wrapping method: set_axis_label
+  - Wrapping method: set_axis_lim
+  - Wrapping method: set_axis_scale
+  - Wrapping method: set_style_dictionary
+[DEBUG] Wrapping methods for: StylingDock
+  - Wrapping method: _is_valid_bounds
+  - Wrapping method: _is_valid_hex_color
+  - Wrapping method: _is_valid_scale
+  - Wrapping method: add_observer
+  - Wrapping method: aspect_ratio_callback
+  - Wrapping method: axis_label_edit_callback
+  - Wrapping method: axis_limit_edit_callback
+  - Wrapping method: axis_reset_callback
+  - Wrapping method: axis_scale_callback
+  - Wrapping method: axis_variable_changed
+  - Wrapping method: button_color_select
+  - Wrapping method: cbar_direction_callback
+  - Wrapping method: cbar_label_callback
+  - Wrapping method: color_norm
+  - Wrapping method: colormap_direction_callback
+  - Wrapping method: create_custom_colormap
+  - Wrapping method: default_plot_axis_dict
+  - Wrapping method: default_scale_length
+  - Wrapping method: disable_style_widgets
+  - Wrapping method: field_colormap_callback
+  - Wrapping method: font_callback
+  - Wrapping method: font_size_callback
+  - Wrapping method: get_axis_field
+  - Wrapping method: get_axis_label
+  - Wrapping method: get_axis_lim
+  - Wrapping method: get_axis_scale
+  - Wrapping method: get_axis_values
+  - Wrapping method: get_cluster_colormap
+  - Wrapping method: get_colormap
+  - Wrapping method: init_field_widgets
+  - Wrapping method: length_multiplier_callback
+  - Wrapping method: line_color_callback
+  - Wrapping method: line_width_callback
+  - Wrapping method: marker_color_callback
+  - Wrapping method: marker_size_callback
+  - Wrapping method: marker_symbol_callback
+  - Wrapping method: notify_observers
+  - Wrapping method: overlay_color_callback
+  - Wrapping method: print_properties
+  - Wrapping method: remove_observer
+  - Wrapping method: resolution_callback
+  - Wrapping method: save_style_theme
+  - Wrapping method: scale_length_callback
+  - Wrapping method: scale_location_callback
+  - Wrapping method: schedule_update
+  - Wrapping method: set_axis_label
+  - Wrapping method: set_axis_lim
+  - Wrapping method: set_axis_scale
+  - Wrapping method: set_axis_widgets
+  - Wrapping method: set_color_axis_widgets
+  - Wrapping method: set_default_cluster_colors
+  - Wrapping method: set_style_dictionary
+  - Wrapping method: set_style_widgets
+  - Wrapping method: slider_alpha_changed
+  - Wrapping method: ternary_colormap_changed
+  - Wrapping method: tickdir_callback
+  - Wrapping method: toggle_mass
+  - Wrapping method: toggle_scale_widgets
+  - Wrapping method: toggle_signals
+  - Wrapping method: toggle_style_labels
+  - Wrapping method: toggle_style_widgets
+  - Wrapping method: update_color_field_type
+  - Wrapping method: update_field
+  - Wrapping method: update_field_type
+  - Wrapping method: update_field_widgets
+  - Wrapping method: update_figure_font
+  - Wrapping method: update_plot_type
+  - Wrapping method: update_scale_direction
+  - Wrapping method: update_scale_direction_combobox
+[DEBUG] Wrapping methods for: ProfileDock
+  - Wrapping method: closeEvent
+  - Wrapping method: get_field_list
+  - Wrapping method: profile_state_changed
+  - Wrapping method: toggle_profile_actions
+  - Wrapping method: update_data
+  - Wrapping method: update_dock_visibility
+  - Wrapping method: update_field_combobox
+  - Wrapping method: update_field_type_combobox
+  - Wrapping method: update_profile_spinbox
+[DEBUG] Wrapping methods for: PolygonManager
+  - Wrapping method: add_samples
+  - Wrapping method: clear_lines
+  - Wrapping method: clear_plot
+  - Wrapping method: clear_polygons
+  - Wrapping method: distance_to_line_segment
+  - Wrapping method: extract_scatter_plot_state
+  - Wrapping method: increment_pid
+  - Wrapping method: load_polygons
+  - Wrapping method: plot_existing_polygon
+  - Wrapping method: plot_polygon_scatter
+  - Wrapping method: reconstruct_polygon
+  - Wrapping method: recreate_scatter_plot
+  - Wrapping method: save_polygons
+  - Wrapping method: show_polygon_lines
+  - Wrapping method: transform_polygon_for_pickling
+  - Wrapping method: update_table_widget
+  - Wrapping method: view_selected_polygon
+[DEBUG] Wrapping methods for: Styling
+  - Wrapping method: _is_valid_bounds
+  - Wrapping method: _is_valid_hex_color
+  - Wrapping method: _is_valid_scale
+  - Wrapping method: add_observer
+  - Wrapping method: color_norm
+  - Wrapping method: create_custom_colormap
+  - Wrapping method: default_plot_axis_dict
+  - Wrapping method: default_scale_length
+  - Wrapping method: get_axis_label
+  - Wrapping method: get_axis_lim
+  - Wrapping method: get_axis_scale
+  - Wrapping method: get_axis_values
+  - Wrapping method: get_colormap
+  - Wrapping method: notify_observers
+  - Wrapping method: print_properties
+  - Wrapping method: remove_observer
+  - Wrapping method: set_axis_label
+  - Wrapping method: set_axis_lim
+  - Wrapping method: set_axis_scale
+  - Wrapping method: set_style_dictionary
+[DEBUG] Wrapping methods for: StylingDock
+  - Wrapping method: _is_valid_bounds
+  - Wrapping method: _is_valid_hex_color
+  - Wrapping method: _is_valid_scale
+  - Wrapping method: add_observer
+  - Wrapping method: aspect_ratio_callback
+  - Wrapping method: axis_label_edit_callback
+  - Wrapping method: axis_limit_edit_callback
+  - Wrapping method: axis_reset_callback
+  - Wrapping method: axis_scale_callback
+  - Wrapping method: axis_variable_changed
+  - Wrapping method: button_color_select
+  - Wrapping method: cbar_direction_callback
+  - Wrapping method: cbar_label_callback
+  - Wrapping method: color_norm
+  - Wrapping method: colormap_direction_callback
+  - Wrapping method: create_custom_colormap
+  - Wrapping method: default_plot_axis_dict
+  - Wrapping method: default_scale_length
+  - Wrapping method: disable_style_widgets
+  - Wrapping method: field_colormap_callback
+  - Wrapping method: font_callback
+  - Wrapping method: font_size_callback
+  - Wrapping method: get_axis_field
+  - Wrapping method: get_axis_label
+  - Wrapping method: get_axis_lim
+  - Wrapping method: get_axis_scale
+  - Wrapping method: get_axis_values
+  - Wrapping method: get_cluster_colormap
+  - Wrapping method: get_colormap
+  - Wrapping method: init_field_widgets
+  - Wrapping method: length_multiplier_callback
+  - Wrapping method: line_color_callback
+  - Wrapping method: line_width_callback
+  - Wrapping method: marker_color_callback
+  - Wrapping method: marker_size_callback
+  - Wrapping method: marker_symbol_callback
+  - Wrapping method: notify_observers
+  - Wrapping method: overlay_color_callback
+  - Wrapping method: print_properties
+  - Wrapping method: remove_observer
+  - Wrapping method: resolution_callback
+  - Wrapping method: save_style_theme
+  - Wrapping method: scale_length_callback
+  - Wrapping method: scale_location_callback
+  - Wrapping method: schedule_update
+  - Wrapping method: set_axis_label
+  - Wrapping method: set_axis_lim
+  - Wrapping method: set_axis_scale
+  - Wrapping method: set_axis_widgets
+  - Wrapping method: set_color_axis_widgets
+  - Wrapping method: set_default_cluster_colors
+  - Wrapping method: set_style_dictionary
+  - Wrapping method: set_style_widgets
+  - Wrapping method: slider_alpha_changed
+  - Wrapping method: ternary_colormap_changed
+  - Wrapping method: tickdir_callback
+  - Wrapping method: toggle_mass
+  - Wrapping method: toggle_scale_widgets
+  - Wrapping method: toggle_signals
+  - Wrapping method: toggle_style_labels
+  - Wrapping method: toggle_style_widgets
+  - Wrapping method: update_color_field_type
+  - Wrapping method: update_field
+  - Wrapping method: update_field_type
+  - Wrapping method: update_field_widgets
+  - Wrapping method: update_figure_font
+  - Wrapping method: update_plot_type
+  - Wrapping method: update_scale_direction
+  - Wrapping method: update_scale_direction_combobox
+[DEBUG] Wrapping methods for: PolygonManager
+  - Wrapping method: clear_polygons
+  - Wrapping method: create_new_polygon
+  - Wrapping method: distance_to_line_segment
+  - Wrapping method: finalize_polygon
+  - Wrapping method: find_nearest_vertex
+  - Wrapping method: handle_polygon_add_point_click
+  - Wrapping method: handle_polygon_click
+  - Wrapping method: handle_polygon_creation_click
+  - Wrapping method: handle_polygon_move_click
+  - Wrapping method: load_polygons
+  - Wrapping method: save_polygons
+  - Wrapping method: update_polygon_patch
+  - Wrapping method: update_polygon_vertex
+[DEBUG] Wrapping methods for: PlotViewer
+  - Wrapping method: add_plotwidget_to_plot_viewer
+  - Wrapping method: clear_layout
+  - Wrapping method: retranslateUi
+  - Wrapping method: save_plot
+  - Wrapping method: setupUi
+  - Wrapping method: toggle_distance_tool
+  - Wrapping method: toolbar_plotting
+  - Wrapping method: update_canvas
+[DEBUG] Wrapping methods for: Clustering
+  - Wrapping method: compute_clusters
+[DEBUG] Wrapping methods for: AppData
+  - Wrapping method: _set_clustering_parameters
+  - Wrapping method: add_observer
+  - Wrapping method: cluster_group_changed
+  - Wrapping method: generate_random_seed
+  - Wrapping method: get_field
+  - Wrapping method: get_field_list
+  - Wrapping method: get_field_type
+  - Wrapping method: histogram_reset_bins
+  - Wrapping method: notify_observers
+  - Wrapping method: remove_observer
+  - Wrapping method: set_field
+  - Wrapping method: set_field_type
+  - Wrapping method: update_hist_bin_width
+  - Wrapping method: update_hist_num_bins
+  - Wrapping method: validate_field
+  - Wrapping method: validate_field_type
+[DEBUG] Wrapping methods for: ProfileDock
+  - Wrapping method: closeEvent
+  - Wrapping method: get_field_list
+  - Wrapping method: profile_state_changed
+  - Wrapping method: toggle_profile_actions
+  - Wrapping method: update_data
+  - Wrapping method: update_dock_visibility
+  - Wrapping method: update_field_combobox
+  - Wrapping method: update_field_type_combobox
+  - Wrapping method: update_profile_spinbox
+[DEBUG] Wrapping methods for: CalculatorDock
+  - Wrapping method: calc_add_field
+  - Wrapping method: calc_delete_formula
+  - Wrapping method: calc_help
+  - Wrapping method: calc_insert_function
+  - Wrapping method: calc_insert_operator
+  - Wrapping method: calc_load_dict
+  - Wrapping method: calc_load_formula
+  - Wrapping method: calc_set_add_formula
+  - Wrapping method: calculate_new_field
+  - Wrapping method: closeEvent
+  - Wrapping method: get_field_list
+  - Wrapping method: update_data
+  - Wrapping method: update_field_combobox
+  - Wrapping method: update_field_type_combobox
+[DEBUG] Wrapping methods for: CustomFieldCalculator
+  - Wrapping method: calc_evaluate_expr
+  - Wrapping method: calc_parse
+  - Wrapping method: calculate_new_field
+[DEBUG] Wrapping methods for: ImageProcessing
+  - Wrapping method: add_edge_detection
+  - Wrapping method: gaussian_sigma
+  - Wrapping method: gradient_checked_state_changed
+  - Wrapping method: noise_reduction
+  - Wrapping method: noise_reduction_method_callback
+  - Wrapping method: noise_reduction_option1_callback
+  - Wrapping method: noise_reduction_option2_callback
+  - Wrapping method: plot_gradient
+  - Wrapping method: run_noise_reduction
+  - Wrapping method: zero_crossing_laplacian
+[DEBUG] Wrapping methods for: PlotViewer
+  - Wrapping method: add_plotwidget_to_plot_viewer
+  - Wrapping method: clear_layout
+  - Wrapping method: retranslateUi
+  - Wrapping method: save_plot
+  - Wrapping method: setupUi
+  - Wrapping method: toggle_distance_tool
+  - Wrapping method: toolbar_plotting
+  - Wrapping method: update_canvas
+[DEBUG] Wrapping methods for: CalculatorDock
+  - Wrapping method: calc_add_field
+  - Wrapping method: calc_delete_formula
+  - Wrapping method: calc_help
+  - Wrapping method: calc_insert_function
+  - Wrapping method: calc_insert_operator
+  - Wrapping method: calc_load_dict
+  - Wrapping method: calc_load_formula
+  - Wrapping method: calc_set_add_formula
+  - Wrapping method: calculate_new_field
+  - Wrapping method: closeEvent
+  - Wrapping method: get_field_list
+  - Wrapping method: update_data
+  - Wrapping method: update_field_combobox
+  - Wrapping method: update_field_type_combobox
+[DEBUG] Wrapping methods for: CustomFieldCalculator
+  - Wrapping method: calc_evaluate_expr
+  - Wrapping method: calc_parse
+  - Wrapping method: calculate_new_field
+loading intersphinx inventory 'pyqtgraph' from http://pyqtgraph.org/documentation/objects.inv ...
+loading intersphinx inventory 'scikit-learn' from https://scikit-learn.org/stable/api/objects.inv ...
+loading intersphinx inventory 'darkdetect' from https://pypi.org/project/darkdetect/objects.inv ...
+loading intersphinx inventory 'rst2pdf' from https://github.com/rst2pdf/rst2pdf/tree/main/doc/objects.inv ...
+building [mo]: targets for 0 po files that are out of date
+writing output... 
+building [html]: targets for 0 source files that are out of date
+updating environment: 0 added, 6 changed, 0 removed
+reading sources... [ 17%] app
+reading sources... [ 33%] common
+reading sources... [ 50%] generated/main
+reading sources... [ 67%] modules
+reading sources... [ 83%] src
+reading sources... [100%] troubleshooting
+
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+copying assets... 
+copying static files... 
+Writing evaluated template result to /Users/dhasterok/GitHub/LaserMapExplorer/docs/build/html/_static/basic.css
+Writing evaluated template result to /Users/dhasterok/GitHub/LaserMapExplorer/docs/build/html/_static/language_data.js
+Writing evaluated template result to /Users/dhasterok/GitHub/LaserMapExplorer/docs/build/html/_static/documentation_options.js
+copying static files: done
+copying extra files... 
+copying extra files: done
+copying assets: done
+writing output... [ 12%] app
+writing output... [ 25%] common
+writing output... [ 38%] documentation
+writing output... [ 50%] generated/main
+writing output... [ 62%] modules
+writing output... [ 75%] src
+writing output... [ 88%] troubleshooting
+writing output... [100%] tutorials
+
+generating indices... genindex py-modindex done
+highlighting module code... [  2%] PyQt6.QtCore
+highlighting module code... [  3%] app.AnalyteSelectionWindow
+highlighting module code... [  5%] app.AppData
+highlighting module code... [  6%] app.CropImage
+highlighting module code... [  8%] app.CustomTableWidget
+highlighting module code... [ 10%] app.FieldSelectionWindow
+highlighting module code... [ 11%] app.ImageProcessing
+highlighting module code... [ 13%] app.InfoViewer
+highlighting module code... [ 14%] app.LameIO
+highlighting module code... [ 16%] app.MapImporter
+highlighting module code... [ 17%] app.PlotTree
+highlighting module code... [ 19%] app.PlotViewerWindow
+highlighting module code... [ 21%] app.Profile
+highlighting module code... [ 22%] app.ProfileNew
+highlighting module code... [ 24%] app.QuickView
+highlighting module code... [ 25%] app.SpecialTools
+highlighting module code... [ 27%] app.SpotImporter
+highlighting module code... [ 29%] app.SpotTools
+highlighting module code... [ 30%] app.StyleToolbox
+highlighting module code... [ 32%] app.UIControl
+highlighting module code... [ 33%] app.UITheme
+highlighting module code... [ 35%] app.config
+highlighting module code... [ 37%] app.help_mapping
+highlighting module code... [ 38%] common.Calculator
+highlighting module code... [ 40%] common.CustomMplCanvas
+highlighting module code... [ 41%] common.CustomWidgets
+highlighting module code... [ 43%] common.DataAnalysis
+highlighting module code... [ 44%] common.DataHandling
+highlighting module code... [ 46%] common.ExtendedDF
+highlighting module code... [ 48%] common.LamePlot
+highlighting module code... [ 49%] common.Logger
+highlighting module code... [ 51%] common.Masking
+highlighting module code... [ 52%] common.MolecularWeightCalculator
+highlighting module code... [ 54%] common.Observable
+highlighting module code... [ 56%] common.Polygon
+highlighting module code... [ 57%] common.PolygonMatplotlib
+highlighting module code... [ 59%] common.PolygonNew
+highlighting module code... [ 60%] common.ScheduleTimer
+highlighting module code... [ 62%] common.SearchTool
+highlighting module code... [ 63%] common.SortAnalytes
+highlighting module code... [ 65%] common.Status
+highlighting module code... [ 67%] common.TableFunctions
+highlighting module code... [ 68%] common.colorfunc
+highlighting module code... [ 70%] common.csvdict
+highlighting module code... [ 71%] common.format
+highlighting module code... [ 73%] common.gausscensor
+highlighting module code... [ 75%] common.outliers
+highlighting module code... [ 76%] common.plot_spider
+highlighting module code... [ 78%] common.radar
+highlighting module code... [ 79%] common.radar_factory
+highlighting module code... [ 81%] common.scalebar
+highlighting module code... [ 83%] common.ternary_plot
+highlighting module code... [ 84%] common.varfunc
+highlighting module code... [ 86%] ui.AnalyteSelectionDialog
+highlighting module code... [ 87%] ui.FieldSelectionDialog
+highlighting module code... [ 89%] ui.FileSelectorDialog
+highlighting module code... [ 90%] ui.MainWindow
+highlighting module code... [ 92%] ui.MapImportDialog
+highlighting module code... [ 94%] ui.PlotViewer
+highlighting module code... [ 95%] ui.PreferencesWindow
+highlighting module code... [ 97%] ui.QuickViewDialog
+highlighting module code... [ 98%] ui.SpotImportDialog
+highlighting module code... [100%] ui.resources_rc
+
+writing additional pages... search done
+copying images... [100%] _static/icons/icon-crop-64.png
+
+dumping search index in English (code: en)... done
+dumping object inventory... done
+build succeeded, 9647 warnings.
+
+The HTML pages are in build/html.

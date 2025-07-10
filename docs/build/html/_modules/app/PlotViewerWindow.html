@@ -29,9 +29,8 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_js.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
@@ -389,26 +388,26 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.PlotViewerWindow</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QMenu</span><span class="p">,</span> <span class="n">QFileDialog</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ViewBox</span><span class="p">,</span> 
     <span class="n">GraphicsLayoutWidget</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph.GraphicsScene</span> <span class="kn">import</span> <span class="n">exportDialog</span>
-<span class="kn">from</span> <span class="nn">src.ui.PlotViewer</span> <span class="kn">import</span> <span class="n">Ui_widgetPlotViewer</span>
-<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
-<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph.GraphicsScene</span><span class="w"> </span><span class="kn">import</span> <span class="n">exportDialog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.ui.PlotViewer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ui_widgetPlotViewer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span>
 
 <span class="c1"># Analyte GUI</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="PlotViewer">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s2">&quot;Plot&quot;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">PlotViewer</span><span class="p">(</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Ui_widgetPlotViewer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlotViewer</span><span class="p">(</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Ui_widgetPlotViewer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates an widget to display plots</span>
 
 <span class="sd">    plot can be viewed in Singleview, Multiview and Quickview</span>
@@ -425,7 +424,7 @@
 <span class="sd">    _type_</span>
 <span class="sd">        _description_</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s2">&quot;Plot&quot;</span>
@@ -465,7 +464,7 @@
 
 <div class="viewcode-block" id="PlotViewer.add_plotwidget_to_plot_viewer">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.add_plotwidget_to_plot_viewer">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_plotwidget_to_plot_viewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_plotwidget_to_plot_viewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds plot to selected view</span>
 
 <span class="sd">        Parameters</span>
@@ -485,7 +484,7 @@
 
 <div class="viewcode-block" id="PlotViewer.clear_layout">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.clear_layout">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clears a widget that contains plots</span>
 
 <span class="sd">        Parameters</span>
@@ -506,7 +505,7 @@
 
 <div class="viewcode-block" id="PlotViewer.update_canvas">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.update_canvas">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_canvas</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_canvas</span><span class="p">):</span>
         <span class="c1"># Clear the existing layout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetSingleView</span><span class="o">.</span><span class="n">layout</span><span class="p">())</span>
         
@@ -527,7 +526,7 @@
 
 <div class="viewcode-block" id="PlotViewer.toolbar_plotting">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.toolbar_plotting">[docs]</a>
-    <span class="k">def</span> <span class="nf">toolbar_plotting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">function</span><span class="p">,</span><span class="n">view</span><span class="p">,</span><span class="n">enable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toolbar_plotting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">function</span><span class="p">,</span><span class="n">view</span><span class="p">,</span><span class="n">enable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Controls functionality of the toolbar</span>
 
 <span class="sd">        Controls the viewing behavior, home view, pan, zoom, pop out, and saving.</span>
@@ -650,7 +649,7 @@
                 
 <div class="viewcode-block" id="PlotViewer.save_plot">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.save_plot">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sorts analyte table in dialog&quot;&quot;&quot;</span>        
         <span class="c1"># get save method (Figure/Data)</span>
         <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv_widget</span> <span class="c1">#get the widget in SV layout</span>
@@ -696,7 +695,7 @@
 
 <div class="viewcode-block" id="PlotViewer.toggle_distance_tool">
 <a class="viewcode-back" href="../../generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.toggle_distance_tool">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_distance_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_distance_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_SV_widget</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">):</span>
             <span class="k">return</span></div>

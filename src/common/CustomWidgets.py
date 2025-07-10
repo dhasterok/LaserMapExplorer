@@ -610,35 +610,78 @@ class CustomActionMenu(QAction):
             self._add_menu_items(submenu, new_items)
 
 class CustomComboBox(QComboBox):
+    """
+    A QComboBox subclass with support for dynamic item updates before showing the popup.
+
+    This custom combo box allows you to define a callback function that is executed
+    each time the combo box is about to display its dropdown list. This is useful for
+    updating the list of items dynamically based on application state.
+
+    Attributes
+    ----------
+    popup_callback : callable or None
+        A function to be executed immediately before the popup is shown. Typically used
+        to refresh or modify the items in the combo box.
+
+    Methods
+    -------
+    allItems() -> list[str]
+        Returns a list of all item texts currently in the combo box.
+    showPopup()
+        Overrides the base class method to invoke the callback (if set) before showing the popup.
+
+    Parameters
+    ----------
+    popup_callback : callable, optional
+        A function that updates the combo box items before display. Default is None.
+    *args, **kwargs : 
+        Additional arguments passed to the QComboBox constructor.
+
+    Examples
+    --------
+
+    .. code-block:: python
+        def refresh_items():
+            combo.clear()
+            combo.addItems(["A", "B", "C"])
+
+        combo = CustomComboBox(popup_callback=refresh_items)
+        combo.show()  # Each time the dropdown is opened, items are refreshed
+    """
     def __init__(self, popup_callback=None, *args, **kwargs):
-        """Initialize the CustomComboBox with an option update callback that executes at popup before the items are displayed.
-        
-        Parameters
-        ----------
-        popup_callback : callback, optional
-            Executes on showPopup(), by default None
-        """
         super().__init__(*args, **kwargs)
         self.popup_callback = popup_callback
 
         setattr(self, "allItems", lambda: [self.itemText(i) for i in range(self.count())])
 
     def showPopup(self):
-        """Update combobox items using callback before displaying items."""
+        """
+        Executes the popup callback (if any) before showing the dropdown list.
 
+        Overrides the QComboBox method to inject behavior that updates the
+        combobox contents just before it is shown to the user.
+        """
         if self.popup_callback:
             self.popup_callback()
         super().showPopup()
 
 class CustomDockWidget(QDockWidget):
-    """_summary_
+    """
+    A custom QDockWidget that hides instead of closing when the user clicks the close button.
 
-    _extended_summary_
+    This subclass of QDockWidget overrides the standard close behavior so that the widget
+    is simply hidden rather than destroyed. This allows the widget to be shown again later
+    without needing to be re-instantiated.
+
+    Parameters
+    ----------
+    parent : QWidget, optional
+        The parent widget, typically a QMainWindow. Default is None.
 
     Methods
     -------
-    closeEvent(event: QEvent) : 
-        Hides the dock when the close button is clicked by the user.
+    closeEvent(event: QEvent)
+        Hides the dock instead of closing it when the user clicks the close button.
     """
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -648,12 +691,16 @@ class CustomDockWidget(QDockWidget):
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
     def closeEvent(self, event):
-        """Hides the dock widget when the close button is clicked by the user.
-        
+        """
+        Override the default close event to hide the dock widget instead of closing it.
+
+        This prevents the widget from being destroyed and allows it to be shown again later
+        via `widget.show()`.
+
         Parameters
         ----------
         event : QEvent
-            Event signal when close is clicked by the user
+            The close event triggered by the user action.
         """
         self.hide()
         event.ignore()  # Ignore the close event to prevent the widget from being removed.

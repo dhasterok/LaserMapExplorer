@@ -1,11 +1,12 @@
 import numpy as np
+import pandas as pd
 import matplotlib.colors as colors
 import src.common.CustomMplCanvas as mplc
 from scipy import ndimage
 from scipy.signal import convolve2d, wiener, decimate
 from pyqtgraph import ( ImageItem )
 import cv2
-from src.common.Logger import LoggerConfig, auto_log_methods
+from src.common.Logger import log, auto_log_methods
 
 # -------------------------------------
 # Image processing functions
@@ -49,20 +50,10 @@ class ImageProcessing():
             'edge-preserving':{'label1':'Sigma S', 'value1':5, 'label2':'Sigma R', 'value2': 0.2},
             'bilateral':{'label1':'Diameter', 'value1':9, 'label2':'Sigma', 'value2':75}}
 
-        self.noise_red_array = None
+        self.noise_red_array = pd.DataFrame()
 
-        # noise reduction
-        self.parent.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
         self.update_noise1_flag = False
-        self.parent.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
-        self.parent.spinBoxNoiseOption1.setEnabled(False)
-        self.parent.labelNoiseOption1.setEnabled(False)
         self.update_noise2_flag = False
-        self.parent.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
-        self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
-        self.parent.labelNoiseOption2.setEnabled(False)
-        self.parent.checkBoxGradient.stateChanged.connect(self.gradient_checked_state_changed)
-        self.parent.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
 
         # add edge detection algorithm to aid in creating polygons
         self.edge_img = None
@@ -578,3 +569,58 @@ class ImageProcessing():
 
         self.parent.clear_layout(self.parent.widgetSingleView.layout())
         self.parent.widgetSingleView.layout().addWidget(canvas)
+
+
+@auto_log_methods(logger_key='Image')
+class ImageProcessingUI(ImageProcessing):
+    def __init__(self, parent):
+        super().__init__(self)
+        self.ui = parent
+
+        self.connect_widgets()
+        self.connect_observer()
+        self.connect_logger()
+
+    def connect_widgets(self):
+        # noise reduction
+        self.ui.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
+        self.ui.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
+        self.ui.spinBoxNoiseOption1.setEnabled(False)
+        self.ui.labelNoiseOption1.setEnabled(False)
+        self.ui.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
+        self.ui.doubleSpinBoxNoiseOption2.setEnabled(False)
+        self.ui.labelNoiseOption2.setEnabled(False)
+        self.ui.checkBoxGradient.stateChanged.connect(self.gradient_checked_state_changed)
+        self.ui.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
+
+    def connect_observer(self):
+        """Connects properties to observer functions."""
+        pass
+
+    def connect_logger(self):
+        """Connects widgets to logger."""
+        self.ui.comboBoxNoiseReductionMethod.activated.connect(lambda: log(f"comboBoxNoiseReductionMethod value=[{self.ui.comboBoxNoiseReductionMethod.currentText()}]", prefix="UI"))
+        self.ui.spinBoxNoiseOption1.valueChanged.connect(lambda: log(f"spinBoxNoiseOption1 value=[{self.ui.spinBoxNoiseOption1.value}]", prefix="UI"))
+        self.ui.doubleSpinBoxNoiseOption2.valueChanged.connect(lambda: log(f"doubleSpinBoxNoiseOption2 value=[{self.ui.doubleSpinBoxNoiseOption2.value}]", prefix="UI"))
+        self.ui.checkBoxApplyNoiseReduction.checkStateChanged.connect(lambda: log(f"checkBoxApplyNoiseReduction value=[{self.ui.checkBoxApplyNoiseReduction.isChecked()}]", prefix="UI"))
+        self.ui.checkBoxGradient.checkStateChanged.connect(lambda: log(f"checkBoxGradient value=[{self.ui.checkBoxGradient.isChecked()}]", prefix="UI"))
+
+    def update_noise_red_method_combobox(self, new_noise_red_method):
+        self.ui.comboBoxNoiseReductionMethod.setCurrentText(new_noise_red_method)
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
+            self.ui.plot_style.schedule_update()
+
+    def update_noise_red_option1_spinbox(self, new_noise_red_option1):
+        self.ui.spinBoxNoiseOption1.setValue(new_noise_red_option1)
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
+            self.ui.plot_style.schedule_update()
+
+    def update_noise_red_option2_spinbox(self, new_noise_red_option2):
+        self.ui.doubleSpinBoxNoiseOption2.setValue(new_noise_red_option2)
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
+            self.ui.plot_style.schedule_update()
+    
+    def update_gradient_flag_checkbox(self, new_gradient_flag):
+        self.ui.checkBoxGradient.setChecked(new_gradient_flag)
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
+            self.ui.plot_style.schedule_update()

@@ -1,4 +1,4 @@
-common.NoteTaking
+﻿common.NoteTaking
 =================
 
 .. automodule:: common.NoteTaking

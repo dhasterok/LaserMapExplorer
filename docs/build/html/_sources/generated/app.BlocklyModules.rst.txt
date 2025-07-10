@@ -1,4 +1,4 @@
-app.BlocklyModules
+﻿app.BlocklyModules
 ==================
 
 .. automodule:: app.BlocklyModules

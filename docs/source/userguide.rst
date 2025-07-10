@@ -43,5 +43,6 @@ There are two ways to use *LaME*, either as a precompiled executable or using th
     cluster_dock
     notes
     logging_tool
+    info_tool
     workflow
     workflow_reference

@@ -76,9 +76,11 @@ env*
 illustrator
 dist
 _build
+build
 docs/build
 test
 blockly/node_modules
+node_modules
 
 # Binaries
 # --------

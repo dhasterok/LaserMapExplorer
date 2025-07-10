@@ -356,7 +356,7 @@ class LameIO():
 
             # connect data observers if required
             if self.connect_actions:
-                self.parent.connect_data_observers(self.parent.data[self.parent.app_data.sample_id])
+                self.parent.preprocess.connect_data_observers(self.parent.data[self.parent.app_data.sample_id])
 
     
     def images_to_dataframe(self, directory):

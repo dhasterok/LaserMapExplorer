@@ -127,10 +127,10 @@ class AppData(Observable):
         self._dim_red_method = "PCA: Principal component analysis (PCA)"
         self._dim_red_x = 0
         self._dim_red_y = 0
-        self._dim_red_x_min = 0
-        self._dim_red_x_max = 0
-        self._dim_red_y_min = 0
-        self._dim_red_y_max = 1
+        self._dim_red_x_min = 1 # should not change
+        self._dim_red_x_max = 2 # should change based on the number of fields used to compute basis
+        self._dim_red_y_min = 1 # should not change
+        self._dim_red_y_max = 2 # should change based on the number of fields used to compute basis
 
         self._cluster_method = "k-means"
         self.cluster_dict = {
@@ -680,13 +680,6 @@ class AppData(Observable):
     def dim_red_x_min(self):
         return self._dim_red_x_min
 
-    @dim_red_x_min.setter
-    def dim_red_x_min(self, new_min):
-        if new_min == self._dim_red_x_min:
-            return
-        self._dim_red_x_min = new_min
-        self.notify_observers("dim_red_x_min", new_min)
-
     @property
     def dim_red_x_max(self):
         return self._dim_red_x_max
@@ -701,14 +694,6 @@ class AppData(Observable):
     @property
     def dim_red_y(self):
         return self._dim_red_y
-    
-    @dim_red_y.setter
-    def dim_red_y(self, new_dim_red_y):
-        if new_dim_red_y == self._dim_red_y:
-            return
-    
-        self._dim_red_y = new_dim_red_y
-        self.notify_observers("dim_red_y", new_dim_red_y)
     
     @property
     def dim_red_y_min(self):

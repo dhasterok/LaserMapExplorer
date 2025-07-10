@@ -77,7 +77,7 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     /**
      * Executes blockly elements
      * @param {*} startBlock 
-     * @returns 
+     * @returns {*} code
      */
     function executeBlocks(startBlock) {
         let block = startBlock;

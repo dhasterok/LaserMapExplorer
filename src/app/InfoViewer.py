@@ -10,9 +10,9 @@ from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
         QToolBar, QComboBox, QToolButton, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
         QGroupBox, QHBoxLayout, QSpacerItem, QSizePolicy, QTableWidgetItem, QTableWidget, QTabWidget,
-        QAbstractItemView, QFormLayout, QHeaderView
+        QAbstractItemView, QFormLayout, QHeaderView, QStyledItemDelegate, QLineEdit
     )
-from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction
+from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction, QDoubleValidator
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
 from src.app.UIControl import UIFieldLogic
@@ -719,15 +719,41 @@ class MetadataTab():
                     self.metadata_table.setCellWidget(row_idx, col_idx, combobox)
 
                 else:
-                    try: 
-                        item = QTableWidgetItem(str(f"{value:.{PRECISION}g}")) #set precision for float values
-                    except:
-                        item = QTableWidgetItem(str(value))
-                    if row_key in self.editable_rows:
+                    is_editable = row_key in self.editable_rows
+
+                    # Check if value is a float (or can be cast to one)
+                    try:
+                        float_value = float(value)
+                        is_float = True
+                    except (ValueError, TypeError):
+                        is_float = False
+
+                    if is_editable and is_float:
+                        item = QTableWidgetItem(f"{float_value:.{PRECISION}g}")
                         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                        self.metadata_table.setItem(row_idx, col_idx, item)
+                        
                     else:
-                        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                    self.metadata_table.setItem(row_idx, col_idx, item)
+                        item = QTableWidgetItem(str(value))
+                        if is_editable:
+                            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                        else:
+                            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                        self.metadata_table.setItem(row_idx, col_idx, item)
+
+        # Add a delegate to handle float formatting
+        # and ensure edited 'plot_min' and 'plot_max' are within bounds
+        delegate = FloatItemDelegate(
+            parent=self.metadata_table,
+            row_labels=rows_to_display,
+            column_keys=columns_to_display,
+            processed_data=self.data.processed_data,
+            special_rows={'plot_min', 'plot_max'},
+            precision=PRECISION
+        )
+
+        self.metadata_table.setItemDelegate(delegate)
+
 
         # Adjust metadata table appearance
         self.metadata_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -813,6 +839,11 @@ class MetadataTab():
         # Update column_attributes
         if col_key not in self.data.processed_data.column_attributes:
             self.data.processed_data.column_attributes[col_key] = {}
+        
+        if row_key in ['plot_min', 'plot_max']:
+
+            amin = np.min(self.data.processed_data[col_key])
+            amax = np.max(self.data.processed_data[col_key])
 
         self.data.processed_data.column_attributes[col_key][row_key] = item.text()
 
@@ -1008,3 +1039,59 @@ class FieldTab(UIFieldLogic):
         update_numpy_array(reshaped_array, self.field_table)
 
 
+
+class FloatItemDelegate(QStyledItemDelegate):
+    """Custom item delegate for handling float input in QTableWidget.       
+    This delegate allows for editing of float values in the table, with validation
+    to ensure that the input is within a specified range and has a defined precision.       
+    It is particularly useful for fields like 'plot_min' and 'plot_max' where the values
+    need to be constrained to the actual data range.
+    Parameters
+    ----------
+    metadata_table : QTableWidget
+        The table where the delegate will be applied.
+    row_labels : list
+        List of row labels corresponding to the table rows (e.g., ['min', 'max', 'plot_min', 'plot_max', ...]).
+    column_keys : list
+        List of column keys corresponding to the table columns (e.g., ['Vp', 'Resistivity']).
+    data : dict
+        The full dataset containing processed data for each sample.
+    sample_id : str
+        The ID of the sample currently being viewed or edited.
+    special_rows : set, optional
+        A set of special row labels that require specific validation (e.g., 'plot_min',
+        'plot_max'). Defaults to None, which means no special rows.
+    precision : int, optional
+        The number of decimal places to which float values should be rounded. Defaults to 3.
+    """
+    def __init__(self, parent, row_labels, column_keys, processed_data, special_rows=None, precision=3):
+        super().__init__(parent)
+        self.row_labels = row_labels        # e.g., ['min', 'max', 'plot_min', 'plot_max', ...]
+        self.column_keys = column_keys      # Mapping col_idx to key (e.g., ['Vp', 'Resistivity'])
+        self.processed_data = processed_data
+        self.special_rows = special_rows or set()
+        self.precision = precision
+
+    def createEditor(self, parent, option, index):
+        row = index.row() - 1   # -1 because header row is at index 0
+        col = index.column() - 1
+
+        editor = QLineEdit(parent)
+        validator = QDoubleValidator(parent)
+
+        if row >= 0 and col >= 0:
+            row_label = self.row_labels[row]
+            col_key = self.column_keys[col]
+
+            # If it's a plot_min or plot_max row, restrict range to actual data
+            if row_label in self.special_rows:
+                col_data = self.processed_data[col_key]
+                amin, amax = np.min(col_data), np.max(col_data)
+                validator.setRange(amin, amax)
+            else:
+                validator.setRange(-1e10, 1e10)
+
+            validator.setDecimals(self.precision)
+            editor.setValidator(validator)
+
+        return editor

@@ -26,7 +26,8 @@ from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotTree import PlotTree
-from src.common.DataAnalysis import ClusteringUI, DimensionalReductionUI
+from src.app.CanvasWidget import CanvasWidget
+from src.app.DataAnalysis import ClusteringUI, DimensionalReductionUI
 from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessingUI
@@ -81,11 +82,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # this flag sets whether the plot can be updated.  Mostly off during change_sample
         self.plot_flag = False
-        self.duplicate_plot_info = None
         self.profile_state = False # True if profiling toggle is set to on
         self.polygon_state = False # True if polygon toggle is set to on
         self.field_control_settings = {} # a dictionary that keeps track of UI data for each toolBox page
-        self.lasermaps = {}
 
         # setup initial logging options
         self.logger_options = {
@@ -94,6 +93,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'IO': True,
                 'Data': True,
                 'Analysis': True,
+                'Canvas': True,
                 'Plot': True,
                 'Style': True,
                 'Tree': True,
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # holds the custom field names and formulas set by the user in the calculator
         self.calc_dict = {}
 
-        self.init_canvas_widget()
+        #self.init_canvas_widget()
 
         self.mpl_canvas = None # will hold the current canvas
 
@@ -259,9 +259,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.toolBox.setCurrentIndex(self.left_tab['sample'])
 
-        self.canvasWindow.currentChanged.connect(lambda: self.canvas_changed())
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-        self.canvas_changed()
+        self.canvas_widget = CanvasWidget(self)
+
         self.init_tabs(enable=False)
 
         # Initialize PreprocessingUI
@@ -269,9 +268,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Initialize LaMEPlotUI
         self.histogram = HistogramUI(self)
-        self.histogram = CorrelationUI(self)
-        self.histogram = ScatterUI(self)
-        self.histogram = NDimUI(self)
+        self.correlation = CorrelationUI(self)
+        self.scatter = ScatterUI(self)
+        self.ndimensional = NDimUI(self)
 
         # Initialise dimentionality reduction class 
         self.dimensional_reduction = DimensionalReductionUI(self)
@@ -315,66 +314,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # For light and dark themes, connects actionViewMode
         self.theme = UIThemes(self.app, self)
 
-    def init_canvas_widget(self):
-        """Initializes the central canvas tabs"""
-        # Plot Layouts
-        #-------------------------
-        # Central widget plot view layouts
-        # single view
-        layout_single_view = QVBoxLayout()
-        layout_single_view.setSpacing(0)
-        layout_single_view.setContentsMargins(0, 0, 0, 0)
-        self.widgetSingleView.setLayout(layout_single_view)
-        self.widgetSingleView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.mpl_toolbar = None
-        #self.mpl_toolbar = NavigationToolbar(mplc.MplCanvas())
-        # for button show hide
-        #self.toolButtonPopFigure.setVisible(False)
-        #self.toolButtonPopFigure.raise_()
-        #self.toolButtonPopFigure.enterEvent = self.mouseEnter
-        #self.toolButtonPopFigure.leaveEvent = self.mouseLeave
-
-        layout_histogram_view = QVBoxLayout()
-        layout_histogram_view.setSpacing(0)
-        layout_histogram_view.setContentsMargins(0, 0, 0, 0)
-        self.widgetHistView.setLayout(layout_histogram_view)
-
-        # multi-view
-        self.multi_view_index = []
-        self.multiview_info_label = {}
-        layout_multi_view = QGridLayout()
-        layout_multi_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
-        layout_multi_view.setContentsMargins(0, 0, 0, 0)
-        self.widgetMultiView.setLayout(layout_multi_view)
-        self.widgetMultiView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.toolButtonRemoveMVPlot.clicked.connect(lambda: self.remove_multi_plot(self.comboBoxMVPlots.currentText()))
-        self.toolButtonRemoveAllMVPlots.clicked.connect(lambda: self.clear_layout(self.widgetMultiView.layout()))
-
-        # quick view
-        layout_quick_view = QGridLayout()
-        layout_quick_view.setSpacing(0) # Set margins to 0 if you want to remove margins as well
-        layout_quick_view.setContentsMargins(0, 0, 0, 0)
-        self.widgetQuickView.setLayout(layout_quick_view)
-        self.widgetQuickView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-
-        try:
-            self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
-        except:
-            self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
-                'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
-                'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
-
-        self.toolButtonNewList.clicked.connect(lambda: QV.QuickView(self))
-        self.comboBoxQVList.activated.connect(lambda: self.display_QV())
-
-
-
     def connect_actions(self):
         self.actionReportBug.triggered.connect(lambda: self.open_browser('report_bug'))
         self.actionUserGuide.triggered.connect(lambda: self.open_browser('user_guide'))
         self.actionTutorials.triggered.connect(lambda: self.open_browser('tutorials'))
-
-        pass
 
     def connect_widgets(self):
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
@@ -382,8 +325,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.comboBoxSampleId.activated.connect(self.update_sample_id)
 
-        self.lineEditDX.editingFinished.connect(self.preprocess.update_dx)
-        self.lineEditDY.editingFinished.connect(self.preprocess.update_dy)
 
 
         self.actionFullMap.triggered.connect(self.preprocess.reset_crop)
@@ -840,156 +781,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
 
-    def canvas_changed(self):
-        """Sets visibility of canvas tools and updates canvas plots"""        
-        if self.app_data.sample_id == '':
-            self.toolButtonHome.setVisible(False)
-            self.toolButtonPan.setVisible(False)
-            self.toolButtonZoom.setVisible(False)
-            self.toolButtonAnnotate.setVisible(False)
-            self.toolButtonDistance.setVisible(False)
-            self.toolButtonPopFigure.setVisible(False)
-            self.toolButtonSave.setVisible(False)
-            self.widgetPlotInfoSV.hide()
-            self.labelMaxRows.setVisible(False)
-            self.spinBoxMaxRows.setVisible(False)
-            self.labelMaxCols.setVisible(False)
-            self.spinBoxMaxCols.setVisible(False)
-            self.comboBoxMVPlots.setVisible(False)
-            self.toolButtonRemoveMVPlot.setVisible(False)
-            self.toolButtonRemoveAllMVPlots.setVisible(False)
-            self.widgetPlotInfoMV.hide()
-            self.comboBoxQVList.setVisible(False)
-            self.toolButtonNewList.setVisible(False)
-
-            self.actionUpdatePlot.setEnabled(False)
-            self.actionSavePlotToTree.setEnabled(False)
-            return
-
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-            # plot toolbar items
-            self.toolButtonHome.setVisible(True)
-            self.toolButtonPan.setVisible(True)
-            self.toolButtonZoom.setVisible(True)
-            self.toolButtonAnnotate.setVisible(True)
-            self.toolButtonDistance.setVisible(True)
-            self.toolButtonPopFigure.setVisible(True)
-            self.toolButtonSave.setVisible(True)
-            self.widgetPlotInfoSV.show()
-            self.labelMaxRows.setVisible(False)
-            self.spinBoxMaxRows.setVisible(False)
-            self.labelMaxCols.setVisible(False)
-            self.spinBoxMaxCols.setVisible(False)
-            self.comboBoxMVPlots.setVisible(False)
-            self.toolButtonRemoveMVPlot.setVisible(False)
-            self.toolButtonRemoveAllMVPlots.setVisible(False)
-            self.widgetPlotInfoMV.hide()
-            self.comboBoxQVList.setVisible(False)
-            self.toolButtonNewList.setVisible(False)
-
-            self.SelectAnalytePage.setEnabled(True)
-            self.PreprocessPage.setEnabled(True)
-            self.ScatterPage.setEnabled(True)
-            self.NDIMPage.setEnabled(True)
-            self.MultidimensionalPage.setEnabled(True)
-            self.ClusteringPage.setEnabled(True)
-            if hasattr(self, "spot_tools"):
-                self.spot_tools.setEnabled(True)
-            if hasattr(self, "special_tools"):
-                self.special_tools.setEnabled(True)
-            if hasattr(self, "mask_dock"):
-                self.mask_dock.setEnabled(True)
-
-            self.toolBoxStyle.setEnabled(True)
-            self.comboBoxPlotType.setEnabled(True)
-            self.comboBoxStyleTheme.setEnabled(True)
-            self.actionUpdatePlot.setEnabled(True)
-            self.actionSavePlotToTree.setEnabled(True)
-            self.toolButtonSaveTheme.setEnabled(True)
-
-            self.dockWidgetStyling.setEnabled(True)
-
-            if self.duplicate_plot_info:
-                self.add_plotwidget_to_canvas(self.duplicate_plot_info)
-        elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
-            # plot toolbar items
-            self.toolButtonHome.setVisible(False)
-            self.toolButtonPan.setVisible(False)
-            self.toolButtonZoom.setVisible(False)
-            self.toolButtonAnnotate.setVisible(False)
-            self.toolButtonDistance.setVisible(False)
-            self.toolButtonPopFigure.setVisible(False)
-            self.toolButtonSave.setVisible(True)
-            self.widgetPlotInfoSV.hide()
-            self.labelMaxRows.setVisible(True)
-            self.spinBoxMaxRows.setVisible(True)
-            self.labelMaxCols.setVisible(True)
-            self.spinBoxMaxCols.setVisible(True)
-            self.comboBoxMVPlots.setVisible(True)
-            self.toolButtonRemoveMVPlot.setVisible(True)
-            self.toolButtonRemoveAllMVPlots.setVisible(True)
-            self.widgetPlotInfoMV.show()
-            self.comboBoxQVList.setVisible(False)
-            self.toolButtonNewList.setVisible(False)
-
-            self.SelectAnalytePage.setEnabled(False)
-            self.PreprocessPage.setEnabled(False)
-            self.ScatterPage.setEnabled(False)
-            self.NDIMPage.setEnabled(False)
-            self.MultidimensionalPage.setEnabled(False)
-            self.ClusteringPage.setEnabled(False)
-            if hasattr(self, "spot_tools"):
-                self.spot_tools.setEnabled(False)
-            if hasattr(self, "special_tools"):
-                self.special_tools.setEnabled(False)
-            if hasattr(self, "mask_dock"):
-                self.mask_dock.setEnabled(False)
-
-            self.actionUpdatePlot.setEnabled(False)
-            self.actionSavePlotToTree.setEnabled(False)
-
-            self.dockWidgetStyling.setEnabled(False)
-            if self.duplicate_plot_info:
-                self.add_plotwidget_to_canvas(self.duplicate_plot_info)
-        else:
-            # plot toolbar items
-            self.toolButtonHome.setVisible(False)
-            self.toolButtonPan.setVisible(False)
-            self.toolButtonZoom.setVisible(False)
-            self.toolButtonAnnotate.setVisible(False)
-            self.toolButtonDistance.setVisible(False)
-            self.toolButtonPopFigure.setVisible(False)
-            self.toolButtonSave.setVisible(True)
-            self.widgetPlotInfoSV.hide()
-            self.labelMaxRows.setVisible(False)
-            self.spinBoxMaxRows.setVisible(False)
-            self.labelMaxCols.setVisible(False)
-            self.spinBoxMaxCols.setVisible(False)
-            self.comboBoxMVPlots.setVisible(False)
-            self.toolButtonRemoveMVPlot.setVisible(False)
-            self.toolButtonRemoveAllMVPlots.setVisible(False)
-            self.widgetPlotInfoMV.hide()
-            self.comboBoxQVList.setVisible(True)
-            self.toolButtonNewList.setVisible(True)
-
-            self.SelectAnalytePage.setEnabled(False)
-            self.PreprocessPage.setEnabled(False)
-            self.ScatterPage.setEnabled(False)
-            self.NDIMPage.setEnabled(False)
-            self.MultidimensionalPage.setEnabled(False)
-            self.ClusteringPage.setEnabled(False)
-            if hasattr(self, "spot_tools"):
-                self.spot_tools.setEnabled(False)
-            if hasattr(self, "special_tools"):
-                self.special_tools.setEnabled(False)
-            if hasattr(self, "mask_dock"):
-                self.mask_dock.setEnabled(False)
-
-            self.dockWidgetStyling.setEnabled(False)
-            self.actionUpdatePlot.setEnabled(False)
-            self.actionSavePlotToTree.setEnabled(False)
-
-            self.display_QV()
 
     
 
@@ -1335,7 +1126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # set canvas to single view
         self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-        self.canvas_changed()
+        self.canvas_widget.canvas_changed()
         
         # set toolbox tab indexes
         self.toolBoxStyle.setCurrentIndex(0)
@@ -1578,9 +1369,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if plot_types == self.comboBoxPlotType.allItems():
             return
 
+        self.comboBoxPlotType.blockSignals(True)
         self.comboBoxPlotType.clear()
         self.comboBoxPlotType.addItems(plot_types)
         self.comboBoxPlotType.setCurrentText(plot_types[self.field_control_settings[plot_idx]['saved_index']])
+        self.comboBoxPlotType.blockSignals(False)
 
         self.plot_style.plot_type = self.comboBoxPlotType.currentText()
 
@@ -1800,11 +1593,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     
                 else:
                     if self.toolBox.currentIndex() == self.left_tab['process']:
-                        canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=True)
+                        canvas, self.plot_info, hist_canvas = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=True)
+
+                        if not self.widgetHistView.layout():
+                            self.widgetHistView.setLayout(QVBoxLayout())
+
+                        self.canvas_widget.clear_layout(self.widgetHistView.layout())
+                        self.widgetHistView.layout().addWidget(hist_canvas)
                     else:
                         canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
                 self.mpl_canvas = canvas
-                self.add_plotwidget_to_canvas(self.plot_info)
+                self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)
                     # I think add_tree_item is done in add_plotwidget_to_canvas, so it doesn't need to be repeated here
                     #self.plot_tree.add_tree_item(self.plot_info)
 
@@ -1852,153 +1651,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add canvas to layout
         if canvas:
-            self.clear_layout(self.widgetSingleView.layout())
+            self.canvas_widget.clear_layout(self.widgetSingleView.layout())
             self.widgetSingleView.layout().addWidget(canvas)
 
         # add plot info to info_dock
         if hasattr(self,"info_dock"):
             self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
-    def add_plotwidget_to_canvas(self, plot_info, position=None):
-        """Adds plot to selected view
-
-        Parameters
-        ----------
-        plot_info : dict
-            A dictionary with details about the plot
-        current_plot_df : dict, optional
-            Defaults to None
-        """
-        sample_id = plot_info['sample_id']
-        tree = plot_info['plot_type']
-        # widget_dict = self.axis_widget_dict[tree][sample_id][plot_name]
-
-        # if on QuickView canvas, then set to SingleView canvas
-        if self.canvasWindow.currentIndex() == self.canvas_tab['qv']:
-            self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
-
-        # add figure to SingleView canvas
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
-            #print('add_plotwidget_to_canvas: SV')
-            self.clear_layout(self.widgetSingleView.layout())
-            self.sv_widget = plot_info['figure']
-            
-            
-            plot_info['view'][0] = True
-            
-            self.SV_plot_name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
-            #self.labelPlotInfo.
-
-            for index in range(self.comboBoxMVPlots.count()):
-                if self.comboBoxMVPlots.itemText(index) == self.SV_plot_name:
-                    #plot exists in MVself.pyqtgraph_widget
-                    self.move_widget_between_layouts(self.widgetMultiView.layout(), self.widgetSingleView.layout(),widget)
-                    self.duplicate_plot_info = plot_info
-                    self.hide()
-                    self.show()
-                    return
-            
-            if self.duplicate_plot_info: #if duplicate exisits and new plot has been plotted on SV
-                #return duplicate back to MV
-                row, col = self.duplicate_plot_info['position']
-                #print(f'd{row,col}')
-                dup_widget =self.duplicate_plot_info['figure']
-                self.widgetMultiView.layout().addWidget( dup_widget, row, col )
-                dup_widget.show()
-                self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
-            else:
-                #update toolbar and SV canvas
-                self.update_canvas(self.sv_widget)
-            self.sv_widget.show()
-
-            if (self.plot_style.plot_type == 'field map') and (self.toolBox.currentIndex() == self.left_tab['sample']):
-                current_map_df = self.data[self.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.plot_style.cscale)
-                plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, current_map_df)
-        # add figure to MultiView canvas
-        elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
-            #print('add_plotwidget_to_canvas: MV')
-            name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
-            layout = self.widgetMultiView.layout()
-
-            list = self.comboBoxMVPlots.allItems()
-            
-            # if list:
-            #     for i, item in enumerate(list):
-            #         mv_plot_data = self.comboBoxMVPlots.itemData(i)
-            #         if mv_plot_data[2] == tree and mv_plot_data[3] == sample_id and mv_plot_data[4] == plot_name:
-            #             self.statusBar().showMessage('Plot already displayed on canvas.')
-            #             return
-            plot_exists = False # to check if plot is already in comboBoxMVPlots
-            for index in range(self.comboBoxMVPlots.count()):
-                if self.comboBoxMVPlots.itemText(index) == name:
-                    plot_exists = True
-                
-            if plot_exists and name != self.SV_plot_name:
-                #plot exists in MV and is doesnt exist in SV
-                self.statusBar().showMessage('Plot already displayed on canvas.')
-                return
-            
-            # if position is given, use it
-            if position:
-                row = position[0]
-                col = position[1]
-                
-                # remove widget that is currently in this place
-                widget = layout.itemAtPosition(row,col)
-                if widget is not None and name != self.SV_plot_name:
-                    # layout.removeWidget(widget)
-                    # widget.setParent(None)
-                    widget.hide()
-
-            # if no position, find first empty space
-            else:
-                keepgoing = True
-                for row in range(self.spinBoxMaxRows.value()):
-                    for col in range(self.spinBoxMaxCols.value()):
-                        if layout.itemAtPosition(row,col):
-                            #print(f'row: {row}   col : {col}')
-                            continue
-                        else:
-                            keepgoing = False
-                            break
-
-                    if not keepgoing:
-                        #print(f'row: {row}   col : {col}')
-                        break
-
-            # check if canvas is full
-            if row == self.spinBoxMaxRows.value()-1 and col == self.spinBoxMaxCols.value()-1 and layout.itemAtPosition(row,col):
-                QMessageBox.warning(self, "Add plot to canvas warning", "Canvas is full, to add more plots, increase row or column max.")
-                return
-
-            
-            widget = plot_info['figure']
-            plot_info['view'][1] = True
-            plot_info['position'] = [row,col]
-            
-            
-            if name == self.SV_plot_name and plot_exists: #if plot already exists in MV and SV
-                self.move_widget_between_layouts(self.widgetSingleView.layout(),self.widgetMultiView.layout(),widget, row,col)
-                self.duplicate_plot_info = plot_info
-            elif name == self.SV_plot_name and not plot_exists: #if plot doesnt exist in MV but exists in SV
-                # save plot info to replot when tab changes to single view and add plot to comboBox
-                self.duplicate_plot_info = plot_info
-                data = [row, col, tree, sample_id, name]
-                self.move_widget_between_layouts(self.widgetSingleView.layout(),self.widgetMultiView.layout(),widget, row,col)
-                self.comboBoxMVPlots.addItem(name, userData=data)
-            else: #new plot which doesnt exist in single view
-                # add figure to canvas
-                layout.addWidget(widget,row,col)    
-                
-                data = [row, col, tree, sample_id, name]
-                self.comboBoxMVPlots.addItem(name, userData=data)
-
-        # self.hide()
-        # self.show()
-
-        # put plot_info back into table
-        #print(plot_info)
-        self.plot_tree.add_tree_item(plot_info)
 
     def compute_clusters_update_groups(self):
         """
@@ -2259,147 +1918,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.workflow.refresh_custom_fields_lists_dropdown() #refresh saved analyte dropdown in blockly 
         if result == QDialog.DialogCode.Rejected:
             pass
-    
-
-    # -------------------------------------
-    # Central canvas widget functions
-    # -------------------------------------
-    def clear_layout(self, layout):
-        """Clears a widget that contains plots
-
-        Parameters
-        ----------
-        layout : QLayout
-            A layout associated with a ``canvasWindow`` tab.
-        """
-        #remove current plot
-        for i in reversed(range(layout.count())):
-            item = layout.itemAt(i)
-            if item is not None:
-                widget = item.widget()   # Get the widget from the item
-                if widget is not None:
-                    widget.hide()
-                    # layout.removeWidget(widget)  # Remove the widget from the layout
-                    # widget.setParent(None)      # Set the widget's parent to None
-
-        if self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
-            list = self.comboBoxMVPlots.allItems()
-            if not list:
-                return
-
-            for i, _ in enumerate(list):
-                # get data from comboBoxMVPlots
-                data = self.comboBoxMVPlots.itemData(i, role=Qt.ItemDataRole.UserRole)
-
-                # get plot_info from tree location and
-                # reset view to False and position to none
-                plot_info = self.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
-                #print(plot_info)
-                plot_info['view'][1] = False
-                plot_info['position'] = None
-            
-            # clear hover information for lasermaps
-            self.multi_view_index = []
-            self.multiview_info_label = {}
-
-            # clear plot list in comboBox
-            self.comboBoxMVPlots.clear()        
-
-    def remove_multi_plot(self, selected_plot_name):
-        """Removes selected plot from MulitView
-
-        Parameters
-        ----------
-        selected_plot_name : str
-            Plot selected in ``MainWindow.treeWidget``
-        """
-        widget_index = self.multi_view_index.index(selected_plot_name)
-        layout = self.widgetMultiView.layout()
-        item = layout.itemAt(widget_index)  # Get the item at the specified index
-        if item is not None:
-            widget = item.widget()   # Get the widget from the item
-            if widget is not None:
-                layout.removeWidget(widget)  # Remove the widget from the layout
-                widget.setParent(None)      # Set the widget's parent to None
-        # if widget is not None:
-        #     index = self.canvasWindow.addTab( widget, selected_plot_name)
-        self.multi_view_index.pop(widget_index)
-        for widget in self.multiview_info_label[selected_plot_name+'1']:
-            widget.setParent(None)
-            widget.deleteLater()
-        del self.multiview_info_label[selected_plot_name+'1']
-        del self.lasermaps[selected_plot_name+'1']
-        #self.axis_widget_dict[selected_plot_name] = widget
-        #self.add_remove(selected_plot_name)
-        self.comboBoxMVPlots.clear()
-        self.comboBoxMVPlots.addItems(self.multi_view_index)
-
-    def update_canvas(self, new_canvas):
-        # Clear the existing layout
-        self.clear_layout(self.widgetSingleView.layout())
-        
-        
-        # Add the new canvas to the layout
-        self.widgetSingleView.layout().addWidget(new_canvas)
-        
-        try:
-            # Recreate the NavigationToolbar with the new canvas
-            self.mpl_toolbar = NavigationToolbar(new_canvas, self.widgetSingleView)
-            #hide the toolbar
-            self.mpl_toolbar.hide()
-            self.widgetSingleView.layout().addWidget(self.mpl_toolbar)
-        except:
-            # canvas is not a mplc.MplCanvas  
-            pass
-
-    def display_QV(self):
-        """Plots selected maps to the Quick View tab
-
-        Adds plots of predefined analytes to the Quick View tab in a grid layout."""
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['qv'])
-        if self.app_data.sample_id == '':
-            return
-
-        key = self.comboBoxQVList.currentText()
-
-        # establish number of rows and columns
-        ratio = 1.8 # aspect ratio of gridlayout
-        # ratio = ncol / nrow, nplots = ncol * nrow
-        ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
-
-        # fields in current sample
-        fields = self.app_data.field_dict['Analyte']
-
-        # clear the quickView layout
-        self.clear_layout(self.widgetQuickView.layout())
-        for i, analyte in enumerate(self.QV_analyte_list[key]):
-            # if analyte is in list of measured fields
-            if analyte not in fields:
-                continue
-
-            # create plot canvas
-            canvas = mplc.MplCanvas()
-
-            # determine location of plot
-            col = i % ncol
-            row = i // ncol
-
-            # get data for current analyte
-            current_plot_df = self.data[self.app_data.sample_id].get_map_data(analyte, 'Analyte')
-            reshaped_array = np.reshape(current_plot_df['array'].values, self.data[self.app_data.sample_id].array_size, order=self.data[self.app_data.sample_id].order)
-
-            # add image to canvas
-            cmap = self.plot_style.get_colormap()
-            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.data[self.app_data.sample_id].aspect_ratio, interpolation='none')
-            font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-            canvas.axes.text( 0.025*self.data[self.app_data.sample_id].array_size[0],
-                    0.1*self.data[self.app_data.sample_id].array_size[1],
-                    analyte,
-                    fontdict=font,
-                    color=self.plot_style.overlay_color,
-                    ha='left', va='top' )
-            canvas.axes.set_axis_off()
-            canvas.fig.tight_layout()
-
-            # add canvas to quickView grid layout
-            self.widgetQuickView.layout().addWidget(canvas,row,col)

@@ -69,8 +69,15 @@ class PreprocessingUI():
             lambda: self.update_neg_handling(self.ui.comboBoxNegativeMethod.currentText())
         )
 
+        self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
+
+    def connect_widgets(self):
+        self.ui.lineEditDX.editingFinished.connect(self.update_dx)
+        self.ui.lineEditDY.editingFinished.connect(self.update_dy)
+        self.ui.lineEditResolutionNx.editingFinished.connect(self.update_nx_lineedit)
+        self.ui.lineEditResolutionNx.editingFinished.connect(self.update_ny_lineedit)
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -131,7 +138,7 @@ class PreprocessingUI():
         """
         self.ui.lineEditResolutionNx.value = value
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_ny_lineedit(self,value):
         """
@@ -147,7 +154,7 @@ class PreprocessingUI():
         """
         self.ui.lineEditResolutionNy.value = value
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_dx_lineedit(self,value):
         """Updates ``MainWindow.lineEditDX.value``
@@ -160,7 +167,7 @@ class PreprocessingUI():
         """
         self.ui.lineEditDX.value = value
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
             field = 'Xc'
             if isinstance(self.ui.plot_info, dict) \
                 and 'field_type' in self.ui.plot_info \
@@ -181,7 +188,7 @@ class PreprocessingUI():
         """
         self.ui.lineEditDY.value = value
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
             field = 'Yc'
             if isinstance(self.ui.plot_info, dict) \
                 and 'field_type' in self.ui.plot_info \
@@ -225,7 +232,7 @@ class PreprocessingUI():
         if hasattr(self,"mask_dock"):
             self.ui.mask_dock.filter_tab.update_filter_values()
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_data_min_diff_quantile(self,value):
         """
@@ -243,7 +250,7 @@ class PreprocessingUI():
         if hasattr(self,"mask_dock"):
             self.ui.mask_dock.filter_tab.update_filter_values()
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_data_max_diff_quantile(self,value):
         """
@@ -261,7 +268,7 @@ class PreprocessingUI():
         if hasattr(self,"mask_dock"):
             self.ui.mask_dock.filter_tab.update_filter_values()
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
 
     def update_auto_scale_value(self,value):
@@ -283,7 +290,7 @@ class PreprocessingUI():
         if hasattr(self,"mask_dock"):
             self.ui.mask_dock.filter_tab.update_filter_values()
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_apply_outlier_to_all(self,value):
         """
@@ -382,7 +389,7 @@ class PreprocessingUI():
             self.ui.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def update_autoscale_checkbox(self, value):
         """
@@ -401,7 +408,7 @@ class PreprocessingUI():
         else:
             self.ui.checkBoxApplyAll.setChecked(False)
 
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
@@ -502,22 +509,22 @@ class PreprocessingUI():
             self.ui.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def update_dx(self):
         """Updates the x-resolution (`dx`) of the current sample and triggers a plot update."""
         self.ui.data[self.ui.app_data.sample_id].update_resolution('x', self.ui.lineEditDX.value)
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def update_dy(self):
         """Updates the y-resolution (`dy`) of the current sample and triggers a plot update."""
         self.ui.data[self.ui.app_data.sample_id].update_resolution('y', self.ui.lineEditDY.value)
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def reset_crop(self):
         """Resets the cropping of the current sample and triggers a plot update."""
         self.ui.data[self.ui.app_data.sample_id].reset_crop
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def update_swap_resolution(self):
         """Resets the pixel resolution of the current sample to original values and triggers a plot update."""
@@ -525,7 +532,7 @@ class PreprocessingUI():
             return
 
         self.ui.data[self.ui.app_data.sample_id].swap_resolution 
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()
 
     def reset_pixel_resolution(self):
         """
@@ -534,4 +541,4 @@ class PreprocessingUI():
         Does nothing if no data is loaded or the sample ID is empty.
         """
         self.ui.data[self.ui.app_data.sample_id].reset_resolution
-        self.schedule_update()
+        self.ui.plot_style.schedule_update()

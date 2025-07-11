@@ -1071,12 +1071,70 @@ class StyleTheme():
             return None
 
     def default_style_dict(self):
-        """Resets style dictionary to default values.
-        
+        """
+        Generates a dictionary of default plot styles for various plot types.
+
+        This method resets the internal `default_plot_style` to a base set of defaults,
+        applies preferred font detection from system fonts, and then clones and customizes
+        this style for multiple predefined plot types (e.g., field map, scatter, histogram).
+
+        The resulting dictionary contains one style dictionary per plot type.
+
         Returns
         -------
-        dict :
-            Default style dictionary.
+        dict
+            A dictionary mapping plot type names to their corresponding style dictionaries.
+
+        Notes
+        -----
+        The base style template (`default_plot_style`) contains the following keys and default values:
+
+        +------------------+------------------+--------------------------------------------------+
+        | Key              | Default Value    | Description                                      |
+        +==================+==================+==================================================+
+        | XFieldType       | 'None'           | Type of field for x-axis (e.g., 'Analyte')       |
+        | XField           | 'None'           | Name of x-axis field                             |
+        | XLim             | [0, 1]           | Limits for x-axis                                |
+        | XScale           | 'linear'         | Scale for x-axis ('linear' or 'log')             |
+        | XLabel           | ''               | Label for x-axis                                 |
+        | YFieldType       | 'None'           | Type of field for y-axis                         |
+        | YField           | 'None'           | Name of y-axis field                             |
+        | YLim             | [0, 1]           | Limits for y-axis                                |
+        | YScale           | 'linear'         | Scale for y-axis                                 |
+        | YLabel           | ''               | Label for y-axis                                 |
+        | ZFieldType       | 'None'           | Type of field for z-axis                         |
+        | ZField           | 'None'           | Name of z-axis field                             |
+        | ZLim             | [0, 1]           | Limits for z-axis                                |
+        | ZScale           | 'linear'         | Scale for z-axis                                 |
+        | ZLabel           | ''               | Label for z-axis                                 |
+        | CFieldType       | 'None'           | Type of color-mapped data                        |
+        | CField           | 'None'           | Field name for color-mapping                     |
+        | CLim             | [0, 1]           | Colorbar limits                                  |
+        | CScale           | 'linear'         | Colorbar scale                                   |
+        | CLabel           | ''               | Label for colorbar                               |
+        | AspectRatio      | 1.0              | Aspect ratio of the plot                         |
+        | TickDir          | 'out'            | Tick direction                                   |
+        | Font             | ''               | Preferred font (auto-selected from system)       |
+        | FontSize         | 11.0             | Font size in points                              |
+        | ScaleDir         | 'none'           | Scale bar direction                              |
+        | ScaleLocation    | 'northeast'      | Position of scale bar                            |
+        | ScaleLength      | None             | Length of the scale bar                          |
+        | OverlayColor     | '#ffffff'        | Overlay color (e.g., for text/annotation)        |
+        | Marker           | 'circle'         | Marker shape                                     |
+        | MarkerSize       | 6                | Marker size in points                            |
+        | MarkerColor      | '#1c75bc'        | Marker color                                     |
+        | MarkerAlpha      | 30               | Marker transparency (0–100)                      |
+        | LineWidth        | 1.5              | Width of lines in the plot                       |
+        | LineMultiplier   | 1                | Multiplier for line width                        |
+        | LineColor        | '#1c75bc'        | Line color                                       |
+        | Colormap         | 'viridis'        | Name of the colormap                             |
+        | CbarReverse      | False            | Whether to reverse the colormap                  |
+        | CbarDir          | 'vertical'       | Direction of colorbar                            |
+        | Resolution       | 10               | Grid resolution                                  |
+        +------------------+------------------+--------------------------------------------------+
+
+        Specific plot types (e.g., 'field map', 'scatter', 'correlation') override some of
+        these values, such as setting `Colormap`, axis fields, aspect ratio, etc.
         """
         styles = {}
 

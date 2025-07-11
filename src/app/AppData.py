@@ -86,6 +86,7 @@ class AppData(Observable):
 
         self._apply_noise_red = "No"
         self._gradient_flag = False
+        self._edge_detection_method = "zero cross"
 
         self._scatter_preset = ""
         self._heatmap_style = "counts"
@@ -404,6 +405,17 @@ class AppData(Observable):
     
         self._gradient_flag = flag
         self.notify_observers("gradient_flag", flag)
+
+    @property
+    def edge_detection_method(self):
+        return self._edge_detection_method
+
+    @edge_detection_method.setter
+    def edge_detection_method(self, method):
+        if method == self._edge_detection_method:
+            return
+        
+        self._edge_detection_method = method
     
     ### Scatter Properties ###
     @property

@@ -1568,7 +1568,7 @@
            <string/>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>1</number>
           </property>
           <property name="tabSpacing">
            <number>2</number>
@@ -5235,7 +5235,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>

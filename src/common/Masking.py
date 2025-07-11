@@ -608,19 +608,22 @@ class PolygonTab():
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
         # polygon toggle
         self.polygon_toggle = ToggleSwitch(toolbar, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
-        self.polygon_toggle.setChecked(False)
+        self.polygon_toggle.setChecked(Qt.CheckState.Unchecked)
         self.actionPolyToggle = QWidgetAction(toolbar)
         self.actionPolyToggle.setDefaultWidget(self.polygon_toggle)
         self.polygon_toggle.stateChanged.connect(self.polygon_state_changed)
 
         self.actionEdgeDetect = QAction("Toggle edge detection", toolbar)
         icon_edge_detection = QIcon(":/resources/icons/icon-spotlight-64.svg")
+        self.actionEdgeDetect.setCheckable(True)
+        self.actionEdgeDetect.setChecked(Qt.CheckState.Unchecked)
         self.actionEdgeDetect.setIcon(icon_edge_detection)
         self.actionEdgeDetect.setToolTip("Add a filter using the properties set below")
-        self.actionEdgeDetect.triggered.connect(self.parent.main_window.noise_reduction.add_edge_detection)
+        self.actionEdgeDetect.triggered.connect(self.toggle_edge_detection)
 
         self.comboBoxEdgeDetectMethod = QComboBox(toolbar)
         self.comboBoxEdgeDetectMethod.addItems(["Sobel","Canny","Zero cross"])
+        self.comboBoxEdgeDetectMethod.activated.connect(self.parent.main_window.noise_reduction._edge_detection_methods)
 
         self.actionPolyLoad = QAction("Load Polygon", toolbar)
         icon_load_file = QIcon(":/resources/icons/icon-open-file-64.svg")
@@ -706,7 +709,7 @@ class PolygonTab():
         self.parent.tabWidgetMask.addTab(self.polygon_tab, polygon_icon, "Polygons")
         
         # initialise polygon dictionary for a given sample id in self.parent.data
-        self.polygon_manager = PolygonManager(parent = self, main_window=self.parent.main_window, logger_options=self.logger_options, logger_key="Polygon")
+        self.polygon_manager = PolygonManager(parent = self, main_window=self.parent.main_window)
         #self.parent.main_window.data.polygon = self.polygon_manger.polygons
         self.actionPolyCreate.triggered.connect(self.polygon_manager.increment_pid)
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.parent.main_window.mpl_canvas))
@@ -868,6 +871,16 @@ class PolygonTab():
         if update_plot:
             self.apply_filters(fullmap=False)
 
+    def toggle_edge_detection(self):
+        """Toggles edge detection to the current laser map plot.
+
+        Executes on change of ``self.comboBoxEdgeDetectMethod`` when ``self.toolButtonEdgeDetect`` is checked.
+        """
+        if self.actionEdgeDetect.isChecked() == Qt.CheckState.Checked:
+            self.parent.main_window.app_data.edge_detection_method = self.comboBoxEdgeDetectMethod.currentText()
+            self.parent.main_window.noise_reduction.add_edge_detection()
+        else:
+            self.parent.main_window.noise_reduction.remove_edge_detection()
 
 
 @auto_log_methods(logger_key='Mask')

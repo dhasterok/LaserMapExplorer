@@ -20,22 +20,45 @@ from src.common.Logger import LoggerConfig, log_call, log
 
 @log_call(logger_key='Plot')
 def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_histogram=False):
-    """Create a matplotlib canvas for plotting a map
-
-    Create a map using ``mplc.MplCanvas``.
+    """
+    Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.
 
     Parameters
     ----------
-    sample_id : str
-        Sample identifier
+    parent : QWidget or similar
+        The parent widget for the plot canvas.
+    data : object
+        Data object containing processed data, mask, and methods for retrieving map data.
+    app_data : object
+        Application data object containing settings such as color scale equalization and sample ID.
+    plot_style : object
+        Plot style object providing colormap, normalization, and style dictionary.
     field_type : str
-        Type of field for plotting
+        The type of field to plot (e.g., 'element', 'phase').
     field : str
-        Field for plotting
-    """        
+        The specific field or attribute to plot.
+    add_histogram : bool, optional
+        If True, adds a small histogram of the field data to the plot (default is False).
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The Matplotlib canvas containing the plotted map.
+    plot_info : dict
+        Dictionary containing metadata about the plot (e.g., field, style, sample ID).
+    hist_canvas : MplCanvas, optional
+        The Matplotlib canvas containing the histogram, only returned if add_histogram is True.
+
+    Notes
+    -----
+    - Applies color normalization and optional color scale equalization.
+    - Handles different color scale types (linear, log, logit, symlog).
+    - Applies a mask as an alpha layer to the plot.
+    - Adds a scalebar and adjusts layout.
+    - Stores the plotted data in the parent for potential export.
+    """
     # create plot canvas
     canvas = mplc.MplCanvas(parent=parent)
-
 
     if hasattr(plot_style,'set_style_widgets'): 
         plot_style.set_style_widgets() # update ui widgets and style dictionary
@@ -117,7 +140,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
 
     # add small histogram
     if add_histogram:
-        plot_small_histogram(parent, data, app_data, plot_style, map_df)
+        hist_canvas = plot_small_histogram(parent, data, app_data, plot_style, map_df)
 
     plot_info = {
         'tree': field_type,
@@ -133,10 +156,13 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
         'position': None
         }
     
-    return canvas, plot_info
+    if add_histogram:
+        return canvas, plot_info, hist_canvas
+    else:
+        return canvas, plot_info
 
 @log_call(logger_key='Plot')
-def plot_map_pg(self, sample_id, field_type, field):
+def plot_map_pg(parent, sample_id, field_type, field):
         """Create a graphic widget for plotting a map
 
         Create a map using pyqtgraph.
@@ -155,14 +181,14 @@ def plot_map_pg(self, sample_id, field_type, field):
         # ----end debugging----
 
         # get data for current map
-        scale = self.plot_style.cscale
-        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type, norm=scale)
+        scale = parent.plot_style.cscale
+        map_df = parent.data[parent.app_data.sample_id].get_map_data(field, field_type, norm=scale)
 
         # store map_df to save_data if data needs to be exported
-        self.save_data = map_df
+        parent.save_data = map_df
         
         #Change transparency of values outside mask
-        self.array, rgba_array = self.array_to_image(map_df)
+        parent.array, rgba_array = parent.array_to_image(map_df)
 
         # plotWidget = QWidget()
         # layout = QVBoxLayout()
@@ -171,14 +197,14 @@ def plot_map_pg(self, sample_id, field_type, field):
 
         title = ''
 
-        view = self.canvasWindow.currentIndex()
-        if view == self.canvas_tab['sv']:
+        view = parent.canvasWindow.currentIndex()
+        if view == parent.canvas_tab['sv']:
             title = field
-        elif view == self.canvas_tab['mv']:
+        elif view == parent.canvas_tab['mv']:
             title = sample_id + '_' + field
         else:
-            view = self.canvas_tab['sv']
-            self.canvasWindow.setCurrentIndex(view)
+            view = parent.canvas_tab['sv']
+            parent.canvasWindow.setCurrentIndex(view)
             title = field
 
         graphicWidget = GraphicsLayoutWidget(show=True)
@@ -188,13 +214,13 @@ def plot_map_pg(self, sample_id, field_type, field):
         # layout.addWidget(graphicWidget)
 
         # Create the ImageItem
-        img_item = ImageItem(image=self.array, antialias=False)
+        img_item = ImageItem(image=parent.array, antialias=False)
 
         #set aspect ratio of rectangle
-        img_item.setRect(self.data[self.app_data.sample_id].x.min(),
-                self.data[self.app_data.sample_id].y.min(),
-                self.data[self.app_data.sample_id].x_range,
-                self.data[self.app_data.sample_id].y_range)
+        img_item.setRect(parent.data[parent.app_data.sample_id].x.min(),
+                parent.data[parent.app_data.sample_id].y.min(),
+                parent.data[parent.app_data.sample_id].x_range,
+                parent.data[parent.app_data.sample_id].y_range)
 
         #--- add non-interactive image with integrated color ------------------
         plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
@@ -208,17 +234,17 @@ def plot_map_pg(self, sample_id, field_type, field):
 
         # Prevent zooming/panning outside the default view
         ## These cut off parts of the map when plotting.
-        #plotWindow.setRange(yRange=[self.y.min(), self.y.max()])
-        #plotWindow.setLimits(xMin=self.x.min(), xMax=self.x.max(), yMin=self.y.min(), yMax = self.y.max())
-        #plotWindow.setLimits(maxXRange=self.data[self.app_data.sample_id].x_range, maxYRange=self.data[self.app_data.sample_id].y_range)
+        #plotWindow.setRange(yRange=[parent.y.min(), parent.y.max()])
+        #plotWindow.setLimits(xMin=parent.x.min(), xMax=parent.x.max(), yMin=parent.y.min(), yMax = parent.y.max())
+        #plotWindow.setLimits(maxXRange=parent.data[parent.app_data.sample_id].x_range, maxYRange=parent.data[parent.app_data.sample_id].y_range)
 
         #supress right click menu
         plotWindow.setMenuEnabled(False)
 
         # colorbar
-        cmap = colormap.get(self.plot_style.cmap, source = 'matplotlib')
-        #clb,cub,cscale,clabel = self.plot_style.get_axis_values(field_type,field)
-        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=self.plot_style.cbar_dir, pen='black')
+        cmap = colormap.get(parent.plot_style.cmap, source = 'matplotlib')
+        #clb,cub,cscale,clabel = parent.plot_style.get_axis_values(field_type,field)
+        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=parent.plot_style.cbar_dir, pen='black')
         img_item.setLookupTable(cmap.getLookupTable())
         # graphicWidget.addItem(cbar)
         pg.setConfigOption('leftButtonPan', False)
@@ -228,13 +254,13 @@ def plot_map_pg(self, sample_id, field_type, field):
         target.setZValue(1e9)
         plotWindow.addItem(target)
 
-        # store plots in self.lasermap to be used in profiling. self.lasermaps is a multi index dictionary with index: (field, view)
-        self.lasermaps[field,view] = (target, plotWindow, self.array)
+        # store plots in parent.lasermap to be used in profiling. parent.lasermaps is a multi index dictionary with index: (field, view)
+        parent.lasermaps[field,view] = (target, plotWindow, parent.array)
 
         #hide pointer
         target.hide()
 
-        plotWindow.scene().sigMouseClicked.connect(lambda event,array=self.array, k=field, plot=plotWindow: self.plot_clicked(event,array, k, plotWindow))
+        plotWindow.scene().sigMouseClicked.connect(lambda event,array=parent.array, k=field, plot=plotWindow: parent.plot_clicked(event,array, k, plotWindow))
 
         #remove previous plot in single view
         if view == 1:
@@ -256,43 +282,43 @@ def plot_map_pg(self, sample_id, field_type, field):
             labelMVInfoValue.setObjectName("labelMVInfoValue"+field)
             labelMVInfoValue.setFont(font)
             verticalLayout.addWidget(labelMVInfoValue)
-            self.gridLayoutMVInfo.addLayout(verticalLayout, 0, self.gridLayoutMVInfo.count()+1, 1, 1)
+            parent.gridLayoutMVInfo.addLayout(verticalLayout, 0, parent.gridLayoutMVInfo.count()+1, 1, 1)
             # Store the reference to verticalLayout in a dictionary
-            self.multiview_info_label[field] = (labelMVInfoField, labelMVInfoValue)
+            parent.multiview_info_label[field] = (labelMVInfoField, labelMVInfoValue)
         else:
-            #print(self.lasermaps)
-            #print(self.prev_plot)
-            if self.prev_plot and (self.prev_plot,0) in self.lasermaps:
-                self.plot_info['view'][0] = False
-                del self.lasermaps[(self.prev_plot,0)]
+            #print(parent.lasermaps)
+            #print(parent.prev_plot)
+            if parent.prev_plot and (parent.prev_plot,0) in parent.lasermaps:
+                parent.plot_info['view'][0] = False
+                del parent.lasermaps[(parent.prev_plot,0)]
             # update variables which stores current plot in SV
-            self.plot = plotWindow
-            self.prev_plot = field
-            self.init_zoom_view()
+            parent.plot = plotWindow
+            parent.prev_plot = field
+            parent.init_zoom_view()
             # uncheck edge detection
-            self.mask_dock.polygon_tab.action_edge_detect.setChecked(False)
+            parent.mask_dock.polygon_tab.action_edge_detect.setChecked(False)
 
 
         # Create a SignalProxy to handle mouse movement events
         # Create a SignalProxy for this plot and connect it to mouseMoved
 
-        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: self.mouse_moved_pg(event,plot))
+        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: parent.mouse_moved_pg(event,plot))
 
         #add zoom window
         plotWindow.getViewBox().autoRange()
 
         # add edge detection
-        if self.mask_dock.polygon_tab.action_edge_detect.isChecked():
-            self.noise_reduction.add_edge_detection()
+        if parent.mask_dock.polygon_tab.action_edge_detect.isChecked():
+            parent.noise_reduction.add_edge_detection()
 
-        if view == 0 and self.plot_info:
-            self.plot_info['view'][0] = False
+        if view == 0 and parent.plot_info:
+            parent.plot_info['view'][0] = False
             tmp = [True,False]
         else:
             tmp = [False,True]
 
 
-        self.plot_info = {
+        parent.plot_info = {
             'tree': 'Analyte',
             'sample_id': sample_id,
             'plot_name': field,
@@ -300,21 +326,21 @@ def plot_map_pg(self, sample_id, field_type, field):
             'field_type': field_type,
             'field': field,
             'figure': graphicWidget,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'style': parent.plot_style.style_dict[parent.plot_style.plot_type],
             'cluster_groups': None,
             'view': tmp,
             'position': None
             }
 
-        #self.plot_widget_dict[self.plot_info['tree']][self.plot_info['sample_id']][self.plot_info['plot_name']] = {'info':self.plot_info, 'view':view, 'position':None}
-        self.add_plotwidget_to_canvas(self.plot_info)
+        #parent.plot_widget_dict[parent.plot_info['tree']][parent.plot_info['sample_id']][parent.plot_info['plot_name']] = {'info':parent.plot_info, 'view':view, 'position':None}
+        parent.parent.canvas_widget.add_plotwidget_to_canvas(parent.plot_info)
 
-        #self.update_tree(plot_info=self.plot_info)
-        self.plot_tree.add_tree_item(self.plot_info)
+        #parent.update_tree(plot_info=parent.plot_info)
+        parent.plot_tree.add_tree_item(parent.plot_info)
 
         # add small histogram
-        if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
-            plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, map_df)
+        if (parent.toolBox.currentIndex() == parent.left_tab['sample']) and (view == parent.canvas_tab['sv']):
+            plot_small_histogram(self, parent.data[parent.app_data.sample_id], parent.app_data, parent.plot_style, map_df)
 
 @log_call(logger_key='Plot')
 def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
@@ -396,8 +422,7 @@ def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
     pos = canvas.axes.get_position()
     canvas.axes.set_position((pos.x0/2, 3*pos.y0, pos.width+pos.x0, pos.height-1.5*pos.y0))
 
-    parent.clear_layout(parent.widgetHistView.layout())
-    parent.widgetHistView.layout().addWidget(canvas)
+    return canvas
 
 @log_call(logger_key='Plot')
 def plot_histogram(parent, data, app_data, plot_style):
@@ -559,7 +584,7 @@ def plot_histogram(parent, data, app_data, plot_style):
         # x-axis
         canvas.axes.set_xlabel(xlbl, fontdict=font)
         if xscale == 'log':
-        #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
+        #    parent.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
             canvas.axes.set_xscale(xscale,base=10)
         # if plot_style.xscale == 'linear':
         # else:

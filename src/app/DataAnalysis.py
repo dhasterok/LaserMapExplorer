@@ -12,7 +12,7 @@ from src.common.Logger import log, auto_log_methods
 @auto_log_methods(logger_key="Analysis")
 class Clustering():
     def __init__(self, parent):
-        self.logger_key = "Clustering"
+        self.logger_key = "Analysis"
         self.parent = parent
 
         self.distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
@@ -143,6 +143,7 @@ class ClusteringUI(Clustering):
     """
     def __init__(self, parent):
         super().__init__(self)
+        self.logger_key = "Analysis"
 
         self.ui = parent
         self.schedule_update = self.ui.plot_style.schedule_update
@@ -208,41 +209,42 @@ class ClusteringUI(Clustering):
     def update_max_clusters_spinbox(self, new_max_clusters):
         self.ui.spinBoxClusterMax.setValue(int(new_max_clusters))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_num_clusters_spinbox(self, new_num_clusters):
         self.ui.spinBoxNClusters.setValue(int(new_num_clusters))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_cluster_seed_lineedit(self, new_cluster_seed):
         self.ui.lineEditSeed.setText(str(new_cluster_seed))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_cluster_exponent_slider(self, new_cluster_exponent):
         self.ui.horizontalSliderClusterExponent.setValue(int(new_cluster_exponent*10))
         self.ui.labelClusterExponent.setText(str(new_cluster_exponent))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_cluster_distance_combobox(self, new_cluster_distance):
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_dim_red_precondition_checkbox(self, new_pca_precondition):
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
     def update_num_basis_for_precondition_spinbox(self, new_value):
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.schedule_update()
+            self.ui.plot_style.schedule_update()
 
 
 @auto_log_methods(logger_key="Analysis")
 class DimensionalReduction():
     def __init__(self, parent):
         self.parent = parent
+        self.logger_key = "Analysis"
 
         self.dim_red_methods = ['PCA: Principal component analysis', 'MDS: Multidimensional scaling', 'LDA: Linear discriminant analysis', 'FA: Factor analysis']
 
@@ -287,6 +289,7 @@ class DimensionalReduction():
 class DimensionalReductionUI(DimensionalReduction):
     def __init__(self, parent):
         super().__init__(self)
+        self.logger_key = "Analysis"
 
         self.ui = parent
 

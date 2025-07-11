@@ -10,6 +10,7 @@ from src.common.Logger import log, auto_log_methods
 class HistogramUI():
     def __init__(self, parent):
         self.ui = parent
+        self.logger_key = "Plot"
 
         self.connect_widgets()
         self.connect_observer()
@@ -54,6 +55,7 @@ class HistogramUI():
 class CorrelationUI():
     def __init__(self, parent):
         self.ui = parent
+        self.logger_key = "Plot"
         
         self.connect_widgets()
         self.connect_observer()
@@ -138,6 +140,7 @@ class CorrelationUI():
 class ScatterUI():
     def __init__(self, parent):
         self.ui = parent
+        self.logger_key = "Plot"
 
         self.connect_widgets()
         self.connect_observer()
@@ -209,6 +212,7 @@ class ScatterUI():
 class NDimUI():
     def __init__(self, parent):
         self.ui = parent
+        self.logger_key = "Plot"
 
         self.table_fcn = TableFcn(self)
 

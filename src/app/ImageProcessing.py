@@ -17,8 +17,11 @@ class ImageProcessing():
 
     Methods
     -------
+
     add_edge_detection :
         Add edge detection to the current laser map plot.
+    remove_edge_detection:
+        Removes edge detection from the current map.
     zero_crossing_lapalcian :
         Apply zero-crossing on the Laplacian of the image.
     noise_reduction_method_callback :
@@ -37,7 +40,6 @@ class ImageProcessing():
         Produces a gradient map with arrows showing gradient direction and colors indicating magnitude
     """
     def __init__(self, parent):
-
         self.logger_key = 'Image'
 
         self.parent = parent
@@ -58,12 +60,7 @@ class ImageProcessing():
         # add edge detection algorithm to aid in creating polygons
         self.edge_img = None
 
-    def gradient_checked_state_changed(self):
-        if self.parent.checkBoxGradient.isChecked():
-            self.parent.plot_style.plot_type = 'gradient map'
-        else:
-            if self.parent.comboBoxPlotType.currentText != 'field map':
-                self.parent.plot_style.plot_type = 'field map'
+        self._edge_detection_methods = ["Sobel","Canny","Zero cross"]
 
 
     def add_edge_detection(self):
@@ -72,15 +69,11 @@ class ImageProcessing():
         Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.
         Options include 'sobel', 'canny', and 'zero_cross'.
         """
-        #print('add_edge_detection')
         if self.edge_img:
             # remove existing filters
-            self.parent.plot.removeItem(self.edge_img)
+            self.remove_edge_detection()
 
-        if not self.parent.mask_dock.polygon_dock.toolButtonEdgeDetect.isChecked():
-            return
-
-        algorithm = self.parent.mask_dock.polygon_dock.comboBoxEdgeDetectMethod.currentText().lower()
+        algorithm = self.parent.app_data.edge_detection_method.lower()
         if algorithm == 'sobel':
             # Apply Sobel edge detection
             sobelx = cv2.Sobel(self.array, cv2.CV_64F, 1, 0, ksize=5)
@@ -135,6 +128,11 @@ class ImageProcessing():
         self.edge_img.setRect(0,0,x_range,y_range)
         self.parent.plot.addItem(self.edge_img)
 
+    def remove_edge_detection(self):
+        """Removes edge detection from the current map."""
+        if self.edge_img:
+            self.parent.plot.removeItem(self.edge_img)
+
     def zero_crossing_laplacian(self,array):
         """Apply Zero Crossing on the Laplacian of the image.
 
@@ -182,92 +180,6 @@ class ImageProcessing():
             zero_crossings[zero_mask] = 1
         return zero_crossings
 
-    def noise_reduction_method_callback(self):
-        """Sets up noise reduction controls when noise reduction method is changed.
-
-        Executes when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is changed.
-        Enables ``MainWindow.spinBoxNoiseOption1`` and ``MainWindow.doubleSpinBoxNoiseOption2`` (if applicable)
-        and associated labels.  Constraints on the ranges are added to the spin boxes.
-
-        After enabling options, it runs ``noise_reduction``.
-        """
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
-
-        match algorithm:
-            case 'none':
-                # turn options off
-                self.parent.labelNoiseOption1.setEnabled(False)
-                self.parent.labelNoiseOption1.setText('')
-                self.parent.spinBoxNoiseOption1.setEnabled(False)
-                self.parent.labelNoiseOption2.setEnabled(False)
-                self.parent.labelNoiseOption2.setText('')
-                self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
-
-                self.noise_reduction(algorithm)
-                self.parent.comboBoxApplyNoiseReduction.setEnabled(False)
-                self.parent.labelApplySmoothing.setEnabled(False)
-                self.parent.checkBoxGradient.setEnabled(False)
-                self.parent.labelGradient.setEnabled(False)
-
-                self.parent.actionNoiseReduction.setEnabled(False)
-
-                self.parent.plot_style.scheduler.schedule_update()
-            case _:
-                # set option 1
-                self.parent.spinBoxNoiseOption1.blockSignals(True)
-                self.parent.labelNoiseOption1.setEnabled(True)
-                self.parent.labelNoiseOption1.setText(self.noise_red_options[algorithm]['label1'])
-                self.parent.spinBoxNoiseOption1.setEnabled(True)
-                match algorithm:
-                    case 'median':
-                        self.parent.spinBoxNoiseOption1.setRange(1,5)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(2)
-                    case 'gaussian' | 'wiener':
-                        self.parent.spinBoxNoiseOption1.setRange(1,199)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(2)
-                    case 'edge-preserving':
-                        self.parent.spinBoxNoiseOption1.setRange(0,200)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(5)
-                    case _:
-                        self.parent.spinBoxNoiseOption1.setRange(0,200)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(5)
-
-                self.parent.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
-                self.parent.spinBoxNoiseOption1.blockSignals(False)
-                #self.comboBoxApplyNoiseReduction.setEnabled(True)
-                #self.labelApplySmoothing.setEnabled(True)
-                self.parent.checkBoxGradient.setEnabled(True)
-                self.parent.labelGradient.setEnabled(True)
-                self.parent.actionNoiseReduction.setEnabled(True)
-
-                val1 = self.parent.spinBoxNoiseOption1.value()
-
-                # set option 2
-                if self.noise_red_options[algorithm]['label2'] is None:
-                    # no option 2
-                    self.parent.labelNoiseOption2.setEnabled(False)
-                    self.parent.labelNoiseOption2.setText('')
-                    self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
-
-                    self.noise_reduction(algorithm, val1)
-                else:
-                    # yes option 2
-                    self.parent.doubleSpinBoxNoiseOption2.blockSignals(True)
-                    self.parent.labelNoiseOption2.setEnabled(True)
-                    self.parent.labelNoiseOption2.setText(self.noise_red_options[algorithm]['label2'])
-                    self.parent.doubleSpinBoxNoiseOption2.setEnabled(True)
-                    match algorithm:
-                        case 'edge-preserving':
-                            self.parent.doubleSpinBoxNoiseOption2.setRange(0,1)
-                        case 'bilateral':
-                            self.parent.doubleSpinBoxNoiseOption2.setRange(0,200)
-
-                    self.parent.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
-                    self.parent.doubleSpinBoxNoiseOption2.blockSignals(False)
-
-                    val2 = self.parent.doubleSpinBoxNoiseOption2.value()
-                    self.noise_reduction(algorithm, val1, val2)
-
     def gaussian_sigma(self, ksize):
         """Sets default Gaussian sigma for Gaussian blur.
 
@@ -277,63 +189,6 @@ class ImageProcessing():
         """
         return 0.3*((ksize-1)*0.5 - 1) + 0.8
 
-    def run_noise_reduction(self):
-        """Gets parameters and runs noise reduction"""
-
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
-        if algorithm == 'none':
-            return
-
-        val1 = self.noise_red_options[algorithm]['value1']
-        if self.noise_red_options[algorithm]['label2'] is None:
-            self.noise_reduction(algorithm,val1)
-        else:
-            val2 = self.noise_red_options[algorithm]['value2']
-            self.noise_reduction(algorithm,val1,val2)
-
-    def noise_reduction_option1_callback(self):
-        """Callback executed when the first noise reduction option is changed
-
-        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by
-        the user."""
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
-
-        # get option 1
-        val1 = self.parent.spinBoxNoiseOption1.value()
-        match algorithm:
-            case 'median' | 'gaussian' | 'wiener':
-                # val1 must be odd
-                if val1 % 2 != 1:
-                    val1 = val1 + 1
-        self.noise_red_options[algorithm]['value1'] = val1
-
-        # add a second parameter (if required and run noise reduction)
-        if self.noise_red_options[algorithm]['label2'] is None:
-            self.noise_reduction(algorithm,val1)
-
-        else:
-            if algorithm == 'gaussian':
-                val2 = self.gaussian_sigma(val1)
-                self.parent.doubleSpinBoxNoiseOption2.blockSignals(True)
-                self.parent.doubleSpinBoxNoiseOption2.setValue(val2)
-                self.parent.doubleSpinBoxNoiseOption2.blockSignals(False)
-                self.noise_red_options[algorithm]['value2'] = val2
-            else:
-                val2 = self.parent.doubleSpinBoxNoiseOption2.value()
-
-            self.noise_reduction(algorithm,val1,val2)
-
-    def noise_reduction_option2_callback(self):
-        """Callback executed when the second noise reduction option is changed
-
-        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by
-        the user.  Note, not all noise reduction methods have a second option."""
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
-
-        val1 = self.parent.spinBoxNoiseOption1.value()
-        val2 = self.parent.doubleSpinBoxNoiseOption2.value()
-        self.noise_red_options[algorithm]['value2'] = val2
-        self.noise_reduction(algorithm,val1,val2)
 
     def noise_reduction(self, algorithm, val1=None, val2=None):
         """
@@ -438,7 +293,7 @@ class ImageProcessing():
         # Update or create the image item for displaying the filtered image
         self.noise_red_array = filtered_image
 
-        if self.parent.checkBoxGradient.isChecked():
+        if self.parent.checkBoxGradient.isChecked() and self.parent.comboBoxPlotType.setCurrentText('gradient map'):
             self.plot_gradient()
             return
         else:
@@ -488,7 +343,7 @@ class ImageProcessing():
             'position': None
             }
 
-        self.parent.clear_layout(self.parent.widgetSingleView.layout())
+        self.parent.canvas_widget.clear_layout(self.parent.widgetSingleView.layout())
         self.parent.widgetSingleView.layout().addWidget(canvas)
 
         self.parent.plot_tree.add_tree_item(self.plot_info)
@@ -502,7 +357,6 @@ class ImageProcessing():
         """
         # update plot type comboBox
         self.plot_flag = False
-        self.parent.comboBoxPlotType.setCurrentText('gradient map')
         self.plot_flat = True
 
         array_size = self.parent.data[self.parent.sample_id].array_size
@@ -567,7 +421,7 @@ class ImageProcessing():
             'position': None
             }
 
-        self.parent.clear_layout(self.parent.widgetSingleView.layout())
+        self.parent.canvas_widget.clear_layout(self.parent.widgetSingleView.layout())
         self.parent.widgetSingleView.layout().addWidget(canvas)
 
 
@@ -575,6 +429,8 @@ class ImageProcessing():
 class ImageProcessingUI(ImageProcessing):
     def __init__(self, parent):
         super().__init__(self)
+        self.logger_key = 'Image'
+
         self.ui = parent
 
         self.connect_widgets()
@@ -624,3 +480,154 @@ class ImageProcessingUI(ImageProcessing):
         self.ui.checkBoxGradient.setChecked(new_gradient_flag)
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
             self.ui.plot_style.schedule_update()
+
+    def gradient_checked_state_changed(self):
+        if self.parent.checkBoxGradient.isChecked():
+            self.parent.plot_style.plot_type = 'gradient map'
+        else:
+            if self.parent.comboBoxPlotType.currentText != 'field map':
+                self.parent.plot_style.plot_type = 'field map'
+
+    def noise_reduction_method_callback(self):
+        """Sets up noise reduction controls when noise reduction method is changed.
+
+        Executes when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is changed.
+        Enables ``MainWindow.spinBoxNoiseOption1`` and ``MainWindow.doubleSpinBoxNoiseOption2`` (if applicable)
+        and associated labels.  Constraints on the ranges are added to the spin boxes.
+
+        After enabling options, it runs ``noise_reduction``.
+        """
+        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+
+        match algorithm:
+            case 'none':
+                # turn options off
+                self.parent.labelNoiseOption1.setEnabled(False)
+                self.parent.labelNoiseOption1.setText('')
+                self.parent.spinBoxNoiseOption1.setEnabled(False)
+                self.parent.labelNoiseOption2.setEnabled(False)
+                self.parent.labelNoiseOption2.setText('')
+                self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
+
+                self.noise_reduction(algorithm)
+                self.parent.comboBoxApplyNoiseReduction.setEnabled(False)
+                self.parent.labelApplySmoothing.setEnabled(False)
+                self.parent.checkBoxGradient.setEnabled(False)
+                self.parent.labelGradient.setEnabled(False)
+
+                self.parent.actionNoiseReduction.setEnabled(False)
+
+                self.parent.plot_style.scheduler.schedule_update()
+            case _:
+                # set option 1
+                self.parent.spinBoxNoiseOption1.blockSignals(True)
+                self.parent.labelNoiseOption1.setEnabled(True)
+                self.parent.labelNoiseOption1.setText(self.noise_red_options[algorithm]['label1'])
+                self.parent.spinBoxNoiseOption1.setEnabled(True)
+                match algorithm:
+                    case 'median':
+                        self.parent.spinBoxNoiseOption1.setRange(1,5)
+                        self.parent.spinBoxNoiseOption1.setSingleStep(2)
+                    case 'gaussian' | 'wiener':
+                        self.parent.spinBoxNoiseOption1.setRange(1,199)
+                        self.parent.spinBoxNoiseOption1.setSingleStep(2)
+                    case 'edge-preserving':
+                        self.parent.spinBoxNoiseOption1.setRange(0,200)
+                        self.parent.spinBoxNoiseOption1.setSingleStep(5)
+                    case _:
+                        self.parent.spinBoxNoiseOption1.setRange(0,200)
+                        self.parent.spinBoxNoiseOption1.setSingleStep(5)
+
+                self.parent.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
+                self.parent.spinBoxNoiseOption1.blockSignals(False)
+                #self.comboBoxApplyNoiseReduction.setEnabled(True)
+                #self.labelApplySmoothing.setEnabled(True)
+                self.parent.checkBoxGradient.setEnabled(True)
+                self.parent.labelGradient.setEnabled(True)
+                self.parent.actionNoiseReduction.setEnabled(True)
+
+                val1 = self.parent.spinBoxNoiseOption1.value()
+
+                # set option 2
+                if self.noise_red_options[algorithm]['label2'] is None:
+                    # no option 2
+                    self.parent.labelNoiseOption2.setEnabled(False)
+                    self.parent.labelNoiseOption2.setText('')
+                    self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
+
+                    self.noise_reduction(algorithm, val1)
+                else:
+                    # yes option 2
+                    self.parent.doubleSpinBoxNoiseOption2.blockSignals(True)
+                    self.parent.labelNoiseOption2.setEnabled(True)
+                    self.parent.labelNoiseOption2.setText(self.noise_red_options[algorithm]['label2'])
+                    self.parent.doubleSpinBoxNoiseOption2.setEnabled(True)
+                    match algorithm:
+                        case 'edge-preserving':
+                            self.parent.doubleSpinBoxNoiseOption2.setRange(0,1)
+                        case 'bilateral':
+                            self.parent.doubleSpinBoxNoiseOption2.setRange(0,200)
+
+                    self.parent.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
+                    self.parent.doubleSpinBoxNoiseOption2.blockSignals(False)
+
+                    val2 = self.parent.doubleSpinBoxNoiseOption2.value()
+                    self.noise_reduction(algorithm, val1, val2)
+
+    def noise_reduction_option2_callback(self):
+        """Callback executed when the second noise reduction option is changed
+
+        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by
+        the user.  Note, not all noise reduction methods have a second option."""
+        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+
+        val1 = self.parent.spinBoxNoiseOption1.value()
+        val2 = self.parent.doubleSpinBoxNoiseOption2.value()
+        self.noise_red_options[algorithm]['value2'] = val2
+        self.noise_reduction(algorithm,val1,val2)
+
+    def run_noise_reduction(self):
+        """Gets parameters and runs noise reduction"""
+
+        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+        if algorithm == 'none':
+            return
+
+        val1 = self.noise_red_options[algorithm]['value1']
+        if self.noise_red_options[algorithm]['label2'] is None:
+            self.noise_reduction(algorithm,val1)
+        else:
+            val2 = self.noise_red_options[algorithm]['value2']
+            self.noise_reduction(algorithm,val1,val2)
+
+    def noise_reduction_option1_callback(self):
+        """Callback executed when the first noise reduction option is changed
+
+        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by
+        the user."""
+        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+
+        # get option 1
+        val1 = self.parent.spinBoxNoiseOption1.value()
+        match algorithm:
+            case 'median' | 'gaussian' | 'wiener':
+                # val1 must be odd
+                if val1 % 2 != 1:
+                    val1 = val1 + 1
+        self.noise_red_options[algorithm]['value1'] = val1
+
+        # add a second parameter (if required and run noise reduction)
+        if self.noise_red_options[algorithm]['label2'] is None:
+            self.noise_reduction(algorithm,val1)
+
+        else:
+            if algorithm == 'gaussian':
+                val2 = self.gaussian_sigma(val1)
+                self.parent.doubleSpinBoxNoiseOption2.blockSignals(True)
+                self.parent.doubleSpinBoxNoiseOption2.setValue(val2)
+                self.parent.doubleSpinBoxNoiseOption2.blockSignals(False)
+                self.noise_red_options[algorithm]['value2'] = val2
+            else:
+                val2 = self.parent.doubleSpinBoxNoiseOption2.value()
+
+            self.noise_reduction(algorithm,val1,val2)

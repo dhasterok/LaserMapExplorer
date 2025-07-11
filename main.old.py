@@ -3782,7 +3782,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     # widget.setParent(None)      # Set the widget's parent to None
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
-            list = self.comboBoxMVPlots.allItems()
+            list = self.ui.comboBoxMVPlots.allItems()
             if not list:
                 return
 
@@ -3792,7 +3792,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # get plot_info from tree location and
                 # reset view to False and position to none
-                plot_info = self.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
+                plot_info = self.plot_tree.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
                 #print(plot_info)
                 plot_info['view'][1] = False
                 plot_info['position'] = None

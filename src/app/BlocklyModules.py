@@ -35,7 +35,7 @@ from src.ui.MainWindow import Ui_MainWindow
 from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
-from src.common.DataAnalysis import Clustering, DimensionalReduction
+from src.app.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotViewerWindow import PlotViewer

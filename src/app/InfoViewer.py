@@ -641,6 +641,11 @@ class MetadataTab():
         global PRECISION
         self.metadata_table.blockSignals(True)
 
+        # clear contents to avoid repeated check box bug
+        self.metadata_table.clear()
+        self.metadata_table.setRowCount(0)
+        self.metadata_table.setColumnCount(0)
+
         data = self.data.processed_data.column_attributes
 
         # Determine the selected display option

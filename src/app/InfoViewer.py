@@ -4,7 +4,7 @@ from src.app.config import BASEDIR
 import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
-
+import src.common.format as fmt
 from PyQt6.QtCore import Qt, QSize, QUrl
 from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
@@ -608,7 +608,7 @@ class MetadataTab():
         # Track selected columns
         self.metadata_selected_columns = []
 
-        self.field_combobox.currentIndexChanged.connect(self.update_table)
+        self.field_combobox.activated.connect(self.update_table)
 
         data = self.data.processed_data
         data.attribute_callback = self.on_attribute_batch_changed
@@ -704,7 +704,12 @@ class MetadataTab():
 
                 editor = self.editable_rows.get(row_key)
 
-                if editor == bool:
+                if not editor: #item is not editable 
+                    item = QTableWidgetItem(str(value))
+                    item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    self.metadata_table.setItem(row_idx, col_idx, item)
+
+                elif editor is bool:
                     checkbox = QCheckBox()
                     checkbox.setChecked(bool(value))
                     checkbox.stateChanged.connect(lambda state, rk=row_key, ck=col_key: self.update_column_attributes_on_checkbox_state(state, rk, ck))
@@ -718,28 +723,18 @@ class MetadataTab():
                     combobox.currentTextChanged.connect(lambda text, rk=row_key, ck=col_key: self.update_column_attributes_on_combobox_change(text, rk, ck))
                     self.metadata_table.setCellWidget(row_idx, col_idx, combobox)
 
-                else:
-                    is_editable = row_key in self.editable_rows
-
-                    # Check if value is a float (or can be cast to one)
-                    try:
-                        float_value = float(value)
-                        is_float = True
-                    except (ValueError, TypeError):
-                        is_float = False
-
-                    if is_editable and is_float:
-                        item = QTableWidgetItem(f"{float_value:.{PRECISION}g}")
-                        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-                        self.metadata_table.setItem(row_idx, col_idx, item)
+                elif editor is float:# Check if value is a float
+                    item = QTableWidgetItem(f"{value:.{PRECISION}g}")
+                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                    self.metadata_table.setItem(row_idx, col_idx, item)
                         
-                    else:
-                        item = QTableWidgetItem(str(value))
-                        if is_editable:
-                            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-                        else:
-                            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                        self.metadata_table.setItem(row_idx, col_idx, item)
+                elif editor is str: #editable string item
+                    item = QTableWidgetItem(str(value))
+                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+                    self.metadata_table.setItem(row_idx, col_idx, item)
+                
+                else: 
+                    pass
 
         # Add a delegate to handle float formatting
         # and ensure edited 'plot_min' and 'plot_max' are within bounds
@@ -832,20 +827,20 @@ class MetadataTab():
         row_key = self.metadata_table.verticalHeaderItem(row).text()
         col_key = self.metadata_table.horizontalHeaderItem(col).text()
 
+        attibute_dtype =  self.editable_rows.get(row_key)
         # Only update editable rows
-        if self.editable_rows.get(row_key) == bool:
+        if attibute_dtype == bool:
             return  # Skip boolean — handled via checkbox callback
 
         # Update column_attributes
         if col_key not in self.data.processed_data.column_attributes:
             self.data.processed_data.column_attributes[col_key] = {}
         
-        if row_key in ['plot_min', 'plot_max']:
-
-            amin = np.min(self.data.processed_data[col_key])
-            amax = np.max(self.data.processed_data[col_key])
-
-        self.data.processed_data.column_attributes[col_key][row_key] = item.text()
+        # store attribute in specified dtype
+        if attibute_dtype == float:
+            self.data.processed_data.column_attributes[col_key][row_key] = fmt.oround(float(item.text()), order=2, toward=0)
+        else:
+            self.data.processed_data.column_attributes[col_key][row_key] = item.text()
 
     def on_attribute_batch_changed(self, columns, attribute, values):
         # Map row keys and column keys to indices
@@ -1088,10 +1083,8 @@ class FloatItemDelegate(QStyledItemDelegate):
                 col_data = self.processed_data[col_key]
                 amin, amax = np.min(col_data), np.max(col_data)
                 validator.setRange(amin, amax)
-            else:
-                validator.setRange(-1e10, 1e10)
 
-            validator.setDecimals(self.precision)
-            editor.setValidator(validator)
+                validator.setDecimals(self.precision)
+                editor.setValidator(validator)
 
         return editor

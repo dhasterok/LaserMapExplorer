@@ -973,7 +973,7 @@ class Styling(Observable):
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""
-        return isinstance(text, str) and text in ['linear', 'log', 'logit', 'symlog']
+        return isinstance(text, str) and text in self.app_data.scale_options
     
     def _is_valid_hex_color(self, hex_color):
         """Validates if a given string is a valid hex color code."""
@@ -2393,7 +2393,7 @@ class StylingDock(Styling):
         else:
             # set color scale options to linear/log
             ui.comboBoxCScale.clear()
-            ui.comboBoxCScale.addItems(['linear','log'])
+            ui.comboBoxCScale.addItems(self.app_data.scale_options)
             style['CScale'] = 'linear'
             ui.comboBoxCScale.setCurrentText(style['CScale'])
             
@@ -2523,16 +2523,8 @@ class StylingDock(Styling):
                 ui.actionSwapAxes.setEnabled(False)
                 if ui.comboBoxCorrelationMethod.currentText() == 'None':
                     ui.comboBoxCorrelationMethod.setCurrentText('Pearson')
-            case 'cluster performance':
-                ui.labelClusterMax.show()
-                ui.spinBoxClusterMax.show()
-                ui.labelNClusters.hide()
-                ui.spinBoxNClusters.hide()
-            case 'cluster' | 'cluster score map':
-                ui.labelClusterMax.hide()
-                ui.spinBoxClusterMax.hide()
-                ui.labelNClusters.show()
-                ui.spinBoxNClusters.show()
+            case 'cluster performance' | 'cluster' | 'cluster score map':
+                self.ui.clustering.toggle_cluster_widgets()
             case _:
                 ui.actionSwapAxes.setEnabled(False)
 

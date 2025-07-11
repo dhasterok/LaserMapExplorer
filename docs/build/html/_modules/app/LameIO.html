@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,19 +388,19 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.LameIO</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">pickle</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QMessageBox</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QPixmap</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.app.SpotImporter</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">SpotImporter</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.app.MapImporter</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">MapImporter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.DataHandling</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleObj</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Status</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusMessageManager</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QMessageBox</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QPixmap</span>
+<span class="kn">import</span> <span class="nn">src.app.SpotImporter</span> <span class="k">as</span> <span class="nn">SpotImporter</span>
+<span class="kn">import</span> <span class="nn">src.app.MapImporter</span> <span class="k">as</span> <span class="nn">MapImporter</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
+<span class="kn">from</span> <span class="nn">src.common.DataHandling</span> <span class="kn">import</span> <span class="n">SampleObj</span>
+<span class="kn">from</span> <span class="nn">src.common.Status</span> <span class="kn">import</span> <span class="n">StatusMessageManager</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 <span class="c1"># -------------------------------------</span>
 <span class="c1"># File I/O related functions</span>
 <span class="c1"># -------------------------------------</span>
@@ -408,7 +408,7 @@
 <div class="viewcode-block" id="LameIO">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;IO&#39;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">LameIO</span><span class="p">():</span>
+<span class="k">class</span> <span class="nc">LameIO</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles most I/O for the main window of LaME</span>
 
 <span class="sd">    Parameters</span>
@@ -416,7 +416,7 @@
 <span class="sd">    parent : QObject, optional</span>
 <span class="sd">        MainWindow UI, by default None</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connect_actions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connect_actions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -438,7 +438,7 @@
 
 <div class="viewcode-block" id="LameIO.open_sample">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.open_sample">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">open_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">open_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens a single \\*.lame.csv file.</span>
 
 <span class="sd">        Opens files created by MapImporter.</span>
@@ -471,7 +471,7 @@
 
 <div class="viewcode-block" id="LameIO.open_directory">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.open_directory">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">open_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">open_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Open directory with samples in \\*.lame.csv files.</span>
 
 <span class="sd">        Executes on ``MainWindow.actionOpen`` and ``MainWindow.actionOpenDirectory``.  Opening a directory, enables</span>
@@ -518,7 +518,7 @@
 
 <div class="viewcode-block" id="LameIO.import_spots">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.import_spots">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">import_spots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">import_spots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Import a data file with spot data.&quot;&quot;&quot;</span>
         <span class="c1"># import spot dialog</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spotDialog</span> <span class="o">=</span> <span class="n">SpotImporter</span><span class="o">.</span><span class="n">SpotImporter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
@@ -532,7 +532,7 @@
 
 <div class="viewcode-block" id="LameIO.populate_spot_table">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.populate_spot_table">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">populate_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">populate_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Populates spot table when spot file is opened or sample is changed</span>
 
 <span class="sd">        Populates ``MainWindow.tableWidgetSpots``.</span>
@@ -556,7 +556,7 @@
 
 <div class="viewcode-block" id="LameIO.save_project">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.save_project">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save a project session</span>
 
 <span class="sd">        Saves (mostly) everything for recalling later.</span>
@@ -618,7 +618,7 @@
 
 <div class="viewcode-block" id="LameIO.open_project">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.open_project">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">open_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">open_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Open a project session.</span>
 
 <span class="sd">        Restores a project session: data, analysis, and plots.</span>
@@ -732,7 +732,7 @@
 
 <div class="viewcode-block" id="LameIO.import_files">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.import_files">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">import_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">import_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens an import dialog from ``MapImporter`` to open selected data directories.&quot;&quot;&quot;</span>
         <span class="c1"># import data dialog</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">importDialog</span> <span class="o">=</span> <span class="n">MapImporter</span><span class="o">.</span><span class="n">MapImporter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
@@ -748,7 +748,7 @@
 
 <div class="viewcode-block" id="LameIO.initialize_sample_object">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.initialize_sample_object">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sample_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outlier_method</span><span class="p">,</span> <span class="n">negative_method</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">initialize_sample_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outlier_method</span><span class="p">,</span> <span class="n">negative_method</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes sample objects for each sample in the application.</span>
 
 <span class="sd">        This method creates a sample object for each sample in the application and stores it in the</span>
@@ -777,7 +777,7 @@
     
 <div class="viewcode-block" id="LameIO.images_to_dataframe">
 <a class="viewcode-back" href="../../generated/app.LameIO.html#app.LameIO.LameIO.images_to_dataframe">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">images_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">images_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads image files into a data structure and saves in LaME format.&quot;&quot;&quot;</span>
         <span class="c1"># Get base directory name for output CSV</span>
         <span class="n">dir_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">directory</span><span class="p">))</span>

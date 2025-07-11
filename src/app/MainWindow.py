@@ -645,7 +645,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # run clustering before changing plot_type if user selects clustering tab
         if tab_id == self.left_tab['cluster'] :
-            self.compute_clusters_update_groups()
+            self.clustering.compute_clusters_update_groups()
             plot_clusters(self,data,self.app_data,self.plot_style)
         # run dim red before changing plot_type if user selects dim red tab
         if tab_id == self.left_tab['multidim'] :
@@ -655,18 +655,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_plot_type_combobox_options()
         self.plot_style.plot_type = self.field_control_settings[tab_id]['plot_list'][self.field_control_settings[tab_id]['saved_index']]
 
-        match self.plot_style.plot_type:
-            case 'cluster' | 'cluster score map':
-                self.labelClusterMax.hide()
-                self.spinBoxClusterMax.hide()
-                self.labelNClusters.show()
-                self.spinBoxNClusters.show()
-            case 'cluster performance':
-                self.labelClusterMax.show()
-                self.spinBoxClusterMax.show()
-                self.labelNClusters.hide()
-                self.spinBoxNClusters.hide()
-            
+        if self.toolBox.currentIndex() == self.left_tab['cluster']:
+            self.clustering.toggle_cluster_widgets()
+
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
         # trigger update to plot
@@ -966,30 +957,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'quick view':
                     self.canvas_tab.update({'qv': tid})
 
-    def toggle_cluster_parameters(self,method):
-        """Toggles enabled state of cluster related UI elements.
-
-        Toggles enabled state of clustering UI elements based on cluster method.
-
-        Parameters
-        ----------
-        method : str
-            _description_
-
-        Errors
-        """
-        match method:
-            case 'k-means':
-                self.horizontalSliderClusterExponent.setEnabled(False)
-                self.labelClusterExponent.setEnabled(False)
-                self.labelClusterDistance.setEnabled(False)
-            case 'fuzzy c-means':
-                self.horizontalSliderClusterExponent.setEnabled(True)
-                self.labelClusterExponent.setEnabled(True)
-                self.labelClusterDistance.setEnabled(True)
-            case _:
-                ValueError(f"Unknown clustering method {method}")
-        
     # -------------------------------
     # UI update functions
     # Executed when a property is changed
@@ -1641,7 +1608,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
             case 'cluster' | 'cluster score map':
-                self.compute_clusters_update_groups()
+                self.clustering.compute_clusters_update_groups()
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)
 
             case 'cluster performance':
@@ -1659,31 +1626,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
 
-    def compute_clusters_update_groups(self):
-        """
-        Computes clusters and updates cluster groups.
-
-        This method:
-        1. Checks if clustering needs to be updated based on the application data flags.
-        2. Invokes the clustering computation if necessary.
-        3. Applies updated cluster colors and refreshes the cluster tab in the Mask Dock.
-        """
-        data = self.data[self.app_data.sample_id]
-        method = self.app_data.cluster_method
-        if self.app_data.update_cluster_flag or \
-                data.processed_data[method].empty or \
-                (method not in list(data.processed_data.columns)):
-            # compute clusters
-            self.statusbar.showMessage('Computing clusters')
-            self.clustering.compute_clusters(data, self.app_data, max_clusters = None)
-            # update cluster colors
-            self.app_data.cluster_group_changed(data, self.plot_style)
-            # enable cluster tab actions and update group table
-            if hasattr(self, 'mask_dock'):
-                self.mask_dock.cluster_tab.toggle_cluster_actions()
-                self.mask_dock.cluster_tab.update_table_widget()
-
-            self.statusbar.showMessage('Clustering successful')
 
     # -------------------------------------
     # Dialogs and Windows

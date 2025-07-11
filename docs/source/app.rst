@@ -20,6 +20,14 @@ app.AnalyteSelectionWindow module
    :undoc-members:
    :show-inheritance:
 
+app.CanvasWidget module
+--------------------
+
+.. automodule:: app.CanvasWidget
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 app.CropImage module
 --------------------
 
@@ -32,6 +40,14 @@ app.CustomTableWidget module
 ----------------------------
 
 .. automodule:: app.CustomTableWidget
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.DataAnalysis module
+----------------------------
+
+.. automodule:: app.DataAnalysis
    :members:
    :undoc-members:
    :show-inheritance:

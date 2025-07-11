@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,27 +388,27 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.CustomMplCanvas</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtGui</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QDialogButtonBox</span>
 <span class="p">)</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Qt5Agg&#39;</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qtagg</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.figure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qtagg</span> <span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
 
 
 <span class="c1"># Matplotlib Canvas object</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="SimpleMplCanvas">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.SimpleMplCanvas">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SimpleMplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SimpleMplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib canvas object for non-interactive plots</span>
 
 <span class="sd">    Parameters</span>
@@ -424,7 +424,7 @@
 <span class="sd">    proj : str, optional</span>
 <span class="sd">        Projection, by default None</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">proj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;radar&#39;</span><span class="p">)</span>
@@ -438,7 +438,7 @@
 
 <div class="viewcode-block" id="MplCanvas">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib canvas object for interactive plots</span>
 
 <span class="sd">    Parameters</span>
@@ -454,7 +454,7 @@
 <span class="sd">    proj : str, optional</span>
 <span class="sd">        Projection, by default None</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -515,7 +515,7 @@
 
 <div class="viewcode-block" id="MplCanvas.enable_distance_mode">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.enable_distance_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">enable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">enable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="c1"># Connect the button and canvas events for distance measurement</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distanceOnClick</span><span class="p">)</span>
@@ -524,7 +524,7 @@
 
 <div class="viewcode-block" id="MplCanvas.disable_distance_mode">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.disable_distance_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">disable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">disable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_move</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span> <span class="o">=</span> <span class="kc">None</span>
@@ -534,21 +534,21 @@
 
 <div class="viewcode-block" id="MplCanvas.enterEvent">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.enterEvent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c1"># Set cursor to cross when the mouse enters the window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CursorShape</span><span class="o">.</span><span class="n">CrossCursor</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.leaveEvent">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.leaveEvent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c1"># Reset cursor to default when the mouse leaves the window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unsetCursor</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.mouseLocation">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.mouseLocation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mouseLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mouseLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get mouse location on axes for display</span>
 
 <span class="sd">        Displays the location and value of a map in ``MainWindow.widgetPlotInfoSV``.</span>
@@ -616,7 +616,7 @@
 
 <div class="viewcode-block" id="MplCanvas.set_initial_extent">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.set_initial_extent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_initial_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_initial_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initial extent of the plot</span>
 
 <span class="sd">        Sets the initital extent of the plot.</span>
@@ -629,7 +629,7 @@
 
 <div class="viewcode-block" id="MplCanvas.restore_view">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.restore_view">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">restore_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">restore_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restores the initial extent</span>
 
 <span class="sd">        Restores the initial extent when ``MainWindow.toolButtonHome`` is clicked.</span>
@@ -645,7 +645,7 @@
 
 <div class="viewcode-block" id="MplCanvas.load_figure">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.load_figure">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load existing figure</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -660,7 +660,7 @@
 
 <div class="viewcode-block" id="MplCanvas.setCursorPosition">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.setCursorPosition">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the cursor position on an MplCanvas</span>
 
 <span class="sd">        Mouse listener</span>
@@ -670,7 +670,7 @@
 
 <div class="viewcode-block" id="MplCanvas.textOnClick">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.textOnClick">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">textOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">textOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds text to plot at clicked position</span>
 
 <span class="sd">        Only adds a text to a plot when the Annotate button is checked.</span>
@@ -704,7 +704,7 @@
 
 <div class="viewcode-block" id="MplCanvas.calculate_distance">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.calculate_distance">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculuates distance on a figure</span>
 
 <span class="sd">        Parameters</span>
@@ -731,7 +731,7 @@
 
 <div class="viewcode-block" id="MplCanvas.plot_line">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.plot_line">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots line from distance calculation</span>
 
 <span class="sd">        Parameters</span>
@@ -758,7 +758,7 @@
  
 <div class="viewcode-block" id="MplCanvas.plot_text">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.plot_text">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds distance to plot and updates distance label</span>
 
 <span class="sd">        Updates distance in ``MainWindow.labelSVInfoDistance`` and adds distance</span>
@@ -819,7 +819,7 @@
 
 <div class="viewcode-block" id="MplCanvas.on_click">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.on_click">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle left/right clicks for distance calculation, polygons and profiles.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
             <span class="k">return</span>
@@ -844,7 +844,7 @@
 
 <div class="viewcode-block" id="MplCanvas.distanceOnClick">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.distanceOnClick">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distanceOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distanceOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates static endpoints of distance measuring line.</span>
 
 <span class="sd">        Updates the endpoint of the distance measuring line and calls methods that </span>
@@ -876,7 +876,7 @@
 
 <div class="viewcode-block" id="MplCanvas.on_mouse_move">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.on_mouse_move">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_mouse_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_mouse_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Optional: handle dynamic feedback (e.g., while moving a polygon vertex).&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
             <span class="k">return</span>
@@ -903,7 +903,7 @@
 
 <div class="viewcode-block" id="MplCanvas.distanceOnMove">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.distanceOnMove">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distanceOnMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distanceOnMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates dynamic second point of distance measuring line.</span>
 
 <span class="sd">        Updates the second endpoint of the distance measuring line and calls methods that </span>
@@ -929,7 +929,7 @@
 
 <div class="viewcode-block" id="MplCanvas.distance_reset">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.distance_reset">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distance_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distance_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets distance variables and clears plot</span>
 
 <span class="sd">        Sets ``MplCanvas.first_point`` to ``None``, ``MplCanvas.line`` and ``MplCanvas.dtext``.</span>
@@ -952,8 +952,8 @@
 
 <div class="viewcode-block" id="MplDialog">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplDialog">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MplDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MplDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A plot dialog</span>
 
 <span class="sd">        This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.</span>

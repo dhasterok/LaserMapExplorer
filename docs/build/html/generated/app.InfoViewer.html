@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -428,13 +428,16 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.FieldTab" title="app.InfoViewer.FieldTab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FieldTab</span></code></a>(parent)</p></td>
 <td><p>Creates the field info tab for plots and annotations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.InfoDock" title="app.InfoViewer.InfoDock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoDock</span></code></a>(parent[, title])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.FloatItemDelegate" title="app.InfoViewer.FloatItemDelegate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FloatItemDelegate</span></code></a>(parent, row_labels, ...[, ...])</p></td>
+<td><p>Custom item delegate for handling float input in QTableWidget. This delegate allows for editing of float values in the table, with validation to ensure that the input is within a specified range and has a defined precision. It is particularly useful for fields like 'plot_min' and 'plot_max' where the values need to be constrained to the actual data range. :param metadata_table: The table where the delegate will be applied. :type metadata_table: QTableWidget :param row_labels: List of row labels corresponding to the table rows (e.g., ['min', 'max', 'plot_min', 'plot_max', ...]). :type row_labels: list :param column_keys: List of column keys corresponding to the table columns (e.g., ['Vp', 'Resistivity']). :type column_keys: list :param data: The full dataset containing processed data for each sample. :type data: dict :param sample_id: The ID of the sample currently being viewed or edited. :type sample_id: str :param special_rows: A set of special row labels that require specific validation (e.g., 'plot_min',                      'plot_max'). Defaults to None, which means no special rows. :type special_rows: set, optional :param precision: The number of decimal places to which float values should be rounded. Defaults to 3. :type precision: int, optional.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.InfoDock" title="app.InfoViewer.InfoDock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoDock</span></code></a>(parent[, title])</p></td>
 <td><p>Dockable widget providing data insight tools through multiple interactive tabs.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.MetadataTab" title="app.InfoViewer.MetadataTab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MetadataTab</span></code></a>(parent)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.MetadataTab" title="app.InfoViewer.MetadataTab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MetadataTab</span></code></a>(parent)</p></td>
 <td><p>Creates the metadata tab for plots and annotations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.PlotInfoTab" title="app.InfoViewer.PlotInfoTab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PlotInfoTab</span></code></a>(parent)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.PlotInfoTab" title="app.InfoViewer.PlotInfoTab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PlotInfoTab</span></code></a>(parent)</p></td>
 <td><p>Plot Info Tab UI for displaying plot metadata and managing annotations.</p></td>
 </tr>
 </tbody>
@@ -491,6 +494,229 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="app.InfoViewer.FieldTab.update_field_table">
 <span class="sig-name descname"><span class="pre">update_field_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FieldTab.update_field_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FieldTab.update_field_table" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="app.InfoViewer.FloatItemDelegate">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">FloatItemDelegate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FloatItemDelegate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FloatItemDelegate" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QStyledItemDelegate</span></code></p>
+<p>Custom item delegate for handling float input in QTableWidget.
+This delegate allows for editing of float values in the table, with validation
+to ensure that the input is within a specified range and has a defined precision.
+It is particularly useful for fields like ‘plot_min’ and ‘plot_max’ where the values
+need to be constrained to the actual data range.
+:param metadata_table: The table where the delegate will be applied.
+:type metadata_table: QTableWidget
+:param row_labels: List of row labels corresponding to the table rows (e.g., [‘min’, ‘max’, ‘plot_min’, ‘plot_max’, …]).
+:type row_labels: list
+:param column_keys: List of column keys corresponding to the table columns (e.g., [‘Vp’, ‘Resistivity’]).
+:type column_keys: list
+:param data: The full dataset containing processed data for each sample.
+:type data: dict
+:param sample_id: The ID of the sample currently being viewed or edited.
+:type sample_id: str
+:param special_rows: A set of special row labels that require specific validation (e.g., ‘plot_min’,</p>
+<blockquote>
+<div><p>‘plot_max’). Defaults to None, which means no special rows.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>precision</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The number of decimal places to which float values should be rounded. Defaults to 3.</p>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">blockSignals</span></code>(self, b)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">connectNotify</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.FloatItemDelegate.createEditor" title="app.InfoViewer.FloatItemDelegate.createEditor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createEditor</span></code></a>(self, parent, option, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">customEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deleteLater</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">destroyEditor</span></code>(self, editor, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnect</span></code>(-&gt; bool disconnect)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnectNotify</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">displayText</span></code>(self, value, locale)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dumpObjectInfo</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dumpObjectTree</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dynamicPropertyNames</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">editorEvent</span></code>(self, event, model, option, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">event</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eventFilter</span></code>(self, object, event)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findChild</span></code>(-&gt; QObjectT)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findChildren</span></code>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">helpEvent</span></code>(self, event, view, option, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inherits</span></code>(self, classname)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initStyleOption</span></code>(self, option, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">installEventFilter</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isQuickItemType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isSignalConnected</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWidgetType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWindowType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">itemEditorFactory</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">killTimer</span></code>(self, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metaObject</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveToThread</span></code>(self, thread)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">objectName</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">paint</span></code>(self, painter, option, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyqtConfigure</span></code>(...)</p></td>
+<td><p>Each keyword argument is either the name of a Qt property or a Qt signal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">receivers</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeEventFilter</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sender</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">senderSignalIndex</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setEditorData</span></code>(self, editor, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setItemEditorFactory</span></code>(self, factory)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setModelData</span></code>(self, editor, model, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setObjectName</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setParent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setProperty</span></code>(self, name, value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">signalsBlocked</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sizeHint</span></code>(self, option, index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">startTimer</span></code>(self, interval[, timerType])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateEditorGeometry</span></code>(self, editor, option, index)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><strong>EndEditHint</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>closeEditor</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>commitData</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>destroyed</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>objectNameChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>sizeHintChanged</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.InfoViewer.FloatItemDelegate.createEditor">
+<span class="sig-name descname"><span class="pre">createEditor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QWidget</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QStyleOptionViewItem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QModelIndex</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QWidget</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/app/InfoViewer.html#FloatItemDelegate.createEditor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FloatItemDelegate.createEditor" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1895,6 +2121,10 @@ up to a maximum of 16 significant figures.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.DataFrameTab"><code class="docutils literal notranslate"><span class="pre">DataFrameTab</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.FieldTab"><code class="docutils literal notranslate"><span class="pre">FieldTab</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.FieldTab.update_field_table"><code class="docutils literal notranslate"><span class="pre">FieldTab.update_field_table()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.FloatItemDelegate"><code class="docutils literal notranslate"><span class="pre">FloatItemDelegate</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.FloatItemDelegate.createEditor"><code class="docutils literal notranslate"><span class="pre">FloatItemDelegate.createEditor()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.InfoDock"><code class="docutils literal notranslate"><span class="pre">InfoDock</span></code></a><ul class="nav section-nav flex-column">

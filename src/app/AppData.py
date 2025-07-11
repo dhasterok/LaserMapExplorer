@@ -15,6 +15,10 @@ class AppData(Observable):
         self.logger_key = 'Data'
 
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
+
+        # options for scaling data
+        self.scale_options = ['linear', 'log', 'symlog']
+
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
         self.selected_directory = ''
@@ -733,6 +737,11 @@ class AppData(Observable):
 
     ### Cluster Properties ###
     @property
+    def cluster_method_options(self):
+        """Returns a list of available clustering methods."""
+        return list(self.cluster_dict.keys())
+
+    @property
     def cluster_method(self):
         return self._cluster_method
     
@@ -740,7 +749,7 @@ class AppData(Observable):
     def cluster_method(self, method):
         if method == self._cluster_method:
             return
-        elif method not in list(self.cluster_dict.keys()):
+        elif method not in self.cluster_method_options:
             ValueError(f"Unknown cluster type ({method})")
 
         self._cluster_method = method

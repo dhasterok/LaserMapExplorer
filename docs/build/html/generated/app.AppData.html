@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -422,6 +422,8 @@
 <dt><strong>cluster_distance</strong></dt><dd></dd>
 <dt><strong>cluster_exponent</strong></dt><dd></dd>
 <dt><strong>cluster_method</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>Returns a list of available clustering methods.</p>
+</dd>
 <dt><strong>cluster_seed</strong></dt><dd></dd>
 <dt><strong>corr_method</strong></dt><dd></dd>
 <dt><strong>corr_squared</strong></dt><dd></dd>
@@ -435,6 +437,7 @@
 <dt><strong>dim_red_y</strong></dt><dd></dd>
 <dt><strong>dim_red_y_max</strong></dt><dd></dd>
 <dt><strong>dim_red_y_min</strong></dt><dd></dd>
+<dt><strong>edge_detection_method</strong></dt><dd></dd>
 <dt><strong>equalize_color_scale</strong></dt><dd></dd>
 <dt><a class="reference internal" href="#app.AppData.AppData.field_dict" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>A dictionary of the field_types in the self.data[sample_id].processed_data dataframe, with “coord” excluded.</p>
 </dd>
@@ -598,6 +601,12 @@ it is separately handled and assigned the last color.</p>
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_method_options">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_method_options</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_method_options" title="Link to this definition">#</a></dt>
+<dd><p>Returns a list of available clustering methods.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.cluster_seed">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_seed</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_seed" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -656,6 +665,11 @@ it is separately handled and assigned the last color.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y_min">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_min" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="app.AppData.AppData.edge_detection_method">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_detection_method</span></span><a class="headerlink" href="#app.AppData.AppData.edge_detection_method" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -995,6 +1009,7 @@ by default <cite>‘all’</cite></p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_exponent"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_exponent</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_group_changed"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_group_changed()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_method"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_method_options"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method_options</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_seed"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_seed</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.corr_method"><code class="docutils literal notranslate"><span class="pre">AppData.corr_method</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.corr_squared"><code class="docutils literal notranslate"><span class="pre">AppData.corr_squared</span></code></a></li>
@@ -1007,6 +1022,7 @@ by default <cite>‘all’</cite></p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y_max"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y_max</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y_min"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y_min</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.edge_detection_method"><code class="docutils literal notranslate"><span class="pre">AppData.edge_detection_method</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.equalize_color_scale"><code class="docutils literal notranslate"><span class="pre">AppData.equalize_color_scale</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.field_dict"><code class="docutils literal notranslate"><span class="pre">AppData.field_dict</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.generate_random_seed"><code class="docutils literal notranslate"><span class="pre">AppData.generate_random_seed()</span></code></a></li>

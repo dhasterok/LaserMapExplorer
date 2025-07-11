@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,20 +388,20 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.AnalyteSelectionWindow</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Qt</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">QImage</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">QBrush</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.ui.AnalyteSelectionDialog</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ui_Dialog</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">RotatedHeaderView</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Qt</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QImage</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">QBrush</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">src.ui.AnalyteSelectionDialog</span> <span class="kn">import</span> <span class="n">Ui_Dialog</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">RotatedHeaderView</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
 <span class="c1"># Analyte GUI</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="AnalyteDialog">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Selector&#39;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">AnalyteDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_Dialog</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">AnalyteDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_Dialog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates an dialog to select analytes and ratios of analytes</span>
 
 <span class="sd">    Creates a dialog with a matrix analytes vs. analytes with a background given by a correlation matrix.</span>
@@ -423,7 +423,7 @@
 <span class="sd">        _description_</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">listUpdated</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;Main&#39;</span><span class="p">):</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span> <span class="c1">#initialisng with no parent widget</span>
         <span class="k">else</span><span class="p">:</span>
@@ -547,7 +547,7 @@
     
 <div class="viewcode-block" id="AnalyteDialog.update_window_title">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.update_window_title">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_window_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_window_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the window title based on the filename and unsaved changes.&quot;&quot;&quot;</span>
         <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_title</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unsaved_changes</span><span class="p">:</span>
@@ -557,7 +557,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.done_selection">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.done_selection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">done_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">done_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes when `Done` button is clicked.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unsaved_changes</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span>
@@ -581,7 +581,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.cancel_selection">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.cancel_selection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cancel_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">cancel_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handles the Cancel button click.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unsaved_changes</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span>
@@ -602,7 +602,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.closeEvent">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.closeEvent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Overrides the close event to check for unsaved changes.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unsaved_changes</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span>
@@ -623,7 +623,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.update_all_combos">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.update_all_combos">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_all_combos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_all_combos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the scale combo box (``comboBoxScale``) and the combo boxes within ``tableWidgetSelected``.&quot;&quot;&quot;</span>
         <span class="c1"># Get the currently selected value in comboBoxScale</span>
         <span class="n">selected_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxScale</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
@@ -641,7 +641,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.update_scale">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.update_scale">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Initialize a variable to store the first combo box&#39;s selection</span>
@@ -673,7 +673,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.calculate_correlation">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.calculate_correlation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_correlation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_correlation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates correlation coefficient between two analytes.</span>
 
 <span class="sd">        The correlation coefficient is used to color the background between two analytes displayed</span>
@@ -692,7 +692,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.color_cell">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.color_cell">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">color_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">correlation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">color_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">correlation</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Colors cells in the correlation table&quot;&quot;&quot;</span>
         <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_color_for_correlation</span><span class="p">(</span><span class="n">correlation</span><span class="p">)</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetAnalytes</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
@@ -704,7 +704,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.get_color_for_correlation">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.get_color_for_correlation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_color_for_correlation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">correlation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_color_for_correlation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">correlation</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes color associated with a given correlation value.</span>
 
 <span class="sd">        Parameters</span>
@@ -732,7 +732,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.create_colorbar">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.create_colorbar">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_colorbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_colorbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Displays a colorbar for the ``tableWidgetAnalytes``.&quot;&quot;&quot;</span>        
         <span class="n">colorbar_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_colorbar_image</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>  <span class="c1"># Width, Height of colorbar</span>
         <span class="n">colorbar_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -742,7 +742,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.generate_colorbar_image">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.generate_colorbar_image">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">generate_colorbar_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">generate_colorbar_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a colorbar for the ``tableWidgetAnalytes``.</span>
 
 <span class="sd">        Parameters</span>
@@ -782,7 +782,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.toggle_cell_selection">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.toggle_cell_selection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_cell_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">toggle_cell_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggles cell selection in `tableWidgetAnalytes` and adds or removes from list of</span>
 <span class="sd">        analytes and ratios used by `MainWindow` methods.</span>
 
@@ -811,7 +811,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.add_analyte_to_list">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.add_analyte_to_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_analyte_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_analyte_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds an analyte or ratio to the list to use for analyses in ``MainWindow`` related methods.</span>
 
 <span class="sd">        Parameters</span>
@@ -845,7 +845,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.remove_analyte_from_list">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.remove_analyte_from_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">remove_analyte_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">remove_analyte_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes an analyte or ratio from the list to use in ``MainWindow`` related methods.</span>
 
 <span class="sd">        Parameters</span>
@@ -875,7 +875,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.get_selected_data">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.get_selected_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_selected_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_selected_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Grabs data from `tableWidgetSelected`.</span>
 
 <span class="sd">        Returns</span>
@@ -894,7 +894,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.save_selection">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.save_selection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves the list of analytes (and ratios) and their norms so they can be quickly recalled for other samples.&quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_dir</span><span class="p">:</span>
             <span class="k">return</span>
@@ -919,7 +919,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.load_selection">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.load_selection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads a saved analyte (and ratio) list and fill the analyte table&quot;&quot;&quot;</span>
         <span class="n">file_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_dir</span><span class="p">,</span> <span class="s2">&quot;Text Files (*.txt);;All Files (*)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
@@ -939,7 +939,7 @@
     
 <div class="viewcode-block" id="AnalyteDialog.clear_selections">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.clear_selections">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">clear_selections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_selections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clears the current selections in the analyte table and selected list.&quot;&quot;&quot;</span>
         <span class="c1"># Clear the selected analytes table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSelected</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -961,7 +961,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.update_list">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.update_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the list of selected analytes&quot;&quot;&quot;</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_dict</span><span class="o">=</span><span class="p">{}</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSelected</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
@@ -977,7 +977,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.populate_analyte_list">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.populate_analyte_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">populate_analyte_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyte_pair</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">populate_analyte_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyte_pair</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Populates the list of selected analytes</span>
 
 <span class="sd">        Parameters</span>
@@ -1015,7 +1015,7 @@
 
 <div class="viewcode-block" id="AnalyteDialog.event_filter">
 <a class="viewcode-back" href="../../generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.event_filter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">event_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">event_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Highlights row and column header of tableWidgetAnalytes as mouse moves over cells.</span>
 
 <span class="sd">        Parameters</span>
@@ -1069,7 +1069,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">event_filter</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_row_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">brush</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_row_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">brush</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the font weight for the vertical header row.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">header_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetAnalytes</span><span class="o">.</span><span class="n">verticalHeaderItem</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
@@ -1080,7 +1080,7 @@
             <span class="c1"># Force a repaint</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetAnalytes</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_col_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">brush</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_col_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">brush</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the font weight for the horizontal header column.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">header_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetAnalytes</span><span class="o">.</span><span class="n">horizontalHeaderItem</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>

@@ -1,4 +1,4 @@
-﻿src.app.LamePlotUI
+src.app.LamePlotUI
 ==================
 
 .. automodule:: src.app.LamePlotUI

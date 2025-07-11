@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,24 +388,24 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.SpecialTools</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.odr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">odr</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy.odr</span> <span class="k">as</span> <span class="nn">odr</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QRect</span><span class="p">,</span> <span class="n">QSize</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QRect</span><span class="p">,</span> <span class="n">QSize</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> 
         <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QScrollArea</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span>
         <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QFrame</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QTabWidget</span><span class="p">,</span>
         <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span> <span class="n">QPushButton</span>
     <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomLineEdit</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomLineEdit</span>
 
 
 <div class="viewcode-block" id="SpecialPage">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialPage">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpecialPage</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page_index</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SpecialPage</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page_index</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -694,8 +694,8 @@
 
 <div class="viewcode-block" id="SpecialFunctions">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpecialFunctions</span><span class="p">():</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SpecialFunctions</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
@@ -705,13 +705,13 @@
 
 <div class="viewcode-block" id="SpecialFunctions.callback_dating_ratios">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.callback_dating_ratios">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">callback_dating_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">callback_dating_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback_dating_method</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SpecialFunctions.callback_dating_method">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.callback_dating_method">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">callback_dating_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">callback_dating_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates isotopes and decay constants when dating method changes.</span>
 
 <span class="sd">        Default decay constants are as follows:</span>
@@ -795,10 +795,10 @@
 
 <div class="viewcode-block" id="SpecialFunctions.scatter_date">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.scatter_date">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">scatter_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">scatter_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y0</span><span class="p">):</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">slope_only</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
-            <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">slope_only</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">b</span>
             <span class="k">return</span> <span class="n">model</span>
 
@@ -812,7 +812,7 @@
 
 <div class="viewcode-block" id="SpecialFunctions.compute_date_map">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.compute_date_map">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute_date_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">compute_date_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute one of several date maps&quot;&quot;&quot;</span>
         <span class="n">decay_constant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="o">.</span><span class="n">value</span>
         <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
@@ -863,7 +863,7 @@
 
 <div class="viewcode-block" id="SpecialFunctions.add_ree">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.add_ree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_ree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_df</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_ree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds predefined sums of rare earth elements to calculated fields</span>
 
 <span class="sd">        Computes four separate sums, LREE, MREE, HREE, and REE.  Elements not analyzed are igorned by the sum.</span>

@@ -30,7 +30,7 @@
   <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -362,8 +362,10 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.AnalyteSelectionWindow.html">src.app.AnalyteSelectionWindow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.AppData.html">src.app.AppData</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.BlocklyModules.html">src.app.BlocklyModules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.app.CanvasWidget.html">src.app.CanvasWidget</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.CropImage.html">src.app.CropImage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.CustomTableWidget.html">src.app.CustomTableWidget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.app.DataAnalysis.html">src.app.DataAnalysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.FieldSelectionWindow.html">src.app.FieldSelectionWindow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.ImageProcessing.html">src.app.ImageProcessing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.InfoViewer.html">src.app.InfoViewer</a></li>
@@ -407,7 +409,6 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.Calculator.html">src.common.Calculator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.CustomMplCanvas.html">src.common.CustomMplCanvas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.CustomWidgets.html">src.common.CustomWidgets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/src.common.DataAnalysis.html">src.common.DataAnalysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.DataHandling.html">src.common.DataHandling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.ExtendedDF.html">src.common.ExtendedDF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.LamePlot.html">src.common.LamePlot</a></li>
@@ -419,6 +420,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.Polygon.html">src.common.Polygon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.PolygonMatplotlib.html">src.common.PolygonMatplotlib</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.PolygonNew.html">src.common.PolygonNew</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.common.Regression.html">src.common.Regression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.ScheduleTimer.html">src.common.ScheduleTimer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.SearchTool.html">src.common.SearchTool</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.common.SortAnalytes.html">src.common.SortAnalytes</a></li>
@@ -4309,6 +4311,12 @@ analytes and ratios used by <cite>MainWindow</cite> methods.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">remove_edge_detection:</span></span></dt>
+<dd><p>Removes edge detection from the current map.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zero_crossing_lapalcian</span> <span class="pre">:</span></span></dt>
 <dd><p>Apply zero-crossing on the Laplacian of the image.</p>
 </dd></dl>
@@ -4367,31 +4375,14 @@ analytes and ratios used by <cite>MainWindow</cite> methods.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction" title="app.ImageProcessing.ImageProcessing.noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction</span></code></a>(algorithm[, val1, val2])</p></td>
 <td><p>Add noise reduction to the current laser map plot.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction_method_callback" title="app.ImageProcessing.ImageProcessing.noise_reduction_method_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_method_callback</span></code></a>()</p></td>
-<td><p>Sets up noise reduction controls when noise reduction method is changed.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback" title="app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_option1_callback</span></code></a>()</p></td>
-<td><p>Callback executed when the first noise reduction option is changed</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback" title="app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_option2_callback</span></code></a>()</p></td>
-<td><p>Callback executed when the second noise reduction option is changed</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.plot_gradient" title="app.ImageProcessing.ImageProcessing.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.plot_gradient" title="app.ImageProcessing.ImageProcessing.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
 <td><p>Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.run_noise_reduction" title="app.ImageProcessing.ImageProcessing.run_noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_noise_reduction</span></code></a>()</p></td>
-<td><p>Gets parameters and runs noise reduction</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.remove_edge_detection" title="app.ImageProcessing.ImageProcessing.remove_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge_detection</span></code></a>()</p></td>
+<td><p>Removes edge detection from the current map.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessing.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessing.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
 <td><p>Apply Zero Crossing on the Laplacian of the image.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table">
-<tbody>
-<tr class="row-odd"><td><p><strong>gradient_checked_state_changed</strong></p></td>
-<td></td>
 </tr>
 </tbody>
 </table>
@@ -4412,11 +4403,6 @@ Options include ‘sobel’, ‘canny’, and ‘zero_cross’.</p>
 value for <code class="docutils literal notranslate"><span class="pre">cv2.GaussianBlur</span></code> only when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code> is ‘Gaussian’ and new kernel
 value is set by the user via <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseReductionOption1.value()</span></code>.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.gradient_checked_state_changed">
-<span class="sig-name descname"><span class="pre">gradient_checked_state_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.gradient_checked_state_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.gradient_checked_state_changed" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.noise_reduction">
@@ -4444,32 +4430,6 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.noise_reduction_method_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_method_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.noise_reduction_method_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.noise_reduction_method_callback" title="Link to this definition">#</a></dt>
-<dd><p>Sets up noise reduction controls when noise reduction method is changed.</p>
-<p>Executes when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod.currentText()</span></code> is changed.
-Enables <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and <code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxNoiseOption2</span></code> (if applicable)
-and associated labels.  Constraints on the ranges are added to the spin boxes.</p>
-<p>After enabling options, it runs <code class="docutils literal notranslate"><span class="pre">noise_reduction</span></code>.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_option1_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.noise_reduction_option1_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback" title="Link to this definition">#</a></dt>
-<dd><p>Callback executed when the first noise reduction option is changed</p>
-<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1.value()</span></code> is changed by
-the user.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_option2_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.noise_reduction_option2_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback" title="Link to this definition">#</a></dt>
-<dd><p>Callback executed when the second noise reduction option is changed</p>
-<p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption2.value()</span></code> is changed by
-the user.  Note, not all noise reduction methods have a second option.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.plot_gradient">
 <span class="sig-name descname"><span class="pre">plot_gradient</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.plot_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.plot_gradient" title="Link to this definition">#</a></dt>
 <dd><p>Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</p>
@@ -4478,9 +4438,9 @@ computes noise reduction and displays gradient map</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.run_noise_reduction">
-<span class="sig-name descname"><span class="pre">run_noise_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.run_noise_reduction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.run_noise_reduction" title="Link to this definition">#</a></dt>
-<dd><p>Gets parameters and runs noise reduction</p>
+<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.remove_edge_detection">
+<span class="sig-name descname"><span class="pre">remove_edge_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessing.remove_edge_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.remove_edge_detection" title="Link to this definition">#</a></dt>
+<dd><p>Removes edge detection from the current map.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -4536,10 +4496,13 @@ computes noise reduction and displays gradient map</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.plot_gradient" title="app.ImageProcessing.ImageProcessingUI.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
 <td><p>Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction" title="app.ImageProcessing.ImageProcessingUI.run_noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_noise_reduction</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.remove_edge_detection" title="app.ImageProcessing.ImageProcessingUI.remove_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge_detection</span></code></a>()</p></td>
+<td><p>Removes edge detection from the current map.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction" title="app.ImageProcessing.ImageProcessingUI.run_noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_noise_reduction</span></code></a>()</p></td>
 <td><p>Gets parameters and runs noise reduction</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
 <td><p>Apply Zero Crossing on the Laplacian of the image.</p></td>
 </tr>
 </tbody>
@@ -4604,7 +4567,7 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">
-<span class="sig-name descname"><span class="pre">gradient_checked_state_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">gradient_checked_state_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessingUI.gradient_checked_state_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -4634,7 +4597,7 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_method_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">noise_reduction_method_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessingUI.noise_reduction_method_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback" title="Link to this definition">#</a></dt>
 <dd><p>Sets up noise reduction controls when noise reduction method is changed.</p>
 <p>Executes when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod.currentText()</span></code> is changed.
 Enables <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1</span></code> and <code class="docutils literal notranslate"><span class="pre">MainWindow.doubleSpinBoxNoiseOption2</span></code> (if applicable)
@@ -4644,7 +4607,7 @@ and associated labels.  Constraints on the ranges are added to the spin boxes.</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_option1_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">noise_reduction_option1_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessingUI.noise_reduction_option1_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback" title="Link to this definition">#</a></dt>
 <dd><p>Callback executed when the first noise reduction option is changed</p>
 <p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption1.value()</span></code> is changed by
 the user.</p>
@@ -4652,7 +4615,7 @@ the user.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">
-<span class="sig-name descname"><span class="pre">noise_reduction_option2_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">noise_reduction_option2_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessingUI.noise_reduction_option2_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback" title="Link to this definition">#</a></dt>
 <dd><p>Callback executed when the second noise reduction option is changed</p>
 <p>Updates noise reduction applied to map(s) when <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseOption2.value()</span></code> is changed by
 the user.  Note, not all noise reduction methods have a second option.</p>
@@ -4667,8 +4630,14 @@ computes noise reduction and displays gradient map</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.remove_edge_detection">
+<span class="sig-name descname"><span class="pre">remove_edge_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.remove_edge_detection" title="Link to this definition">#</a></dt>
+<dd><p>Removes edge detection from the current map.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.run_noise_reduction">
-<span class="sig-name descname"><span class="pre">run_noise_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.run_noise_reduction" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">run_noise_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/ImageProcessing.html#ImageProcessingUI.run_noise_reduction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.run_noise_reduction" title="Link to this definition">#</a></dt>
 <dd><p>Gets parameters and runs noise reduction</p>
 </dd></dl>
 
@@ -13679,7 +13648,7 @@ first row that defines the type of column data.  An attempt is made to determine
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme.default_style_dict" title="app.StyleToolbox.StyleTheme.default_style_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_style_dict</span></code></a>()</p></td>
-<td><p>Resets style dictionary to default values.</p></td>
+<td><p>Generates a dictionary of default plot styles for various plot types.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme.input_theme_name_dlg" title="app.StyleToolbox.StyleTheme.input_theme_name_dlg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_theme_name_dlg</span></code></a>(style_dict)</p></td>
 <td><p>Opens a dialog to save style theme</p></td>
@@ -13696,15 +13665,152 @@ first row that defines the type of column data.  An attempt is made to determine
 <dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleTheme.default_style_dict">
 <span class="sig-name descname"><span class="pre">default_style_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/StyleToolbox.html#StyleTheme.default_style_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleTheme.default_style_dict" title="Link to this definition">#</a></dt>
-<dd><p>Resets style dictionary to default values.</p>
+<dd><p>Generates a dictionary of default plot styles for various plot types.</p>
+<p>This method resets the internal <cite>default_plot_style</cite> to a base set of defaults,
+applies preferred font detection from system fonts, and then clones and customizes
+this style for multiple predefined plot types (e.g., field map, scatter, histogram).</p>
+<p>The resulting dictionary contains one style dictionary per plot type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Default style dictionary.</p>
+<dd class="field-odd"><p>A dictionary mapping plot type names to their corresponding style dictionaries.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>The base style template (<cite>default_plot_style</cite>) contains the following keys and default values:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default Value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>XFieldType
+XField
+XLim
+XScale
+XLabel
+YFieldType
+YField
+YLim
+YScale
+YLabel
+ZFieldType
+ZField
+ZLim
+ZScale
+ZLabel
+CFieldType
+CField
+CLim
+CScale
+CLabel
+AspectRatio
+TickDir
+Font
+FontSize
+ScaleDir
+ScaleLocation
+ScaleLength
+OverlayColor
+Marker
+MarkerSize
+MarkerColor
+MarkerAlpha
+LineWidth
+LineMultiplier
+LineColor
+Colormap
+CbarReverse
+CbarDir
+Resolution</p></td>
+<td><p>‘None’
+‘None’
+[0, 1]
+‘linear’
+‘’
+‘None’
+‘None’
+[0, 1]
+‘linear’
+‘’
+‘None’
+‘None’
+[0, 1]
+‘linear’
+‘’
+‘None’
+‘None’
+[0, 1]
+‘linear’
+‘’
+1.0
+‘out’
+‘’
+11.0
+‘none’
+‘northeast’
+None
+‘#ffffff’
+‘circle’
+6
+‘#1c75bc’
+30
+1.5
+1
+‘#1c75bc’
+‘viridis’
+False
+‘vertical’
+10</p></td>
+<td><p>Type of field for x-axis (e.g., ‘Analyte’)
+Name of x-axis field
+Limits for x-axis
+Scale for x-axis (‘linear’ or ‘log’)
+Label for x-axis
+Type of field for y-axis
+Name of y-axis field
+Limits for y-axis
+Scale for y-axis
+Label for y-axis
+Type of field for z-axis
+Name of z-axis field
+Limits for z-axis
+Scale for z-axis
+Label for z-axis
+Type of color-mapped data
+Field name for color-mapping
+Colorbar limits
+Colorbar scale
+Label for colorbar
+Aspect ratio of the plot
+Tick direction
+Preferred font (auto-selected from system)
+Font size in points
+Scale bar direction
+Position of scale bar
+Length of the scale bar
+Overlay color (e.g., for text/annotation)
+Marker shape
+Marker size in points
+Marker color
+Marker transparency (0–100)
+Width of lines in the plot
+Multiplier for line width
+Line color
+Name of the colormap
+Whether to reverse the colormap
+Direction of colorbar
+Grid resolution</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Specific plot types (e.g., ‘field map’, ‘scatter’, ‘correlation’) override some of
+these values, such as setting <cite>Colormap</cite>, axis fields, aspect ratio, etc.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -17243,13 +17349,9 @@ scratch.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing"><code class="docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.add_edge_detection"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.add_edge_detection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.gaussian_sigma()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.gradient_checked_state_changed"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.gradient_checked_state_changed()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.noise_reduction_method_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction_method_callback()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction_option1_callback()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction_option2_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.plot_gradient"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.plot_gradient()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.run_noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.run_noise_reduction()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.remove_edge_detection"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.remove_edge_detection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.zero_crossing_laplacian()</span></code></a></li>
 </ul>
 </li>
@@ -17265,6 +17367,7 @@ scratch.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.noise_reduction_option1_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.noise_reduction_option2_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.plot_gradient"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.plot_gradient()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.remove_edge_detection"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.remove_edge_detection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.run_noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.run_noise_reduction()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.update_gradient_flag_checkbox"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.update_gradient_flag_checkbox()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.update_noise_red_method_combobox"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.update_noise_red_method_combobox()</span></code></a></li>

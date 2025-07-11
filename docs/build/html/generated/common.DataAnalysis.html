@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -244,8 +244,10 @@
       
       
       
+        
+      
       <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -335,15 +337,6 @@
     
   </div>
   
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-<nav class="bd-docs-nav bd-links"
-     aria-label="Section Navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"></div>
-</nav></div>
-    </div>
-  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
       <div class="sidebar-primary-item">
@@ -396,292 +389,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-common.DataAnalysis">
-<span id="common-dataanalysis"></span><h1>common.DataAnalysis<a class="headerlink" href="#module-common.DataAnalysis" title="Link to this heading">#</a></h1>
-<p class="rubric">Classes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataAnalysis.Clustering" title="common.DataAnalysis.Clustering"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Clustering</span></code></a>(parent)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.DataAnalysis.ClusteringUI" title="common.DataAnalysis.ClusteringUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClusteringUI</span></code></a>(parent)</p></td>
-<td><p>Manages the clustering interface and links app_data updates to the MainWindow UI.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataAnalysis.DimensionalReduction" title="common.DataAnalysis.DimensionalReduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DimensionalReduction</span></code></a>(parent)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.DataAnalysis.DimensionalReductionUI" title="common.DataAnalysis.DimensionalReductionUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DimensionalReductionUI</span></code></a>(parent)</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py class">
-<dt class="sig sig-object py" id="common.DataAnalysis.Clustering">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataAnalysis.</span></span><span class="sig-name descname"><span class="pre">Clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#Clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.Clustering" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataAnalysis.Clustering.compute_clusters" title="common.DataAnalysis.Clustering.compute_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_clusters</span></code></a>(data, app_data[, max_clusters])</p></td>
-<td><p>Computes cluster results</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.Clustering.compute_clusters">
-<span class="sig-name descname"><span class="pre">compute_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#Clustering.compute_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.Clustering.compute_clusters" title="Link to this definition">#</a></dt>
-<dd><p>Computes cluster results</p>
-<p>When clustering is run once with a specified value of app_data.n_clusters, compute_cluster is run with max_cluster = None. Else clustering is run
-n_cluster fro 1 to app_data.max_clusters</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataAnalysis.</span></span><span class="sig-name descname"><span class="pre">ClusteringUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#common.DataAnalysis.Clustering" title="common.DataAnalysis.Clustering"><code class="xref py py-class docutils literal notranslate"><span class="pre">Clustering</span></code></a></p>
-<p>Manages the clustering interface and links app_data updates to the MainWindow UI.</p>
-<p>The <cite>ClusteringUI</cite> class connects UI elements in the application’s “Clustering” tab
-to corresponding app_data-handling logic. It listens for changes in style, and applies those
-settings to the active dataset.</p>
-<p>The class also ensures that the UI is updated dynamically when the underlying data
-model changes, and that scheduled plot updates are triggered when required.</p>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataAnalysis.ClusteringUI.compute_clusters" title="common.DataAnalysis.ClusteringUI.compute_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_clusters</span></code></a>(data, app_data[, max_clusters])</p></td>
-<td><p>Computes cluster results</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.DataAnalysis.ClusteringUI.connect_logger" title="common.DataAnalysis.ClusteringUI.connect_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_logger</span></code></a>()</p></td>
-<td><p>Connects widgets to logger.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataAnalysis.ClusteringUI.connect_observer" title="common.DataAnalysis.ClusteringUI.connect_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_observer</span></code></a>()</p></td>
-<td><p>Connects properties to observer functions.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table">
-<tbody>
-<tr class="row-odd"><td><p><strong>update_cluster_distance_combobox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_cluster_exponent_slider</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>update_cluster_method_combobox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_cluster_seed_lineedit</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>update_dim_red_precondition_checkbox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_max_clusters_spinbox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>update_num_basis_for_precondition_spinbox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_num_clusters_spinbox</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.compute_clusters">
-<span class="sig-name descname"><span class="pre">compute_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.compute_clusters" title="Link to this definition">#</a></dt>
-<dd><p>Computes cluster results</p>
-<p>When clustering is run once with a specified value of app_data.n_clusters, compute_cluster is run with max_cluster = None. Else clustering is run
-n_cluster fro 1 to app_data.max_clusters</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.connect_logger">
-<span class="sig-name descname"><span class="pre">connect_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.connect_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.connect_logger" title="Link to this definition">#</a></dt>
-<dd><p>Connects widgets to logger.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.connect_observer">
-<span class="sig-name descname"><span class="pre">connect_observer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.connect_observer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.connect_observer" title="Link to this definition">#</a></dt>
-<dd><p>Connects properties to observer functions.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_cluster_distance_combobox">
-<span class="sig-name descname"><span class="pre">update_cluster_distance_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_cluster_distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_cluster_distance_combobox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_cluster_distance_combobox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_cluster_exponent_slider">
-<span class="sig-name descname"><span class="pre">update_cluster_exponent_slider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_cluster_exponent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_cluster_exponent_slider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_cluster_exponent_slider" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_cluster_method_combobox">
-<span class="sig-name descname"><span class="pre">update_cluster_method_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_cluster_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_cluster_method_combobox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_cluster_method_combobox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_cluster_seed_lineedit">
-<span class="sig-name descname"><span class="pre">update_cluster_seed_lineedit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_cluster_seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_cluster_seed_lineedit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_cluster_seed_lineedit" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_dim_red_precondition_checkbox">
-<span class="sig-name descname"><span class="pre">update_dim_red_precondition_checkbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_pca_precondition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_dim_red_precondition_checkbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_dim_red_precondition_checkbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_max_clusters_spinbox">
-<span class="sig-name descname"><span class="pre">update_max_clusters_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_max_clusters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_max_clusters_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_max_clusters_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_num_basis_for_precondition_spinbox">
-<span class="sig-name descname"><span class="pre">update_num_basis_for_precondition_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_num_basis_for_precondition_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_num_basis_for_precondition_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.ClusteringUI.update_num_clusters_spinbox">
-<span class="sig-name descname"><span class="pre">update_num_clusters_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_num_clusters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#ClusteringUI.update_num_clusters_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.ClusteringUI.update_num_clusters_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReduction">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataAnalysis.</span></span><span class="sig-name descname"><span class="pre">DimensionalReduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReduction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReduction" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<tbody>
-<tr class="row-odd"><td><p><strong>compute_dim_red</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>compute_pca</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReduction.compute_dim_red">
-<span class="sig-name descname"><span class="pre">compute_dim_red</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReduction.compute_dim_red"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReduction.compute_dim_red" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReduction.compute_pca">
-<span class="sig-name descname"><span class="pre">compute_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReduction.compute_pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReduction.compute_pca" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataAnalysis.</span></span><span class="sig-name descname"><span class="pre">DimensionalReductionUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#common.DataAnalysis.DimensionalReduction" title="common.DataAnalysis.DimensionalReduction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimensionalReduction</span></code></a></p>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataAnalysis.DimensionalReductionUI.connect_logger" title="common.DataAnalysis.DimensionalReductionUI.connect_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_logger</span></code></a>()</p></td>
-<td><p>Connects widgets to logger.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.DataAnalysis.DimensionalReductionUI.connect_observer" title="common.DataAnalysis.DimensionalReductionUI.connect_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_observer</span></code></a>()</p></td>
-<td><p>Connects properties to observer functions.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table">
-<tbody>
-<tr class="row-odd"><td><p><strong>compute_dim_red</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>compute_pca</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>connect_widgets</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_dim_red_method_combobox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>update_dim_red_x_max_spinbox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_dim_red_x_spinbox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>update_dim_red_y_max_spinbox</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>update_dim_red_y_spinbox</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.compute_dim_red">
-<span class="sig-name descname"><span class="pre">compute_dim_red</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.compute_dim_red" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.compute_pca">
-<span class="sig-name descname"><span class="pre">compute_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.compute_pca" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.connect_logger">
-<span class="sig-name descname"><span class="pre">connect_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.connect_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.connect_logger" title="Link to this definition">#</a></dt>
-<dd><p>Connects widgets to logger.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.connect_observer">
-<span class="sig-name descname"><span class="pre">connect_observer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.connect_observer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.connect_observer" title="Link to this definition">#</a></dt>
-<dd><p>Connects properties to observer functions.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.connect_widgets">
-<span class="sig-name descname"><span class="pre">connect_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.connect_widgets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.connect_widgets" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.update_dim_red_method_combobox">
-<span class="sig-name descname"><span class="pre">update_dim_red_method_combobox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.update_dim_red_method_combobox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_method_combobox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_max_spinbox">
-<span class="sig-name descname"><span class="pre">update_dim_red_x_max_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.update_dim_red_x_max_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_max_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_spinbox">
-<span class="sig-name descname"><span class="pre">update_dim_red_x_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.update_dim_red_x_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_max_spinbox">
-<span class="sig-name descname"><span class="pre">update_dim_red_y_max_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.update_dim_red_y_max_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_max_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_spinbox">
-<span class="sig-name descname"><span class="pre">update_dim_red_y_spinbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataAnalysis.html#DimensionalReductionUI.update_dim_red_y_spinbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_spinbox" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <section id="common-dataanalysis">
+<h1>common.DataAnalysis<a class="headerlink" href="#common-dataanalysis" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -704,53 +413,6 @@ n_cluster fro 1 to app_data.max_clusters</p>
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.Clustering"><code class="docutils literal notranslate"><span class="pre">Clustering</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.Clustering.compute_clusters"><code class="docutils literal notranslate"><span class="pre">Clustering.compute_clusters()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI"><code class="docutils literal notranslate"><span class="pre">ClusteringUI</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.compute_clusters"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.compute_clusters()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.connect_logger"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.connect_logger()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.connect_observer"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.connect_observer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_cluster_distance_combobox"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_cluster_distance_combobox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_cluster_exponent_slider"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_cluster_exponent_slider()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_cluster_method_combobox"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_cluster_method_combobox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_cluster_seed_lineedit"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_cluster_seed_lineedit()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_dim_red_precondition_checkbox"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_dim_red_precondition_checkbox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_max_clusters_spinbox"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_max_clusters_spinbox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_num_basis_for_precondition_spinbox"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_num_basis_for_precondition_spinbox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.ClusteringUI.update_num_clusters_spinbox"><code class="docutils literal notranslate"><span class="pre">ClusteringUI.update_num_clusters_spinbox()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReduction"><code class="docutils literal notranslate"><span class="pre">DimensionalReduction</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReduction.compute_dim_red"><code class="docutils literal notranslate"><span class="pre">DimensionalReduction.compute_dim_red()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReduction.compute_pca"><code class="docutils literal notranslate"><span class="pre">DimensionalReduction.compute_pca()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.compute_dim_red"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.compute_dim_red()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.compute_pca"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.compute_pca()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.connect_logger"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.connect_logger()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.connect_observer"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.connect_observer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.connect_widgets"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.connect_widgets()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_method_combobox"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.update_dim_red_method_combobox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_max_spinbox"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.update_dim_red_x_max_spinbox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_spinbox"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.update_dim_red_x_spinbox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_max_spinbox"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.update_dim_red_y_max_spinbox()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_spinbox"><code class="docutils literal notranslate"><span class="pre">DimensionalReductionUI.update_dim_red_y_spinbox()</span></code></a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">

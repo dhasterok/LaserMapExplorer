@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,14 +388,14 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.ProfileNew</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line2D</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathCollection</span>
+<span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PathCollection</span>
 
 <div class="viewcode-block" id="Profile">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profile">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Profile</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">Profile</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Holds data for one profile and references to drawn lines/scatters.</span>
 
@@ -414,7 +414,7 @@
 <span class="sd">    scatters : list</span>
 <span class="sd">        References to matplotlib PathCollection objects or single scatter for each point.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
@@ -427,7 +427,7 @@
 
 <div class="viewcode-block" id="Profiling">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Profiling</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">Profiling</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Manages multiple profiles for multiple samples, with:</span>
 <span class="sd">      - Multi-sample logic ( self.profiles[sample_id][profile_name] )</span>
@@ -455,7 +455,7 @@
 <span class="sd">        shows how you might check if a point is inside a polygon.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_accessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygon_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_accessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygon_manager</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># Example: profiles stored as { sample_id: { profile_name: Profile } }</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_sample_id</span> <span class="o">=</span> <span class="kc">None</span>
@@ -481,7 +481,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Profiling.create_new_profile">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.create_new_profile">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_new_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_new_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start building a new profile for a specific sample ID, with a given name.</span>
 <span class="sd">        Optionally set a radius for averaging.</span>
@@ -505,7 +505,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Profiling.handle_profile_click">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.handle_profile_click">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">handle_profile_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">is_moving</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle_profile_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">is_moving</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called from MplCanvas when user clicks in profile mode.</span>
 
@@ -520,7 +520,7 @@
 
 <div class="viewcode-block" id="Profiling.handle_profile_creation_click">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.handle_profile_creation_click">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">handle_profile_creation_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle_profile_creation_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Left-click =&gt; add point, Right-click =&gt; finalize.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
             <span class="k">return</span>  <span class="c1"># not building a new profile right now</span>
@@ -543,7 +543,7 @@
 
 <div class="viewcode-block" id="Profiling.finalize_profile">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.finalize_profile">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">finalize_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">finalize_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Once user right-clicks, we store the points in the final Profile object,</span>
 <span class="sd">        then optionally draw a connecting line and do radius-based averaging.</span>
@@ -565,7 +565,7 @@
 
 <div class="viewcode-block" id="Profiling.radius_based_averaging">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.radius_based_averaging">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">radius_based_averaging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_obj</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">radius_based_averaging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_obj</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        For each point in the given profile, gather data from the array within `radius`</span>
 <span class="sd">        and compute stats (mean, std, etc.). If a polygon ROI is present, only include</span>
@@ -627,7 +627,7 @@
 
 <div class="viewcode-block" id="Profiling.is_in_roi">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.is_in_roi">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">is_in_roi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_pix</span><span class="p">,</span> <span class="n">y_pix</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">is_in_roi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_pix</span><span class="p">,</span> <span class="n">y_pix</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the pixel (x_pix, y_pix) is inside the polygon ROI(s).</span>
 <span class="sd">        If no polygon manager or no polygons, return True (no masking).</span>
@@ -661,7 +661,7 @@
 
 <div class="viewcode-block" id="Profiling.get_current_profile">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.get_current_profile">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_current_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_current_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper to get the Profile object for current_sample_id/current_profile_name.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_profile_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_sample_id</span><span class="p">]:</span>
@@ -674,7 +674,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Profiling.handle_profile_move_click">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.handle_profile_move_click">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">handle_profile_move_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle_profile_move_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If user is in &quot;move profile point&quot; mode:</span>
 
@@ -700,7 +700,7 @@
 
 <div class="viewcode-block" id="Profiling.find_nearest_profile_point">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.find_nearest_profile_point">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">find_nearest_profile_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">click_x</span><span class="p">,</span> <span class="n">click_y</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">find_nearest_profile_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">click_x</span><span class="p">,</span> <span class="n">click_y</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return (sample_id, profile_name, idx) for the nearest profile point if within</span>
 <span class="sd">        max_dist, else (None, None, -1).</span>
@@ -732,7 +732,7 @@
 
 <div class="viewcode-block" id="Profiling.update_profile_point">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.update_profile_point">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_profile_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">,</span> <span class="n">point_idx</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_profile_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">,</span> <span class="n">point_idx</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update a single point in the profile and re-draw line/scatter/stats.&quot;&quot;&quot;</span>
         <span class="n">prof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample_id</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">profile_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">prof</span><span class="p">:</span>
@@ -768,7 +768,7 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Profiling.clear_profiles">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.clear_profiles">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">clear_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all profiles from the plot (all samples).&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">s_id</span><span class="p">,</span> <span class="n">p_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">p_name</span><span class="p">,</span> <span class="n">prof</span> <span class="ow">in</span> <span class="n">p_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -784,7 +784,7 @@
 
 <div class="viewcode-block" id="Profiling.save_profiles">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.save_profiles">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the current profiles to a file (using pickle).</span>
 
@@ -824,7 +824,7 @@
 
 <div class="viewcode-block" id="Profiling.load_profiles">
 <a class="viewcode-back" href="../../generated/app.ProfileNew.html#app.ProfileNew.Profiling.load_profiles">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load profiles from a pickle file and re-draw them on the given axes.</span>
 <span class="sd">        We&#39;ll recreate the lines/scatters for each loaded profile.</span>

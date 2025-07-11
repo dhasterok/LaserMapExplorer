@@ -15,8 +15,8 @@ class Clustering():
         self.logger_key = "Analysis"
         self.parent = parent
 
-        self.distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
-        self.cluster_methods = ['k-means', 'fuzzy c-means']
+        self._distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
+        self._cluster_methods = ['k-means', 'fuzzy c-means']
 
     def compute_clusters(self,data, app_data, max_clusters = None):
         """Computes cluster results
@@ -140,21 +140,32 @@ class ClusteringUI(Clustering):
 
     The class also ensures that the UI is updated dynamically when the underlying data
     model changes, and that scheduled plot updates are triggered when required.
+
+    Methods
+    -------
     """
     def __init__(self, parent):
         super().__init__(self)
         self.logger_key = "Analysis"
-
         self.ui = parent
-        self.schedule_update = self.ui.plot_style.schedule_update
 
+        self.update_cluster_flag = True
+
+        self.connect_widgets()
+        self.connect_observer()
+        self.connect_logger()
+
+    def connect_widgets(self):
+        """Connect clustering widgets to UI."""
         # Clustering ui widgets
-        self.ui.spinBoxNClusters.valueChanged.connect(lambda: setattr(self.ui.app_data, "num_clusters",self.ui.spinBoxNClusters.value()))
-        self.ui.comboBoxClusterDistance.clear()
-        self.ui.comboBoxClusterDistance.addItems(self.distance_metrics)
-        self.ui.app_data.cluster_distance = self.distance_metrics[0] 
+        self.ui.spinBoxClusterMax.valueChanged.connect(lambda _: self.update_max_clusters())
+        self.ui.spinBoxNClusters.valueChanged.connect(lambda _: self.update_num_clusters())
 
-        self.ui.comboBoxClusterDistance.activated.connect(lambda: setattr(self.ui.app_data, "cluster_distance",self.ui.comboBoxClusterDistance.currentText()))
+        self.ui.comboBoxClusterDistance.clear()
+        self.ui.comboBoxClusterDistance.addItems(self._distance_metrics)
+        self.ui.app_data.cluster_distance = self._distance_metrics[0]
+        self.ui.comboBoxClusterDistance.activated.connect(lambda _: self.update_cluster_distance())
+
         # cluster exponent
         self.ui.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
         self.ui.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
@@ -165,28 +176,35 @@ class ClusteringUI(Clustering):
 
         # starting seed
         self.ui.lineEditSeed.setValidator(QIntValidator(0,1000000000))
-        self.ui.lineEditSeed.editingFinished.connect(lambda: setattr(self.ui.app_data, "cluster_seed",int(self.ui.lineEditSeed.text())))
-        self.ui.toolButtonRandomSeed.clicked.connect(self.ui.app_data.generate_random_seed)
+        self.ui.lineEditSeed.editingFinished.connect(lambda _: self.update_cluster_seed())
+        self.ui.toolButtonRandomSeed.clicked.connect(lambda _: self.ui.app_data.generate_random_seed())
 
         # cluster method
-        self.ui.comboBoxClusterMethod.addItems(self.cluster_methods)
-        self.ui.app_data.cluster_method = self.cluster_methods[0]
-        self.ui.toggle_cluster_parameters(self.cluster_methods[0]) 
-        self.ui.comboBoxClusterMethod.activated.connect(lambda: setattr(self.ui.app_data, "cluster_method",self.ui.comboBoxClusterMethod.currentText()))
+        self.ui.comboBoxClusterMethod.clear()
+        self.ui.comboBoxClusterMethod.addItems(self.ui.app_data.cluster_method_options)
+        self.ui.app_data.cluster_method = self.ui.app_data.cluster_method_options[0]
+        self.ui.comboBoxClusterMethod.activated.connect(lambda _: self.update_cluster_method())
 
-        self.connect_observer()
-        self.connect_logger()
+        self.ui.checkBoxWithPCA.setChecked(self.ui.app_data.dim_red_precondition)
+        self.ui.checkBoxWithPCA.setToolTip("Use dimensional reduction scores for clustering.")
+        self.ui.checkBoxWithPCA.stateChanged.connect(lambda _: self.update_dim_red_precondition())
+
+        self.ui.spinBoxPCANumBasis.setMinimum(1)
+        self.ui.spinBoxPCANumBasis.setMaximum(1)
+        self.ui.spinBoxPCANumBasis.setValue(self.ui.app_data.num_basis_for_precondition)
+        self.ui.spinBoxPCANumBasis.valueChanged.connect(lambda _: self.update_num_basis_for_precondition())
+
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("cluster_method", self.update_cluster_method_combobox)
-        self.ui.app_data.add_observer("max_clusters", self.update_max_clusters_spinbox)
-        self.ui.app_data.add_observer("num_clusters", self.update_num_clusters_spinbox)
-        self.ui.app_data.add_observer("cluster_seed", self.update_cluster_seed_lineedit)
+        self.ui.app_data.add_observer("cluster_method", self.update_cluster_method)
+        self.ui.app_data.add_observer("max_clusters", self.update_max_clusters)
+        self.ui.app_data.add_observer("num_clusters", self.update_num_clusters)
+        self.ui.app_data.add_observer("cluster_seed", self.update_cluster_seed)
         self.ui.app_data.add_observer("cluster_exponent", self.update_cluster_exponent_slider)
-        self.ui.app_data.add_observer("cluster_distance", self.update_cluster_distance_combobox)
-        self.ui.app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition_checkbox)
-        self.ui.app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition_spinbox)
+        self.ui.app_data.add_observer("cluster_distance", self.update_cluster_distance)
+        self.ui.app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition)
+        self.ui.app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -199,25 +217,146 @@ class ClusteringUI(Clustering):
         self.ui.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.ui.checkBoxWithPCA.isChecked()}]", prefix="UI"))
         self.ui.spinBoxPCANumBasis.valueChanged.connect(lambda: log(f"spinBoxPCANumBasis value=[{self.ui.spinBoxPCANumBasis.value()}]", prefix="UI"))
 
+    def toggle_cluster_widgets(self):
+        """Toggle visibility of cluster widgets based on the current clustering method.
+        
+        This method updates the visibility of various widgets in the clustering tab based on the current plot type and clustering method.
+        It ensures that the appropriate widgets are shown or hidden based on the selected clustering method and plot type.
+        It also enables or disables widgets based on the current clustering method and whether PCA is used for clustering.
+        """
+        # toggle visibility of widgets based on the current plot type
+        match self.ui.plot_style.plot_type:
+            case 'cluster' | 'cluster score map':
+                self.ui.labelClusterMax.hide()
+                self.ui.spinBoxClusterMax.hide()
+                self.ui.labelNClusters.show()
+                self.ui.spinBoxNClusters.show()
+            case 'cluster performance':
+                self.ui.labelClusterMax.show()
+                self.ui.spinBoxClusterMax.show()
+                self.ui.labelNClusters.hide()
+                self.ui.spinBoxNClusters.hide()
 
-    def update_cluster_method_combobox(self, new_cluster_method):
-        self.ui.comboBoxClusterMethod.setCurrentText(new_cluster_method)
+        # enable/disable widgets based on the current clustering method
+        match self.ui.app_data.cluster_method:
+            case 'k-means':
+                self.ui.spinBoxNClusters.setEnabled(True)
+                self.ui.spinBoxClusterMax.setEnabled(True)
+                self.ui.comboBoxClusterDistance.setEnabled(True)
+                self.ui.horizontalSliderClusterExponent.setEnabled(False)
+            case 'fuzzy c-means':
+                self.ui.spinBoxNClusters.setEnabled(True)
+                self.ui.spinBoxClusterMax.setEnabled(True)
+                self.ui.comboBoxClusterDistance.setEnabled(False)
+                self.ui.horizontalSliderClusterExponent.setEnabled(True)
+            case _:
+                ValueError(f"Unknown clustering method {self.ui.app_data.cluster_method}")
+        
+        if 'PCA score' in self.ui.app_data.field_dict.keys():
+            self.ui.checkBoxWithPCA.setEnabled(True)
+            self.ui.labelClusterWithPCA.setEnabled(True)
+        else:
+            self.ui.checkBoxWithPCA.setEnabled(False)
+            self.ui.labelClusterWithPCA.setEnabled(False)
+
+        # enable/disable widgets based on the current clustering method
+        self.ui.labelNClusters.setEnabled(self.ui.spinBoxNClusters.isEnabled())
+        self.ui.labelClusterMax.setEnabled(self.ui.spinBoxClusterMax.isEnabled())
+        self.ui.labelClusterDistance.setEnabled(self.ui.comboBoxClusterDistance.isEnabled())
+        self.ui.labelClusterExponent.setEnabled(self.ui.horizontalSliderClusterExponent.isEnabled())
+        self.ui.labelExponent.setEnabled(self.ui.horizontalSliderClusterExponent.isEnabled())
+
+        # if PCA is not used for clustering, disable the PCA widgets
+        if self.ui.checkBoxWithPCA.isChecked() and self.ui.checkBoxWithPCA.isEnabled():
+            self.ui.spinBoxPCANumBasis.setMaximum(self.ui.data[self.ui.app_data.sample_id].processed_data.get_attribute('PCA score').shape[1])
+            self.ui.spinBoxPCANumBasis.setEnabled(True)
+            self.ui.labelPCANumBasis.setEnabled(True)
+        else:
+            self.ui.spinBoxPCANumBasis.setEnabled(False)
+            self.ui.labelPCANumBasis.setEnabled(False)
+
+
+    def update_cluster_method(self, new_method=None):
+        """Updates unsupervised clustering method.
+
+        This method updates the clustering method used in the application. If a new method is provided,
+        it sets the current text of the combo box to that method. If no new method is provided,
+        it retrieves the current text from the combo box and updates the application data accordingly.
+
+        Parameters
+        ----------
+        new_method : str or None, optional
+            New clustering method.
+        """
+        if not new_method:
+            self.ui.app_data.cluster_method = self.ui.comboBoxClusterMethod.currentText()
+        else:
+            self.ui.comboBoxClusterMethod.setCurrentText(new_method)
+
+        self.toggle_cluster_widgets()
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.toggle_cluster_parameters(new_cluster_method)
+            self.toggle_cluster_widgets()
             self.ui.plot_style.schedule_update()
 
-    def update_max_clusters_spinbox(self, new_max_clusters):
-        self.ui.spinBoxClusterMax.setValue(int(new_max_clusters))
+    def update_max_clusters(self, max_clusters=None):
+        """Update the maximum number of clusters for computing cluster performance plots.
+
+        This method updates the maximum number of clusters used in clustering analysis. If a new maximum number of clusters is provided,
+        it sets the spin box value to that number. If no new maximum number is provided,
+        it retrieves the current value from the spin box and updates the application data accordingly.
+
+        Parameters
+        ----------
+        max_clusters : int or None, optional
+            The maximum number of clusters that will be used to produce a cluster performance plot.
+        """
+        if not max_clusters:
+            self.ui.app_data.max_clusters = self.ui.spinBoxClusterMax.value()
+        else:
+            self.ui.spinBoxClusterMax.setValue(int(max_clusters))
+            if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
+                self.ui.plot_style.schedule_update()
+
+    def update_num_clusters(self, num_clusters=None):
+        """Update the number of clusters.
+        
+        This method updates the number of clusters used in clustering analysis. If a new number of clusters is provided,
+        it sets the spin box value to that number. If no new number is provided, it retrieves the current value from the spin box
+        and updates the application data accordingly.
+
+        Parameters
+        ----------
+        num_clusters : int or None, optional
+            The number of clusters for clustering analysis.
+        """
+        if not num_clusters:
+            self.ui.app_data.num_clusters = self.ui.spinBoxNClusters.value()
+        else:
+            self.ui.spinBoxNClusters.setValue(int(num_clusters))
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
-    def update_num_clusters_spinbox(self, new_num_clusters):
-        self.ui.spinBoxNClusters.setValue(int(new_num_clusters))
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+    def update_cluster_seed(self, new_seed=None):
+        """Change the random seed for clustering.
 
-    def update_cluster_seed_lineedit(self, new_cluster_seed):
-        self.ui.lineEditSeed.setText(str(new_cluster_seed))
+        The seed for clustering may have an impact on the results, though generally there are
+        few variations in the results.  To ensure that the results are meaningful you may wish
+        to try a few random seeds.  However, fixing the seed ensures that the result can be
+        replicated and the numbers assigned to each cluster are fixed.
+
+        Parameters
+        ----------
+        new_seed : int or None, optional
+            The random seed for clustering. If not provided, the current value of the line edit is used.
+            If provided, the line edit is updated with the new seed value.
+        """
+        if not new_seed:
+            self.ui.app_data.cluster_seed = self.ui.lineEditSeed.value
+        else:
+            self.ui.lineEditSeed.setText(str(new_seed))
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
@@ -227,17 +366,92 @@ class ClusteringUI(Clustering):
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
-    def update_cluster_distance_combobox(self, new_cluster_distance):
+    def update_cluster_distance(self, new_distance=None):
+        """ Update the distance metric used for clustering.
+
+        This method updates the distance metric used for clustering. If a new distance is provided,
+        it sets the current text of the combo box to that distance. If no new distance is provided,
+        it retrieves the current text from the combo box and updates the application data accordingly.
+
+        Parameters
+        ----------
+        new_distance : str or None, optional
+            The new distance metric used for clustering. If not provided, the current text of the combo box is used.
+        """
+        if not new_distance:
+            self.ui.app_data.cluster_distance = self.ui.comboBoxClusterDistance.currentText()
+        else:
+            self.ui.comboBoxClusterDistance.setCurrentText(new_distance)
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
-    def update_dim_red_precondition_checkbox(self, new_pca_precondition):
+    def update_dim_red_precondition(self, new_value=None):
+        """Update the preconditioning for PCA in clustering.
+
+        This method updates the preconditioning for PCA in clustering. If a new value is provided,
+        it sets the checkbox state to that value. If no new value is provided,
+        it retrieves the current state of the checkbox and updates the application data accordingly.
+
+        Parameters
+        ----------
+        new_value : bool or None, optional
+            The new state of the checkbox for PCA preconditioning. If not provided, the current state
+            of the checkbox is used. If provided, the checkbox state is updated with the new value
+        """
+        if new_value is None:
+            self.ui.app_data.dim_red_precondition = self.ui.checkBoxWithPCA.isChecked()
+        else:
+            self.ui.checkBoxWithPCA.setChecked(new_value)
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
-    def update_num_basis_for_precondition_spinbox(self, new_value):
+    def update_num_basis_for_precondition(self, new_value=None):
+        """Update the number of basis vectors for PCA preconditioning.
+
+        This method updates the number of basis vectors used for PCA preconditioning in clustering.
+        If a new value is provided, it sets the spin box value to that number. If no new value is provided,
+        it retrieves the current value from the spin box and updates the application data accordingly.
+
+        Parameters
+        ----------
+        new_value : int or None, optional
+            The number of basis vectors for PCA preconditioning. If not provided, the current value of the spin box is used.
+            If provided, the spin box is updated with the new value.
+        """
+        if not new_value:
+            self.ui.app_data.num_basis_for_precondition = self.ui.spinBoxPCANumBasis.value()
+        else:
+            self.ui.spinBoxPCANumBasis.setValue(int(new_value))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
+
+    def compute_clusters_update_groups(self):
+        """
+        Computes clusters and updates cluster groups.
+
+        This method:
+        1. Checks if clustering needs to be updated based on the application data flags.
+        2. Invokes the clustering computation if necessary.
+        3. Applies updated cluster colors and refreshes the cluster tab in the Mask Dock.
+        """
+        data = self.ui.data[self.ui.app_data.sample_id]
+        method = self.ui.app_data.cluster_method
+        if self.ui.app_data.update_cluster_flag or \
+                data.processed_data[method].empty or \
+                (method not in list(data.processed_data.columns)):
+            # compute clusters
+            self.ui.statusbar.showMessage('Computing clusters')
+            self.compute_clusters(data, self.ui.app_data, max_clusters = None)
+            # update cluster colors
+            self.ui.app_data.cluster_group_changed(data, self.ui.plot_style)
+            # enable cluster tab actions and update group table
+            if hasattr(self, 'mask_dock'):
+                self.ui.mask_dock.cluster_tab.toggle_cluster_actions()
+                self.ui.mask_dock.cluster_tab.update_table_widget()
+
+            self.ui.statusbar.showMessage('Clustering successful')
 
 
 @auto_log_methods(logger_key="Analysis")

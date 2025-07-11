@@ -1,4 +1,4 @@
-﻿src.common.Browser
+src.common.Browser
 ==================
 
 .. automodule:: src.common.Browser

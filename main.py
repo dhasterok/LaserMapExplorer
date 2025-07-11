@@ -12,15 +12,24 @@ from src.app.MainWindow import MainWindow
 app = None
 
 def create_app():
-    """_summary_
+    """
+    Initializes and configures the QApplication instance for the application.
 
-    _extended_summary_
+    This function creates a global QApplication object, applies a high-DPI scaling setting (default in PyQt6),
+    and sets the application's stylesheet based on the current system theme (dark or light mode).  The stylesheet
+    is loaded from either 'dark.qss' or 'light.qss' using the `load_stylesheet` function.  If the system is in
+    dark mode, it applies the dark stylesheet; otherwise, it applies the light stylesheet.
+
+    The function also sets the global `app` variable to the created QApplication instance.
+
+    This function should be called before creating any GUI elements to ensure that the application is properly initialized.
 
     Returns
     -------
-    _type_
-        _description_
-    """    
+    QApplication :
+        The initialized and configured QApplication instance.
+    """
+
     global app
     app = QApplication(sys.argv)
 
@@ -36,7 +45,11 @@ def create_app():
     return app
 
 def show_splash():
-    """Creates splash screen while LaME loads"""    
+    """
+    Displays a splash screen for the application using a QPixmap image.
+
+    The splash screen shows an image for 3 seconds before closing automatically.
+    """
     pixmap = QPixmap("lame_splash.png")
     splash = QSplashScreen(pixmap)
     splash.setMask(pixmap.mask())
@@ -44,7 +57,15 @@ def show_splash():
     QTimer.singleShot(3000, splash.close)
 
 def main():
-    """Main function for LaME"""    
+    """
+    Main entry point for the application.
+
+    This function initializes the application, displays a splash screen,
+    and creates the main window of the application.  It sets the
+    application icon and starts the event loop.
+
+    It also ensures that the application exits cleanly when the main window is closed.
+    """    
     app = create_app()
     show_splash()
 

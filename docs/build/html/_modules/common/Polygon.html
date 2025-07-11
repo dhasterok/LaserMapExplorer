@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,19 +388,19 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.Polygon</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">pickle</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QGraphicsPolygonItem</span><span class="p">,</span> <span class="n">QCheckBox</span> <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">ScatterPlotItem</span><span class="p">,</span> <span class="n">PlotDataItem</span> <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">PyQt6</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QGraphicsPolygonItem</span><span class="p">,</span> <span class="n">QCheckBox</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">ScatterPlotItem</span><span class="p">,</span> <span class="n">PlotDataItem</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span>
 
 
 <span class="c1"># Polygons</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="Polygon">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.Polygon">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Polygon</span><span class="p">:</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="p">):</span>
+<span class="k">class</span> <span class="nc">Polygon</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="o">=</span> <span class="n">p_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List to store points as (x, y, scatter)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List to store lines as graphical items</span>
@@ -737,7 +737,7 @@
 <div class="viewcode-block" id="PolygonManager">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Polygon&#39;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">PolygonManager</span><span class="p">():</span>
+<span class="k">class</span> <span class="nc">PolygonManager</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Operations related to polygon generation and manipulation</span>
 
 <span class="sd">    Polygons can be used to select or exclude regions of maps for analysis.</span>
@@ -752,7 +752,7 @@
 <span class="sd">    show_polygon_lines:</span>
 <span class="sd">    update_table_widget:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">logger_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">logger_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span> <span class="o">=</span> <span class="n">main_window</span>
 
@@ -765,7 +765,7 @@
 
 <div class="viewcode-block" id="PolygonManager.add_samples">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.add_samples">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sample_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="n">sample_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
@@ -773,7 +773,7 @@
 
 <div class="viewcode-block" id="PolygonManager.increment_pid">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.increment_pid">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">increment_pid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">increment_pid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a new polygon ID&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id_gen</span>
@@ -784,7 +784,7 @@
 
 <div class="viewcode-block" id="PolygonManager.save_polygons">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.save_polygons">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save polygons to a file&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p_id</span><span class="p">,</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -797,7 +797,7 @@
 
 <div class="viewcode-block" id="PolygonManager.load_polygons">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.load_polygons">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load polygons from a file&quot;&quot;&quot;</span>
         <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
@@ -814,7 +814,7 @@
 
 <div class="viewcode-block" id="PolygonManager.transform_polygon_for_pickling">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.transform_polygon_for_pickling">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">transform_polygon_for_pickling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">transform_polygon_for_pickling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the polygon into a serializable format&quot;&quot;&quot;</span>
         <span class="n">serializable_polygon</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;p_id&#39;</span><span class="p">:</span> <span class="n">polygon</span><span class="o">.</span><span class="n">p_id</span><span class="p">,</span>
@@ -840,7 +840,7 @@
 
 <div class="viewcode-block" id="PolygonManager.extract_scatter_plot_state">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.extract_scatter_plot_state">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">extract_scatter_plot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scatter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_scatter_plot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scatter</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract the state of a scatter plot item&quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">scatter</span><span class="o">.</span><span class="n">getData</span><span class="p">()</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">scatter</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;symbol&#39;</span><span class="p">]</span>
@@ -851,7 +851,7 @@
 
 <div class="viewcode-block" id="PolygonManager.reconstruct_polygon">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.reconstruct_polygon">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reconstruct_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializable_polygon</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reconstruct_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializable_polygon</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct a polygon from a serializable format&quot;&quot;&quot;</span>
         <span class="n">polygon</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">serializable_polygon</span><span class="p">[</span><span class="s1">&#39;p_id&#39;</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">serializable_polygon</span><span class="p">[</span><span class="s1">&#39;points&#39;</span><span class="p">]:</span>
@@ -879,7 +879,7 @@
 
 <div class="viewcode-block" id="PolygonManager.recreate_scatter_plot">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.recreate_scatter_plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">recreate_scatter_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">recreate_scatter_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Recreate a scatter plot item from a saved state&quot;&quot;&quot;</span>
         <span class="n">scatter</span> <span class="o">=</span> <span class="n">ScatterPlotItem</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">symbol</span><span class="o">=</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;symbol&#39;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">])</span>
         <span class="n">scatter</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;z_value&#39;</span><span class="p">])</span>
@@ -888,7 +888,7 @@
 
 <div class="viewcode-block" id="PolygonManager.plot_polygon_scatter">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.plot_polygon_scatter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_polygon_scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span><span class="n">k</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot_polygon_scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span><span class="n">k</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]:</span>
             <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">p_id</span><span class="p">]</span><span class="o">.</span><span class="n">points</span>
 
@@ -1047,7 +1047,7 @@
 
 <div class="viewcode-block" id="PolygonManager.distance_to_line_segment">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.distance_to_line_segment">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distance_to_line_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distance_to_line_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes distance to the line segment of a polygon</span>
 
 <span class="sd">        Determines the minimum distance from a point (px,py) to a line segment defined by</span>
@@ -1074,7 +1074,7 @@
 
 <div class="viewcode-block" id="PolygonManager.show_polygon_lines">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.show_polygon_lines">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">show_polygon_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">complete</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">show_polygon_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">complete</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">p_id</span><span class="p">]</span><span class="o">.</span><span class="n">lines</span>
@@ -1133,7 +1133,7 @@
 
 <div class="viewcode-block" id="PolygonManager.update_table_widget">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.update_table_widget">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_table_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_table_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the polygon table&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">tableWidgetPolyPoints</span><span class="o">.</span><span class="n">clearContents</span><span class="p">()</span>
@@ -1158,7 +1158,7 @@
 
 <div class="viewcode-block" id="PolygonManager.clear_lines">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.clear_lines">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">clear_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]:</span>
                 <span class="c1"># Remove existing temporary line(s) if any</span>
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">p_id</span><span class="p">]</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
@@ -1167,7 +1167,7 @@
 
 <div class="viewcode-block" id="PolygonManager.clear_polygons">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.clear_polygons">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">clear_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">tableWidgetPolyPoints</span><span class="o">.</span><span class="n">clearContents</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">tableWidgetPolyPoints</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -1187,7 +1187,7 @@
 
 <div class="viewcode-block" id="PolygonManager.plot_existing_polygon">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.plot_existing_polygon">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_existing_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">p_id</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot_existing_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">p_id</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the first existing polygon for the current sample ID.</span>
 
 <span class="sd">        If there are polygons for the sample ID, select the row in the table widget</span>
@@ -1234,7 +1234,7 @@
 
 <div class="viewcode-block" id="PolygonManager.view_selected_polygon">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.view_selected_polygon">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">view_selected_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">view_selected_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;View the selected polygon when a selection is made in the table widget.&quot;&quot;&quot;</span>
         <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span>
 
@@ -1260,7 +1260,7 @@
 
 <div class="viewcode-block" id="PolygonManager.clear_plot">
 <a class="viewcode-back" href="../../generated/common.Polygon.html#common.Polygon.PolygonManager.clear_plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">clear_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all existing polygons from the plot.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">polygons</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="n">polygons</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>

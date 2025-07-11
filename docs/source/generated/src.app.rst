@@ -13,8 +13,10 @@
    AnalyteSelectionWindow
    AppData
    BlocklyModules
+   CanvasWidget
    CropImage
    CustomTableWidget
+   DataAnalysis
    FieldSelectionWindow
    ImageProcessing
    InfoViewer

@@ -1,4 +1,4 @@
-﻿src.common.NoteTaking
+src.common.NoteTaking
 =====================
 
 .. automodule:: src.common.NoteTaking

@@ -14,7 +14,6 @@
    Calculator
    CustomMplCanvas
    CustomWidgets
-   DataAnalysis
    DataHandling
    ExtendedDF
    LamePlot

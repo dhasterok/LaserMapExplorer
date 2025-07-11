@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -438,9 +438,9 @@
 <td><p>Plots a histogramn in the canvas window</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_map_mpl" title="common.LamePlot.plot_map_mpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_map_mpl</span></code></a>(parent, data, app_data, ...[, ...])</p></td>
-<td><p>Create a matplotlib canvas for plotting a map</p></td>
+<td><p>Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_map_pg" title="common.LamePlot.plot_map_pg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_map_pg</span></code></a>(self, sample_id, field_type, field)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_map_pg" title="common.LamePlot.plot_map_pg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_map_pg</span></code></a>(parent, sample_id, field_type, field)</p></td>
 <td><p>Create a graphic widget for plotting a map</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_ndim" title="common.LamePlot.plot_ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ndim</span></code></a>(parent, data, app_data, plot_style)</p></td>
@@ -633,22 +633,41 @@ tick_label_rotation (float): Angle of text rotation, default is 0.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_map_mpl">
 <span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_mpl" title="Link to this definition">#</a></dt>
-<dd><p>Create a matplotlib canvas for plotting a map</p>
-<p>Create a map using <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.</p>
+<dd><p>Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sample_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sample identifier</p></li>
-<li><p><strong>field_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Type of field for plotting</p></li>
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Field for plotting</p></li>
+<li><p><strong>parent</strong> (<em>QWidget</em><em> or </em><em>similar</em>) – The parent widget for the plot canvas.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Data object containing processed data, mask, and methods for retrieving map data.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Application data object containing settings such as color scale equalization and sample ID.</p></li>
+<li><p><strong>plot_style</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
+<li><p><strong>field_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The type of field to plot (e.g., ‘element’, ‘phase’).</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The specific field or attribute to plot.</p></li>
+<li><p><strong>add_histogram</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, adds a small histogram of the field data to the plot (default is False).</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>canvas</strong> (<em>MplCanvas</em>) – The Matplotlib canvas containing the plotted map.</p></li>
+<li><p><strong>plot_info</strong> (<em>dict</em>) – Dictionary containing metadata about the plot (e.g., field, style, sample ID).</p></li>
+<li><p><strong>hist_canvas</strong> (<em>MplCanvas, optional</em>) – The Matplotlib canvas containing the histogram, only returned if add_histogram is True.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Applies color normalization and optional color scale equalization.</p></li>
+<li><p>Handles different color scale types (linear, log, logit, symlog).</p></li>
+<li><p>Applies a mask as an alpha layer to the plot.</p></li>
+<li><p>Adds a scalebar and adjusts layout.</p></li>
+<li><p>Stores the plotted data in the parent for potential export.</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_map_pg">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_pg" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_pg" title="Link to this definition">#</a></dt>
 <dd><p>Create a graphic widget for plotting a map</p>
 <p>Create a map using pyqtgraph.</p>
 <dl class="field-list simple">

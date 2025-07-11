@@ -12,6 +12,8 @@ class HistogramUI():
         self.ui = parent
         self.logger_key = "Plot"
 
+        self._histogram_type_options = ['PDF','CDF','log-scaling']
+
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
@@ -21,6 +23,9 @@ class HistogramUI():
         self.ui.doubleSpinBoxBinWidth.valueChanged.connect(lambda: self.update_hist_bin_width_spinbox(self.ui.doubleSpinBoxBinWidth.value()))
         self.ui.spinBoxNBins.valueChanged.connect(lambda: self.update_hist_num_bins_spinbox(self.ui.spinBoxNBins.value()))
         self.ui.toolButtonHistogramReset.clicked.connect(lambda: self.ui.spinBox)
+
+        self.ui.comboBoxHistType.clear()
+        self.ui.comboBoxHistType.addItems(self._histogram_type_options)
         self.ui.comboBoxHistType.activated.connect(lambda: self.ui.comboBoxHistType.currentText())
 
     def connect_observer(self):
@@ -56,6 +61,8 @@ class CorrelationUI():
     def __init__(self, parent):
         self.ui = parent
         self.logger_key = "Plot"
+
+        self._correlation_method_options = ['none','Pearson','Spearman','Kendall']
         
         self.connect_widgets()
         self.connect_observer()
@@ -63,7 +70,11 @@ class CorrelationUI():
 
     def connect_widgets(self):
         """Connects correlation widgets to methods."""
-        pass
+        self.ui.comboBoxCorrelationMethod.clear()
+        self.ui.comboBoxCorrelationMethod.addItems(self._correlation_method_options)
+        self.ui.comboBoxCorrelationMethod.activated.connect(self.update_corr_method)
+
+        self.ui.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -142,13 +153,18 @@ class ScatterUI():
         self.ui = parent
         self.logger_key = "Plot"
 
+        self._heatmap_options = ['counts','median','median, MAD','MAD','mean','mean, std','std']
+
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
 
     def connect_widgets(self):
         """Connects scatter and heatmap widgets to methods."""
-        pass
+        self.ui.comboBoxHeatmaps.clear()
+        self.ui.comboBoxHeatmaps.addItems(self._heatmap_options)
+        self.ui.comboBoxHeatmaps.activated.connect(self.update_heatmap_style_combobox)
+
 
     def connect_observer(self):
         """Connects properties to observer functions."""

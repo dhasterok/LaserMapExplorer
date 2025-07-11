@@ -20,6 +20,7 @@ src.app.InfoViewer
    
       DataFrameTab
       FieldTab
+      FloatItemDelegate
       InfoDock
       MetadataTab
       PlotInfoTab

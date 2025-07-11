@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,15 +388,15 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.PlotTree</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">darkdetect</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span> <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QBrush</span><span class="p">,</span> <span class="n">QStandardItemModel</span><span class="p">,</span> <span class="n">QStandardItem</span> <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QMenu</span> <span class="p">)</span> 
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardItem</span><span class="p">,</span> <span class="n">CustomTreeView</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.SortAnalytes</span><span class="w"> </span><span class="kn">import</span> <span class="n">sort_analytes</span>
+<span></span><span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QBrush</span><span class="p">,</span> <span class="n">QStandardItemModel</span><span class="p">,</span> <span class="n">QStandardItem</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QMenu</span> <span class="p">)</span> 
+<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">StandardItem</span><span class="p">,</span> <span class="n">CustomTreeView</span>
+<span class="kn">from</span> <span class="nn">src.common.SortAnalytes</span> <span class="kn">import</span> <span class="n">sort_analytes</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
 
 <span class="c1"># -------------------------------</span>
 <span class="c1"># Plot Selector (tree) functions</span>
@@ -404,8 +404,8 @@
 <div class="viewcode-block" id="PlotTree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Tree&#39;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">PlotTree</span><span class="p">():</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PlotTree</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Tree&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -423,7 +423,7 @@
 
 <div class="viewcode-block" id="PlotTree.initialize_tree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.initialize_tree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">initialize_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ``self.parent.treeView`` with the top level items.&quot;&quot;&quot;</span>        
         <span class="c1"># create tree</span>
         <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">treeView</span>
@@ -452,7 +452,7 @@
         
 <div class="viewcode-block" id="PlotTree.add_sample">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.add_sample">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create plot selector tree</span>
 
 <span class="sd">        Initializes ``MainWindow.treeView``.  The ``tree`` is intialized for each of the plot groups.</span>
@@ -525,7 +525,7 @@
 
 <div class="viewcode-block" id="PlotTree.add_calculated_leaf">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.add_calculated_leaf">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_calculated_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_calculated_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
 
         <span class="c1"># assign the two objects needed from self.parent</span>
         <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span>
@@ -544,7 +544,7 @@
     
 <div class="viewcode-block" id="PlotTree.sort_tree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.sort_tree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sort_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">sort_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.</span>
 
 <span class="sd">        Parameters</span>
@@ -580,7 +580,7 @@
 
 <div class="viewcode-block" id="PlotTree.retrieve_plotinfo_from_tree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.retrieve_plotinfo_from_tree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">retrieve_plotinfo_from_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">leaf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">retrieve_plotinfo_from_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">leaf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the plot_info associated with a tree location</span>
 <span class="sd">        </span>
 <span class="sd">        Can recall the plot info given the index into the tree (top level group in ``Plot Selector``), or by the tree, branch, leaf location.</span>
@@ -634,7 +634,7 @@
 
 <div class="viewcode-block" id="PlotTree.tree_double_click">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.tree_double_click">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">tree_double_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tree_index</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">tree_double_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tree_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Double-click on plot selector</span>
 <span class="sd">        </span>
 <span class="sd">        When the user double-clicks on the ``Plot Selector``, the stored plot is placed on the current canvas.</span>
@@ -693,7 +693,7 @@
 
 <div class="viewcode-block" id="PlotTree.update_tree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.update_tree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm_update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm_update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates plot selector list and data</span>
 
 <span class="sd">        Updates the tree with the list of analytes in ``MainWindow.data[sample_id][&#39;norm&#39;]`` and background color</span>
@@ -788,7 +788,7 @@
 
 <div class="viewcode-block" id="PlotTree.add_tree_item">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.add_tree_item">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_tree_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_tree_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates plot selector list and adds plot information data to tree item</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -857,7 +857,7 @@
  
 <div class="viewcode-block" id="PlotTree.unhighlight_tree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.unhighlight_tree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the highlight of all items in the tree.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -881,7 +881,7 @@
 
 <div class="viewcode-block" id="PlotTree.get_tree_items">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.get_tree_items">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_tree_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_tree_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns items associated with the specified tree</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -899,7 +899,7 @@
 
 <div class="viewcode-block" id="PlotTree.find_leaf">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.find_leaf">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">leaf</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">find_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">leaf</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a branch or leaf item from treeView</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -935,7 +935,7 @@
 
 <div class="viewcode-block" id="PlotTree.clear_tree_data">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.clear_tree_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">clear_tree_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_tree_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes item data from all items in a given tree</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -945,7 +945,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tree_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tree_items</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">clear_item_data</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">clear_item_data</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Recursively clear data from the item and its children&quot;&quot;&quot;</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">UserRole</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
@@ -959,7 +959,7 @@
 
 <div class="viewcode-block" id="PlotTree.get_plot_info_from_tree">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.get_plot_info_from_tree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_plot_info_from_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_plot_info_from_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract plot_info data from the root of QStandardItemModel as a flat list.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -972,7 +972,7 @@
 
 <div class="viewcode-block" id="PlotTree.extract_plot_info">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.extract_plot_info">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">extract_plot_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_plot_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively extract plot_info from QStandardItem and append to a flat list.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -995,7 +995,7 @@
 
 <div class="viewcode-block" id="PlotTree.create_item_from_data">
 <a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.create_item_from_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_item_from_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_item_from_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively create QStandardItem from data.&quot;&quot;&quot;</span>
         <span class="n">item</span> <span class="o">=</span> <span class="n">QStandardItem</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="s1">&#39;plot_info&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>

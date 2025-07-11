@@ -29,7 +29,7 @@
   <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -500,7 +500,7 @@
         <li><a href="generated/src.common.Observable.html#src.common.Observable.Observable.add_observer">(src.common.Observable.Observable method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.add_plotwidget_to_canvas">add_plotwidget_to_canvas() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.add_plotwidget_to_canvas">add_plotwidget_to_canvas() (src.app.CanvasWidget.CanvasWidget method)</a>
 </li>
       <li><a href="generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.add_plotwidget_to_plot_viewer">add_plotwidget_to_plot_viewer() (app.PlotViewerWindow.PlotViewer method)</a>
 
@@ -1099,7 +1099,9 @@
         <li><a href="generated/src.app.FieldSelectionWindow.html#src.app.FieldSelectionWindow.FieldDialog.cancel_selection">(src.app.FieldSelectionWindow.FieldDialog method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.canvas_changed">canvas_changed() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.canvas_changed">canvas_changed() (src.app.CanvasWidget.CanvasWidget method)</a>
+</li>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget">CanvasWidget (class in src.app.CanvasWidget)</a>
 </li>
       <li><a href="app.html#app.Profile.Profiling.cart_to_dist">cart_to_dist() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.cart_to_dist">[1]</a>
 
@@ -1182,7 +1184,7 @@
       <li><a href="generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.clear_layout">clear_layout() (app.PlotViewerWindow.PlotViewer method)</a>
 
       <ul>
-        <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.clear_layout">(src.app.MainWindow.MainWindow method)</a>
+        <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.clear_layout">(src.app.CanvasWidget.CanvasWidget method)</a>
 </li>
         <li><a href="generated/src.app.PlotViewerWindow.html#src.app.PlotViewerWindow.PlotViewer.clear_layout">(src.app.PlotViewerWindow.PlotViewer method)</a>
 </li>
@@ -1349,6 +1351,12 @@
         <li><a href="generated/src.app.AppData.html#src.app.AppData.AppData.cluster_method">(src.app.AppData.AppData property)</a>
 </li>
       </ul></li>
+      <li><a href="generated/app.AppData.html#app.AppData.AppData.cluster_method_options">cluster_method_options (app.AppData.AppData property)</a>
+
+      <ul>
+        <li><a href="generated/src.app.AppData.html#src.app.AppData.AppData.cluster_method_options">(src.app.AppData.AppData property)</a>
+</li>
+      </ul></li>
       <li><a href="generated/common.LamePlot.html#common.LamePlot.cluster_performance_plot">cluster_performance_plot() (in module common.LamePlot)</a>
 
       <ul>
@@ -1361,18 +1369,10 @@
         <li><a href="generated/src.app.AppData.html#src.app.AppData.AppData.cluster_seed">(src.app.AppData.AppData property)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.Clustering">Clustering (class in common.DataAnalysis)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.Clustering">(class in src.common.DataAnalysis)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.Clustering">Clustering (class in src.app.DataAnalysis)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI">ClusteringUI (class in common.DataAnalysis)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI">(class in src.common.DataAnalysis)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI">ClusteringUI (class in src.app.DataAnalysis)</a>
 </li>
-      </ul></li>
       <li><a href="common.html#common.Masking.ClusterTab">ClusterTab (class in common.Masking)</a>, <a href="generated/common.Masking.html#common.Masking.ClusterTab">[1]</a>
 
       <ul>
@@ -1443,6 +1443,8 @@
         <li><a href="generated/common.Browser.html#module-common.Browser">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     common.Calculator
 
@@ -1457,8 +1459,6 @@
         <li><a href="common.html#module-common.colorfunc">module</a>, <a href="generated/common.colorfunc.html#module-common.colorfunc">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     common.csvdict
 
@@ -1478,13 +1478,6 @@
 
       <ul>
         <li><a href="common.html#module-common.CustomWidgets">module</a>, <a href="generated/common.CustomWidgets.html#module-common.CustomWidgets">[1]</a>
-</li>
-      </ul></li>
-      <li>
-    common.DataAnalysis
-
-      <ul>
-        <li><a href="generated/common.DataAnalysis.html#module-common.DataAnalysis">module</a>
 </li>
       </ul></li>
       <li>
@@ -1607,6 +1600,13 @@
 </li>
       </ul></li>
       <li>
+    common.Regression
+
+      <ul>
+        <li><a href="common.html#module-common.Regression">module</a>, <a href="generated/common.Regression.html#module-common.Regression">[1]</a>
+</li>
+      </ul></li>
+      <li>
     common.scalebar
 
       <ul>
@@ -1662,17 +1662,13 @@
         <li><a href="common.html#module-common.varfunc">module</a>, <a href="generated/common.varfunc.html#module-common.varfunc">[1]</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.Clustering.compute_clusters">compute_clusters() (common.DataAnalysis.Clustering method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.Clustering.compute_clusters">compute_clusters() (src.app.DataAnalysis.Clustering method)</a>
 
       <ul>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.compute_clusters">(common.DataAnalysis.ClusteringUI method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.Clustering.compute_clusters">(src.common.DataAnalysis.Clustering method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.compute_clusters">(src.common.DataAnalysis.ClusteringUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.compute_clusters">(src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.compute_clusters_update_groups">compute_clusters_update_groups() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.compute_clusters_update_groups">compute_clusters_update_groups() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
       <li><a href="generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.compute_date_map">compute_date_map() (app.SpecialTools.SpecialFunctions method)</a>
 
@@ -1680,24 +1676,16 @@
         <li><a href="generated/src.app.SpecialTools.html#src.app.SpecialTools.SpecialFunctions.compute_date_map">(src.app.SpecialTools.SpecialFunctions method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReduction.compute_dim_red">compute_dim_red() (common.DataAnalysis.DimensionalReduction method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReduction.compute_dim_red">compute_dim_red() (src.app.DataAnalysis.DimensionalReduction method)</a>
 
       <ul>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.compute_dim_red">(common.DataAnalysis.DimensionalReductionUI method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReduction.compute_dim_red">(src.common.DataAnalysis.DimensionalReduction method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.compute_dim_red">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.compute_dim_red">(src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReduction.compute_pca">compute_pca() (common.DataAnalysis.DimensionalReduction method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReduction.compute_pca">compute_pca() (src.app.DataAnalysis.DimensionalReduction method)</a>
 
       <ul>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.compute_pca">(common.DataAnalysis.DimensionalReductionUI method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReduction.compute_pca">(src.common.DataAnalysis.DimensionalReduction method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.compute_pca">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.compute_pca">(src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
       </ul></li>
       <li><a href="app.html#app.Profile.Profiling.compute_profile_points">compute_profile_points() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.compute_profile_points">[1]</a>
@@ -1729,9 +1717,9 @@
       <ul>
         <li><a href="app.html#app.StyleToolbox.StylingDock.connect_logger">(app.StyleToolbox.StylingDock method)</a>, <a href="generated/app.StyleToolbox.html#app.StyleToolbox.StylingDock.connect_logger">[1]</a>
 </li>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.connect_logger">(common.DataAnalysis.ClusteringUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.connect_logger">(src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.connect_logger">(common.DataAnalysis.DimensionalReductionUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.connect_logger">(src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.connect_logger">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
@@ -1749,19 +1737,15 @@
 </li>
         <li><a href="generated/src.app.StyleToolbox.html#src.app.StyleToolbox.StylingDock.connect_logger">(src.app.StyleToolbox.StylingDock method)</a>
 </li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.connect_logger">(src.common.DataAnalysis.ClusteringUI method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.connect_logger">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
-</li>
       </ul></li>
       <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.connect_observer">connect_observer() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.connect_observer">[1]</a>
 
       <ul>
         <li><a href="app.html#app.StyleToolbox.StylingDock.connect_observer">(app.StyleToolbox.StylingDock method)</a>, <a href="generated/app.StyleToolbox.html#app.StyleToolbox.StylingDock.connect_observer">[1]</a>
 </li>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.connect_observer">(common.DataAnalysis.ClusteringUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.connect_observer">(src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.connect_observer">(common.DataAnalysis.DimensionalReductionUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.connect_observer">(src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.connect_observer">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
@@ -1777,15 +1761,13 @@
 </li>
         <li><a href="generated/src.app.StyleToolbox.html#src.app.StyleToolbox.StylingDock.connect_observer">(src.app.StyleToolbox.StylingDock method)</a>
 </li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.connect_observer">(src.common.DataAnalysis.ClusteringUI method)</a>
-</li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.connect_observer">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
-</li>
       </ul></li>
       <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.connect_widgets">connect_widgets() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.connect_widgets">[1]</a>
 
       <ul>
-        <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.connect_widgets">(common.DataAnalysis.DimensionalReductionUI method)</a>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.connect_widgets">(src.app.DataAnalysis.ClusteringUI method)</a>
+</li>
+        <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.connect_widgets">(src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.connect_widgets">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
@@ -1799,7 +1781,7 @@
 </li>
         <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.connect_widgets">(src.app.MainWindow.MainWindow method)</a>
 </li>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.connect_widgets">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+        <li><a href="generated/src.app.Preprocessing.html#src.app.Preprocessing.PreprocessingUI.connect_widgets">(src.app.Preprocessing.PreprocessingUI method)</a>
 </li>
       </ul></li>
       <li><a href="app.html#app.Workflow.BlocklyBridge.convert_numpy_types">convert_numpy_types() (app.Workflow.BlocklyBridge method)</a>, <a href="generated/app.Workflow.html#app.Workflow.BlocklyBridge.convert_numpy_types">[1]</a>
@@ -1902,6 +1884,12 @@
 
       <ul>
         <li><a href="generated/src.app.ProfileNew.html#src.app.ProfileNew.Profiling.create_new_profile">(src.app.ProfileNew.Profiling method)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/app.InfoViewer.html#app.InfoViewer.FloatItemDelegate.createEditor">createEditor() (app.InfoViewer.FloatItemDelegate method)</a>
+
+      <ul>
+        <li><a href="generated/src.app.InfoViewer.html#src.app.InfoViewer.FloatItemDelegate.createEditor">(src.app.InfoViewer.FloatItemDelegate method)</a>
 </li>
       </ul></li>
       <li><a href="common.html#common.DataHandling.SampleObj.crop_mask">crop_mask (common.DataHandling.SampleObj property)</a>, <a href="generated/common.DataHandling.html#common.DataHandling.SampleObj.crop_mask">[1]</a>
@@ -2190,18 +2178,10 @@
         <li><a href="generated/src.app.AppData.html#src.app.AppData.AppData.dim_red_y_min">(src.app.AppData.AppData property)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReduction">DimensionalReduction (class in common.DataAnalysis)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReduction">(class in src.common.DataAnalysis)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReduction">DimensionalReduction (class in src.app.DataAnalysis)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI">DimensionalReductionUI (class in common.DataAnalysis)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI">(class in src.common.DataAnalysis)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI">DimensionalReductionUI (class in src.app.DataAnalysis)</a>
 </li>
-      </ul></li>
       <li><a href="common.html#common.CustomMplCanvas.MplCanvas.disable_distance_mode">disable_distance_mode() (common.CustomMplCanvas.MplCanvas method)</a>, <a href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.disable_distance_mode">[1]</a>
 
       <ul>
@@ -2220,7 +2200,7 @@
         <li><a href="generated/src.common.PolygonMatplotlib.html#src.common.PolygonMatplotlib.PolygonManager.disconnect">(src.common.PolygonMatplotlib.PolygonManager method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.display_QV">display_QV() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.display_QV">display_QV() (src.app.CanvasWidget.CanvasWidget method)</a>
 </li>
       <li><a href="app.html#app.Profile.Profiling.dist_to_cart">dist_to_cart() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.dist_to_cart">[1]</a>
 
@@ -2308,6 +2288,12 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/app.AppData.html#app.AppData.AppData.edge_detection_method">edge_detection_method (app.AppData.AppData property)</a>
+
+      <ul>
+        <li><a href="generated/src.app.AppData.html#src.app.AppData.AppData.edge_detection_method">(src.app.AppData.AppData property)</a>
+</li>
+      </ul></li>
       <li><a href="generated/common.PolygonMatplotlib.html#common.PolygonMatplotlib.PolygonManager.enable_connections">enable_connections() (common.PolygonMatplotlib.PolygonManager method)</a>
 
       <ul>
@@ -2506,6 +2492,12 @@
 
       <ul>
         <li><a href="generated/src.common.PolygonMatplotlib.html#src.common.PolygonMatplotlib.PolygonManager.finish_polygon">(src.common.PolygonMatplotlib.PolygonManager method)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/app.InfoViewer.html#app.InfoViewer.FloatItemDelegate">FloatItemDelegate (class in app.InfoViewer)</a>
+
+      <ul>
+        <li><a href="generated/src.app.InfoViewer.html#src.app.InfoViewer.FloatItemDelegate">(class in src.app.InfoViewer)</a>
 </li>
       </ul></li>
       <li><a href="generated/common.Logger.html#common.Logger.LoggerDock.flush">flush() (common.Logger.LoggerDock method)</a>
@@ -2752,14 +2744,14 @@
         <li><a href="generated/src.common.Logger.html#src.common.Logger.get_global_logger">(in module src.common.Logger)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.colorfunc.get_hex_color">get_hex_color() (in module common.colorfunc)</a>, <a href="generated/common.colorfunc.html#common.colorfunc.get_hex_color">[1]</a>
 
       <ul>
         <li><a href="generated/src.common.colorfunc.html#src.common.colorfunc.get_hex_color">(in module src.common.colorfunc)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.CustomWidgets.CustomTreeView.get_item_path">get_item_path() (common.CustomWidgets.CustomTreeView method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.get_item_path">[1]</a>
 
       <ul>
@@ -2926,13 +2918,9 @@
         <li><a href="generated/src.common.Browser.html#src.common.Browser.Browser.go_to_page">(src.common.Browser.Browser method)</a>
 </li>
       </ul></li>
-      <li><a href="app.html#app.ImageProcessing.ImageProcessing.gradient_checked_state_changed">gradient_checked_state_changed() (app.ImageProcessing.ImageProcessing method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.gradient_checked_state_changed">[1]</a>
+      <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">gradient_checked_state_changed() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">[1]</a>
 
       <ul>
-        <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">(app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">[1]</a>
-</li>
-        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessing.gradient_checked_state_changed">(src.app.ImageProcessing.ImageProcessing method)</a>
-</li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
       </ul></li>
@@ -3172,7 +3160,7 @@
         <li><a href="generated/src.app.InfoViewer.html#src.app.InfoViewer.InfoDock">(class in src.app.InfoViewer)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.init_canvas_widget">init_canvas_widget() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.init_canvas_widget">init_canvas_widget() (src.app.CanvasWidget.CanvasWidget method)</a>
 </li>
       <li><a href="app.html#app.CropImage.CropTool.init_crop">init_crop() (app.CropImage.CropTool method)</a>, <a href="generated/app.CropImage.html#app.CropImage.CropTool.init_crop">[1]</a>
 
@@ -3743,8 +3731,6 @@
 </li>
         <li><a href="common.html#module-common.CustomWidgets">common.CustomWidgets</a>, <a href="generated/common.CustomWidgets.html#module-common.CustomWidgets">[1]</a>
 </li>
-        <li><a href="generated/common.DataAnalysis.html#module-common.DataAnalysis">common.DataAnalysis</a>
-</li>
         <li><a href="common.html#module-common.DataHandling">common.DataHandling</a>, <a href="generated/common.DataHandling.html#module-common.DataHandling">[1]</a>
 </li>
         <li><a href="common.html#module-common.ExtendedDF">common.ExtendedDF</a>, <a href="generated/common.ExtendedDF.html#module-common.ExtendedDF">[1]</a>
@@ -3779,6 +3765,8 @@
 </li>
         <li><a href="common.html#module-common.radar_factory">common.radar_factory</a>, <a href="generated/common.radar_factory.html#module-common.radar_factory">[1]</a>
 </li>
+        <li><a href="common.html#module-common.Regression">common.Regression</a>, <a href="generated/common.Regression.html#module-common.Regression">[1]</a>
+</li>
         <li><a href="common.html#module-common.scalebar">common.scalebar</a>, <a href="generated/common.scalebar.html#module-common.scalebar">[1]</a>
 </li>
         <li><a href="common.html#module-common.ScheduleTimer">common.ScheduleTimer</a>, <a href="generated/common.ScheduleTimer.html#module-common.ScheduleTimer">[1]</a>
@@ -3807,11 +3795,15 @@
 </li>
         <li><a href="generated/src.app.BlocklyModules.html#module-src.app.BlocklyModules">src.app.BlocklyModules</a>
 </li>
+        <li><a href="generated/src.app.CanvasWidget.html#module-src.app.CanvasWidget">src.app.CanvasWidget</a>
+</li>
         <li><a href="generated/src.app.config.html#module-src.app.config">src.app.config</a>
 </li>
         <li><a href="generated/src.app.CropImage.html#module-src.app.CropImage">src.app.CropImage</a>
 </li>
         <li><a href="generated/src.app.CustomTableWidget.html#module-src.app.CustomTableWidget">src.app.CustomTableWidget</a>
+</li>
+        <li><a href="generated/src.app.DataAnalysis.html#module-src.app.DataAnalysis">src.app.DataAnalysis</a>
 </li>
         <li><a href="generated/src.app.FieldSelectionWindow.html#module-src.app.FieldSelectionWindow">src.app.FieldSelectionWindow</a>
 </li>
@@ -3869,8 +3861,6 @@
 </li>
         <li><a href="generated/src.common.CustomWidgets.html#module-src.common.CustomWidgets">src.common.CustomWidgets</a>
 </li>
-        <li><a href="generated/src.common.DataAnalysis.html#module-src.common.DataAnalysis">src.common.DataAnalysis</a>
-</li>
         <li><a href="generated/src.common.DataHandling.html#module-src.common.DataHandling">src.common.DataHandling</a>
 </li>
         <li><a href="generated/src.common.ExtendedDF.html#module-src.common.ExtendedDF">src.common.ExtendedDF</a>
@@ -3904,6 +3894,8 @@
         <li><a href="generated/src.common.radar.html#module-src.common.radar">src.common.radar</a>
 </li>
         <li><a href="generated/src.common.radar_factory.html#module-src.common.radar_factory">src.common.radar_factory</a>
+</li>
+        <li><a href="generated/src.common.Regression.html#module-src.common.Regression">src.common.Regression</a>
 </li>
         <li><a href="generated/src.common.scalebar.html#module-src.common.scalebar">src.common.scalebar</a>
 </li>
@@ -4030,6 +4022,8 @@
         <li><a href="generated/src.common.PolygonMatplotlib.html#src.common.PolygonMatplotlib.InteractivePolygon.move_vertex">(src.common.PolygonMatplotlib.InteractivePolygon method)</a>
 </li>
       </ul></li>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.move_widget_between_layouts">move_widget_between_layouts() (src.app.CanvasWidget.CanvasWidget method)</a>
+</li>
       <li><a href="common.html#common.CustomMplCanvas.MplCanvas">MplCanvas (class in common.CustomMplCanvas)</a>, <a href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas">[1]</a>
 
       <ul>
@@ -4120,35 +4114,23 @@
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.noise_reduction">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
       </ul></li>
-      <li><a href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction_method_callback">noise_reduction_method_callback() (app.ImageProcessing.ImageProcessing method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction_method_callback">[1]</a>
+      <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">noise_reduction_method_callback() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">[1]</a>
 
       <ul>
-        <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">(app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">[1]</a>
-</li>
-        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessing.noise_reduction_method_callback">(src.app.ImageProcessing.ImageProcessing method)</a>
-</li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
       </ul></li>
-      <li><a href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback">noise_reduction_option1_callback() (app.ImageProcessing.ImageProcessing method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback">[1]</a>
+      <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">noise_reduction_option1_callback() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">[1]</a>
 
       <ul>
-        <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">(app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">[1]</a>
-</li>
-        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessing.noise_reduction_option1_callback">(src.app.ImageProcessing.ImageProcessing method)</a>
-</li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="app.html#app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback">noise_reduction_option2_callback() (app.ImageProcessing.ImageProcessing method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback">[1]</a>
+      <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">noise_reduction_option2_callback() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">[1]</a>
 
       <ul>
-        <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">(app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">[1]</a>
-</li>
-        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessing.noise_reduction_option2_callback">(src.app.ImageProcessing.ImageProcessing method)</a>
-</li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
       </ul></li>
@@ -5046,6 +5028,12 @@
         <li><a href="generated/src.common.Masking.html#src.common.Masking.MaskObj.register_callback">(src.common.Masking.MaskObj method)</a>
 </li>
       </ul></li>
+      <li><a href="common.html#common.Regression.RegressionPage">RegressionPage (class in common.Regression)</a>, <a href="generated/common.Regression.html#common.Regression.RegressionPage">[1]</a>
+
+      <ul>
+        <li><a href="generated/src.common.Regression.html#src.common.Regression.RegressionPage">(class in src.common.Regression)</a>
+</li>
+      </ul></li>
       <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.reindex_canvas_tab">reindex_canvas_tab() (src.app.MainWindow.MainWindow method)</a>
 </li>
       <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.reindex_left_tab">reindex_left_tab() (src.app.MainWindow.MainWindow method)</a>
@@ -5064,13 +5052,23 @@
         <li><a href="generated/src.app.AnalyteSelectionWindow.html#src.app.AnalyteSelectionWindow.AnalyteDialog.remove_analyte_from_list">(src.app.AnalyteSelectionWindow.AnalyteDialog method)</a>
 </li>
       </ul></li>
+      <li><a href="app.html#app.ImageProcessing.ImageProcessing.remove_edge_detection">remove_edge_detection() (app.ImageProcessing.ImageProcessing method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.remove_edge_detection">[1]</a>
+
+      <ul>
+        <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.remove_edge_detection">(app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.remove_edge_detection">[1]</a>
+</li>
+        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessing.remove_edge_detection">(src.app.ImageProcessing.ImageProcessing method)</a>
+</li>
+        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.remove_edge_detection">(src.app.ImageProcessing.ImageProcessingUI method)</a>
+</li>
+      </ul></li>
       <li><a href="app.html#app.Profile.Profiling.remove_field_from_listview">remove_field_from_listview() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.remove_field_from_listview">[1]</a>
 
       <ul>
         <li><a href="generated/src.app.Profile.html#src.app.Profile.Profiling.remove_field_from_listview">(src.app.Profile.Profiling method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.remove_multi_plot">remove_multi_plot() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.remove_multi_plot">remove_multi_plot() (src.app.CanvasWidget.CanvasWidget method)</a>
 </li>
       <li><a href="generated/app.AppData.html#app.AppData.AppData.remove_observer">remove_observer() (app.AppData.AppData method)</a>
 
@@ -5106,6 +5104,8 @@
         <li><a href="generated/src.common.Masking.html#src.common.Masking.FilterTab.remove_selected_rows">(src.common.Masking.FilterTab method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/common.PolygonMatplotlib.html#common.PolygonMatplotlib.InteractivePolygon.remove_vertex">remove_vertex() (common.PolygonMatplotlib.InteractivePolygon method)</a>
 
       <ul>
@@ -5118,8 +5118,6 @@
         <li><a href="generated/src.app.SpotImporter.html#src.app.SpotImporter.SpotImporter.rename_column">(src.app.SpotImporter.SpotImporter method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.SearchTool.SearchWidget.replace_all">replace_all() (common.SearchTool.SearchWidget method)</a>, <a href="generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_all">[1]</a>
 
       <ul>
@@ -5280,13 +5278,9 @@
         <li><a href="generated/src.common.CustomWidgets.html#src.common.CustomWidgets.RotatedHeaderView">(class in src.common.CustomWidgets)</a>
 </li>
       </ul></li>
-      <li><a href="app.html#app.ImageProcessing.ImageProcessing.run_noise_reduction">run_noise_reduction() (app.ImageProcessing.ImageProcessing method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.run_noise_reduction">[1]</a>
+      <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction">run_noise_reduction() (app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction">[1]</a>
 
       <ul>
-        <li><a href="app.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction">(app.ImageProcessing.ImageProcessingUI method)</a>, <a href="generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction">[1]</a>
-</li>
-        <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessing.run_noise_reduction">(src.app.ImageProcessing.ImageProcessing method)</a>
-</li>
         <li><a href="generated/src.app.ImageProcessing.html#src.app.ImageProcessing.ImageProcessingUI.run_noise_reduction">(src.app.ImageProcessing.ImageProcessingUI method)</a>
 </li>
       </ul></li>
@@ -5908,14 +5902,14 @@
         <li><a href="generated/src.app.StyleToolbox.html#src.app.StyleToolbox.StylingDock.signal_state">(src.app.StyleToolbox.StylingDock property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.CustomMplCanvas.SimpleMplCanvas">SimpleMplCanvas (class in common.CustomMplCanvas)</a>, <a href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.SimpleMplCanvas">[1]</a>
 
       <ul>
         <li><a href="generated/src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.SimpleMplCanvas">(class in src.common.CustomMplCanvas)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.CustomWidgets.ToggleSwitch.sizeHint">sizeHint() (common.CustomWidgets.ToggleSwitch method)</a>, <a href="generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.sizeHint">[1]</a>
 
       <ul>
@@ -6060,6 +6054,13 @@
 </li>
       </ul></li>
       <li>
+    src.app.CanvasWidget
+
+      <ul>
+        <li><a href="generated/src.app.CanvasWidget.html#module-src.app.CanvasWidget">module</a>
+</li>
+      </ul></li>
+      <li>
     src.app.config
 
       <ul>
@@ -6078,6 +6079,13 @@
 
       <ul>
         <li><a href="generated/src.app.CustomTableWidget.html#module-src.app.CustomTableWidget">module</a>
+</li>
+      </ul></li>
+      <li>
+    src.app.DataAnalysis
+
+      <ul>
+        <li><a href="generated/src.app.DataAnalysis.html#module-src.app.DataAnalysis">module</a>
 </li>
       </ul></li>
       <li>
@@ -6277,13 +6285,6 @@
 </li>
       </ul></li>
       <li>
-    src.common.DataAnalysis
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#module-src.common.DataAnalysis">module</a>
-</li>
-      </ul></li>
-      <li>
     src.common.DataHandling
 
       <ul>
@@ -6400,6 +6401,13 @@
 
       <ul>
         <li><a href="generated/src.common.radar_factory.html#module-src.common.radar_factory">module</a>
+</li>
+      </ul></li>
+      <li>
+    src.common.Regression
+
+      <ul>
+        <li><a href="generated/src.common.Regression.html#module-src.common.Regression">module</a>
 </li>
       </ul></li>
       <li>
@@ -6828,14 +6836,14 @@
         <li><a href="generated/src.app.InfoViewer.html#src.app.InfoViewer.PlotInfoTab.toggle_annotation">(src.app.InfoViewer.PlotInfoTab method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="app.html#app.Profile.Profiling.toggle_buttons">toggle_buttons() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.toggle_buttons">[1]</a>
 
       <ul>
         <li><a href="generated/src.app.Profile.html#src.app.Profile.Profiling.toggle_buttons">(src.app.Profile.Profiling method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="app.html#app.AnalyteSelectionWindow.AnalyteDialog.toggle_cell_selection">toggle_cell_selection() (app.AnalyteSelectionWindow.AnalyteDialog method)</a>, <a href="generated/app.AnalyteSelectionWindow.html#app.AnalyteSelectionWindow.AnalyteDialog.toggle_cell_selection">[1]</a>
 
       <ul>
@@ -6848,7 +6856,7 @@
         <li><a href="generated/src.common.Masking.html#src.common.Masking.ClusterTab.toggle_cluster_actions">(src.common.Masking.ClusterTab method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.toggle_cluster_parameters">toggle_cluster_parameters() (src.app.MainWindow.MainWindow method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.toggle_cluster_widgets">toggle_cluster_widgets() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
       <li><a href="generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.toggle_column_selection">toggle_column_selection() (app.InfoViewer.MetadataTab method)</a>
 
@@ -6866,6 +6874,12 @@
       </ul></li>
       <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.toggle_dock_visibility">toggle_dock_visibility() (src.app.MainWindow.MainWindow method)</a>
 </li>
+      <li><a href="common.html#common.Masking.PolygonTab.toggle_edge_detection">toggle_edge_detection() (common.Masking.PolygonTab method)</a>, <a href="generated/common.Masking.html#common.Masking.PolygonTab.toggle_edge_detection">[1]</a>
+
+      <ul>
+        <li><a href="generated/src.common.Masking.html#src.common.Masking.PolygonTab.toggle_edge_detection">(src.common.Masking.PolygonTab method)</a>
+</li>
+      </ul></li>
       <li><a href="app.html#app.Profile.Profiling.toggle_edit_mode">toggle_edit_mode() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.toggle_edit_mode">[1]</a>
 
       <ul>
@@ -7241,7 +7255,7 @@
       <li><a href="generated/app.PlotViewerWindow.html#app.PlotViewerWindow.PlotViewer.update_canvas">update_canvas() (app.PlotViewerWindow.PlotViewer method)</a>
 
       <ul>
-        <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.update_canvas">(src.app.MainWindow.MainWindow method)</a>
+        <li><a href="generated/src.app.CanvasWidget.html#src.app.CanvasWidget.CanvasWidget.update_canvas">(src.app.CanvasWidget.CanvasWidget method)</a>
 </li>
         <li><a href="generated/src.app.PlotViewerWindow.html#src.app.PlotViewerWindow.PlotViewer.update_canvas">(src.app.PlotViewerWindow.PlotViewer method)</a>
 </li>
@@ -7270,30 +7284,14 @@
         <li><a href="generated/src.app.StyleToolbox.html#src.app.StyleToolbox.StylingDock.update_clim_lineedits">(src.app.StyleToolbox.StylingDock method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_cluster_distance_combobox">update_cluster_distance_combobox() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_cluster_distance_combobox">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_cluster_distance">update_cluster_distance() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_cluster_exponent_slider">update_cluster_exponent_slider() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_cluster_exponent_slider">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_cluster_exponent_slider">update_cluster_exponent_slider() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_cluster_method_combobox">update_cluster_method_combobox() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_cluster_method_combobox">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_cluster_method">update_cluster_method() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_cluster_seed_lineedit">update_cluster_seed_lineedit() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_cluster_seed_lineedit">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_cluster_seed">update_cluster_seed() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
       <li><a href="common.html#common.Masking.ClusterTab.update_clusters">update_clusters() (common.Masking.ClusterTab method)</a>, <a href="generated/common.Masking.html#common.Masking.ClusterTab.update_clusters">[1]</a>
 
       <ul>
@@ -7382,42 +7380,18 @@
         <li><a href="generated/src.app.InfoViewer.html#src.app.InfoViewer.update_dataframe">(in module src.app.InfoViewer)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.update_dim_red_method_combobox">update_dim_red_method_combobox() (common.DataAnalysis.DimensionalReductionUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.update_dim_red_method_combobox">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.update_dim_red_method_combobox">update_dim_red_method_combobox() (src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_dim_red_precondition_checkbox">update_dim_red_precondition_checkbox() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_dim_red_precondition_checkbox">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_dim_red_precondition">update_dim_red_precondition() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_max_spinbox">update_dim_red_x_max_spinbox() (common.DataAnalysis.DimensionalReductionUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_max_spinbox">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.update_dim_red_x_max_spinbox">update_dim_red_x_max_spinbox() (src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_spinbox">update_dim_red_x_spinbox() (common.DataAnalysis.DimensionalReductionUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.update_dim_red_x_spinbox">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.update_dim_red_x_spinbox">update_dim_red_x_spinbox() (src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_max_spinbox">update_dim_red_y_max_spinbox() (common.DataAnalysis.DimensionalReductionUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_max_spinbox">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.update_dim_red_y_max_spinbox">update_dim_red_y_max_spinbox() (src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_spinbox">update_dim_red_y_spinbox() (common.DataAnalysis.DimensionalReductionUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.DimensionalReductionUI.update_dim_red_y_spinbox">(src.common.DataAnalysis.DimensionalReductionUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.DimensionalReductionUI.update_dim_red_y_spinbox">update_dim_red_y_spinbox() (src.app.DataAnalysis.DimensionalReductionUI method)</a>
 </li>
-      </ul></li>
       <li><a href="app.html#app.Profile.ProfileDock.update_dock_visibility">update_dock_visibility() (app.Profile.ProfileDock method)</a>, <a href="generated/app.Profile.html#app.Profile.ProfileDock.update_dock_visibility">[1]</a>
 
       <ul>
@@ -7540,8 +7514,6 @@
         <li><a href="generated/src.app.StyleToolbox.html#src.app.StyleToolbox.StylingDock.update_figure_font">(src.app.StyleToolbox.StylingDock method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="common.html#common.Masking.FilterTab.update_filter_table">update_filter_table() (common.Masking.FilterTab method)</a>, <a href="generated/common.Masking.html#common.Masking.FilterTab.update_filter_table">[1]</a>
 
       <ul>
@@ -7554,6 +7526,8 @@
         <li><a href="generated/src.common.Masking.html#src.common.Masking.FilterTab.update_filter_values">(src.common.Masking.FilterTab method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="app.html#app.StyleToolbox.StylingDock.update_font_family_combobox">update_font_family_combobox() (app.StyleToolbox.StylingDock method)</a>, <a href="generated/app.StyleToolbox.html#app.StyleToolbox.StylingDock.update_font_family_combobox">[1]</a>
 
       <ul>
@@ -7672,12 +7646,8 @@
         <li><a href="generated/src.common.SearchTool.html#src.common.SearchTool.SearchWidget.update_match_label">(src.common.SearchTool.SearchWidget method)</a>
 </li>
       </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_max_clusters_spinbox">update_max_clusters_spinbox() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_max_clusters_spinbox">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_max_clusters">update_max_clusters() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
       <li><a href="common.html#common.NoteTaking.NoteOptionsDialog.update_maxcolumns">update_maxcolumns() (common.NoteTaking.NoteOptionsDialog method)</a>, <a href="generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog.update_maxcolumns">[1]</a>
 
       <ul>
@@ -7732,18 +7702,10 @@
       </ul></li>
       <li><a href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow.update_norm_reference_combobox">update_norm_reference_combobox() (src.app.MainWindow.MainWindow method)</a>
 </li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_num_basis_for_precondition_spinbox">update_num_basis_for_precondition_spinbox() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_num_basis_for_precondition_spinbox">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_num_basis_for_precondition">update_num_basis_for_precondition() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
-      <li><a href="generated/common.DataAnalysis.html#common.DataAnalysis.ClusteringUI.update_num_clusters_spinbox">update_num_clusters_spinbox() (common.DataAnalysis.ClusteringUI method)</a>
-
-      <ul>
-        <li><a href="generated/src.common.DataAnalysis.html#src.common.DataAnalysis.ClusteringUI.update_num_clusters_spinbox">(src.common.DataAnalysis.ClusteringUI method)</a>
+      <li><a href="generated/src.app.DataAnalysis.html#src.app.DataAnalysis.ClusteringUI.update_num_clusters">update_num_clusters() (src.app.DataAnalysis.ClusteringUI method)</a>
 </li>
-      </ul></li>
       <li><a href="app.html#app.Profile.Profiling.update_num_subplots">update_num_subplots() (app.Profile.Profiling method)</a>, <a href="generated/app.Profile.html#app.Profile.Profiling.update_num_subplots">[1]</a>
 
       <ul>

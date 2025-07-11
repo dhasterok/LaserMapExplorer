@@ -60,7 +60,8 @@ class ImageProcessing():
         # add edge detection algorithm to aid in creating polygons
         self.edge_img = None
 
-        self._edge_detection_methods = ["Sobel","Canny","Zero cross"]
+        self._noise_reduction_methods = ['none','median','Gaussian','Wiener','edge-preserving','bilateral']
+        self._edge_detection_methods = ['Sobel','Canny','zero cross']
 
 
     def add_edge_detection(self):
@@ -439,13 +440,18 @@ class ImageProcessingUI(ImageProcessing):
 
     def connect_widgets(self):
         # noise reduction
+        self.ui.comboBoxNoiseReductionMethod.clear()
+        self.ui.comboBoxNoiseReductionMethod.addItems(self._noise_reduction_methods)
         self.ui.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
-        self.ui.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
+
         self.ui.spinBoxNoiseOption1.setEnabled(False)
         self.ui.labelNoiseOption1.setEnabled(False)
-        self.ui.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
+        self.ui.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
+
         self.ui.doubleSpinBoxNoiseOption2.setEnabled(False)
         self.ui.labelNoiseOption2.setEnabled(False)
+        self.ui.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
+
         self.ui.checkBoxGradient.stateChanged.connect(self.gradient_checked_state_changed)
         self.ui.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
 

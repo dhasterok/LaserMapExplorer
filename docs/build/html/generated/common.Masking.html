@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -1810,13 +1810,16 @@ Calls <code class="docutils literal notranslate"><span class="pre">MainWindow.ge
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.apply_polygon_mask" title="common.Masking.PolygonTab.apply_polygon_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_polygon_mask</span></code></a>([update_plot])</p></td>
 <td><p>Creates the polygon mask for masking data</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.toggle_polygon_actions" title="common.Masking.PolygonTab.toggle_polygon_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_polygon_actions</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.toggle_edge_detection" title="common.Masking.PolygonTab.toggle_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_edge_detection</span></code></a>()</p></td>
+<td><p>Toggles edge detection to the current laser map plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.toggle_polygon_actions" title="common.Masking.PolygonTab.toggle_polygon_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_polygon_actions</span></code></a>()</p></td>
 <td><p>Toggle enabled state of polygon actions based on <code class="docutils literal notranslate"><span class="pre">self.polygon_toggle</span></code> checked state.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.update_table_widget" title="common.Masking.PolygonTab.update_table_widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_table_widget</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.update_table_widget" title="common.Masking.PolygonTab.update_table_widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_table_widget</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Update the polygon table (PyQt6 version).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.view_selected_polygon" title="common.Masking.PolygonTab.view_selected_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view_selected_polygon</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.Masking.PolygonTab.view_selected_polygon" title="common.Masking.PolygonTab.view_selected_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view_selected_polygon</span></code></a>()</p></td>
 <td><p>View the selected polygon when a selection is made in the table widget .</p></td>
 </tr>
 </tbody>
@@ -1846,6 +1849,13 @@ Calls <code class="docutils literal notranslate"><span class="pre">MainWindow.ge
 <dt class="sig sig-object py" id="common.Masking.PolygonTab.polygon_state_changed">
 <span class="sig-name descname"><span class="pre">polygon_state_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Masking.html#PolygonTab.polygon_state_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Masking.PolygonTab.polygon_state_changed" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="common.Masking.PolygonTab.toggle_edge_detection">
+<span class="sig-name descname"><span class="pre">toggle_edge_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/Masking.html#PolygonTab.toggle_edge_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Masking.PolygonTab.toggle_edge_detection" title="Link to this definition">#</a></dt>
+<dd><p>Toggles edge detection to the current laser map plot.</p>
+<p>Executes on change of <code class="docutils literal notranslate"><span class="pre">self.comboBoxEdgeDetectMethod</span></code> when <code class="docutils literal notranslate"><span class="pre">self.toolButtonEdgeDetect</span></code> is checked.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.Masking.PolygonTab.toggle_polygon_actions">
@@ -1939,6 +1949,7 @@ Calls <code class="docutils literal notranslate"><span class="pre">MainWindow.ge
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab"><code class="docutils literal notranslate"><span class="pre">PolygonTab</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab.apply_polygon_mask"><code class="docutils literal notranslate"><span class="pre">PolygonTab.apply_polygon_mask()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab.polygon_state_changed"><code class="docutils literal notranslate"><span class="pre">PolygonTab.polygon_state_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab.toggle_edge_detection"><code class="docutils literal notranslate"><span class="pre">PolygonTab.toggle_edge_detection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab.toggle_polygon_actions"><code class="docutils literal notranslate"><span class="pre">PolygonTab.toggle_polygon_actions()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab.update_table_widget"><code class="docutils literal notranslate"><span class="pre">PolygonTab.update_table_widget()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Masking.PolygonTab.view_selected_polygon"><code class="docutils literal notranslate"><span class="pre">PolygonTab.view_selected_polygon()</span></code></a></li>

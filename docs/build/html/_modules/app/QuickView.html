@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,20 +388,20 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.QuickView</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">darkdetect</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QMenu</span><span class="p">,</span> <span class="n">QMessageBox</span> <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QIcon</span> <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.ui.QuickViewDialog</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ui_QuickViewDialog</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.app.CustomTableWidget</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">TW</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.csvdict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">csvdict</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">lamepath</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.SortAnalytes</span><span class="w"> </span><span class="kn">import</span> <span class="n">sort_analytes</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QMenu</span><span class="p">,</span> <span class="n">QMessageBox</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QIcon</span> <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">src.ui.QuickViewDialog</span> <span class="kn">import</span> <span class="n">Ui_QuickViewDialog</span>
+<span class="kn">import</span> <span class="nn">src.app.CustomTableWidget</span> <span class="k">as</span> <span class="nn">TW</span>
+<span class="kn">import</span> <span class="nn">src.common.csvdict</span> <span class="k">as</span> <span class="nn">csvdict</span>
+<span class="kn">import</span> <span class="nn">src.app.config</span> <span class="k">as</span> <span class="nn">lamepath</span>
+<span class="kn">from</span> <span class="nn">src.common.SortAnalytes</span> <span class="kn">import</span> <span class="n">sort_analytes</span>
 
 <span class="c1"># QuickViewDialog gui</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="QuickView">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">QuickView</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_QuickViewDialog</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">QuickView</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_QuickViewDialog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a dialog for the user to select and order analytes for Quick View</span>
 
 <span class="sd">    Opens an instance of QuickViewDialog for the user to select and order analytes for Quick View.</span>
@@ -414,7 +414,7 @@
 <span class="sd">    Ui_QuickViewDialog : QuickViewDialog</span>
 <span class="sd">        User interface design.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes quickView</span>
 
 <span class="sd">        Parameters</span>
@@ -452,7 +452,7 @@
 
 <div class="viewcode-block" id="QuickView.setup_table">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView.setup_table">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setup_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets up analyte selection table in dialog&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analyte_list</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setColumnCount</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -465,7 +465,7 @@
 
 <div class="viewcode-block" id="QuickView.populate_table">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView.populate_table">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">populate_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">populate_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Populates dialog table with analytes&quot;&quot;&quot;</span>
         <span class="c1"># Before repopulating, save the current state of checkboxes</span>
         <span class="n">checkbox_states</span> <span class="o">=</span> <span class="p">{}</span>
@@ -488,7 +488,7 @@
 
 <div class="viewcode-block" id="QuickView.setup_sort_menu">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView.setup_sort_menu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup_sort_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setup_sort_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds options to sort menu&quot;&quot;&quot;</span>
         <span class="n">sortmenu_items</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;alphabetical&#39;</span><span class="p">,</span> <span class="s1">&#39;atomic number&#39;</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">,</span> <span class="s1">&#39;compatibility&#39;</span><span class="p">,</span> <span class="s1">&#39;radius&#39;</span><span class="p">]</span>
         <span class="n">SortMenu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">()</span>
@@ -500,7 +500,7 @@
 
 <div class="viewcode-block" id="QuickView.apply_sort">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView.apply_sort">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sorts analyte table in dialog&quot;&quot;&quot;</span>        
         <span class="n">method</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyte_list</span> <span class="o">=</span> <span class="n">sort_analytes</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyte_list</span><span class="p">)</span>
@@ -509,7 +509,7 @@
 
 <div class="viewcode-block" id="QuickView.save_selected_analytes">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView.save_selected_analytes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_selected_analytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_selected_analytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets list of analytes and group name when Save button is clicked.</span>
 
 <span class="sd">        Retrieves the user-defined name from ``quickView.lineEditViewName`` and list of analytes</span>
@@ -539,7 +539,7 @@
 
 <div class="viewcode-block" id="QuickView.save_to_csv">
 <a class="viewcode-back" href="../../generated/app.QuickView.html#app.QuickView.QuickView.save_to_csv">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens a message box, prompting user to in put a file to save the table list&quot;&quot;&quot;</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lamepath</span><span class="o">.</span><span class="n">BASEDIR</span><span class="p">,</span><span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;styles&#39;</span><span class="p">,</span> <span class="s1">&#39;qv_lists.csv&#39;</span><span class="p">)</span>
         <span class="c1"># Ensure directory exists</span>

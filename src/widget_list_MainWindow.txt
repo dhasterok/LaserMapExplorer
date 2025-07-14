@@ -28,9 +28,7 @@ self.lineEditDecayConstantUncertainty
 self.treeView
 self.tableWidgetNDim
 self.dockWidgetLeftToolbox
-self.dockWidgetRightToolbox
-self.dockWidgetMaskToolbox
-self.dockWidgetInfoToolbox
+self.dockWidgetStyleToolbox
 self.comboBoxPlotType
 self.comboBoxMVPlots
 self.comboBoxFieldTypeX

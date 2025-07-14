@@ -1531,6 +1531,53 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_34">
+             <item>
+              <widget class="QLabel" name="labelReferenceValue">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <bold>false</bold>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="text">
+                <string>Normalization</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboBoxRefMaterial">
+               <property name="maximumSize">
+                <size>
+                 <width>190</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <bold>false</bold>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select reference for normalizing chemistry</string>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>Error: earthref.xlsx not found</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
         </item>
@@ -1582,7 +1629,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>548</height>
+             <height>506</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -1622,7 +1669,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>548</height>
+                 <height>507</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_71">
@@ -2338,7 +2385,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>548</height>
+             <height>506</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -2378,7 +2425,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>548</height>
+                 <height>506</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_74">
@@ -2549,7 +2596,6 @@
                      <property name="toolTip">
                       <string>Display histogram as probability or cumulative density</string>
                      </property>
-                      <property name="text">
                     </widget>
                    </item>
                    <item row="1" column="1">
@@ -2964,7 +3010,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>548</height>
+             <height>506</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -3004,7 +3050,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>548</height>
+                 <height>506</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_76">
@@ -3440,7 +3486,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>548</height>
+             <height>506</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -3480,7 +3526,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>548</height>
+                 <height>506</height>
                 </rect>
                </property>
                <property name="font">
@@ -3534,46 +3580,6 @@
                    <item>
                     <layout class="QFormLayout" name="formLayout_31">
                      <item row="0" column="0">
-                      <widget class="QLabel" name="labelNDimRefValues">
-                       <property name="font">
-                        <font>
-                         <family>.AppleSystemUIFont</family>
-                         <pointsize>11</pointsize>
-                         <stylestrategy>PreferDefault</stylestrategy>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Ref. values</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QComboBox" name="comboBoxNDimRefMaterial">
-                       <property name="maximumSize">
-                        <size>
-                         <width>200</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="font">
-                        <font>
-                         <family>.AppleSystemUIFont</family>
-                         <pointsize>11</pointsize>
-                         <stylestrategy>PreferDefault</stylestrategy>
-                        </font>
-                       </property>
-                       <property name="toolTip">
-                        <string>Select reference for normalizing series</string>
-                       </property>
-                       <property name="placeholderText">
-                        <string>Error: earthref.xlsx not found</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="0">
                       <widget class="QLabel" name="labelNDimAnalyte">
                        <property name="font">
                         <font>
@@ -3590,7 +3596,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="1" column="1">
+                     <item row="0" column="1">
                       <layout class="QHBoxLayout" name="horizontalLayout_70">
                        <item>
                         <widget class="QComboBox" name="comboBoxNDimAnalyte">
@@ -3662,7 +3668,7 @@
                        </item>
                       </layout>
                      </item>
-                     <item row="2" column="0">
+                     <item row="1" column="0">
                       <widget class="QLabel" name="labelNDimPredefined">
                        <property name="font">
                         <font>
@@ -3679,7 +3685,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="2" column="1">
+                     <item row="1" column="1">
                       <layout class="QHBoxLayout" name="horizontalLayout_71">
                        <item>
                         <widget class="QComboBox" name="comboBoxNDimAnalyteSet">
@@ -3753,7 +3759,7 @@
                        </item>
                       </layout>
                      </item>
-                     <item row="3" column="0">
+                     <item row="2" column="0">
                       <widget class="QLabel" name="labelNDimQuantiles">
                        <property name="text">
                         <string>Quantiles</string>
@@ -3763,7 +3769,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="3" column="1">
+                     <item row="2" column="1">
                       <widget class="QComboBox" name="comboBoxNDimQuantiles">
                        <property name="maximumSize">
                         <size>
@@ -4053,7 +4059,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>548</height>
+             <height>506</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -4100,7 +4106,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>548</height>
+                 <height>506</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_82">
@@ -4288,7 +4294,7 @@
              <x>0</x>
              <y>0</y>
              <width>300</width>
-             <height>548</height>
+             <height>506</height>
             </rect>
            </property>
            <attribute name="icon">
@@ -4328,7 +4334,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>300</width>
-                 <height>548</height>
+                 <height>506</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_84">
@@ -4744,229 +4750,6 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidgetPlotTree">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>256</width>
-     <height>276</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>300</width>
-     <height>524287</height>
-    </size>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>11</pointsize>
-     <stylestrategy>PreferDefault</stylestrategy>
-    </font>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>Plot Tree</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContentsRightToolbox">
-    <layout class="QVBoxLayout" name="verticalLayout_11">
-     <property name="leftMargin">
-      <number>3</number>
-     </property>
-     <property name="topMargin">
-      <number>3</number>
-     </property>
-     <property name="rightMargin">
-      <number>3</number>
-     </property>
-     <property name="bottomMargin">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QTreeView" name="treeView">
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-         <bold>false</bold>
-         <stylestrategy>PreferDefault</stylestrategy>
-        </font>
-       </property>
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_34">
-         <item>
-          <widget class="QLabel" name="labelReferenceValue">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <bold>false</bold>
-             <stylestrategy>PreferDefault</stylestrategy>
-            </font>
-           </property>
-           <property name="text">
-            <string>Ref. value</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="comboBoxRefMaterial">
-           <property name="maximumSize">
-            <size>
-             <width>190</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <bold>false</bold>
-             <stylestrategy>PreferDefault</stylestrategy>
-            </font>
-           </property>
-           <property name="toolTip">
-            <string>Select reference for normalizing chemistry</string>
-           </property>
-           <property name="statusTip">
-            <string/>
-           </property>
-           <property name="placeholderText">
-            <string>Error: earthref.xlsx not found</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_17">
-         <item>
-          <widget class="QToolButton" name="toolButtonSortAnalyte">
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <bold>false</bold>
-             <stylestrategy>PreferDefault</stylestrategy>
-            </font>
-           </property>
-           <property name="toolTip">
-            <string>Select method for sorting analytes</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../resources.qrc">
-             <normaloff>:/resources/icons/icon-sort-64.svg</normaloff>:/resources/icons/icon-sort-64.svg</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>28</width>
-             <height>28</height>
-            </size>
-           </property>
-           <property name="popupMode">
-            <enum>QToolButton::InstantPopup</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_9">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="toolButtonRemovePlot">
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-             <bold>false</bold>
-             <stylestrategy>PreferDefault</stylestrategy>
-            </font>
-           </property>
-           <property name="toolTip">
-            <string>Remove selected plot</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../resources.qrc">
-             <normaloff>:/resources/icons/icon-delete-64.svg</normaloff>:/resources/icons/icon-delete-64.svg</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>24</width>
-             <height>24</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-  </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="font">
     <font>
@@ -5177,7 +4960,7 @@
           <x>0</x>
           <y>0</y>
           <width>248</width>
-          <height>393</height>
+          <height>767</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5217,7 +5000,7 @@
               <x>0</x>
               <y>0</y>
               <width>248</width>
-              <height>411</height>
+              <height>767</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -5699,8 +5482,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>292</width>
-          <height>367</height>
+          <width>248</width>
+          <height>767</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5739,8 +5522,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>292</width>
-              <height>374</height>
+              <width>248</width>
+              <height>767</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_34">
@@ -6097,8 +5880,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>254</width>
-          <height>367</height>
+          <width>248</width>
+          <height>767</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6137,8 +5920,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>254</width>
-              <height>367</height>
+              <width>248</width>
+              <height>767</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_70">
@@ -6455,8 +6238,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>292</width>
-          <height>367</height>
+          <width>248</width>
+          <height>767</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -6495,8 +6278,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>292</width>
-              <height>364</height>
+              <width>248</width>
+              <height>764</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">

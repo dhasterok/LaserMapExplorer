@@ -5,7 +5,6 @@
         "designer/PreferencesWindow.ui",
         "resources.qrc",
         "designer/toggleswitch.cpp",
-        "designer/toggleswitch.h",
         "designer/MapImportDialog.ui",
         "designer/QuickViewDialog.ui",
         "designer/ImageImportDialog.ui",

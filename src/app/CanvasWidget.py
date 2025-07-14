@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import ( QIcon, QAction, QFont )
 from src.common.CustomWidgets import CustomActionMenu
-from src.ui.QuickViewDialog import Ui_QuickViewDialog
 from src.app.config import BASEDIR, ICONPATH 
 
 import numpy as np

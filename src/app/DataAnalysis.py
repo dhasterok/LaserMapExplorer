@@ -535,7 +535,6 @@ class DimensionalReductionUI(DimensionalReduction):
 
     def connect_logger(self):
         """Connects widgets to logger."""
-        self.ui.comboBoxNDimRefMaterial.activated.connect(lambda: log(f"comboBoxNDimRefMaterial value=[{self.ui.comboBoxNDimRefMaterial.currentText()}]", prefix="UI"))
         self.ui.comboBoxNDimAnalyte.activated.connect(lambda: log(f"comboBoxNDimAnalyte value=[{self.ui.comboBoxNDimAnalyte.currentText()}]", prefix="UI"))
         self.ui.toolButtonNDimAnalyteAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
         self.ui.comboBoxNDimAnalyteSet.activated.connect(lambda: log(f"comboBoxNDimAnalyteSet value=[{self.ui.comboBoxNDimAnalyteSet.currentText()}]", prefix="UI"))

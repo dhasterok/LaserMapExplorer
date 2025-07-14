@@ -16,7 +16,6 @@ def create_help_mapping(parent):
         parent.canvasWindow: 'center_pane',
         parent.dockWidgetLeftToolbox: 'left_toolbox',
         parent.toolBox: 'left_toolbox',
-        parent.dockWidgetPlotTree: 'right_toolbox',
         parent.dockWidgetStyling: 'right_toolbox',
     }
     if hasattr(parent, "mask_dock"):

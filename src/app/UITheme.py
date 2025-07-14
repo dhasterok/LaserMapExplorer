@@ -76,8 +76,10 @@ class UIThemes():
         #parent.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-dark-64.svg')))
         # Plot Tree
-        parent.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
-        parent.toolButtonRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+        if hasattr(parent,"plot_tree"):
+            parent.plot_tree.actionSortMenu.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-dark-64.svg')))
+            parent.plot_tree.actionRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
+            parent.plot_tree.actionRemoveAllPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-dark-64.svg')))
         # Samples
         parent.toolBox.setItemIcon(parent.left_tab['sample'],QIcon(os.path.join(ICONPATH,'icon-atom-dark-64.svg')))
         parent.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(ICONPATH,'icon-histeq-dark-64.svg')))
@@ -191,8 +193,11 @@ class UIThemes():
             parent.mask_dock.actionClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(os.path.join(ICONPATH,'icon-reset-64.svg')))
         # Plot Tree
-        parent.toolButtonSortAnalyte.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-64.svg')))
-        parent.toolButtonRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+        if hasattr(parent,"plot_tree"):
+            parent.plot_tree.actionSortMenu.setIcon(QIcon(os.path.join(ICONPATH,'icon-sort-64.svg')))
+            parent.plot_tree.actionRemovePlot.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+            parent.plot_tree.actionRemoveAllPlots.setIcon(QIcon(os.path.join(ICONPATH,'icon-delete-64.svg')))
+
         # Samples
         parent.toolBox.setItemIcon(parent.left_tab['sample'],QIcon(os.path.join(ICONPATH,'icon-atom-64.svg')))
         parent.toolButtonScaleEqualize.setIcon(QIcon(os.path.join(ICONPATH,'icon-histeq-64.svg')))

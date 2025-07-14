@@ -1,9 +1,12 @@
 import re, darkdetect
-from PyQt6.QtCore import ( Qt )
-from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
-from PyQt6.QtWidgets import ( QMenu ) 
+
+from PyQt6.QtCore import ( Qt, QSize )
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem, QAction, QIcon )
+from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QHBoxLayout, QLabel, QComboBox, QToolBar ) 
+from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomActionMenu
+from src.app.UITheme import default_font
+
 import src.common.CustomMplCanvas as mplc
-from src.common.CustomWidgets import StandardItem, CustomTreeView
 from src.common.SortAnalytes import sort_analytes
 
 from src.common.Logger import LoggerConfig, auto_log_methods, log
@@ -12,27 +15,102 @@ from src.common.Logger import LoggerConfig, auto_log_methods, log
 # Plot Selector (tree) functions
 # -------------------------------
 @auto_log_methods(logger_key='Tree')
-class PlotTree():
+class PlotTree(CustomDockWidget):
     def __init__(self, parent):
+        super().__init__(parent=parent)
         self.logger_key = 'Tree'
 
-        self.parent = parent
+        self.ui = parent
 
         #create plot tree
+        self.setupUI()
+        self.connect_logger()
         self.initialize_tree()
 
-        # create analyte sort menu
-        sortmenu_items = ['alphabetical', 'atomic number', 'mass', 'compatibility', 'radius']
-        SortMenu = QMenu()
-        SortMenu.triggered.connect(self.sort_tree)
-        self.parent.toolButtonSortAnalyte.setMenu(SortMenu)
-        for item in sortmenu_items:
-            SortMenu.addAction(item)
+    def setupUI(self):
+        font = default_font()
+
+        self.setFloating(True)
+        self.setWindowTitle("Plot Tree")
+        size_policy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(size_policy)
+        self.setMinimumSize(QSize(256, 276))
+        self.setMaximumSize(QSize(300, 524287))
+        self.setFont(font)
+        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        self.setObjectName("dockWidgetPlotTree")
+
+        # Create a container widget for the dock contents
+        container = QWidget()
+        self.setWidget(container)
+
+        # Set up the layout on the container, not self!
+        container_layout = QVBoxLayout(container)
+        container_layout.setObjectName("plot_tree_layout")
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+
+        # Toolbar
+        toolbar = QToolBar()
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)
+        container_layout.addWidget(toolbar)
+
+        sort_icon = ":resources/icons/icon-sort-64.svg"
+        sortmenu_items = [
+            ("alphabetical", lambda: self.sort_tree("alphabetical")),
+            ("atomic number", lambda: self.sort_tree("atomic number")),
+            ("mass", lambda: self.sort_tree("mass")),
+            ("compatibility", lambda: self.sort_tree("compatibility")),
+            ("radius", lambda: self.sort_tree("radius")),
+        ]
+
+        self.actionSortMenu = CustomActionMenu(
+            icon=sort_icon,
+            text="Sort fields for Quick View",
+            menu_items=sortmenu_items,
+            parent=self
+        )
+
+        self.actionRemovePlot = QAction(parent=self)
+        self.actionRemovePlot.setFont(font)
+        self.actionRemovePlot.setIcon(QIcon(":/resources/icons/icon-delete-64.svg"))
+        self.actionRemovePlot.setObjectName("actionRemovePlot")
+        self.actionRemovePlot.setStatusTip("Remove selected plot from plot tree")
+
+        self.actionRemoveAllPlots = QAction(parent=self)
+        self.actionRemoveAllPlots.setFont(font)
+        self.actionRemoveAllPlots.setIcon(QIcon(":/resources/icons/icon-delete-all-64.svg"))
+        self.actionRemoveAllPlots.setObjectName("actionRemoveAllPlots")
+        self.actionRemoveAllPlots.setStatusTip("Remove all plots from plot tree")
+
+        toolbar.addAction(self.actionSortMenu)
+        toolbar.addSeparator()
+        toolbar.addAction(self.actionRemovePlot)
+        toolbar.addAction(self.actionRemoveAllPlots)
+
+        # TreeView
+        self.treeView = CustomTreeView(parent=self)
+        self.treeView.setFont(font)
+        self.treeView.setMouseTracking(True)
+        self.treeView.setObjectName("treeView")
+
+        container_layout.addWidget(self.treeView)
+
+    def connect_logger(self):
+        """Connects logger to actions in the plot tree."""
+        self.actionSortMenu.triggered.connect(lambda: log("PlotTree.actionSortMenu", prefix="UI"))
+        self.actionRemovePlot.triggered.connect(lambda: log("PlotTree.actionRemovePlot", prefix="UI"))
+        self.actionRemoveAllPlots.triggered.connect(lambda: log("PlotTree.actionRemoveAllPlots", prefix="UI"))
 
     def initialize_tree(self):
-        """Initialize ``self.parent.treeView`` with the top level items."""        
+        """Initialize ``self.treeView`` with the top level items."""        
         # create tree
-        treeView = self.parent.treeView
+        treeView = self.treeView
         # hide the header row
         treeView.setHeaderHidden(True)
 
@@ -52,7 +130,7 @@ class PlotTree():
         treeView.expandAll()
         
         # Connect double-click event
-        #self.parent.treeView.doubleClicked.connect(treeView.on_double_click)
+        #self.treeView.doubleClicked.connect(treeView.on_double_click)
         treeView.doubleClicked.connect(self.tree_double_click)
         
     def add_sample(self, sample_id):
@@ -70,9 +148,9 @@ class PlotTree():
         if not sample_id:
             return
 
-        # assign the two objects needed from self.parent
-        data = self.parent.app_data.data[sample_id].processed_data
-        treeView = self.parent.treeView
+        # assign the two objects needed from self.ui
+        data = self.ui.app_data.data[sample_id].processed_data
+        treeView = self.treeView
 
         # add sample_id to analyte branch
         analyte_branch = treeView.branch_exists(self.tree['Analyte'], sample_id)
@@ -127,9 +205,9 @@ class PlotTree():
 
     def add_calculated_leaf(self, new_field):
 
-        # assign the two objects needed from self.parent
-        sample_id = self.parent.app_data.sample_id
-        treeView = self.parent.treeView
+        # assign the two objects needed from self.ui
+        sample_id = self.ui.app_data.sample_id
+        treeView = self.treeView
 
         calculated_branch = treeView.branch_exists(self.tree['Calculated'], sample_id)
         if not calculated_branch:
@@ -141,27 +219,24 @@ class PlotTree():
         if not leaf:
             treeView.add_leaf(sample_branch, new_field)
     
-    def sort_tree(self, action, method=None):
+    def sort_tree(self, method=None):
         """Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.
 
         Parameters
         ----------
-        action : QAction
-            Menu selection defining sort type
         method : str, optional
             Method used for sorting the analytes. If `None`, defined by action, by default `None`
         """        
         if method is None:
-            method = action.text()
-            self.parent.app_data.sort_method = method
+            self.ui.app_data.sort_method = method
 
-        treeView = self.parent.treeView
+        treeView = self.treeView
 
-        analyte_list, sorted_analyte_list = self.parent.data[self.parent.app_data.sample_id].sort_data(method)
+        analyte_list, sorted_analyte_list = self.ui.data[self.ui.app_data.sample_id].sort_data(method)
          
         # Reorder tree items according to the new analyte list
         # Sort the tree branches associated with analytes
-        for sample_id in self.parent.app_data.sample_list:
+        for sample_id in self.ui.app_data.sample_list:
             sample_branch = treeView.find_leaf(self.tree['Analyte'], sample_id)
             if sample_branch:
                 treeView.sort_branch(sample_branch, sorted_analyte_list)
@@ -246,37 +321,37 @@ class PlotTree():
         leaf = tree_index.data()
 
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
-            self.parent.plot_style.initialize_axis_values(tree, leaf)
-            self.parent.plot_style.set_style_widgets()
+            self.ui.plot_style.initialize_axis_values(tree, leaf)
+            self.ui.plot_style.set_style_widgets()
             if self.plot_info:
                 log("plot_info exists, adding to canvas", "NOTE")
 
-                self.parent.add_plotwidget_to_canvas(self.plot_info)
+                self.ui.add_plotwidget_to_canvas(self.plot_info)
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
+                self.ui.update_fields(self.ui.plot_info['sample_id'], self.ui.plot_info['plot_type'],self.ui.plot_info['field_type'], self.ui.plot_info['field'])
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.parent.update_spinboxes(self.parent.plot_info['field'],self.parent.plot_info['field_type'])
+                self.ui.update_spinboxes(self.ui.plot_info['field'],self.ui.plot_info['field_type'])
             else:
                 log("plot_info does not exist, creating map", "NOTE")
 
                 # print('tree_double_click: plot_map_pg')
-                if self.parent.toolBox.currentIndex() not in [self.parent.left_tab['sample'], self.parent.left_tab['process']]:
-                    self.parent.toolBox.setCurrentIndex(self.parent.left_tab['sample'])
+                if self.ui.toolBox.currentIndex() not in [self.ui.left_tab['sample'], self.ui.left_tab['process']]:
+                    self.ui.toolBox.setCurrentIndex(self.ui.left_tab['sample'])
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
-                self.parent.update_fields(branch,'field map',tree, leaf, plot=True)
+                self.ui.update_fields(branch,'field map',tree, leaf, plot=True)
 
                 #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.parent.update_spinboxes(field=leaf, field_type=tree)
+                self.ui.update_spinboxes(field=leaf, field_type=tree)
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis']:
 
             if self.plot_info:
-                self.parent.add_plotwidget_to_canvas(self.plot_info)
-                self.parent.plot_style.style_dict[self.plot_info.plot_type] = self.plot_info.style
-                self.parent.plot_style.plot_type = self.plot_info.plot_type
+                self.ui.add_plotwidget_to_canvas(self.plot_info)
+                self.ui.plot_style.style_dict[self.plot_info.plot_type] = self.plot_info.style
+                self.ui.plot_style.plot_type = self.plot_info.plot_type
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                #self.parent.update_fields(self.parent.plot_info['sample_id'], self.parent.plot_info['plot_type'],self.parent.plot_info['field_type'], self.parent.plot_info['field'])
+                #self.ui.update_fields(self.ui.plot_info['sample_id'], self.ui.plot_info['plot_type'],self.ui.plot_info['field_type'], self.ui.plot_info['field'])
 
         else:
             raise ValueError(f"Unknown tree type {tree}.")
@@ -294,17 +369,17 @@ class PlotTree():
         norm_update : bool
             Flag for updating norm list. Defaults to False
         """
-        sample_id = self.parent.app_data.sample_id
+        sample_id = self.ui.app_data.sample_id
         if sample_id == '':
             return
 
         if darkdetect.isDark():
-            hexcolor = self.parent.theme.highlight_color_dark
+            hexcolor = self.ui.theme.highlight_color_dark
         else:
-            hexcolor = self.parent.theme.highlight_color_light
+            hexcolor = self.ui.theme.highlight_color_light
 
-        data = self.parent.app_data.data[sample_id]
-        ref_chem = self.parent.app_data.ref_chem
+        data = self.ui.app_data.data[sample_id]
+        ref_chem = self.ui.app_data.ref_chem
 
         # Un-highlight all leaf in the trees
         self.unhighlight_tree(self.tree['Ratio'])
@@ -314,7 +389,7 @@ class PlotTree():
         ratios = data.processed_data.match_attribute('data_type','Ratio')
 
         data.processed_data.set_attribute(analytes,'use',False)
-        treeView = self.parent.treeView
+        treeView = self.treeView
 
         for analyte in analytes + ratios:
             norm = data.processed_data.get_attribute(analyte,'norm')
@@ -324,12 +399,12 @@ class PlotTree():
                 # find sample_id (branch) in ratio (tree), if it does not exist, create it
                 sample_branch = treeView.branch_exists(self.tree['Ratio'],sample_id)
                 if not sample_branch:
-                    sample_branch = self.parent.treeView.add_branch(self.tree['Ratio'], sample_id)
+                    sample_branch = self.treeView.add_branch(self.tree['Ratio'], sample_id)
 
                 # find sample_id (branch) in ratio normalized (tree), if it does not exist, create it
                 sample_branch_norm = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
                 if not sample_branch_norm:
-                    sample_branch_norm = self.parent.treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
+                    sample_branch_norm = self.treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
 
                 # check if ratio (leaf) exists in sample_id (branch) and create if necessesary
                 leaf_item_norm = None

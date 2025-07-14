@@ -192,8 +192,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         ## right/plot tree dock
         self.comboBoxRefMaterial.activated.connect(lambda: log(f"comboBoxRefMaterial value=[{self.comboBoxRefMaterial.currentText()}]", prefix="UI"))
-        self.toolButtonSortAnalyte.clicked.connect(lambda: log("toolButtonSortAnalyte", prefix="UI"))
-        self.toolButtonRemovePlot.clicked.connect(lambda: log("toolButtonSortAnalyte", prefix="UI"))
 
         ## right/styling toolbox
 
@@ -223,15 +221,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dockWidgetLeftToolbox.show()
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
         self.dockWidgetLeftToolbox.setFloating(False)
-        self.dockWidgetPlotTree.show()
+        self.open_plot_tree()
         self.dockWidgetStyling.show()
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetPlotTree)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetStyling)
-        self.dockWidgetPlotTree.setFloating(False)
         self.dockWidgetStyling.setFloating(False)
 
         self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
-        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetPlotTree, button=None))
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetStyling, button=self.toolButtonRightDock))
 
         self.statusbar.addPermanentWidget(self.toolButtonLeftDock)
@@ -415,11 +410,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
         
         self.comboBoxRefMaterial.addItems(self.app_data.ref_list.values)          # Select analyte Tab
-        self.comboBoxNDimRefMaterial.addItems(self.app_data.ref_list.values)      # NDim Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
-        self.comboBoxNDimRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxNDimRefMaterial.currentText()))
         self.comboBoxRefMaterial.setCurrentIndex(self.app_data.ref_index)
-        self.comboBoxNDimRefMaterial.setCurrentIndex(self.app_data.ref_index)
 
         # N-dim table
         header = self.tableWidgetNDim.horizontalHeader()
@@ -1023,7 +1015,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_mask_and_profile_widgets()
 
         # sort data
-        self.plot_tree.sort_tree(None, method=self.app_data.sort_method)
+        self.plot_tree.sort_tree(self.app_data.sort_method)
 
         # precalculate custom fields
         if hasattr(self, "calculator") and self.calculator.precalculate_custom_fields:
@@ -1369,7 +1361,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if ref_index:
             self.comboBoxRefMaterial.setCurrentIndex(ref_index)
-            self.comboBoxNDimRefMaterial.setCurrentIndex(ref_index)
             
             # loop through normalized ratios and enable/disable ratios based
             # on the new reference's analytes
@@ -1626,6 +1617,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Dialogs and Windows
     # -------------------------------------
+    def open_plot_tree(self, *args, **kwargs):
+        """Opens Plot Tree dock
+
+        Opens Plot Tree dock, creates on first instance.  The Plot Tree is used to manage
+        plots and their properties.
+        """
+        if not hasattr(self, 'plot_tree'):
+            self.plot_tree = PlotTree(self)
+
+            if not (self.plot_tree in self.help_mapping.keys()):
+                self.help_mapping[self.plot_tree] = 'right_toolbox'
+
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.plot_tree)
+            self.plot_tree.setFloating(False)
+
+            self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.plot_tree, button=self.toolButtonRightDock))
+
+        self.plot_tree.show()
+
     def open_workflow(self, *args, **kwargs):
         """Opens Workflow dock.
 

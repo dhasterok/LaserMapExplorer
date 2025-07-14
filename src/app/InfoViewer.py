@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction, QDoubleValidator
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
-from src.app.UIControl import UIFieldLogic
+from src.app.FieldLogic import FieldLogicUI
 
 from src.app.UITheme import default_font
 from src.common.CustomMplCanvas import MplCanvas
@@ -141,7 +141,7 @@ def update_numpy_array(array, table_widget):
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             table_widget.setItem(row_idx, col_idx, item)
 
-class InfoDock(CustomDockWidget, UIFieldLogic):
+class InfoDock(CustomDockWidget, FieldLogicUI):
     """
     Dockable widget providing data insight tools through multiple interactive tabs.
 
@@ -945,7 +945,7 @@ class DataFrameTab():
 # -------------------------------
 # Field Tab functions
 # -------------------------------
-class FieldTab(UIFieldLogic):
+class FieldTab(FieldLogicUI):
     """Creates the field info tab for plots and annotations.
 
     Parameters

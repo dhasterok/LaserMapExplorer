@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QAbstractItemView
     )
 from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
-from src.app.UIControl import UIFieldLogic
+from src.app.FieldLogic import FieldLogicUI
 from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -19,7 +19,7 @@ import numpy as np
 from src.common.Logger import LoggerConfig, auto_log_methods
 
 @auto_log_methods(logger_key='Profile')
-class ProfileDock(CustomDockWidget, UIFieldLogic):
+class ProfileDock(CustomDockWidget, FieldLogicUI):
     def __init__(self, parent=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")

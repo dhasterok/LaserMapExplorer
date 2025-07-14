@@ -12,14 +12,6 @@ app.Actions module
    :undoc-members:
    :show-inheritance:
 
-app.AnalyteSelectionWindow module
----------------------------------
-
-.. automodule:: app.AnalyteSelectionWindow
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 app.CanvasWidget module
 --------------------
 
@@ -48,6 +40,14 @@ app.DataAnalysis module
 ----------------------------
 
 .. automodule:: app.DataAnalysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.FieldLogic module
+----------------------------
+
+.. automodule:: app.FieldLogic
    :members:
    :undoc-members:
    :show-inheritance:
@@ -92,13 +92,6 @@ app.Profile module
    :undoc-members:
    :show-inheritance:
 
-app.QuickView module
---------------------
-
-.. automodule:: app.QuickView
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 app.SpecialFunctions module
 ---------------------------

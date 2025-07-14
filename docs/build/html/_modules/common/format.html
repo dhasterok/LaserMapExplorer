@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,11 +388,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.format</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <div class="viewcode-block" id="oround">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.oround">[docs]</a>
-<span class="k">def</span> <span class="nf">oround</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">oround</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rounds a single of value to n digits</span>
 
 <span class="sd">    Round a single number to the first n digits.</span>
@@ -427,7 +427,7 @@
 
 <div class="viewcode-block" id="oround_matrix">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.oround_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">oround_matrix</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">oround_matrix</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rounds a matrix of values to n digits</span>
 
 <span class="sd">    Rounds all numbers in a matrix to the first n digits.</span>
@@ -462,7 +462,7 @@
 
 <div class="viewcode-block" id="dynamic_format">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.dynamic_format">[docs]</a>
-<span class="k">def</span> <span class="nf">dynamic_format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dynamic_format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepares number for display as *str*</span>
 
 <span class="sd">    Formats a number of display as a *str*, typically in a *lineEdit* widget.</span>
@@ -495,7 +495,7 @@
 
 <div class="viewcode-block" id="symlog">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.symlog">[docs]</a>
-<span class="k">def</span> <span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">linear_threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">linear_threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transforms data from linear to symlog space</span>
 
 <span class="sd">    The advantage of a symlog transformation is that produces a log-like distribution for most</span>
@@ -524,7 +524,7 @@
 
 <div class="viewcode-block" id="invsymlog">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.invsymlog">[docs]</a>
-<span class="k">def</span> <span class="nf">invsymlog</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">linthresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">invsymlog</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">linthresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse symlog transform back to linear space</span>
 
 <span class="sd">    Converts an array back to into linear space.</span>

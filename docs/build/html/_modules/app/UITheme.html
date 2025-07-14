@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,13 +388,13 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.UITheme</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">darkdetect</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
-<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">darkdetect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
 
 <div class="viewcode-block" id="default_font">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.default_font">[docs]</a>
-<span class="k">def</span> <span class="nf">default_font</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_font</span><span class="p">():</span>
     <span class="c1"># set default font for application</span>
     <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
     <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
@@ -405,8 +405,8 @@
 
 <div class="viewcode-block" id="UIThemes">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes">[docs]</a>
-<span class="k">class</span> <span class="nc">UIThemes</span><span class="p">():</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UIThemes</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -421,7 +421,7 @@
 
 <div class="viewcode-block" id="UIThemes.switch_view_mode">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.switch_view_mode">[docs]</a>
-    <span class="k">def</span> <span class="nf">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view_mode</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view_mode</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">view_mode</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">view_mode</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="n">view_mode</span>
@@ -443,7 +443,7 @@
 
 <div class="viewcode-block" id="UIThemes.set_dark_theme">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.set_dark_theme">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_dark_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_dark_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">load_stylesheet</span><span class="p">(</span><span class="s1">&#39;dark.qss&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 
@@ -536,8 +536,6 @@
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonPan</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-move-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonZoom</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-zoom-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-distance-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Regression</span>
-        <span class="c1">#parent.toolBoxTreeView.setItemIcon(parent.right_tab[&#39;regression&#39;],QIcon(os.path.join(ICONPATH,&#39;icon-regression-dark-64.svg&#39;)))</span>
         <span class="c1"># Calculator</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">actionCalculator</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-calculator-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;calculator&#39;</span><span class="p">):</span>
@@ -547,8 +545,7 @@
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-axes-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-text-and-scales-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;markers&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-marker-and-lines-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-rgb-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;regression&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-regression-dark-64.svg&#39;</span><span class="p">)))</span></div>
+        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-rgb-dark-64.svg&#39;</span><span class="p">)))</span></div>
 
         <span class="c1"># Cluster tab</span>
         <span class="c1">#parent.tabWidgetMask.setItemIcon(parent.mask_tab[&#39;cluster&#39;],QIcon(os.path.join(ICONPATH,&#39;icon-cluster-dark-64.svg&#39;)))</span>
@@ -557,7 +554,7 @@
 
 <div class="viewcode-block" id="UIThemes.set_light_theme">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.set_light_theme">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_light_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_light_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">load_stylesheet</span><span class="p">(</span><span class="s1">&#39;light.qss&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 
@@ -668,7 +665,6 @@
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-text-and-scales-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;markers&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-marker-and-lines-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-rgb-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;regression&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-regression-64.svg&#39;</span><span class="p">)))</span>
         <span class="c1"># Cluster tab</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;mask_dock&quot;</span><span class="p">):</span>
             <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">cluster_tab</span><span class="o">.</span><span class="n">setTabIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">mask_tab</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-cluster-64.svg&#39;</span><span class="p">)))</span>

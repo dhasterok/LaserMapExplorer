@@ -18,7 +18,7 @@ from src.app.UITheme import default_font
 # Add equations and stats
 
 
-class RegressionPage(CustomDockWidget):
+class RegressionDock(CustomDockWidget):
     """Regression analysis page for the toolbox.
     
     This page allows users to select regression methods, configure outlier detection,

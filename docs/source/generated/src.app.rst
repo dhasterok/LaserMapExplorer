@@ -10,14 +10,13 @@
    :toctree:
    :recursive:
 
-   AnalyteSelectionWindow
    AppData
    BlocklyModules
    CanvasWidget
    CropImage
    CustomTableWidget
    DataAnalysis
-   FieldSelectionWindow
+   FieldLogic
    ImageProcessing
    InfoViewer
    LameIO
@@ -29,13 +28,12 @@
    Preprocessing
    Profile
    ProfileNew
-   QuickView
    SpecialTools
    SpotImporter
    SpotTools
    StyleToolbox
-   UIControl
    UITheme
    Workflow
+   base_dialog
    config
    help_mapping

@@ -4959,7 +4959,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Updates field type/field paired comboBoxes
         
         .. seealso::
-            ``UIControls.UIFieldLogic.update_field_type_combobox`` and ``UICongrols.UIFieldLogic.update_field_combobox``
+            ``UIControls.UIFieldLogic.update_field_type_combobox`` and
+            ``UICongrols.UIFieldLogic.update_field_combobox``
         """
         #print('check_analysis_type')
         self.check_analysis = True

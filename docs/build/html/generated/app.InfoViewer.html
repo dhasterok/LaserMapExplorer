@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -458,7 +458,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.FieldTab">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">FieldTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FieldTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FieldTab" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="src.app.UIControl.html#src.app.UIControl.UIFieldLogic" title="src.app.UIControl.UIFieldLogic"><code class="xref py py-class docutils literal notranslate"><span class="pre">UIFieldLogic</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="src.app.FieldLogic.html#src.app.FieldLogic.FieldLogicUI" title="src.app.FieldLogic.FieldLogicUI"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldLogicUI</span></code></a></p>
 <p>Creates the field info tab for plots and annotations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -724,7 +724,7 @@ need to be constrained to the actual data range.
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.InfoDock">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">InfoDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Info</span> <span class="pre">Tools'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#InfoDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.InfoDock" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="src.common.CustomWidgets.html#src.common.CustomWidgets.CustomDockWidget" title="src.common.CustomWidgets.CustomDockWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomDockWidget</span></code></a>, <a class="reference internal" href="src.app.UIControl.html#src.app.UIControl.UIFieldLogic" title="src.app.UIControl.UIFieldLogic"><code class="xref py py-class docutils literal notranslate"><span class="pre">UIFieldLogic</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="src.common.CustomWidgets.html#src.common.CustomWidgets.CustomDockWidget" title="src.common.CustomWidgets.CustomDockWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomDockWidget</span></code></a>, <a class="reference internal" href="src.app.FieldLogic.html#src.app.FieldLogic.FieldLogicUI" title="src.app.FieldLogic.FieldLogicUI"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldLogicUI</span></code></a></p>
 <p>Dockable widget providing data insight tools through multiple interactive tabs.</p>
 <p>This widget embeds a tabbed interface within a dockable container, giving users access
 to key information and visualization tools related to the dataset and current plot.

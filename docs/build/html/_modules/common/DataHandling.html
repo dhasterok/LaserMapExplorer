@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,28 +388,28 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.DataHandling</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">src.common.ExtendedDF</span> <span class="kn">import</span> <span class="n">AttributeDataFrame</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">yeojohnson</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ExtendedDF</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">yeojohnson</span>
 <span class="c1"># from kneed import KneeLocator</span>
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">src.common.format</span> <span class="k">as</span> <span class="nn">fmt</span>
-<span class="kn">from</span> <span class="nn">src.common.Observable</span> <span class="kn">import</span> <span class="n">Observable</span>
-<span class="kn">from</span> <span class="nn">src.common.SortAnalytes</span> <span class="kn">import</span> <span class="n">sort_analytes</span>
-<span class="kn">from</span> <span class="nn">src.common.outliers</span> <span class="kn">import</span> <span class="n">chauvenet_criterion</span><span class="p">,</span> <span class="n">quantile_and_difference</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QMessageBox</span>
-<span class="kn">from</span> <span class="nn">src.common.Status</span> <span class="kn">import</span> <span class="n">StatusMessageManager</span>
-<span class="kn">from</span> <span class="nn">src.common.format</span> <span class="kn">import</span> <span class="n">symlog</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Observable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.SortAnalytes</span><span class="w"> </span><span class="kn">import</span> <span class="n">sort_analytes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.outliers</span><span class="w"> </span><span class="kn">import</span> <span class="n">chauvenet_criterion</span><span class="p">,</span> <span class="n">quantile_and_difference</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QMessageBox</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Status</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusMessageManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="kn">import</span> <span class="n">symlog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
 <div class="viewcode-block" id="SampleObj">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">SampleObj</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SampleObj</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a sample object to store and manipulate geochemical data in map form</span>
 <span class="sd">    </span>
 <span class="sd">    The sample object is initially constructed from the data within a *.lame.csv file and loaded into</span>
@@ -555,7 +555,7 @@
 <span class="sd">    &#39;cluster_mask&#39; : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.</span>
 <span class="sd">    &#39;mask&#39; : () -- combined mask, derived from filter_mask &amp; &#39;polygon_mask&#39; &amp; &#39;crop_mask&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">outlier_method</span><span class="p">,</span> <span class="n">negative_method</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ref_chem</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">outlier_method</span><span class="p">,</span> <span class="n">negative_method</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ref_chem</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Data&#39;</span>
@@ -611,7 +611,7 @@
 
 <div class="viewcode-block" id="SampleObj.reset_data">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.reset_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reverts back to the original data.</span>
 
 <span class="sd">        What is reset?</span>
@@ -689,7 +689,7 @@
 
 <div class="viewcode-block" id="SampleObj.reset_data_handling">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.reset_data_handling">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_data_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_data_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        _extended_summary_</span>
@@ -746,21 +746,21 @@
     <span class="c1"># note properties are based on the cropped X and Y values</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;dict: Reference chemistry&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_chem</span>
 
     <span class="nd">@ref_chem</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ref_chem</span> <span class="o">=</span> <span class="n">d</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;numpy.ndarray: Value of x-coordinate associated with map data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
 
     <span class="nd">@x</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_x</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">new_x</span>
@@ -770,12 +770,12 @@
 
     <span class="c1"># Define the y property</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;numpy.ndarray: Value of y-coordinate associated with map data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span>
 
     <span class="nd">@y</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_y</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_y</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">new_y</span>
@@ -784,12 +784,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Width of pixels in x-direction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
 
     <span class="nd">@dx</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dx</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -811,12 +811,12 @@
             
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Width of pixels in y-direction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span>
 
     <span class="nd">@dy</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dy</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dy</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updating</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -836,11 +836,11 @@
         
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span>
     
     <span class="nd">@nx</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">nx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_nx</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_nx</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_nx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -849,11 +849,11 @@
         
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ny</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ny</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span>
     
     <span class="nd">@ny</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ny</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ny</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ny</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ny</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_ny</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -864,44 +864,44 @@
 
     <span class="c1"># Cropped X-axis limits</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;list: (float, float) Limits of pixels in x-direction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1"># Cropped Y-axis limits</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;list: (float, float) Limits of pixels in y-direction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Range of pixels in x-direction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">y_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Range of pixels in y-direction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Aspect ratio of maps (dy / dx).&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">array_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">array_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;tuple: (int, int) Size of map in pixels&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">.</span><span class="n">nunique</span><span class="p">())</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">apply_outlier_to_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_outlier_to_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_outlier_to_all</span>
     
     <span class="nd">@apply_outlier_to_all</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">apply_outlier_to_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_apply_outlier_to_all</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_outlier_to_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_apply_outlier_to_all</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_apply_outlier_to_all</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_outlier_to_all</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -909,11 +909,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;apply_outlier_to_all&quot;</span><span class="p">,</span> <span class="n">new_apply_outlier_to_all</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">auto_scale_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_scale_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_scale_value</span>
     
     <span class="nd">@auto_scale_value</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">auto_scale_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_auto_scale_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_scale_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_auto_scale_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_auto_scale_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_scale_value</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_auto_scale_value</span> <span class="o">=</span> <span class="n">new_auto_scale_value</span>
@@ -922,12 +922,12 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">outlier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">outlier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Method for predicting and clipping outliers.&quot;&quot;&quot;</span>        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outlier_method</span>
 
     <span class="nd">@outlier_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">outlier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">outlier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outlier_method</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outlier_method</span> <span class="o">=</span> <span class="n">method</span>
@@ -935,12 +935,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;outlier_method&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">negative_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">negative_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;str: Method for negative handling.&quot;&quot;&quot;</span>        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_negative_method</span>
  
     <span class="nd">@negative_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">negative_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">negative_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_negative_method</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_negative_method</span> <span class="o">=</span> <span class="n">method</span>
@@ -948,11 +948,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;negative_method&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_min_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_min_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_min_quantile</span>
     
     <span class="nd">@data_min_quantile</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">data_min_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_min_quantile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_min_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_min_quantile</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_data_min_quantile</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_min_quantile</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -960,11 +960,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;data_min_quantile&quot;</span><span class="p">,</span> <span class="n">new_data_min_quantile</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_max_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_max_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_max_quantile</span>
     
     <span class="nd">@data_max_quantile</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">data_max_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_max_quantile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_max_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_max_quantile</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_data_max_quantile</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_max_quantile</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -972,11 +972,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;data_max_quantile&quot;</span><span class="p">,</span> <span class="n">new_data_max_quantile</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_min_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_min_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_min_diff_quantile</span>
     
     <span class="nd">@data_min_diff_quantile</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">data_min_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_min_diff_quantile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_min_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_min_diff_quantile</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_data_min_diff_quantile</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_min_diff_quantile</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -984,11 +984,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;data_min_diff_quantile&quot;</span><span class="p">,</span> <span class="n">new_data_min_diff_quantile</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_max_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_max_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_max_diff_quantile</span>
     
     <span class="nd">@data_max_diff_quantile</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">data_max_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_max_diff_quantile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_max_diff_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_max_diff_quantile</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_data_max_diff_quantile</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_max_diff_quantile</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -996,12 +996,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;data_max_diff_quantile&quot;</span><span class="p">,</span> <span class="n">new_data_max_diff_quantile</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">crop_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crop_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;numpy.ndarray: Boolean mask used to crop the raw data. True values will be used.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crop_mask</span>
     
     <span class="nd">@crop_mask</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">crop_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_xlim</span><span class="p">,</span> <span class="n">new_ylim</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crop_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_xlim</span><span class="p">,</span> <span class="n">new_ylim</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">crop</span><span class="o">=</span><span class="kc">True</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_crop_mask</span> <span class="o">=</span> <span class="p">(</span>
@@ -1024,11 +1024,11 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">current_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">current_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_field</span>
     
     <span class="nd">@current_field</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">current_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">current_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_field</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1060,13 +1060,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;apply_process_to_all_data&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_field</span><span class="p">)</span>
 
     <span class="c1"># validation functions</span>
-    <span class="k">def</span> <span class="nf">_is_valid_oulier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_valid_oulier_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates if a the method is a valid string.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;quantile criteria&#39;</span><span class="p">,</span> <span class="s1">&#39;quantile and distance criteria&#39;</span><span class="p">,</span> <span class="s1">&#39;chauvenet criterion&#39;</span><span class="p">,</span> <span class="s1">&#39;log(n&gt;x) inflection&#39;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SampleObj.parse_field">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.parse_field">[docs]</a>
-    <span class="k">def</span> <span class="nf">parse_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a field to symbol and mass.</span>
 
 <span class="sd">        Separates an analyte field with a element symbol-mass name to its separate parts.</span>
@@ -1090,7 +1090,7 @@
 
 <div class="viewcode-block" id="SampleObj.add_columns">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.add_columns">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add one or more columns to the sample object.</span>
 
@@ -1214,7 +1214,7 @@
 
 <div class="viewcode-block" id="SampleObj.create_label">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.create_label">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a default label for plotting</span>
 
 <span class="sd">        Creates a default label for plotting </span>
@@ -1276,7 +1276,7 @@
 
 <div class="viewcode-block" id="SampleObj.delete_column">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.delete_column">[docs]</a>
-    <span class="k">def</span> <span class="nf">delete_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deletes a column and associated attributes from the AttributeDataFrame.</span>
 
 <span class="sd">        Parameters</span>
@@ -1303,7 +1303,7 @@
 
 <div class="viewcode-block" id="SampleObj.reset_resolution">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.reset_resolution">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets dx and dy to initial values</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_dx</span>
@@ -1313,7 +1313,7 @@
 
 <div class="viewcode-block" id="SampleObj.swap_xy">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.swap_xy">[docs]</a>
-    <span class="k">def</span> <span class="nf">swap_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">swap_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Swaps data in a SampleObj.&quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">is_swapped</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_swapped</span>
 
@@ -1332,7 +1332,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_orig_dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_dy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orig_dx</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_swap_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_swap_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Swaps X and Y of a dataframe</span>
 
 <span class="sd">        Swaps coordinates for all maps in sample dataframe.</span>
@@ -1350,7 +1350,7 @@
 
 <div class="viewcode-block" id="SampleObj.update_resolution">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.update_resolution">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates DX and DY for a dataframe</span>
 
 <span class="sd">        Recalculates X and Y for a dataframe when the user changes the value of</span>
@@ -1374,7 +1374,7 @@
 
 <div class="viewcode-block" id="SampleObj.swap_resolution">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.swap_resolution">[docs]</a>
-    <span class="k">def</span> <span class="nf">swap_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">swap_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Swaps DX and DY for a dataframe, updates X and Y</span>
 
 <span class="sd">        Recalculates X and Y for a dataframe</span>
@@ -1398,7 +1398,7 @@
 
 <div class="viewcode-block" id="SampleObj.reset_crop">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.reset_crop">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the data to the original bounds.</span>
 
 <span class="sd">        Reseting the data to the original bounds results in deleting progress on analyses,</span>
@@ -1414,7 +1414,7 @@
 
 <div class="viewcode-block" id="SampleObj.compute_ratio">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.compute_ratio">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyte_1</span><span class="p">,</span> <span class="n">analyte_2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyte_1</span><span class="p">,</span> <span class="n">analyte_2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute a ratio field from two analytes.</span>
 
 <span class="sd">        Ratios are computed on the processed_data, after negative handling, but before autoscaling.</span>
@@ -1441,7 +1441,7 @@
 
 <div class="viewcode-block" id="SampleObj.cluster_data">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.cluster_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">cluster_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clusters data for use with data preprocessing</span>
 
 <span class="sd">        _extended_summary_</span>
@@ -1501,7 +1501,7 @@
 
 <div class="viewcode-block" id="SampleObj.prep_data">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.prep_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">prep_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prep_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies adjustments to data data prior to analyses and plotting.</span>
 
 <span class="sd">        This method applies a workflow to adjust data to limit the number of data that are otherwise</span>
@@ -1649,7 +1649,7 @@
 
 <div class="viewcode-block" id="SampleObj.k_optimal_clusters">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.k_optimal_clusters">[docs]</a>
-    <span class="k">def</span> <span class="nf">k_optimal_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">k_optimal_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predicts the optimal number of clusters.</span>
 
@@ -1732,7 +1732,7 @@
 
 <div class="viewcode-block" id="SampleObj.clip_outliers">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.clip_outliers">[docs]</a>
-    <span class="k">def</span> <span class="nf">clip_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">outlier_method</span><span class="p">,</span> <span class="n">pl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dpl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clip_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">outlier_method</span><span class="p">,</span> <span class="n">pl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dpl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attempts to remove outliers to by a method selected by the user.</span>
 
 <span class="sd">        Parameters</span>
@@ -1787,7 +1787,7 @@
 
 <div class="viewcode-block" id="SampleObj.transform_array">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.transform_array">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">negative_method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">negative_method</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Negative and zero handling with clustering for noise detection.</span>
 
@@ -1835,7 +1835,7 @@
 
 <div class="viewcode-block" id="SampleObj.update_norm">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.update_norm">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the norm of the data.</span>
 
 <span class="sd">        Parameters</span>
@@ -1859,7 +1859,7 @@
 
 <div class="viewcode-block" id="SampleObj.get_map_data">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.get_map_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">field_type</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">field_type</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves and processes the mapping data for the given sample and analytes</span>
 
@@ -1955,7 +1955,7 @@
 
 <div class="viewcode-block" id="SampleObj.get_processed_data">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.get_processed_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_processed_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_processed_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the processed data for analysis</span>
 
 <span class="sd">        Returns</span>
@@ -2004,7 +2004,7 @@
     <span class="c1"># extracts data for scatter plot</span>
 <div class="viewcode-block" id="SampleObj.get_vector">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.get_vector">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a dictionary of values for plotting</span>
 
 <span class="sd">        Returns</span>
@@ -2147,7 +2147,7 @@
 
 <div class="viewcode-block" id="SampleObj.apply_field_filters">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.apply_field_filters">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply_field_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_field_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies filters based on field values.</span>
 <span class="sd">        </span>
 <span class="sd">        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.</span>
@@ -2171,7 +2171,7 @@
 
 <div class="viewcode-block" id="SampleObj.confirm_reset">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.confirm_reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">confirm_reset</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">confirm_reset</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A simple dialog that ensures the user wishes to reset data</span>
 
 <span class="sd">        Returns</span>
@@ -2195,7 +2195,7 @@
         <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># User chose to proceed</span></div>
 
     
-    <span class="k">def</span> <span class="nf">sort_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sort_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="c1"># retrieve analyte_list</span>
         <span class="n">analyte_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
 
@@ -2217,7 +2217,7 @@
 
 <div class="viewcode-block" id="SampleObj.auto_scale">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.auto_scale">[docs]</a>
-    <span class="k">def</span> <span class="nf">auto_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sample_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sample_id</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Auto-scales pixel values in map</span>
 
 <span class="sd">        Executes on ``MainWindow.toolButtonAutoScale`` click.</span>
@@ -2314,7 +2314,7 @@
 
 <div class="viewcode-block" id="SampleObj.sort_data">
 <a class="viewcode-back" href="../../generated/common.DataHandling.html#common.DataHandling.SampleObj.sort_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">sort_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sort_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="c1"># retrieve analyte_list</span>
         <span class="n">analyte_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
         <span class="n">sorted_analyte_list</span> <span class="o">=</span> <span class="n">sort_analytes</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">analyte_list</span><span class="p">)</span>

@@ -2549,21 +2549,7 @@
                      <property name="toolTip">
                       <string>Display histogram as probability or cumulative density</string>
                      </property>
-                     <item>
                       <property name="text">
-                       <string>PDF</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>CDF</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>log-scaling</string>
-                      </property>
-                     </item>
                     </widget>
                    </item>
                    <item row="1" column="1">
@@ -2655,26 +2641,6 @@
                          <property name="toolTip">
                           <string>Choose correlation method</string>
                          </property>
-                         <item>
-                          <property name="text">
-                           <string>none</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>Pearson</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>Spearman</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>Kendall</string>
-                          </property>
-                         </item>
                         </widget>
                        </item>
                        <item>
@@ -3181,31 +3147,6 @@
                          <property name="toolTip">
                           <string>Select the ternary heatmap(s) to display</string>
                          </property>
-                         <item>
-                          <property name="text">
-                           <string>counts</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>counts, median</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>median</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>counts, mean, std</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>mean, std</string>
-                          </property>
-                         </item>
                         </widget>
                        </item>
                       </layout>
@@ -4771,16 +4712,6 @@
                      <property name="toolTip">
                       <string>Select clustering method</string>
                      </property>
-                     <item>
-                      <property name="text">
-                       <string>k-means</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>fuzzy c-means</string>
-                      </property>
-                     </item>
                     </widget>
                    </item>
                   </layout>
@@ -5235,7 +5166,7 @@
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <property name="tabSpacing">
         <number>2</number>
@@ -5245,8 +5176,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>292</width>
-          <height>367</height>
+          <width>248</width>
+          <height>393</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -5285,7 +5216,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>292</width>
+              <width>248</width>
               <height>411</height>
              </rect>
             </property>
@@ -6833,162 +6764,6 @@
                 <size>
                  <width>20</width>
                  <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="StyleRegression">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>254</width>
-          <height>367</height>
-         </rect>
-        </property>
-        <attribute name="icon">
-         <iconset resource="../resources.qrc">
-          <normaloff>:/resources/icons/icon-regression-64.svg</normaloff>:/resources/icons/icon-regression-64.svg</iconset>
-        </attribute>
-        <attribute name="label">
-         <string>Regression</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_38">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QScrollArea" name="scrollAreaRegression">
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContentsRegression">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>252</width>
-              <height>365</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_78">
-             <property name="leftMargin">
-              <number>6</number>
-             </property>
-             <property name="topMargin">
-              <number>6</number>
-             </property>
-             <property name="rightMargin">
-              <number>6</number>
-             </property>
-             <property name="bottomMargin">
-              <number>6</number>
-             </property>
-             <item>
-              <layout class="QFormLayout" name="formLayout_13">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Show/hide</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                   <bold>false</bold>
-                   <stylestrategy>PreferDefault</stylestrategy>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Method</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QComboBox" name="comboBoxRegressionMethod">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                   <bold>false</bold>
-                   <stylestrategy>PreferDefault</stylestrategy>
-                  </font>
-                 </property>
-                 <item>
-                  <property name="text">
-                   <string>linear least squares</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>total least squares</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                   <bold>false</bold>
-                   <stylestrategy>PreferDefault</stylestrategy>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Fixed intercept</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QCheckBox" name="checkBox">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                   <bold>false</bold>
-                   <stylestrategy>PreferDefault</stylestrategy>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QCheckBox" name="checkBox_2">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_14">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>257</height>
                 </size>
                </property>
               </spacer>

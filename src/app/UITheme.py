@@ -136,8 +136,6 @@ class UIThemes():
         parent.toolButtonPan.setIcon(QIcon(os.path.join(ICONPATH,'icon-move-dark-64.svg')))
         parent.toolButtonZoom.setIcon(QIcon(os.path.join(ICONPATH,'icon-zoom-dark-64.svg')))
         parent.toolButtonDistance.setIcon(QIcon(os.path.join(ICONPATH,'icon-distance-dark-64.svg')))
-        # Regression
-        #parent.toolBoxTreeView.setItemIcon(parent.right_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Calculator
         parent.actionCalculator.setIcon(QIcon(os.path.join(ICONPATH,'icon-calculator-dark-64.svg')))
         if hasattr(parent,'calculator'):
@@ -148,7 +146,6 @@ class UIThemes():
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-dark-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['markers'],QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-dark-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(os.path.join(ICONPATH,'icon-rgb-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-dark-64.svg')))
         # Cluster tab
         #parent.tabWidgetMask.setItemIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-dark-64.svg')))
         #parent.toolButtonClusterLink.setIcon(QIcon(os.path.join(ICONPATH,'icon-link-dark-64.svg')))
@@ -265,7 +262,6 @@ class UIThemes():
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(os.path.join(ICONPATH,'icon-text-and-scales-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['markers'],QIcon(os.path.join(ICONPATH,'icon-marker-and-lines-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(os.path.join(ICONPATH,'icon-rgb-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['regression'],QIcon(os.path.join(ICONPATH,'icon-regression-64.svg')))
         # Cluster tab
         if hasattr(parent, "mask_dock"):
             parent.mask_dock.cluster_tab.setTabIcon(parent.mask_tab['cluster'],QIcon(os.path.join(ICONPATH,'icon-cluster-64.svg')))

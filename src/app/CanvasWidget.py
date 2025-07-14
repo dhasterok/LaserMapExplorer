@@ -1,24 +1,29 @@
-
-import sys, os, re, copy, random, darkdetect
-from PyQt6.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
+import os, darkdetect
+from PyQt6.QtCore import ( Qt, QSize )
 from PyQt6.QtWidgets import (
-    QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
-    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
-    QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView,
-    QSplashScreen, QApplication, QMainWindow, QSizePolicy
+    QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox,
+    QHeaderView, QMenu, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy,
+    QLineEdit, QLabel, QToolBar
 )
-from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
+from PyQt6.QtGui import ( QIcon, QAction, QFont )
+from src.common.CustomWidgets import CustomActionMenu
+from src.ui.QuickViewDialog import Ui_QuickViewDialog
+from src.app.config import BASEDIR, ICONPATH 
+
+import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
-from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
+
+import src.common.CustomMplCanvas as mplc
+from src.common.LamePlot import plot_small_histogram
 import src.common.csvdict as csvdict
 from src.common.TableFunctions import TableFcn as TableFcn
-import src.common.CustomMplCanvas as mplc
-import src.app.QuickView as QV
-from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
+import src.app.CustomTableWidget as TW
+from src.common.SortAnalytes import sort_analytes
+from src.app.UITheme import default_font
 from src.common.Logger import auto_log_methods, log, no_log
 
 @auto_log_methods(logger_key='Canvas')
@@ -30,7 +35,18 @@ class CanvasWidget():
         self.duplicate_plot_info = None
         self.lasermaps = {}
 
-        self.ui.canvasWindow.currentChanged.connect(lambda: self.canvas_changed())
+        self.QV_analyte_list = {}
+        try:
+            self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
+        except:
+            self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
+                'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
+                'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
+
+        self.ui.toolButtonNewList.clicked.connect(lambda: QuickView(self))
+        self.ui.comboBoxQVList.activated.connect(lambda _: self.display_QV())
+
+        self.ui.canvasWindow.currentChanged.connect(lambda _: self.canvas_changed())
         self.ui.canvasWindow.setCurrentIndex(self.ui.canvas_tab['sv'])
         self.canvas_changed()
 
@@ -83,7 +99,7 @@ class CanvasWidget():
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
                 'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
 
-        self.ui.toolButtonNewList.clicked.connect(lambda: QV.QuickView(self))
+        self.ui.toolButtonNewList.clicked.connect(lambda: QuickView(self))
         self.ui.comboBoxQVList.activated.connect(lambda: self.display_QV())
 
     def canvas_changed(self):
@@ -237,7 +253,7 @@ class CanvasWidget():
             ui.actionUpdatePlot.setEnabled(False)
             ui.actionSavePlotToTree.setEnabled(False)
 
-            ui.display_QV()
+            self.display_QV()
 
     def remove_multi_plot(self, selected_plot_name):
         """Removes selected plot from MulitView
@@ -314,7 +330,7 @@ class CanvasWidget():
                 continue
 
             # create plot canvas
-            canvas = mplc.MplCanvas()
+            canvas = mplc.MplCanvas(parent=self.ui)
 
             # determine location of plot
             col = i % ncol
@@ -338,7 +354,15 @@ class CanvasWidget():
             canvas.fig.tight_layout()
 
             # add canvas to quickView grid layout
-            self.ui.widgetQuickView.layout().addWidget(canvas,row,col)
+            if self.ui.widgetQuickView.layout() is None:
+                layout_quick_view = QGridLayout()
+                layout_quick_view.setSpacing(0)
+                layout_quick_view.setContentsMargins(0, 0, 0, 0)
+                self.ui.widgetQuickView.setLayout(layout_quick_view)
+            layout = self.ui.widgetQuickView.layout()
+
+            # add canvas to layout
+            layout.addWidget(canvas,row,col)
 
     def clear_layout(self, layout):
         """Clears a widget that contains plots.
@@ -420,11 +444,12 @@ class CanvasWidget():
 
             for index in range(self.ui.comboBoxMVPlots.count()):
                 if self.ui.comboBoxMVPlots.itemText(index) == self.SV_plot_name:
-                    #plot exists in MVself.pyqtgraph_widget
-                    self.move_widget_between_layouts(self.ui.widgetMultiView.layout(), self.ui.widgetSingleView.layout(),widget)
-                    self.duplicate_plot_info = plot_info
-                    self.hide()
-                    self.show()
+                    item = self.ui.widgetMultiView.layout().itemAt(index)
+                    if item is not None:
+                        widget = item.widget()
+                        if widget is not None:
+                            self.move_widget_between_layouts(self.ui.widgetMultiView.layout(), self.ui.widgetSingleView.layout(), widget)
+                            self.duplicate_plot_info = plot_info
                     return
             
             if self.duplicate_plot_info: #if duplicate exists and new plot has been plotted on SV
@@ -522,9 +547,6 @@ class CanvasWidget():
                 data = [row, col, tree, sample_id, name]
                 self.ui.comboBoxMVPlots.addItem(name, userData=data)
 
-        # self.hide()
-        # self.show()
-
         # put plot_info back into table
         #print(plot_info)
         self.ui.plot_tree.add_tree_item(plot_info)
@@ -544,17 +566,273 @@ class CanvasWidget():
             placeholder = QWidget()
             placeholder.setFixedSize(widget.size())
             src_row, src_col, _, _ = source_layout.getItemPosition(index)
-            source_layout.addWidget(placeholder, src_row, src_col)
+            if src_row is not None and src_col is not None:
+                source_layout.addWidget(placeholder, src_row, src_col)
+            # else: skip adding placeholder if position is invalid
         else:
             placeholder = QWidget()  # Create an empty placeholder widget for non-grid layouts
             placeholder.setFixedSize(widget.size())
 
             source_layout.insertWidget(0, placeholder)
-            
+        
         if isinstance(target_layout, QGridLayout):
             # Add widget to the target grid layout
-            target_layout.addWidget(widget, row, col)
+            if row is not None and col is not None:
+                target_layout.addWidget(widget, row, col)
         else:
             # Add widget to the target layout
             target_layout.addWidget(widget)
         widget.show()  # Ensure the widget is visible in the new layout
+
+# QuickViewDialog gui
+# -------------------------------
+@auto_log_methods(logger_key='Canvas')
+class QuickView(QDialog):
+    """Creates a dialog for the user to select and order analytes for Quick View.
+
+    This dialog allows the user to select analytes from a list, reorder them, and save the
+    selection for quick access in the Quick View tab.
+
+    Parameters
+    ----------
+    parent : None
+        Parent UI
+    """
+    def __init__(self, parent):
+        if hasattr(parent, 'ui'):
+            self.ui = parent.ui
+        else:
+            self.ui = parent
+        super().__init__(self.ui)
+        self.parent = parent
+
+        # Set up list of fields for the table
+        self.analyte_list = self.ui.app_data.get_field_list("Analyte")
+
+        # Initialize the dialog
+        self.setupUi()
+
+    def setupUi(self):
+        font = default_font()
+
+        self.setObjectName("QuickViewDialog")
+        self.resize(300, 640)
+        self.setWindowTitle("Quick View List Editor")
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowCloseButtonHint | Qt
+            .WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint)
+        self.setFont(font)
+
+        dialog_layout = QVBoxLayout(self)
+        dialog_layout.setObjectName("dialog_layout")
+        dialog_layout.setContentsMargins(0, 0, 0, 0)
+        dialog_layout.setSpacing(0)
+        self.setLayout(dialog_layout)
+
+        toolbar = QToolBar()
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+        dialog_layout.addWidget(toolbar)
+
+        sort_icon = ":resources/icons/icon-sort-64.svg"
+        sortmenu_items = [
+            ("alphabetical", lambda: self.apply_sort("alphabetical")),
+            ("atomic number", lambda: self.apply_sort("atomic number")),
+            ("mass", lambda: self.apply_sort("mass")),
+            ("compatibility", lambda: self.apply_sort("compatibility")),
+            ("radius", lambda: self.apply_sort("radius")),
+        ]
+
+        self.sort_action_menu = CustomActionMenu(
+            icon=sort_icon,
+            text="Sort fields for Quick View",
+            menu_items=sortmenu_items,
+            parent=self
+        )
+
+        self.label = QLabel()
+        self.label.setText("Enter name:")
+
+        self.lineEditQVName = QLineEdit(toolbar)
+        self.lineEditQVName.setFont(font)
+        self.lineEditQVName.setText("")
+        self.lineEditQVName.setObjectName("lineEditViewName")
+
+        self.save_action = QAction(toolbar)
+        self.save_action.setObjectName("actionSave")
+        self.save_action.setToolTip("Save current analyte list")
+        self.save_action.triggered.connect(lambda: self.apply_selected_analytes(save=True))
+
+        self.apply_action = QAction(toolbar)
+        self.apply_action.setObjectName("actionApply")
+        self.apply_action.setToolTip("Apply current analyte list to Quick View")
+        self.apply_action.triggered.connect(lambda: self.apply_selected_analytes(save=False))
+
+        # Setup sort menu and associated toolButton
+        if darkdetect.isDark():
+            self.sort_action_menu.setIcon(QIcon(":resources/icons/icon-sort-dark-64.svg"))
+            self.save_action.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
+            self.apply_action.setIcon(QIcon(":resources/icons/icon-add-list-dark-64.svg"))
+        else:
+            self.sort_action_menu.setIcon(QIcon(":resources/icons/icon-sort-64.svg"))
+            self.save_action.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
+            self.apply_action.setIcon(QIcon(":resources/icons/icon-add-list-64.svg"))
+
+        toolbar.addAction(self.sort_action_menu)
+        toolbar.addSeparator()
+        toolbar.addWidget(self.label)
+        toolbar.addWidget(self.lineEditQVName)
+        toolbar.addSeparator()
+        toolbar.addAction(self.save_action)
+        toolbar.addAction(self.apply_action)
+
+        # Assuming TableWidgetDragRows is defined elsewhere
+        self.tableWidget = TW.TableWidgetDragRows()  
+        dialog_layout.addWidget(self.tableWidget)
+
+        self.setup_table()
+
+        self.show()
+
+    def setup_table(self):
+        """
+        Sets up analyte selection table in dialog.
+        
+        This method initializes the table widget with the analyte list, sets the number of rows
+        and columns, and configures the header labels. It also sets the resize modes for the
+        columns to ensure proper display of the analyte names and checkboxes.
+        """
+        self.tableWidget.setRowCount(len(self.analyte_list))
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setHorizontalHeaderLabels(['Show', 'Analyte'])
+
+        header = self.tableWidget.horizontalHeader()
+        if header is not None:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+
+        self.populate_table()
+
+    def populate_table(self):
+        """
+        Populates dialog table with analytes.
+        
+        This method fills the table with analytes from the `self.analyte_list` and adds checkboxes
+        for each analyte to allow the user to select which analytes to include in the Quick
+        View. It also restores the state of checkboxes based on previous selections.
+        If the table is empty, it will be populated with the default analyte list.
+        """
+        # Before repopulating, save the current state of checkboxes
+        checkbox_states = {}
+        for row in range(self.tableWidget.rowCount()):
+            checkbox = self.tableWidget.cellWidget(row, 0)
+            item = self.tableWidget.item(row, 1)
+            if checkbox is not None and isinstance(checkbox, QCheckBox) and item is not None:
+                analyte = item.text()
+                checkbox_states[analyte] = checkbox.isChecked()
+
+        # Clear the table and repopulate
+        self.tableWidget.setRowCount(len(self.analyte_list))
+        for row, analyte in enumerate(self.analyte_list):
+            checkbox = QCheckBox()
+            checkbox.setChecked(checkbox_states.get(analyte, True))
+            self.tableWidget.setCellWidget(row, 0, checkbox)
+
+            item = QTableWidgetItem(analyte)
+            self.tableWidget.setItem(row, 1, item)
+
+
+    def apply_sort(self, method):
+        """
+        Sorts analyte table in dialog.
+
+        Sorts the analyte list based on the specified method and repopulates the table.
+
+        Parameters
+        ----------
+        method : str
+            The sorting method to apply. Options include 'alphabetical', 'atomic number',
+            'mass', 'compatibility', and 'radius'.
+        """        
+        self.analyte_list = sort_analytes(method, self.analyte_list)
+        self.populate_table()  # Refresh table with sorted data
+
+    def apply_selected_analytes(self, save=False):
+        """Gets list of analytes and group name when Save button is clicked.
+
+        Retrieves the user-defined name from ``quickView.lineEditViewName`` and list of analytes
+        using ``quickView.column_to_list()``, and adds them to a dictionary item with the name
+        defined as the key.
+
+        Parameters
+        ----------
+        save : bool, optional
+            If True, the list is saved to a CSV file. Defaults to False.
+
+        Raises
+        ------
+        ValueError
+            If the view name is empty or if no analytes are selected.
+        QMessageBox.warning
+            If the view name is invalid or if no analytes are selected.
+        QMessageBox.information
+            If the analyte list is saved successfully.
+        ValueError
+            If the view name is not valid or if no analytes are selected.
+        """        
+        self.view_name = self.lineEditQVName.text().strip() if self.lineEditQVName is not None else ''
+        if not self.view_name:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid view name.")
+            return
+
+        # Collect selected analytes from the table
+        selected_analytes = []
+        for row in range(self.tableWidget.rowCount()):
+            item = self.tableWidget.item(row, 1)
+            checkbox = self.tableWidget.cellWidget(row, 0)
+            if item is not None and isinstance(checkbox, QCheckBox) and checkbox.isChecked():
+                selected_analytes.append(item.text())
+
+        if not selected_analytes:
+            QMessageBox.warning(self, "No Analytes Selected", "Please select at least one analyte.")
+            return
+
+        # Update the main QV_analyte_list dict in the parent
+        self.parent.QV_analyte_list[self.view_name] = selected_analytes
+
+        # update self.main_window.comboBoxQVList combo box with view_name if not already present
+        if self.ui.comboBoxQVList.findText(self.view_name) == -1:
+            self.ui.comboBoxQVList.addItem(self.view_name)
+        
+        # Save to CSV
+        if save == True:
+            self.save_to_csv()
+
+    def save_to_csv(self):
+        """Opens a message box, prompting user to in put a file to save the table list.
+
+        Saves the current analyte list to a CSV file in the resources/styles directory.
+        If the directory does not exist, it is created. The file is named 'qv_lists.csv' and
+        contains the analyte lists for quick access in the Quick View tab.
+        If the parent has a QV_analyte_list attribute, it exports the list to the CSV file.
+        If the save is successful, a message box informs the user of the success.
+        If the save fails, a warning message box is displayed.
+
+        Raises
+        ------
+        OSError
+            If there is an issue creating the directory or writing to the file.
+        QMessageBox.warning
+            If the save operation fails or if the QV_analyte_list is not available.
+        QMessageBox.information
+            If the save operation is successful.
+        """
+        file_path = os.path.join(BASEDIR,'resources', 'styles', 'qv_lists.csv')
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        # append dictionary to file of saved qv_lists
+        if hasattr(self.parent, 'QV_analyte_list'):
+            csvdict.export_dict_to_csv(self.ui.QV_analyte_list, file_path)
+            QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
+        else:
+            QMessageBox.warning(self, "Error", "Could not save analyte list.")

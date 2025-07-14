@@ -60,9 +60,6 @@ class MplCanvas(FigureCanvas):
         Projection, by default None
     """    
     def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui= None):
-        if parent is None:
-            return
-
         #create MPLCanvas with existing figure (required when loading saved projects)
         if fig:
             self.fig = fig
@@ -74,6 +71,8 @@ class MplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
+        if parent is None:
+            return
         self.parent = parent
         
         # if ui components does are not part of parent initialise them seperately

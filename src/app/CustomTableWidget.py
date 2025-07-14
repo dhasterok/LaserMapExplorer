@@ -14,9 +14,9 @@ class TableWidgetDragRows(QTableWidget):
         self.setDragDropOverwriteMode(False)
         self.setDropIndicatorShown(True)
 
-        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.setDragDropMode(QAbstractItemView.InternalMove)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
 
     def dropEvent(self, event: QDropEvent):
         if not event.isAccepted() and event.source() == self:

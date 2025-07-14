@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon, QAction
 
 from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
-from src.app.UIControl import UIFieldLogic
+from src.app.FieldLogic import FieldLogicUI
 from src.common.Logger import LoggerConfig, auto_log_methods
 
 def calc_error(parent, func, err, addinfo):
@@ -36,7 +36,7 @@ def calc_error(parent, func, err, addinfo):
 # Calculator
 # -------------------------------
 @auto_log_methods(logger_key='Calculator')
-class CalculatorDock(CustomDockWidget, UIFieldLogic):
+class CalculatorDock(CustomDockWidget, FieldLogicUI):
     """Creates a CustomFieldCalculator with UI controls inside a dock widget that can be added to a QMainWindow
 
     Parameters
@@ -75,7 +75,7 @@ class CalculatorDock(CustomDockWidget, UIFieldLogic):
         else:
             self.data = parent.app_data.data[parent.app_data.sample_id].processed_data
 
-        UIFieldLogic.__init__(self, self.data)
+        FieldLogicUI.__init__(self, self.data)
 
         # create an instance of CustomFieldCalculator for the heavy lifting
         if parent.app_data.sample_id != '':

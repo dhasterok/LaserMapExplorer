@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,31 +388,31 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.Profile</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QStandardItem</span><span class="p">,</span> <span class="n">QStandardItemModel</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QIntValidator</span><span class="p">,</span> <span class="n">QAction</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> 
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
         <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QGroupBox</span><span class="p">,</span>
         <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QSpinBox</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QListView</span><span class="p">,</span> <span class="n">QToolBar</span><span class="p">,</span>
         <span class="n">QLabel</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QScrollArea</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QWidgetAction</span><span class="p">,</span> <span class="n">QAbstractItemView</span>
     <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">CustomLineEdit</span><span class="p">,</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">ToggleSwitch</span>
-<span class="kn">from</span> <span class="nn">src.app.UIControl</span> <span class="kn">import</span> <span class="n">UIFieldLogic</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">ScatterPlotItem</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qtagg</span> <span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
-<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
-<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
-<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PathCollection</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">CustomLineEdit</span><span class="p">,</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">ToggleSwitch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.FieldLogic</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldLogicUI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">ScatterPlotItem</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qtagg</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.figure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathCollection</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
 <div class="viewcode-block" id="ProfileDock">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.ProfileDock">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Profile&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">ProfileDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">UIFieldLogic</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProfileDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">FieldLogicUI</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parent must be an instance of QMainWindow.&quot;</span><span class="p">)</span>
 
@@ -745,7 +745,7 @@
 
 <div class="viewcode-block" id="ProfileDock.update_dock_visibility">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.ProfileDock.update_dock_visibility">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_dock_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_dock_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_toggle</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="k">return</span>
 
@@ -757,7 +757,7 @@
 
 <div class="viewcode-block" id="ProfileDock.toggle_profile_actions">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.ProfileDock.toggle_profile_actions">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_profile_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_profile_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_toggle</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actionInterpolate</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actionControlPoints</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -802,7 +802,7 @@
         
 <div class="viewcode-block" id="ProfileDock.update_profile_spinbox">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.ProfileDock.update_profile_spinbox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_profile_spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_profile_spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the maximum number of subplots that can be selected.</span>
 
 <span class="sd">        Updates ``MainWindow.spinBoxProfileSelectedSubplot.setMaximum()</span>
@@ -813,7 +813,7 @@
 
 <div class="viewcode-block" id="ProfileDock.profile_state_changed">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.ProfileDock.profile_state_changed">[docs]</a>
-    <span class="k">def</span> <span class="nf">profile_state_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">profile_state_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">profile_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_toggle</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_toggle</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">update_plot_type_combobox</span><span class="p">()</span>
@@ -829,8 +829,8 @@
 <span class="c1"># The following class defines the metadata of profiles created along with information regarding each point</span>
 <div class="viewcode-block" id="Profile">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profile">[docs]</a>
-<span class="k">class</span> <span class="nc">Profile</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">sort</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">thresh</span><span class="p">,</span><span class="n">int_dist</span><span class="p">,</span> <span class="n">point_error</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Profile</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">sort</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">thresh</span><span class="p">,</span><span class="n">int_dist</span><span class="p">,</span> <span class="n">point_error</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># name given by user for the profile</span>
         <span class="c1"># points, i_points stores profile point information in format: </span>
         <span class="c1"># {</span>
@@ -862,8 +862,8 @@
 
 <div class="viewcode-block" id="Profiling">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling">[docs]</a>
-<span class="k">class</span> <span class="nc">Profiling</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Profiling</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Profiling class.</span>
 
 <span class="sd">        Sets up the profiling functionality, initializing necessary attributes and states.</span>
@@ -890,7 +890,7 @@
     
 <div class="viewcode-block" id="Profiling.add_samples">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.add_samples">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add sample IDs to the profiles dictionary.</span>
 
 <span class="sd">        Initializes an empty dictionary for each sample ID to store profiles.</span>
@@ -911,7 +911,7 @@
 
 <div class="viewcode-block" id="Profiling.save_profiles">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.save_profiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save profiles to files with *.prfl extension.</span>
 
 <span class="sd">        Serializes and saves profile data for a given sample into the specified project directory.</span>
@@ -939,7 +939,7 @@
 
 <div class="viewcode-block" id="Profiling.load_profiles">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.load_profiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load saved profiles from files.</span>
 
 <span class="sd">        Deserializes and loads profile data for a given sample from the specified project directory.</span>
@@ -972,7 +972,7 @@
 
 <div class="viewcode-block" id="Profiling.transform_profile_for_pickling">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.transform_profile_for_pickling">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform_profile_for_pickling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform_profile_for_pickling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert profile object into a serializable format for pickling.</span>
 
 <span class="sd">        Transforms profile attributes into basic data types to enable serialization using pickle.</span>
@@ -1016,7 +1016,7 @@
 
 <div class="viewcode-block" id="Profiling.extract_scatter_plot_state">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.extract_scatter_plot_state">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_scatter_plot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scatter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_scatter_plot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scatter</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract the state of a ScatterPlotItem for serialization.</span>
 
 <span class="sd">        Collects data and properties from a ScatterPlotItem to create a serializable representation.</span>
@@ -1040,7 +1040,7 @@
 
 <div class="viewcode-block" id="Profiling.recreate_scatter_plot">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.recreate_scatter_plot">[docs]</a>
-    <span class="k">def</span> <span class="nf">recreate_scatter_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recreate_scatter_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Recreate a ScatterPlotItem from its saved state.</span>
 
 <span class="sd">        Uses the serialized state to reconstruct a ScatterPlotItem instance.</span>
@@ -1062,7 +1062,7 @@
 
 <div class="viewcode-block" id="Profiling.reconstruct_profile">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.reconstruct_profile">[docs]</a>
-    <span class="k">def</span> <span class="nf">reconstruct_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializable_profile</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reconstruct_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializable_profile</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct a Profile object from its serialized form.</span>
 
 <span class="sd">        Deserializes and rebuilds a Profile object using the data from a serialized profile dictionary.</span>
@@ -1103,7 +1103,7 @@
 
 <div class="viewcode-block" id="Profiling.populate_combobox">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.populate_combobox">[docs]</a>
-    <span class="k">def</span> <span class="nf">populate_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">populate_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Populate the profile selection combobox.</span>
 
 <span class="sd">        Clears and repopulates the combobox with the list of profile names for the current sample.</span>
@@ -1126,7 +1126,7 @@
 
 <div class="viewcode-block" id="Profiling.load_profiles_from_directory">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.load_profiles_from_directory">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_profiles_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_profiles_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load all profiles from a directory for a sample.</span>
 
 <span class="sd">        Iterates over .prfl files in the specified directory and loads profiles for the given sample.</span>
@@ -1156,7 +1156,7 @@
 
 <div class="viewcode-block" id="Profiling.on_profile_selected">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.on_profile_selected">[docs]</a>
-    <span class="k">def</span> <span class="nf">on_profile_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_profile_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle profile selection from the combobox.</span>
 
 <span class="sd">        Loads existing profile data or creates a new profile based on the user&#39;s selection.</span>
@@ -1211,7 +1211,7 @@
 
 <div class="viewcode-block" id="Profiling.cart_to_dist">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.cart_to_dist">[docs]</a>
-    <span class="k">def</span> <span class="nf">cart_to_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cart_to_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert pixel units to distance units.</span>
 
 <span class="sd">        Converts pixel coordinates to physical distance based on the array size and range.</span>
@@ -1236,7 +1236,7 @@
 
 <div class="viewcode-block" id="Profiling.dist_to_cart">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.dist_to_cart">[docs]</a>
-    <span class="k">def</span> <span class="nf">dist_to_cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dist_to_cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert distance units to pixel units.</span>
 
 <span class="sd">        Converts physical distance to pixel coordinates based on the array size and range.</span>
@@ -1261,7 +1261,7 @@
 
 <div class="viewcode-block" id="Profiling.plot_profile_scatter">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.plot_profile_scatter">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_profile_scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">field</span> <span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_profile_scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">field</span> <span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot/move a scatter point for profile at the clicked position.</span>
 
 <span class="sd">        Computes the profile value by averaging concentrations over a specified radius around the clicked point and plots it.</span>
@@ -1348,7 +1348,7 @@
 
 <div class="viewcode-block" id="Profiling.plot_scatter_points">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.plot_scatter_points">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_scatter_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scatter_points</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span><span class="n">point_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_scatter_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scatter_points</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span><span class="n">point_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots scatter point in all plots in canvas (Single view/ Multi view)</span>
 
 <span class="sd">        Determines iterates through all plot items in self.lasermaps and add scatter points to the plots in the current view</span>
@@ -1462,7 +1462,7 @@
     <span class="c1">#             profile_points[field] = [circ_values]</span>
 <div class="viewcode-block" id="Profiling.compute_profile_points">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.compute_profile_points">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_profile_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_points</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">,</span> <span class="n">point_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_profile_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profile_points</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span><span class="p">,</span> <span class="n">point_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute profile points by averaging values within a radius.</span>
 
 <span class="sd">        Calculates the mean values within a specified radius around a point and updates the profile points.</span>
@@ -1564,7 +1564,7 @@
 
 <div class="viewcode-block" id="Profiling.plot_existing_profile">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.plot_existing_profile">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_existing_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_existing_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot existing profile points on the plot.</span>
 
 <span class="sd">        Clears existing plot and plots all profile points for the selected profile.</span>
@@ -1600,7 +1600,7 @@
 
 <div class="viewcode-block" id="Profiling.interpolate_points">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.interpolate_points">[docs]</a>
-    <span class="k">def</span> <span class="nf">interpolate_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpolation_distance</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpolate_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpolation_distance</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate points between existing profile points.</span>
 
 <span class="sd">        Generates interpolated points between profile points and updates the plot accordingly.</span>
@@ -1705,7 +1705,7 @@
 
 <div class="viewcode-block" id="Profiling.clear_plot">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.clear_plot">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all existing profiles from the plot.</span>
 
 <span class="sd">        Removes all profile points and interpolated points from the plot for the current sample.</span>
@@ -1732,7 +1732,7 @@
 
 <div class="viewcode-block" id="Profiling.clear_interpolation">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.clear_interpolation">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_interpolation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_interpolation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all interpolated points from the plot.</span>
 
 <span class="sd">        Removes all interpolated profile points from the plot for the current profile.</span>
@@ -1760,7 +1760,7 @@
 
 <div class="viewcode-block" id="Profiling.plot_profiles">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.plot_profiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_subplots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selected_subplot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_subplots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selected_subplot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot averaged profile values with error bars.</span>
 
 <span class="sd">        Plots the profile values stored in self.profiles with error bars on the specified subplot(s),</span>
@@ -1934,7 +1934,7 @@
 
 <div class="viewcode-block" id="Profiling.process_points">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.process_points">[docs]</a>
-    <span class="k">def</span> <span class="nf">process_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">circ_values</span><span class="p">,</span> <span class="n">sort_axis</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">circ_values</span><span class="p">,</span> <span class="n">sort_axis</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process profile points to compute statistics and distances.</span>
 
 <span class="sd">        Calculates distances and statistical measures (median, mean, quartiles, standard errors) for profile points.</span>
@@ -2015,7 +2015,7 @@
 
 <div class="viewcode-block" id="Profiling.clear_profiles">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.clear_profiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear profile data and plots.</span>
 
 <span class="sd">        Removes all profile scatter points from the plots and clears profile data from the table.</span>
@@ -2082,7 +2082,7 @@
 
 <div class="viewcode-block" id="Profiling.calculate_distance">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.calculate_distance">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the Euclidean distance between two points.</span>
 
 <span class="sd">        Computes the Euclidean distance between two 2D points or from the origin if scalar values are given.</span>
@@ -2108,7 +2108,7 @@
 
 <div class="viewcode-block" id="Profiling.update_table_widget">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.update_table_widget">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_table_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_table_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the profile points table widget.</span>
 
 <span class="sd">        Refreshes the table widget to display the current profile points.</span>
@@ -2146,7 +2146,7 @@
 
 <div class="viewcode-block" id="Profiling.toggle_buttons">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.toggle_buttons">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable or disable profile point editing buttons.</span>
 
 <span class="sd">        Enables or disables buttons based on the presence of profile points.</span>
@@ -2167,7 +2167,7 @@
 
 <div class="viewcode-block" id="Profiling.on_pick">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.on_pick">[docs]</a>
-    <span class="k">def</span> <span class="nf">on_pick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle pick events on the profile plot.</span>
 
 <span class="sd">        Processes user interactions with profile points on the plot when in edit mode.</span>
@@ -2219,7 +2219,7 @@
 
 <div class="viewcode-block" id="Profiling.toggle_edit_mode">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.toggle_edit_mode">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_edit_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_edit_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle the profile editing mode.</span>
 
 <span class="sd">        Enables or disables profile editing mode based on the state of the edit mode toggle.</span>
@@ -2271,7 +2271,7 @@
 
 <div class="viewcode-block" id="Profiling.toggle_point_visibility">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.toggle_point_visibility">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_point_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_point_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle visibility of selected profile points.</span>
 
 <span class="sd">        Hides or shows selected profile points on the plot without removing them from the data.</span>
@@ -2322,7 +2322,7 @@
 
 <div class="viewcode-block" id="Profiling.get_scatter_errorbar_by_gid">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.get_scatter_errorbar_by_gid">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_scatter_errorbar_by_gid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_scatter_errorbar_by_gid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve scatter and errorbar objects by group ID.</span>
 
 <span class="sd">        Finds and returns the scatter and errorbar plot items corresponding to a given group ID.</span>
@@ -2346,7 +2346,7 @@
 
 <div class="viewcode-block" id="Profiling.add_field_to_listview">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.add_field_to_listview">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_field_to_listview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_field_to_listview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add selected fields to the profile list view and update the fields per subplot.&quot;&quot;&quot;</span>
         <span class="c1"># Get the currently selected subplot index</span>
         <span class="n">selected_subplot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_dock</span><span class="o">.</span><span class="n">spinBoxProfileSelectedSubplot</span><span class="o">.</span><span class="n">value</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># 0-based index</span>
@@ -2375,7 +2375,7 @@
 
 <div class="viewcode-block" id="Profiling.remove_field_from_listview">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.remove_field_from_listview">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_field_from_listview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_field_from_listview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove selected fields from the profile list view and update the fields per subplot.&quot;&quot;&quot;</span>
         <span class="c1"># Get the currently selected subplot index</span>
         <span class="n">selected_subplot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_dock</span><span class="o">.</span><span class="n">spinBoxProfileSelectedSubplot</span><span class="o">.</span><span class="n">value</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># 0-based index</span>
@@ -2407,7 +2407,7 @@
 
 <div class="viewcode-block" id="Profiling.update_num_subplots">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.update_num_subplots">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_num_subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_num_subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">num_subplots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile_dock</span><span class="o">.</span><span class="n">spinBoxProfileNumSubplots</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         <span class="c1"># Adjust fields_per_subplot</span>
         <span class="n">existing_subplots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields_per_subplot</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -2432,7 +2432,7 @@
 
 <div class="viewcode-block" id="Profiling.update_listview_with_fields">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.update_listview_with_fields">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_listview_with_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_listview_with_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the list view with the given list of fields.</span>
 
 <span class="sd">        Parameters</span>
@@ -2458,7 +2458,7 @@
             
 <div class="viewcode-block" id="Profiling.plot_profile_and_table">
 <a class="viewcode-back" href="../../generated/app.Profile.html#app.Profile.Profiling.plot_profile_and_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_profile_and_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_profile_and_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_profiles</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_table_widget</span><span class="p">()</span></div>
 </div>

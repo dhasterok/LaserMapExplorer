@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 from src.common.CustomWidgets import (
     CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 )
-from src.app.UIControl import UIFieldLogic
+from src.app.FieldLogic import FieldLogicUI
 # from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -56,7 +56,7 @@ class MaskObj:
 
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
 @auto_log_methods(logger_key='Mask')
-class MaskDock(CustomDockWidget, UIFieldLogic):
+class MaskDock(CustomDockWidget, FieldLogicUI):
     def __init__(self, parent=None, title="Masking Toolbox"):
         self.logger_key = 'Mask'
 

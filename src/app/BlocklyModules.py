@@ -28,20 +28,13 @@ from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
-#import src.radar_factory
-from src.common.radar import Radar
-from src.ui.MainWindow import Ui_MainWindow
-#from src.ui.PreferencesWindow import Ui_PreferencesWindow
 from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
-from src.app.FieldSelectionWindow import FieldDialog
-from src.app.AnalyteSelectionWindow import AnalyteDialog
+from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.app.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotViewerWindow import PlotViewer
 from src.common.DataHandling import SampleObj
-from src.app.PlotTree import PlotTree
-from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessing as ip
 from src.app.StyleToolbox import Styling, StyleTheme
 from src.app.Profile import Profiling
@@ -50,7 +43,6 @@ from src.common.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialTools import SpecialFunctions as specfun
 from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
-import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt

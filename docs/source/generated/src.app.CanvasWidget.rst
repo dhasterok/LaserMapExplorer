@@ -9,4 +9,5 @@ src.app.CanvasWidget
    .. autosummary::
    
       CanvasWidget
+      QuickView
    

@@ -1331,9 +1331,6 @@ class Ui_MainWindow(object):
         self.formLayout_26.setWidget(3, QFormLayout.LabelRole, self.labelHistType)
 
         self.comboBoxHistType = QComboBox(self.groupBoxHistogram)
-        self.comboBoxHistType.addItem("")
-        self.comboBoxHistType.addItem("")
-        self.comboBoxHistType.addItem("")
         self.comboBoxHistType.setObjectName(u"comboBoxHistType")
         sizePolicy2.setHeightForWidth(self.comboBoxHistType.sizePolicy().hasHeightForWidth())
         self.comboBoxHistType.setSizePolicy(sizePolicy2)
@@ -1372,10 +1369,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_14 = QHBoxLayout()
         self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
         self.comboBoxCorrelationMethod = QComboBox(self.groupBox_5)
-        self.comboBoxCorrelationMethod.addItem("")
-        self.comboBoxCorrelationMethod.addItem("")
-        self.comboBoxCorrelationMethod.addItem("")
-        self.comboBoxCorrelationMethod.addItem("")
         self.comboBoxCorrelationMethod.setObjectName(u"comboBoxCorrelationMethod")
         self.comboBoxCorrelationMethod.setMaximumSize(QSize(16777215, 16777215))
         self.comboBoxCorrelationMethod.setFont(font5)
@@ -1575,11 +1568,6 @@ class Ui_MainWindow(object):
         self.formLayout_29.setWidget(0, QFormLayout.LabelRole, self.labelHeatmaps)
 
         self.comboBoxHeatmaps = QComboBox(self.groupBoxAxes)
-        self.comboBoxHeatmaps.addItem("")
-        self.comboBoxHeatmaps.addItem("")
-        self.comboBoxHeatmaps.addItem("")
-        self.comboBoxHeatmaps.addItem("")
-        self.comboBoxHeatmaps.addItem("")
         self.comboBoxHeatmaps.setObjectName(u"comboBoxHeatmaps")
         self.comboBoxHeatmaps.setEnabled(True)
         self.comboBoxHeatmaps.setMaximumSize(QSize(16777215, 16777215))
@@ -2164,8 +2152,6 @@ class Ui_MainWindow(object):
         self.formLayout_33.setWidget(0, QFormLayout.LabelRole, self.labelClusterMethod)
 
         self.comboBoxClusterMethod = QComboBox(self.groupBoxClustering)
-        self.comboBoxClusterMethod.addItem("")
-        self.comboBoxClusterMethod.addItem("")
         self.comboBoxClusterMethod.setObjectName(u"comboBoxClusterMethod")
         self.comboBoxClusterMethod.setMaximumSize(QSize(150, 16777215))
         self.comboBoxClusterMethod.setFont(font5)
@@ -2336,7 +2322,7 @@ class Ui_MainWindow(object):
         self.toolBoxStyle.setFrameShadow(QFrame.Raised)
         self.StyleAxes = QWidget()
         self.StyleAxes.setObjectName(u"StyleAxes")
-        self.StyleAxes.setGeometry(QRect(0, 0, 292, 367))
+        self.StyleAxes.setGeometry(QRect(0, 0, 248, 393))
         self.verticalLayout_31 = QVBoxLayout(self.StyleAxes)
         self.verticalLayout_31.setObjectName(u"verticalLayout_31")
         self.verticalLayout_31.setContentsMargins(0, 0, 0, 0)
@@ -2347,7 +2333,7 @@ class Ui_MainWindow(object):
         self.scrollAreaAxes.setWidgetResizable(True)
         self.scrollAreaWidgetContentsAxes = QWidget()
         self.scrollAreaWidgetContentsAxes.setObjectName(u"scrollAreaWidgetContentsAxes")
-        self.scrollAreaWidgetContentsAxes.setGeometry(QRect(0, 0, 292, 411))
+        self.scrollAreaWidgetContentsAxes.setGeometry(QRect(0, 0, 248, 411))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContentsAxes)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(6, 6, 6, 6)
@@ -3088,71 +3074,6 @@ class Ui_MainWindow(object):
         icon65 = QIcon()
         icon65.addFile(u":/resources/icons/icon-rgb-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.toolBoxStyle.addItem(self.StyleColors, icon65, u"Coloring")
-        self.StyleRegression = QWidget()
-        self.StyleRegression.setObjectName(u"StyleRegression")
-        self.StyleRegression.setGeometry(QRect(0, 0, 254, 367))
-        self.verticalLayout_38 = QVBoxLayout(self.StyleRegression)
-        self.verticalLayout_38.setObjectName(u"verticalLayout_38")
-        self.verticalLayout_38.setContentsMargins(0, 0, 0, 0)
-        self.scrollAreaRegression = QScrollArea(self.StyleRegression)
-        self.scrollAreaRegression.setObjectName(u"scrollAreaRegression")
-        self.scrollAreaRegression.setWidgetResizable(True)
-        self.scrollAreaWidgetContentsRegression = QWidget()
-        self.scrollAreaWidgetContentsRegression.setObjectName(u"scrollAreaWidgetContentsRegression")
-        self.scrollAreaWidgetContentsRegression.setGeometry(QRect(0, 0, 252, 365))
-        self.verticalLayout_78 = QVBoxLayout(self.scrollAreaWidgetContentsRegression)
-        self.verticalLayout_78.setObjectName(u"verticalLayout_78")
-        self.verticalLayout_78.setContentsMargins(6, 6, 6, 6)
-        self.formLayout_13 = QFormLayout()
-        self.formLayout_13.setObjectName(u"formLayout_13")
-        self.label_4 = QLabel(self.scrollAreaWidgetContentsRegression)
-        self.label_4.setObjectName(u"label_4")
-
-        self.formLayout_13.setWidget(0, QFormLayout.LabelRole, self.label_4)
-
-        self.label_2 = QLabel(self.scrollAreaWidgetContentsRegression)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setFont(font12)
-
-        self.formLayout_13.setWidget(1, QFormLayout.LabelRole, self.label_2)
-
-        self.comboBoxRegressionMethod = QComboBox(self.scrollAreaWidgetContentsRegression)
-        self.comboBoxRegressionMethod.addItem("")
-        self.comboBoxRegressionMethod.addItem("")
-        self.comboBoxRegressionMethod.setObjectName(u"comboBoxRegressionMethod")
-        self.comboBoxRegressionMethod.setFont(font12)
-
-        self.formLayout_13.setWidget(1, QFormLayout.FieldRole, self.comboBoxRegressionMethod)
-
-        self.label_3 = QLabel(self.scrollAreaWidgetContentsRegression)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setFont(font12)
-
-        self.formLayout_13.setWidget(2, QFormLayout.LabelRole, self.label_3)
-
-        self.checkBox = QCheckBox(self.scrollAreaWidgetContentsRegression)
-        self.checkBox.setObjectName(u"checkBox")
-        self.checkBox.setFont(font12)
-
-        self.formLayout_13.setWidget(2, QFormLayout.FieldRole, self.checkBox)
-
-        self.checkBox_2 = QCheckBox(self.scrollAreaWidgetContentsRegression)
-        self.checkBox_2.setObjectName(u"checkBox_2")
-
-        self.formLayout_13.setWidget(0, QFormLayout.FieldRole, self.checkBox_2)
-
-
-        self.verticalLayout_78.addLayout(self.formLayout_13)
-
-        self.verticalSpacer_14 = QSpacerItem(20, 257, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.verticalLayout_78.addItem(self.verticalSpacer_14)
-
-        self.scrollAreaRegression.setWidget(self.scrollAreaWidgetContentsRegression)
-
-        self.verticalLayout_38.addWidget(self.scrollAreaRegression)
-
-        self.toolBoxStyle.addItem(self.StyleRegression, icon40, u"Regression")
 
         self.verticalLayout_13.addWidget(self.toolBoxStyle)
 
@@ -3254,7 +3175,7 @@ class Ui_MainWindow(object):
         self.toolBox.setCurrentIndex(1)
         self.toolBox.layout().setSpacing(2)
         self.comboBoxNDimQuantiles.setCurrentIndex(2)
-        self.toolBoxStyle.setCurrentIndex(3)
+        self.toolBoxStyle.setCurrentIndex(0)
         self.toolBoxStyle.layout().setSpacing(2)
 
 
@@ -3672,10 +3593,6 @@ class Ui_MainWindow(object):
         self.spinBoxNBins.setToolTip(QCoreApplication.translate("MainWindow", u"Number of bins used to produce histogram", None))
 #endif // QT_CONFIG(tooltip)
         self.labelHistType.setText(QCoreApplication.translate("MainWindow", u"Histogram type", None))
-        self.comboBoxHistType.setItemText(0, QCoreApplication.translate("MainWindow", u"PDF", None))
-        self.comboBoxHistType.setItemText(1, QCoreApplication.translate("MainWindow", u"CDF", None))
-        self.comboBoxHistType.setItemText(2, QCoreApplication.translate("MainWindow", u"log-scaling", None))
-
 #if QT_CONFIG(tooltip)
         self.comboBoxHistType.setToolTip(QCoreApplication.translate("MainWindow", u"Display histogram as probability or cumulative density", None))
 #endif // QT_CONFIG(tooltip)
@@ -3684,11 +3601,6 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.groupBox_5.setTitle(QCoreApplication.translate("MainWindow", u"Correlations", None))
         self.labelCorrelationMethod.setText(QCoreApplication.translate("MainWindow", u"Method", None))
-        self.comboBoxCorrelationMethod.setItemText(0, QCoreApplication.translate("MainWindow", u"none", None))
-        self.comboBoxCorrelationMethod.setItemText(1, QCoreApplication.translate("MainWindow", u"Pearson", None))
-        self.comboBoxCorrelationMethod.setItemText(2, QCoreApplication.translate("MainWindow", u"Spearman", None))
-        self.comboBoxCorrelationMethod.setItemText(3, QCoreApplication.translate("MainWindow", u"Kendall", None))
-
 #if QT_CONFIG(tooltip)
         self.comboBoxCorrelationMethod.setToolTip(QCoreApplication.translate("MainWindow", u"Choose correlation method", None))
 #endif // QT_CONFIG(tooltip)
@@ -3723,12 +3635,6 @@ class Ui_MainWindow(object):
         self.comboBoxScatterPreset.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Select predefined plot", None))
         self.labelScatterPreset.setText(QCoreApplication.translate("MainWindow", u"Preset", None))
         self.labelHeatmaps.setText(QCoreApplication.translate("MainWindow", u"Heatmaps", None))
-        self.comboBoxHeatmaps.setItemText(0, QCoreApplication.translate("MainWindow", u"counts", None))
-        self.comboBoxHeatmaps.setItemText(1, QCoreApplication.translate("MainWindow", u"counts, median", None))
-        self.comboBoxHeatmaps.setItemText(2, QCoreApplication.translate("MainWindow", u"median", None))
-        self.comboBoxHeatmaps.setItemText(3, QCoreApplication.translate("MainWindow", u"counts, mean, std", None))
-        self.comboBoxHeatmaps.setItemText(4, QCoreApplication.translate("MainWindow", u"mean, std", None))
-
 #if QT_CONFIG(tooltip)
         self.comboBoxHeatmaps.setToolTip(QCoreApplication.translate("MainWindow", u"Select the ternary heatmap(s) to display", None))
 #endif // QT_CONFIG(tooltip)
@@ -3872,9 +3778,6 @@ class Ui_MainWindow(object):
         self.spinBoxNClusters.setToolTip(QCoreApplication.translate("MainWindow", u"Change the number of clusters", None))
 #endif // QT_CONFIG(tooltip)
         self.labelClusterMethod.setText(QCoreApplication.translate("MainWindow", u"Method", None))
-        self.comboBoxClusterMethod.setItemText(0, QCoreApplication.translate("MainWindow", u"k-means", None))
-        self.comboBoxClusterMethod.setItemText(1, QCoreApplication.translate("MainWindow", u"fuzzy c-means", None))
-
 #if QT_CONFIG(tooltip)
         self.comboBoxClusterMethod.setToolTip(QCoreApplication.translate("MainWindow", u"Select clustering method", None))
 #endif // QT_CONFIG(tooltip)
@@ -4101,14 +4004,5 @@ class Ui_MainWindow(object):
         self.spinBoxHeatmapResolution.setToolTip(QCoreApplication.translate("MainWindow", u"Select resolution factor for heatmap", None))
 #endif // QT_CONFIG(tooltip)
         self.toolBoxStyle.setItemText(self.toolBoxStyle.indexOf(self.StyleColors), QCoreApplication.translate("MainWindow", u"Coloring", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Show/hide", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Method", None))
-        self.comboBoxRegressionMethod.setItemText(0, QCoreApplication.translate("MainWindow", u"linear least squares", None))
-        self.comboBoxRegressionMethod.setItemText(1, QCoreApplication.translate("MainWindow", u"total least squares", None))
-
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Fixed intercept", None))
-        self.checkBox.setText("")
-        self.checkBox_2.setText("")
-        self.toolBoxStyle.setItemText(self.toolBoxStyle.indexOf(self.StyleRegression), QCoreApplication.translate("MainWindow", u"Regression", None))
     # retranslateUi
 

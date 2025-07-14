@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,74 +388,66 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.BlocklyModules</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">darkdetect</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">random</span><span class="o">,</span><span class="w"> </span><span class="nn">darkdetect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">copy_on_write</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
 <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Qt5Agg&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QDialog</span>
-<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qtagg</span> <span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QDialog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qtagg</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
 <span class="c1">#from matplotlib.figure import Figure</span>
 <span class="c1">#from matplotlib.projections.polar import PolarAxes</span>
 <span class="c1">#from matplotlib.collections import PathCollection</span>
-<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.gridspec</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gs</span>
 <span class="c1">#import matplotlib.pyplot as plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Patch</span>
-<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
-<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
-<span class="kn">import</span> <span class="nn">cmcrameri</span> <span class="k">as</span> <span class="nn">cmc</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">yeojohnson</span><span class="p">,</span> <span class="n">percentileofscore</span>
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">silhouette_score</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Patch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cmcrameri</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cmc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">yeojohnson</span><span class="p">,</span> <span class="n">percentileofscore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">silhouette_score</span>
 <span class="c1">#from sklearn_extra.cluster import KMedoids</span>
-<span class="kn">import</span> <span class="nn">skfuzzy</span> <span class="k">as</span> <span class="nn">fuzz</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
-<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
-<span class="kn">from</span> <span class="nn">src.common.ternary_plot</span> <span class="kn">import</span> <span class="n">ternary</span>
-<span class="kn">from</span> <span class="nn">src.common.plot_spider</span> <span class="kn">import</span> <span class="n">plot_spider_norm</span>
-<span class="kn">from</span> <span class="nn">src.common.scalebar</span> <span class="kn">import</span> <span class="n">scalebar</span>
-<span class="kn">from</span> <span class="nn">src.app.LameIO</span> <span class="kn">import</span> <span class="n">LameIO</span>
-<span class="kn">import</span> <span class="nn">src.common.csvdict</span> <span class="k">as</span> <span class="nn">csvdict</span>
-<span class="c1">#import src.radar_factory</span>
-<span class="kn">from</span> <span class="nn">src.common.radar</span> <span class="kn">import</span> <span class="n">Radar</span>
-<span class="kn">from</span> <span class="nn">src.ui.MainWindow</span> <span class="kn">import</span> <span class="n">Ui_MainWindow</span>
-<span class="c1">#from src.ui.PreferencesWindow import Ui_PreferencesWindow</span>
-<span class="kn">from</span> <span class="nn">src.common.LamePlot</span> <span class="kn">import</span> <span class="n">plot_map_mpl</span><span class="p">,</span> <span class="n">plot_small_histogram</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="p">,</span> <span class="n">plot_correlation</span><span class="p">,</span> <span class="n">get_scatter_data</span><span class="p">,</span> <span class="n">plot_scatter</span><span class="p">,</span> <span class="n">plot_ternary_map</span><span class="p">,</span> <span class="n">plot_ndim</span><span class="p">,</span> <span class="n">plot_pca</span><span class="p">,</span> <span class="n">plot_clusters</span><span class="p">,</span> <span class="n">cluster_performance_plot</span>
-<span class="kn">from</span> <span class="nn">src.app.FieldSelectionWindow</span> <span class="kn">import</span> <span class="n">FieldDialog</span>
-<span class="kn">from</span> <span class="nn">src.app.AnalyteSelectionWindow</span> <span class="kn">import</span> <span class="n">AnalyteDialog</span>
-<span class="kn">from</span> <span class="nn">src.app.DataAnalysis</span> <span class="kn">import</span> <span class="n">Clustering</span><span class="p">,</span> <span class="n">DimensionalReduction</span>
-<span class="kn">from</span> <span class="nn">src.common.TableFunctions</span> <span class="kn">import</span> <span class="n">TableFcn</span> <span class="k">as</span> <span class="n">TableFcn</span>
-<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
-<span class="kn">from</span> <span class="nn">src.app.PlotViewerWindow</span> <span class="kn">import</span> <span class="n">PlotViewer</span>
-<span class="kn">from</span> <span class="nn">src.common.DataHandling</span> <span class="kn">import</span> <span class="n">SampleObj</span>
-<span class="kn">from</span> <span class="nn">src.app.PlotTree</span> <span class="kn">import</span> <span class="n">PlotTree</span>
-<span class="kn">from</span> <span class="nn">src.app.CropImage</span> <span class="kn">import</span> <span class="n">CropTool</span>
-<span class="kn">from</span> <span class="nn">src.app.ImageProcessing</span> <span class="kn">import</span> <span class="n">ImageProcessing</span> <span class="k">as</span> <span class="n">ip</span>
-<span class="kn">from</span> <span class="nn">src.app.StyleToolbox</span> <span class="kn">import</span> <span class="n">Styling</span><span class="p">,</span> <span class="n">StyleTheme</span>
-<span class="kn">from</span> <span class="nn">src.app.Profile</span> <span class="kn">import</span> <span class="n">Profiling</span>
-<span class="kn">from</span> <span class="nn">src.common.Polygon</span> <span class="kn">import</span> <span class="n">PolygonManager</span>
-<span class="kn">from</span> <span class="nn">src.common.Calculator</span> <span class="kn">import</span> <span class="n">CustomFieldCalculator</span> <span class="k">as</span> <span class="n">cfc</span>
-<span class="kn">from</span> <span class="nn">src.app.SpecialTools</span> <span class="kn">import</span> <span class="n">SpecialFunctions</span> <span class="k">as</span> <span class="n">specfun</span>
-<span class="kn">from</span> <span class="nn">src.common.NoteTaking</span> <span class="kn">import</span> <span class="n">Notes</span>
-<span class="kn">from</span> <span class="nn">src.common.Browser</span> <span class="kn">import</span> <span class="n">Browser</span>
-<span class="kn">import</span> <span class="nn">src.app.QuickView</span> <span class="k">as</span> <span class="nn">QV</span>
-<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span><span class="p">,</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">SSPATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
-<span class="kn">from</span> <span class="nn">src.common.ExtendedDF</span> <span class="kn">import</span> <span class="n">AttributeDataFrame</span>
-<span class="kn">import</span> <span class="nn">src.common.format</span> <span class="k">as</span> <span class="nn">fmt</span>
-<span class="kn">from</span> <span class="nn">src.common.colorfunc</span> <span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
-<span class="kn">import</span> <span class="nn">src.app.config</span> <span class="k">as</span> <span class="nn">config</span>
-<span class="kn">from</span> <span class="nn">src.app.help_mapping</span> <span class="kn">import</span> <span class="n">create_help_mapping</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerDock</span>
-<span class="kn">from</span> <span class="nn">src.app.AppData</span> <span class="kn">import</span> <span class="n">AppData</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">skfuzzy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fuzz</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ternary_plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">ternary</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.plot_spider</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_spider_norm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.scalebar</span><span class="w"> </span><span class="kn">import</span> <span class="n">scalebar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.LameIO</span><span class="w"> </span><span class="kn">import</span> <span class="n">LameIO</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.csvdict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">csvdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.LamePlot</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_map_mpl</span><span class="p">,</span> <span class="n">plot_small_histogram</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="p">,</span> <span class="n">plot_correlation</span><span class="p">,</span> <span class="n">get_scatter_data</span><span class="p">,</span> <span class="n">plot_scatter</span><span class="p">,</span> <span class="n">plot_ternary_map</span><span class="p">,</span> <span class="n">plot_ndim</span><span class="p">,</span> <span class="n">plot_pca</span><span class="p">,</span> <span class="n">plot_clusters</span><span class="p">,</span> <span class="n">cluster_performance_plot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.FieldLogic</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnalyteDialog</span><span class="p">,</span> <span class="n">FieldDialog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.DataAnalysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">Clustering</span><span class="p">,</span> <span class="n">DimensionalReduction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.TableFunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TableFcn</span> <span class="k">as</span> <span class="n">TableFcn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.PlotViewerWindow</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlotViewer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.DataHandling</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleObj</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.ImageProcessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImageProcessing</span> <span class="k">as</span> <span class="n">ip</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.StyleToolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styling</span><span class="p">,</span> <span class="n">StyleTheme</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.Profile</span><span class="w"> </span><span class="kn">import</span> <span class="n">Profiling</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Polygon</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolygonManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Calculator</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomFieldCalculator</span> <span class="k">as</span> <span class="n">cfc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.SpecialTools</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpecialFunctions</span> <span class="k">as</span> <span class="n">specfun</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.NoteTaking</span><span class="w"> </span><span class="kn">import</span> <span class="n">Notes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Browser</span><span class="w"> </span><span class="kn">import</span> <span class="n">Browser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span><span class="p">,</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">SSPATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ExtendedDF</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeDataFrame</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.colorfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.help_mapping</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_help_mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerDock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.AppData</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppData</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
 <div class="viewcode-block" id="LameBlockly">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly">[docs]</a>
-<span class="k">class</span> <span class="nc">LameBlockly</span><span class="p">(</span><span class="n">PlotViewer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LameBlockly</span><span class="p">(</span><span class="n">PlotViewer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="c1"># setup initial logging options</span>
         <span class="c1"># self.logger = LogCounter()</span>
@@ -553,7 +545,7 @@
 
 <div class="viewcode-block" id="LameBlockly.change_sample">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.change_sample">[docs]</a>
-    <span class="k">def</span> <span class="nf">change_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">save_analysis</span><span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">change_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">save_analysis</span><span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Changes sample and plots first map</span>
 
 <span class="sd">        Parameters</span>
@@ -577,7 +569,7 @@
     <span class="c1"># -------------------------------------</span>
 <div class="viewcode-block" id="LameBlockly.reset_analysis">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.reset_analysis">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -602,7 +594,7 @@
 
 <div class="viewcode-block" id="LameBlockly.open_select_analyte_dialog">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.open_select_analyte_dialog">[docs]</a>
-    <span class="k">def</span> <span class="nf">open_select_analyte_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_select_analyte_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens Select Analyte dialog</span>
 
 <span class="sd">        Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.</span>
@@ -626,7 +618,7 @@
     
 <div class="viewcode-block" id="LameBlockly.open_field_selector_dialog">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.open_field_selector_dialog">[docs]</a>
-    <span class="k">def</span> <span class="nf">open_field_selector_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_field_selector_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens Select Analyte dialog</span>
 
 <span class="sd">        Opens a dialog to select analytes for analysis either graphically or in a table.  Selection updates the list of analytes, and ratios in plot selector and comboBoxes.</span>
@@ -650,7 +642,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_analyte_ratio_selection">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_analyte_ratio_selection">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_analyte_ratio_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analyte_dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_analyte_ratio_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analyte_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates analytes/ratios in mainwindow and its corresponding scale used for each field</span>
 
 <span class="sd">        Updates analytes/ratios and its corresponding scale used for each field based on selection made by user in Analyteselection window or if user choses analyte list in blockly</span>
@@ -789,7 +781,7 @@
     <span class="c1"># -------------------------------------</span>
 <div class="viewcode-block" id="LameBlockly.histogram_get_range">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.histogram_get_range">[docs]</a>
-    <span class="k">def</span> <span class="nf">histogram_get_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">histogram_get_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the bin width</span>
 
 <span class="sd">        Generally called when the number of bins is changed by the user.  Updates the plot.</span>
@@ -811,7 +803,7 @@
 
 <div class="viewcode-block" id="LameBlockly.histogram_update_n_bins">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.histogram_update_n_bins">[docs]</a>
-    <span class="k">def</span> <span class="nf">histogram_update_n_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">field_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">histogram_update_n_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">field_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the number of bins</span>
 
 <span class="sd">        Generally called when the bin width is changed by the user.  Updates the plot.</span>
@@ -836,7 +828,7 @@
 
 <div class="viewcode-block" id="LameBlockly.plot_histogram">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.plot_histogram">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hist_type</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hist_type</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots a histogramn in the canvas window&quot;&quot;&quot;</span>
         <span class="n">plot_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1">#print(&#39;plot histogram&#39;)</span>
@@ -1045,7 +1037,7 @@
 
 <div class="viewcode-block" id="LameBlockly.plot_correlation">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.plot_correlation">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_correlation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corr_method</span><span class="p">,</span> <span class="n">squared</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span><span class="n">field_type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_correlation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corr_method</span><span class="p">,</span> <span class="n">squared</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span><span class="n">field_type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an image of the correlation matrix&quot;&quot;&quot;</span>
         <span class="c1">#print(&#39;plot_correlation&#39;)</span>
 
@@ -1150,7 +1142,7 @@
     <span class="c1"># -------------------------------------</span>
 <div class="viewcode-block" id="LameBlockly.get_scatter_data">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.get_scatter_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_scatter_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span><span class="n">field_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">field_type_x</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field_type_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_type_z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_y</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field_z</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">color_by_field</span> <span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_scatter_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span><span class="n">field_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">field_type_x</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field_type_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_type_z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_y</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">field_z</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">color_by_field</span> <span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">scatter_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;array&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
                 <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;array&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
@@ -1208,7 +1200,7 @@
 
 <div class="viewcode-block" id="LameBlockly.add_scalebar">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.add_scalebar">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_scalebar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_scalebar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a scalebar to a map</span>
 
 <span class="sd">        Parameters</span>
@@ -1240,7 +1232,7 @@
         
 <div class="viewcode-block" id="LameBlockly.add_colorbar">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.add_colorbar">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_colorbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_colorbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a colorbar to a MPL figure</span>
 
 <span class="sd">        Parameters</span>
@@ -1340,7 +1332,7 @@
     <span class="c1"># updates field type comboboxes for analyses and plotting</span>
 <div class="viewcode-block" id="LameBlockly.update_field_type_combobox">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_field_type_combobox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_field_type_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">addNone</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_field_type_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">addNone</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates field type combobox</span>
 <span class="sd">        </span>
 <span class="sd">        Used to update ``MainWindow.comboBoxHistFieldType``, ``MainWindow.comboBoxFilterFieldType``,</span>
@@ -1423,7 +1415,7 @@
     <span class="c1"># gets the set of fields types</span>
 <div class="viewcode-block" id="LameBlockly.update_blockly_field_types">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_blockly_field_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_blockly_field_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">workflow</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_blockly_field_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">workflow</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the fields types available and invokes workflow function</span>
 <span class="sd">          which updates field type dropdown in blockly workflow</span>
 
@@ -1454,7 +1446,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_blockly_analyte_dropdown">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_blockly_analyte_dropdown">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_blockly_analyte_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span> <span class="n">unsaved_changes</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_blockly_analyte_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span> <span class="n">unsaved_changes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;update analyte/ratio lists dropdown with the selected analytes/ratios</span>
 <span class="sd">  </span>
 <span class="sd">        Parameters</span>
@@ -1472,7 +1464,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_analyte_selection_from_file">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_analyte_selection_from_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_analyte_selection_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_analyte_selection_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASEDIR</span><span class="p">,</span> <span class="s1">&#39;resources/analytes_list&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
         <span class="n">analyte_dict</span> <span class="o">=</span><span class="p">{}</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -1486,7 +1478,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_field_list_from_file">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_field_list_from_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_field_list_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_field_list_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASEDIR</span><span class="p">,</span> <span class="s1">&#39;resources/fields_list&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
         <span class="n">field_dict</span> <span class="o">=</span><span class="p">{}</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -1499,7 +1491,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_bounds">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_bounds">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">lb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">d_ub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">d_lb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">lb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">d_ub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">d_lb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span>
         <span class="c1"># Apply to all analytes in sample</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">columns</span>
@@ -1518,7 +1510,7 @@
     <span class="c1"># gets the set of fields</span>
 <div class="viewcode-block" id="LameBlockly.get_field_list">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.get_field_list">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the fields associated with a defined set</span>
 
 <span class="sd">        Set names are consistent with QComboBox.</span>
@@ -1557,7 +1549,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_axis_limits">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_axis_limits">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_axis_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">style_dict</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_axis_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">style_dict</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># Check if user changed XLim, YLim, ZLim, or CLim</span>
         <span class="k">if</span> <span class="s2">&quot;XLim&quot;</span> <span class="ow">in</span> <span class="n">style_dict</span><span class="p">:</span>
             <span class="n">lowerVal</span> <span class="o">=</span> <span class="n">style_dict</span><span class="p">[</span><span class="s2">&quot;XLim&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -1588,7 +1580,7 @@
     
 <div class="viewcode-block" id="LameBlockly.get_saved_lists">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.get_saved_lists">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_saved_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_saved_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the names of saved analyte lists from the resources/analytes list directory.</span>
 
@@ -1610,7 +1602,7 @@
 
 <div class="viewcode-block" id="LameBlockly.execute_code">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.execute_code">[docs]</a>
-    <span class="k">def</span> <span class="nf">execute_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">output_text_edit</span><span class="p">,</span><span class="n">code</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">output_text_edit</span><span class="p">,</span><span class="n">code</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
             <span class="c1"># Get the code from the output_text_edit and execute it</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">output_text_edit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
@@ -1624,7 +1616,7 @@
     <span class="c1">### Blockly functions ##</span>
 <div class="viewcode-block" id="LameBlockly.store_sample_ids">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.store_sample_ids">[docs]</a>
-    <span class="k">def</span> <span class="nf">store_sample_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">store_sample_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sends sample_ids to JavaScript to update the sample_ids list and refresh dropdowns.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1635,7 +1627,7 @@
 
 <div class="viewcode-block" id="LameBlockly.update_field_type_list">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.update_field_type_list">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_field_type_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type_list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_field_type_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type_list</span><span class="p">):</span>
         <span class="c1"># Convert the field type list to JSON</span>
         <span class="n">field_type_list_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">field_type_list</span><span class="p">)</span>
         <span class="c1"># Send the field type list to JavaScript</span>
@@ -1646,7 +1638,7 @@
 
 <div class="viewcode-block" id="LameBlockly.refresh_saved_lists_dropdown">
 <a class="viewcode-back" href="../../generated/app.BlocklyModules.html#app.BlocklyModules.LameBlockly.refresh_saved_lists_dropdown">[docs]</a>
-    <span class="k">def</span> <span class="nf">refresh_saved_lists_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refresh_saved_lists_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.</span>
 <span class="sd">            &quot;&quot;&quot;</span>

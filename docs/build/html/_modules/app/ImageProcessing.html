@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,15 +388,15 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.ImageProcessing</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
-<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">convolve2d</span><span class="p">,</span> <span class="n">wiener</span><span class="p">,</span> <span class="n">decimate</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">ImageItem</span> <span class="p">)</span>
-<span class="kn">import</span> <span class="nn">cv2</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndimage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">convolve2d</span><span class="p">,</span> <span class="n">wiener</span><span class="p">,</span> <span class="n">decimate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">ImageItem</span> <span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
 <span class="c1"># -------------------------------------</span>
 <span class="c1"># Image processing functions</span>
@@ -404,7 +404,7 @@
 <div class="viewcode-block" id="ImageProcessing">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Image&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">ImageProcessing</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ImageProcessing</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Image processing methods for use in LaME.</span>
 
 <span class="sd">    Methods</span>
@@ -431,7 +431,7 @@
 <span class="sd">    plot_gradient : </span>
 <span class="sd">        Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Image&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -458,7 +458,7 @@
 
 <div class="viewcode-block" id="ImageProcessing.add_edge_detection">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.add_edge_detection">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_edge_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_edge_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add edge detection to the current laser map plot.</span>
 
 <span class="sd">        Executes on change of ``MainWindow.comboBoxEdgeDetectMethod`` when ``MainWindow.toolButtonEdgeDetect`` is checked.</span>
@@ -526,7 +526,7 @@
 
 <div class="viewcode-block" id="ImageProcessing.remove_edge_detection">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.remove_edge_detection">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_edge_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_edge_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes edge detection from the current map.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_img</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edge_img</span><span class="p">)</span></div>
@@ -534,7 +534,7 @@
 
 <div class="viewcode-block" id="ImageProcessing.zero_crossing_laplacian">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian">[docs]</a>
-    <span class="k">def</span> <span class="nf">zero_crossing_laplacian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">array</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zero_crossing_laplacian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply Zero Crossing on the Laplacian of the image.</span>
 
 <span class="sd">        Parameters</span>
@@ -584,7 +584,7 @@
 
 <div class="viewcode-block" id="ImageProcessing.gaussian_sigma">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.gaussian_sigma">[docs]</a>
-    <span class="k">def</span> <span class="nf">gaussian_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksize</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gaussian_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ksize</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets default Gaussian sigma for Gaussian blur.</span>
 
 <span class="sd">        Same as default in OpenCV, i.e., 0.3 ((ksize-1)/2 - 1) + 0.8. This functions sets the sigma</span>
@@ -597,7 +597,7 @@
 
 <div class="viewcode-block" id="ImageProcessing.noise_reduction">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.noise_reduction">[docs]</a>
-    <span class="k">def</span> <span class="nf">noise_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">val1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">val1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add noise reduction to the current laser map plot.</span>
 
@@ -758,7 +758,7 @@
 
 <div class="viewcode-block" id="ImageProcessing.plot_gradient">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessing.plot_gradient">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</span>
 
@@ -840,8 +840,8 @@
 <div class="viewcode-block" id="ImageProcessingUI">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Image&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">ImageProcessingUI</span><span class="p">(</span><span class="n">ImageProcessing</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ImageProcessingUI</span><span class="p">(</span><span class="n">ImageProcessing</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Image&#39;</span>
 
@@ -853,7 +853,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.connect_widgets">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.connect_widgets">[docs]</a>
-    <span class="k">def</span> <span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># noise reduction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">comboBoxNoiseReductionMethod</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">comboBoxNoiseReductionMethod</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_reduction_methods</span><span class="p">)</span>
@@ -873,14 +873,14 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.connect_observer">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.connect_observer">[docs]</a>
-    <span class="k">def</span> <span class="nf">connect_observer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_observer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Connects properties to observer functions.&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="ImageProcessingUI.connect_logger">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.connect_logger">[docs]</a>
-    <span class="k">def</span> <span class="nf">connect_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Connects widgets to logger.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">comboBoxNoiseReductionMethod</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;comboBoxNoiseReductionMethod value=[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">comboBoxNoiseReductionMethod</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;UI&quot;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">spinBoxNoiseOption1</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spinBoxNoiseOption1 value=[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">spinBoxNoiseOption1</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;UI&quot;</span><span class="p">))</span>
@@ -891,7 +891,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.update_noise_red_method_combobox">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.update_noise_red_method_combobox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_noise_red_method_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_noise_red_method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_noise_red_method_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_noise_red_method</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">comboBoxNoiseReductionMethod</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">new_noise_red_method</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
@@ -899,7 +899,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.update_noise_red_option1_spinbox">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.update_noise_red_option1_spinbox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_noise_red_option1_spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_noise_red_option1</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_noise_red_option1_spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_noise_red_option1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">spinBoxNoiseOption1</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">new_noise_red_option1</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
@@ -907,7 +907,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.update_noise_red_option2_spinbox">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.update_noise_red_option2_spinbox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_noise_red_option2_spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_noise_red_option2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_noise_red_option2_spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_noise_red_option2</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">doubleSpinBoxNoiseOption2</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">new_noise_red_option2</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
@@ -915,7 +915,7 @@
     
 <div class="viewcode-block" id="ImageProcessingUI.update_gradient_flag_checkbox">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.update_gradient_flag_checkbox">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_gradient_flag_checkbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gradient_flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_gradient_flag_checkbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gradient_flag</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxGradient</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">new_gradient_flag</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
@@ -923,7 +923,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.gradient_checked_state_changed">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">[docs]</a>
-    <span class="k">def</span> <span class="nf">gradient_checked_state_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gradient_checked_state_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">checkBoxGradient</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;gradient map&#39;</span>
         <span class="k">else</span><span class="p">:</span>
@@ -933,7 +933,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.noise_reduction_method_callback">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback">[docs]</a>
-    <span class="k">def</span> <span class="nf">noise_reduction_method_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_reduction_method_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets up noise reduction controls when noise reduction method is changed.</span>
 
 <span class="sd">        Executes when ``MainWindow.comboBoxNoiseReductionMethod.currentText()`` is changed.</span>
@@ -1022,7 +1022,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.noise_reduction_option2_callback">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback">[docs]</a>
-    <span class="k">def</span> <span class="nf">noise_reduction_option2_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_reduction_option2_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback executed when the second noise reduction option is changed</span>
 
 <span class="sd">        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by</span>
@@ -1037,7 +1037,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.run_noise_reduction">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction">[docs]</a>
-    <span class="k">def</span> <span class="nf">run_noise_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_noise_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets parameters and runs noise reduction&quot;&quot;&quot;</span>
 
         <span class="n">algorithm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxNoiseReductionMethod</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -1054,7 +1054,7 @@
 
 <div class="viewcode-block" id="ImageProcessingUI.noise_reduction_option1_callback">
 <a class="viewcode-back" href="../../generated/app.ImageProcessing.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback">[docs]</a>
-    <span class="k">def</span> <span class="nf">noise_reduction_option1_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_reduction_option1_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback executed when the first noise reduction option is changed</span>
 
 <span class="sd">        Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by</span>

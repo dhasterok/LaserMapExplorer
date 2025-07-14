@@ -21,8 +21,7 @@ from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
 from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
-from src.app.FieldSelectionWindow import FieldDialog
-from src.app.AnalyteSelectionWindow import AnalyteDialog
+from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotTree import PlotTree
@@ -35,6 +34,7 @@ from src.app.LamePlotUI import HistogramUI, CorrelationUI, ScatterUI, NDimUI
 from src.app.StyleToolbox import StylingDock
 from src.app.Preprocessing import PreprocessingUI
 from src.app.Profile import Profiling, ProfileDock
+from src.common.Regression import RegressionDock
 from src.common.Polygon import PolygonManager
 from src.app.SpotTools import SpotPage
 from src.app.SpecialTools import SpecialPage
@@ -42,7 +42,6 @@ from src.common.NoteTaking import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
-import src.app.QuickView as QV
 from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
@@ -249,7 +248,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSpecialTools.triggered.connect(self.toggle_special_tab)
 
         self.actionRegression.setChecked(False)
-        self.actionRegression.triggered.connect(self.toggle_regression_tab)
+        self.actionRegression.triggered.connect(self.open_regression)
 
         # code is more resilient if toolbox indices for each page is not hard coded
         # will need to change case text if the page text is changed
@@ -318,14 +317,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionReportBug.triggered.connect(lambda: self.open_browser('report_bug'))
         self.actionUserGuide.triggered.connect(lambda: self.open_browser('user_guide'))
         self.actionTutorials.triggered.connect(lambda: self.open_browser('tutorials'))
+        self.actionSelectAnalytes.triggered.connect(lambda _: self.open_select_analyte_dialog())
 
     def connect_widgets(self):
+        """ Connects widgets to their respective methods and actions.
+        
+        This method sets up the connections for various widgets in the MainWindow,
+        including the toolBox, comboBoxes, and buttons. It ensures that user interactions
+        with these widgets trigger the appropriate methods for updating the UI and data.
+        """
         self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
         self.toolBox.currentChanged.connect(self.toolbox_changed)
 
         self.comboBoxSampleId.activated.connect(self.update_sample_id)
-
-
 
         self.actionFullMap.triggered.connect(self.preprocess.reset_crop)
         self.toolButtonSwapResolution.clicked.connect(self.preprocess.update_swap_resolution)
@@ -809,14 +813,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.toolBox.removeItem(self.left_tab['special'])
         self.reindex_left_tab()
-
-    def toggle_regression_tab(self, *args, **kwargs):
-        if self.actionRegression.isChecked():
-            pass
-            #self.regression_tools = RegressionPage(self.right_tab['stylecolors'], self)
-        else:
-            self.toolBox.removeItem(self.left_tab['regression'])
-        self.reindex_style_tab()
 
     def reindex_left_tab(self):
         """Resets the dictionaries for the Control Toolbox and plot types.
@@ -1707,6 +1703,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.profile_dock.show()
 
+    def open_regression(self, *args, **kwargs):
+        """Opens Regression dock
+
+        Opens Regression dock, creates on first instance.  The regression dock is used to fit
+        curves and models to data.
+        """
+        if not hasattr(self, 'profile'):
+            self.regression_dock = RegressionDock(self)
+
+            if not (self.regression_dock in self.help_mapping.keys()):
+                self.help_mapping[self.regression_dock] = 'regression'
+
+        self.regression_dock.show()
 
     def open_notes(self, *args, **kwargs):
         """Opens Notes Dock
@@ -1833,10 +1842,48 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         result = self.analyte_dialog.exec()  # Store the result here
         if result == QDialog.DialogCode.Accepted:
-            self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
+            self.update_analyte_ratio_selection(analyte_dict=self.analyte_dialog.norm_dict)   
             self.workflow.refresh_analyte_saved_lists_dropdown() #refresh saved analyte dropdown in blockly 
         if result == QDialog.DialogCode.Rejected:
             pass
+
+    def update_analyte_ratio_selection(self,analyte_dict):
+        """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
+
+        Updates analytes/ratios and its corresponding scale used for each field based
+        on selection made by user in Analyteselection window or if user choses analyte
+        list in blockly.
+        
+        Parameters
+            ----------
+            analyte_dict: dict
+                key: Analyte/Ratio name
+                value: scale used (linear/log/logit)
+        """
+        #update self.data['norm'] with selection
+        for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
+            if analyte in list(analyte_dict.keys()):
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
+            else:
+                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
+
+        for analyte, norm in analyte_dict.items():
+            if '/' in analyte:
+                if analyte not in self.data[self.app_data.sample_id].processed_data.columns:
+                    analyte_1, analyte_2 = analyte.split(' / ') 
+                    self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
+
+            self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+
+        self.plot_tree.update_tree(norm_update=True)
+
+        if self.left_tab['dimensional reduction'] == self.toolBox.currentIndex() or self.left_tab['clustering'] == self.toolBox.currentIndex():
+            self.plot_style.schedule_update()
+
+        #update analysis type combo in styles
+        #self.check_analysis_type()
+        #self.update_all_field_comboboxes()
+        #self.update_blockly_field_types()
 
 
     def open_select_custom_field_dialog(self):

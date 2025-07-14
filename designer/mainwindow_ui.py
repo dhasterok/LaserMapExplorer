@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractSpinBox, QApplication
     QScrollArea, QSizePolicy, QSlider, QSpacerItem,
     QSpinBox, QStatusBar, QTabWidget, QTableWidget,
     QTableWidgetItem, QToolBar, QToolBox, QToolButton,
-    QTreeView, QVBoxLayout, QWidget)
+    QVBoxLayout, QWidget)
 import resources_rc
 
 class Ui_MainWindow(object):
@@ -920,6 +920,29 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_19.addLayout(self.gridLayout_2)
 
+        self.horizontalLayout_34 = QHBoxLayout()
+        self.horizontalLayout_34.setObjectName(u"horizontalLayout_34")
+        self.labelReferenceValue = QLabel(self.groupBox)
+        self.labelReferenceValue.setObjectName(u"labelReferenceValue")
+        font9 = QFont()
+        font9.setPointSize(11)
+        font9.setBold(False)
+        font9.setStyleStrategy(QFont.PreferDefault)
+        self.labelReferenceValue.setFont(font9)
+        self.labelReferenceValue.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_34.addWidget(self.labelReferenceValue)
+
+        self.comboBoxRefMaterial = QComboBox(self.groupBox)
+        self.comboBoxRefMaterial.setObjectName(u"comboBoxRefMaterial")
+        self.comboBoxRefMaterial.setMaximumSize(QSize(190, 16777215))
+        self.comboBoxRefMaterial.setFont(font9)
+
+        self.horizontalLayout_34.addWidget(self.comboBoxRefMaterial)
+
+
+        self.verticalLayout_19.addLayout(self.horizontalLayout_34)
+
 
         self.verticalLayout_20.addWidget(self.groupBox)
 
@@ -933,15 +956,15 @@ class Ui_MainWindow(object):
         self.toolBox.setSizePolicy(sizePolicy6)
         self.toolBox.setMinimumSize(QSize(300, 0))
         self.toolBox.setMaximumSize(QSize(300, 16777215))
-        font9 = QFont()
-        font9.setFamilies([u".AppleSystemUIFont"])
-        font9.setPointSize(12)
-        font9.setStyleStrategy(QFont.PreferDefault)
-        self.toolBox.setFont(font9)
+        font10 = QFont()
+        font10.setFamilies([u".AppleSystemUIFont"])
+        font10.setPointSize(12)
+        font10.setStyleStrategy(QFont.PreferDefault)
+        self.toolBox.setFont(font10)
         self.PreprocessPage = QWidget()
         self.PreprocessPage.setObjectName(u"PreprocessPage")
         self.PreprocessPage.setEnabled(True)
-        self.PreprocessPage.setGeometry(QRect(0, 0, 300, 548))
+        self.PreprocessPage.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_69 = QVBoxLayout(self.PreprocessPage)
         self.verticalLayout_69.setObjectName(u"verticalLayout_69")
         self.verticalLayout_69.setContentsMargins(0, 0, 0, 0)
@@ -952,7 +975,7 @@ class Ui_MainWindow(object):
         self.scrollAreaAnalyte.setWidgetResizable(True)
         self.scrollAreaWidgetContentsAnalyte = QWidget()
         self.scrollAreaWidgetContentsAnalyte.setObjectName(u"scrollAreaWidgetContentsAnalyte")
-        self.scrollAreaWidgetContentsAnalyte.setGeometry(QRect(0, 0, 300, 548))
+        self.scrollAreaWidgetContentsAnalyte.setGeometry(QRect(0, 0, 300, 507))
         self.verticalLayout_71 = QVBoxLayout(self.scrollAreaWidgetContentsAnalyte)
         self.verticalLayout_71.setObjectName(u"verticalLayout_71")
         self.verticalLayout_71.setContentsMargins(6, 6, 6, 6)
@@ -1087,11 +1110,11 @@ class Ui_MainWindow(object):
         self.widgetHistView = QWidget(self.scrollAreaWidgetContentsAnalyte)
         self.widgetHistView.setObjectName(u"widgetHistView")
         self.widgetHistView.setMinimumSize(QSize(0, 150))
-        font10 = QFont()
-        font10.setFamilies([u".AppleSystemUIFont"])
-        font10.setPointSize(8)
-        font10.setStyleStrategy(QFont.PreferDefault)
-        self.widgetHistView.setFont(font10)
+        font11 = QFont()
+        font11.setFamilies([u".AppleSystemUIFont"])
+        font11.setPointSize(8)
+        font11.setStyleStrategy(QFont.PreferDefault)
+        self.widgetHistView.setFont(font11)
         self.widgetHistView.setAutoFillBackground(False)
 
         self.verticalLayout_71.addWidget(self.widgetHistView)
@@ -1263,7 +1286,7 @@ class Ui_MainWindow(object):
         self.SelectAnalytePage = QWidget()
         self.SelectAnalytePage.setObjectName(u"SelectAnalytePage")
         self.SelectAnalytePage.setEnabled(True)
-        self.SelectAnalytePage.setGeometry(QRect(0, 0, 300, 548))
+        self.SelectAnalytePage.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_73 = QVBoxLayout(self.SelectAnalytePage)
         self.verticalLayout_73.setObjectName(u"verticalLayout_73")
         self.verticalLayout_73.setContentsMargins(0, 0, 0, 0)
@@ -1274,7 +1297,7 @@ class Ui_MainWindow(object):
         self.scrollAreaPreprocess.setWidgetResizable(True)
         self.scrollAreaWidgetContentsPreprocess = QWidget()
         self.scrollAreaWidgetContentsPreprocess.setObjectName(u"scrollAreaWidgetContentsPreprocess")
-        self.scrollAreaWidgetContentsPreprocess.setGeometry(QRect(0, 0, 300, 548))
+        self.scrollAreaWidgetContentsPreprocess.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_74 = QVBoxLayout(self.scrollAreaWidgetContentsPreprocess)
         self.verticalLayout_74.setObjectName(u"verticalLayout_74")
         self.verticalLayout_74.setContentsMargins(6, 6, 6, 6)
@@ -1501,7 +1524,7 @@ class Ui_MainWindow(object):
         self.ScatterPage = QWidget()
         self.ScatterPage.setObjectName(u"ScatterPage")
         self.ScatterPage.setEnabled(True)
-        self.ScatterPage.setGeometry(QRect(0, 0, 300, 548))
+        self.ScatterPage.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_75 = QVBoxLayout(self.ScatterPage)
         self.verticalLayout_75.setObjectName(u"verticalLayout_75")
         self.verticalLayout_75.setContentsMargins(0, 0, 0, 0)
@@ -1512,7 +1535,7 @@ class Ui_MainWindow(object):
         self.scrollAreaScatter.setWidgetResizable(True)
         self.scrollAreaWidgetContentsScatter = QWidget()
         self.scrollAreaWidgetContentsScatter.setObjectName(u"scrollAreaWidgetContentsScatter")
-        self.scrollAreaWidgetContentsScatter.setGeometry(QRect(0, 0, 300, 548))
+        self.scrollAreaWidgetContentsScatter.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_76 = QVBoxLayout(self.scrollAreaWidgetContentsScatter)
         self.verticalLayout_76.setObjectName(u"verticalLayout_76")
         self.verticalLayout_76.setContentsMargins(6, 6, 6, 6)
@@ -1684,7 +1707,7 @@ class Ui_MainWindow(object):
         self.NDIMPage = QWidget()
         self.NDIMPage.setObjectName(u"NDIMPage")
         self.NDIMPage.setEnabled(True)
-        self.NDIMPage.setGeometry(QRect(0, 0, 300, 548))
+        self.NDIMPage.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_79 = QVBoxLayout(self.NDIMPage)
         self.verticalLayout_79.setObjectName(u"verticalLayout_79")
         self.verticalLayout_79.setContentsMargins(0, 0, 0, 0)
@@ -1695,7 +1718,7 @@ class Ui_MainWindow(object):
         self.scrollAreaNDim.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 300, 548))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 300, 506))
         self.scrollAreaWidgetContents.setFont(font5)
         self.verticalLayout_80 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_80.setObjectName(u"verticalLayout_80")
@@ -1709,26 +1732,12 @@ class Ui_MainWindow(object):
         self.verticalLayout_9.setContentsMargins(3, 3, 3, 3)
         self.formLayout_31 = QFormLayout()
         self.formLayout_31.setObjectName(u"formLayout_31")
-        self.labelNDimRefValues = QLabel(self.groupBoxNDim)
-        self.labelNDimRefValues.setObjectName(u"labelNDimRefValues")
-        self.labelNDimRefValues.setFont(font5)
-        self.labelNDimRefValues.setAlignment(Qt.AlignCenter)
-
-        self.formLayout_31.setWidget(0, QFormLayout.LabelRole, self.labelNDimRefValues)
-
-        self.comboBoxNDimRefMaterial = QComboBox(self.groupBoxNDim)
-        self.comboBoxNDimRefMaterial.setObjectName(u"comboBoxNDimRefMaterial")
-        self.comboBoxNDimRefMaterial.setMaximumSize(QSize(200, 16777215))
-        self.comboBoxNDimRefMaterial.setFont(font5)
-
-        self.formLayout_31.setWidget(0, QFormLayout.FieldRole, self.comboBoxNDimRefMaterial)
-
         self.labelNDimAnalyte = QLabel(self.groupBoxNDim)
         self.labelNDimAnalyte.setObjectName(u"labelNDimAnalyte")
         self.labelNDimAnalyte.setFont(font5)
         self.labelNDimAnalyte.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.formLayout_31.setWidget(1, QFormLayout.LabelRole, self.labelNDimAnalyte)
+        self.formLayout_31.setWidget(0, QFormLayout.LabelRole, self.labelNDimAnalyte)
 
         self.horizontalLayout_70 = QHBoxLayout()
         self.horizontalLayout_70.setObjectName(u"horizontalLayout_70")
@@ -1755,14 +1764,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_70.addWidget(self.toolButtonNDimAnalyteAdd)
 
 
-        self.formLayout_31.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_70)
+        self.formLayout_31.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_70)
 
         self.labelNDimPredefined = QLabel(self.groupBoxNDim)
         self.labelNDimPredefined.setObjectName(u"labelNDimPredefined")
         self.labelNDimPredefined.setFont(font5)
         self.labelNDimPredefined.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.formLayout_31.setWidget(2, QFormLayout.LabelRole, self.labelNDimPredefined)
+        self.formLayout_31.setWidget(1, QFormLayout.LabelRole, self.labelNDimPredefined)
 
         self.horizontalLayout_71 = QHBoxLayout()
         self.horizontalLayout_71.setObjectName(u"horizontalLayout_71")
@@ -1788,13 +1797,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_71.addWidget(self.toolButtonNDimAnalyteSetAdd)
 
 
-        self.formLayout_31.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout_71)
+        self.formLayout_31.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_71)
 
         self.labelNDimQuantiles = QLabel(self.groupBoxNDim)
         self.labelNDimQuantiles.setObjectName(u"labelNDimQuantiles")
         self.labelNDimQuantiles.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.formLayout_31.setWidget(3, QFormLayout.LabelRole, self.labelNDimQuantiles)
+        self.formLayout_31.setWidget(2, QFormLayout.LabelRole, self.labelNDimQuantiles)
 
         self.comboBoxNDimQuantiles = QComboBox(self.groupBoxNDim)
         self.comboBoxNDimQuantiles.addItem("")
@@ -1804,7 +1813,7 @@ class Ui_MainWindow(object):
         self.comboBoxNDimQuantiles.setObjectName(u"comboBoxNDimQuantiles")
         self.comboBoxNDimQuantiles.setMaximumSize(QSize(16777215, 16777215))
 
-        self.formLayout_31.setWidget(3, QFormLayout.FieldRole, self.comboBoxNDimQuantiles)
+        self.formLayout_31.setWidget(2, QFormLayout.FieldRole, self.comboBoxNDimQuantiles)
 
 
         self.verticalLayout_9.addLayout(self.formLayout_31)
@@ -1814,13 +1823,13 @@ class Ui_MainWindow(object):
         self.tableWidgetNDim = QTableWidget(self.groupBoxNDim)
         if (self.tableWidgetNDim.columnCount() < 2):
             self.tableWidgetNDim.setColumnCount(2)
-        font11 = QFont()
-        font11.setPointSize(11)
+        font12 = QFont()
+        font12.setPointSize(11)
         __qtablewidgetitem = QTableWidgetItem()
-        __qtablewidgetitem.setFont(font11);
+        __qtablewidgetitem.setFont(font12);
         self.tableWidgetNDim.setHorizontalHeaderItem(0, __qtablewidgetitem)
         __qtablewidgetitem1 = QTableWidgetItem()
-        __qtablewidgetitem1.setFont(font11);
+        __qtablewidgetitem1.setFont(font12);
         self.tableWidgetNDim.setHorizontalHeaderItem(1, __qtablewidgetitem1)
         self.tableWidgetNDim.setObjectName(u"tableWidgetNDim")
         self.tableWidgetNDim.setMaximumSize(QSize(16777215, 16777215))
@@ -1906,7 +1915,7 @@ class Ui_MainWindow(object):
         self.MultidimensionalPage = QWidget()
         self.MultidimensionalPage.setObjectName(u"MultidimensionalPage")
         self.MultidimensionalPage.setEnabled(True)
-        self.MultidimensionalPage.setGeometry(QRect(0, 0, 300, 548))
+        self.MultidimensionalPage.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_81 = QVBoxLayout(self.MultidimensionalPage)
         self.verticalLayout_81.setObjectName(u"verticalLayout_81")
         self.verticalLayout_81.setContentsMargins(0, 0, 0, 0)
@@ -1918,7 +1927,7 @@ class Ui_MainWindow(object):
         self.scrollAreaMultiDim.setWidgetResizable(True)
         self.scrollAreaWidgetContentsMultiDim = QWidget()
         self.scrollAreaWidgetContentsMultiDim.setObjectName(u"scrollAreaWidgetContentsMultiDim")
-        self.scrollAreaWidgetContentsMultiDim.setGeometry(QRect(0, 0, 300, 548))
+        self.scrollAreaWidgetContentsMultiDim.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_82 = QVBoxLayout(self.scrollAreaWidgetContentsMultiDim)
         self.verticalLayout_82.setObjectName(u"verticalLayout_82")
         self.verticalLayout_82.setContentsMargins(6, 6, 6, 6)
@@ -1991,7 +2000,7 @@ class Ui_MainWindow(object):
         self.ClusteringPage = QWidget()
         self.ClusteringPage.setObjectName(u"ClusteringPage")
         self.ClusteringPage.setEnabled(True)
-        self.ClusteringPage.setGeometry(QRect(0, 0, 300, 548))
+        self.ClusteringPage.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_83 = QVBoxLayout(self.ClusteringPage)
         self.verticalLayout_83.setObjectName(u"verticalLayout_83")
         self.verticalLayout_83.setContentsMargins(0, 0, 0, 0)
@@ -2002,7 +2011,7 @@ class Ui_MainWindow(object):
         self.scrollAreaClustering.setWidgetResizable(True)
         self.scrollAreaWidgetContentsClustering = QWidget()
         self.scrollAreaWidgetContentsClustering.setObjectName(u"scrollAreaWidgetContentsClustering")
-        self.scrollAreaWidgetContentsClustering.setGeometry(QRect(0, 0, 300, 548))
+        self.scrollAreaWidgetContentsClustering.setGeometry(QRect(0, 0, 300, 506))
         self.verticalLayout_84 = QVBoxLayout(self.scrollAreaWidgetContentsClustering)
         self.verticalLayout_84.setObjectName(u"verticalLayout_84")
         self.verticalLayout_84.setContentsMargins(6, 6, 6, 6)
@@ -2178,90 +2187,6 @@ class Ui_MainWindow(object):
 
         self.dockWidgetLeftToolbox.setWidget(self.dockWidgetContentsLeftToolbox)
         MainWindow.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
-        self.dockWidgetPlotTree = QDockWidget(MainWindow)
-        self.dockWidgetPlotTree.setObjectName(u"dockWidgetPlotTree")
-        sizePolicy6.setHeightForWidth(self.dockWidgetPlotTree.sizePolicy().hasHeightForWidth())
-        self.dockWidgetPlotTree.setSizePolicy(sizePolicy6)
-        self.dockWidgetPlotTree.setMinimumSize(QSize(256, 276))
-        self.dockWidgetPlotTree.setMaximumSize(QSize(300, 524287))
-        self.dockWidgetPlotTree.setFont(font)
-        self.dockWidgetPlotTree.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
-        self.dockWidgetPlotTree.setAllowedAreas(Qt.LeftDockWidgetArea|Qt.RightDockWidgetArea)
-        self.dockWidgetContentsRightToolbox = QWidget()
-        self.dockWidgetContentsRightToolbox.setObjectName(u"dockWidgetContentsRightToolbox")
-        self.verticalLayout_11 = QVBoxLayout(self.dockWidgetContentsRightToolbox)
-        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
-        self.verticalLayout_11.setContentsMargins(3, 3, 3, 3)
-        self.treeView = QTreeView(self.dockWidgetContentsRightToolbox)
-        self.treeView.setObjectName(u"treeView")
-        self.treeView.setMinimumSize(QSize(200, 0))
-        font12 = QFont()
-        font12.setPointSize(11)
-        font12.setBold(False)
-        font12.setStyleStrategy(QFont.PreferDefault)
-        self.treeView.setFont(font12)
-        self.treeView.setMouseTracking(True)
-
-        self.verticalLayout_11.addWidget(self.treeView)
-
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.horizontalLayout_34 = QHBoxLayout()
-        self.horizontalLayout_34.setObjectName(u"horizontalLayout_34")
-        self.labelReferenceValue = QLabel(self.dockWidgetContentsRightToolbox)
-        self.labelReferenceValue.setObjectName(u"labelReferenceValue")
-        self.labelReferenceValue.setFont(font12)
-        self.labelReferenceValue.setAlignment(Qt.AlignCenter)
-
-        self.horizontalLayout_34.addWidget(self.labelReferenceValue)
-
-        self.comboBoxRefMaterial = QComboBox(self.dockWidgetContentsRightToolbox)
-        self.comboBoxRefMaterial.setObjectName(u"comboBoxRefMaterial")
-        self.comboBoxRefMaterial.setMaximumSize(QSize(190, 16777215))
-        self.comboBoxRefMaterial.setFont(font12)
-
-        self.horizontalLayout_34.addWidget(self.comboBoxRefMaterial)
-
-
-        self.verticalLayout_3.addLayout(self.horizontalLayout_34)
-
-        self.horizontalLayout_17 = QHBoxLayout()
-        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
-        self.toolButtonSortAnalyte = QToolButton(self.dockWidgetContentsRightToolbox)
-        self.toolButtonSortAnalyte.setObjectName(u"toolButtonSortAnalyte")
-        self.toolButtonSortAnalyte.setMinimumSize(QSize(32, 32))
-        self.toolButtonSortAnalyte.setMaximumSize(QSize(32, 32))
-        self.toolButtonSortAnalyte.setFont(font12)
-        icon61 = QIcon()
-        icon61.addFile(u":/resources/icons/icon-sort-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolButtonSortAnalyte.setIcon(icon61)
-        self.toolButtonSortAnalyte.setIconSize(QSize(28, 28))
-        self.toolButtonSortAnalyte.setPopupMode(QToolButton.InstantPopup)
-
-        self.horizontalLayout_17.addWidget(self.toolButtonSortAnalyte)
-
-        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_17.addItem(self.horizontalSpacer_9)
-
-        self.toolButtonRemovePlot = QToolButton(self.dockWidgetContentsRightToolbox)
-        self.toolButtonRemovePlot.setObjectName(u"toolButtonRemovePlot")
-        self.toolButtonRemovePlot.setMinimumSize(QSize(32, 32))
-        self.toolButtonRemovePlot.setMaximumSize(QSize(32, 32))
-        self.toolButtonRemovePlot.setFont(font12)
-        self.toolButtonRemovePlot.setIcon(icon44)
-        self.toolButtonRemovePlot.setIconSize(QSize(24, 24))
-
-        self.horizontalLayout_17.addWidget(self.toolButtonRemovePlot)
-
-
-        self.verticalLayout_3.addLayout(self.horizontalLayout_17)
-
-
-        self.verticalLayout_11.addLayout(self.verticalLayout_3)
-
-        self.dockWidgetPlotTree.setWidget(self.dockWidgetContentsRightToolbox)
-        MainWindow.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetPlotTree)
         self.toolBar = QToolBar(MainWindow)
         self.toolBar.setObjectName(u"toolBar")
         font13 = QFont()
@@ -2286,7 +2211,7 @@ class Ui_MainWindow(object):
         self.gridLayoutStyleTheme.setObjectName(u"gridLayoutStyleTheme")
         self.labelStyleTheme = QLabel(self.dockWidgetContents)
         self.labelStyleTheme.setObjectName(u"labelStyleTheme")
-        self.labelStyleTheme.setFont(font12)
+        self.labelStyleTheme.setFont(font9)
         self.labelStyleTheme.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayoutStyleTheme.addWidget(self.labelStyleTheme, 0, 0, 1, 1)
@@ -2295,7 +2220,7 @@ class Ui_MainWindow(object):
         self.toolButtonSaveTheme.setObjectName(u"toolButtonSaveTheme")
         self.toolButtonSaveTheme.setMinimumSize(QSize(28, 28))
         self.toolButtonSaveTheme.setMaximumSize(QSize(28, 28))
-        self.toolButtonSaveTheme.setFont(font12)
+        self.toolButtonSaveTheme.setFont(font9)
         self.toolButtonSaveTheme.setIcon(icon2)
         self.toolButtonSaveTheme.setIconSize(QSize(20, 20))
 
@@ -2306,7 +2231,7 @@ class Ui_MainWindow(object):
         self.comboBoxStyleTheme.setObjectName(u"comboBoxStyleTheme")
         sizePolicy2.setHeightForWidth(self.comboBoxStyleTheme.sizePolicy().hasHeightForWidth())
         self.comboBoxStyleTheme.setSizePolicy(sizePolicy2)
-        self.comboBoxStyleTheme.setFont(font12)
+        self.comboBoxStyleTheme.setFont(font9)
 
         self.gridLayoutStyleTheme.addWidget(self.comboBoxStyleTheme, 0, 1, 1, 1)
 
@@ -2317,12 +2242,12 @@ class Ui_MainWindow(object):
         self.toolBoxStyle.setObjectName(u"toolBoxStyle")
         sizePolicy6.setHeightForWidth(self.toolBoxStyle.sizePolicy().hasHeightForWidth())
         self.toolBoxStyle.setSizePolicy(sizePolicy6)
-        self.toolBoxStyle.setFont(font12)
+        self.toolBoxStyle.setFont(font9)
         self.toolBoxStyle.setFrameShape(QFrame.Panel)
         self.toolBoxStyle.setFrameShadow(QFrame.Raised)
         self.StyleAxes = QWidget()
         self.StyleAxes.setObjectName(u"StyleAxes")
-        self.StyleAxes.setGeometry(QRect(0, 0, 248, 393))
+        self.StyleAxes.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_31 = QVBoxLayout(self.StyleAxes)
         self.verticalLayout_31.setObjectName(u"verticalLayout_31")
         self.verticalLayout_31.setContentsMargins(0, 0, 0, 0)
@@ -2333,7 +2258,7 @@ class Ui_MainWindow(object):
         self.scrollAreaAxes.setWidgetResizable(True)
         self.scrollAreaWidgetContentsAxes = QWidget()
         self.scrollAreaWidgetContentsAxes.setObjectName(u"scrollAreaWidgetContentsAxes")
-        self.scrollAreaWidgetContentsAxes.setGeometry(QRect(0, 0, 248, 411))
+        self.scrollAreaWidgetContentsAxes.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContentsAxes)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(6, 6, 6, 6)
@@ -2341,7 +2266,7 @@ class Ui_MainWindow(object):
         self.formLayout_11.setObjectName(u"formLayout_11")
         self.labelXLabel = QLabel(self.scrollAreaWidgetContentsAxes)
         self.labelXLabel.setObjectName(u"labelXLabel")
-        self.labelXLabel.setFont(font12)
+        self.labelXLabel.setFont(font9)
 
         self.formLayout_11.setWidget(0, QFormLayout.LabelRole, self.labelXLabel)
 
@@ -2578,12 +2503,12 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_31.addWidget(self.scrollAreaAxes)
 
-        icon62 = QIcon()
-        icon62.addFile(u":/resources/icons/icon-axes-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleAxes, icon62, u"Axes and Labels")
+        icon61 = QIcon()
+        icon61.addFile(u":/resources/icons/icon-axes-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleAxes, icon61, u"Axes and Labels")
         self.StyleAnnotations = QWidget()
         self.StyleAnnotations.setObjectName(u"StyleAnnotations")
-        self.StyleAnnotations.setGeometry(QRect(0, 0, 292, 367))
+        self.StyleAnnotations.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_35 = QVBoxLayout(self.StyleAnnotations)
         self.verticalLayout_35.setObjectName(u"verticalLayout_35")
         self.verticalLayout_35.setContentsMargins(0, 0, 0, 0)
@@ -2594,7 +2519,7 @@ class Ui_MainWindow(object):
         self.scrollAreaAnnotations.setWidgetResizable(True)
         self.scrollAreaWidgetContentsAnnotations = QWidget()
         self.scrollAreaWidgetContentsAnnotations.setObjectName(u"scrollAreaWidgetContentsAnnotations")
-        self.scrollAreaWidgetContentsAnnotations.setGeometry(QRect(0, 0, 292, 374))
+        self.scrollAreaWidgetContentsAnnotations.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_34 = QVBoxLayout(self.scrollAreaWidgetContentsAnnotations)
         self.verticalLayout_34.setObjectName(u"verticalLayout_34")
         self.verticalLayout_34.setContentsMargins(6, 6, 6, 6)
@@ -2758,12 +2683,12 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_35.addWidget(self.scrollAreaAnnotations)
 
-        icon63 = QIcon()
-        icon63.addFile(u":/resources/icons/icon-text-and-scales-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleAnnotations, icon63, u"Annotations and Scale")
+        icon62 = QIcon()
+        icon62.addFile(u":/resources/icons/icon-text-and-scales-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleAnnotations, icon62, u"Annotations and Scale")
         self.StyleMarkers = QWidget()
         self.StyleMarkers.setObjectName(u"StyleMarkers")
-        self.StyleMarkers.setGeometry(QRect(0, 0, 254, 367))
+        self.StyleMarkers.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_36 = QVBoxLayout(self.StyleMarkers)
         self.verticalLayout_36.setObjectName(u"verticalLayout_36")
         self.verticalLayout_36.setContentsMargins(0, 0, 0, 0)
@@ -2774,7 +2699,7 @@ class Ui_MainWindow(object):
         self.scrollAreaMarkers.setWidgetResizable(True)
         self.scrollAreaWidgetContentsMarkers = QWidget()
         self.scrollAreaWidgetContentsMarkers.setObjectName(u"scrollAreaWidgetContentsMarkers")
-        self.scrollAreaWidgetContentsMarkers.setGeometry(QRect(0, 0, 254, 367))
+        self.scrollAreaWidgetContentsMarkers.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_70 = QVBoxLayout(self.scrollAreaWidgetContentsMarkers)
         self.verticalLayout_70.setObjectName(u"verticalLayout_70")
         self.verticalLayout_70.setContentsMargins(6, 6, 6, 6)
@@ -2916,12 +2841,12 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_36.addWidget(self.scrollAreaMarkers)
 
-        icon64 = QIcon()
-        icon64.addFile(u":/resources/icons/icon-marker-and-lines-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleMarkers, icon64, u"Markers and Lines")
+        icon63 = QIcon()
+        icon63.addFile(u":/resources/icons/icon-marker-and-lines-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleMarkers, icon63, u"Markers and Lines")
         self.StyleColors = QWidget()
         self.StyleColors.setObjectName(u"StyleColors")
-        self.StyleColors.setGeometry(QRect(0, 0, 292, 367))
+        self.StyleColors.setGeometry(QRect(0, 0, 248, 767))
         self.verticalLayout_37 = QVBoxLayout(self.StyleColors)
         self.verticalLayout_37.setObjectName(u"verticalLayout_37")
         self.verticalLayout_37.setContentsMargins(0, 0, 0, 3)
@@ -2932,7 +2857,7 @@ class Ui_MainWindow(object):
         self.scrollAreaColors.setWidgetResizable(True)
         self.scrollAreaWidgetContentsColors = QWidget()
         self.scrollAreaWidgetContentsColors.setObjectName(u"scrollAreaWidgetContentsColors")
-        self.scrollAreaWidgetContentsColors.setGeometry(QRect(0, 0, 292, 364))
+        self.scrollAreaWidgetContentsColors.setGeometry(QRect(0, 0, 248, 764))
         self.verticalLayout_32 = QVBoxLayout(self.scrollAreaWidgetContentsColors)
         self.verticalLayout_32.setObjectName(u"verticalLayout_32")
         self.verticalLayout_32.setContentsMargins(6, 6, 6, 6)
@@ -2967,7 +2892,7 @@ class Ui_MainWindow(object):
         self.toolButtonCAxisReset.setObjectName(u"toolButtonCAxisReset")
         self.toolButtonCAxisReset.setMinimumSize(QSize(20, 20))
         self.toolButtonCAxisReset.setMaximumSize(QSize(20, 20))
-        self.toolButtonCAxisReset.setFont(font12)
+        self.toolButtonCAxisReset.setFont(font9)
         self.toolButtonCAxisReset.setIcon(icon50)
         self.toolButtonCAxisReset.setIconSize(QSize(14, 14))
 
@@ -3071,9 +2996,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_37.addWidget(self.scrollAreaColors)
 
-        icon65 = QIcon()
-        icon65.addFile(u":/resources/icons/icon-rgb-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toolBoxStyle.addItem(self.StyleColors, icon65, u"Coloring")
+        icon64 = QIcon()
+        icon64.addFile(u":/resources/icons/icon-rgb-64.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.toolBoxStyle.addItem(self.StyleColors, icon64, u"Coloring")
 
         self.verticalLayout_13.addWidget(self.toolBoxStyle)
 
@@ -3503,6 +3428,14 @@ class Ui_MainWindow(object):
         self.comboBoxPlotType.setToolTip(QCoreApplication.translate("MainWindow", u"Select plot type, options depend on open tabs in control toolbox", None))
 #endif // QT_CONFIG(tooltip)
         self.comboBoxPlotType.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Select a plot", None))
+        self.labelReferenceValue.setText(QCoreApplication.translate("MainWindow", u"Normalization", None))
+#if QT_CONFIG(tooltip)
+        self.comboBoxRefMaterial.setToolTip(QCoreApplication.translate("MainWindow", u"Select reference for normalizing chemistry", None))
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(statustip)
+        self.comboBoxRefMaterial.setStatusTip("")
+#endif // QT_CONFIG(statustip)
+        self.comboBoxRefMaterial.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Error: earthref.xlsx not found", None))
 #if QT_CONFIG(tooltip)
         self.toolBox.setToolTip("")
 #endif // QT_CONFIG(tooltip)
@@ -3684,11 +3617,6 @@ class Ui_MainWindow(object):
         self.toolButtonTernaryMap.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.toolBox.setItemText(self.toolBox.indexOf(self.ScatterPage), QCoreApplication.translate("MainWindow", u"Scatter and Heatmaps", None))
         self.groupBoxNDim.setTitle("")
-        self.labelNDimRefValues.setText(QCoreApplication.translate("MainWindow", u"Ref. values", None))
-#if QT_CONFIG(tooltip)
-        self.comboBoxNDimRefMaterial.setToolTip(QCoreApplication.translate("MainWindow", u"Select reference for normalizing series", None))
-#endif // QT_CONFIG(tooltip)
-        self.comboBoxNDimRefMaterial.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Error: earthref.xlsx not found", None))
         self.labelNDimAnalyte.setText(QCoreApplication.translate("MainWindow", u"Analyte", None))
 #if QT_CONFIG(tooltip)
         self.comboBoxNDimAnalyte.setToolTip(QCoreApplication.translate("MainWindow", u"Select analyte to add", None))
@@ -3782,23 +3710,6 @@ class Ui_MainWindow(object):
         self.comboBoxClusterMethod.setToolTip(QCoreApplication.translate("MainWindow", u"Select clustering method", None))
 #endif // QT_CONFIG(tooltip)
         self.toolBox.setItemText(self.toolBox.indexOf(self.ClusteringPage), QCoreApplication.translate("MainWindow", u"Clustering", None))
-        self.dockWidgetPlotTree.setWindowTitle(QCoreApplication.translate("MainWindow", u"Plot Tree", None))
-        self.labelReferenceValue.setText(QCoreApplication.translate("MainWindow", u"Ref. value", None))
-#if QT_CONFIG(tooltip)
-        self.comboBoxRefMaterial.setToolTip(QCoreApplication.translate("MainWindow", u"Select reference for normalizing chemistry", None))
-#endif // QT_CONFIG(tooltip)
-#if QT_CONFIG(statustip)
-        self.comboBoxRefMaterial.setStatusTip("")
-#endif // QT_CONFIG(statustip)
-        self.comboBoxRefMaterial.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Error: earthref.xlsx not found", None))
-#if QT_CONFIG(tooltip)
-        self.toolButtonSortAnalyte.setToolTip(QCoreApplication.translate("MainWindow", u"Select method for sorting analytes", None))
-#endif // QT_CONFIG(tooltip)
-        self.toolButtonSortAnalyte.setText(QCoreApplication.translate("MainWindow", u"...", None))
-#if QT_CONFIG(tooltip)
-        self.toolButtonRemovePlot.setToolTip(QCoreApplication.translate("MainWindow", u"Remove selected plot", None))
-#endif // QT_CONFIG(tooltip)
-        self.toolButtonRemovePlot.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
 #if QT_CONFIG(tooltip)
         self.toolBar.setToolTip("")

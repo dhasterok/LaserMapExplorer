@@ -159,12 +159,28 @@ class StyleData(Observable):
 
         self.logger_key = 'Style'
 
+
+        self.ui = parent.ui
         self.app_data = parent.app_data
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
-        self.map_plot_types = ['field map', 'ternary map', 'PCA score', 'cluster map', 'cluster score']
+        self.map_plot_types = [
+            'field map',
+            'ternary map',
+            'PCA score',
+            'cluster map',
+            'cluster score'
+        ]
 
-        self.marker_dict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
+        self.marker_dict = {
+            'circle':'o',
+            'square':'s',
+            'diamond':'d',
+            'triangle (up)':'^',
+            'triangle (down)':'v',
+            'hexagon':'h',
+            'pentagon':'p'
+        }
 
         # keep track of the plot type.
         self._plot_type = ''
@@ -833,8 +849,8 @@ class StyleData(Observable):
                 return
 
             
-            xmin,xmax,xscale,xlabel = self.get_axis_values(data,'Analyte','Xc')
-            ymin,ymax,yscale,ylabel = self.get_axis_values(data,'Analyte','Yc')
+            xmin,xmax,xscale,_ = self.get_axis_values(data,'Analyte','Xc')
+            ymin,ymax,yscale,_ = self.get_axis_values(data,'Analyte','Yc')
 
             # set style dictionary values for X and Y
             style['XLim'] = [xmin, xmax]
@@ -1012,9 +1028,9 @@ class StyleData(Observable):
 
 class StyleTheme():
     def __init__(self, parent=None):
-        self.parent = parent
 
         self.logger_key = 'Style'
+        self.ui = parent.ui
 
     # Themes
     # -------------------------------------
@@ -1057,7 +1073,7 @@ class StyleTheme():
             with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'rb') as file:
                 style_dict = pickle.load(file)
         except:
-            QMessageBox.warning(self.parent,'Error','Could not load style theme.')
+            QMessageBox.warning(self.ui,'Error','Could not load style theme.')
 
         return style_dict
 
@@ -1087,7 +1103,7 @@ class StyleTheme():
             return name
         else:
             # throw a warning that name is not saved
-            QMessageBox.warning(self.parent,'Error','Could not save theme.')
+            QMessageBox.warning(self.ui,'Error','Could not save theme.')
 
             return None
 

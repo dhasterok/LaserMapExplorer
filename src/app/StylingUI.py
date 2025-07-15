@@ -18,7 +18,10 @@ from src.common.Logger import auto_log_methods, log
 @auto_log_methods(logger_key='Style')
 class StylingDock(StyleData, StyleTheme):
     def __init__(self, parent):
-        super().__init__(parent)
+        self.ui = parent
+        self.app_data = parent.app_data
+
+        super().__init__(self)
 
         self.logger_key = 'Style'
 
@@ -33,8 +36,6 @@ class StylingDock(StyleData, StyleTheme):
             'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditCUB],
         }
 
-        self.ui = parent
-        self.app_data = parent.app_data
 
         # initialize style themes and associated widgets
         parent.comboBoxStyleTheme.clear()

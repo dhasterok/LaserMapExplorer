@@ -15,14 +15,16 @@ def create_app():
     """
     Initializes and configures the QApplication instance for the application.
 
-    This function creates a global QApplication object, applies a high-DPI scaling setting (default in PyQt6),
-    and sets the application's stylesheet based on the current system theme (dark or light mode).  The stylesheet
-    is loaded from either 'dark.qss' or 'light.qss' using the `load_stylesheet` function.  If the system is in
-    dark mode, it applies the dark stylesheet; otherwise, it applies the light stylesheet.
+    This function creates a global QApplication object, applies a high-DPI scaling setting
+    (default in PyQt6), and sets the application's stylesheet based on the current system
+    theme (dark or light mode).  The stylesheet is loaded from either 'dark.qss' or
+    'light.qss' using the `load_stylesheet` function.  If the system is in dark mode, it
+    applies the dark stylesheet; otherwise, it applies the light stylesheet.
 
     The function also sets the global `app` variable to the created QApplication instance.
 
-    This function should be called before creating any GUI elements to ensure that the application is properly initialized.
+    This function should be called before creating any GUI elements to ensure that the
+    application is properly initialized.
 
     Returns
     -------

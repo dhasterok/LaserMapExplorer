@@ -120,8 +120,6 @@ from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QCo
 from src.common.CustomWidgets import CustomDockWidget, ToggleSwitch
 from src.common.SearchTool import SearchWidget
 
-*
-
 _global_logger = None
 
 def set_global_logger(logger):
@@ -204,6 +202,11 @@ def log_call(logger_key=None):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            # skip logging if the caller is another wrapper
+            stack = inspect.stack()
+            if len(stack) > 1 and stack[1].function == 'wrapper':
+                return func(*args, **kwargs)
+
             # Determine if 'self' exists (bound method)
             self_obj = args[0] if args else None
             if logger_key and LoggerConfig.get_option(logger_key):

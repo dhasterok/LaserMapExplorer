@@ -6,11 +6,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from PyQt6.QtWidgets import QWidget, QDialog
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-#from matplotlib.figure import Figure
-#from matplotlib.projections.polar import PolarAxes
-#from matplotlib.collections import PathCollection
 import matplotlib.gridspec as gs
-#import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
@@ -19,7 +15,6 @@ import cmcrameri as cmc
 from scipy.stats import yeojohnson, percentileofscore
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-#from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -36,7 +31,7 @@ import src.common.CustomMplCanvas as mplc
 from src.app.PlotViewerWindow import PlotViewer
 from src.common.DataHandling import SampleObj
 from src.app.ImageProcessing import ImageProcessing as ip
-from src.app.StyleToolbox import Styling, StyleTheme
+from src.app.StyleToolbox import StyleData, StyleTheme
 from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
@@ -103,7 +98,7 @@ class LameBlockly(PlotViewer):
 
         self.io = LameIO(self, connect_actions=False)
 
-        self.plot_style = Styling(self)
+        self.plot_style = StyleData(self)
         #set style using 'default' style them
         self.style_themes = StyleTheme(parent)
         self.plot_style.style_dict = self.style_themes.default_style_dict()

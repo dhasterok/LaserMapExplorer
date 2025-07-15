@@ -1,13 +1,42 @@
 
 import re
 from PyQt6.QtCore import ( Qt )
-from PyQt6.QtWidgets import ( QCheckBox, QTableWidgetItem, QMessageBox, QInputDialog, )
+from PyQt6.QtWidgets import ( QCheckBox, QTableWidgetItem, QMessageBox, QInputDialog )
 from src.common.TableFunctions import TableFcn
 import src.common.csvdict as csvdict
 from src.common.Logger import log, auto_log_methods
 
 @auto_log_methods(logger_key="Plot")
 class HistogramUI():
+    """ Handles histogram plot settings and updates.
+
+    This class manages the histogram bin width, number of bins, and plot style.
+    It connects the UI widgets to the appropriate methods and updates the plot style accordingly.
+
+    Attributes
+    ----------
+    ui : MainWindow
+        The main window instance containing the UI elements.
+    logger_key : str
+        The key used for logging messages related to this class.
+    _histogram_type_options : list
+        A list of available histogram plot styles.  Options include 'PDF', 'CDF', and 'log-scaling'.
+
+    Methods
+    -------
+    connect_widgets()
+        Connects the histogram widgets to their respective methods.
+    connect_observer()
+        Connects the properties to observer functions for updates.
+    connect_logger()
+        Connects the widgets to the logger for logging changes.
+    update_hist_bin_width(value=None)
+        Updates the histogram bin width.
+    update_hist_num_bins(value=None)
+        Updates the histogram number of bins.
+    update_hist_plot_style(new_plot_style=None)
+        Updates the histogram plot style combobox and triggers a plot update.
+    """
     def __init__(self, parent):
         self.ui = parent
         self.logger_key = "Plot"
@@ -20,19 +49,23 @@ class HistogramUI():
 
     def connect_widgets(self):
         """Connects histogram widgets to methods."""
-        self.ui.doubleSpinBoxBinWidth.valueChanged.connect(lambda: self.update_hist_bin_width_spinbox(self.ui.doubleSpinBoxBinWidth.value()))
-        self.ui.spinBoxNBins.valueChanged.connect(lambda: self.update_hist_num_bins_spinbox(self.ui.spinBoxNBins.value()))
+        self.ui.doubleSpinBoxBinWidth.valueChanged.connect(lambda _: self.update_hist_bin_width(self.ui.doubleSpinBoxBinWidth.value()))
+        self.ui.spinBoxNBins.valueChanged.connect(lambda _: self.update_hist_num_bins(self.ui.spinBoxNBins.value()))
         self.ui.toolButtonHistogramReset.clicked.connect(lambda: self.ui.spinBox)
 
         self.ui.comboBoxHistType.clear()
         self.ui.comboBoxHistType.addItems(self._histogram_type_options)
-        self.ui.comboBoxHistType.activated.connect(lambda: self.ui.comboBoxHistType.currentText())
+        self.ui.comboBoxHistType.setCurrentText(self._histogram_type_options[0])
+        self.ui.app_data.hist_plot_style = self._histogram_type_options[0]
+        self.ui.comboBoxHistType.activated.connect(lambda _: self.update_hist_plot_style())
+
+        self.ui.toolButtonHistogramReset.clicked.connect(self.ui.app_data.histogram_reset_bins)
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("hist_bin_width", self.update_hist_bin_width_spinbox)
-        self.ui.app_data.add_observer("hist_num_bins", self.update_hist_num_bins_spinbox)
-        self.ui.app_data.add_observer("hist_plot_style", self.update_hist_plot_style_combobox)
+        self.ui.app_data.add_observer("hist_bin_width", self.update_hist_bin_width)
+        self.ui.app_data.add_observer("hist_num_bins", self.update_hist_num_bins)
+        self.ui.app_data.add_observer("hist_plot_style", self.update_hist_plot_style)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -40,21 +73,89 @@ class HistogramUI():
         self.ui.spinBoxNBins.valueChanged.connect(lambda: log(f"spinBoxNBins value=[{self.ui.spinBoxNBins.value()}]", prefix="UI"))
         self.ui.toolButtonHistogramReset.clicked.connect(lambda: log("toolButtonHistogramReset", prefix="UI"))
 
-    def update_hist_bin_width_spinbox(self, value):
-        self.ui.doubleSpinBoxBinWidth.setValue(value)
+    def update_hist_bin_width(self, value=None):
+        """ Updates histogram bin width.
+        
+        If `value` is None, it uses the current value of `doubleSpinBoxBinWidth`.
+        If `value` is provided, it updates the `doubleSpinBoxBinWidth` state accordingly.
+
+        Parameters
+        ----------
+        value : float, optional
+            New value for the histogram bin width, by default None
+        """
+        if value is None:
+            # use current value of doubleSpinBoxBinWidth
+            self.ui.app_data.hist_bin_width = self.ui.doubleSpinBoxBinWidth.value()
+        else:
+            # update doubleSpinBoxBinWidth with new value
+            if self.ui.doubleSpinBoxBinWidth.value() == value:
+                return
+            # block signals to prevent infinite loop
+            self.ui.doubleSpinBoxBinWidth.blockSignals(True)
+            self.ui.doubleSpinBoxBinWidth.setValue(value)
+            self.ui.doubleSpinBoxBinWidth.blockSignals(False)
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "histogram":
             self.ui.plot_style.schedule_update()
 
-    def update_hist_num_bins_spinbox(self, value):
-        self.ui.spinBoxNBins.setValue(value)
+    def update_hist_num_bins(self, value=None):
+        """ Updates histogram number of bins.
+        
+        If `value` is None, it uses the current value of `spinBoxNBins`.
+        If `value` is provided, it updates the `spinBoxNBins` state accordingly.
+        
+        Parameters
+        ----------
+        value : int, optional
+            New value for the histogram number of bins, by default None
+        """
+        if value is None:
+            # use current value of spinBoxNBins
+            self.ui.app_data.hist_num_bins = self.ui.spinBoxNBins.value()
+        else:
+            # if value is 0, set to default number of bins
+            if value == 0:
+                self.ui.app_data.reset_hist_num_bins()
+
+            # update spinBoxNBins with new value
+            if self.ui.spinBoxNBins.value() == value:
+                return
+
+            # block signals to prevent infinite loop
+            self.ui.spinBoxNBins.blockSignals(True)
+            self.ui.spinBoxNBins.setValue(value)
+            self.ui.spinBoxNBins.blockSignals(False)
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "histogram":
             self.ui.plot_style.schedule_update()
 
-    def update_hist_plot_style_combobox(self, new_hist_plot_style):
-        self.ui.comboBoxHistType.setCurrentText(new_hist_plot_style)
+    def update_hist_plot_style(self, new_plot_style=None):
+        """
+        Updates histogram plot style combobox and triggers plot update.
+
+        If `new_plot_style` is None, it uses the current text of the combobox to set `ui.app_data.hist_plot_style`.
+        If `new_plot_style` is provided, it updates the `ui.comboBoxHistType` state accordingly.
+
+        Parameters
+        ----------
+        new_plot_style : str, optional
+            New style for the histogram plot, by default None
+        """
+        if new_plot_style is None:
+            # use current text of combobox
+            self.ui.app_data.hist_plot_style = self.ui.comboBoxHistType.currentText()
+        else:
+            # update combobox with new plot style
+            if self.ui.comboBoxHistType.currentText() == new_plot_style:
+                return
+            # block signals to prevent infinite loop
+            self.ui.comboBoxHistType.blockSignals(True)
+            self.ui.comboBoxHistType.setCurrentText(new_plot_style)
+            self.ui.comboBoxHistType.blockSignals(False)
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "histogram":
             self.ui.plot_style.schedule_update()
-
 
 @auto_log_methods(logger_key="Plot")
 class CorrelationUI():
@@ -345,8 +446,27 @@ class NDimUI():
             self.ui.plot_style.schedule_update()
 
     def update_ndim_table(self,calling_widget):
-        """Updates tableWidgetNDim"""
+        """Updates tableWidgetNDim based on the calling widget.
+
+        If the calling widget is 'analyteAdd', it adds a new row for the selected analyte.
+        If the calling widget is 'analyteSetAdd', it adds rows for all analytes in the selected set.
+
+        Parameters
+        ----------
+        calling_widget : str
+            The widget that triggered the update, either 'analyteAdd' or 'analyteSetAdd'.
+        """
         def on_use_checkbox_state_changed(row, state):
+            """Callback for checkbox state change in the 'use' column.
+            Updates the 'use' value in the filter_df for the given row.
+
+            Parameters
+            ----------
+            row : int
+                The row index of the checkbox that was changed.
+            state : Qt.CheckState
+                The new state of the checkbox (Checked or Unchecked).
+            """
             # Update the 'use' value in the filter_df for the given row
             self.ui.data[self.ui.app_data.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
 
@@ -398,6 +518,14 @@ class NDimUI():
             self.ui.plot_style.schedule_update()
 
     def save_ndim_list(self):
+        """
+        Saves the current NDim list to a file.
+
+        This method prompts the user for a name for the new list, saves the current NDim list to the
+        application's data dictionary, and exports the dictionary to a CSV file.
+
+        If the user cancels the input dialog or an error occurs during saving, a warning message is displayed.
+        """
         # get the list name from the user
         name, ok = QInputDialog.getText(self.ui, 'Save custom TEC list', 'Enter name for new list:')
         if ok:

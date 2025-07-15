@@ -1,6 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import QLabel, QVBoxLayout
+
+import pyqtgraph as pg
+from pyqtgraph import GraphicsLayoutWidget, ImageItem, colormap, TargetItem
+
 import matplotlib
 import matplotlib.gridspec as gs
 #import matplotlib.pyplot as plt
@@ -134,7 +140,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     #canvas.axes.set_ylim(ymin,ymax)
 
     # add scalebar
-    add_scalebar(app_data, plot_style, canvas.axes)
+    add_scalebar(data, app_data, plot_style, canvas.axes)
 
     canvas.fig.tight_layout()
 
@@ -223,7 +229,7 @@ def plot_map_pg(parent, sample_id, field_type, field):
                 parent.data[parent.app_data.sample_id].y_range)
 
         #--- add non-interactive image with integrated color ------------------
-        plotWindow = graphicWidget.addPlot(0,0,title=field.replace('_',' '))
+        plotWindow = graphicWidget.addPlot(0,0,title=title.replace('_',' '))
 
         plotWindow.addItem(img_item)
 
@@ -340,7 +346,7 @@ def plot_map_pg(parent, sample_id, field_type, field):
 
         # add small histogram
         if (parent.toolBox.currentIndex() == parent.left_tab['sample']) and (view == parent.canvas_tab['sv']):
-            plot_small_histogram(self, parent.data[parent.app_data.sample_id], parent.app_data, parent.plot_style, map_df)
+            plot_small_histogram(parent, parent.data[parent.app_data.sample_id], parent.app_data, parent.plot_style, map_df)
 
 @log_call(logger_key='Plot')
 def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
@@ -348,10 +354,21 @@ def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
 
     Parameters
     ----------
-    current_plot_df : dict
-        Current data for plotting
-    field : str
-        Name of field to plot
+    parent : QWidget
+        The parent widget for the plot canvas.
+    data : object
+        Data object containing processed data, mask, and methods for retrieving map data.
+    app_data : object
+        Application data object containing settings such as color scale equalization and sample ID.
+    plot_style : object
+        Plot style object providing colormap, normalization, and style dictionary.
+    current_plot_df : pd.DataFrame
+        DataFrame containing the current plot data, typically the map data for the selected field.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The Matplotlib canvas containing the plotted histogram.
     """
     #print('plot_small_histogram')
     # create Mpl canvas
@@ -426,7 +443,24 @@ def plot_small_histogram(parent, data, app_data, plot_style, current_plot_df):
 
 @log_call(logger_key='Plot')
 def plot_histogram(parent, data, app_data, plot_style):
-    """Plots a histogramn in the canvas window"""
+    """Plots a histogramn in the canvas window.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget for the plot canvas.
+    data : object
+        Data object containing processed data, mask, and methods for retrieving map data.
+    app_data : object
+        Application data object containing settings such as color scale equalization and sample ID.
+    plot_style : object
+        Plot style object providing colormap, normalization, and style dictionary.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The Matplotlib canvas containing the plotted histogram.
+    """
     
     plot_data = None
     #print('plot histogram')
@@ -439,6 +473,7 @@ def plot_histogram(parent, data, app_data, plot_style):
     #    analyte_1 = field.split(' / ')[0]
     #    analyte_2 = field.split(' / ')[1]
 
+    x = dict()
     if app_data.hist_plot_style == 'log-scaling' and app_data.c_field_type == 'Analyte':
         print('raw_data for log-scaling')
         x = get_scatter_data(data, app_data, plot_style, processed=False)['x']
@@ -633,14 +668,22 @@ def plot_histogram(parent, data, app_data, plot_style):
 @log_call(logger_key='Plot')
 def logax(ax, lim, axis='y', label='', tick_label_rotation=0):
     """
-    Produces log-axes limits and labels.
+    Creates a logarithmic axis with tick marks and labels for a given axis.
 
-    Parameters:
-    ax (matplotlib.axes.Axes): The axes to modify.
-    lim (list): The log10 values of the axes limits.
-    axis (str): 'x' or 'y' to add ticks to x- or y-axis, default is 'y'.
-    label (str): Label for the axis.
-    tick_label_rotation (float): Angle of text rotation, default is 0.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes object to modify.
+    lim : list or tuple
+        The limits for the logarithmic axis, e.g., [1, 3] for 10^1 to 10^3.
+    axis : str, optional
+        The axis to apply the logarithmic scale to, either 'x' or 'y'.
+        Defaults to 'y'.
+    label : str, optional
+        The label for the axis. If provided, it will be set as the axis label.
+        Defaults to an empty string.
+    tick_label_rotation : int, optional
+        The rotation angle for the tick labels. Defaults to 0 (no rotation).
     """
     # Create tick marks and labels
     mt = np.log10(np.arange(1, 10))
@@ -671,6 +714,8 @@ def add_colorbar(plot_style, canvas, cax, cbartype='continuous', grouplabels=Non
 
     Parameters
     ----------
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     canvas : mplc.MplCanvas
         canvas object
     cax : axes
@@ -679,6 +724,10 @@ def add_colorbar(plot_style, canvas, cax, cbartype='continuous', grouplabels=Non
         Type of colorbar, ``dicrete`` or ``continuous``, Defaults to continuous
     grouplabels : list of str, optional
         category/group labels for tick marks
+    groupcolors : list of str, optional
+        List of colors for each group/category, used for discrete colorbars.
+    alpha : float, optional
+        Transparency of the colorbar, defaults to 1 (opaque).
     """
     #print("add_colorbar")
     # Add a colorbar
@@ -760,11 +809,17 @@ def add_colorbar(plot_style, canvas, cax, cbartype='continuous', grouplabels=Non
     #    print('(add_colorbar) Unknown type: '+cbartype)
 
 @log_call(logger_key='Plot')
-def add_scalebar(app_data, plot_style, ax):
+def add_scalebar(data, app_data, plot_style, ax):
     """Add a scalebar to a map
 
     Parameters
     ----------
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     ax : 
         Axes to place scalebar on.
     """        
@@ -911,6 +966,30 @@ def plot_correlation(parent, data, app_data, plot_style):
  
 @log_call(logger_key='Plot')
 def get_scatter_data(data, app_data, plot_style, processed=True):
+    """
+    Get data for scatter plots.
+
+    This function retrieves the necessary data vectors for scatter plots based on the
+    specified plot style and application settings. It constructs a dictionary containing
+    vectors for the x, y, z, and c axes, which can be used for plotting scatter or heatmap
+    visualizations.
+
+    Parameters
+    ----------
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+    processed : bool, optional
+        If True, use processed data; if False, use raw data. Defaults to True.
+
+    Returns
+    -------
+    scatter_dict : dict
+        Dictionary containing vectors for x, y, z, and c axes.
+    """
 
     scatter_dict = {'x': {'type': None, 'field': None, 'label': None, 'array': None},
             'y': {'type': None, 'field': None, 'label': None, 'array': None},
@@ -967,11 +1046,31 @@ def plot_scatter(parent, data, app_data, plot_style, canvas=None):
     """Creates a plots from self.toolBox Scatter page.
 
     Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
+    This function retrieves the necessary data vectors for scatter plots based on the
+    specified plot style and application settings. It constructs a dictionary containing
+    vectors for the x, y, z, and c axes, which can be used for plotting scatter or heatmap
+    visualizations.
 
     Parameters
     ----------
+    parent : QWidget
+        The parent widget for the plot canvas.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     canvas : MplCanvas
         canvas within gui for plotting, by default ``None``
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The Matplotlib canvas containing the plotted scatter or heatmap.
+    plot_info : dict
+        Dictionary containing information about the plot, including the x, y, z, and c data
+        and the plot type.
     """
     #print('plot_scatter')
     plot_type = plot_style.plot_type 
@@ -991,19 +1090,40 @@ def plot_scatter(parent, data, app_data, plot_style, canvas=None):
         case 'scatter':
             if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
                 # biplot
-                plot_info = biplot(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['c'])
+                plot_info = biplot(
+                    canvas, data, app_data, plot_style,
+                    scatter_dict['x'],
+                    scatter_dict['y'],
+                    scatter_dict['c']
+                )
             else:
                 # ternary
-                plot_info = ternary_scatter(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
+                plot_info = ternary_scatter(
+                    canvas, data, app_data, plot_style,
+                    scatter_dict['x'],
+                    scatter_dict['y'],
+                    scatter_dict['z'],
+                    scatter_dict['c']
+                )
 
         # heatmap
         case 'heatmap':
             # biplot
             if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
-                plot_info = hist2dbiplot(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'])
+                plot_info = hist2dbiplot(
+                    canvas, data, app_data, plot_style,
+                    scatter_dict['x'],
+                    scatter_dict['y']
+                )
             # ternary
             else:
-                plot_info = hist2dternplot(canvas, data, app_data, plot_style, scatter_dict['x'],scatter_dict['y'],scatter_dict['z'],scatter_dict['c'])
+                plot_info = hist2dternplot(
+                    canvas, data, app_data, plot_style,
+                    scatter_dict['x'],
+                    scatter_dict['y'],
+                    scatter_dict['z'],
+                    scatter_dict['c']
+                )
 
     canvas.axes.margins(x=0)
 
@@ -1022,14 +1142,24 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
     ----------
     canvas : MplCanvas
         Canvas to be added to main window
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     x : dict
         Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate
     y : dict
         Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate
     c : dict
         Data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors
-    style : dict
-        Style parameters
+
+    Returns
+    -------
+    plot_info : dict
+        Dictionary containing information about the plot, including the x, y, and c data
+        and the plot type.
     """
     if (c['field'] is None) or (c['field'] == ''):
         # single color
@@ -1146,6 +1276,12 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
     ----------
     canvas : MplCanvas
         Canvas that contains axes and figure
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     x : dict
         coordinate associated with top vertex
     y : dict
@@ -1154,10 +1290,17 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
         coordinate associated with right vertex
     c : dict
         color dimension
+
+    Returns
+    -------
+    plot_info : dict
+        Dictionary containing information about the plot, including the x, y, z, and c data
+        and the plot type.
     """
     labels = [x['field'], y['field'], z['field']]
     tp = ternary(canvas.axes, labels, 'scatter')
 
+    plot_data = pd.DataFrame()
     if (c['field'] is None) or (c['field'] == ''):
         tp.ternscatter( x['array'], y['array'], z['array'],
                 marker=plot_style.marker_dict[plot_style.marker],
@@ -1245,10 +1388,22 @@ def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
     ----------
     canvas : MplCanvas
         plotting canvas
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     x : dict
         X-axis dictionary
     y : dict
         Y-axis dictionary
+
+    Returns
+    -------
+    plot_info : dict
+        Dictionary containing information about the plot, including the x and y data
+        and the plot type.
     """
     # color by field
     norm = plot_style.color_norm()
@@ -1318,14 +1473,16 @@ def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
 
     Parameters
     ----------
-    fig : matplotlib.figure
-        Figure object
+    canvas : MplCanvas
+        Canvas that contains axes and figure
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
     x, y, z : dict
         Coordinates associated with top, left and right vertices, respectively
-    style:  dict
-        Style parameters
-    save : bool
-        Saves figure widget to plot tree
     c : str
         Display, mean, median, standard deviation plots for a fourth dimension in
         addition to histogram map. Default is None, which produces a histogram.
@@ -1378,12 +1535,36 @@ def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
 
 @log_call(logger_key='Plot')
 def plot_ternary_map(parent, data, app_data, plot_style):
-    """Creates map colored by ternary coordinate positions"""
+    """
+    Creates map colored by ternary coordinate positions.
+
+    This function generates a ternary map plot using the specified x, y, and z fields from the
+    processed data. It uses the ternary library to create a ternary plot and displays it
+    on a Matplotlib canvas. The plot is styled according to the provided PlotStyle object.
+    
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the ternary map plot.
+    plot_info : dict
+        Dictionary containing information about the plot, including the x, y, z fields and the plot type.
+    """
     if plot_style.plot_type != 'ternary map':
         app_data.plot_type = 'ternary map'
         plot_style.set_style_widgets('ternary map')
 
-    canvas = mplc.MplCanvas(sub=121,parent=parent)
+    canvas = mplc.MplCanvas(sub=121, parent=parent)
 
     afield = app_data.x_field
     bfield = app_data.y_field
@@ -1412,7 +1593,7 @@ def plot_ternary_map(parent, data, app_data, plot_style):
     canvas.array = map_data
 
     # add scalebar
-    add_scalebar(app_data, plot_style, canvas.axes)
+    add_scalebar(data, app_data, plot_style, canvas.axes)
 
     grid = None
     if plot_style.cbar_dir == 'vertical':
@@ -1464,11 +1645,31 @@ def plot_ternary_map(parent, data, app_data, plot_style):
 def plot_ndim(parent, data, app_data, plot_style):
     """Produces trace element compatibility (TEC) and Radar plots
     
-    Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider diagrams, which display a set of elements
-    arranged by compatibility.  Radar plots show data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
+    Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider
+    diagrams, which display a set of elements arranged by compatibility.  Radar plots show
+    data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
     or spider web.
     
-    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``mplc.MplCanvas`` for display in the centralWidget views.
+    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure
+    ``mplc.MplCanvas`` for display in the centralWidget views.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the TEC or Radar plot.
+    plot_info : dict
+        Dictionary containing information about the plot, including the fields and plot type.
     """
     if not app_data.ndim_list:
         return None, None
@@ -1627,9 +1828,29 @@ def plot_ndim(parent, data, app_data, plot_style):
 # -------------------------------------
 @log_call(logger_key='Plot')
 def plot_score_map(parent,data, app_data, plot_style):
-    """Plots score maps
+    """Plots score maps for dimensionality reduction methods such as PCA or clustering.
 
     Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.
+    The function uses the processed data from the DataHandler and the selected field from AppData
+    to generate the score map. The plot is styled according to the provided PlotStyle object.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the score map plot.
+    field_data : pd.Series
+        The data series corresponding to the selected field for the score map.
     """
     canvas = mplc.MplCanvas(parent=parent)
 
@@ -1664,7 +1885,7 @@ def plot_score_map(parent,data, app_data, plot_style):
     #canvas.axes.set_axis_off()
 
     # add scalebar
-    add_scalebar(app_data, plot_style, canvas.axes)
+    add_scalebar(data, app_data, plot_style, canvas.axes)
 
     return canvas, data.processed_data[field]
 
@@ -1677,6 +1898,24 @@ def plot_pca(parent, data, app_data, plot_style):
     * ``plot_pca_vectors()`` a plot of PCA vector components as a heatmap
     * uses ``plot_scatter()`` and ``plot_pca_components`` to produce both scatter and heatmaps of PCA scores with vector components.
     * ``plot_score_map()`` produces a plot of PCA scores for a single component as a map
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the PCA plot.
+    plot_info : dict
+        Dictionary containing information about the plot, including the fields and plot type.
 
     .. seealso::
         ``MainWindow.plot_scatter``
@@ -1753,10 +1992,21 @@ def plot_pca(parent, data, app_data, plot_style):
 def plot_pca_variance(parent,pca_results, plot_style):
     """Creates a plot of explained variance, individual and cumulative, for PCA
 
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    pca_results : PCA
+        PCA results object containing explained variance ratios.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
     Returns
     -------
-    mplc.MplCanvas
-        
+    canvas : MplCanvas
+        The canvas containing the PCA variance plot.
+    plot_data : pd.DataFrame
+        DataFrame containing the principal components, variance ratios, and cumulative variance ratios.
     """        
     canvas = mplc.MplCanvas(parent=parent)
 
@@ -1808,10 +2058,25 @@ def plot_pca_variance(parent,pca_results, plot_style):
 def plot_pca_vectors(parent,pca_results, data, app_data, plot_style):
     """Displays a heat map of PCA vector components
 
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    pca_results : PCA
+        PCA results object containing the components.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
     Returns
     -------
-    mplc.MplCanvas
-        Creates figure on mplc.MplCanvas
+    canvas : MplCanvas
+        The canvas containing the PCA vector components heatmap.
+    plot_data : pd.DataFrame
+        DataFrame containing the PCA components, with columns for each variable.
     """        
     canvas = mplc.MplCanvas(parent=parent)
 
@@ -1881,11 +2146,24 @@ def plot_pca_components(pca_results,data, app_data, plot_style,canvas):
 
     Parameters
     ----------
-    canvas : mplc.MplCanvas
-        Canvas object for plotting
+    pca_results : PCA
+        PCA results object containing the components.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+    canvas : MplCanvas
+        The canvas containing the PCA scatter or heatmap plot.
+
+    Returns
+    -------
+    plot_data : pd.DataFrame
+        DataFrame containing the PCA components, with columns for each variable.
 
     .. seealso::
-        ``MainWindow.plot_pca_vectors``
+        plot_pca_vectors
     """
     #print('plot_pca_components')
     if plot_style.line_width == 0:
@@ -1929,6 +2207,26 @@ def plot_clusters(parent, data, app_data, plot_style):
     """Plot maps associated with clustering
 
     Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
+    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure
+    ``mplc.MplCanvas`` for display in the centralWidget views.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the clustering plot.
+    plot_info : dict
+        Dictionary containing information about the plot, including the fields and plot type.
     """        
     if app_data.sample_id == '':
         return
@@ -1998,6 +2296,24 @@ def cluster_performance_plot(parent, data, app_data, plot_style):
     * Run KMeans for a range of cluster numbers (k).
     * Calculate the silhouette score for each k.
     * Choose the k with the highest silhouette score.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+    
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the cluster performance plot.
+    plot_info : dict
+        Dictionary containing information about the plot, including the fields and plot type.
     """        
     if app_data.sample_id == '':
         return
@@ -2089,6 +2405,26 @@ def plot_cluster_map(parent, data, app_data, plot_style):
     """Produces a map of cluster categories
     
     Creates the map on an ``mplc.MplCanvas``.  Each cluster category is assigned a unique color.
+    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure
+    ``mplc.MplCanvas`` for display in the centralWidget views.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the cluster map plot.
+    plot_data : pd.Series
+        Series containing the cluster labels for each data point.
     """
     canvas = mplc.MplCanvas(parent=parent)
 
@@ -2126,6 +2462,6 @@ def plot_cluster_map(parent, data, app_data, plot_style):
     #canvas.axes.set_axis_off()
 
     # add scalebar
-    add_scalebar(app_data,plot_style,canvas.axes)
+    add_scalebar(data, app_data, plot_style, canvas.axes)
 
     return canvas, data.processed_data[method]

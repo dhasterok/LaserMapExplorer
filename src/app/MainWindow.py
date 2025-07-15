@@ -23,7 +23,6 @@ from src.common.radar import Radar
 from src.ui.MainWindow import Ui_MainWindow
 from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.common.TableFunctions import TableFcn as TableFcn
-import src.common.CustomMplCanvas as mplc
 from src.app.PlotTree import PlotTree
 from src.app.CanvasWidget import CanvasWidget
 from src.app.DataAnalysis import ClusteringUI, DimensionalReductionUI
@@ -31,7 +30,7 @@ from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessingUI
 from src.app.LamePlotUI import HistogramUI, CorrelationUI, ScatterUI, NDimUI
-from src.app.StyleToolbox import StylingDock
+from src.app.StylingUI import StylingDock
 from src.app.Preprocessing import PreprocessingUI
 from src.app.Profile import Profiling, ProfileDock
 from src.common.Regression import RegressionDock
@@ -43,14 +42,11 @@ from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
 from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
-from src.common.ExtendedDF import AttributeDataFrame
-import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
-from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
 #import src.radar_factory
 #from src.ui.PreferencesWindow import Ui_PreferencesWindow
@@ -344,7 +340,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ax=3,
             user_activated=True
             )
-        #self.comboBoxFieldC.currentTextChanged.connect(self.plot_style.update_c_field_combobox)
         self.comboBoxFieldC.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=3))
         # update spinbox associated with map/color field
         self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))

@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -402,7 +402,7 @@
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData" title="app.AppData.AppData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AppData</span></code></a>(data)</p></td>
-<td><p></p></td>
+<td><p>AppData is a central data model and state manager for the LaserMapExplorer application.</p></td>
 </tr>
 </tbody>
 </table>
@@ -411,76 +411,847 @@
 <dt class="sig sig-object py" id="app.AppData.AppData">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.AppData.</span></span><span class="sig-name descname"><span class="pre">AppData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="src.common.Observable.html#src.common.Observable.Observable" title="src.common.Observable.Observable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observable</span></code></a></p>
+<p>AppData is a central data model and state manager for the LaserMapExplorer application.</p>
+<p>This class encapsulates all application-level data, user preferences, and analysis settings,
+and provides property-based accessors and mutators for all relevant state. It manages sample
+data, field selections, plotting and histogram settings, clustering and dimensionality reduction
+parameters, and user interface preferences. AppData also implements the Observable pattern,
+notifying observers (such as UI widgets) when relevant properties change.</p>
+<p>AppData is responsible for:
+- Storing and managing user preferences (units, font size, tick direction, etc.).
+- Maintaining references to all loaded sample data and their processed attributes.
+- Providing property-based access to current sample, field, and field type selections for plotting.
+- Managing histogram and color scale settings for data visualization.
+- Storing and updating clustering and dimensionality reduction parameters.
+- Handling reference chemistry data for normalization.
+- Supporting multi-dimensional analyte selection and quantile settings.
+- Notifying observers of changes to any relevant property, enabling reactive UI updates.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.logger_key">
+<span class="sig-name descname"><span class="pre">logger_key</span></span><a class="headerlink" href="#app.AppData.AppData.logger_key" title="Link to this definition">#</a></dt>
+<dd><p>Identifier for logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.default_preferences">
+<span class="sig-name descname"><span class="pre">default_preferences</span></span><a class="headerlink" href="#app.AppData.AppData.default_preferences" title="Link to this definition">#</a></dt>
+<dd><p>Default user preferences for units, font size, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.scale_options">
+<span class="sig-name descname"><span class="pre">scale_options</span></span><a class="headerlink" href="#app.AppData.AppData.scale_options" title="Link to this definition">#</a></dt>
+<dd><p>Available scaling options for data visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.preferences">
+<span class="sig-name descname"><span class="pre">preferences</span></span><a class="headerlink" href="#app.AppData.AppData.preferences" title="Link to this definition">#</a></dt>
+<dd><p>Current user preferences (deep copy of default_preferences).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.selected_directory">
+<span class="sig-name descname"><span class="pre">selected_directory</span></span><a class="headerlink" href="#app.AppData.AppData.selected_directory" title="Link to this definition">#</a></dt>
+<dd><p>Currently selected directory for file operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.sample_list">
+<span class="sig-name descname"><span class="pre">sample_list</span></span><a class="headerlink" href="#app.AppData.AppData.sample_list" title="Link to this definition">#</a></dt>
+<dd><p>List of sample IDs currently loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#app.AppData.AppData.data" title="Link to this definition">#</a></dt>
+<dd><p>Dictionary mapping sample IDs to SampleObj data classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.field_dict">
+<span class="sig-name descname"><span class="pre">field_dict</span></span><a class="headerlink" href="#app.AppData.AppData.field_dict" title="Link to this definition">#</a></dt>
+<dd><p>Dictionary of field types for the current sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.plot_info">
+<span class="sig-name descname"><span class="pre">plot_info</span></span><a class="headerlink" href="#app.AppData.AppData.plot_info" title="Link to this definition">#</a></dt>
+<dd><p>Dictionary for storing plot-related information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.outlier_methods">
+<span class="sig-name descname"><span class="pre">outlier_methods</span></span><a class="headerlink" href="#app.AppData.AppData.outlier_methods" title="Link to this definition">#</a></dt>
+<dd><p>Available methods for outlier detection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.negative_methods">
+<span class="sig-name descname"><span class="pre">negative_methods</span></span><a class="headerlink" href="#app.AppData.AppData.negative_methods" title="Link to this definition">#</a></dt>
+<dd><p>Available methods for handling negative values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_options">
+<span class="sig-name descname"><span class="pre">noise_red_options</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_options" title="Link to this definition">#</a></dt>
+<dd><p>Options for noise reduction methods and their parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_dict">
+<span class="sig-name descname"><span class="pre">cluster_dict</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_dict" title="Link to this definition">#</a></dt>
+<dd><p>Dictionary of clustering method parameters and results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ndim_list_dict">
+<span class="sig-name descname"><span class="pre">ndim_list_dict</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_list_dict" title="Link to this definition">#</a></dt>
+<dd><p>Preset analyte lists for multi-dimensional analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ndim_analyte_df">
+<span class="sig-name descname"><span class="pre">ndim_analyte_df</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_analyte_df" title="Link to this definition">#</a></dt>
+<dd><p>DataFrame of analytes for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ref_data">
+<span class="sig-name descname"><span class="pre">ref_data</span></span><a class="headerlink" href="#app.AppData.AppData.ref_data" title="Link to this definition">#</a></dt>
+<dd><p>Reference chemistry data for normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ref_list">
+<span class="sig-name descname"><span class="pre">ref_list</span></span><a class="headerlink" href="#app.AppData.AppData.ref_list" title="Link to this definition">#</a></dt>
+<dd><p>List of reference chemistry sources.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.axis">
+<span class="sig-name descname"><span class="pre">axis</span></span><a class="headerlink" href="#app.AppData.AppData.axis" title="Link to this definition">#</a></dt>
+<dd><p>List of axis labels (‘x’, ‘y’, ‘z’, ‘c’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.Properties">
+<span class="sig-name descname"><span class="pre">Properties</span></span><a class="headerlink" href="#app.AppData.AppData.Properties" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">----------</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.sort_method">
+<span class="sig-name descname"><span class="pre">sort_method</span></span><a class="headerlink" href="#app.AppData.AppData.sort_method" title="Link to this definition">#</a></dt>
+<dd><p>Method used to sort the sample list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ref_index">
+<span class="sig-name descname"><span class="pre">ref_index</span></span><a class="headerlink" href="#app.AppData.AppData.ref_index" title="Link to this definition">#</a></dt>
+<dd><p>Index of the reference chemistry source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ref_chem">
+<span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#app.AppData.AppData.ref_chem" title="Link to this definition">#</a></dt>
+<dd><p>Reference chemistry for the current reference index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.sample_id">
+<span class="sig-name descname"><span class="pre">sample_id</span></span><a class="headerlink" href="#app.AppData.AppData.sample_id" title="Link to this definition">#</a></dt>
+<dd><p>ID of the currently selected sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.equalize_color_scale">
+<span class="sig-name descname"><span class="pre">equalize_color_scale</span></span><a class="headerlink" href="#app.AppData.AppData.equalize_color_scale" title="Link to this definition">#</a></dt>
+<dd><p>Whether to equalize color scale for histograms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.default_hist_num_bins">
+<span class="sig-name descname"><span class="pre">default_hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.default_hist_num_bins" title="Link to this definition">#</a></dt>
+<dd><p>Default number of histogram bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.hist_bin_width">
+<span class="sig-name descname"><span class="pre">hist_bin_width</span></span><a class="headerlink" href="#app.AppData.AppData.hist_bin_width" title="Link to this definition">#</a></dt>
+<dd><p>Width of histogram bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.hist_num_bins">
+<span class="sig-name descname"><span class="pre">hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.hist_num_bins" title="Link to this definition">#</a></dt>
+<dd><p>Number of histogram bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.hist_plot_style">
+<span class="sig-name descname"><span class="pre">hist_plot_style</span></span><a class="headerlink" href="#app.AppData.AppData.hist_plot_style" title="Link to this definition">#</a></dt>
+<dd><p>Style of histogram plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.corr_method">
+<span class="sig-name descname"><span class="pre">corr_method</span></span><a class="headerlink" href="#app.AppData.AppData.corr_method" title="Link to this definition">#</a></dt>
+<dd><p>Method used for correlation plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.corr_squared">
+<span class="sig-name descname"><span class="pre">corr_squared</span></span><a class="headerlink" href="#app.AppData.AppData.corr_squared" title="Link to this definition">#</a></dt>
+<dd><p>Whether to use squared correlation values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_method">
+<span class="sig-name descname"><span class="pre">noise_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_method" title="Link to this definition">#</a></dt>
+<dd><p>Method used for noise reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_option1">
+<span class="sig-name descname"><span class="pre">noise_red_option1</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option1" title="Link to this definition">#</a></dt>
+<dd><p>First option for noise reduction method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_option2">
+<span class="sig-name descname"><span class="pre">noise_red_option2</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option2" title="Link to this definition">#</a></dt>
+<dd><p>Second option for noise reduction method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.apply_noise_red">
+<span class="sig-name descname"><span class="pre">apply_noise_red</span></span><a class="headerlink" href="#app.AppData.AppData.apply_noise_red" title="Link to this definition">#</a></dt>
+<dd><p>Whether to apply noise reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.gradient_flag">
+<span class="sig-name descname"><span class="pre">gradient_flag</span></span><a class="headerlink" href="#app.AppData.AppData.gradient_flag" title="Link to this definition">#</a></dt>
+<dd><p>Whether to plot the gradient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.edge_detection_method">
+<span class="sig-name descname"><span class="pre">edge_detection_method</span></span><a class="headerlink" href="#app.AppData.AppData.edge_detection_method" title="Link to this definition">#</a></dt>
+<dd><p>Method used for edge detection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">x_field_type,</span> <span class="pre">y_field_type,</span> <span class="pre">z_field_type,</span> <span class="pre">c_field_type</span></span></dt>
+<dd><p>Field types for axes and color mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">x_field,</span> <span class="pre">y_field,</span> <span class="pre">z_field,</span> <span class="pre">c_field</span></span></dt>
+<dd><p>Fields for axes and color mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.scatter_preset">
+<span class="sig-name descname"><span class="pre">scatter_preset</span></span><a class="headerlink" href="#app.AppData.AppData.scatter_preset" title="Link to this definition">#</a></dt>
+<dd><p>Preset for scatter plot styles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.heatmap_style">
+<span class="sig-name descname"><span class="pre">heatmap_style</span></span><a class="headerlink" href="#app.AppData.AppData.heatmap_style" title="Link to this definition">#</a></dt>
+<dd><p>Style of heatmap to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ternary_colormap">
+<span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_colormap" title="Link to this definition">#</a></dt>
+<dd><p>Colormap for ternary maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ternary_color_x,</span> <span class="pre">ternary_color_y,</span> <span class="pre">ternary_color_z,</span> <span class="pre">ternary_color_m</span></span></dt>
+<dd><p>Colors for ternary diagram vertices and centroid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.norm_reference">
+<span class="sig-name descname"><span class="pre">norm_reference</span></span><a class="headerlink" href="#app.AppData.AppData.norm_reference" title="Link to this definition">#</a></dt>
+<dd><p>Reference used for normalizing analyte and ratio data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ndim_analyte_set">
+<span class="sig-name descname"><span class="pre">ndim_analyte_set</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_analyte_set" title="Link to this definition">#</a></dt>
+<dd><p>Set of analytes used for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ndim_list">
+<span class="sig-name descname"><span class="pre">ndim_list</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_list" title="Link to this definition">#</a></dt>
+<dd><p>List of analytes for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.ndim_quantile_index">
+<span class="sig-name descname"><span class="pre">ndim_quantile_index</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_quantile_index" title="Link to this definition">#</a></dt>
+<dd><p>Index of quantile set for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.dim_red_method">
+<span class="sig-name descname"><span class="pre">dim_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_method" title="Link to this definition">#</a></dt>
+<dd><p>Method for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">dim_red_x,</span> <span class="pre">dim_red_y</span></span></dt>
+<dd><p>Axis indices for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">dim_red_x_max,</span> <span class="pre">dim_red_y_max</span></span></dt>
+<dd><p>Maximum axis indices for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_method">
+<span class="sig-name descname"><span class="pre">cluster_method</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_method" title="Link to this definition">#</a></dt>
+<dd><p>Current clustering method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.max_clusters">
+<span class="sig-name descname"><span class="pre">max_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.max_clusters" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.num_clusters">
+<span class="sig-name descname"><span class="pre">num_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.num_clusters" title="Link to this definition">#</a></dt>
+<dd><p>Number of clusters to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_seed">
+<span class="sig-name descname"><span class="pre">cluster_seed</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_seed" title="Link to this definition">#</a></dt>
+<dd><p>Random seed for clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_exponent">
+<span class="sig-name descname"><span class="pre">cluster_exponent</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_exponent" title="Link to this definition">#</a></dt>
+<dd><p>Exponent for fuzzy c-means clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_distance">
+<span class="sig-name descname"><span class="pre">cluster_distance</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_distance" title="Link to this definition">#</a></dt>
+<dd><p>Distance metric for clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.selected_clusters">
+<span class="sig-name descname"><span class="pre">selected_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.selected_clusters" title="Link to this definition">#</a></dt>
+<dd><p>List of selected clusters for masking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.dim_red_precondition">
+<span class="sig-name descname"><span class="pre">dim_red_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_precondition" title="Link to this definition">#</a></dt>
+<dd><p>Whether to precondition dimensionality reduction with PCA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.AppData.AppData.num_basis_for_precondition">
+<span class="sig-name descname"><span class="pre">num_basis_for_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.num_basis_for_precondition" title="Link to this definition">#</a></dt>
+<dd><p>Number of basis vectors for preconditioning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.get_field">
+<span class="sig-name descname"><span class="pre">get_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.set_field">
+<span class="sig-name descname"><span class="pre">set_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.set_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.set_field" title="Link to this definition">#</a></dt>
+<dd><p>Sets the field for the specified axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.get_field_type">
+<span class="sig-name descname"><span class="pre">get_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field_type" title="Link to this definition">#</a></dt>
+<dd><p>Returns the field type for the specified axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.set_field_type">
+<span class="sig-name descname"><span class="pre">set_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.set_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.set_field_type" title="Link to this definition">#</a></dt>
+<dd><p>Sets the field type for the specified axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.validate_field_type">
+<span class="sig-name descname"><span class="pre">validate_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_field_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.validate_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.validate_field_type" title="Link to this definition">#</a></dt>
+<dd><p>Validates if the new field type exists in the current sample’s processed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.validate_field">
+<span class="sig-name descname"><span class="pre">validate_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.validate_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.validate_field" title="Link to this definition">#</a></dt>
+<dd><p>Validates if the new field exists for the given field type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.get_field_list">
+<span class="sig-name descname"><span class="pre">get_field_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Analyte'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field_list" title="Link to this definition">#</a></dt>
+<dd><p>Gets the fields associated with a defined set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.update_hist_bin_width">
+<span class="sig-name descname"><span class="pre">update_hist_bin_width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.update_hist_bin_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.update_hist_bin_width" title="Link to this definition">#</a></dt>
+<dd><p>Updates the bin width for histograms.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.update_hist_num_bins">
+<span class="sig-name descname"><span class="pre">update_hist_num_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.update_hist_num_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.update_hist_num_bins" title="Link to this definition">#</a></dt>
+<dd><p>Updates the number of bins for histograms.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.histogram_reset_bins">
+<span class="sig-name descname"><span class="pre">histogram_reset_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.histogram_reset_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.histogram_reset_bins" title="Link to this definition">#</a></dt>
+<dd><p>Resets number of histogram bins to the default.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData._set_clustering_parameters">
+<span class="sig-name descname"><span class="pre">_set_clustering_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData._set_clustering_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData._set_clustering_parameters" title="Link to this definition">#</a></dt>
+<dd><p>Sets clustering parameters based on the current method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.generate_random_seed">
+<span class="sig-name descname"><span class="pre">generate_random_seed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.generate_random_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.generate_random_seed" title="Link to this definition">#</a></dt>
+<dd><p>Generates a random seed for clustering.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.AppData.AppData.cluster_group_changed">
+<span class="sig-name descname"><span class="pre">cluster_group_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.cluster_group_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.cluster_group_changed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Notes</p>
+<p>This class is designed to be used as a singleton or shared instance within the application,
+serving as the authoritative source of state for all data analysis and visualization operations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>apply_noise_red</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.c_field" title="app.AppData.AppData.c_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field</span></code></a></dt><dd><p>(str) Field associated with colors or a histrogram</p>
+<dt><a class="reference internal" href="#id0" title="app.AppData.AppData.apply_noise_red"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_noise_red</span></code></a></dt><dd><p>(str): Whether to apply noise reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.c_field_type" title="app.AppData.AppData.c_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field_type</span></code></a></dt><dd><p>(str) Field type associated with colors or a histrogram</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.c_field" title="app.AppData.AppData.c_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field</span></code></a></dt><dd><p>(str): Field associated with color on many plots.</p>
 </dd>
-<dt><strong>cluster_distance</strong></dt><dd></dd>
-<dt><strong>cluster_exponent</strong></dt><dd></dd>
-<dt><strong>cluster_method</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>Returns a list of available clustering methods.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.c_field_type" title="app.AppData.AppData.c_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field_type</span></code></a></dt><dd><p>(str): Field type for color field or map data.</p>
 </dd>
-<dt><strong>cluster_seed</strong></dt><dd></dd>
-<dt><strong>corr_method</strong></dt><dd></dd>
-<dt><strong>corr_squared</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.default_hist_num_bins" title="app.AppData.AppData.default_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_hist_num_bins</span></code></a></dt><dd><p>Default bin width for histograms.</p>
+<dt><a class="reference internal" href="#id1" title="app.AppData.AppData.cluster_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_distance</span></code></a></dt><dd><p>(str): The distance metric used in clustering.</p>
 </dd>
-<dt><strong>dim_red_method</strong></dt><dd></dd>
-<dt><strong>dim_red_precondition</strong></dt><dd></dd>
-<dt><strong>dim_red_x</strong></dt><dd></dd>
-<dt><strong>dim_red_x_max</strong></dt><dd></dd>
-<dt><strong>dim_red_x_min</strong></dt><dd></dd>
-<dt><strong>dim_red_y</strong></dt><dd></dd>
-<dt><strong>dim_red_y_max</strong></dt><dd></dd>
-<dt><strong>dim_red_y_min</strong></dt><dd></dd>
-<dt><strong>edge_detection_method</strong></dt><dd></dd>
-<dt><strong>equalize_color_scale</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.field_dict" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>A dictionary of the field_types in the self.data[sample_id].processed_data dataframe, with “coord” excluded.</p>
+<dt><a class="reference internal" href="#id2" title="app.AppData.AppData.cluster_exponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_exponent</span></code></a></dt><dd><p>(float): The exponent used in fuzzy c-means clustering.</p>
 </dd>
-<dt><strong>gradient_flag</strong></dt><dd></dd>
-<dt><strong>heatmap_style</strong></dt><dd></dd>
-<dt><strong>hist_bin_width</strong></dt><dd></dd>
-<dt><strong>hist_num_bins</strong></dt><dd></dd>
-<dt><strong>hist_plot_style</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.max_clusters" title="app.AppData.AppData.max_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_clusters</span></code></a></dt><dd><p>The maximum number of clusters to test when producing estimates of the optimal number of clusters</p>
+<dt><a class="reference internal" href="#id4" title="app.AppData.AppData.cluster_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method</span></code></a></dt><dd><p>(str): The current clustering method used for data analysis.</p>
 </dd>
-<dt><strong>ndim_analyte_set</strong></dt><dd></dd>
-<dt><strong>ndim_list</strong></dt><dd></dd>
-<dt><strong>ndim_quantile_index</strong></dt><dd></dd>
-<dt><strong>noise_red_method</strong></dt><dd></dd>
-<dt><strong>noise_red_option1</strong></dt><dd></dd>
-<dt><strong>noise_red_option2</strong></dt><dd></dd>
-<dt><strong>norm_reference</strong></dt><dd></dd>
-<dt><strong>num_basis_for_precondition</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.num_clusters" title="app.AppData.AppData.num_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_clusters</span></code></a></dt><dd><p>The number of clusters used to classify the data</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>(list): The available clustering methods.</p>
 </dd>
-<dt><strong>ref_chem</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.ref_index" title="app.AppData.AppData.ref_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_index</span></code></a></dt><dd><p>Index into reference chemistry database</p>
+<dt><a class="reference internal" href="#id5" title="app.AppData.AppData.cluster_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_seed</span></code></a></dt><dd><p>(int): The random seed used for clustering.</p>
 </dd>
-<dt><strong>sample_id</strong></dt><dd></dd>
-<dt><strong>sample_list</strong></dt><dd></dd>
-<dt><strong>scatter_preset</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.selected_analytes" title="app.AppData.AppData.selected_analytes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_analytes</span></code></a></dt><dd><p>Gets the list of selected analytes for use in analyses.</p>
+<dt><a class="reference internal" href="#id6" title="app.AppData.AppData.corr_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_method</span></code></a></dt><dd><p>(str): The method used for correlation plots.</p>
 </dd>
-<dt><strong>selected_clusters</strong></dt><dd></dd>
-<dt><strong>sort_method</strong></dt><dd></dd>
-<dt><strong>ternary_color_m</strong></dt><dd></dd>
-<dt><strong>ternary_color_x</strong></dt><dd></dd>
-<dt><strong>ternary_color_y</strong></dt><dd></dd>
-<dt><strong>ternary_color_z</strong></dt><dd></dd>
-<dt><strong>ternary_colormap</strong></dt><dd></dd>
-<dt><strong>x_field</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.x_field_type" title="app.AppData.AppData.x_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field_type</span></code></a></dt><dd><p>str: Plot type used to determine plot method and associated style settings.</p>
+<dt><a class="reference internal" href="#id7" title="app.AppData.AppData.corr_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_squared</span></code></a></dt><dd><p>(bool): Whether to use squared correlation values.</p>
 </dd>
-<dt><strong>y_field</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.y_field_type" title="app.AppData.AppData.y_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field_type</span></code></a></dt><dd><p>str: Plot type used to determine plot method and associated style settings.</p>
+<dt><a class="reference internal" href="#id8" title="app.AppData.AppData.default_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_hist_num_bins</span></code></a></dt><dd><p>(int): The default number of histogram bins.</p>
 </dd>
-<dt><strong>z_field</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.z_field_type" title="app.AppData.AppData.z_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field_type</span></code></a></dt><dd><p>str: Plot type used to determine plot method and associated style settings.</p>
+<dt><a class="reference internal" href="#id9" title="app.AppData.AppData.dim_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_method</span></code></a></dt><dd><p>(str): The method used for dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#id10" title="app.AppData.AppData.dim_red_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_precondition</span></code></a></dt><dd><p>(bool): Whether to precondition the dimensionality reduction with PCA.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x" title="app.AppData.AppData.dim_red_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x</span></code></a></dt><dd><p>(int): The x-axis index for dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x_max" title="app.AppData.AppData.dim_red_x_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x_max</span></code></a></dt><dd><p>(int): The maximum x-axis index for dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y" title="app.AppData.AppData.dim_red_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y</span></code></a></dt><dd><p>(int): The y-axis index for dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y_max" title="app.AppData.AppData.dim_red_y_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y_max</span></code></a></dt><dd><p>(int): The maximum y-axis index for dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#id11" title="app.AppData.AppData.edge_detection_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detection_method</span></code></a></dt><dd><p>(str): The method used for edge detection.</p>
+</dd>
+<dt><a class="reference internal" href="#id12" title="app.AppData.AppData.equalize_color_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equalize_color_scale</span></code></a></dt><dd><p>(bool): Whether to equalize the color scale for histograms.</p>
+</dd>
+<dt><a class="reference internal" href="#id13" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>(dict): A dictionary of field names and their types for the current sample.</p>
+</dd>
+<dt><a class="reference internal" href="#id18" title="app.AppData.AppData.gradient_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_flag</span></code></a></dt><dd><p>(bool): Whether to plot the gradient.</p>
+</dd>
+<dt><a class="reference internal" href="#id19" title="app.AppData.AppData.heatmap_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heatmap_style</span></code></a></dt><dd><p>(str): The style of heatmap to use.</p>
+</dd>
+<dt><a class="reference internal" href="#id20" title="app.AppData.AppData.hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_bin_width</span></code></a></dt><dd><p>(float): The width of histogram bins.</p>
+</dd>
+<dt><a class="reference internal" href="#id21" title="app.AppData.AppData.hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_num_bins</span></code></a></dt><dd><p>(int): The number of histogram bins.</p>
+</dd>
+<dt><a class="reference internal" href="#id22" title="app.AppData.AppData.hist_plot_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_plot_style</span></code></a></dt><dd><p>(str): The style of histogram plot to use.</p>
+</dd>
+<dt><a class="reference internal" href="#id24" title="app.AppData.AppData.max_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_clusters</span></code></a></dt><dd><p>(int): The maximum number of clusters allowed for testing cluster performance.</p>
+</dd>
+<dt><a class="reference internal" href="#id25" title="app.AppData.AppData.ndim_analyte_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_analyte_set</span></code></a></dt><dd><p>(str): The set of analytes used for N-Dim analysis.</p>
+</dd>
+<dt><a class="reference internal" href="#id26" title="app.AppData.AppData.ndim_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_list</span></code></a></dt><dd><p>(list): The list of analytes used for N-Dim analysis.</p>
+</dd>
+<dt><a class="reference internal" href="#id27" title="app.AppData.AppData.ndim_quantile_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_quantile_index</span></code></a></dt><dd><p>(int): The index of the quantile set used for N-Dim analysis.</p>
+</dd>
+<dt><a class="reference internal" href="#id28" title="app.AppData.AppData.noise_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_method</span></code></a></dt><dd><p>(str): The method used for noise reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#id29" title="app.AppData.AppData.noise_red_option1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option1</span></code></a></dt><dd><p>(int or float): The first option for noise reduction method.</p>
+</dd>
+<dt><a class="reference internal" href="#id30" title="app.AppData.AppData.noise_red_option2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option2</span></code></a></dt><dd><p>(int or float): The second option for noise reduction method.</p>
+</dd>
+<dt><a class="reference internal" href="#id31" title="app.AppData.AppData.norm_reference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm_reference</span></code></a></dt><dd><p>(str): The reference used for normalizing analyte and ratio data.</p>
+</dd>
+<dt><a class="reference internal" href="#id32" title="app.AppData.AppData.num_basis_for_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_basis_for_precondition</span></code></a></dt><dd><p>(int): The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#id33" title="app.AppData.AppData.num_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_clusters</span></code></a></dt><dd><p>(int): The number of clusters to use in clustering.</p>
+</dd>
+<dt><a class="reference internal" href="#id34" title="app.AppData.AppData.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>(pd.Series): The reference chemistry for the current reference index.</p>
+</dd>
+<dt><a class="reference internal" href="#id35" title="app.AppData.AppData.ref_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_index</span></code></a></dt><dd><p>(int): The index of the reference chemistry source used for normalization.</p>
+</dd>
+<dt><a class="reference internal" href="#id36" title="app.AppData.AppData.sample_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_id</span></code></a></dt><dd><p>(str): The ID/name of the currently selected sample.</p>
+</dd>
+<dt><a class="reference internal" href="#id37" title="app.AppData.AppData.sample_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_list</span></code></a></dt><dd><p>(list): A list of sample IDs in the current sample list.</p>
+</dd>
+<dt><a class="reference internal" href="#id38" title="app.AppData.AppData.scatter_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter_preset</span></code></a></dt><dd><p>(str): The preset for scatter plot styles.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.selected_analytes" title="app.AppData.AppData.selected_analytes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_analytes</span></code></a></dt><dd><p>(pd.Series): The selected analytes for the current sample.</p>
+</dd>
+<dt><a class="reference internal" href="#id39" title="app.AppData.AppData.selected_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_clusters</span></code></a></dt><dd><p>(list): The list of selected clusters for masking.</p>
+</dd>
+<dt><a class="reference internal" href="#id42" title="app.AppData.AppData.sort_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_method</span></code></a></dt><dd><p>(str): The method used to sort the sample list.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_m" title="app.AppData.AppData.ternary_color_m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_m</span></code></a></dt><dd><p>(str): The color for the centroid on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_x" title="app.AppData.AppData.ternary_color_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_x</span></code></a></dt><dd><p>(str): The color for the A-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_y" title="app.AppData.AppData.ternary_color_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_y</span></code></a></dt><dd><p>(str): The color for the B-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_z" title="app.AppData.AppData.ternary_color_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_z</span></code></a></dt><dd><p>(str): The color for the C-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#id43" title="app.AppData.AppData.ternary_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_colormap</span></code></a></dt><dd><p>(str): The colormap used for ternary maps.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.x_field" title="app.AppData.AppData.x_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field</span></code></a></dt><dd><p>(str): Field associated with x-axis or A-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.x_field_type" title="app.AppData.AppData.x_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field_type</span></code></a></dt><dd><p>(str): Field type for x field.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.y_field" title="app.AppData.AppData.y_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field</span></code></a></dt><dd><p>(str): Field associated with y-axis or B-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.y_field_type" title="app.AppData.AppData.y_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field_type</span></code></a></dt><dd><p>(str): Field type for y field.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.z_field" title="app.AppData.AppData.z_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field</span></code></a></dt><dd><p>(str): Field associated with z-axis or C-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.AppData.AppData.z_field_type" title="app.AppData.AppData.z_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field_type</span></code></a></dt><dd><p>(str): Field type for z field.</p>
 </dd>
 </dl>
 </dd>
@@ -491,17 +1262,23 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.add_observer" title="app.AppData.AppData.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Register a callback function to be called when a property changes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.AppData.AppData.cluster_group_changed" title="app.AppData.AppData.cluster_group_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_group_changed</span></code></a>(data, plot_style)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="app.AppData.AppData.cluster_group_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_group_changed</span></code></a>(data, plot_style)</p></td>
 <td><p>Updates the cluster dictionary and selected cluster groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.generate_random_seed" title="app.AppData.AppData.generate_random_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_random_seed</span></code></a>()</p></td>
-<td><p>Generates a random seed for clustering</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id14" title="app.AppData.AppData.generate_random_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_random_seed</span></code></a>()</p></td>
+<td><p>Generates a random seed for clustering.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.AppData.AppData.get_field_list" title="app.AppData.AppData.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([set_name, filter])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id15" title="app.AppData.AppData.get_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field</span></code></a>(ax)</p></td>
+<td><p>Returns the field associated with the specified axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id16" title="app.AppData.AppData.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([set_name, filter_type])</p></td>
 <td><p>Gets the fields associated with a defined set</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.histogram_reset_bins" title="app.AppData.AppData.histogram_reset_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram_reset_bins</span></code></a>()</p></td>
-<td><p>Resets number of histogram bins to default</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id17" title="app.AppData.AppData.get_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_type</span></code></a>(ax)</p></td>
+<td><p>Returns the field type associated with the specified axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id23" title="app.AppData.AppData.histogram_reset_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram_reset_bins</span></code></a>()</p></td>
+<td><p>Resets number of histogram bins to the default.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.AppData.AppData.notify_observers" title="app.AppData.AppData.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
 <td><p>Notify all registered observers of an event or property change.</p></td>
@@ -509,33 +1286,27 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.remove_observer" title="app.AppData.AppData.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Deregister a callback function from an event.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.AppData.AppData.update_hist_bin_width" title="app.AppData.AppData.update_hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_bin_width</span></code></a>()</p></td>
-<td><p>Updates the bin width</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id40" title="app.AppData.AppData.set_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_field</span></code></a>(ax, value)</p></td>
+<td><p>Sets the field associated with the specified axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.update_hist_num_bins" title="app.AppData.AppData.update_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_num_bins</span></code></a>()</p></td>
-<td><p>Updates the number of bins</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id41" title="app.AppData.AppData.set_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_field_type</span></code></a>(ax, value)</p></td>
+<td><p>Sets the field type associated with the specified axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id44" title="app.AppData.AppData.update_hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_bin_width</span></code></a>()</p></td>
+<td><p>Updates the bin width for histograms</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id45" title="app.AppData.AppData.update_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_num_bins</span></code></a>()</p></td>
+<td><p>Updates the number of bins for histograms</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id47" title="app.AppData.AppData.validate_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_field_type</span></code></a>(new_field_type)</p></td>
+<td><p>Validates if the new field type exists in the current sample's processed data.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="pst-scrollable-table-container"><table class="table">
 <tbody>
-<tr class="row-odd"><td><p><strong>get_field</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>get_field_type</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>set_field</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>set_field_type</strong></p></td>
-<td></td>
-</tr>
 <tr class="row-odd"><td><p><strong>validate_field</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>validate_field_type</strong></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -548,35 +1319,63 @@
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.apply_noise_red">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_noise_red</span></span><a class="headerlink" href="#app.AppData.AppData.apply_noise_red" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_noise_red</span></span><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
+<dd><p>Whether to apply noise reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.c_field">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_field</span></span><a class="headerlink" href="#app.AppData.AppData.c_field" title="Link to this definition">#</a></dt>
-<dd><p>(str) Field associated with colors or a histrogram</p>
+<dd><p>Field associated with color on many plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.c_field_type">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">c_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.c_field_type" title="Link to this definition">#</a></dt>
-<dd><p>(str) Field type associated with colors or a histrogram</p>
+<dd><p>Field type for color field or map data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.cluster_distance">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_distance</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_distance" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_distance</span></span><a class="headerlink" href="#id1" title="Link to this definition">#</a></dt>
+<dd><p>The distance metric used in clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.cluster_exponent">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_exponent</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_exponent" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_exponent</span></span><a class="headerlink" href="#id2" title="Link to this definition">#</a></dt>
+<dd><p>The exponent used in fuzzy c-means clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.cluster_group_changed">
-<span class="sig-name descname"><span class="pre">cluster_group_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.cluster_group_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.cluster_group_changed" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">cluster_group_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.cluster_group_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
 <dd><p>Updates the cluster dictionary and selected cluster groups.</p>
 <p>This method checks if the current clustering method is available in
 <code class="docutils literal notranslate"><span class="pre">data.processed_data[method]</span></code>. If found, it retrieves and sorts
@@ -596,117 +1395,222 @@ it is separately handled and assigned the last color.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.cluster_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_method</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_method" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id4">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_method</span></span><a class="headerlink" href="#id4" title="Link to this definition">#</a></dt>
+<dd><p>The current clustering method used for data analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.cluster_method_options">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_method_options</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_method_options" title="Link to this definition">#</a></dt>
-<dd><p>Returns a list of available clustering methods.</p>
+<dd><p>The available clustering methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.cluster_seed">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_seed</span></span><a class="headerlink" href="#app.AppData.AppData.cluster_seed" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.corr_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_method</span></span><a class="headerlink" href="#app.AppData.AppData.corr_method" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.corr_squared">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_squared</span></span><a class="headerlink" href="#app.AppData.AppData.corr_squared" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.default_hist_num_bins">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.default_hist_num_bins" title="Link to this definition">#</a></dt>
-<dd><p>Default bin width for histograms.</p>
+<dt class="sig sig-object py" id="id5">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster_seed</span></span><a class="headerlink" href="#id5" title="Link to this definition">#</a></dt>
+<dd><p>The random seed used for clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.dim_red_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_method" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id6">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_method</span></span><a class="headerlink" href="#id6" title="Link to this definition">#</a></dt>
+<dd><p>The method used for correlation plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.dim_red_precondition">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_precondition" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id7">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corr_squared</span></span><a class="headerlink" href="#id7" title="Link to this definition">#</a></dt>
+<dd><p>Whether to use squared correlation values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id8">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_hist_num_bins</span></span><a class="headerlink" href="#id8" title="Link to this definition">#</a></dt>
+<dd><p>The default number of histogram bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id9">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_method</span></span><a class="headerlink" href="#id9" title="Link to this definition">#</a></dt>
+<dd><p>The method used for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id10">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_precondition</span></span><a class="headerlink" href="#id10" title="Link to this definition">#</a></dt>
+<dd><p>Whether to precondition the dimensionality reduction with PCA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_x">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The x-axis index for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_x_max">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x_max</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x_max" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.dim_red_x_min">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_x_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_x_min" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The maximum x-axis index for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The y-axis index for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y_max">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_max</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_max" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The maximum y-axis index for dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.dim_red_y_min">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_red_y_min</span></span><a class="headerlink" href="#app.AppData.AppData.dim_red_y_min" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id11">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_detection_method</span></span><a class="headerlink" href="#id11" title="Link to this definition">#</a></dt>
+<dd><p>The method used for edge detection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.edge_detection_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_detection_method</span></span><a class="headerlink" href="#app.AppData.AppData.edge_detection_method" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id12">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equalize_color_scale</span></span><a class="headerlink" href="#id12" title="Link to this definition">#</a></dt>
+<dd><p>Whether to equalize the color scale for histograms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.equalize_color_scale">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">equalize_color_scale</span></span><a class="headerlink" href="#app.AppData.AppData.equalize_color_scale" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.field_dict">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">field_dict</span></span><a class="headerlink" href="#app.AppData.AppData.field_dict" title="Link to this definition">#</a></dt>
-<dd><p>A dictionary of the field_types in the self.data[sample_id].processed_data dataframe, with “coord” excluded.</p>
+<dt class="sig sig-object py" id="id13">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">field_dict</span></span><a class="headerlink" href="#id13" title="Link to this definition">#</a></dt>
+<dd><p>A dictionary of field names and their types for the current sample.</p>
+<p>This dictionary is used to populate field selection widgets and ensure valid selections.
+Coordinate fields are excluded from this dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.generate_random_seed">
-<span class="sig-name descname"><span class="pre">generate_random_seed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.generate_random_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.generate_random_seed" title="Link to this definition">#</a></dt>
-<dd><p>Generates a random seed for clustering</p>
-<p>Updates <a href="#id1"><span class="problematic" id="id2">``</span></a>self.cluster_seed using a random number generator with one of 10**9 integers.</p>
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">generate_random_seed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.generate_random_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition">#</a></dt>
+<dd><p>Generates a random seed for clustering.</p>
+<p>This method generates a random integer between 0 and 1,000,000,000 to be used as
+a seed for clustering algorithms. This is useful for ensuring reproducibility in
+clustering results by providing a consistent starting point for random number
+generation in clustering algorithms.  The generated seed is stored in the
+instance variable <cite>self.cluster_seed</cite>.  The seed can be used in clustering methods
+like k-means or fuzzy c-means to ensure that the results can be replicated across
+different runs of the algorithm.  The seed is generated using Python’s
+<cite>random.randint</cite> function.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.get_field">
-<span class="sig-name descname"><span class="pre">get_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">get_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition">#</a></dt>
+<dd><p>Returns the field associated with the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The axis index (0 for x, 1 for y, 2 for z, 3 for c).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The field associated with the specified axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if the axis index is invalid.</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.get_field_list">
-<span class="sig-name descname"><span class="pre">get_field_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Analyte'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field_list" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">get_field_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Analyte'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Link to this definition">#</a></dt>
 <dd><p>Gets the fields associated with a defined set</p>
-<p>Set names are consistent with QComboBox.</p>
+<p>Set names are consistent with QComboBox.
+The set names are: <code class="docutils literal notranslate"><span class="pre">Analyte</span></code>, <code class="docutils literal notranslate"><span class="pre">Analyte</span> <span class="pre">(normalized)</span></code>, <code class="docutils literal notranslate"><span class="pre">Ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">Calculated</span> <span class="pre">Field</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PCA</span> <span class="pre">Score</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Score</span></code>, <code class="docutils literal notranslate"><span class="pre">Special</span></code>
+and <code class="docutils literal notranslate"><span class="pre">None</span></code>.  The set names are used to filter the data to a specific set of fields.
+The <code class="docutils literal notranslate"><span class="pre">filter_type</span></code> parameter is used to filter the data to only fields that are used in analysis.
+The options for <code class="docutils literal notranslate"><span class="pre">filter_type</span></code> are <code class="docutils literal notranslate"><span class="pre">'all'</span></code> and <code class="docutils literal notranslate"><span class="pre">'used'</span></code>.  If <code class="docutils literal notranslate"><span class="pre">filter_type</span></code> is set to <code class="docutils literal notranslate"><span class="pre">'all'</span></code>, all fields
+in the set will be returned.  If <code class="docutils literal notranslate"><span class="pre">filter_type</span></code> is set to <code class="docutils literal notranslate"><span class="pre">'used'</span></code>, only fields that are used in analysis will be returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>set_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – name of set list, options include <code class="docutils literal notranslate"><span class="pre">Analyte</span></code>, <code class="docutils literal notranslate"><span class="pre">Analyte</span> <span class="pre">(normalized)</span></code>, <code class="docutils literal notranslate"><span class="pre">Ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">Calcualated</span> <span class="pre">Field</span></code>,
-<code class="docutils literal notranslate"><span class="pre">PCA</span> <span class="pre">Score</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span></code>, <code class="docutils literal notranslate"><span class="pre">Cluster</span> <span class="pre">Score</span></code>, <code class="docutils literal notranslate"><span class="pre">Special</span></code>, Defaults to <code class="docutils literal notranslate"><span class="pre">Analyte</span></code></p></li>
-<li><p><strong>filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Optionally filters data to columns selected for analysis, options are <code class="docutils literal notranslate"><span class="pre">'all'</span></code> and <code class="docutils literal notranslate"><span class="pre">'used'</span></code>,
-by default <cite>‘all’</cite></p></li>
+<li><p><strong>set_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – name of set list, by default ‘Analyte’</p></li>
+<li><p><strong>filter_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Filters data to columns selected for analysis, by default ‘all’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -719,81 +1623,173 @@ by default <cite>‘all’</cite></p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.get_field_type">
-<span class="sig-name descname"><span class="pre">get_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field_type" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">get_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Link to this definition">#</a></dt>
+<dd><p>Returns the field type associated with the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The axis index (0 for x, 1 for y, 2 for z, 3 for c).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The field type associated with the specified axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if the axis index is invalid.</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.gradient_flag">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient_flag</span></span><a class="headerlink" href="#app.AppData.AppData.gradient_flag" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id18">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient_flag</span></span><a class="headerlink" href="#id18" title="Link to this definition">#</a></dt>
+<dd><p>Whether to plot the gradient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.heatmap_style">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">heatmap_style</span></span><a class="headerlink" href="#app.AppData.AppData.heatmap_style" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id19">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">heatmap_style</span></span><a class="headerlink" href="#id19" title="Link to this definition">#</a></dt>
+<dd><p>The style of heatmap to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.hist_bin_width">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_bin_width</span></span><a class="headerlink" href="#app.AppData.AppData.hist_bin_width" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id20">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_bin_width</span></span><a class="headerlink" href="#id20" title="Link to this definition">#</a></dt>
+<dd><p>The width of histogram bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.hist_num_bins">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_num_bins</span></span><a class="headerlink" href="#app.AppData.AppData.hist_num_bins" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id21">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_num_bins</span></span><a class="headerlink" href="#id21" title="Link to this definition">#</a></dt>
+<dd><p>The number of histogram bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.hist_plot_style">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_plot_style</span></span><a class="headerlink" href="#app.AppData.AppData.hist_plot_style" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id22">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hist_plot_style</span></span><a class="headerlink" href="#id22" title="Link to this definition">#</a></dt>
+<dd><p>The style of histogram plot to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.histogram_reset_bins">
-<span class="sig-name descname"><span class="pre">histogram_reset_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.histogram_reset_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.histogram_reset_bins" title="Link to this definition">#</a></dt>
-<dd><p>Resets number of histogram bins to default</p>
+<dt class="sig sig-object py" id="id23">
+<span class="sig-name descname"><span class="pre">histogram_reset_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.histogram_reset_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id23" title="Link to this definition">#</a></dt>
+<dd><p>Resets number of histogram bins to the default.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.max_clusters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.max_clusters" title="Link to this definition">#</a></dt>
-<dd><p>The maximum number of clusters to test when producing estimates of the optimal number of clusters</p>
+<dt class="sig sig-object py" id="id24">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_clusters</span></span><a class="headerlink" href="#id24" title="Link to this definition">#</a></dt>
+<dd><p>The maximum number of clusters allowed for testing cluster performance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.ndim_analyte_set">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_analyte_set</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_analyte_set" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id25">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_analyte_set</span></span><a class="headerlink" href="#id25" title="Link to this definition">#</a></dt>
+<dd><p>The set of analytes used for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.ndim_list">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_list</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_list" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id26">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_list</span></span><a class="headerlink" href="#id26" title="Link to this definition">#</a></dt>
+<dd><p>The list of analytes used for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.ndim_quantile_index">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_quantile_index</span></span><a class="headerlink" href="#app.AppData.AppData.ndim_quantile_index" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id27">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim_quantile_index</span></span><a class="headerlink" href="#id27" title="Link to this definition">#</a></dt>
+<dd><p>The index of the quantile set used for N-Dim analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_method</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_method" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id28">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_method</span></span><a class="headerlink" href="#id28" title="Link to this definition">#</a></dt>
+<dd><p>The method used for noise reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_option1">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option1</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option1" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id29">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option1</span></span><a class="headerlink" href="#id29" title="Link to this definition">#</a></dt>
+<dd><p>The first option for noise reduction method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.noise_red_option2">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option2</span></span><a class="headerlink" href="#app.AppData.AppData.noise_red_option2" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id30">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_red_option2</span></span><a class="headerlink" href="#id30" title="Link to this definition">#</a></dt>
+<dd><p>The second option for noise reduction method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.norm_reference">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm_reference</span></span><a class="headerlink" href="#app.AppData.AppData.norm_reference" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id31">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm_reference</span></span><a class="headerlink" href="#id31" title="Link to this definition">#</a></dt>
+<dd><p>The reference used for normalizing analyte and ratio data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.AppData.AppData.notify_observers">
@@ -802,25 +1798,47 @@ by default <cite>‘all’</cite></p></li>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.num_basis_for_precondition">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_basis_for_precondition</span></span><a class="headerlink" href="#app.AppData.AppData.num_basis_for_precondition" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.num_clusters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.num_clusters" title="Link to this definition">#</a></dt>
-<dd><p>The number of clusters used to classify the data</p>
+<dt class="sig sig-object py" id="id32">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_basis_for_precondition</span></span><a class="headerlink" href="#id32" title="Link to this definition">#</a></dt>
+<dd><p>The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.ref_chem">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#app.AppData.AppData.ref_chem" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id33">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_clusters</span></span><a class="headerlink" href="#id33" title="Link to this definition">#</a></dt>
+<dd><p>The number of clusters to use in clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.ref_index">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_index</span></span><a class="headerlink" href="#app.AppData.AppData.ref_index" title="Link to this definition">#</a></dt>
-<dd><p>Index into reference chemistry database</p>
+<dt class="sig sig-object py" id="id34">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_chem</span></span><a class="headerlink" href="#id34" title="Link to this definition">#</a></dt>
+<dd><p>The reference chemistry for the current reference index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(pd.Series)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id35">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_index</span></span><a class="headerlink" href="#id35" title="Link to this definition">#</a></dt>
+<dd><p>The index of the reference chemistry source used for normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -830,107 +1848,221 @@ by default <cite>‘all’</cite></p></li>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.sample_id">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_id</span></span><a class="headerlink" href="#app.AppData.AppData.sample_id" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id36">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_id</span></span><a class="headerlink" href="#id36" title="Link to this definition">#</a></dt>
+<dd><p>The ID/name of the currently selected sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.sample_list">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_list</span></span><a class="headerlink" href="#app.AppData.AppData.sample_list" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id37">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_list</span></span><a class="headerlink" href="#id37" title="Link to this definition">#</a></dt>
+<dd><p>A list of sample IDs in the current sample list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.scatter_preset">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scatter_preset</span></span><a class="headerlink" href="#app.AppData.AppData.scatter_preset" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id38">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scatter_preset</span></span><a class="headerlink" href="#id38" title="Link to this definition">#</a></dt>
+<dd><p>The preset for scatter plot styles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.selected_analytes">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_analytes</span></span><a class="headerlink" href="#app.AppData.AppData.selected_analytes" title="Link to this definition">#</a></dt>
-<dd><p>Gets the list of selected analytes for use in analyses.</p>
+<dd><p>The selected analytes for the current sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(pd.Series)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.selected_clusters">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_clusters</span></span><a class="headerlink" href="#app.AppData.AppData.selected_clusters" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id39">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_clusters</span></span><a class="headerlink" href="#id39" title="Link to this definition">#</a></dt>
+<dd><p>The list of selected clusters for masking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.set_field">
-<span class="sig-name descname"><span class="pre">set_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.set_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.set_field" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id40">
+<span class="sig-name descname"><span class="pre">set_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.set_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id40" title="Link to this definition">#</a></dt>
+<dd><p>Sets the field associated with the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The axis index (0 for x, 1 for y, 2 for z, 3 for c).</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The field to set for the specified axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if the axis index is invalid.</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.set_field_type">
-<span class="sig-name descname"><span class="pre">set_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.set_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.set_field_type" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id41">
+<span class="sig-name descname"><span class="pre">set_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.set_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id41" title="Link to this definition">#</a></dt>
+<dd><p>Sets the field type associated with the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The axis index (0 for x, 1 for y, 2 for z, 3 for c).</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The field type to set for the specified axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if the axis index is invalid</strong><strong> or </strong><strong>if the field type does</strong> – not exist in the current sample’s processed data.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.sort_method">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_method</span></span><a class="headerlink" href="#app.AppData.AppData.sort_method" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id42">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_method</span></span><a class="headerlink" href="#id42" title="Link to this definition">#</a></dt>
+<dd><p>The method used to sort the sample list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_m">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_m</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_m" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The color for the centroid on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_x">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_x</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_x" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The color for the A-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_y">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_y</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_y" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The color for the B-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.ternary_color_z">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_z</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_color_z" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>The color for the C-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="app.AppData.AppData.ternary_colormap">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#app.AppData.AppData.ternary_colormap" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.update_hist_bin_width">
-<span class="sig-name descname"><span class="pre">update_hist_bin_width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.update_hist_bin_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.update_hist_bin_width" title="Link to this definition">#</a></dt>
-<dd><p>Updates the bin width</p>
-<p>Generally called when the number of bins is changed by the user.  Updates the plot.</p>
+<dt class="sig sig-object py" id="id43">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#id43" title="Link to this definition">#</a></dt>
+<dd><p>The colormap used for ternary maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.update_hist_num_bins">
-<span class="sig-name descname"><span class="pre">update_hist_num_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.update_hist_num_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.update_hist_num_bins" title="Link to this definition">#</a></dt>
-<dd><p>Updates the number of bins</p>
-<p>Generally called when the bin width is changed by the user.  Updates the plot.</p>
+<dt class="sig sig-object py" id="id44">
+<span class="sig-name descname"><span class="pre">update_hist_bin_width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.update_hist_bin_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id44" title="Link to this definition">#</a></dt>
+<dd><p>Updates the bin width for histograms</p>
+<p>This method calculates the bin width based on the currently selected data field and type.
+It retrieves the data for the selected field and type, calculates the range of values,
+and sets the bin width based on the number of histogram bins.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.validate_field">
-<span class="sig-name descname"><span class="pre">validate_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.validate_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.validate_field" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id45">
+<span class="sig-name descname"><span class="pre">update_hist_num_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.update_hist_num_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id45" title="Link to this definition">#</a></dt>
+<dd><p>Updates the number of bins for histograms</p>
+<p>This method calculates the number of histogram bins based on the currently selected data field and type.
+It retrieves the data for the selected field and type, calculates the range of values,
+and sets the number of bins based on the bin width.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id46">
+<span class="sig-name descname"><span class="pre">validate_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.validate_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id46" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.AppData.AppData.validate_field_type">
-<span class="sig-name descname"><span class="pre">validate_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_field_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.validate_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.validate_field_type" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="id47">
+<span class="sig-name descname"><span class="pre">validate_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_field_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.validate_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id47" title="Link to this definition">#</a></dt>
+<dd><p>Validates if the new field type exists in the current sample’s processed data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_field_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The field type to validate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the field type exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if the sample_id is empty</strong><strong> or </strong><strong>the field type is not found.</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.x_field">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_field</span></span><a class="headerlink" href="#app.AppData.AppData.x_field" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Field associated with x-axis or A-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.x_field_type">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.x_field_type" title="Link to this definition">#</a></dt>
-<dd><p>Plot type used to determine plot method and associated style settings.</p>
+<dd><p>Field type for x field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -938,15 +2070,21 @@ by default <cite>‘all’</cite></p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.y_field">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_field</span></span><a class="headerlink" href="#app.AppData.AppData.y_field" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Field associated with y-axis or B-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.y_field_type">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.y_field_type" title="Link to this definition">#</a></dt>
-<dd><p>Plot type used to determine plot method and associated style settings.</p>
+<dd><p>Field type for y field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -954,15 +2092,21 @@ by default <cite>‘all’</cite></p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.z_field">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_field</span></span><a class="headerlink" href="#app.AppData.AppData.z_field" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Field associated with z-axis or C-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.AppData.AppData.z_field_type">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_field_type</span></span><a class="headerlink" href="#app.AppData.AppData.z_field_type" title="Link to this definition">#</a></dt>
-<dd><p>Plot type used to determine plot method and associated style settings.</p>
+<dd><p>Field type for z field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1001,71 +2145,135 @@ by default <cite>‘all’</cite></p></li>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData"><code class="docutils literal notranslate"><span class="pre">AppData</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.add_observer"><code class="docutils literal notranslate"><span class="pre">AppData.add_observer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.apply_noise_red"><code class="docutils literal notranslate"><span class="pre">AppData.apply_noise_red</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.c_field"><code class="docutils literal notranslate"><span class="pre">AppData.c_field</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.c_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.c_field_type</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_distance"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_distance</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_exponent"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_exponent</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_group_changed"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_group_changed()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_method"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_method_options"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method_options</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_seed"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_seed</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.corr_method"><code class="docutils literal notranslate"><span class="pre">AppData.corr_method</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.corr_squared"><code class="docutils literal notranslate"><span class="pre">AppData.corr_squared</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.default_hist_num_bins"><code class="docutils literal notranslate"><span class="pre">AppData.default_hist_num_bins</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_method"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_method</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_precondition"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_precondition</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_x"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_x</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_x_max"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_x_max</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_x_min"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_x_min</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y_max"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y_max</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y_min"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y_min</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.edge_detection_method"><code class="docutils literal notranslate"><span class="pre">AppData.edge_detection_method</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.equalize_color_scale"><code class="docutils literal notranslate"><span class="pre">AppData.equalize_color_scale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.logger_key"><code class="docutils literal notranslate"><span class="pre">AppData.logger_key</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.default_preferences"><code class="docutils literal notranslate"><span class="pre">AppData.default_preferences</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.scale_options"><code class="docutils literal notranslate"><span class="pre">AppData.scale_options</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.preferences"><code class="docutils literal notranslate"><span class="pre">AppData.preferences</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.selected_directory"><code class="docutils literal notranslate"><span class="pre">AppData.selected_directory</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sample_list"><code class="docutils literal notranslate"><span class="pre">AppData.sample_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.data"><code class="docutils literal notranslate"><span class="pre">AppData.data</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.field_dict"><code class="docutils literal notranslate"><span class="pre">AppData.field_dict</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.generate_random_seed"><code class="docutils literal notranslate"><span class="pre">AppData.generate_random_seed()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.get_field"><code class="docutils literal notranslate"><span class="pre">AppData.get_field()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.get_field_list"><code class="docutils literal notranslate"><span class="pre">AppData.get_field_list()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.get_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.get_field_type()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.gradient_flag"><code class="docutils literal notranslate"><span class="pre">AppData.gradient_flag</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.heatmap_style"><code class="docutils literal notranslate"><span class="pre">AppData.heatmap_style</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.plot_info"><code class="docutils literal notranslate"><span class="pre">AppData.plot_info</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.outlier_methods"><code class="docutils literal notranslate"><span class="pre">AppData.outlier_methods</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.negative_methods"><code class="docutils literal notranslate"><span class="pre">AppData.negative_methods</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.noise_red_options"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_options</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_dict"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_list_dict"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_list_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_analyte_df"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_analyte_df</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ref_data"><code class="docutils literal notranslate"><span class="pre">AppData.ref_data</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ref_list"><code class="docutils literal notranslate"><span class="pre">AppData.ref_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.axis"><code class="docutils literal notranslate"><span class="pre">AppData.axis</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.Properties"><code class="docutils literal notranslate"><span class="pre">AppData.Properties</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sort_method"><code class="docutils literal notranslate"><span class="pre">AppData.sort_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ref_index"><code class="docutils literal notranslate"><span class="pre">AppData.ref_index</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ref_chem"><code class="docutils literal notranslate"><span class="pre">AppData.ref_chem</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sample_id"><code class="docutils literal notranslate"><span class="pre">AppData.sample_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.equalize_color_scale"><code class="docutils literal notranslate"><span class="pre">AppData.equalize_color_scale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.default_hist_num_bins"><code class="docutils literal notranslate"><span class="pre">AppData.default_hist_num_bins</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.hist_bin_width"><code class="docutils literal notranslate"><span class="pre">AppData.hist_bin_width</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.hist_num_bins"><code class="docutils literal notranslate"><span class="pre">AppData.hist_num_bins</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.hist_plot_style"><code class="docutils literal notranslate"><span class="pre">AppData.hist_plot_style</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.histogram_reset_bins"><code class="docutils literal notranslate"><span class="pre">AppData.histogram_reset_bins()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.max_clusters"><code class="docutils literal notranslate"><span class="pre">AppData.max_clusters</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_analyte_set"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_analyte_set</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_list"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_list</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_quantile_index"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_quantile_index</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.corr_method"><code class="docutils literal notranslate"><span class="pre">AppData.corr_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.corr_squared"><code class="docutils literal notranslate"><span class="pre">AppData.corr_squared</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.noise_red_method"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_method</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.noise_red_option1"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_option1</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.noise_red_option2"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_option2</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.norm_reference"><code class="docutils literal notranslate"><span class="pre">AppData.norm_reference</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.notify_observers"><code class="docutils literal notranslate"><span class="pre">AppData.notify_observers()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.num_basis_for_precondition"><code class="docutils literal notranslate"><span class="pre">AppData.num_basis_for_precondition</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.num_clusters"><code class="docutils literal notranslate"><span class="pre">AppData.num_clusters</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ref_chem"><code class="docutils literal notranslate"><span class="pre">AppData.ref_chem</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ref_index"><code class="docutils literal notranslate"><span class="pre">AppData.ref_index</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.remove_observer"><code class="docutils literal notranslate"><span class="pre">AppData.remove_observer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sample_id"><code class="docutils literal notranslate"><span class="pre">AppData.sample_id</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sample_list"><code class="docutils literal notranslate"><span class="pre">AppData.sample_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.apply_noise_red"><code class="docutils literal notranslate"><span class="pre">AppData.apply_noise_red</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.gradient_flag"><code class="docutils literal notranslate"><span class="pre">AppData.gradient_flag</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.edge_detection_method"><code class="docutils literal notranslate"><span class="pre">AppData.edge_detection_method</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.scatter_preset"><code class="docutils literal notranslate"><span class="pre">AppData.scatter_preset</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.selected_analytes"><code class="docutils literal notranslate"><span class="pre">AppData.selected_analytes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.heatmap_style"><code class="docutils literal notranslate"><span class="pre">AppData.heatmap_style</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ternary_colormap"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_colormap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.norm_reference"><code class="docutils literal notranslate"><span class="pre">AppData.norm_reference</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_analyte_set"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_analyte_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_list"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ndim_quantile_index"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_quantile_index</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_method"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_method"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.max_clusters"><code class="docutils literal notranslate"><span class="pre">AppData.max_clusters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.num_clusters"><code class="docutils literal notranslate"><span class="pre">AppData.num_clusters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_seed"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_seed</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_exponent"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_exponent</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_distance"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_distance</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.selected_clusters"><code class="docutils literal notranslate"><span class="pre">AppData.selected_clusters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_precondition"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_precondition</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.num_basis_for_precondition"><code class="docutils literal notranslate"><span class="pre">AppData.num_basis_for_precondition</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.get_field"><code class="docutils literal notranslate"><span class="pre">AppData.get_field()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.set_field"><code class="docutils literal notranslate"><span class="pre">AppData.set_field()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.get_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.get_field_type()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.set_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.set_field_type()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sort_method"><code class="docutils literal notranslate"><span class="pre">AppData.sort_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.validate_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.validate_field_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.validate_field"><code class="docutils literal notranslate"><span class="pre">AppData.validate_field()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.get_field_list"><code class="docutils literal notranslate"><span class="pre">AppData.get_field_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.update_hist_bin_width"><code class="docutils literal notranslate"><span class="pre">AppData.update_hist_bin_width()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.update_hist_num_bins"><code class="docutils literal notranslate"><span class="pre">AppData.update_hist_num_bins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.histogram_reset_bins"><code class="docutils literal notranslate"><span class="pre">AppData.histogram_reset_bins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData._set_clustering_parameters"><code class="docutils literal notranslate"><span class="pre">AppData._set_clustering_parameters()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.generate_random_seed"><code class="docutils literal notranslate"><span class="pre">AppData.generate_random_seed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_group_changed"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_group_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.add_observer"><code class="docutils literal notranslate"><span class="pre">AppData.add_observer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">AppData.apply_noise_red</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.c_field"><code class="docutils literal notranslate"><span class="pre">AppData.c_field</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.c_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.c_field_type</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_distance</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_exponent</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_group_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.cluster_method_options"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_method_options</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">AppData.cluster_seed</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">AppData.corr_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">AppData.corr_squared</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">AppData.default_hist_num_bins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_precondition</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_x"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_x</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_x_max"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_x_max</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.dim_red_y_max"><code class="docutils literal notranslate"><span class="pre">AppData.dim_red_y_max</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11"><code class="docutils literal notranslate"><span class="pre">AppData.edge_detection_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12"><code class="docutils literal notranslate"><span class="pre">AppData.equalize_color_scale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><code class="docutils literal notranslate"><span class="pre">AppData.field_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">AppData.generate_random_seed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">AppData.get_field()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">AppData.get_field_list()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">AppData.get_field_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id18"><code class="docutils literal notranslate"><span class="pre">AppData.gradient_flag</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id19"><code class="docutils literal notranslate"><span class="pre">AppData.heatmap_style</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">AppData.hist_bin_width</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21"><code class="docutils literal notranslate"><span class="pre">AppData.hist_num_bins</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id22"><code class="docutils literal notranslate"><span class="pre">AppData.hist_plot_style</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id23"><code class="docutils literal notranslate"><span class="pre">AppData.histogram_reset_bins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id24"><code class="docutils literal notranslate"><span class="pre">AppData.max_clusters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id25"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_analyte_set</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id27"><code class="docutils literal notranslate"><span class="pre">AppData.ndim_quantile_index</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id28"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id29"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_option1</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id30"><code class="docutils literal notranslate"><span class="pre">AppData.noise_red_option2</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id31"><code class="docutils literal notranslate"><span class="pre">AppData.norm_reference</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.notify_observers"><code class="docutils literal notranslate"><span class="pre">AppData.notify_observers()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id32"><code class="docutils literal notranslate"><span class="pre">AppData.num_basis_for_precondition</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id33"><code class="docutils literal notranslate"><span class="pre">AppData.num_clusters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id34"><code class="docutils literal notranslate"><span class="pre">AppData.ref_chem</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id35"><code class="docutils literal notranslate"><span class="pre">AppData.ref_index</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.remove_observer"><code class="docutils literal notranslate"><span class="pre">AppData.remove_observer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id36"><code class="docutils literal notranslate"><span class="pre">AppData.sample_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id37"><code class="docutils literal notranslate"><span class="pre">AppData.sample_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id38"><code class="docutils literal notranslate"><span class="pre">AppData.scatter_preset</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.selected_analytes"><code class="docutils literal notranslate"><span class="pre">AppData.selected_analytes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id39"><code class="docutils literal notranslate"><span class="pre">AppData.selected_clusters</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id40"><code class="docutils literal notranslate"><span class="pre">AppData.set_field()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id41"><code class="docutils literal notranslate"><span class="pre">AppData.set_field_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id42"><code class="docutils literal notranslate"><span class="pre">AppData.sort_method</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ternary_color_m"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_color_m</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ternary_color_x"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_color_x</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ternary_color_y"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_color_y</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ternary_color_z"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_color_z</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.ternary_colormap"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_colormap</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.update_hist_bin_width"><code class="docutils literal notranslate"><span class="pre">AppData.update_hist_bin_width()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.update_hist_num_bins"><code class="docutils literal notranslate"><span class="pre">AppData.update_hist_num_bins()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.validate_field"><code class="docutils literal notranslate"><span class="pre">AppData.validate_field()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.validate_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.validate_field_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id43"><code class="docutils literal notranslate"><span class="pre">AppData.ternary_colormap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id44"><code class="docutils literal notranslate"><span class="pre">AppData.update_hist_bin_width()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id45"><code class="docutils literal notranslate"><span class="pre">AppData.update_hist_num_bins()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id46"><code class="docutils literal notranslate"><span class="pre">AppData.validate_field()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id47"><code class="docutils literal notranslate"><span class="pre">AppData.validate_field_type()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.x_field"><code class="docutils literal notranslate"><span class="pre">AppData.x_field</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.x_field_type"><code class="docutils literal notranslate"><span class="pre">AppData.x_field_type</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.y_field"><code class="docutils literal notranslate"><span class="pre">AppData.y_field</span></code></a></li>

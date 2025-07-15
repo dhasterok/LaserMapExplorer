@@ -30,7 +30,7 @@
   <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -358,6 +358,7 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules Summary</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/main.html">main</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="generated/src.app.html">src.app</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.AppData.html">src.app.AppData</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.BlocklyModules.html">src.app.BlocklyModules</a></li>
@@ -370,6 +371,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.InfoViewer.html">src.app.InfoViewer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.LameIO.html">src.app.LameIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.LamePlotUI.html">src.app.LamePlotUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.app.MainWindow.html">src.app.MainWindow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.MapImporter.html">src.app.MapImporter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.PlotTree.html">src.app.PlotTree</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.PlotViewerWindow.html">src.app.PlotViewerWindow</a></li>
@@ -378,7 +380,9 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.ProfileNew.html">src.app.ProfileNew</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.SpecialTools.html">src.app.SpecialTools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.SpotImporter.html">src.app.SpotImporter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.app.SpotTools.html">src.app.SpotTools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.StyleToolbox.html">src.app.StyleToolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.app.StylingUI.html">src.app.StylingUI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.UITheme.html">src.app.UITheme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.Workflow.html">src.app.Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.app.base_dialog.html">src.app.base_dialog</a></li>
@@ -397,6 +401,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/src.ui.PreferencesWindow.html">src.ui.PreferencesWindow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.ui.QuickViewDialog.html">src.ui.QuickViewDialog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/src.ui.SpotImportDialog.html">src.ui.SpotImportDialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/src.ui.resources_rc.html">src.ui.resources_rc</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="generated/src.common.html">src.common</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -780,7 +785,7 @@
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filename</span></code>()</p></td>
-<td><p>Return a suitable default filename, including the extension.</p></td>
+<td><p>Return a string, which includes extension, suitable for use as a default filename.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filetype</span></code>()</p></td>
 <td><p>Return the default savefig file format as specified in <a href="#id1"><span class="problematic" id="id2">:rc:`savefig.format`</span></a>.</p></td>
@@ -1475,29 +1480,35 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleSheet</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch_backends</span></code>(FigureCanvasClass)</p></td>
+<td><p>[<em>Deprecated</em>] Instantiate an instance of FigureCanvasClass</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.textOnClick" title="common.CustomMplCanvas.MplCanvas.textOnClick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">textOnClick</span></code></a>(event)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.textOnClick" title="common.CustomMplCanvas.MplCanvas.textOnClick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">textOnClick</span></code></a>(event)</p></td>
 <td><p>Adds text to plot at clicked position</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
 <td><p>Get the image as ARGB <cite>bytes</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_rgb</span></code>()</p></td>
+<td><p>[<em>Deprecated</em>] Get the image as RGB <cite>bytes</cite>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
 <td><p></p></td>
@@ -1847,7 +1858,7 @@ at the end of the measuring line.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parent</strong> (<em>MainWindow</em>) – Calling class.</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow" title="src.app.MainWindow.MainWindow"><em>MainWindow</em></a>) – Calling class.</p></li>
 <li><p><strong>canvas</strong> (<a class="reference internal" href="generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Matplotlib plot canvas.</p></li>
 <li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Dialog title, by default ‘’</p></li>
 </ul>
@@ -3119,7 +3130,7 @@ at the end of the measuring line.</p>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filename</span></code>()</p></td>
-<td><p>Return a suitable default filename, including the extension.</p></td>
+<td><p>Return a string, which includes extension, suitable for use as a default filename.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filetype</span></code>()</p></td>
 <td><p>Return the default savefig file format as specified in <a href="#id3"><span class="problematic" id="id4">:rc:`savefig.format`</span></a>.</p></td>
@@ -3787,26 +3798,32 @@ at the end of the measuring line.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleSheet</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch_backends</span></code>(FigureCanvasClass)</p></td>
+<td><p>[<em>Deprecated</em>] Instantiate an instance of FigureCanvasClass</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
 <td><p>Get the image as ARGB <cite>bytes</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_rgb</span></code>()</p></td>
+<td><p>[<em>Deprecated</em>] Get the image as RGB <cite>bytes</cite>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
 <td><p></p></td>
@@ -22744,7 +22761,7 @@ formatting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parent</strong> (<em>MainWindow</em><em>, </em><em>optional</em>) – Parent UI, by default None</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="generated/src.app.MainWindow.html#src.app.MainWindow.MainWindow" title="src.app.MainWindow.MainWindow"><em>MainWindow</em></a><em>, </em><em>optional</em>) – Parent UI, by default None</p></li>
 <li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Filename for saving notes, by default None</p></li>
 <li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Title for Notes dockwidget, by default ‘Notes’</p></li>
 </ul>
@@ -24265,8 +24282,8 @@ and plot the first polygon with its points and lines.</p>
 <section id="module-common.Regression">
 <span id="common-regression-module"></span><h2>common.Regression module<a class="headerlink" href="#module-common.Regression" title="Link to this heading">#</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="common.Regression.RegressionPage">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Regression.</span></span><span class="sig-name descname"><span class="pre">RegressionPage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/Regression.html#RegressionPage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Regression.RegressionPage" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="common.Regression.RegressionDock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.Regression.</span></span><span class="sig-name descname"><span class="pre">RegressionDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/common/Regression.html#RegressionDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.Regression.RegressionDock" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="generated/src.common.CustomWidgets.html#src.common.CustomWidgets.CustomDockWidget" title="src.common.CustomWidgets.CustomDockWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomDockWidget</span></code></a></p>
 <p>Regression analysis page for the toolbox.</p>
 <p>This page allows users to select regression methods, configure outlier detection,
@@ -27692,11 +27709,11 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>(/)</p></td>
+<td><p>Remove all items from the dict.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>(/)</p></td>
+<td><p>Return a shallow copy of the dict.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fromkeys</span></code>(iterable[, value])</p></td>
 <td><p>Create a new dictionary with keys from iterable and values set to value.</p></td>
@@ -27704,11 +27721,11 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(key[, default])</p></td>
 <td><p>Return the value for key if key is in the dictionary, else default.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>(/)</p></td>
+<td><p>Return a set-like object providing a view on the dict's items.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code>(/)</p></td>
+<td><p>Return a set-like object providing a view on the dict's keys.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code>(key[, default])</p></td>
 <td><p>If the key is not found, return the default if given; otherwise, raise a KeyError.</p></td>
@@ -27720,18 +27737,18 @@ the Cartesian origin is defined at the midpoint between b and c.</p>
 <td><p>Insert key with a value of default if key is not in the dictionary.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/common.varfunc.html#common.varfunc.ObservableDict.update" title="common.varfunc.ObservableDict.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>([E, ]**F)</p></td>
-<td><p>If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k] If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v In either case, this is followed by: for k in F:  D[k] = F[k]</p></td>
+<td><p>If E is present and has a .keys() method, then does:  for k in E.keys(): D[k] = E[k] If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v In either case, this is followed by: for k in F:  D[k] = F[k]</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code>(/)</p></td>
+<td><p>Return an object providing a view on the dict's values.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="common.varfunc.ObservableDict.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <span class="optional">]</span><em class="sig-param"><span class="n"><span class="pre">**F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Update</span> <span class="pre">D</span> <span class="pre">from</span> <span class="pre">dict/iterable</span> <span class="pre">E</span> <span class="pre">and</span> <span class="pre">F.</span></span></span><a class="reference internal" href="_modules/common/varfunc.html#ObservableDict.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.varfunc.ObservableDict.update" title="Link to this definition">#</a></dt>
-<dd><p>If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <span class="optional">]</span><em class="sig-param"><span class="n"><span class="pre">**F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Update</span> <span class="pre">D</span> <span class="pre">from</span> <span class="pre">mapping/iterable</span> <span class="pre">E</span> <span class="pre">and</span> <span class="pre">F.</span></span></span><a class="reference internal" href="_modules/common/varfunc.html#ObservableDict.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.varfunc.ObservableDict.update" title="Link to this definition">#</a></dt>
+<dd><p>If E is present and has a .keys() method, then does:  for k in E.keys(): D[k] = E[k]
 If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
 In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 </dd></dl>
@@ -28136,7 +28153,7 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-common.Regression">common.Regression module</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Regression.RegressionPage"><code class="docutils literal notranslate"><span class="pre">RegressionPage</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.Regression.RegressionDock"><code class="docutils literal notranslate"><span class="pre">RegressionDock</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-common.ScheduleTimer">common.ScheduleTimer module</a><ul class="nav section-nav flex-column">

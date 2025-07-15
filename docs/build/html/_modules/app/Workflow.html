@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,25 +388,25 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.Workflow</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
+<span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> 
     <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QDockWidget</span><span class="p">,</span> <span class="n">QToolBar</span> <span class="p">,</span> <span class="n">QStatusBar</span><span class="p">,</span> <span class="n">QLabel</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWebEngineWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWebEngineView</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWebChannel</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWebChannel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QAction</span><span class="p">,</span> <span class="n">QFont</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyqtSlot</span><span class="p">,</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">QUrl</span><span class="p">,</span> <span class="n">QFile</span><span class="p">,</span> <span class="n">QIODevice</span><span class="p">,</span> <span class="n">QSize</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomDockWidget</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.BlocklyModules</span><span class="w"> </span><span class="kn">import</span> <span class="n">LameBlockly</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWebEngineWidgets</span> <span class="kn">import</span> <span class="n">QWebEngineView</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWebChannel</span> <span class="kn">import</span> <span class="n">QWebChannel</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QAction</span><span class="p">,</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSlot</span><span class="p">,</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">QUrl</span><span class="p">,</span> <span class="n">QFile</span><span class="p">,</span> <span class="n">QIODevice</span><span class="p">,</span> <span class="n">QSize</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomDockWidget</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">src.app.BlocklyModules</span> <span class="kn">import</span> <span class="n">LameBlockly</span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;QTWEBENGINE_REMOTE_DEBUGGING&quot;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;9222&quot;</span> <span class="c1">#uncomment to debug in chrome  </span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;QTWEBENGINE_CHROMIUM_FLAGS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--disable-gpu&quot;</span>
 
 <div class="viewcode-block" id="BlocklyBridge">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BlocklyBridge</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">BlocklyBridge</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">output_text_edit</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">output_text_edit</span> <span class="c1"># This will be used to display the generated code</span>
@@ -419,7 +419,7 @@
 <div class="viewcode-block" id="BlocklyBridge.runCode">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.runCode">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">runCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">runCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
         <span class="c1"># Display the received code in the QTextEdit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_text_edit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">code</span><span class="p">)</span></div>
 
@@ -431,14 +431,14 @@
 <div class="viewcode-block" id="BlocklyBridge.executeCode">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.executeCode">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">executeCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">executeCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lame_blockly</span><span class="o">.</span><span class="n">execute_code</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_text_edit</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BlocklyBridge.invokeSetStyleWidgets">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.invokeSetStyleWidgets">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">invokeSetStyleWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">invokeSetStyleWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
         <span class="c1"># Call the set_style_widgets function</span>
         <span class="n">plot_type</span> <span class="o">=</span> <span class="n">plot_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">plot_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lame_blockly</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">style_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -457,14 +457,14 @@
 <div class="viewcode-block" id="BlocklyBridge.getHistogramRange">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.getHistogramRange">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getHistogramRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fieldType</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getHistogramRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fieldType</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lame_blockly</span><span class="o">.</span><span class="n">histogram_get_range</span><span class="p">(</span><span class="n">fieldType</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="BlocklyBridge.getFieldList">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.getFieldList">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getFieldList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getFieldList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;get_field_list&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lame_blockly</span><span class="o">.</span><span class="n">get_field_list</span><span class="p">(</span><span class="n">field_type</span><span class="p">)</span></div>
 
@@ -472,14 +472,14 @@
 <div class="viewcode-block" id="BlocklyBridge.getBaseDir">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.getBaseDir">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getBaseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getBaseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">BASEDIR</span></div>
 
     
 <div class="viewcode-block" id="BlocklyBridge.getRefValueList">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.getRefValueList">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getRefValueList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getRefValueList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lame_blockly</span><span class="o">.</span><span class="n">ref_list</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
 
@@ -487,7 +487,7 @@
 <div class="viewcode-block" id="BlocklyBridge.getSavedLists">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.getSavedLists">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">result</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getSavedLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getSavedLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Exposed method to JavaScript to get the list of saved analyte lists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -499,7 +499,7 @@
 <div class="viewcode-block" id="BlocklyBridge.getCurrentDimensions">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.getCurrentDimensions">[docs]</a>
     <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getCurrentDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getCurrentDimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Exposed method to JavaScript to get the current dx and dy dimensions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -516,7 +516,7 @@
 
 <div class="viewcode-block" id="BlocklyBridge.convert_numpy_types">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.BlocklyBridge.convert_numpy_types">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">convert_numpy_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">convert_numpy_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Recursively convert NumPy types to Python native types. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_numpy_types</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -535,7 +535,7 @@
         
 <div class="viewcode-block" id="Workflow">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.Workflow">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Workflow</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates the workflow method design dock.</span>
 
 <span class="sd">    Use this tool to create workflows using a customized version of Google&#39;s Blockly.</span>
@@ -555,7 +555,7 @@
 <span class="sd">    TypeError</span>
 <span class="sd">        main_window must be an instance of QMainWindow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">main_window</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">main_window</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">main_window</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;main_window must be an instance of QMainWindow.&quot;</span><span class="p">)</span>
 
@@ -673,7 +673,7 @@
 
 <div class="viewcode-block" id="Workflow.handleResizeEvent">
 <a class="viewcode-back" href="../../generated/app.Workflow.html#app.Workflow.Workflow.handleResizeEvent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">handleResizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handleResizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">web_view</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">runJavaScript</span><span class="p">(</span><span class="s2">&quot;resizeBlocklyWorkspace()&quot;</span><span class="p">)</span>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 </div>

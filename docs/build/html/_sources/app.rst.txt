@@ -117,6 +117,14 @@ app.StyleToolbox module
    :undoc-members:
    :show-inheritance:
 
+app.StylingUI module
+-----------------------
+
+.. automodule:: app.StylingUI
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 app.UITheme module
 ------------------
 

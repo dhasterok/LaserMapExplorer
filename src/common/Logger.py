@@ -1,18 +1,9 @@
-import sys, functools, inspect, types
-
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtWidgets import (
-        QMainWindow, QLineEdit, QTextEdit, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
-        QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox, QToolButton, QWidgetAction
-    )
-from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QColor, QTextDocument
-
-from src.common.CustomWidgets import CustomDockWidget, ToggleSwitch
-from src.common.SearchTool import SearchWidget
-
 """
-Logger Module for PyQt6 Applications
-=====================================
+Created on Tues July 8 13:30 2025
+
+@author: Derrick Hasterok (Adelaide University)
+
+*Logger Module for PyQt6 Applications**
 
 This module provides a flexible logging system for PyQt6 GUI applications, featuring:
 
@@ -23,11 +14,9 @@ This module provides a flexible logging system for PyQt6 GUI applications, featu
 - Customizable color-coded prefixes (e.g., 'UI', 'Error', 'Warning')
 - Runtime log control through a `LoggerOptionsDialog`
 
----------------------
-BASIC USAGE EXAMPLES
----------------------
+*BASIC USAGE EXAMPLES*
 
-**1. Log Function Calls with Arguments:**
+1. *Log Function Calls with Arguments:*
 
     .. code-block:: python
 
@@ -37,7 +26,7 @@ BASIC USAGE EXAMPLES
         def button_clicked():
             print("Button was clicked")
 
-**2. Log All Methods in a Class:**
+2. *Log All Methods in a Class:*
 
     .. code-block:: python
         
@@ -51,7 +40,7 @@ BASIC USAGE EXAMPLES
             def save_data(self):
                 pass
         
-**3. Exclude Specific Methods:**
+3. *Exclude Specific Methods:*
 
     .. code-block:: python
 
@@ -62,21 +51,20 @@ BASIC USAGE EXAMPLES
             def helper(self):
                 pass
 
-**4. Add LoggerDock in Your QMainWindow:**
+4. *Add LoggerDock in Your QMainWindow:*
 
     .. code-block:: python
 
         self.logger_options = {"UI": True, "Data": False}
         self.logger_dock = LoggerDock(parent=self)
 
-**5. Customize Log Colors (optional):**
+5. *Customize Log Colors (optional):*
 
     .. code-block:: python
 
         self.log_colors = {"Data": "teal", "CustomTag": "#ffaa00"}
 
-LOGGER OPTIONS / DOCK USER INTERFACE
-------------------------------------
+**LOGGER OPTIONS / DOCK USER INTERFACE**
 
 - Pause/resume toggle: Temporarily stop or resume log output.
 - Search bar: Filter visible log messages.
@@ -84,8 +72,7 @@ LOGGER OPTIONS / DOCK USER INTERFACE
 - Save icon: Exports log to file (default "temp.log").
 - Clear icon: Clears current log view.
 
-LOGGERCONFIG OPTIONS (GLOBAL FLAGS)
------------------------------------
+**LOGGERCONFIG OPTIONS (GLOBAL FLAGS)**
 
 - `LoggerConfig` stores persistent settings accessible globally across the app.
 - `LoggerConfig.set_show_args(True)`: Print function arguments
@@ -96,8 +83,23 @@ To update all logger keys at runtime::
 
     LoggerConfig.set_options({"UI": True, "Data": False, "Custom": True})
 
-COMMON ERROR: Missing `*args`/`**kwargs`
-------------------------------------
+**EXTENDING LOGGER BEHAVIOR**
+
+To support more complex behaviors (e.g. conditional prefixes, advanced color mapping),
+subclass LoggerDock or modify:
+- `LoggerDock.detect_color_from_message(msg)`
+- `LoggerConfig` to store more global flags
+- `auto_log_methods()` to wrap only specific method names
+
+**RECOMMENDED STRUCTURE**
+
+- Attach LoggerDock to your QMainWindow
+- Set `self.logger_options` and optionally `self.log_colors`
+- Use `@log_call` or `@auto_log_methods` on key components, skipping any functions with `@no_log`
+- Enable/disable features at runtime with `LoggerConfig`
+- Export or clear logs using the built-in toolbar
+
+*COMMON ERROR: Missing `*args`/`**kwargs`*
 - If a decorated function causes a crash like:
     `TypeError: wrapper() takes N positional arguments but M were given`
 - Ensure the original function accepts *args and **kwargs::
@@ -105,23 +107,20 @@ COMMON ERROR: Missing `*args`/`**kwargs`
     @log_call("UI")
     def your_function(*args, **kwargs):
         ...
-
-EXTENDING LOGGER BEHAVIOR
--------------------------
-To support more complex behaviors (e.g. conditional prefixes, advanced color mapping),
-subclass LoggerDock or modify:
-- `LoggerDock.detect_color_from_message(msg)`
-- `LoggerConfig` to store more global flags
-- `auto_log_methods()` to wrap only specific method names
-
-RECOMMENDED STRUCTURE
----------------------
-- Attach LoggerDock to your QMainWindow
-- Set `self.logger_options` and optionally `self.log_colors`
-- Use `@log_call` or `@auto_log_methods` on key components, skipping any functions with `@no_log`
-- Enable/disable features at runtime with `LoggerConfig`
-- Export or clear logs using the built-in toolbar
 """
+import sys, functools, inspect, types
+
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtWidgets import (
+        QMainWindow, QLineEdit, QTextEdit, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
+        QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox, QToolButton, QWidgetAction
+    )
+from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QColor, QTextDocument
+
+from src.common.CustomWidgets import CustomDockWidget, ToggleSwitch
+from src.common.SearchTool import SearchWidget
+
+*
 
 _global_logger = None
 

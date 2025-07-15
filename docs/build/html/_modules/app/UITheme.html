@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,13 +388,13 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.UITheme</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">darkdetect</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
 
 <div class="viewcode-block" id="default_font">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.default_font">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">default_font</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">default_font</span><span class="p">():</span>
     <span class="c1"># set default font for application</span>
     <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
     <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
@@ -405,8 +405,8 @@
 
 <div class="viewcode-block" id="UIThemes">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">UIThemes</span><span class="p">():</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">UIThemes</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -421,7 +421,7 @@
 
 <div class="viewcode-block" id="UIThemes.switch_view_mode">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.switch_view_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view_mode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view_mode</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">view_mode</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">view_mode</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="n">view_mode</span>
@@ -443,7 +443,7 @@
 
 <div class="viewcode-block" id="UIThemes.set_dark_theme">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.set_dark_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_dark_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_dark_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">load_stylesheet</span><span class="p">(</span><span class="s1">&#39;dark.qss&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 
@@ -476,8 +476,10 @@
         <span class="c1">#parent.toolButtonClusterColorReset.setIcon(QIcon(os.path.join(ICONPATH,&#39;icon-reset-dark-64.svg&#39;)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonHistogramReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-reset-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="c1"># Plot Tree</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSortAnalyte</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-sort-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonRemovePlot</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-delete-dark-64.svg&#39;</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;plot_tree&quot;</span><span class="p">):</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">actionSortMenu</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-sort-dark-64.svg&#39;</span><span class="p">)))</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">actionRemovePlot</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-delete-dark-64.svg&#39;</span><span class="p">)))</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">actionRemoveAllPlots</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-delete-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="c1"># Samples</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-atom-dark-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonScaleEqualize</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-histeq-dark-64.svg&#39;</span><span class="p">)))</span>
@@ -554,7 +556,7 @@
 
 <div class="viewcode-block" id="UIThemes.set_light_theme">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.set_light_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_light_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_light_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">load_stylesheet</span><span class="p">(</span><span class="s1">&#39;light.qss&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 
@@ -594,8 +596,11 @@
             <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">actionClusterColorReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonHistogramReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
         <span class="c1"># Plot Tree</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSortAnalyte</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-sort-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonRemovePlot</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;plot_tree&quot;</span><span class="p">):</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">actionSortMenu</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-sort-64.svg&#39;</span><span class="p">)))</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">actionRemovePlot</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">actionRemoveAllPlots</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
+
         <span class="c1"># Samples</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-atom-64.svg&#39;</span><span class="p">)))</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonScaleEqualize</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ICONPATH</span><span class="p">,</span><span class="s1">&#39;icon-histeq-64.svg&#39;</span><span class="p">)))</span>

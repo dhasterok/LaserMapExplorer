@@ -270,26 +270,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # connect actions to docks
         #-------------------------
-        self.actionFilters.triggered.connect(lambda: self.open_mask_dock('filter'))
-        self.actionPolygons.triggered.connect(lambda: self.open_mask_dock('polygon'))
-        self.actionClusters.triggered.connect(lambda: self.open_mask_dock('cluster'))
-        self.actionProfiles.triggered.connect(self.open_profile)
-        self.actionCalculator.triggered.connect(self.open_calculator)
+        self.actionFilters.triggered.connect(lambda _: self.open_mask_dock('filter'))
+        self.actionPolygons.triggered.connect(lambda _: self.open_mask_dock('polygon'))
+        self.actionClusters.triggered.connect(lambda _: self.open_mask_dock('cluster'))
+        self.actionProfiles.triggered.connect(lambda _: self.open_profile())
+        self.actionCalculator.triggered.connect(lambda _: self.open_calculator())
         self.open_calculator()
         self.calculator.hide()
-        self.actionNotes.triggered.connect(self.open_notes)
-        if hasattr(self,'notes'):
-            # this won't do anything so it needs to get added somewhere else
-            self.notes.update_equation_menu()
-        self.actionLogger.triggered.connect(self.open_logger)
-        self.actionWorkflowTool.triggered.connect(self.open_workflow)
+        self.actionNotes.triggered.connect(lambda _: self.open_notes())
+        self.actionLogger.triggered.connect(lambda _: self.open_logger())
+        self.actionWorkflowTool.triggered.connect(lambda _: self.open_workflow())
         self.info_tab = {}
-        self.actionInfo.triggered.connect(self.open_info_dock)
+        self.actionInfo.triggered.connect(lambda _: self.open_info_dock())
 
         self.io = LameIO(parent=self, connect_actions=True)
 
         self.actionHelp.setCheckable(True)
-        self.actionHelp.toggled.connect(self.toggle_help_mode)
+        self.actionHelp.toggled.connect(lambda _: self.toggle_help_mode())
 
         # initialize used classes
         self.crop_tool = CropTool(self)
@@ -304,9 +301,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.theme = UIThemes(self.app, self)
 
     def connect_actions(self):
-        self.actionReportBug.triggered.connect(lambda: self.open_browser('report_bug'))
-        self.actionUserGuide.triggered.connect(lambda: self.open_browser('user_guide'))
-        self.actionTutorials.triggered.connect(lambda: self.open_browser('tutorials'))
+        self.actionReportBug.triggered.connect(lambda _: self.open_browser('report_bug'))
+        self.actionUserGuide.triggered.connect(lambda _: self.open_browser('user_guide'))
+        self.actionTutorials.triggered.connect(lambda _: self.open_browser('tutorials'))
         self.actionSelectAnalytes.triggered.connect(lambda _: self.open_select_analyte_dialog())
 
     def connect_widgets(self):
@@ -424,10 +421,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         parentbox : CustomComboBox
             Field type comobobox to be updated on popup
-        childbox : CustomComboBox (optional)
+        childbox : CustomComboBox, optional
             Field combobox associated with parent combobox, by default None
-        ax : int (optional)
+        ax : int, optional
             Axis index, by default None
+        user_activated : bool, optional
+            Indicates whether the call is user activated (True) or in response to
+            code (False), by default False
         """
         if self.app_data.sample_id == '' or self.plot_style.plot_type == '':
             return
@@ -518,11 +518,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         childbox : CustomComboBox
             Field combobox to be updated on popup
-        parentbox : CustomComboBox (optional)
+        parentbox : CustomComboBox, optional
             Field type comobobox associated with child combobox, by default None
-        ax : int (optional)
+        ax : int, optional
             Axis index, by default None
-        user_activated : bool (optional)
+        user_activated : bool, optional
             Indicates whether the call is user activated (True) or in response to
             code (False), by default False
         """
@@ -1333,7 +1333,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # initiate the sample change
         self.change_sample()
 
-    def update_plot_type_combobox_options(self, *args, **kwargs):
+    def update_plot_type_combobox_options(self):
         """Updates plot type combobox based on current toolbox index or certain dock widget controls."""
         if self.profile_state == True or self.polygon_state == True:
             plot_idx = -1
@@ -1603,7 +1603,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # -------------------------------------
     # Dialogs and Windows
     # -------------------------------------
-    def open_plot_tree(self, *args, **kwargs):
+    def open_plot_tree(self):
         """Opens Plot Tree dock
 
         Opens Plot Tree dock, creates on first instance.  The Plot Tree is used to manage
@@ -1622,7 +1622,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.plot_tree.show()
 
-    def open_workflow(self, *args, **kwargs):
+    def open_workflow(self):
         """Opens Workflow dock.
 
         Opens Workflow dock, creates on first instance.  The Workflow is used to design
@@ -1648,7 +1648,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Parameters
         ----------
-        tab_name : str (optional)
+        tab_name : str, optional
             Will open the dock to the requested tab, options include 'filter', 'polygon'
             and cluster', by default None
         """
@@ -1713,7 +1713,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.regression_dock.show()
 
-    def open_notes(self, *args, **kwargs):
+    def open_notes(self):
         """Opens Notes Dock
 
         Opens Notes Dock, creates on first instance.  The notes can be used to record
@@ -1732,6 +1732,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.notes = Notes(self, notes_file)
 
+            self.notes.update_equation_menu()
+
             if not (self.notes in self.help_mapping.keys()):
                 self.help_mapping[self.notes] = 'notes'
 
@@ -1739,7 +1741,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
 
-    def open_calculator(self, *args, **kwargs):
+    def open_calculator(self):
         """Opens Calculator dock
 
         Opens Calculator dock, creates on first instance.  The Calculator is used to compute
@@ -1755,7 +1757,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.calculator.show()
         #self.calculator.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-    def open_info_dock(self, *args, **kwargs):
+    def open_info_dock(self):
         """Opens Info Dock.
         
         Opens Info Dock, creates on first instance.  The Info Dock can be used to interrogate 
@@ -1780,7 +1782,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.help_mapping[self.info_dock] = 'info_tool'
 
-    def open_logger(self, *args, **kwargs):
+    def open_logger(self):
         """Creates or shows Logger Dock
 
         Creates or opens a dock-based logger.  The logger dock prints information that can be
@@ -1799,7 +1801,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         #self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
-    def open_browser(self, action=None, *args, **kwargs):
+    def open_browser(self, action=None):
         """Opens Browser dock with documentation
 
         Opens Browser dock, creates on first instance.
@@ -1821,7 +1823,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             case _:
                 self.browser.go_to_home()
 
-    def open_select_analyte_dialog(self, *args, **kwargs):
+    def open_select_analyte_dialog(self):
         """Opens Select Analyte dialog
 
         Opens a dialog to select analytes for analysis either graphically or in a table.  

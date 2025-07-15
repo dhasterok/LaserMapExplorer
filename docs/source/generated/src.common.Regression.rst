@@ -8,5 +8,5 @@
 
    .. autosummary::
    
-      RegressionPage
+      RegressionDock
    

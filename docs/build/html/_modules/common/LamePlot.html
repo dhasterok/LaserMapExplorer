@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,30 +388,36 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.LamePlot</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.gridspec</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gs</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QVBoxLayout</span>
+
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="n">GraphicsLayoutWidget</span><span class="p">,</span> <span class="n">ImageItem</span><span class="p">,</span> <span class="n">colormap</span><span class="p">,</span> <span class="n">TargetItem</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gs</span>
 <span class="c1">#import matplotlib.pyplot as plt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Patch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Patch</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.colorfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.plot_spider</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_spider_norm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.radar</span><span class="w"> </span><span class="kn">import</span> <span class="n">Radar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.scalebar</span><span class="w"> </span><span class="kn">import</span> <span class="n">scalebar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ternary_plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">ternary</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">log_call</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">import</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="k">as</span> <span class="nn">mplc</span>
+<span class="kn">import</span> <span class="nn">src.common.format</span> <span class="k">as</span> <span class="nn">fmt</span>
+<span class="kn">from</span> <span class="nn">src.common.colorfunc</span> <span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
+<span class="kn">from</span> <span class="nn">src.common.plot_spider</span> <span class="kn">import</span> <span class="n">plot_spider_norm</span>
+<span class="kn">from</span> <span class="nn">src.common.radar</span> <span class="kn">import</span> <span class="n">Radar</span>
+<span class="kn">from</span> <span class="nn">src.common.scalebar</span> <span class="kn">import</span> <span class="n">scalebar</span>
+<span class="kn">from</span> <span class="nn">src.common.ternary_plot</span> <span class="kn">import</span> <span class="n">ternary</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">log_call</span><span class="p">,</span> <span class="n">log</span>
 
 <div class="viewcode-block" id="plot_map_mpl">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_map_mpl">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_map_mpl</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">add_histogram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_map_mpl</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">add_histogram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.</span>
 
@@ -526,7 +532,7 @@
     <span class="c1">#canvas.axes.set_ylim(ymin,ymax)</span>
 
     <span class="c1"># add scalebar</span>
-    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
@@ -557,7 +563,7 @@
 <div class="viewcode-block" id="plot_map_pg">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_map_pg">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_map_pg</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_map_pg</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a graphic widget for plotting a map</span>
 
 <span class="sd">        Create a map using pyqtgraph.</span>
@@ -618,7 +624,7 @@
                 <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y_range</span><span class="p">)</span>
 
         <span class="c1">#--- add non-interactive image with integrated color ------------------</span>
-        <span class="n">plotWindow</span> <span class="o">=</span> <span class="n">graphicWidget</span><span class="o">.</span><span class="n">addPlot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
+        <span class="n">plotWindow</span> <span class="o">=</span> <span class="n">graphicWidget</span><span class="o">.</span><span class="n">addPlot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
 
         <span class="n">plotWindow</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">img_item</span><span class="p">)</span>
 
@@ -735,21 +741,32 @@
 
         <span class="c1"># add small histogram</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">left_tab</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">canvas_tab</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]):</span>
-            <span class="n">plot_small_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">],</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="p">,</span> <span class="n">map_df</span><span class="p">)</span></div>
+            <span class="n">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">],</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="p">,</span> <span class="n">map_df</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="plot_small_histogram">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_small_histogram">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">current_plot_df</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">current_plot_df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a small histogram on the Samples and Fields tab associated with the selected map</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    current_plot_df : dict</span>
-<span class="sd">        Current data for plotting</span>
-<span class="sd">    field : str</span>
-<span class="sd">        Name of field to plot</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        The parent widget for the plot canvas.</span>
+<span class="sd">    data : object</span>
+<span class="sd">        Data object containing processed data, mask, and methods for retrieving map data.</span>
+<span class="sd">    app_data : object</span>
+<span class="sd">        Application data object containing settings such as color scale equalization and sample ID.</span>
+<span class="sd">    plot_style : object</span>
+<span class="sd">        Plot style object providing colormap, normalization, and style dictionary.</span>
+<span class="sd">    current_plot_df : pd.DataFrame</span>
+<span class="sd">        DataFrame containing the current plot data, typically the map data for the selected field.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The Matplotlib canvas containing the plotted histogram.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;plot_small_histogram&#39;)</span>
     <span class="c1"># create Mpl canvas</span>
@@ -826,8 +843,25 @@
 <div class="viewcode-block" id="plot_histogram">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_histogram">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots a histogramn in the canvas window&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">plot_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots a histogramn in the canvas window.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        The parent widget for the plot canvas.</span>
+<span class="sd">    data : object</span>
+<span class="sd">        Data object containing processed data, mask, and methods for retrieving map data.</span>
+<span class="sd">    app_data : object</span>
+<span class="sd">        Application data object containing settings such as color scale equalization and sample ID.</span>
+<span class="sd">    plot_style : object</span>
+<span class="sd">        Plot style object providing colormap, normalization, and style dictionary.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The Matplotlib canvas containing the plotted histogram.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">plot_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1">#print(&#39;plot histogram&#39;)</span>
@@ -840,6 +874,7 @@
     <span class="c1">#    analyte_1 = field.split(&#39; / &#39;)[0]</span>
     <span class="c1">#    analyte_2 = field.split(&#39; / &#39;)[1]</span>
 
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">app_data</span><span class="o">.</span><span class="n">hist_plot_style</span> <span class="o">==</span> <span class="s1">&#39;log-scaling&#39;</span> <span class="ow">and</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field_type</span> <span class="o">==</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;raw_data for log-scaling&#39;</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">get_scatter_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
@@ -1035,16 +1070,24 @@
 <div class="viewcode-block" id="logax">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.logax">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">logax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">lim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">tick_label_rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">logax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">lim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">tick_label_rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Produces log-axes limits and labels.</span>
+<span class="sd">    Creates a logarithmic axis with tick marks and labels for a given axis.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    ax (matplotlib.axes.Axes): The axes to modify.</span>
-<span class="sd">    lim (list): The log10 values of the axes limits.</span>
-<span class="sd">    axis (str): &#39;x&#39; or &#39;y&#39; to add ticks to x- or y-axis, default is &#39;y&#39;.</span>
-<span class="sd">    label (str): Label for the axis.</span>
-<span class="sd">    tick_label_rotation (float): Angle of text rotation, default is 0.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : matplotlib.axes.Axes</span>
+<span class="sd">        The axes object to modify.</span>
+<span class="sd">    lim : list or tuple</span>
+<span class="sd">        The limits for the logarithmic axis, e.g., [1, 3] for 10^1 to 10^3.</span>
+<span class="sd">    axis : str, optional</span>
+<span class="sd">        The axis to apply the logarithmic scale to, either &#39;x&#39; or &#39;y&#39;.</span>
+<span class="sd">        Defaults to &#39;y&#39;.</span>
+<span class="sd">    label : str, optional</span>
+<span class="sd">        The label for the axis. If provided, it will be set as the axis label.</span>
+<span class="sd">        Defaults to an empty string.</span>
+<span class="sd">    tick_label_rotation : int, optional</span>
+<span class="sd">        The rotation angle for the tick labels. Defaults to 0 (no rotation).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Create tick marks and labels</span>
     <span class="n">mt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
@@ -1073,11 +1116,13 @@
 
 <div class="viewcode-block" id="add_colorbar">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.add_colorbar">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_colorbar</span><span class="p">(</span><span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_colorbar</span><span class="p">(</span><span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds a colorbar to a MPL figure</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    canvas : mplc.MplCanvas</span>
 <span class="sd">        canvas object</span>
 <span class="sd">    cax : axes</span>
@@ -1086,6 +1131,10 @@
 <span class="sd">        Type of colorbar, ``dicrete`` or ``continuous``, Defaults to continuous</span>
 <span class="sd">    grouplabels : list of str, optional</span>
 <span class="sd">        category/group labels for tick marks</span>
+<span class="sd">    groupcolors : list of str, optional</span>
+<span class="sd">        List of colors for each group/category, used for discrete colorbars.</span>
+<span class="sd">    alpha : float, optional</span>
+<span class="sd">        Transparency of the colorbar, defaults to 1 (opaque).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&quot;add_colorbar&quot;)</span>
     <span class="c1"># Add a colorbar</span>
@@ -1170,11 +1219,17 @@
 <div class="viewcode-block" id="add_scalebar">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.add_scalebar">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_scalebar</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a scalebar to a map</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    ax : </span>
 <span class="sd">        Axes to place scalebar on.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
@@ -1202,8 +1257,28 @@
 <div class="viewcode-block" id="plot_correlation">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_correlation">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_correlation</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates an image of the correlation matrix&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">plot_correlation</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an image of the correlation matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : mplc.MplCanvas</span>
+<span class="sd">        The canvas containing the correlation plot.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the correlation matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;plot_correlation&#39;)</span>
 
     <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
@@ -1306,7 +1381,31 @@
 <div class="viewcode-block" id="get_scatter_data">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.get_scatter_data">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_scatter_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_scatter_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get data for scatter plots.</span>
+
+<span class="sd">    This function retrieves the necessary data vectors for scatter plots based on the</span>
+<span class="sd">    specified plot style and application settings. It constructs a dictionary containing</span>
+<span class="sd">    vectors for the x, y, z, and c axes, which can be used for plotting scatter or heatmap</span>
+<span class="sd">    visualizations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+<span class="sd">    processed : bool, optional</span>
+<span class="sd">        If True, use processed data; if False, use raw data. Defaults to True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    scatter_dict : dict</span>
+<span class="sd">        Dictionary containing vectors for x, y, z, and c axes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">scatter_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;array&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
             <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;array&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
@@ -1362,15 +1461,35 @@
 <div class="viewcode-block" id="plot_scatter">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_scatter">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_scatter</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_scatter</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a plots from self.toolBox Scatter page.</span>
 
 <span class="sd">    Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.</span>
+<span class="sd">    This function retrieves the necessary data vectors for scatter plots based on the</span>
+<span class="sd">    specified plot style and application settings. It constructs a dictionary containing</span>
+<span class="sd">    vectors for the x, y, z, and c axes, which can be used for plotting scatter or heatmap</span>
+<span class="sd">    visualizations.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        The parent widget for the plot canvas.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    canvas : MplCanvas</span>
 <span class="sd">        canvas within gui for plotting, by default ``None``</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The Matplotlib canvas containing the plotted scatter or heatmap.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the x, y, z, and c data</span>
+<span class="sd">        and the plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;plot_scatter&#39;)</span>
     <span class="n">plot_type</span> <span class="o">=</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span> 
@@ -1390,19 +1509,40 @@
         <span class="k">case</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
                 <span class="c1"># biplot</span>
-                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">biplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
+                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">biplot</span><span class="p">(</span>
+                    <span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># ternary</span>
-                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">ternary_scatter</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
+                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">ternary_scatter</span><span class="p">(</span>
+                    <span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+                <span class="p">)</span>
 
         <span class="c1"># heatmap</span>
         <span class="k">case</span> <span class="s1">&#39;heatmap&#39;</span><span class="p">:</span>
             <span class="c1"># biplot</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">][</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
-                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">hist2dbiplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">hist2dbiplot</span><span class="p">(</span>
+                    <span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+                <span class="p">)</span>
             <span class="c1"># ternary</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">hist2dternplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">],</span><span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
+                <span class="n">plot_info</span> <span class="o">=</span> <span class="n">hist2dternplot</span><span class="p">(</span>
+                    <span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
+                    <span class="n">scatter_dict</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+                <span class="p">)</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
@@ -1415,7 +1555,7 @@
 <div class="viewcode-block" id="biplot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.biplot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">biplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">biplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates scatter bi-plots</span>
 
 <span class="sd">    A general function for creating scatter plots of 2-dimensions.</span>
@@ -1424,14 +1564,24 @@
 <span class="sd">    ----------</span>
 <span class="sd">    canvas : MplCanvas</span>
 <span class="sd">        Canvas to be added to main window</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    x : dict</span>
 <span class="sd">        Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as x coordinate</span>
 <span class="sd">    y : dict</span>
 <span class="sd">        Data associated with field ``MainWindow.comboBoxFieldX.currentText()`` as y coordinate</span>
 <span class="sd">    c : dict</span>
 <span class="sd">        Data associated with field ``MainWindow.comboBoxColorField.currentText()`` as marker colors</span>
-<span class="sd">    style : dict</span>
-<span class="sd">        Style parameters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the x, y, and c data</span>
+<span class="sd">        and the plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="c1"># single color</span>
@@ -1542,7 +1692,7 @@
 <div class="viewcode-block" id="ternary_scatter">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.ternary_scatter">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ternary_scatter</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">ternary_scatter</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates ternary scatter plots</span>
 
 <span class="sd">    A general function for creating ternary scatter plots.</span>
@@ -1551,6 +1701,12 @@
 <span class="sd">    ----------</span>
 <span class="sd">    canvas : MplCanvas</span>
 <span class="sd">        Canvas that contains axes and figure</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    x : dict</span>
 <span class="sd">        coordinate associated with top vertex</span>
 <span class="sd">    y : dict</span>
@@ -1559,10 +1715,17 @@
 <span class="sd">        coordinate associated with right vertex</span>
 <span class="sd">    c : dict</span>
 <span class="sd">        color dimension</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the x, y, z, and c data</span>
+<span class="sd">        and the plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]]</span>
     <span class="n">tp</span> <span class="o">=</span> <span class="n">ternary</span><span class="p">(</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
 
+    <span class="n">plot_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="n">tp</span><span class="o">.</span><span class="n">ternscatter</span><span class="p">(</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span>
                 <span class="n">marker</span><span class="o">=</span><span class="n">plot_style</span><span class="o">.</span><span class="n">marker_dict</span><span class="p">[</span><span class="n">plot_style</span><span class="o">.</span><span class="n">marker</span><span class="p">],</span>
@@ -1644,7 +1807,7 @@
 <div class="viewcode-block" id="hist2dbiplot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.hist2dbiplot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">hist2dbiplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">hist2dbiplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates 2D histogram figure</span>
 
 <span class="sd">    A general function for creating 2D histograms (heatmaps).</span>
@@ -1653,10 +1816,22 @@
 <span class="sd">    ----------</span>
 <span class="sd">    canvas : MplCanvas</span>
 <span class="sd">        plotting canvas</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    x : dict</span>
 <span class="sd">        X-axis dictionary</span>
 <span class="sd">    y : dict</span>
 <span class="sd">        Y-axis dictionary</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the x and y data</span>
+<span class="sd">        and the plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># color by field</span>
     <span class="n">norm</span> <span class="o">=</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">color_norm</span><span class="p">()</span>
@@ -1722,21 +1897,23 @@
 <div class="viewcode-block" id="hist2dternplot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.hist2dternplot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">hist2dternplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">hist2dternplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a ternary histogram figure</span>
 
 <span class="sd">    A general function for creating scatter plots of 2-dimensions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    fig : matplotlib.figure</span>
-<span class="sd">        Figure object</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        Canvas that contains axes and figure</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 <span class="sd">    x, y, z : dict</span>
 <span class="sd">        Coordinates associated with top, left and right vertices, respectively</span>
-<span class="sd">    style:  dict</span>
-<span class="sd">        Style parameters</span>
-<span class="sd">    save : bool</span>
-<span class="sd">        Saves figure widget to plot tree</span>
 <span class="sd">    c : str</span>
 <span class="sd">        Display, mean, median, standard deviation plots for a fourth dimension in</span>
 <span class="sd">        addition to histogram map. Default is None, which produces a histogram.</span>
@@ -1791,13 +1968,37 @@
 <div class="viewcode-block" id="plot_ternary_map">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_ternary_map">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_ternary_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates map colored by ternary coordinate positions&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">plot_ternary_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates map colored by ternary coordinate positions.</span>
+
+<span class="sd">    This function generates a ternary map plot using the specified x, y, and z fields from the</span>
+<span class="sd">    processed data. It uses the ternary library to create a ternary plot and displays it</span>
+<span class="sd">    on a Matplotlib canvas. The plot is styled according to the provided PlotStyle object.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the ternary map plot.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the x, y, z fields and the plot type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">!=</span> <span class="s1">&#39;ternary map&#39;</span><span class="p">:</span>
         <span class="n">app_data</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;ternary map&#39;</span>
         <span class="n">plot_style</span><span class="o">.</span><span class="n">set_style_widgets</span><span class="p">(</span><span class="s1">&#39;ternary map&#39;</span><span class="p">)</span>
 
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">sub</span><span class="o">=</span><span class="mi">121</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">sub</span><span class="o">=</span><span class="mi">121</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">afield</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">x_field</span>
     <span class="n">bfield</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">y_field</span>
@@ -1826,7 +2027,7 @@
     <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">map_data</span>
 
     <span class="c1"># add scalebar</span>
-    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
     <span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">cbar_dir</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
@@ -1878,14 +2079,34 @@
 <div class="viewcode-block" id="plot_ndim">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_ndim">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_ndim</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_ndim</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Produces trace element compatibility (TEC) and Radar plots</span>
 <span class="sd">    </span>
-<span class="sd">    Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider diagrams, which display a set of elements</span>
-<span class="sd">    arranged by compatibility.  Radar plots show data displayed on a set of radial spokes (axes), giving the appearance of a radar screen</span>
+<span class="sd">    Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider</span>
+<span class="sd">    diagrams, which display a set of elements arranged by compatibility.  Radar plots show</span>
+<span class="sd">    data displayed on a set of radial spokes (axes), giving the appearance of a radar screen</span>
 <span class="sd">    or spider web.</span>
 <span class="sd">    </span>
-<span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+<span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure</span>
+<span class="sd">    ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the TEC or Radar plot.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the fields and plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">app_data</span><span class="o">.</span><span class="n">ndim_list</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
@@ -2046,10 +2267,30 @@
 <div class="viewcode-block" id="plot_score_map">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_score_map">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_score_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots score maps</span>
+<span class="k">def</span> <span class="nf">plot_score_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots score maps for dimensionality reduction methods such as PCA or clustering.</span>
 
 <span class="sd">    Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.</span>
+<span class="sd">    The function uses the processed data from the DataHandler and the selected field from AppData</span>
+<span class="sd">    to generate the score map. The plot is styled according to the provided PlotStyle object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the score map plot.</span>
+<span class="sd">    field_data : pd.Series</span>
+<span class="sd">        The data series corresponding to the selected field for the score map.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
@@ -2084,7 +2325,7 @@
     <span class="c1">#canvas.axes.set_axis_off()</span>
 
     <span class="c1"># add scalebar</span>
-    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span></div>
 
@@ -2092,7 +2333,7 @@
 <div class="viewcode-block" id="plot_pca">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot principal component analysis (PCA)</span>
 <span class="sd">    </span>
 <span class="sd">    Wrapper for one of four types of PCA plots:</span>
@@ -2100,6 +2341,24 @@
 <span class="sd">    * ``plot_pca_vectors()`` a plot of PCA vector components as a heatmap</span>
 <span class="sd">    * uses ``plot_scatter()`` and ``plot_pca_components`` to produce both scatter and heatmaps of PCA scores with vector components.</span>
 <span class="sd">    * ``plot_score_map()`` produces a plot of PCA scores for a single component as a map</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the PCA plot.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the fields and plot type.</span>
 
 <span class="sd">    .. seealso::</span>
 <span class="sd">        ``MainWindow.plot_scatter``</span>
@@ -2176,13 +2435,24 @@
 <div class="viewcode-block" id="plot_pca_variance">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca_variance">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_variance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca_variance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a plot of explained variance, individual and cumulative, for PCA</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    pca_results : PCA</span>
+<span class="sd">        PCA results object containing explained variance ratios.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mplc.MplCanvas</span>
-<span class="sd">        </span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the PCA variance plot.</span>
+<span class="sd">    plot_data : pd.DataFrame</span>
+<span class="sd">        DataFrame containing the principal components, variance ratios, and cumulative variance ratios.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
     <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
@@ -2234,13 +2504,28 @@
 <div class="viewcode-block" id="plot_pca_vectors">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca_vectors">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_vectors</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca_vectors</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Displays a heat map of PCA vector components</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    pca_results : PCA</span>
+<span class="sd">        PCA results object containing the components.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mplc.MplCanvas</span>
-<span class="sd">        Creates figure on mplc.MplCanvas</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the PCA vector components heatmap.</span>
+<span class="sd">    plot_data : pd.DataFrame</span>
+<span class="sd">        DataFrame containing the PCA components, with columns for each variable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
     <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
@@ -2308,16 +2593,29 @@
 <div class="viewcode-block" id="plot_pca_components">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca_components">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_components</span><span class="p">(</span><span class="n">pca_results</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span><span class="n">canvas</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca_components</span><span class="p">(</span><span class="n">pca_results</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span><span class="n">canvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds vector components to PCA scatter and heatmaps</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    canvas : mplc.MplCanvas</span>
-<span class="sd">        Canvas object for plotting</span>
+<span class="sd">    pca_results : PCA</span>
+<span class="sd">        PCA results object containing the components.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the PCA scatter or heatmap plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    plot_data : pd.DataFrame</span>
+<span class="sd">        DataFrame containing the PCA components, with columns for each variable.</span>
 
 <span class="sd">    .. seealso::</span>
-<span class="sd">        ``MainWindow.plot_pca_vectors``</span>
+<span class="sd">        plot_pca_vectors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;plot_pca_components&#39;)</span>
     <span class="k">if</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">line_width</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -2360,10 +2658,30 @@
 <div class="viewcode-block" id="plot_clusters">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_clusters">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_clusters</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_clusters</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot maps associated with clustering</span>
 
 <span class="sd">    Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.</span>
+<span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure</span>
+<span class="sd">    ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the clustering plot.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the fields and plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
     <span class="k">if</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">return</span>
@@ -2371,7 +2689,7 @@
     <span class="n">plot_type</span> <span class="o">=</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">cluster_method</span>
     <span class="k">match</span> <span class="n">plot_type</span><span class="p">:</span>
-        <span class="k">case</span> <span class="s1">&#39;cluster&#39;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s1">&#39;cluster map&#39;</span><span class="p">:</span>
             <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">_map&quot;</span>
             <span class="n">canvas</span><span class="p">,</span> <span class="n">plot_data</span> <span class="o">=</span> <span class="n">plot_cluster_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">)</span>
         <span class="k">case</span> <span class="s1">&#39;cluster score&#39;</span><span class="p">:</span>
@@ -2406,7 +2724,7 @@
 <div class="viewcode-block" id="cluster_performance_plot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.cluster_performance_plot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cluster_performance_plot</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">cluster_performance_plot</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots used to estimate the optimal number of clusters</span>
 
 <span class="sd">    1. Elbow Method</span>
@@ -2436,6 +2754,24 @@
 <span class="sd">    * Run KMeans for a range of cluster numbers (k).</span>
 <span class="sd">    * Calculate the silhouette score for each k.</span>
 <span class="sd">    * Choose the k with the highest silhouette score.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the cluster performance plot.</span>
+<span class="sd">    plot_info : dict</span>
+<span class="sd">        Dictionary containing information about the plot, including the fields and plot type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
     <span class="k">if</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">return</span>
@@ -2526,10 +2862,30 @@
 <div class="viewcode-block" id="plot_cluster_map">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_cluster_map">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_cluster_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_cluster_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Produces a map of cluster categories</span>
 <span class="sd">    </span>
 <span class="sd">    Creates the map on an ``mplc.MplCanvas``.  Each cluster category is assigned a unique color.</span>
+<span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure</span>
+<span class="sd">    ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent : QWidget</span>
+<span class="sd">        Parent widget for the plot.</span>
+<span class="sd">    data : DataHandler</span>
+<span class="sd">        DataHandler object containing the processed data.</span>
+<span class="sd">    app_data : AppData</span>
+<span class="sd">        AppData object containing application settings and user preferences.</span>
+<span class="sd">    plot_style : PlotStyle</span>
+<span class="sd">        PlotStyle object containing style settings for the plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    canvas : MplCanvas</span>
+<span class="sd">        The canvas containing the cluster map plot.</span>
+<span class="sd">    plot_data : pd.Series</span>
+<span class="sd">        Series containing the cluster labels for each data point.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
@@ -2567,7 +2923,7 @@
     <span class="c1">#canvas.axes.set_axis_off()</span>
 
     <span class="c1"># add scalebar</span>
-    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span><span class="n">plot_style</span><span class="p">,</span><span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="p">[</span><span class="n">method</span><span class="p">]</span></div>
 

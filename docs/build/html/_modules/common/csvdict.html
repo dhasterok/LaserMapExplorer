@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,11 +388,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.csvdict</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span></span><span class="kn">import</span> <span class="nn">csv</span>
 
 <div class="viewcode-block" id="import_csv_to_dict">
 <a class="viewcode-back" href="../../generated/common.csvdict.html#common.csvdict.import_csv_to_dict">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">import_csv_to_dict</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">import_csv_to_dict</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Imports a csv to a dictionary</span>
 
 <span class="sd">    Imports a csv in the format produced by ``MainWindow.export_dict_to_csv``</span>
@@ -419,7 +419,7 @@
 
 <div class="viewcode-block" id="export_dict_to_csv">
 <a class="viewcode-back" href="../../generated/common.csvdict.html#common.csvdict.export_dict_to_csv">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">export_dict_to_csv</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">export_dict_to_csv</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exports a dictionary to csv file</span>
 
 <span class="sd">    Explorts a simple dictionary that includes a set of keyword associated with lists to a csv.</span>
@@ -447,7 +447,7 @@
 
 <div class="viewcode-block" id="export_filtered_dict_to_csv">
 <a class="viewcode-back" href="../../generated/common.csvdict.html#common.csvdict.export_filtered_dict_to_csv">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">export_filtered_dict_to_csv</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">filter_key</span><span class="p">,</span> <span class="n">filter_val</span><span class="p">,</span> <span class="n">selected_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">export_filtered_dict_to_csv</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">filter_key</span><span class="p">,</span> <span class="n">filter_val</span><span class="p">,</span> <span class="n">selected_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Exports specific items from a dictionary to a CSV file based on conditions.</span>
 

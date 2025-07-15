@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,12 +388,12 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.ExtendedDF</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <div class="viewcode-block" id="AttributeDataFrame">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AttributeDataFrame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">AttributeDataFrame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a pandas DataFrame with custom attributes stored with each column.</span>
 
 <span class="sd">    Create a dataframe with column attributes or add attributes to existing columns of a</span>
@@ -478,10 +478,10 @@
     <span class="n">_metadata</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;column_attributes&#39;</span><span class="p">]</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">AttributeDataFrame</span>
     
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="c1"># Initialize column attributes</span>
@@ -496,7 +496,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">attribute_callback</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
             <span class="n">result</span><span class="o">.</span><span class="n">column_attributes</span> <span class="o">=</span> <span class="p">{</span>
@@ -543,7 +543,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.is_attribute">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.is_attribute">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">is_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">is_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a given attribute exists for the specified column.</span>
 
 <span class="sd">        Parameters</span>
@@ -563,7 +563,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.show_attributes">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.show_attributes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">show_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">show_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Displays all attributes for a specific column or for the entire DataFrame.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">column</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="p">{})</span>
@@ -572,7 +572,7 @@
     
 <div class="viewcode-block" id="AttributeDataFrame.get_attribute">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.get_attribute">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a single attribute from an AttributeDataFrame for one or more columns.</span>
 
@@ -611,7 +611,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">column_attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set attribute of an AttributeDataFrame</span>
 
 <span class="sd">        Adds an attribute to a dataframe</span>
@@ -639,7 +639,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.set_attribute">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.set_attribute">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set an attribute for one or more columns.</span>
 <span class="sd">        </span>
@@ -691,7 +691,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.match_attribute">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.match_attribute">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">match_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">match_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of columns where a specific attribute matches the given value.</span>
 
@@ -715,7 +715,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.match_attributes">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.match_attributes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">match_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes_dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">match_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of columns where each attribute matches its corresponding value.</span>
 
@@ -735,7 +735,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.get_attribute_dict">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.get_attribute_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_attribute_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_attribute_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a dictionary from an attribute where the unique values of the attribute becomes the</span>
 <span class="sd">        keys and the items are lists with the column names that match each attribute_name.</span>
@@ -768,7 +768,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.attributes_to_dataframe">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">attributes_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">attributes_to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return selected attributes of all columns in the AttributeDataFrame as a new DataFrame.</span>
 
@@ -818,7 +818,7 @@
 
 <div class="viewcode-block" id="AttributeDataFrame.copy_columns">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.copy_columns">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">copy_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">copy_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract specified columns into a new AttributeDataFrame, preserving their attributes.</span>
 <span class="sd">        If no columns are specified, all columns will be copied.</span>
@@ -874,7 +874,7 @@
     <span class="c1"># Function to reorder both columns and attributes</span>
 <div class="viewcode-block" id="AttributeDataFrame.sort_columns">
 <a class="viewcode-back" href="../../generated/common.ExtendedDF.html#common.ExtendedDF.AttributeDataFrame.sort_columns">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sort_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sorted_columns</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">sort_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sorted_columns</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sorts columns and attributes of an AttributeDataFrame object.</span>
 
 <span class="sd">        Parameters</span>

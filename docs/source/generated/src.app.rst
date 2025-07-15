@@ -32,6 +32,7 @@
    SpotImporter
    SpotTools
    StyleToolbox
+   StylingUI
    UITheme
    Workflow
    base_dialog

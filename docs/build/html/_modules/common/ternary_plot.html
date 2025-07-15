@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -396,21 +396,21 @@
 <span class="sd">@author: Shavin Kaluthantri and Derrick Hasterok</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.figure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Figure</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.tri</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tri</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Delaunay</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.tri</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mtri</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.cm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cm</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryNorm</span><span class="p">,</span> <span class="n">ListedColormap</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span> <span class="nn">matplotlib.tri</span> <span class="k">as</span> <span class="nn">tri</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">Delaunay</span>
+<span class="kn">import</span> <span class="nn">matplotlib.tri</span> <span class="k">as</span> <span class="nn">mtri</span>
+<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">BoundaryNorm</span><span class="p">,</span> <span class="n">ListedColormap</span>
 <span class="c1"># import ternary</span>
 <div class="viewcode-block" id="ternary">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ternary</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">ternary</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ternary plotting class, produces ternary axes and creates various plot types.</span>
 
 <span class="sd">    The ternary plotting class can be used to produce scatter plots, heatmaps, or produce ternary coloring maps that can be used to color points </span>
@@ -441,7 +441,7 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        &quot;Style must be &#39;ternary&#39; or &#39;quaternary&#39;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;ternary&#39;</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tick_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;ternary&#39;</span><span class="p">,</span> <span class="n">grid_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tick_spacing</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="n">style</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="n">plot_type</span>
@@ -457,7 +457,7 @@
 
 <div class="viewcode-block" id="ternary.ternticks">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.ternticks">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternticks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ternticks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds ternary tick marks to ternary axes.</span>
 <span class="sd">        </span>
 <span class="sd">        Updates current ternary axes with tick marks.</span>
@@ -503,7 +503,7 @@
 
 <div class="viewcode-block" id="ternary.ternaxes">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.ternaxes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternaxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ternaxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up ternary plot axes with optional labeling for a quaternary plot.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -570,7 +570,7 @@
             
 <div class="viewcode-block" id="ternary.tern2xy">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.tern2xy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">tern2xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">tern2xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts ternary (a,b,c) points to cartesian (x,y) coordinates. </span>
 
 <span class="sd">        The order of the axes are a (top), b (left), and c (right), where</span>
@@ -601,7 +601,7 @@
         
 <div class="viewcode-block" id="ternary.xy2tern">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.xy2tern">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">xy2tern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">xy2tern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts cartesian (x,y) points to ternary (a,b,c) coordinates. </span>
 
 <span class="sd">        The order of the axes are a (top), b (left), and c (right), where</span>
@@ -629,7 +629,7 @@
     
 <div class="viewcode-block" id="ternary.terngrid">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.terngrid">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">terngrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">terngrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds ternary grid lines to ternary axes.</span>
 
 <span class="sd">        Updates current ternary axes with tick marks.</span>
@@ -670,7 +670,7 @@
     
 <div class="viewcode-block" id="ternary.ternscatter">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.ternscatter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternscatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">36</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">ternscatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">36</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scatter plot data on ternary axes.</span>
 
@@ -786,7 +786,7 @@
     
 <div class="viewcode-block" id="ternary.hexagon">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.hexagon">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">hexagon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">hexagon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates hexagonal bins within a ternary</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -893,7 +893,7 @@
     
 <div class="viewcode-block" id="ternary.ternhex">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.ternhex">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternhex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hexbin_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plotfield</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ternhex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hexbin_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plotfield</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a heatmap from a set of hexgonal bins</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -975,7 +975,7 @@
 
 <div class="viewcode-block" id="ternary.terncolor">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.terncolor">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">terncolor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">ca</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cb</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.73</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span> <span class="n">cc</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.15</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">],</span> <span class="n">cp</span> <span class="o">=</span> <span class="p">[]):</span>
+    <span class="k">def</span> <span class="nf">terncolor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">ca</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cb</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.73</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span> <span class="n">cc</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.15</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">],</span> <span class="n">cp</span> <span class="o">=</span> <span class="p">[]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes colors using a ternary colormap</span>
 
 <span class="sd">        Given four colors, one for each vertex of a ternary and a fourth at an arbitrary</span>
@@ -1021,7 +1021,7 @@
 
 <div class="viewcode-block" id="ternary.cplane">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.cplane">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cplane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">ca</span><span class="p">,</span><span class="n">cb</span><span class="p">,</span><span class="n">cc</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">cp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">cplane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">ca</span><span class="p">,</span><span class="n">cb</span><span class="p">,</span><span class="n">cc</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">cp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines colors for a set of points (a,b,c) within a ternary</span>
 <span class="sd">        </span>
 <span class="sd">        Given four colors, one for each vertex of a ternary and a fourth at an arbitrary</span>
@@ -1086,7 +1086,7 @@
 
 <div class="viewcode-block" id="ternary.cplanexy">
 <a class="viewcode-back" href="../../generated/common.ternary_plot.html#common.ternary_plot.ternary.cplanexy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cplanexy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xd</span><span class="p">,</span><span class="n">yd</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span><span class="n">yp</span><span class="p">,</span><span class="n">cp</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">cv1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">cv2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">cplanexy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xd</span><span class="p">,</span><span class="n">yd</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span><span class="n">yp</span><span class="p">,</span><span class="n">cp</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">cv1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">cv2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fits a plane to (x,y,color) data</span>
 <span class="sd">        </span>
 <span class="sd">        Fits a plane using three points in (x,y,color) space and then interpolates the</span>

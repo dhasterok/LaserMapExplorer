@@ -8,8 +8,7 @@ src.app.StyleToolbox
 
    .. autosummary::
    
+      StyleData
       StyleObj
       StyleTheme
-      Styling
-      StylingDock
    

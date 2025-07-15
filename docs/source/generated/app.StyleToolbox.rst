@@ -1,4 +1,4 @@
-app.StyleToolbox
+﻿app.StyleToolbox
 ================
 
 .. automodule:: app.StyleToolbox
@@ -8,8 +8,7 @@ app.StyleToolbox
 
    .. autosummary::
    
+      StyleData
       StyleObj
       StyleTheme
-      Styling
-      StylingDock
    

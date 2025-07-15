@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -689,7 +689,7 @@
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filename</span></code>()</p></td>
-<td><p>Return a suitable default filename, including the extension.</p></td>
+<td><p>Return a string, which includes extension, suitable for use as a default filename.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filetype</span></code>()</p></td>
 <td><p>Return the default savefig file format as specified in <a href="#id1"><span class="problematic" id="id2">:rc:`savefig.format`</span></a>.</p></td>
@@ -1384,29 +1384,35 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleSheet</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch_backends</span></code>(FigureCanvasClass)</p></td>
+<td><p>[<em>Deprecated</em>] Instantiate an instance of FigureCanvasClass</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.CustomMplCanvas.MplCanvas.textOnClick" title="common.CustomMplCanvas.MplCanvas.textOnClick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">textOnClick</span></code></a>(event)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.CustomMplCanvas.MplCanvas.textOnClick" title="common.CustomMplCanvas.MplCanvas.textOnClick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">textOnClick</span></code></a>(event)</p></td>
 <td><p>Adds text to plot at clicked position</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
 <td><p>Get the image as ARGB <cite>bytes</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_rgb</span></code>()</p></td>
+<td><p>[<em>Deprecated</em>] Get the image as RGB <cite>bytes</cite>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
 <td><p></p></td>
@@ -1756,7 +1762,7 @@ at the end of the measuring line.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parent</strong> (<em>MainWindow</em>) – Calling class.</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="src.app.MainWindow.html#src.app.MainWindow.MainWindow" title="src.app.MainWindow.MainWindow"><em>MainWindow</em></a>) – Calling class.</p></li>
 <li><p><strong>canvas</strong> (<a class="reference internal" href="#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Matplotlib plot canvas.</p></li>
 <li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Dialog title, by default ‘’</p></li>
 </ul>
@@ -3028,7 +3034,7 @@ at the end of the measuring line.</p>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filename</span></code>()</p></td>
-<td><p>Return a suitable default filename, including the extension.</p></td>
+<td><p>Return a string, which includes extension, suitable for use as a default filename.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_filetype</span></code>()</p></td>
 <td><p>Return the default savefig file format as specified in <a href="#id3"><span class="problematic" id="id4">:rc:`savefig.format`</span></a>.</p></td>
@@ -3696,26 +3702,32 @@ at the end of the measuring line.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleSheet</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">switch_backends</span></code>(FigureCanvasClass)</p></td>
+<td><p>[<em>Deprecated</em>] Instantiate an instance of FigureCanvasClass</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tabletEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">testAttribute</span></code>(self, attribute)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTip</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toolTipDuration</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_argb</span></code>()</p></td>
 <td><p>Get the image as ARGB <cite>bytes</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tostring_rgb</span></code>()</p></td>
+<td><p>[<em>Deprecated</em>] Get the image as RGB <cite>bytes</cite>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
 <td><p></p></td>

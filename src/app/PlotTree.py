@@ -7,8 +7,6 @@ from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWid
 from src.app.UITheme import default_font
 
 import src.common.CustomMplCanvas as mplc
-from src.common.SortAnalytes import sort_analytes
-
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 # -------------------------------
@@ -26,6 +24,8 @@ class PlotTree(CustomDockWidget):
         self.setupUI()
         self.connect_logger()
         self.initialize_tree()
+
+        self.show()
 
     def setupUI(self):
         font = default_font()
@@ -75,18 +75,19 @@ class PlotTree(CustomDockWidget):
             menu_items=sortmenu_items,
             parent=self
         )
+        self.actionSortMenu.setToolTip("Choose a method for sorting the analyte fields")
 
         self.actionRemovePlot = QAction(parent=self)
         self.actionRemovePlot.setFont(font)
         self.actionRemovePlot.setIcon(QIcon(":/resources/icons/icon-delete-64.svg"))
         self.actionRemovePlot.setObjectName("actionRemovePlot")
-        self.actionRemovePlot.setStatusTip("Remove selected plot from plot tree")
+        self.actionRemovePlot.setToolTip("Remove selected plot from plot tree")
 
         self.actionRemoveAllPlots = QAction(parent=self)
         self.actionRemoveAllPlots.setFont(font)
         self.actionRemoveAllPlots.setIcon(QIcon(":/resources/icons/icon-delete-all-64.svg"))
         self.actionRemoveAllPlots.setObjectName("actionRemoveAllPlots")
-        self.actionRemoveAllPlots.setStatusTip("Remove all plots from plot tree")
+        self.actionRemoveAllPlots.setToolTip("Remove all plots from plot tree")
 
         toolbar.addAction(self.actionSortMenu)
         toolbar.addSeparator()
@@ -219,16 +220,15 @@ class PlotTree(CustomDockWidget):
         if not leaf:
             treeView.add_leaf(sample_branch, new_field)
     
-    def sort_tree(self, method=None):
+    def sort_tree(self, method):
         """Sorts `MainWindow.treeView` and raw_data and processed_data according to one of several options.
 
         Parameters
         ----------
-        method : str, optional
-            Method used for sorting the analytes. If `None`, defined by action, by default `None`
+        method : str
+            Method used for sorting the analytes.
         """        
-        if method is None:
-            self.ui.app_data.sort_method = method
+        self.ui.app_data.sort_method = method
 
         treeView = self.treeView
 

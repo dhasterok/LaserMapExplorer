@@ -297,7 +297,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # initialize used classes
         self.crop_tool = CropTool(self)
-        self.plot_tree = PlotTree(self)
         self.table_fcn = TableFcn(self)
         #self.clustertool = Clustering(self)
         #self.dimredtool = DimensionalReduction(self)
@@ -526,7 +525,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         old_list = childbox.allItems()
         # if no parent combobox supplied, then assume field type is `analyte`
         if parentbox is None:
-            field_list = self.app_data.field_dict['Analyte']
+            field_type = 'Analyte'
 
         # if parent combobox has no field type selected, clear childbox and return
         elif parentbox.currentText() in ['', 'none', 'None']:
@@ -538,7 +537,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_type = parentbox.currentText()
             if 'normalized' in field_type:
                 field_type = field_type.replace(' (normalized)','')
-            field_list = self.app_data.field_dict[field_type]
+
+        field_list = self.app_data.field_dict[field_type]
+
+        if field_type == 'Analyte':
+            _, field_list = self.data[self.app_data.sample_id].sort_data(self.app_data.sort_method)
 
         # add 'None' as first option if required
         if add_none:
@@ -772,7 +775,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
 
     def connect_app_data_observers(self, app_data):
-        app_data.add_observer("sort_method", self.update_sort_method)
+        #app_data.add_observer("sort_method", self.update_sort_method)
         app_data.add_observer("ref_chem", self.update_ref_index_combobox)
         app_data.add_observer("sample_list", self.update_sample_list_combobox)
         app_data.add_observer("sample_id", self.update_sample_id_combobox)
@@ -950,9 +953,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # Executed when a property is changed
     # -------------------------------
 
-
-    def update_sort_method(self, new_method):
-        self.plot_tree.sort_tree(None, method=new_method)
+    #def update_sort_method(self, new_method):
+    #    self.plot_tree.sort_tree(new_method)
+    #    self.data[self.app_data.sample_id].sort_data(new_method)
 
     def update_sample_list_combobox(self, new_sample_list):
         """Updates ``MainWindow.comboBoxSampleID.items()``
@@ -1434,7 +1437,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
 
         if parentBox is None:
-            fields = self.app_data.field_dict['Analyte']
+            field_type = 'Analyte'
         else:
             if parentBox.currentText() == 'None':
                 childBox.clear()
@@ -1442,7 +1445,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_type = parentBox.currentText()
             if 'normalized' in field_type:
                 field_type = field_type.replace(' (normalized)','')
-            fields = self.app_data.field_dict[field_type]
+
+        fields = self.app_data.field_dict[field_type]
+
+        if field_type == 'Analyte':
+            _, fields = self.data[self.app_data.sample_id].sort_data(self.app_data.sort_method)
 
         childBox.clear()
         childBox.addItems(fields)

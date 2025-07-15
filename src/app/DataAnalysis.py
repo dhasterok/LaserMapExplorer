@@ -226,7 +226,7 @@ class ClusteringUI(Clustering):
         """
         # toggle visibility of widgets based on the current plot type
         match self.ui.plot_style.plot_type:
-            case 'cluster' | 'cluster score map':
+            case 'cluster map' | 'cluster score map':
                 self.ui.labelClusterMax.hide()
                 self.ui.spinBoxClusterMax.hide()
                 self.ui.labelNClusters.show()

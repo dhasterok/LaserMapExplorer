@@ -86,7 +86,7 @@ class Styling(Observable):
     resolution : int
         Resolution for heat maps
     map_plot_types : list
-        A list of plots that result in a map, i.e., ['field map', 'ternary map', 'PCA score', 'cluster', 'cluster score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
+        A list of plots that result in a map, i.e., ['field map', 'ternary map', 'PCA score', 'cluster map', 'cluster score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
     marker_dict : dict
         Dictionary of marker names used to translate ``comboBoxMarker`` to a subset of matplotlib makers symbol, though not all matplotlib markers
         are used.
@@ -163,7 +163,7 @@ class Styling(Observable):
         self.app_data = parent.app_data
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
-        self.map_plot_types = ['field map', 'ternary map', 'PCA score', 'cluster', 'cluster score']
+        self.map_plot_types = ['field map', 'ternary map', 'PCA score', 'cluster map', 'cluster score']
 
         self.marker_dict = {'circle':'o', 'square':'s', 'diamond':'d', 'triangle (up)':'^', 'triangle (down)':'v', 'hexagon':'h', 'pentagon':'p'}
 
@@ -712,10 +712,10 @@ class Styling(Observable):
                 'field_type': ['Analyte','Ratio','Calculated','Special']
                 },
             'correlation': {
-                'axis': [True, False, False, True],
+                'axis': [False, False, False, True],
                 'add_none': [False, False, False, True],
                 'spinbox': [False, False, False, True],
-                'field_type': ['Cluster']
+                'cfield_type': ['Cluster']
                 },
             'histogram': {
                 'axis': [True, False, False, True],
@@ -782,7 +782,7 @@ class Styling(Observable):
                 'spinbox': [True, True, False, False],
                 'field_type': ['PCA score']
                 },
-            'cluster': {
+            'cluster map': {
                 'axis': [False, False, False, True],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
@@ -1114,23 +1114,23 @@ class StyleTheme():
         +------------------+------------------+--------------------------------------------------+
         | Key              | Default Value    | Description                                      |
         +==================+==================+==================================================+
-        | XFieldType       | 'None'           | Type of field for x-axis (e.g., 'Analyte')       |
-        | XField           | 'None'           | Name of x-axis field                             |
+        | XFieldType       | 'none'           | Type of field for x-axis (e.g., 'Analyte')       |
+        | XField           | 'none'           | Name of x-axis field                             |
         | XLim             | [0, 1]           | Limits for x-axis                                |
         | XScale           | 'linear'         | Scale for x-axis ('linear' or 'log')             |
         | XLabel           | ''               | Label for x-axis                                 |
-        | YFieldType       | 'None'           | Type of field for y-axis                         |
-        | YField           | 'None'           | Name of y-axis field                             |
+        | YFieldType       | 'none'           | Type of field for y-axis                         |
+        | YField           | 'none'           | Name of y-axis field                             |
         | YLim             | [0, 1]           | Limits for y-axis                                |
         | YScale           | 'linear'         | Scale for y-axis                                 |
         | YLabel           | ''               | Label for y-axis                                 |
-        | ZFieldType       | 'None'           | Type of field for z-axis                         |
-        | ZField           | 'None'           | Name of z-axis field                             |
+        | ZFieldType       | 'none'           | Type of field for z-axis                         |
+        | ZField           | 'none'           | Name of z-axis field                             |
         | ZLim             | [0, 1]           | Limits for z-axis                                |
         | ZScale           | 'linear'         | Scale for z-axis                                 |
         | ZLabel           | ''               | Label for z-axis                                 |
-        | CFieldType       | 'None'           | Type of color-mapped data                        |
-        | CField           | 'None'           | Field name for color-mapping                     |
+        | CFieldType       | 'none'           | Type of color-mapped data                        |
+        | CField           | 'none'           | Field name for color-mapping                     |
         | CLim             | [0, 1]           | Colorbar limits                                  |
         | CScale           | 'linear'         | Colorbar scale                                   |
         | CLabel           | ''               | Label for colorbar                               |
@@ -1161,23 +1161,23 @@ class StyleTheme():
         styles = {}
 
         self.default_plot_style = {
-                'XFieldType': 'None',
-                'XField': 'None',
+                'XFieldType': 'none',
+                'XField': 'none',
                 'XLim': [0,1],
                 'XScale': 'linear',
                 'XLabel': '',
-                'YFieldType': 'None',
-                'YField': 'None',
+                'YFieldType': 'none',
+                'YField': 'none',
                 'YLim': [0,1],
                 'YScale': 'linear',
                 'YLabel': '',
-                'ZFieldType': 'None',
-                'ZField': 'None',
+                'ZFieldType': 'none',
+                'ZField': 'none',
                 'ZLim': [0,1],
                 'ZLabel': '',
                 'ZScale': 'linear',
-                'CFieldType': 'None',
-                'CField': 'None',
+                'CFieldType': 'none',
+                'CField': 'none',
                 'CLim': [0,1],
                 'CScale': 'linear',
                 'CLabel': '',
@@ -1226,7 +1226,7 @@ class StyleTheme():
                 'dimension scatter': copy.deepcopy(self.default_plot_style),
                 'dimension heatmap': copy.deepcopy(self.default_plot_style),
                 'dimension score map': copy.deepcopy(self.default_plot_style),
-                'cluster': copy.deepcopy(self.default_plot_style),
+                'cluster map': copy.deepcopy(self.default_plot_style),
                 'cluster score map': copy.deepcopy(self.default_plot_style),
                 'cluster performance': copy.deepcopy(self.default_plot_style),
                 'profile': copy.deepcopy(self.default_plot_style),
@@ -1258,17 +1258,17 @@ class StyleTheme():
         styles['dimension score map']['XField'] = 'Xc'
         styles['dimension score map']['YField'] = 'Yc'
 
-        styles['cluster']['CScale'] = 'discrete'
-        styles['cluster']['MarkerAlpha'] = 100
-        styles['cluster']['FieldType'] = 'Cluster'
+        styles['cluster map']['CScale'] = 'discrete'
+        styles['cluster map']['MarkerAlpha'] = 100
+        styles['cluster map']['FieldType'] = 'Cluster'
 
         styles['cluster performance']['AspectRatio'] = 0.62
 
         styles['scatter']['AspectRatio'] = 1
         styles['scatter']['XFieldType'] = 'Analyte'
         styles['scatter']['YFieldType'] = 'Analyte'
-        styles['scatter']['ZFieldType'] = 'None'
-        styles['scatter']['CFieldType'] = 'None'
+        styles['scatter']['ZFieldType'] = 'none'
+        styles['scatter']['CFieldType'] = 'none'
 
         styles['heatmap']['AspectRatio'] = 1
         styles['heatmap']['CLim'] = [1,1000]
@@ -1296,7 +1296,7 @@ class StyleTheme():
         styles['histogram']['AspectRatio'] = 0.62
         styles['histogram']['LineWidth'] = 0
         styles['histogram']['XFieldType'] = 'Analyte'
-        styles['histogram']['CFieldType'] = 'None'
+        styles['histogram']['CFieldType'] = 'none'
 
         styles['profile']['AspectRatio'] = 0.62
         styles['profile']['LineWidth'] = 1.0
@@ -1580,9 +1580,11 @@ class StylingDock(Styling):
 
     @property
     def signal_state(self):
-        """Signal state for styling related widgets.
+        """
+        Signal state for styling related widgets.
         
-        When ``signal_state == False``, signals from widgets are blocked. """
+        When ``signal_state == False``, signals from widgets are blocked.
+        """
         return self._signal_state
     
     @signal_state.setter
@@ -2115,7 +2117,7 @@ class StylingDock(Styling):
                 # color properties
                 ui.toolButtonMarkerColor.setEnabled(True)
 
-            case 'pca score' | 'cluster score' | 'cluster':
+            case 'pca score' | 'cluster score' | 'cluster map':
                 # axes properties
                 ui.lineEditXLB.setEnabled(True)
                 ui.lineEditXUB.setEnabled(True)
@@ -2518,10 +2520,12 @@ class StylingDock(Styling):
 
     # style widget callbacks
     # -------------------------------------
-    def init_field_widgets(self, plot_axis_dict, widget_dict, plot_type=None, *args, **kwargs):
-        """Initializes widgets associated with axes for plotting
+    def init_field_widgets(self, plot_axis_dict, widget_dict, plot_type=None):
+        """
+        Initializes widgets associated with axes for plotting
 
-        Enables and sets visibility of labels, comboboxes, and spinboxes associated with axes for choosing plot dimensions, including color.
+        Enables and sets visibility of labels, comboboxes, and spinboxes associated with
+        axes for choosing plot dimensions, including color.
 
         Parameters
         ----------
@@ -2535,16 +2539,20 @@ class StylingDock(Styling):
         else:
             setting = plot_axis_dict[plot_type]
 
-        for ax in range(3):
+        # enable and set visibility of widgets
+        for ax in range(4):
+            # set field label text
             widget_dict['label'][ax].setEnabled(setting['axis'][ax])
             widget_dict['label'][ax].setVisible(setting['axis'][ax])
 
+            # set parent and child comboboxes
             widget_dict['parentbox'][ax].setEnabled(setting['axis'][ax])
             widget_dict['parentbox'][ax].setVisible(setting['axis'][ax])
 
             widget_dict['childbox'][ax].setEnabled(setting['axis'][ax])
             widget_dict['childbox'][ax].setVisible(setting['axis'][ax])
 
+            # set field spinboxes
             if widget_dict['spinbox'][ax] is not None:
                 widget_dict['spinbox'][ax].setEnabled(setting['spinbox'][ax])
                 widget_dict['spinbox'][ax].setVisible(setting['spinbox'][ax])
@@ -2580,9 +2588,9 @@ class StylingDock(Styling):
                 ui.actionSwapAxes.setEnabled(True)
             case 'correlation':
                 ui.actionSwapAxes.setEnabled(False)
-                if ui.comboBoxCorrelationMethod.currentText() == 'None':
+                if ui.comboBoxCorrelationMethod.currentText() == 'none':
                     ui.comboBoxCorrelationMethod.setCurrentText('Pearson')
-            case 'cluster performance' | 'cluster' | 'cluster score map':
+            case 'cluster performance' | 'cluster map' | 'cluster score ':
                 self.ui.clustering.toggle_cluster_widgets()
             case _:
                 ui.actionSwapAxes.setEnabled(False)
@@ -2762,7 +2770,7 @@ class StylingDock(Styling):
                         return f'PC{self.ui.spinBoxPCX.value()}'
                     case 'y':
                         return f'PC{self.ui.spinBoxPCY.value()}'
-            case 'field map' | 'ternary map' | 'PCA score' | 'cluster' | 'cluster score':
+            case 'field map' | 'ternary map' | 'PCA score' | 'cluster map' | 'cluster score':
                 return ax.upper()
 
     def axis_label_edit_callback(self, ax, new_label):
@@ -2962,7 +2970,7 @@ class StylingDock(Styling):
         if ax == 'c':
             if self.ui.comboBoxPlotType.currentText() == 'basis vectors':
                 self.style_dict['basis vectors']['CLim'] = [np.amin(self.ui.pca_results.components_), np.amax(self.ui.pca_results.components_)]
-            elif not (self.ui.comboBoxFieldTypeC.currentText() in ['None','cluster']):
+            elif not (self.ui.comboBoxFieldTypeC.currentText() in ['none','cluster']):
                 field_type = self.ui.comboBoxFieldTypeC.currentText()
                 field = self.ui.comboBoxFieldC.currentText()
                 if field == '':
@@ -2972,7 +2980,7 @@ class StylingDock(Styling):
             self.set_color_axis_widgets()
         else:
             match self.ui.comboBoxPlotType.currentText().lower():
-                case 'field map' | 'cluster' | 'cluster score' | 'pca score':
+                case 'field map' | 'cluster map' | 'cluster score map' | 'pca score':
                     field = ax.upper()
                     data.processed_data.prep_data(field)
                     self.set_axis_widgets(ax, field)
@@ -3318,7 +3326,7 @@ class StylingDock(Styling):
             return
 
         # only run update current plot if color field is selected or the color by field is clusters
-        if self.ui.comboBoxFieldTypeC.currentText() != 'None' or self.ui.comboBoxFieldC.currentText() != '' or self.ui.comboBoxFieldTypeC.currentText() in ['cluster']:
+        if self.ui.comboBoxFieldTypeC.currentText() != 'none' or self.ui.comboBoxFieldC.currentText() != '' or self.ui.comboBoxFieldTypeC.currentText() in ['cluster']:
             self.schedule_update()
 
     def update_field_type(self, ax, field_type=None, *args, **kwargs):
@@ -3516,7 +3524,7 @@ class StylingDock(Styling):
         """Sets cluster group to default colormap
 
         Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in
-        ``self.styles['cluster']['Colormap'].  Change the default colormap
+        ``self.styles['cluster map']['Colormap'].  Change the default colormap
         by changing ``self.comboBoxColormap``, when ``self.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
 
         Returns
@@ -3539,7 +3547,7 @@ class StylingDock(Styling):
             hexcolor.append(get_hex_color(colors[i]))
             
         if mask:
-            hexcolor.append(self.style_dict['cluster']['OverlayColor'])
+            hexcolor.append(self.style_dict['cluster map']['OverlayColor'])
 
         return hexcolor
 

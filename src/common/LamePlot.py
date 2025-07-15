@@ -790,7 +790,27 @@ def add_scalebar(app_data, plot_style, ax):
 
 @log_call(logger_key='Plot')
 def plot_correlation(parent, data, app_data, plot_style):
-    """Creates an image of the correlation matrix"""
+    """
+    Creates an image of the correlation matrix.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    plot_style : PlotStyle
+        PlotStyle object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : mplc.MplCanvas
+        The canvas containing the correlation plot.
+    plot_info : dict
+        Dictionary containing information about the plot, including the correlation matrix.
+    """
     #print('plot_correlation')
 
     canvas = mplc.MplCanvas(parent=parent)
@@ -1916,7 +1936,7 @@ def plot_clusters(parent, data, app_data, plot_style):
     plot_type = plot_style.plot_type
     method = app_data.cluster_method
     match plot_type:
-        case 'cluster':
+        case 'cluster map':
             plot_name = f"{plot_type}_{method}_map"
             canvas, plot_data = plot_cluster_map(parent, data, app_data, plot_style)
         case 'cluster score':

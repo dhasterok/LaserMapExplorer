@@ -58,11 +58,41 @@ class HistogramUI():
 
 @auto_log_methods(logger_key="Plot")
 class CorrelationUI():
+    """ Handles correlation plot settings and updates.
+    This class manages the correlation method selection and squared correlation checkbox.
+    It connects the UI widgets to the appropriate methods and updates the plot style accordingly.
+    
+    Attributes
+    ----------
+    ui : MainWindow
+        The main window instance containing the UI elements.
+    logger_key : str
+        The key used for logging messages related to this class.
+    _correlation_method_options : list
+        A list of available correlation methods.  Methods include 'Pearson', 'Spearman', and 'Kendall'.
+    
+    Methods
+    -------
+    connect_widgets()
+        Connects the correlation widgets to their respective methods.
+    connect_observer()
+        Connects the properties to observer functions for updates.
+    connect_logger()
+        Connects the widgets to the logger for logging changes.
+    update_corr_method(new_method=None)
+        Updates the correlation method combobox and triggers a plot update.
+    update_corr_squared(new_state=None)
+        Updates the correlation squared checkbox and triggers a plot update.
+    correlation_method_callback()
+        Updates the colorbar label for correlation plots based on the current method.
+    correlation_squared_callback()
+        Produces a plot of the squared correlation and updates the color limits and colormap.
+    """
     def __init__(self, parent):
         self.ui = parent
         self.logger_key = "Plot"
 
-        self._correlation_method_options = ['none','Pearson','Spearman','Kendall']
+        self._correlation_method_options = ['Pearson','Spearman','Kendall']
         
         self.connect_widgets()
         self.connect_observer()
@@ -72,40 +102,85 @@ class CorrelationUI():
         """Connects correlation widgets to methods."""
         self.ui.comboBoxCorrelationMethod.clear()
         self.ui.comboBoxCorrelationMethod.addItems(self._correlation_method_options)
-        self.ui.comboBoxCorrelationMethod.activated.connect(self.update_corr_method)
+        self.ui.comboBoxCorrelationMethod.setCurrentText(self._correlation_method_options[0])
+        self.ui.app_data.corr_method = self._correlation_method_options[0]
+        self.ui.comboBoxCorrelationMethod.activated.connect(lambda _: self.update_corr_method())
 
-        self.ui.checkBoxCorrelationSquared.stateChanged.connect(self.correlation_squared_callback)
+        self.ui.checkBoxCorrelationSquared.stateChanged.connect(lambda _: self.update_corr_squared())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("corr_method", self.update_corr_method_combobox)
-        self.ui.app_data.add_observer("corr_squared", self.update_corr_squared_checkbox)
+        self.ui.app_data.add_observer("corr_method", self.update_corr_method)
+        self.ui.app_data.add_observer("corr_squared", self.update_corr_squared)
 
     def connect_logger(self):
         """Connects widgets to logger."""
         self.ui.comboBoxCorrelationMethod.activated.connect(lambda: log(f"comboBoxCorrelationMethod value=[{self.ui.comboBoxCorrelationMethod.currentText()}]", prefix="UI"))
         self.ui.checkBoxCorrelationSquared.checkStateChanged.connect(lambda: log(f"checkBoxCorrelationSquared value=[{self.ui.checkBoxCorrelationSquared.isChecked()}]", prefix="UI"))
 
-    def update_corr_method_combobox(self, new_corr_method):
-        self.ui.comboBoxCorrelationMethod.setCurrentText(new_corr_method)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "correlation":
-            self.ui.plot_style.schedule_update()
 
-    def update_corr_squared_checkbox(self, new_corr_squared):
-        self.ui.checkBoxCorrelationSquared.setChecked(new_corr_squared)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "correlation":
-            self.ui.plot_style.schedule_update()
+    def update_corr_method(self, new_method=None):
+        """ Updates correlation method combobox and triggers plot update.
 
-    def update_corr_method(self):
-        self.ui.app_data.corr_method = self.ui.comboBoxCorrelationMethod.currentText()
+        If `new_method` is None, it uses the current text of the combobox to set `ui.app_data.corr_method`.
+        If `new_method` is provided, it updates the `ui.comboBoxCorrelationMethod` state accordingly.
+
+        Parameters
+        ----------
+        new_method : int, optional
+            New index for the correlation method, by default None
+        """
+        if new_method is None:
+            # use current text of combobox
+            self.ui.app_data.corr_method = self.ui.comboBoxCorrelationMethod.currentText()
+        else:
+            # update combobox with new method
+            if self.ui.comboBoxCorrelationMethod.currentText() == new_method:
+                return
+            # block signals to prevent infinite loop
+            self.ui.comboBoxCorrelationMethod.blockSignals(True)
+            self.ui.comboBoxCorrelationMethod.setCurrentText(new_method)
+            self.ui.comboBoxCorrelationMethod.blockSignals(False)
+
+        # update the other plot style settings related to correlation method
         self.correlation_method_callback()
 
-    def update_corr_squared(self):
-        self.ui.app_data.corr_squared = self.ui.checkBoxCorrelationSquared.isChecked()
+    def update_corr_squared(self, new_state=None):
+        """
+        Updates correlation squared checkbox and triggers plot update.
+
+        If `new_state` is None, it uses the current state of the checkbox to set `ui.app_data.corr_squared`.
+        If `new_state` is provided, it updates the `ui.checkBoxCorrelationSquared` state accordingly.
+
+        Parameters
+        ----------
+        new_state : bool, optional
+            New state for the correlation squared checkbox, by default None
+        """
+        if new_state is None:
+            self.ui.app_data.corr_squared = self.ui.checkBoxCorrelationSquared.isChecked()
+        else:
+            if self.ui.checkBoxCorrelationSquared.isChecked() == new_state:
+                return
+            # block signals to prevent infinite loop
+            self.ui.checkBoxCorrelationSquared.blockSignals(True)
+            self.ui.checkBoxCorrelationSquared.setChecked(new_state)
+            self.ui.checkBoxCorrelationSquared.blockSignals(False)
+
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "correlation":
+            self.ui.plot_style.schedule_update()
+
+        # update the color limits and colormap based on whether the correlation is squared or not
         self.correlation_squared_callback()
 
     def correlation_method_callback(self):
-        """Updates colorbar label for correlation plots"""
+        """
+        Updates colorbar label for correlation plots.
+        
+        Checks the current correlation method and updates the colorbar label accordingly.
+        If the method has changed, it updates the color limits and colormap based on whether the correlation is squared or not.
+        Also ensures that the plot type is set to 'correlation'.
+        """
         method = self.ui.app_data.corr_method
         if self.ui.plot_style.clabel == method:
             return
@@ -128,10 +203,16 @@ class CorrelationUI():
             self.ui.plot_style.plot_type = 'correlation'
 
         # trigger update to plot
-        self.ui.plot_style.schedule_update()
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "correlation":
+            self.ui.plot_style.schedule_update()
 
     def correlation_squared_callback(self):
-        """Produces a plot of the squared correlation."""        
+        """
+        Produces a plot of the squared correlation.
+        
+        Updates the color limits and colormap based on whether the correlation is squared or not.
+        Also updates the colorbar label based on the current correlation method.
+        """
         # update color limits and colorbar
         if self.ui.app_data.corr_squared:
             self.ui.plot_style.clim = [0,1]
@@ -144,8 +225,8 @@ class CorrelationUI():
         self.correlation_method_callback()
 
         # trigger update to plot
-        self.ui.plot_style.schedule_update()
-
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample'] and self.ui.plot_style.plot_type == "correlation":
+            self.ui.plot_style.schedule_update()
     
 @auto_log_methods(logger_key="Plot")
 class ScatterUI():

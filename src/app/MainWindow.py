@@ -465,7 +465,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # add 'None' as first option if required.
         if plot_dict['add_none'][ax]:
-            new_list.insert(0,'None')
+            new_list.insert(0,'none')
 
         # if the list hasn't changed then don't change anything
         if old_list and new_list == old_list:
@@ -488,8 +488,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if childbox is None:
             return
 
-        if parentbox.currentText() == 'None':
+        if parentbox.currentText() == 'none':
             childbox.clear()
+            childbox.setPlaceholderText('none')
             return
 
         if 'normalized' in old_field_type:
@@ -508,7 +509,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Updates a field comobobox list.
 
         Executed on popup of a field combobox or by forcing an update to the list
-        of fields.
+        of fields.  If a parent combobox is supplied, then the field list is
+        associated with the current field type selected in the parent combobox.
+
+        If no parent combobox is supplied, then the field type is assumed to be
+        'Analyte'.  If the parent combobox has no field type selected, then the
+        child combobox is cleared and returned.
+
+        If the field type is 'Analyte', then the field list is sorted based on
+        the current sort method selected in the app_data.sort_method.
         
         Parameters
         ----------
@@ -528,7 +537,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             field_type = 'Analyte'
 
         # if parent combobox has no field type selected, clear childbox and return
-        elif parentbox.currentText() in ['', 'none', 'None']:
+        elif parentbox.currentText() in [None, '', 'none', 'None']:
             childbox.clear()
             return
 
@@ -543,9 +552,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if field_type == 'Analyte':
             _, field_list = self.data[self.app_data.sample_id].sort_data(self.app_data.sort_method)
 
-        # add 'None' as first option if required
+        # add 'none' as first option if required
         if add_none:
-            field_list.insert(0,'None')
+            field_list.insert(0,'none')
 
         # if the new list is same as old, then nothing to update
         if old_list == field_list:
@@ -680,7 +689,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ----------
         tab_name : str
             opens tab, values: 'samples', 'preprocess', 'spot data', 'filter',
-            'scatter', 'ndim', pca', 'filters',''clustering', 'cluster', 'polygons',
+            'scatter', 'ndim', pca', 'filters','clustering', 'clusters', 'polygons',
             'profiles', 'special'
         """
         match tab_name.lower():
@@ -745,21 +754,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def toggle_data_widgets(self):
         """Disables/enables widgets if self.data is empty."""
         if self.data:
-            self.actionReset.setEnabled(True)
+            self.actionSelectAnalytes.setEnabled(True)
+            self.actionFullMap.setEnabled(True)
+            self.actionCrop.setEnabled(True)
+            self.actionSwapAxes.setEnabled(True)
+            self.actionNoiseReduction.setEnabled(True)
             self.actionFilters.setEnabled(True)
             self.actionPolygons.setEnabled(True)
             self.actionClusters.setEnabled(True)
             self.actionProfiles.setEnabled(True)
             self.actionInfo.setEnabled(True)
             self.actionNotes.setEnabled(True)
+            self.actionReset.setEnabled(True)
+            self.actionUpdatePlot.setEnabled(True)
+            self.actionSavePlotToTree.setEnabled(True)
         else:
-            self.actionReset.setEnabled(False)
+            self.actionSelectAnalytes.setEnabled(False)
+            self.actionFullMap.setEnabled(False)
+            self.actionCrop.setEnabled(False)
+            self.actionSwapAxes.setEnabled(False)
+            self.actionNoiseReduction.setEnabled(False)
             self.actionFilters.setEnabled(False)
             self.actionPolygons.setEnabled(False)
             self.actionClusters.setEnabled(False)
             self.actionProfiles.setEnabled(False)
             self.actionInfo.setEnabled(False)
             self.actionNotes.setEnabled(False)
+            self.actionReset.setEnabled(False)
+            self.actionUpdatePlot.setEnabled(False)
+            self.actionSavePlotToTree.setEnabled(False)
 
     def toggle_help_mode(self):
         """Toggles help mode
@@ -903,7 +926,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.field_control_settings.update(
                         {self.left_tab['cluster']: {
                             'saved_index': 0,
-                            'plot_list': ['cluster', 'cluster score map', 'cluster performance'],
+                            'plot_list': ['cluster map', 'cluster score map', 'cluster performance'],
                             'label': ['','','',''],
                             'saved_field_type': [None, None, None, None],
                             'saved_field': [None, None, None, None]
@@ -1222,7 +1245,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         field : str, optional
             Name of field to plot, Defaults to None
         analysis_type : str, optional
-            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score map',
+            Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score',
             'Special', 'Computed'. Some options require a field. Defaults to 'Analyte'
         """
         if field == '' or field_type == '':
@@ -1422,45 +1445,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             return ref_index
 
-    def update_field_combobox(self, parentBox, childBox):
-        """Updates comboBoxes with fields for plots or analysis
-
-        Updates lists of fields in comboBoxes that are used to generate plots or used for analysis.
-
-        Parameters
-        ----------
-        parentBox : QComboBox, None
-            ComboBox used to select field type
-
-        childBox : QComboBox
-            ComboBox with list of field values
-        """
-
-        if parentBox is None:
-            field_type = 'Analyte'
-        else:
-            if parentBox.currentText() == 'None':
-                childBox.clear()
-                return
-            field_type = parentBox.currentText()
-            if 'normalized' in field_type:
-                field_type = field_type.replace(' (normalized)','')
-
-        fields = self.app_data.field_dict[field_type]
-
-        if field_type == 'Analyte':
-            _, fields = self.data[self.app_data.sample_id].sort_data(self.app_data.sort_method)
-
-        childBox.clear()
-        childBox.addItems(fields)
-
-        # ----start debugging----
-        # if parentBox is not None:
-        #     print('update_field_combobox: '+parentBox.currentText())
-        # else:
-        #     print('update_field_combobox: None')
-        # print(fields)
-        # ----end debugging----
 
 
     # -------------------------------------
@@ -1495,13 +1479,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return True
             case 'variance' | 'basis vectors' | 'performance':
                 return True
-            case 'cluster score map':
-                axes = [3]
             case 'dimension score map':
                 axes = [3]
             case 'dimension scatter', 'dimension heatmap':
                 axes = [0,1]
-            case 'cluster':
+            case 'cluster map':
+                axes = [3]
+            case 'cluster score map':
                 axes = [3]
             case 'profile':
                 axes = [3]
@@ -1601,7 +1585,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.dimensional_reduction.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
-            case 'cluster' | 'cluster score map':
+            case 'cluster map' | 'cluster score map':
                 self.clustering.compute_clusters_update_groups()
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)
 

@@ -252,7 +252,7 @@ class ClusteringUI(Clustering):
             case _:
                 ValueError(f"Unknown clustering method {self.ui.app_data.cluster_method}")
         
-        if 'PCA score' in self.ui.app_data.field_dict.keys():
+        if 'PCA score' in self.ui.app_data.field_dict:
             self.ui.checkBoxWithPCA.setEnabled(True)
             self.ui.labelClusterWithPCA.setEnabled(True)
         else:

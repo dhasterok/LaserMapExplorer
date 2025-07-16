@@ -634,10 +634,16 @@ class PlotTree(CustomDockWidget):
             if child:
                 self.extract_plot_info(child)  # Process child recursively
 
-    def create_item_from_data(self,data):
-        """Recursively create QStandardItem from data."""
+    def create_item_from_data(self, data):
+        """Recursively create QStandardItem from data.
+        
+        Parameters
+        ----------
+        data : dict
+            data dictionary
+        """
         item = QStandardItem(data['text'])
-        if 'plot_info' in data.keys():
+        if 'plot_info' in data:
             #create new matplotlib canvas and save fig
             canvas = mplc.MplCanvas(fig=data['plot_info']['figure'])
             data['plot_info']['figure'] = canvas

@@ -35,6 +35,7 @@ extensions = [
         'sphinx.ext.intersphinx',
         'sphinx.ext.autosectionlabel',
         'sphinx.ext.viewcode',
+        'sphinx.ext.mathjax',
         'numpydoc',
     ]
     #    'sphinx_js'
@@ -127,6 +128,12 @@ autodoc_default_options = {
     'undoc-members': True,  # Include members without docstrings
     'inherited-members': False,
     'show-inheritance': True,
+}
+
+mathjax3_config = {
+    "tex": {
+        "packages": ["base", "ams"],
+    }
 }
 
 # ------

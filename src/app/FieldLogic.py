@@ -258,7 +258,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
 
-        self.scale_methods = parent.app_data.scale_options
+        self.scale_methods = parent.data[parent.app_data.sample_id].scale_options
         self.scale_methods.append('mixed')
 
         for scale in self.scale_methods:

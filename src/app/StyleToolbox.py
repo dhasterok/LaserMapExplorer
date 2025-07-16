@@ -845,7 +845,7 @@ class StyleData(Observable):
         style = self.style_dict[plot_type]
                 
         if plot_type.lower() in self.map_plot_types:
-            if ('Xc' not in list(data.column_attrributes.keys())) or ('Yc' not in list(data.column_attrributes.keys())):
+            if ('Xc' not in list(data.column_attrributes)) or ('Yc' not in list(data.column_attrributes)):
                 return
 
             
@@ -864,7 +864,7 @@ class StyleData(Observable):
         if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
             style['ScaleLength'] = self.default_scale_length()
 
-        if app_data.c_field in list(data.column_attrributes.keys()):
+        if app_data.c_field in list(data.column_attrributes):
             field = app_data.c_field
             style['CLim'] = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
             style['CLabel'] = data.processed_data.get_attribute(field,'label')
@@ -1010,7 +1010,7 @@ class StyleData(Observable):
 
     def _is_valid_scale(self, text):
         """Validates if a the variable is a valid string."""
-        return isinstance(text, str) and text in self.app_data.scale_options
+        return isinstance(text, str) and text in self.ui.data[self.app_data.sample_id].scale_options
     
     def _is_valid_hex_color(self, hex_color):
         """Validates if a given string is a valid hex color code."""

@@ -1017,22 +1017,22 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
 
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['x']['field'] not in data.processed_data.column_attributes.keys():
+        if scatter_dict['x']['field'] not in data.processed_data.column_attributes:
             plot_style.initialize_axis_values(data,scatter_dict['x']['type'], scatter_dict['x']['field'])
             plot_style.set_axis_widgets(data,'x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['y']['field'] not in data.processed_data.column_attributes.keys():
+        if scatter_dict['y']['field'] not in data.processed_data.column_attributes:
             plot_style.initialize_axis_values(data,scatter_dict['y']['type'], scatter_dict['y']['field'])
             plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-        if scatter_dict['z']['field'] not in data.processed_data.column_attributes.keys():
+        if scatter_dict['z']['field'] not in data.processed_data.column_attributes:
             plot_style.initialize_axis_values(data,scatter_dict['z']['type'], scatter_dict['z']['field'])
             plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-        if scatter_dict['c']['field'] not in data.processed_data.column_attributes.keys():
+        if scatter_dict['c']['field'] not in data.processed_data.column_attributes:
             plot_style.set_color_axis_widgets()
             plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 
@@ -1175,10 +1175,10 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
     elif app_data.c_field_type == 'cluster':
         # color by cluster
         method = app_data.c_field
-        if method not in list(app_data.cluster_dict.keys()):
+        if method not in app_data.cluster_dict:
             return
         else:
-            if 0 not in list(app_data.cluster_dict[method].keys()):
+            if 0 not in app_data.cluster_dict[method]:
                 return
 
         cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(app_data.cluster_dict[method],alpha=plot_style.marker_alpha)
@@ -1314,10 +1314,10 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
     elif app_data.c_field_type == 'cluster':
         # color by cluster
         method = app_data.c_field
-        if method not in list(app_data.cluster_dict.keys()):
+        if method not in app_data.cluster_dict:
             return
         else:
-            if 0 not in list(app_data.cluster_dict[method].keys()):
+            if 0 not in app_data.cluster_dict[method]:
                 return
 
         cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(app_data.cluster_dict[method],alpha=plot_style.marker_alpha)
@@ -1719,7 +1719,7 @@ def plot_ndim(parent, data, app_data, plot_style):
         cluster_color, cluster_label, cmap = plot_style.get_cluster_colormap(cluster_dict, alpha=plot_style.marker_alpha)
 
         clusters = cluster_dict['selected_clusters']
-        if 0 in list(cluster_dict.keys()):
+        if 0 in cluster_dict:
             cluster_flag = True
         else:
             cluster_dict = None

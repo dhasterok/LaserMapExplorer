@@ -425,6 +425,22 @@ class ImageProcessing():
         self.parent.canvas_widget.clear_layout(self.parent.widgetSingleView.layout())
         self.parent.widgetSingleView.layout().addWidget(canvas)
 
+    def histogram_equalization(array):
+        """Apply histogram equalization to an array.
+
+        Transforms an array such that the histogram becomes uniform.  This is useful for
+        equally distributing colors for maps.
+        
+        Parameters
+        ----------
+        array : np.ndarray
+            Array to transform
+        """
+        sorted_vals = np.sort(array.ravel())
+        cdf = np.searchsorted(sorted_vals, array.ravel(), side='right') / len(sorted_vals)
+
+        return cdf.reshape(array.shape)
+
 
 @auto_log_methods(logger_key='Image')
 class ImageProcessingUI(ImageProcessing):

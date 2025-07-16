@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,23 +388,23 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.NoteTaking</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QTimer</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QUrl</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QTimer</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QUrl</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span>
         <span class="n">QLabel</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QHBoxLayout</span>
     <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QTextCursor</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QCursor</span><span class="p">,</span> <span class="n">QDoubleValidator</span><span class="p">,</span> <span class="n">QAction</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWebEngineWidgets</span> <span class="kn">import</span> <span class="n">QWebEngineView</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>   
-<span class="kn">from</span> <span class="nn">rst2pdf.createpdf</span> <span class="kn">import</span> <span class="n">RstToPdf</span>
-<span class="kn">from</span> <span class="nn">docutils.core</span> <span class="kn">import</span> <span class="n">publish_string</span>
-<span class="kn">import</span> <span class="nn">src.common.format</span> <span class="k">as</span> <span class="nn">fmt</span>
-<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomLineEdit</span><span class="p">,</span> <span class="n">CustomActionMenu</span><span class="p">,</span> <span class="n">CustomDockWidget</span>
-<span class="kn">from</span> <span class="nn">src.common.SearchTool</span> <span class="kn">import</span> <span class="n">SearchWidget</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QTextCursor</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QCursor</span><span class="p">,</span> <span class="n">QDoubleValidator</span><span class="p">,</span> <span class="n">QAction</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWebEngineWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWebEngineView</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>   
+<span class="kn">from</span><span class="w"> </span><span class="nn">rst2pdf.createpdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">RstToPdf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docutils.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish_string</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomLineEdit</span><span class="p">,</span> <span class="n">CustomActionMenu</span><span class="p">,</span> <span class="n">CustomDockWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.SearchTool</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
 <span class="c1"># -------------------------------</span>
 <span class="c1"># Notes functions</span>
@@ -412,7 +412,7 @@
 <div class="viewcode-block" id="Notes">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Notes&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Notes</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Notes</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A dock that can be used to take notes in ReStructured Text (ReST) including formatted output.</span>
 
 <span class="sd">    Notes are automatically saved at regular intervals and upon close of the dock.  The</span>
@@ -436,7 +436,7 @@
 <span class="sd">    TypeError</span>
 <span class="sd">        Parent must be an instance of QMainWindow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Notes&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Notes&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parent must be an instance of QMainWindow.&quot;</span><span class="p">)</span>
 
@@ -715,7 +715,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">notes_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">notes_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;str : File name associated with the current sample.  When set, the current file will be</span>
 <span class="sd">        saved before changing files.  If the new file name is not ``None``, an autosave timer will</span>
 <span class="sd">        be set.</span>
@@ -723,7 +723,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notes_file</span>
 
     <span class="nd">@notes_file</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">notes_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">notes_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="c1"># no need to do anything if the filename is the same</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notes_file</span> <span class="o">==</span> <span class="n">filename</span><span class="p">:</span>
             <span class="k">return</span>
@@ -761,7 +761,7 @@
 
 <div class="viewcode-block" id="Notes.update_equation_menu">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.update_equation_menu">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_equation_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_equation_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">new_items</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">(</span><span class="n">eq_name</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_equation</span><span class="p">(</span><span class="n">equation</span><span class="p">))</span> <span class="k">for</span> <span class="n">eq_name</span><span class="p">,</span> <span class="n">equation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">calc_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">]</span>
@@ -770,7 +770,7 @@
 
 <div class="viewcode-block" id="Notes.write_equation">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.write_equation">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation</span><span class="p">):</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">cursor</span><span class="o">.</span><span class="n">movePosition</span><span class="p">(</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">MoveOperation</span><span class="o">.</span><span class="n">EndOfLine</span><span class="p">)</span>
 
@@ -782,7 +782,7 @@
 
 <div class="viewcode-block" id="Notes.add_menu">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.add_menu">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu_items</span><span class="p">,</span> <span class="n">menu_obj</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu_items</span><span class="p">,</span> <span class="n">menu_obj</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds items to a context menu</span>
 
 <span class="sd">        Parameters</span>
@@ -799,7 +799,7 @@
 
 <div class="viewcode-block" id="Notes.save_notes_file">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.save_notes_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_notes_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_notes_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves notes to an *.rst file</span>
 
 <span class="sd">        Autosaves the notes to a file ``[sample_id].rst``</span>
@@ -816,7 +816,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">statusbar</span><span class="o">.</span><span class="n">clearMessage</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_insert_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">halign</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">alt_text</span><span class="p">,</span> <span class="n">caption</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_insert_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">halign</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">alt_text</span><span class="p">,</span> <span class="n">caption</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">.. figure:: </span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    :align: </span><span class="si">{</span><span class="n">halign</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -826,7 +826,7 @@
 
 <div class="viewcode-block" id="Notes.insert_image">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.insert_image">[docs]</a>
-    <span class="k">def</span> <span class="nf">insert_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">alt_text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">alt_text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a generic placeholder image to notes</span>
 
 <span class="sd">        Uses the reStructured Text figure format</span>
@@ -875,7 +875,7 @@
 
 <div class="viewcode-block" id="Notes.format_header">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.format_header">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Formats a selected line as a header</span>
 
 <span class="sd">        Places a symbol consistent with the heading level below the selected text line.</span>
@@ -911,7 +911,7 @@
 
 <div class="viewcode-block" id="Notes.format_list">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.format_list">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Formats a list in the text, either bulleted or enumerated</span>
 
 <span class="sd">        Formats selected text as bulleted or enumerated in restructured text format.</span>
@@ -947,7 +947,7 @@
 
 <div class="viewcode-block" id="Notes.format_text">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.format_text">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Formats the text</span>
 
 <span class="sd">        Formats selected text as bold, italic or literal in restructured text format.</span>
@@ -989,7 +989,7 @@
 
 <div class="viewcode-block" id="Notes.format_citation">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.format_citation">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_citation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_citation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Formats and appends citation under References section.</span>
 
 <span class="sd">        Creates a citation at the current location, using the selected text as the citation key</span>
@@ -1047,7 +1047,7 @@
 
 <div class="viewcode-block" id="Notes.format_hyperlink">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.format_hyperlink">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_hyperlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://www.example.com&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_hyperlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://www.example.com&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Formats and inserts a hyperlink definition.</span>
 
 <span class="sd">        Ensures the hyperlink is placed above the References section if it exists,</span>
@@ -1097,7 +1097,7 @@
 
 <div class="viewcode-block" id="Notes.insert_info">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.insert_info">[docs]</a>
-    <span class="k">def</span> <span class="nf">insert_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infotype</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infotype</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds preformatted notes</span>
 
 <span class="sd">        Parameters</span>
@@ -1168,7 +1168,7 @@
 
 <div class="viewcode-block" id="Notes.add_table_note">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.add_table_note">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_table_note</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">row_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">col_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_table_note</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">row_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">col_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert matrix to restructured text</span>
 
 <span class="sd">        Adds a table to the note tab, including row lables and column headers.</span>
@@ -1224,7 +1224,7 @@
 
 <div class="viewcode-block" id="Notes.save_notes_to_pdf">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.save_notes_to_pdf">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_notes_to_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_notes_to_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts notes *.rst file to *.pdf&quot;&quot;&quot;</span>
         <span class="c1"># save note file first to ensure all changes have been recorded</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1262,7 +1262,7 @@
 
 <div class="viewcode-block" id="Notes.to_rst_table">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.to_rst_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_rst_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_rst_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a Pandas DataFrame to a reST table string.</span>
 
 <span class="sd">        Parameters</span>
@@ -1275,7 +1275,7 @@
 <span class="sd">        str</span>
 <span class="sd">            Table in restructred text format</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">rst_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">rst_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">:</span><span class="s1">^10</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span>
 
         <span class="c1"># Extracting column names and data as lists</span>
@@ -1294,7 +1294,7 @@
 
 <div class="viewcode-block" id="Notes.closeEvent">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.closeEvent">[docs]</a>
-    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Override closeEvent to execute custom logic when the dock widget closes.&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dock widget is closing!&quot;</span><span class="p">)</span>
 
@@ -1308,7 +1308,7 @@
     <span class="c1"># Main Function to Open the Dialog</span>
 <div class="viewcode-block" id="Notes.open_note_options">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.open_note_options">[docs]</a>
-    <span class="k">def</span> <span class="nf">open_note_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_note_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Opens the note options dialog.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1323,7 +1323,7 @@
 
 <div class="viewcode-block" id="Notes.toggle_preview_notes">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.toggle_preview_notes">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_preview_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_preview_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shows/hides the PDF preview browser&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_preview_pdf</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="c1"># show previewer</span>
@@ -1337,7 +1337,7 @@
 
 <div class="viewcode-block" id="Notes.update_pdf">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.Notes.update_pdf">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens the compiled PDF, ``self.notes_file``, for viewing&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pdf_browser</span><span class="o">.</span><span class="n">setUrl</span><span class="p">(</span><span class="n">QUrl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notes_file</span><span class="p">))</span></div>
 </div>
@@ -1345,7 +1345,7 @@
 
 <div class="viewcode-block" id="NoteOptionsDialog">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog">[docs]</a>
-<span class="k">class</span> <span class="nc">NoteOptionsDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoteOptionsDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Opens when ``Notes.action_options`` is triggered.</span>
 
 <span class="sd">    Opens a dialog to change options associated with Notes formatting options.</span>
@@ -1355,7 +1355,7 @@
 <span class="sd">    parent : Notes, optional</span>
 <span class="sd">        Notes class used to call this dialog, by default None</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">NoteOptionsDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Note Options&quot;</span><span class="p">)</span>
 
@@ -1408,21 +1408,21 @@
 
 <div class="viewcode-block" id="NoteOptionsDialog.update_maxcolumns">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog.update_maxcolumns">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_maxcolumns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_maxcolumns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates maximum number of columns option&quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;MaxColumns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_input</span><span class="o">.</span><span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="NoteOptionsDialog.update_maxvariance">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog.update_maxvariance">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_maxvariance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_maxvariance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates maximum variance option&quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;MaxVariance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_input</span><span class="o">.</span><span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="NoteOptionsDialog.update_options_dict">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog.update_options_dict">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_options_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_options_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates notes option dictionary upon accept &quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span>
@@ -1431,7 +1431,7 @@
 
 <div class="viewcode-block" id="NoteOptionsDialog.get_options">
 <a class="viewcode-back" href="../../generated/common.NoteTaking.html#common.NoteTaking.NoteOptionsDialog.get_options">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the options set in the dialog.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

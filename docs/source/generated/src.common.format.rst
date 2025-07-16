@@ -1,4 +1,4 @@
-src.common.format
+﻿src.common.format
 =================
 
 .. automodule:: src.common.format
@@ -9,8 +9,11 @@ src.common.format
    .. autosummary::
    
       dynamic_format
-      invsymlog
+      inv_logit
+      inv_symlog
+      logit
       oround
       oround_matrix
+      parse_isotope
       symlog
    

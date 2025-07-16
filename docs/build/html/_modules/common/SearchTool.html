@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,18 +388,18 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.SearchTool</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QWidget</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QTextEdit</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QTextCursor</span><span class="p">,</span> <span class="n">QTextCharFormat</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QTextDocument</span><span class="p">,</span> <span class="n">QAction</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
-<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 
 <div class="viewcode-block" id="SearchWidget">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget">[docs]</a>
-<span class="k">class</span> <span class="nc">SearchWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SearchWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A search and replace toolbar for use with QTextEdit widgets.</span>
 
@@ -417,7 +417,7 @@
 <span class="sd">    realtime : bool, optional</span>
 <span class="sd">        If True, triggers search on every keypress; otherwise, search activates on Return (default is False).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_edit</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable_replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">realtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_edit</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable_replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">realtime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="n">text_edit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span> <span class="o">=</span> <span class="n">realtime</span>
@@ -428,7 +428,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_ui</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_signals</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_build_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the layout and widgets for the search interface,</span>
 <span class="sd">        including search input, toggle buttons, and navigation controls.</span>
@@ -502,7 +502,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">replace_all_button</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">toggle_replace_button</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_connect_signals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_connect_signals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connects internal UI signals to their corresponding slots.</span>
 <span class="sd">        Handles text change, toggle buttons, navigation, and replace actions.</span>
@@ -526,7 +526,7 @@
 
 <div class="viewcode-block" id="SearchWidget.toggle_replace_fields">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.toggle_replace_fields">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_replace_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_replace_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shows or hides the replace input and buttons based on the toggle state.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -540,7 +540,7 @@
 
 <div class="viewcode-block" id="SearchWidget.highlight_matches">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.highlight_matches">[docs]</a>
-    <span class="k">def</span> <span class="nf">highlight_matches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">highlight_matches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Searches the text_edit for the current search term and highlights all matches.</span>
 
@@ -626,7 +626,7 @@
 
 <div class="viewcode-block" id="SearchWidget.select_current">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.select_current">[docs]</a>
-    <span class="k">def</span> <span class="nf">select_current</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_current</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Moves the cursor to the currently selected match and applies highlight.</span>
 
@@ -652,7 +652,7 @@
 
 <div class="viewcode-block" id="SearchWidget.update_match_label">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.update_match_label">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_match_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_match_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the display label that shows current match index and total matches.</span>
 <span class="sd">        e.g., &#39;3 / 7&#39;</span>
@@ -665,7 +665,7 @@
 
 <div class="viewcode-block" id="SearchWidget.navigate_match">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.navigate_match">[docs]</a>
-    <span class="k">def</span> <span class="nf">navigate_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">navigate_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Navigates to the next or previous search match in the document.</span>
 
@@ -688,7 +688,7 @@
 
 <div class="viewcode-block" id="SearchWidget.clear_search">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.clear_search">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clears the search and replace fields, removes all highlights,</span>
 <span class="sd">        and resets internal state (matches, positions, cursor).</span>
@@ -710,7 +710,7 @@
 
 <div class="viewcode-block" id="SearchWidget.replace_current">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_current">[docs]</a>
-    <span class="k">def</span> <span class="nf">replace_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replace_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Replaces the currently selected match in the text_edit with the replacement text.</span>
 <span class="sd">        After replacing, it re-highlights all matches to update positions.</span>
@@ -734,7 +734,7 @@
 
 <div class="viewcode-block" id="SearchWidget.replace_all">
 <a class="viewcode-back" href="../../generated/common.SearchTool.html#common.SearchTool.SearchWidget.replace_all">[docs]</a>
-    <span class="k">def</span> <span class="nf">replace_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replace_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Replaces all matches in the document with the replacement text.</span>
 

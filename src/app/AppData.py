@@ -33,8 +33,6 @@ class AppData(Observable):
         Identifier for logging.
     default_preferences : dict
         Default user preferences for units, font size, etc.
-    scale_options : list
-        Available scaling options for data visualization.
     preferences : dict
         Current user preferences (deep copy of default_preferences).
     selected_directory : str
@@ -196,9 +194,6 @@ class AppData(Observable):
             'TickDir':'out',
         }
 
-        # options for scaling data
-        self.scale_options = ['linear', 'log', 'symlog']
-
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
         self.selected_directory = ''
@@ -303,11 +298,11 @@ class AppData(Observable):
                 'option2':75.0,
             },
         }
-        if 'option1' in self.noise_red_options[self._noise_red_method].keys():
+        if 'option1' in self.noise_red_options[self._noise_red_method]:
             self._noise_red_option1 = self.noise_red_options[self._noise_red_method]['option1']
         else:
             self._noise_red_option1 = 0
-        if 'option2' in self.noise_red_options[self._noise_red_method].keys():
+        if 'option2' in self.noise_red_options[self._noise_red_method]:
             self._noise_red_option2 = self.noise_red_options[self._noise_red_method]['option2']
         else:
             self._noise_red_option2 = 0.0
@@ -341,7 +336,7 @@ class AppData(Observable):
                     'REE': ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu'],
                     'metals': ['Na','Al','Ca','Zn','Sc','Cu','Fe','Mn','V','Co','Mg','Ni','Cr'],
                 }
-        if 'REE' in self.ndim_list_dict.keys():
+        if 'REE' in self.ndim_list_dict:
             self._ndim_analyte_set = 'REE'
         else:
             self._ndim_analyte_set = list(self.ndim_list_dict.keys())[0]
@@ -380,11 +375,11 @@ class AppData(Observable):
         }
         self._max_clusters = 10
         self._num_clusters = self.cluster_dict[self._cluster_method]['n_clusters']
-        if 'distance' in self.cluster_dict[self._cluster_method].keys():
+        if 'distance' in self.cluster_dict[self._cluster_method]:
             self._cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         else:
             self._cluster_distance = None
-        if 'exponent' in self.cluster_dict[self._cluster_method].keys():
+        if 'exponent' in self.cluster_dict[self._cluster_method]:
             self._cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
         else:
             self._cluster_exponent = 0
@@ -521,7 +516,7 @@ class AppData(Observable):
 
     @property
     def ref_index(self):
-        """(int): The index of the reference chemistry source used for normalization."""
+        """int : The index of the reference chemistry source used for normalization."""
         return self._ref_index
     
     @ref_index.setter
@@ -534,7 +529,7 @@ class AppData(Observable):
 
     @property
     def ref_chem(self):
-        """(pd.Series): The reference chemistry for the current reference index."""
+        """pd.Series : The reference chemistry for the current reference index."""
         chem = self.ref_data.iloc[self._ref_index]
         chem.index = [col.replace('_ppm', '') for col in chem.index]
 
@@ -542,7 +537,7 @@ class AppData(Observable):
 
     @property
     def sample_list(self):
-        """(list): A list of sample IDs in the current sample list."""
+        """list : A list of sample IDs in the current sample list."""
         return self._sample_list
 
     @sample_list.setter
@@ -560,7 +555,7 @@ class AppData(Observable):
 
     @property
     def sample_id(self):
-        """(str): The ID/name of the currently selected sample."""
+        """str : The ID/name of the currently selected sample."""
         return self._sample_id
     
     @sample_id.setter
@@ -574,7 +569,7 @@ class AppData(Observable):
     ### Histogram Properties ###
     @property
     def equalize_color_scale(self):
-        """(bool): Whether to equalize the color scale for histograms."""
+        """bool : Whether to equalize the color scale for histograms."""
         return self._equalize_color_scale
     
     @equalize_color_scale.setter
@@ -587,12 +582,12 @@ class AppData(Observable):
 
     @property
     def default_hist_num_bins(self):
-        """(int): The default number of histogram bins."""
+        """int : The default number of histogram bins."""
         return self._default_hist_num_bins
 
     @property
     def hist_bin_width(self):
-        """(float): The width of histogram bins."""
+        """float : The width of histogram bins."""
         return self._hist_bin_width
     
     @hist_bin_width.setter
@@ -612,7 +607,7 @@ class AppData(Observable):
 
     @property
     def hist_num_bins(self):
-        """(int): The number of histogram bins."""
+        """int : The number of histogram bins."""
         return self._hist_num_bins
     
     @hist_num_bins.setter
@@ -632,7 +627,7 @@ class AppData(Observable):
 
     @property
     def hist_plot_style(self):
-        """(str): The style of histogram plot to use."""
+        """str : The style of histogram plot to use."""
         return self._hist_plot_style
     
     @hist_plot_style.setter
@@ -647,7 +642,7 @@ class AppData(Observable):
 
     @property
     def corr_method(self):
-        """(str): The method used for correlation plots."""
+        """str : The method used for correlation plots."""
         return self._corr_method
     
     @corr_method.setter
@@ -662,7 +657,7 @@ class AppData(Observable):
 
     @property
     def corr_squared(self):
-        """(bool): Whether to use squared correlation values."""
+        """bool : Whether to use squared correlation values."""
         return self._corr_squared
     
     @corr_squared.setter
@@ -675,7 +670,7 @@ class AppData(Observable):
 
     @property
     def noise_red_method(self):
-        """(str): The method used for noise reduction."""
+        """str : The method used for noise reduction."""
         return self._noise_red_method
     
     @noise_red_method.setter
@@ -688,7 +683,7 @@ class AppData(Observable):
 
     @property
     def noise_red_option1(self):
-        """(int or float): The first option for noise reduction method."""
+        """int | float : The first option for noise reduction method."""
         return self._noise_red_option1
     
     @noise_red_option1.setter
@@ -701,7 +696,7 @@ class AppData(Observable):
 
     @property
     def noise_red_option2(self):
-        """(int or float): The second option for noise reduction method."""
+        """int | float : The second option for noise reduction method."""
         return self._noise_red_option2
     
     @noise_red_option2.setter
@@ -714,7 +709,7 @@ class AppData(Observable):
 
     @property
     def apply_noise_red(self):
-        """(str): Whether to apply noise reduction."""
+        """str : Whether to apply noise reduction."""
         return self._apply_noise_red
     
     @apply_noise_red.setter
@@ -727,7 +722,7 @@ class AppData(Observable):
     
     @property
     def gradient_flag(self):
-        """(bool): Whether to plot the gradient."""
+        """bool : Whether to plot the gradient."""
         return self._gradient_flag
     
     @gradient_flag.setter
@@ -740,7 +735,7 @@ class AppData(Observable):
 
     @property
     def edge_detection_method(self):
-        """(str): The method used for edge detection."""
+        """str : The method used for edge detection."""
         return self._edge_detection_method
 
     @edge_detection_method.setter
@@ -753,7 +748,7 @@ class AppData(Observable):
     ### Scatter Properties ###
     @property
     def x_field_type(self):
-        """(str): Field type for x field."""
+        """str : Field type for x field."""
         return self._x_field_type
 
     @x_field_type.setter
@@ -765,7 +760,7 @@ class AppData(Observable):
 
     @property
     def y_field_type(self):
-        """(str): Field type for y field."""
+        """str : Field type for y field."""
         return self._y_field_type
 
     @y_field_type.setter
@@ -777,7 +772,7 @@ class AppData(Observable):
 
     @property
     def z_field_type(self):
-        """(str): Field type for z field."""
+        """str : Field type for z field."""
         return self._z_field_type
 
     @z_field_type.setter
@@ -789,7 +784,7 @@ class AppData(Observable):
 
     @property
     def c_field_type(self):
-        """(str): Field type for color field or map data."""
+        """str : Field type for color field or map data."""
         return self._c_field_type
     
     @c_field_type.setter
@@ -811,7 +806,7 @@ class AppData(Observable):
 
     @property
     def x_field(self):
-        """(str): Field associated with x-axis or A-vertex on a ternary diagram."""
+        """str : Field associated with x-axis or A-vertex on a ternary diagram."""
         return self._x_field
     
     @x_field.setter
@@ -824,7 +819,7 @@ class AppData(Observable):
     
     @property
     def y_field(self):
-        """(str): Field associated with y-axis or B-vertex on a ternary diagram."""
+        """str : Field associated with y-axis or B-vertex on a ternary diagram."""
         return self._y_field
     
     @y_field.setter
@@ -837,7 +832,7 @@ class AppData(Observable):
     
     @property
     def z_field(self):
-        """(str): Field associated with z-axis or C-vertex on a ternary diagram."""
+        """str : Field associated with z-axis or C-vertex on a ternary diagram."""
         return self._z_field
     
     @z_field.setter
@@ -850,7 +845,7 @@ class AppData(Observable):
 
     @property
     def c_field(self):
-        """(str): Field associated with color on many plots."""
+        """str : Field associated with color on many plots."""
         return self._c_field
 
     @c_field.setter
@@ -864,7 +859,7 @@ class AppData(Observable):
 
     @property
     def scatter_preset(self):
-        """(str): The preset for scatter plot styles."""
+        """str : The preset for scatter plot styles."""
         return self._scatter_preset
     
     @scatter_preset.setter
@@ -878,7 +873,7 @@ class AppData(Observable):
     ### Heatmap Properties ###
     @property
     def heatmap_style(self):
-        """(str): The style of heatmap to use."""
+        """str : The style of heatmap to use."""
         return self._heatmap_style
     
     @heatmap_style.setter
@@ -892,7 +887,7 @@ class AppData(Observable):
     ### Ternary Map ###
     @property
     def ternary_colormap(self):
-        """(str): The colormap used for ternary maps."""
+        """str : The colormap used for ternary maps."""
         return self._ternary_colormap
     
     @ternary_colormap.setter
@@ -906,7 +901,7 @@ class AppData(Observable):
 
     @property
     def ternary_color_x(self):
-        """(str): The color for the A-vertex on a ternary diagram."""
+        """str : The color for the A-vertex on a ternary diagram."""
         return self._ternary_color_x
     
     @ternary_color_x.setter
@@ -919,7 +914,7 @@ class AppData(Observable):
 
     @property
     def ternary_color_y(self):
-        """(str): The color for the B-vertex on a ternary diagram."""
+        """str : The color for the B-vertex on a ternary diagram."""
         return self._ternary_color_y
     
     @ternary_color_y.setter
@@ -932,7 +927,7 @@ class AppData(Observable):
 
     @property
     def ternary_color_z(self):
-        """(str): The color for the C-vertex on a ternary diagram."""
+        """str : The color for the C-vertex on a ternary diagram."""
         return self._ternary_color_z
     
     @ternary_color_z.setter
@@ -945,7 +940,7 @@ class AppData(Observable):
 
     @property
     def ternary_color_m(self):
-        """(str): The color for the centroid on a ternary diagram."""
+        """str : The color for the centroid on a ternary diagram."""
         return self._ternary_color_m
     
     @ternary_color_m.setter
@@ -959,7 +954,7 @@ class AppData(Observable):
     ### Multidimensional Properties ###
     @property
     def norm_reference(self):
-        """(str): The reference used for normalizing analyte and ratio data."""
+        """str : The reference used for normalizing analyte and ratio data."""
         return self._norm_reference
     
     @norm_reference.setter
@@ -972,14 +967,14 @@ class AppData(Observable):
 
     @property
     def ndim_analyte_set(self):
-        """(str): The set of analytes used for N-Dim analysis."""
+        """str : The set of analytes used for N-Dim analysis."""
         return self._ndim_analyte_set
     
     @ndim_analyte_set.setter
     def ndim_analyte_set(self, new_list):
         if new_list == self._ndim_analyte_set:
             return
-        elif new_list not in self.ndim_list_dict.keys():
+        elif new_list not in self.ndim_list_dict:
             raise ValueError(f"N Dim list ({new_list}) is not a defined option.")
     
         self._ndim_analyte_set = new_list
@@ -987,7 +982,7 @@ class AppData(Observable):
 
     @property
     def ndim_list(self):
-        """(list): The list of analytes used for N-Dim analysis."""
+        """list : The list of analytes used for N-Dim analysis."""
         return self._ndim_list
 
     @ndim_list.setter
@@ -997,7 +992,7 @@ class AppData(Observable):
 
     @property
     def ndim_quantile_index(self):
-        """(int): The index of the quantile set used for N-Dim analysis."""
+        """int : The index of the quantile set used for N-Dim analysis."""
         return self._ndim_quantile_index
     
     @ndim_quantile_index.setter
@@ -1011,7 +1006,7 @@ class AppData(Observable):
     ### Dimensional Reduction Properties ###
     @property
     def dim_red_method(self):
-        """(str): The method used for dimensionality reduction."""
+        """str : The method used for dimensionality reduction."""
         return self._dim_red_method
     
     @dim_red_method.setter
@@ -1024,7 +1019,7 @@ class AppData(Observable):
 
     @property
     def dim_red_x(self):
-        """(int): The x-axis index for dimensionality reduction."""
+        """int : The x-axis index for dimensionality reduction."""
         return self._dim_red_x
     
     @dim_red_x.setter
@@ -1037,7 +1032,7 @@ class AppData(Observable):
 
     @property
     def dim_red_x_max(self):
-        """(int): The maximum x-axis index for dimensionality reduction."""
+        """int : The maximum x-axis index for dimensionality reduction."""
         return self._dim_red_x_max
 
     @dim_red_x_max.setter
@@ -1049,7 +1044,7 @@ class AppData(Observable):
 
     @property
     def dim_red_y(self):
-        """(int): The y-axis index for dimensionality reduction."""
+        """int : The y-axis index for dimensionality reduction."""
         return self._dim_red_y
 
     @dim_red_y.setter
@@ -1062,7 +1057,7 @@ class AppData(Observable):
     
     @property
     def dim_red_y_max(self):
-        """(int): The maximum y-axis index for dimensionality reduction."""
+        """int : The maximum y-axis index for dimensionality reduction."""
         return self._dim_red_x_max
 
     @dim_red_y_max.setter
@@ -1075,12 +1070,12 @@ class AppData(Observable):
     ### Cluster Properties ###
     @property
     def cluster_method_options(self):
-        """(list): The available clustering methods."""
+        """list : The available clustering methods."""
         return list(self.cluster_dict.keys())
 
     @property
     def cluster_method(self):
-        """(str): The current clustering method used for data analysis."""
+        """str : The current clustering method used for data analysis."""
         return self._cluster_method
     
     @cluster_method.setter
@@ -1096,7 +1091,7 @@ class AppData(Observable):
 
     @property
     def max_clusters(self):
-        """(int): The maximum number of clusters allowed for testing cluster performance."""
+        """int : The maximum number of clusters allowed for testing cluster performance."""
         return self._max_clusters
     
     @max_clusters.setter
@@ -1109,7 +1104,7 @@ class AppData(Observable):
 
     @property
     def num_clusters(self):
-        """(int): The number of clusters to use in clustering."""
+        """int : The number of clusters to use in clustering."""
         return self._num_clusters
     
     @num_clusters.setter
@@ -1124,7 +1119,7 @@ class AppData(Observable):
 
     @property
     def cluster_seed(self):
-        """(int): The random seed used for clustering."""
+        """int : The random seed used for clustering."""
         return self._cluster_seed
     
     @cluster_seed.setter
@@ -1139,7 +1134,7 @@ class AppData(Observable):
 
     @property
     def cluster_exponent(self):
-        """(float): The exponent used in fuzzy c-means clustering."""
+        """float : The exponent used in fuzzy c-means clustering."""
         return self._cluster_exponent
     
     @cluster_exponent.setter
@@ -1154,7 +1149,7 @@ class AppData(Observable):
 
     @property
     def cluster_distance(self):
-        """(str): The distance metric used in clustering."""
+        """str : The distance metric used in clustering."""
         return self._cluster_distance
     
     @cluster_distance.setter
@@ -1169,7 +1164,7 @@ class AppData(Observable):
 
     @property
     def selected_clusters(self):
-        """(list): The list of selected clusters for masking."""
+        """list : The list of selected clusters for masking."""
         return self._selected_clusters
     
     @selected_clusters.setter
@@ -1182,7 +1177,7 @@ class AppData(Observable):
 
     @property
     def dim_red_precondition(self):
-        """(bool): Whether to precondition the dimensionality reduction with PCA."""
+        """bool : Whether to precondition the dimensionality reduction with PCA."""
         return self._dim_red_precondition
     
     @dim_red_precondition.setter
@@ -1195,7 +1190,7 @@ class AppData(Observable):
 
     @property
     def num_basis_for_precondition(self):
-        """(int): The number of basis vectors to use for preconditioning in dimensionality reduction."""
+        """int : The number of basis vectors to use for preconditioning in dimensionality reduction."""
         return self._num_basis_for_precondition
     
     @num_basis_for_precondition.setter
@@ -1208,7 +1203,7 @@ class AppData(Observable):
 
     @property
     def field_dict(self):
-        """(dict): A dictionary of field names and their types for the current sample.
+        """dict : A dictionary of field names and their types for the current sample.
 
         This dictionary is used to populate field selection widgets and ensure valid selections.
         Coordinate fields are excluded from this dictionary.
@@ -1220,7 +1215,7 @@ class AppData(Observable):
 
     @property
     def selected_analytes(self):
-        """(pd.Series): The selected analytes for the current sample."""
+        """pd.Series : The selected analytes for the current sample."""
         if self.data and self.sample_id != '':
             return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
 
@@ -1325,9 +1320,9 @@ class AppData(Observable):
         also updates the number of clusters and seed in the cluster dictionary for the
         selected method.
         """
-        if 'distance' in self.cluster_dict[self._cluster_method].keys():
+        if 'distance' in self.cluster_dict[self._cluster_method]:
             self.cluster_distance = self.cluster_dict[self._cluster_method]['distance']
-        if 'exponent' in self.cluster_dict[self._cluster_method].keys():
+        if 'exponent' in self.cluster_dict[self._cluster_method]:
             self.cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
 
     def generate_random_seed(self):

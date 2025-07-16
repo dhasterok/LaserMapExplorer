@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,17 +388,17 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.CropImage</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt6</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QRectF</span><span class="p">,</span> <span class="n">QPointF</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QGraphicsRectItem</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPen</span><span class="p">,</span> <span class="n">QCursor</span> <span class="p">)</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QRectF</span><span class="p">,</span> <span class="n">QPointF</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QGraphicsRectItem</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPen</span><span class="p">,</span> <span class="n">QCursor</span> <span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="c1"># Cropping</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="CropTool">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.CropTool">[docs]</a>
-<span class="k">class</span> <span class="nc">CropTool</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CropTool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Crop maps</span>
 
 <span class="sd">    Cropping maps sets the maximum extent of the map for analysis.</span>
@@ -408,7 +408,7 @@
 <span class="sd">    overlays: QGraphicsRectItem()</span>
 <span class="sd">        contains data for the figure overlay showing crop region</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
         <span class="c1"># Initialize overlay rectangles</span>
@@ -416,7 +416,7 @@
 
 <div class="viewcode-block" id="CropTool.init_crop">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.CropTool.init_crop">[docs]</a>
-    <span class="k">def</span> <span class="nf">init_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets intial crop region as full map extent.&quot;&quot;&quot;</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span>
@@ -463,7 +463,7 @@
 
 <div class="viewcode-block" id="CropTool.remove_overlays">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.CropTool.remove_overlays">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_overlays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_overlays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes darkened overlay following completion of crop.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="p">)</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#remove crop rect and overlays</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_rect</span><span class="p">)</span>
@@ -474,7 +474,7 @@
 
 <div class="viewcode-block" id="CropTool.update_overlay">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.CropTool.update_overlay">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_overlay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_overlay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the overlay after user moves a boundary.</span>
 
 <span class="sd">        Parameters</span>
@@ -496,7 +496,7 @@
 
 <div class="viewcode-block" id="CropTool.apply_crop">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.CropTool.apply_crop">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Uses selected crop extent to set viewable area and map region for analysis.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_rect</span><span class="p">:</span>
             <span class="n">crop_rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_rect</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span>  <span class="c1"># self.crop_rect is ResizableRectItem</span>
@@ -515,8 +515,8 @@
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="ResizableRectItem">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem">[docs]</a>
-<span class="k">class</span> <span class="nc">ResizableRectItem</span><span class="p">(</span><span class="n">QGraphicsRectItem</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ResizableRectItem</span><span class="p">(</span><span class="n">QGraphicsRectItem</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ResizableRectItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptHoverEvents</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -530,7 +530,7 @@
 
 <div class="viewcode-block" id="ResizableRectItem.hoverMoveEvent">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.hoverMoveEvent">[docs]</a>
-    <span class="k">def</span> <span class="nf">hoverMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hoverMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -549,7 +549,7 @@
 
 <div class="viewcode-block" id="ResizableRectItem.mousePressEvent">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.mousePressEvent">[docs]</a>
-    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -563,7 +563,7 @@
 
 <div class="viewcode-block" id="ResizableRectItem.mouseMoveEvent">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.mouseMoveEvent">[docs]</a>
-    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -575,14 +575,14 @@
 
 <div class="viewcode-block" id="ResizableRectItem.mouseReleaseEvent">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.mouseReleaseEvent">[docs]</a>
-    <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resizing</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ResizableRectItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ResizableRectItem.onEdge">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.onEdge">[docs]</a>
-    <span class="k">def</span> <span class="nf">onEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="n">rect</span><span class="o">.</span><span class="n">left</span><span class="p">())</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursorChangeThreshold</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">-</span> <span class="n">rect</span><span class="o">.</span><span class="n">top</span><span class="p">())</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursorChangeThreshold</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="s1">&#39;TL&#39;</span> <span class="c1"># top, left</span>
@@ -601,7 +601,7 @@
 
 <div class="viewcode-block" id="ResizableRectItem.resizeRect">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.resizeRect">[docs]</a>
-    <span class="k">def</span> <span class="nf">resizeRect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newPos</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resizeRect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newPos</span><span class="p">):</span>
         <span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragStartRect</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span><span class="s1">&#39;TL&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span><span class="s1">&#39;BL&#39;</span><span class="p">:</span>  <span class="c1"># left</span>
@@ -622,7 +622,7 @@
 
 <div class="viewcode-block" id="ResizableRectItem.validateRect">
 <a class="viewcode-back" href="../../generated/app.CropImage.html#app.CropImage.ResizableRectItem.validateRect">[docs]</a>
-    <span class="k">def</span> <span class="nf">validateRect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validateRect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
         <span class="n">x_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x_range</span>
         <span class="n">y_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y_range</span>
 

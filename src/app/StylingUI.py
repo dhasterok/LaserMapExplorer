@@ -1108,7 +1108,7 @@ class StylingDock(StyleData, StyleTheme):
         ui.checkBoxReverseColormap.setChecked(style['CbarReverse'])
         ui.checkBoxReverseColormap.blockSignals(False)
         field = self.app_data.c_field
-        if field in list(data.processed_data.column_attributes.keys()):
+        if field in data.processed_data.column_attributes:
             style['CLim'] = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
             style['CLabel'] = data.processed_data.get_attribute(field,'label')
         ui.lineEditCLB.value = style['CLim'][0]
@@ -1126,7 +1126,7 @@ class StylingDock(StyleData, StyleTheme):
         else:
             # set color scale options to linear/log
             ui.comboBoxCScale.clear()
-            ui.comboBoxCScale.addItems(self.app_data.scale_options)
+            ui.comboBoxCScale.addItems(self.ui.data[self.app_data.sample_id].scale_options)
             style['CScale'] = 'linear'
             ui.comboBoxCScale.setCurrentText(style['CScale'])
             
@@ -2194,7 +2194,7 @@ class StylingDock(StyleData, StyleTheme):
             cluster_label[i] = cluster_dict[i]['name']
 
         # mask
-        if 99 in list(cluster_dict.keys()):
+        if 99 in cluster_dict:
             color = get_rgb_color(cluster_dict[99]['color'])
             cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
             cluster_label.append(cluster_dict[99]['name'])

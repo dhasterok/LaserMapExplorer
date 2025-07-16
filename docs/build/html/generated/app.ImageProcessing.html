@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -401,10 +401,10 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing" title="app.ImageProcessing.ImageProcessing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a>(parent)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing" title="app.ImageProcessing.ImageProcessing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a>(parent)</p></td>
 <td><p>Image processing methods for use in LaME.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI" title="app.ImageProcessing.ImageProcessingUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageProcessingUI</span></code></a>(parent)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI" title="app.ImageProcessing.ImageProcessingUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageProcessingUI</span></code></a>(parent)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -478,22 +478,25 @@
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing.add_edge_detection" title="app.ImageProcessing.ImageProcessing.add_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_edge_detection</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.add_edge_detection" title="app.ImageProcessing.ImageProcessing.add_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_edge_detection</span></code></a>()</p></td>
 <td><p>Add edge detection to the current laser map plot.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing.gaussian_sigma" title="app.ImageProcessing.ImageProcessing.gaussian_sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_sigma</span></code></a>(ksize)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.gaussian_sigma" title="app.ImageProcessing.ImageProcessing.gaussian_sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_sigma</span></code></a>(ksize)</p></td>
 <td><p>Sets default Gaussian sigma for Gaussian blur.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing.noise_reduction" title="app.ImageProcessing.ImageProcessing.noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction</span></code></a>(algorithm[, val1, val2])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.histogram_equalization" title="app.ImageProcessing.ImageProcessing.histogram_equalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram_equalization</span></code></a>()</p></td>
+<td><p>Apply histogram equalization to an array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.noise_reduction" title="app.ImageProcessing.ImageProcessing.noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction</span></code></a>(algorithm[, val1, val2])</p></td>
 <td><p>Add noise reduction to the current laser map plot.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing.plot_gradient" title="app.ImageProcessing.ImageProcessing.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.plot_gradient" title="app.ImageProcessing.ImageProcessing.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
 <td><p>Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing.remove_edge_detection" title="app.ImageProcessing.ImageProcessing.remove_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge_detection</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.remove_edge_detection" title="app.ImageProcessing.ImageProcessing.remove_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge_detection</span></code></a>()</p></td>
 <td><p>Removes edge detection from the current map.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessing.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessing.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
 <td><p>Apply Zero Crossing on the Laplacian of the image.</p></td>
 </tr>
 </tbody>
@@ -514,6 +517,19 @@ Options include ‘sobel’, ‘canny’, and ‘zero_cross’.</p>
 <p>Same as default in OpenCV, i.e., 0.3 ((ksize-1)/2 - 1) + 0.8. This functions sets the sigma
 value for <code class="docutils literal notranslate"><span class="pre">cv2.GaussianBlur</span></code> only when <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxNoiseReductionMethod</span></code> is ‘Gaussian’ and new kernel
 value is set by the user via <code class="docutils literal notranslate"><span class="pre">MainWindow.spinBoxNoiseReductionOption1.value()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessing.histogram_equalization">
+<span class="sig-name descname"><span class="pre">histogram_equalization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/ImageProcessing.html#ImageProcessing.histogram_equalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessing.histogram_equalization" title="Link to this definition">#</a></dt>
+<dd><p>Apply histogram equalization to an array.</p>
+<p>Transforms an array such that the histogram becomes uniform.  This is useful for
+equally distributing colors for maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>np.ndarray</em>) – Array to transform</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -577,44 +593,47 @@ computes noise reduction and displays gradient map</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.ImageProcessing.</span></span><span class="sig-name descname"><span class="pre">ImageProcessingUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/ImageProcessing.html#ImageProcessingUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#app.ImageProcessing.ImageProcessing" title="app.ImageProcessing.ImageProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessing" title="app.ImageProcessing.ImageProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a></p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.add_edge_detection" title="app.ImageProcessing.ImageProcessingUI.add_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_edge_detection</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.add_edge_detection" title="app.ImageProcessing.ImageProcessingUI.add_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_edge_detection</span></code></a>()</p></td>
 <td><p>Add edge detection to the current laser map plot.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.connect_logger" title="app.ImageProcessing.ImageProcessingUI.connect_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_logger</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.connect_logger" title="app.ImageProcessing.ImageProcessingUI.connect_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_logger</span></code></a>()</p></td>
 <td><p>Connects widgets to logger.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.connect_observer" title="app.ImageProcessing.ImageProcessingUI.connect_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_observer</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.connect_observer" title="app.ImageProcessing.ImageProcessingUI.connect_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_observer</span></code></a>()</p></td>
 <td><p>Connects properties to observer functions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.gaussian_sigma" title="app.ImageProcessing.ImageProcessingUI.gaussian_sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_sigma</span></code></a>(ksize)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.gaussian_sigma" title="app.ImageProcessing.ImageProcessingUI.gaussian_sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussian_sigma</span></code></a>(ksize)</p></td>
 <td><p>Sets default Gaussian sigma for Gaussian blur.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction" title="app.ImageProcessing.ImageProcessingUI.noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction</span></code></a>(algorithm[, val1, val2])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.histogram_equalization" title="app.ImageProcessing.ImageProcessingUI.histogram_equalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram_equalization</span></code></a>()</p></td>
+<td><p>Apply histogram equalization to an array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction" title="app.ImageProcessing.ImageProcessingUI.noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction</span></code></a>(algorithm[, val1, val2])</p></td>
 <td><p>Add noise reduction to the current laser map plot.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback" title="app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_method_callback</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback" title="app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_method_callback</span></code></a>()</p></td>
 <td><p>Sets up noise reduction controls when noise reduction method is changed.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback" title="app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_option1_callback</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback" title="app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_option1_callback</span></code></a>()</p></td>
 <td><p>Callback executed when the first noise reduction option is changed</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback" title="app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_option2_callback</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback" title="app.ImageProcessing.ImageProcessingUI.noise_reduction_option2_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_reduction_option2_callback</span></code></a>()</p></td>
 <td><p>Callback executed when the second noise reduction option is changed</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.plot_gradient" title="app.ImageProcessing.ImageProcessingUI.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.plot_gradient" title="app.ImageProcessing.ImageProcessingUI.plot_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gradient</span></code></a>()</p></td>
 <td><p>Produces a gradient map with arrows showing gradient direction and colors indicating magnitude</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.remove_edge_detection" title="app.ImageProcessing.ImageProcessingUI.remove_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge_detection</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.remove_edge_detection" title="app.ImageProcessing.ImageProcessingUI.remove_edge_detection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge_detection</span></code></a>()</p></td>
 <td><p>Removes edge detection from the current map.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.run_noise_reduction" title="app.ImageProcessing.ImageProcessingUI.run_noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_noise_reduction</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.run_noise_reduction" title="app.ImageProcessing.ImageProcessingUI.run_noise_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_noise_reduction</span></code></a>()</p></td>
 <td><p>Gets parameters and runs noise reduction</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian" title="app.ImageProcessing.ImageProcessingUI.zero_crossing_laplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zero_crossing_laplacian</span></code></a>(array)</p></td>
 <td><p>Apply Zero Crossing on the Laplacian of the image.</p></td>
 </tr>
 </tbody>
@@ -681,6 +700,19 @@ value is set by the user via <code class="docutils literal notranslate"><span cl
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed">
 <span class="sig-name descname"><span class="pre">gradient_checked_state_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/ImageProcessing.html#ImageProcessingUI.gradient_checked_state_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.histogram_equalization">
+<span class="sig-name descname"><span class="pre">histogram_equalization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.ImageProcessing.ImageProcessingUI.histogram_equalization" title="Link to this definition">#</a></dt>
+<dd><p>Apply histogram equalization to an array.</p>
+<p>Transforms an array such that the histogram becomes uniform.  This is useful for
+equally distributing colors for maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>np.ndarray</em>) – Array to transform</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.ImageProcessing.ImageProcessingUI.noise_reduction">
@@ -826,6 +858,7 @@ computes noise reduction and displays gradient map</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing"><code class="docutils literal notranslate"><span class="pre">ImageProcessing</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.add_edge_detection"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.add_edge_detection()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.gaussian_sigma()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.histogram_equalization"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.histogram_equalization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.noise_reduction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.plot_gradient"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.plot_gradient()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessing.remove_edge_detection"><code class="docutils literal notranslate"><span class="pre">ImageProcessing.remove_edge_detection()</span></code></a></li>
@@ -839,6 +872,7 @@ computes noise reduction and displays gradient map</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.connect_widgets"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.connect_widgets()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.gaussian_sigma"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.gaussian_sigma()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.gradient_checked_state_changed"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.gradient_checked_state_changed()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.histogram_equalization"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.histogram_equalization()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.noise_reduction()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_method_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.noise_reduction_method_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.ImageProcessing.ImageProcessingUI.noise_reduction_option1_callback"><code class="docutils literal notranslate"><span class="pre">ImageProcessingUI.noise_reduction_option1_callback()</span></code></a></li>

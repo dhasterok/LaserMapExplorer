@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -401,7 +401,7 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a>([data])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a>([data])</p></td>
 <td><p>Creates a pandas DataFrame with custom attributes stored with each column.</p></td>
 </tr>
 </tbody>
@@ -491,7 +491,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <dd class="field-odd"><p>Adds a dictionary <code class="docutils literal notranslate"><span class="pre">column_attributes</span></code> to a dataframe and the methods to add, set, and get column attributes and their values.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
+<dd class="field-even"><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -648,7 +648,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at_time</span></code>(time[, asof, axis])</p></td>
 <td><p>Select values at particular time of day (e.g., 9:30AM).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe" title="common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attributes_to_dataframe</span></code></a>([attributes])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe" title="common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attributes_to_dataframe</span></code></a>([attributes])</p></td>
 <td><p>Return selected attributes of all columns in the AttributeDataFrame as a new DataFrame.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backfill</span></code>(*[, axis, inplace, limit, downcast])</p></td>
@@ -684,7 +684,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>([deep])</p></td>
 <td><p>Make a copy of this object's indices and data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.copy_columns" title="common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_columns</span></code></a>([columns])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.copy_columns" title="common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_columns</span></code></a>([columns])</p></td>
 <td><p>Extract specified columns into a new AttributeDataFrame, preserving their attributes.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code>([method, min_periods, numeric_only])</p></td>
@@ -789,10 +789,10 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(key[, default])</p></td>
 <td><p>Get item from object for given key (ex: DataFrame column).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.get_attribute" title="common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute</span></code></a>(columns, attribute)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.get_attribute" title="common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute</span></code></a>(columns, attribute)</p></td>
 <td><p>Get a single attribute from an AttributeDataFrame for one or more columns.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.get_attribute_dict" title="common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute_dict</span></code></a>(attribute_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.get_attribute_dict" title="common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute_dict</span></code></a>(attribute_name)</p></td>
 <td><p>Creates a dictionary from an attribute where the unique values of the attribute becomes the keys and the items are lists with the column names that match each attribute_name.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groupby</span></code>([by, axis, level, as_index, sort, ...])</p></td>
@@ -825,7 +825,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate</span></code>([method, axis, limit, inplace, ...])</p></td>
 <td><p>Fill NaN values using an interpolation method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.is_attribute" title="common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_attribute</span></code></a>(column, attribute)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.is_attribute" title="common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_attribute</span></code></a>(column, attribute)</p></td>
 <td><p>Check if a given attribute exists for the specified column.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isetitem</span></code>(loc, value)</p></td>
@@ -879,10 +879,10 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code>(cond[, other, inplace, axis, level])</p></td>
 <td><p>Replace values where the condition is True.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.match_attribute" title="common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attribute</span></code></a>(attribute, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.match_attribute" title="common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attribute</span></code></a>(attribute, value)</p></td>
 <td><p>Returns a list of columns where a specific attribute matches the given value.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.match_attributes" title="common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attributes</span></code></a>(attributes_dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.match_attributes" title="common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attributes</span></code></a>(attributes_dict)</p></td>
 <td><p>Returns a list of columns where each attribute matches its corresponding value.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>([axis, skipna, numeric_only])</p></td>
@@ -1038,7 +1038,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sem</span></code>([axis, skipna, ddof, numeric_only])</p></td>
 <td><p>Return unbiased standard error of the mean over requested axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.set_attribute" title="common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attribute</span></code></a>(columns, attribute, values)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.set_attribute" title="common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attribute</span></code></a>(columns, attribute, values)</p></td>
 <td><p>Set an attribute for one or more columns.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axis</span></code>(labels, *[, axis, copy])</p></td>
@@ -1053,13 +1053,13 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift</span></code>([periods, freq, axis, fill_value, suffix])</p></td>
 <td><p>Shift index by desired number of periods with an optional time <cite>freq</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.show_attributes" title="common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_attributes</span></code></a>([column])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.show_attributes" title="common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_attributes</span></code></a>([column])</p></td>
 <td><p>Displays all attributes for a specific column or for the entire DataFrame.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skew</span></code>([axis, skipna, numeric_only])</p></td>
 <td><p>Return unbiased skew over requested axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.sort_columns" title="common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_columns</span></code></a>(sorted_columns)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.sort_columns" title="common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_columns</span></code></a>(sorted_columns)</p></td>
 <td><p>Sorts columns and attributes of an AttributeDataFrame object.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_index</span></code>(*[, axis, level, ascending, ...])</p></td>
@@ -1253,7 +1253,7 @@ If no columns are specified, all columns will be copied.</p>
 <dd class="field-even"><p>A new AttributeDataFrame containing the selected columns and their attributes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
 </dd>
 </dl>
 <p class="rubric">Example</p>

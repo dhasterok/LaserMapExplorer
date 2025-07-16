@@ -29,7 +29,7 @@ from src.app.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc
 from src.app.PlotViewerWindow import PlotViewer
-from src.common.DataHandling import SampleObj
+from src.common.DataHandling import LaserSampleObj
 from src.app.ImageProcessing import ImageProcessing as ip
 from src.app.StyleToolbox import StyleData, StyleTheme
 from src.app.Profile import Profiling
@@ -244,7 +244,7 @@ class LameBlockly(PlotViewer):
         """
         #update self.data['norm'] with selection
         for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
-            if analyte in list(analyte_dict.keys()):
+            if analyte in analyte_dict:
                 self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
             else:
                 self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
@@ -744,22 +744,22 @@ class LameBlockly(PlotViewer):
 
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-            if scatter_dict['x']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
+            if scatter_dict['x']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
                 # self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-            if scatter_dict['y']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
+            if scatter_dict['y']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
                 # self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-            if scatter_dict['z']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
+            if scatter_dict['z']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
                 # self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-            if scatter_dict['c']['field'] not in self.data[self.app_data.sample_id].axis_dict.keys():
+            if scatter_dict['c']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.set_color_axis_widgets()
                 # self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
 

@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,20 +388,20 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.SpotImporter</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QDialog</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QMenu</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> 
     <span class="n">QMessageBox</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QAction</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
-<span class="kn">from</span> <span class="nn">src.ui.SpotImportDialog</span> <span class="kn">import</span> <span class="n">Ui_SpotImportDialog</span>
-<span class="kn">from</span> <span class="nn">src.common.ExtendedDF</span> <span class="kn">import</span> <span class="n">AttributeDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QAction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.ui.SpotImportDialog</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ui_SpotImportDialog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ExtendedDF</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeDataFrame</span>
 
 <div class="viewcode-block" id="SpotImporter">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter">[docs]</a>
-<span class="k">class</span> <span class="nc">SpotImporter</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_SpotImportDialog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SpotImporter</span><span class="p">(</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_SpotImportDialog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A dialog for importing spot data into LaME</span>
 
 <span class="sd">    Import spot data.  Import format requires csv file(s) with one row per spot and columns with metadata and analyses.</span>
@@ -418,7 +418,7 @@
 <span class="sd">    parent : MainWindow</span>
 <span class="sd">        Parent window</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -448,7 +448,7 @@
         
 <div class="viewcode-block" id="SpotImporter.load_spot_data">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.load_spot_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_spot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_spot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load spot data file(s) when ``toolButtonOpenSpotFile``</span>
 
 <span class="sd">        Loads csv data into ``tableWidgetSpotData`` for the user to view and update before importing.  A row of comboboxes are added to the</span>
@@ -516,7 +516,7 @@
 
 <div class="viewcode-block" id="SpotImporter.update_spot_table">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.update_spot_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the ``tableWidgetSpotData`` with data from csv file(s) now in ``spot_data``.&quot;&quot;&quot;</span>        
         <span class="c1"># initialize table (add row for combobox in row 1)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetSpotData</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -542,7 +542,7 @@
 
 <div class="viewcode-block" id="SpotImporter.add_combobox">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.add_combobox">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">col</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_combobox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">col</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a combobox with column data types to the first row.</span>
 
 <span class="sd">        The user can use the combobox to select the type of data given column.  These types are used to develop a standard format for importing into *LaME*.</span>
@@ -591,7 +591,7 @@
 
 <div class="viewcode-block" id="SpotImporter.open_context_menu">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.open_context_menu">[docs]</a>
-    <span class="k">def</span> <span class="nf">open_context_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_context_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Context menu for header functions</span>
 
 <span class="sd">        Adds a context menu for adding, removing and deleting columns from ``tableWidgetSpotData``.</span>
@@ -625,7 +625,7 @@
     
 <div class="viewcode-block" id="SpotImporter.insert_column">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.insert_column">[docs]</a>
-    <span class="k">def</span> <span class="nf">insert_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Insert a column into ``tableWidgetSpotData``</span>
 
 <span class="sd">        Parameters</span>
@@ -643,7 +643,7 @@
         
 <div class="viewcode-block" id="SpotImporter.rename_column">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.rename_column">[docs]</a>
-    <span class="k">def</span> <span class="nf">rename_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rename_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rename a column in ``tableWidgetSpotData``</span>
 
 <span class="sd">        Parameters</span>
@@ -662,7 +662,7 @@
 
 <div class="viewcode-block" id="SpotImporter.import_spot_table">
 <a class="viewcode-back" href="../../generated/app.SpotImporter.html#app.SpotImporter.SpotImporter.import_spot_table">[docs]</a>
-    <span class="k">def</span> <span class="nf">import_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">import_spot_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the ``MainWindow.tableWidgetSpots`` and update ``MainWindow.spot_data``</span>
 
 <span class="sd">        Add spot data to *LaME* when pushButtonImport is clicked.</span>

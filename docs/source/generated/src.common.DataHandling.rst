@@ -1,4 +1,4 @@
-src.common.DataHandling
+﻿src.common.DataHandling
 =======================
 
 .. automodule:: src.common.DataHandling
@@ -8,5 +8,7 @@ src.common.DataHandling
 
    .. autosummary::
    
+      LaserSampleObj
       SampleObj
+      XRFSampleObj
    

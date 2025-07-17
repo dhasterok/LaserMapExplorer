@@ -1749,7 +1749,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
-            self.calculator = CalculatorDock(self, filename=calc_file)
+            self.calculator = CalculatorDock(parent=self, filename=calc_file)
 
             if self.calculator not in self.help_mapping:
                 self.help_mapping[self.calculator] = 'calculator'

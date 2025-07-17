@@ -69,7 +69,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         
         super().__init__(parent)
 
-        self.parent = parent
+        self.ui = parent
         if parent.app_data.sample_id == '':
             self.data = None
         else:
@@ -280,13 +280,13 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
         try:
-            if not hasattr(self.parent,"browser"):
-                self.parent.open_browser()
+            if not hasattr(self.ui,"browser"):
+                self.ui.open_browser()
 
-            self.parent.browser.show()
-            self.parent.browser.go_to_page('calculator')
+            self.ui.browser.show()
+            self.ui.browser.go_to_page('calculator')
         except Exception as e:
-            print("Could not open browser to load page.")
+            print("Could not open browser to load calculator help page.")
         
     def calc_insert_operator(self, operator):
         """Inserts an operator into the calculator
@@ -418,7 +418,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
             pass
 
         # remove field from Calculated dataframe
-        self.parent.app_data.data[self.parent.app_data.sample_id].delete_column(name)
+        self.ui.app_data.data[self.ui.app_data.sample_id].delete_column(name)
 
         self.message_label.setText("Formula, successfully deleted...")
     
@@ -472,16 +472,16 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
             new_field = self.comboBoxFormula.currentText()
 
         # Use CustomFieldCalculator to compute new field
-        self.cfc.calculate_new_field(self.parent.app_data.data[self.parent.app_data.sample_id].processed_data, self.parent.ref_chem, new_field)
+        self.cfc.calculate_new_field(self.ui.app_data.data[self.ui.app_data.sample_id].processed_data, self.ui.ref_chem, new_field)
 
         # update formula_combobox
         self.comboBoxFormula.addItem(new_field)
         self.comboBoxFormula.setCurrentText(new_field)
 
         # add new calculated field to self.treeView
-        self.parent.plot_tree.add_calculated_leaf(new_field)
+        self.ui.plot_tree.add_calculated_leaf(new_field)
 
-        if self.parent.field_type_combobox.currentText == 'Calculated':
+        if self.ui.field_type_combobox.currentText == 'Calculated':
             self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField)
 
         # get the formula and add to custom field dictionary
@@ -536,50 +536,56 @@ class CustomFieldCalculator():
         txt = txt.replace('ln(','log(')
         txt = txt.replace('grad(','gradient(')
 
-        cond = []
-        expr = []
         if ('case' in txt) or ('otherwise' in txt):
             cases = txt.split(';')
             # if last case includes a ';', there will be an extra blank in cases list, remove it
             if cases[-1] == '':
                 cases.pop()
 
+            cond = []
+            expr = []
+
             # deal with otherwise first as it will be used to set all the values and then cases will reset them
-            idx = [i for i, j in enumerate(['foo', 'bar', 'baz']) if j == 'bar']
-            if idx is not None:
-                cond[0] = 'any'
-                expr[0] = cases.index(idx)[10:-1]
-                cases.pop(idx)
+            otherwise_expr = None
+            for i, c in enumerate(cases):
+                if c.startswith('otherwise'):
+                    try:
+                        # extract expression after 'otherwise'
+                        otherwise_expr = c[len('otherwise'):].strip()
+                        _, expr_temp = self.calc_parse(data, ref_chem, txt=otherwise_expr)
+                        cond.append('any')  # or None, depending on how you use it
+                        expr.append(expr_temp)
+                    except Exception as e:
+                        calc_error(self, func, "Error parsing otherwise expression", e)
+                        return None, None
+                    cases.pop(i)
+                    break  # only handle one 'otherwise'
 
             for c in cases:
-                c = c[5:-1]
-                # separate conditional from expression
                 try:
-                    cond_temp, expr_temp = c.split(',')
+                    # remove 'case' and trailing spaces
+                    c = c[len('case'):].strip()
+                    cond_txt, expr_txt = c.split(',', 1)
+                    _, cond_temp = self.calc_parse(data, ref_chem, txt=cond_txt)
+                    _, expr_temp = self.calc_parse(data, ref_chem, txt=expr_txt)
+                    cond.append(cond_temp)
+                    expr.append(expr_temp)
                 except Exception as e:
-                    err = "a case statement must include a conditional and an expression separated by a comma, ',' and end with a ';'."
+                    err = "Each 'case' must be formatted as 'case condition, expression;'"
                     calc_error(self, func, err, e)
                     return None, None
 
-                # parse conditional and expression
-                _, cond_temp = self.calc_parse(data, ref_chem, txt=cond_temp)
-                _, expr_temp = self.calc_parse(data, ref_chem, txt=expr_temp)
-
-                # append list
-                cond = cond + cond_temp
-                expr = expr + expr_temp
-
-            return cond, expr
-        else:
-            cond = None
+                    return cond, expr
+                else:
+                    cond = None
 
         if txt.count('(') != txt.count(')'):
-            'mismatched parentheses in expr'
+            err = 'mismatched parentheses in expr'
             calc_error(self, func, err, '')
             return None
 
         if txt.count('{') != txt.count('}'):
-            'mismatched braces in expr'
+            err = 'mismatched braces in expr'
             calc_error(self, func, err, '')
             return None
         

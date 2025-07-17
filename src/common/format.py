@@ -105,7 +105,7 @@ def symlog(x, linear_threshold=1.0):
     A symlog transformation is
      
     .. math::
-        \operatorname{symlog} (x) = \operatorname{sign} (x) \log_{10} (1 + |x|/\lambda), # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore # type: ignore
+        \operatorname{symlog} (x) = \operatorname{sign} (x) \log_{10} (1 + |x|/\lambda),
 
     where :math:`\lambda` is the linear threshold, region where the transformation is approximately linear.
 
@@ -159,7 +159,7 @@ def logit(x, eps=1e-8):
     The logit function is defined as,
 
     .. math::
-        \operatorname{logit}(x) = \log [x / (1 - x)] # type: ignore
+        \operatorname{logit}(x) = \log [x / (1 - x)]
 
     Values of `x` must be in the open interval (0, 1). To avoid division by zero or
     log of zero, values are clipped to [eps, 1 - eps].

@@ -394,11 +394,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
         self.spinBoxFieldZ.valueChanged.connect(lambda: self.field_spinbox_changed(ax=2))
 
-        # N-Dim Tab
-        #-------------------------
-        # setup comboBoxNDIM
-        self.comboBoxNDimAnalyteSet.clear()
-        self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
         
         self.comboBoxRefMaterial.addItems(self.app_data.ref_list.values)          # Select analyte Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
@@ -1574,6 +1569,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     return
                 canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
+            case 'ternary map':
+                if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText() or \
+                    self.comboBoxFieldX.currentText() == self.comboBoxFieldZ.currentText() or \
+                    self.comboBoxFieldY.currentText() == self.comboBoxFieldZ.currentText():
+                    return
+
+                canvas, self.plot_info = plot_ternary_map(self, data, self.app_data, self.plot_style)
 
             case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
                 if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):

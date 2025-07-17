@@ -19,6 +19,54 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 # -------------------------------
 # Notes functions
 # -------------------------------
+class NotesFormatter:
+    def __init__(self):
+        pass
+
+    def format(self, data) -> str:
+        if isinstance(data, dict):
+            return self.format_dict(data)
+        elif isinstance(data, list):
+            return self.format_list(data)
+        elif isinstance(data, str):
+            return self.format_string(data)
+        elif data is None:
+            return '*None*'
+        elif isinstance(data, bool):
+            return f'*{data}*'
+        else:
+            return str(data)
+
+    def format_dict(self, d: dict, indent: int = 0) -> str:
+        lines = []
+        prefix = ' ' * indent
+        for key, value in d.items():
+            key_str = f"{prefix}**{key}**:"
+            value_str = self.format(value)
+            if isinstance(value, (dict, list)):
+                lines.append(f"{key_str}\n{value_str}")
+            else:
+                lines.append(f"{key_str} {value_str}")
+        return '\n'.join(lines)
+
+    def format_list(self, items: list, indent: int = 0) -> str:
+        lines = []
+        prefix = ' ' * indent
+        for item in items:
+            item_str = self.format(item)
+            if isinstance(item, (dict, list)):
+                lines.append(f"{prefix}-\n{item_str}")
+            else:
+                lines.append(f"{prefix}- {item_str}")
+        return '\n'.join(lines)
+
+    def format_string(self, text: str) -> str:
+        # You can optionally escape special reST characters here
+        return text
+
+# -------------------------------
+# Notes functions
+# -------------------------------
 @auto_log_methods(logger_key='Notes')
 class Notes(CustomDockWidget):
     """A dock that can be used to take notes in ReStructured Text (ReST) including formatted output.
@@ -740,6 +788,11 @@ class Notes(CustomDockWidget):
             case 'cluster results':
                 if not self.parent.cluster_results:
                     return
+
+    def print_info(self, info_data):
+        formatter = NotesFormatter()
+        output_rst = formatter.format(info_data)
+        self.text_edit.setPlainText(output_rst)
 
     def add_table_note(self, matrix, row_labels=None, col_labels=None):
         """Convert matrix to restructured text

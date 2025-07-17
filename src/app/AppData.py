@@ -54,6 +54,8 @@ class AppData(Observable):
         Options for noise reduction methods and their parameters.
     cluster_dict : dict
         Dictionary of clustering method parameters and results.
+    scatter_preset_dict : dict
+        Preset field lists for scatter diagrams.
     ndim_list_dict : dict
         Preset analyte lists for multi-dimensional analysis.
     ndim_analyte_df : pd.DataFrame
@@ -109,10 +111,6 @@ class AppData(Observable):
         Preset for scatter plot styles.
     heatmap_style : str
         Style of heatmap to use.
-    ternary_colormap : str
-        Colormap for ternary maps.
-    ternary_color_x, ternary_color_y, ternary_color_z, ternary_color_m : str
-        Colors for ternary diagram vertices and centroid.
     norm_reference : str
         Reference used for normalizing analyte and ratio data.
     ndim_analyte_set : str
@@ -313,12 +311,14 @@ class AppData(Observable):
         self._edge_detection_method = "zero cross"
 
         self._scatter_preset = ""
+        # get scatter presets list
+        self.scatter_list_filename = 'resources/app_data/scatter_presets.csv'
+        try:
+            self.scatter_preset_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,self.scatter_list_filename))
+        except FileNotFoundError:
+            self.scatter_preset_dict = {}
+
         self._heatmap_style = "counts"
-        self._ternary_colormap = ""
-        self._ternary_color_x = ""
-        self._ternary_color_y = ""
-        self._ternary_color_z = ""
-        self._ternary_color_m = ""
 
         self._norm_reference = ""
 
@@ -885,72 +885,6 @@ class AppData(Observable):
         self._heatmap_style = new_style
         self.notify_observers("heatmap_style", new_style)
 
-    ### Ternary Map ###
-    @property
-    def ternary_colormap(self):
-        """str : The colormap used for ternary maps."""
-        return self._ternary_colormap
-    
-    @ternary_colormap.setter
-    def ternary_colormap(self, new_cmap):
-        if new_cmap == self._ternary_colormap:
-            return
-    
-        self._ternary_colormap = new_cmap
-        self.notify_observers("ternary_colormap", new_cmap)
-
-
-    @property
-    def ternary_color_x(self):
-        """str : The color for the A-vertex on a ternary diagram."""
-        return self._ternary_color_x
-    
-    @ternary_color_x.setter
-    def ternary_color_x(self, new_color):
-        if new_color == self._ternary_color_x:
-            return
-    
-        self._ternary_color_x = new_color
-        self.notify_observers("ternary_color_x", new_color)
-
-    @property
-    def ternary_color_y(self):
-        """str : The color for the B-vertex on a ternary diagram."""
-        return self._ternary_color_y
-    
-    @ternary_color_y.setter
-    def ternary_color_y(self, new_color):
-        if new_color == self._ternary_color_y:
-            return
-    
-        self._ternary_color_y = new_color
-        self.notify_observers("ternary_color_y", new_color)
-
-    @property
-    def ternary_color_z(self):
-        """str : The color for the C-vertex on a ternary diagram."""
-        return self._ternary_color_z
-    
-    @ternary_color_z.setter
-    def ternary_color_z(self, new_color):
-        if new_color == self._ternary_color_z:
-            return
-    
-        self._ternary_color_z = new_color
-        self.notify_observers("ternary_color_z", new_color)
-
-    @property
-    def ternary_color_m(self):
-        """str : The color for the centroid on a ternary diagram."""
-        return self._ternary_color_m
-    
-    @ternary_color_m.setter
-    def ternary_color_m(self, new_color):
-        if new_color == self._ternary_color_m:
-            return
-    
-        self._ternary_color_m = new_color
-        self.notify_observers("ternary_color_m", new_color)
 
     ### Multidimensional Properties ###
     @property

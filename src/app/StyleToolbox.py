@@ -84,6 +84,10 @@ class StyleData(Observable):
         Color-axis scale function, ``linear``, ``log``, ``logit``, or ``symlog``
     resolution : int
         Resolution for heat maps
+    ternary_colormap : str
+        Colormap for ternary maps.
+    ternary_color_x, ternary_color_y, ternary_color_z, ternary_color_m : str
+        Colors for ternary diagram vertices and centroid.
     map_plot_types : list
         A list of plots that result in a map, i.e., ['field map', 'ternary map', 'PCA score', 'cluster map', 'cluster score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
     marker_dict : dict
@@ -664,6 +668,77 @@ class StyleData(Observable):
         else:
             raise TypeError("value must be an integer or None.")
 
+    ### Ternary Map ###
+    @property
+    def ternary_colormap(self):
+        """str : The colormap used for ternary maps."""
+        return self._ternary_colormap
+    
+    @ternary_colormap.setter
+    def ternary_colormap(self, new_cmap):
+        if new_cmap == self._ternary_colormap:
+            return
+    
+        self._ternary_colormap = new_cmap
+
+        self.ternary_color_x = self.ternary_colormaps[self._ternary_colormap]['x']
+        self.ternary_color_y = self.ternary_colormaps[self._ternary_colormap]['y']
+        self.ternary_color_z = self.ternary_colormaps[self._ternary_colormap]['z']
+        self.ternary_color_m = self.ternary_colormaps[self._ternary_colormap]['m']
+        self.notify_observers("ternary_colormap", new_cmap)
+
+    @property
+    def ternary_color_x(self):
+        """str : The color for the A-vertex on a ternary diagram."""
+        return self._ternary_color_x
+    
+    @ternary_color_x.setter
+    def ternary_color_x(self, new_color):
+        if new_color == self._ternary_color_x:
+            return
+    
+        self._ternary_color_x = new_color
+        self.notify_observers("ternary_color_x", new_color)
+
+    @property
+    def ternary_color_y(self):
+        """str : The color for the B-vertex on a ternary diagram."""
+        return self._ternary_color_y
+    
+    @ternary_color_y.setter
+    def ternary_color_y(self, new_color):
+        if new_color == self._ternary_color_y:
+            return
+    
+        self._ternary_color_y = new_color
+        self.notify_observers("ternary_color_y", new_color)
+
+    @property
+    def ternary_color_z(self):
+        """str : The color for the C-vertex on a ternary diagram."""
+        return self._ternary_color_z
+    
+    @ternary_color_z.setter
+    def ternary_color_z(self, new_color):
+        if new_color == self._ternary_color_z:
+            return
+    
+        self._ternary_color_z = new_color
+        self.notify_observers("ternary_color_z", new_color)
+
+    @property
+    def ternary_color_m(self):
+        """str : The color for the centroid on a ternary diagram."""
+        return self._ternary_color_m
+    
+    @ternary_color_m.setter
+    def ternary_color_m(self, new_color):
+        if new_color == self._ternary_color_m:
+            return
+    
+        self._ternary_color_m = new_color
+        self.notify_observers("ternary_color_m", new_color)
+
     def get_axis_label(self, ax):
         return getattr(self, f"{self.axis[ax]}label")
 
@@ -767,8 +842,8 @@ class StyleData(Observable):
                 'axis_scale': [True, True, True, True],
                 'axis_widgets': [True, True, True, True],
                 'lim_precision': [3, 3, 3, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, False],
+                'add_none': [False, False, True, False],
+                'spinbox': [True, True, True, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'ternary map': {
@@ -777,7 +852,7 @@ class StyleData(Observable):
                 'axis_widgets': [True, True, False, False],
                 'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, False],
+                'spinbox': [True, True, True, False],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
                 },
             'TEC': {
@@ -786,14 +861,17 @@ class StyleData(Observable):
                 'axis_widgets': [False, True, False, False],
                 'lim_precision': [None, 3, None, None],
                 'add_none': [False, False, False, True],
-                'spinbox': [False, False, False, False],
+                'spinbox': [False, False, False, True],
                 'field_type': ['Analyte'],
                 'cfield_type': ['Cluster']
                 },
             'radar': {
                 'axis': [False, False, False, True],
+                'axis_scale': [True, False, False, False],
+                'axis_widgets': [False, False, False, False],
+                'lim_precision': [None, 3, None, None],
                 'add_none': [False, False, False, True],
-                'spinbox': [False, False, False, False],
+                'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
                 },
             'variance': {

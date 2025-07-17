@@ -711,53 +711,80 @@ class StyleData(Observable):
         self.plot_axis_dict = {
             '': {
                 'axis': [False, False, False, False],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, False],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': [''],
                 },
             'field map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 },
             'gradient map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','Special']
                 },
             'correlation': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, True],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, True],
                 'spinbox': [False, False, False, True],
                 'cfield_type': ['Cluster']
                 },
             'histogram': {
                 'axis': [True, False, False, True],
+                'axis_scale': [True, True, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [3, None, None, 3],
                 'add_none': [False, False, False, True],
                 'spinbox': [True, False, False, True],
                 'cfield_type': ['Cluster']
                 },
             'scatter': {
                 'axis': [True, True, True, True],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, True, True],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'heatmap': {
                 'axis': [True, True, True, False],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'ternary map': {
                 'axis': [True, True, True, False],
+                'axis_scale': [True, True, False, False],
+                'axis_widgets': [True, True, False, False],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
                 },
             'TEC': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, True, False, False],
+                'axis_widgets': [False, True, False, False],
+                'lim_precision': [None, 3, None, None],
                 'add_none': [False, False, False, True],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Analyte'],
@@ -771,58 +798,88 @@ class StyleData(Observable):
                 },
             'variance': {
                 'axis': [False, False, False, False],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, True],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False]
                 },
             'basis vectors': {
                 'axis': [False, False, False, False],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, False],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [True, True, False, False]
                 },
             'dimension score map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['PCA score']
                 },
             'dimension scatter': {
                 'axis': [True, True, False, True],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, False, True],
                 'spinbox': [True, True, False, True],
                 'field_type': ['PCA score']
                 }, 
             'dimension heatmap': {
                 'axis': [True, True, False, False],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [True, True, False, False],
                 'field_type': ['PCA score']
                 },
             'cluster map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, False],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Cluster']
                 },
             'cluster score map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Cluster score']
                 },
             'cluster performance': {
                 'axis': [False, False, False, True],
+                'axis_scale': [True, True, False, False],
+                'axis_widgets': [True, True, False, False],
+                'lim_precision': [3, 3, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Cluster']
                 },
             'profile': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
                 },
             'polygon': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']

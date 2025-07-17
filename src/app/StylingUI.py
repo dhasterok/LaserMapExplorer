@@ -1018,16 +1018,22 @@ class StylingDock(StyleData, StyleTheme):
             ui.lineEditXLB.value = style['XLim'][0]
             ui.lineEditXUB.value = style['XLim'][1]
 
+            ui.lineEditYLB.precision = None
+            ui.lineEditYUB.precision = None
             ui.lineEditYLB.value = style['YLim'][0]
             ui.lineEditYUB.value = style['YLim'][1]
 
             ui.lineEditZLB.value = style['ZLim'][0]
             ui.lineEditZUB.value = style['ZLim'][1]
         else:
+            ui.lineEditXLB.precision = 3
+            ui.lineEditXUB.precision = 3
             # round axes limits for everything that isn't a map
             ui.lineEditXLB.value = style['XLim'][0]
             ui.lineEditXUB.value = style['XLim'][1]
 
+            ui.lineEditYLB.precision = 3
+            ui.lineEditYUB.precision = 3
             ui.lineEditYLB.value = style['YLim'][0]
             ui.lineEditYUB.value = style['YLim'][1]
 
@@ -1311,7 +1317,7 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.plot_flag = False
         for ax in range(4):
             if self.plot_axis_dict[self.plot_type]['axis'][ax]:
-                self.update_field(ax, self.axis_widget_dict['parentbox'][ax].currentText())
+                self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
         self.ui.plot_flag = True
 
         if self.plot_type != '':

@@ -165,7 +165,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     if add_histogram:
         return canvas, plot_info, hist_canvas
     else:
-        return canvas, plot_info
+        return canvas, plot_info, None
 
 @log_call(logger_key='Plot')
 def plot_map_pg(parent, sample_id, field_type, field):

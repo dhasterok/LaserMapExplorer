@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import (
     QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView,
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
-)
-from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
+) # type: ignore
+from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon ) 
 from src.common.CustomWidgets import CustomCheckButton
 from src.app.UITheme import UIThemes
 import numpy as np
@@ -1541,7 +1541,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.canvas_widget.clear_layout(self.widgetHistView.layout())
                         self.widgetHistView.layout().addWidget(hist_canvas)
                     else:
-                        canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
+                        canvas, self.plot_info, _ = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
                 self.mpl_canvas = canvas
                 self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)
                     # I think add_tree_item is done in add_plotwidget_to_canvas, so it doesn't need to be repeated here
@@ -1749,7 +1749,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
-            self.calculator = CalculatorDock(parent=self, filename=calc_file)
+            self.calculator = CalculatorDock(ui=self, filename=calc_file)
 
             if self.calculator not in self.help_mapping:
                 self.help_mapping[self.calculator] = 'calculator'

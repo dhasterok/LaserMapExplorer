@@ -226,10 +226,9 @@ class SampleObj(Observable):
             'Cluster',
             'Cluster score'
         ]
-
         self._valid_data_types = self._default_data_types
 
-        self._default_scale_options = ['linear', 'log', 'logit', 'symlog']
+        self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
         self._scale_options = self._default_scale_options
 
         self.order = 'F'
@@ -1571,13 +1570,15 @@ class SampleObj(Observable):
                 #norm = self.processed_data.get_attribute(field, 'norm')
                 
                 #perform scaling for groups of analytes with same norm parameter
-                if norm == 'log':
-                    df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
-
-                elif norm == 'logit':
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
+                match norm:
+                    case 'log':
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
+                    case 'inv_logit':
+                        # Handle division by zero and NaN values
+                        with np.errstate(divide='ignore', invalid='ignore'):
+                            df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.inv_logit(df['array']), np.nan)
+                    case 'symlog':
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.symlog(df['array']), np.nan)
                 
                 # normalize
                 if 'normalized' in field_type:

@@ -58,27 +58,25 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
     TypeError
         Parent must be an instance of QMainWindow.
     """        
-    def __init__(self, parent=None, filename=None):
+    def __init__(self, ui=None, filename=None):
         # super().__init__(self, parent=None)
         self.logger_key = 'Calculator'
 
-        if not isinstance(parent, QMainWindow):
+        if not isinstance(ui, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
-        elif parent is None:
-            return
         
-        super().__init__(parent)
+        super().__init__(ui)
 
-        self.ui = parent
-        if parent.app_data.sample_id == '':
+        self.ui = ui
+        if self.ui.app_data.sample_id == '':
             self.data = None
         else:
-            self.data = parent.app_data.data[parent.app_data.sample_id].processed_data
+            self.data = self.ui.data[self.ui.app_data.sample_id].processed_data
 
         FieldLogicUI.__init__(self, self.data)
 
         # create an instance of CustomFieldCalculator for the heavy lifting
-        if parent.app_data.sample_id != '':
+        if self.ui.app_data.sample_id != '':
             self.cfc = CustomFieldCalculator()
 
         if filename is None:
@@ -264,7 +262,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         self.setFloating(True)
         self.setWindowTitle("LaME Calculator")
 
-        parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
+        self.ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
         # connect actions to methods
         self.actionCalculate.triggered.connect(self.calculate_new_field)

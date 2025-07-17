@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
-        QMenu, QDockWidget, QHeaderView, QToolButton, QSlider
+        QMenu, QDockWidget, QHeaderView, QToolButton, QSlider, QVBoxLayout, QHBoxLayout, QLabel,
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
@@ -300,33 +300,88 @@ class CustomTableWidget(QTableWidget):
 
 
 class RotatedHeaderView(QHeaderView):
-    """Rotates the column header of a table by 90 degrees
+    """
+    A custom QHeaderView that displays horizontal headers rotated by 90 degrees.
+
+    This header view is useful for tables with many columns where horizontal space
+    is constrained. It transposes the size hint and rotates the header text during
+    painting to display the headers vertically.
 
     Parameters
     ----------
-    parent : obj, optional
-        Parent table object
-    """    
+    parent : QWidget, optional
+        The parent widget (typically a QTableView).
+
+    Attributes
+    ----------
+    orientation : Qt.Orientation
+        The orientation of the header view. Fixed to Qt.Horizontal.
+    minimumSectionSize : int
+        The minimum size of each header section, set to 20 pixels.
+
+    Methods
+    -------
+    paintSection(painter, rect, logicalIndex)
+        Paints a rotated header section by -90 degrees.
+    minimumSizeHint()
+        Returns the transposed minimum size hint for the rotated layout.
+    sectionSizeFromContents(logicalIndex)
+        Returns the transposed section size to accommodate vertical text.
+    """
     def __init__(self, parent=None):
         super(RotatedHeaderView, self).__init__(Qt.Orientation.Horizontal, parent)
         self.setMinimumSectionSize(20)
 
     def paintSection(self, painter, rect, logicalIndex ):
-        painter.save()
-        # translate the painter to the appropriate position
-        painter.translate(rect.x(), rect.y() + rect.height())
-        painter.rotate(-90)  # rotate by -90 degrees
-        # and have parent code paint at this location
-        newrect = QRect(0,0,rect.height(),rect.width())
-        super(RotatedHeaderView, self).paintSection(painter, newrect, logicalIndex)
-        painter.restore()
+        """
+        Paint a single section of the header, rotating the text by -90 degrees.
+
+        Parameters
+        ----------
+        painter : QPainter
+            The painter used to draw the section.
+        rect : QRect
+            The bounding rectangle of the section.
+        logicalIndex : int
+            The index of the section being painted.
+        """
+        if painter:
+            painter.save()
+            # translate the painter to the appropriate position
+            painter.translate(rect.x(), rect.y() + rect.height())
+            painter.rotate(-90)  # rotate by -90 degrees
+            # and have parent code paint at this location
+            newrect = QRect(0,0,rect.height(),rect.width())
+            super(RotatedHeaderView, self).paintSection(painter, newrect, logicalIndex)
+            painter.restore()
 
     def minimumSizeHint(self):
+        """
+        Return the minimum size hint for the header.
+
+        Returns
+        -------
+        QSize
+            The minimum size hint, transposed due to rotation.
+        """
         size = super(RotatedHeaderView, self).minimumSizeHint()
         size.transpose()
         return size
 
     def sectionSizeFromContents(self, logicalIndex):
+        """
+        Return the size of a section, adjusted for rotated text.
+
+        Parameters
+        ----------
+        logicalIndex : int
+            The index of the section.
+
+        Returns
+        -------
+        QSize
+            The size of the section, transposed for vertical layout.
+        """
         size = super(RotatedHeaderView, self).sectionSizeFromContents(logicalIndex)
         size.transpose()
         return size
@@ -468,7 +523,7 @@ class CustomTreeView(QTreeView):
             item = item.parent()
         return path
     
-    def get_leaf_data(self, parent_item, branch_name, leaf_name):
+    def get_leaf_data(self, leaf_item):
         """
         Return the full path of an item as a list from root to the given item.
 
@@ -652,7 +707,9 @@ class CustomComboBox(QComboBox):
         super().__init__(*args, **kwargs)
         self.popup_callback = popup_callback
 
-        setattr(self, "allItems", lambda: [self.itemText(i) for i in range(self.count())])
+    def allItems(self):
+        """Return a list of all item texts in the combobox."""
+        return [self.itemText(i) for i in range(self.count())]
 
     def showPopup(self):
         """
@@ -703,7 +760,8 @@ class CustomDockWidget(QDockWidget):
             The close event triggered by the user action.
         """
         self.hide()
-        event.ignore()  # Ignore the close event to prevent the widget from being removed.
+        if event:
+            event.ignore()  # Ignore the close event to prevent the widget from being removed.
 
 class ToggleSwitch(QWidget):
     """
@@ -781,9 +839,9 @@ class ToggleSwitch(QWidget):
     def toggle(self):
         """Toggle switch state and emit signal"""
         self._checked = not self._checked
-        self.animation.setStartValue(self._thumb_pos)
-        self.animation.setEndValue(self._width - self._height + 2 if self._checked else 2)
-        self.animation.start()
+        self._animation.setStartValue(self._thumb_pos)
+        self._animation.setEndValue(self._width - self._height + 2 if self._checked else 2)
+        self._animation.start()
 
         self.stateChanged.emit(self._checked)  # Emit signal
 
@@ -807,20 +865,48 @@ class ToggleSwitch(QWidget):
 
 
     def isChecked(self) -> bool:
-        """Return the current state of the toggle switch"""
+        """Return the current state of the toggle switch.
+        
+        Returns
+        -------
+        bool
+            Returns checked state of the toggle switch
+        """
         return self._checked
 
     def mousePressEvent(self, event):
-        """Toggle switch on click."""
+        """
+        Handles mouse press events to toggle the switch state when clicked.
+
+        If the left mouse button is pressed, this method toggles the checked state of the switch.
+
+        Parameters
+        ----------
+        event : QMouseEvent
+            The mouse event triggered by the user interaction.
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self.setChecked(not self._checked)
 
     def sizeHint(self):
-        """Returns the size of the toggle switch."""
+        """Returns the size of the toggle switch.
+        
+        Returns
+        -------
+        size : QSize
+            Returns the size of the toggle switch.
+        """
         return self.size()
 
     def paintEvent(self, event):
-        """Draw the toggle switch."""
+        """Draw the toggle switch.
+
+        Draws the toggle switch.
+
+        Parameters
+        ----------
+        event : QEvent
+        """
         painter = QPainter(self)
         try:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -845,12 +931,17 @@ class ToggleSwitch(QWidget):
         return self._thumb_pos
 
     def set_thumb_pos(self, pos):
-        """Sets the thumb position."""
+        """Sets the thumb position.
+        
+        Paramters
+        ---------
+        pos : int
+            Thumb position"""
         self._thumb_pos = pos
         self.update()  # Redraw switch
 
     thumb_pos = pyqtProperty(float, get_thumb_pos, set_thumb_pos)
-    #thumb_pos = property(get_thumb_pos, set_thumb_pos)
+
 
 class CustomCheckButton(QToolButton):
     """A button that changes icons when checked
@@ -874,7 +965,7 @@ class CustomCheckButton(QToolButton):
 
         # icons for checked and unchecked states
         self.icon_checked = icon_checked
-        self.icon_unchecked = icon_checked
+        self.icon_unchecked = icon_unchecked
 
         # button properties
         self.setFixedSize(24, 24)
@@ -1025,17 +1116,6 @@ class CustomSlider(QWidget):
         """
         return self.slider.value()
 
-    def slider(self):
-        """
-        Returns the QSlider instance.
-
-        Returns
-        -------
-        QSlider
-            The underlying slider widget.
-        """
-        return self.slider
-
 
 class DoubleSlider(QWidget):
     """
@@ -1104,13 +1184,13 @@ class DoubleSlider(QWidget):
         self.left_slider.valueChanged.connect(self.valueChanged.emit)
         self.right_slider.valueChanged.connect(self.valueChanged.emit)
 
-        self.left_slider.sliderMoved.connect(self.update_label)
-        self.right_slider.sliderMoved.connect(self.update_label)
+        self.left_slider.sliderMoved.connect(self.update_values)
+        self.right_slider.sliderMoved.connect(self.update_values)
         self.left_slider.sliderMoved.connect(self.sliderMoved.emit)
         self.right_slider.sliderMoved.connect(self.sliderMoved.emit)
 
-        self.left_slider.sliderReleased.connect(self.update_label)
-        self.right_slider.sliderReleased.connect(self.update_label)
+        self.left_slider.sliderReleased.connect(self.update_values)
+        self.right_slider.sliderReleased.connect(self.update_values)
         self.left_slider.sliderReleased.connect(self.sliderReleased.emit)
         self.right_slider.sliderReleased.connect(self.sliderReleased.emit)
 

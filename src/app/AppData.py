@@ -20,7 +20,8 @@ class AppData(Observable):
     AppData is responsible for:
     - Storing and managing user preferences (units, font size, tick direction, etc.).
     - Maintaining references to all loaded sample data and their processed attributes.
-    - Providing property-based access to current sample, field, and field type selections for plotting.
+    - Providing property-based access to current sample, field, and field type selections for
+      plotting.
     - Managing histogram and color scale settings for data visualization.
     - Storing and updating clustering and dimensionality reduction parameters.
     - Handling reference chemistry data for normalization.
@@ -391,7 +392,7 @@ class AppData(Observable):
         self.update_cluster_flag = False
         self.updating_cluster_table_flag = False
         self.update_pca_flag = False
-        
+
         self.axis = ['x','y','z','c']
 
     def get_field(self, ax):
@@ -530,8 +531,8 @@ class AppData(Observable):
     @property
     def ref_chem(self):
         """pd.Series : The reference chemistry for the current reference index."""
-        chem = self.ref_data.iloc[self._ref_index]
-        chem.index = [col.replace('_ppm', '') for col in chem.index]
+        chem = self.ref_data.iloc[self._ref_index].copy()
+        chem.index = [str(col).replace('_ppm', '') for col in chem.index]
 
         return chem
 
@@ -1190,7 +1191,8 @@ class AppData(Observable):
 
     @property
     def num_basis_for_precondition(self):
-        """int : The number of basis vectors to use for preconditioning in dimensionality reduction."""
+        """int : The number of basis vectors to use for preconditioning in dimensionality reduction.
+        """
         return self._num_basis_for_precondition
     
     @num_basis_for_precondition.setter
@@ -1228,9 +1230,10 @@ class AppData(Observable):
         The set names are: ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calculated Field``,
         ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``
         and ``None``.  The set names are used to filter the data to a specific set of fields.
-        The ``filter_type`` parameter is used to filter the data to only fields that are used in analysis.
-        The options for ``filter_type`` are ``'all'`` and ``'used'``.  If ``filter_type`` is set to ``'all'``, all fields
-        in the set will be returned.  If ``filter_type`` is set to ``'used'``, only fields that are used in analysis will be returned.
+        The ``filter_type`` parameter is used to filter the data to only fields that are used
+        in analysis.  The options for ``filter_type`` are ``'all'`` and ``'used'``.  If
+        ``filter_type`` is set to ``'all'``, all fields in the set will be returned.  If
+        ``filter_type`` is set to ``'used'``, only fields that are used in analysis will be returned.
 
         Parameters
         ----------
@@ -1291,9 +1294,9 @@ class AppData(Observable):
     def update_hist_num_bins(self):
         """Updates the number of bins for histograms
 
-        This method calculates the number of histogram bins based on the currently selected data field and type.
-        It retrieves the data for the selected field and type, calculates the range of values,
-        and sets the number of bins based on the bin width.
+        This method calculates the number of histogram bins based on the currently selected data
+        field and type.  It retrieves the data for the selected field and type, calculates the
+        range of values, and sets the number of bins based on the bin width.
         """
         if (self.c_field_type == '') or (self.c_field == ''):
             return

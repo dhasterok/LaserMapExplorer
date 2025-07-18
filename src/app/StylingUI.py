@@ -1399,7 +1399,7 @@ class StylingDock(StyleData, StyleTheme):
         for ax in range(4):
             if self.plot_axis_dict[self.plot_type]['axis'][ax]:
                 self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
-                self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
+                self.update_field_type(ax, self.axis_widget_dict['parentbox'][ax].currentText())
         self.ui.plot_flag = True
 
         if self.plot_type != '':
@@ -2141,8 +2141,10 @@ class StylingDock(StyleData, StyleTheme):
             self.app_data.set_field_type(ax, parentbox.currentText())
         else:   # direct setting of property
             if field_type == parentbox.currentText() and field_type == self.app_data.get_field_type(ax):
+                
                 return
-
+            # set field type property to combobox
+            self.app_data.set_field_type(ax, parentbox.currentText())
             # set combobox to field
             parentbox.setCurrentText(field_type)
 

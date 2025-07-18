@@ -1516,7 +1516,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 field = self.app_data.c_field
 
                 if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
-                    canvas, self.plot_info =  plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
+                    canvas, self.plot_info,_ =  plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
                     # show increated profiles if exists
                     if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                         self.profile_dock.profiling.clear_plot()

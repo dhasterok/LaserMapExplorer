@@ -1207,7 +1207,7 @@ class StylingDock(StyleData, StyleTheme):
         else:
             # set color scale options to linear/log
             ui.comboBoxCScale.clear()
-            ui.comboBoxCScale.addItems(self.app_data.scale_options)
+            ui.comboBoxCScale.addItems(data.scale_options)
             self.cscale = 'linear'
             ui.comboBoxCScale.setCurrentText(self.cscale)
             

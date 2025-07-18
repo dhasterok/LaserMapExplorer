@@ -58,7 +58,7 @@ class StyleData(Observable):
         Marker size
     marker_color : str
         Hex string used to color markers
-    marker_alpha : int
+    marker_alpha : float
         Marker alpha blending.
     line_width : float
         Line width
@@ -128,9 +128,9 @@ class StyleData(Observable):
 
         * associated with widgets in the toolBoxTreeView > Styling > Markers tab
         'Marker' : (str) -- marker symbol defined by matplotlib styles in the attribute ``marker_dict``
-        'MarkerSize' : (int) -- marker size in points, set by ``doubleSpinBoxMarkerSize``
+        'MarkerSize' : (float) -- marker size in points, set by ``doubleSpinBoxMarkerSize``
         'MarkerColor' : (hex str) -- color of markers, set by ``toolButtonMarkerColor``
-        'MarkerAlpha' : (int) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
+        'MarkerAlpha' : (float) -- marker transparency, set by ``horizontalSliderMarkerAlpha``
 
         * associated with widgets in the toolBoxTreeView > Styling > Lines tab
         'LineWidth' : (float) -- width of line objects, varies between plot types, set by ``doubleSpinBoxLineWidth``
@@ -144,7 +144,7 @@ class StyleData(Observable):
         'Colormap' : (str) -- colormap used in figure, set by ``comboBoxFieldColormap``
         'CbarReverse' : (bool) -- inverts colormap, set by ``checkBoxReverseColormap``
         'CbarDir' : (str) -- colorbar direction, options include ``none``, ``vertical``, and ``horizontal``, set by ``comboBoxCbarDirection``
-        'Resolution' : (int) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
+        'Resolution' : (float) -- used to set discritization in 2D and ternary heatmaps, set by ``spinBoxHeatmapResolution``
 
         Parameters
         ----------
@@ -213,34 +213,49 @@ class StyleData(Observable):
 
         self.default_plot_axis_dict()
 
-
     # -------------------------------------
     # Styling properties
     # -------------------------------------
+
     @property
     def plot_type(self):
         return self._plot_type
 
     @plot_type.setter
     def plot_type(self, value):
-        if value == self._plot_type:
-            return
         self._plot_type = value
         self.notify_observers("plot_type", value)
 
+    @property
+    def xfield(self):
+        return self.style_dict[self._plot_type]['XField']
+
+    @xfield.setter
+    def xfield(self, value):
+        self.style_dict[self._plot_type]['XField'] = value
+        self.notify_observers("xfield", value)
+
+    @property
+    def xfield_type(self):
+        return self.style_dict[self._plot_type]['XFieldType']
+
+    @xfield_type.setter
+    def xfield_type(self, value):
+        self.style_dict[self._plot_type]['XFieldType'] = value
+        self.notify_observers("xfield_type", value)
+    
     @property
     def xlim(self):
         return self.style_dict[self._plot_type]['XLim']
 
     @xlim.setter
     def xlim(self, value):
-        if value == self.style_dict[self._plot_type]['XLim']:
-            return
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['XLim'] = value
             self.notify_observers("xlim", value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
+        
 
     @property
     def xlabel(self):
@@ -248,8 +263,6 @@ class StyleData(Observable):
 
     @xlabel.setter
     def xlabel(self, label):
-        if label == self.style_dict[self._plot_type]['XLabel']:
-            return
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['XLabel'] = label
             self.notify_observers("xlabel", label)
@@ -262,13 +275,29 @@ class StyleData(Observable):
 
     @xscale.setter
     def xscale(self, scale):
-        if scale == self.style_dict[self._plot_type]['XScale']:
-            return
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['XScale'] = scale
             self.notify_observers("xscale", scale)
         else:
             raise TypeError("scale must be linear, log, logit, or symlog.")
+        
+    @property
+    def yfield(self):
+        return self.style_dict[self._plot_type]['YField']
+
+    @yfield.setter
+    def yfield(self, value):
+        self.style_dict[self._plot_type]['YField'] = value      
+        self.notify_observers("yfield", value)
+
+    @property
+    def yfield_type(self):
+        return self.style_dict[self._plot_type]['YFieldType']
+
+    @yfield_type.setter
+    def yfield_type(self, value):
+        self.style_dict[self._plot_type]['YFieldType'] = value
+        self.notify_observers("yfield_type", value)
 
     @property
     def ylim(self):
@@ -276,8 +305,6 @@ class StyleData(Observable):
 
     @ylim.setter
     def ylim(self, value):
-        if value == self.style_dict[self._plot_type]['YLim']:
-            return
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['YLim'] = value
             self.notify_observers("ylim", value)
@@ -290,8 +317,6 @@ class StyleData(Observable):
 
     @ylabel.setter
     def ylabel(self, label):
-        if label == self.style_dict[self._plot_type]['YLabel']:
-            return
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['YLabel'] = label
             self.notify_observers("ylabel", label)
@@ -304,8 +329,6 @@ class StyleData(Observable):
 
     @yscale.setter
     def yscale(self, scale):
-        if scale == self.style_dict[self._plot_type]['YScale']:
-            return
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['YScale'] = scale
             self.notify_observers("yscale", scale)
@@ -318,8 +341,6 @@ class StyleData(Observable):
 
     @zlim.setter
     def zlim(self, value):
-        if value == self.style_dict[self._plot_type]['ZLim']:
-            return
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['ZLim'] = value
             self.notify_observers("zlim", value)
@@ -332,8 +353,6 @@ class StyleData(Observable):
 
     @zlabel.setter
     def zlabel(self, label):
-        if label == self.style_dict[self._plot_type]['ZLabel']:
-            return
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['ZLabel'] = label
             self.notify_observers("zlabel", label)
@@ -346,8 +365,6 @@ class StyleData(Observable):
 
     @zscale.setter
     def zscale(self, scale):
-        if scale == self.style_dict[self._plot_type]['ZScale']:
-            return
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['ZScale'] = scale
             self.notify_observers("zscale", scale)
@@ -360,8 +377,6 @@ class StyleData(Observable):
 
     @aspect_ratio.setter
     def aspect_ratio(self, value):
-        if value == self.style_dict[self._plot_type]['AspectRatio']:
-            return
         if value is None or isinstance(value, float):
             self.style_dict[self._plot_type]['AspectRatio'] = value
             self.notify_observers("aspect_ratio", value)
@@ -374,8 +389,6 @@ class StyleData(Observable):
 
     @tick_dir.setter
     def tick_dir(self, new_dir):
-        if new_dir == self.style_dict[self._plot_type]['TickDir']:
-            return
         if isinstance(new_dir, str):
             self.style_dict[self._plot_type]['TickDir'] = new_dir
             self.notify_observers("tick_dir", new_dir)
@@ -388,8 +401,6 @@ class StyleData(Observable):
 
     @font.setter
     def font(self, font_family):
-        if font_family == self.style_dict[self._plot_type]['Font']:
-            return
         if isinstance(font_family, str):
             self.style_dict[self._plot_type]['Font'] = font_family
             self.notify_observers("font_family", font_family)
@@ -402,8 +413,6 @@ class StyleData(Observable):
 
     @font_size.setter
     def font_size(self, value):
-        if value == self.style_dict[self._plot_type]['FontSize']:
-            return
         if isinstance(value, float):
             self.style_dict[self._plot_type]['FontSize'] = value
             self.notify_observers("font_size", value)
@@ -416,8 +425,6 @@ class StyleData(Observable):
 
     @scale_dir.setter
     def scale_dir(self, new_dir):
-        if new_dir == self.style_dict[self._plot_type]['ScaleDir']:
-            return
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
             self.style_dict[self._plot_type]['ScaleDir'] = new_dir
             self.notify_observers("scale_dir", new_dir)
@@ -430,8 +437,6 @@ class StyleData(Observable):
 
     @scale_location.setter
     def scale_location(self, location):
-        if location == self.style_dict[self._plot_type]['ScaleLocation']:
-            return
         if (location is not None) and isinstance(location, str) and (location in ['northeast', 'northwest', 'southwest', 'southeast']):
             self.style_dict[self._plot_type]['ScaleLocation'] = location
         else:
@@ -443,8 +448,6 @@ class StyleData(Observable):
 
     @scale_length.setter
     def scale_length(self, length):
-        if length == self.style_dict[self._plot_type]['ScaleLength']:
-            return
         if length is None or isinstance(length, float):
             x_range = self.xlim[1] - self.xlim[0] if self.xlim else None
             y_range = self.ylim[1] - self.ylim[0] if self.ylim else None
@@ -461,8 +464,6 @@ class StyleData(Observable):
 
     @overlay_color.setter
     def overlay_color(self, hexstr):
-        if hexstr == self.style_dict[self._plot_type]['OverlayColor']:
-            return
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['OverlayColor'] = hexstr
         else:
@@ -474,8 +475,6 @@ class StyleData(Observable):
 
     @show_mass.setter
     def show_mass(self, flag):
-        if flag == self._show_mass:
-            return
         self._show_mass = flag
         self.notify_observers("show_mass", flag)
 
@@ -485,12 +484,10 @@ class StyleData(Observable):
 
     @marker.setter
     def marker(self, symbol):
-        if symbol == self.style_dict[self._plot_type]['Marker']:
-            return
-        if isinstance(symbol, float):
+        if isinstance(symbol, str):
             self.style_dict[self._plot_type]['Marker'] = symbol
         else:
-            raise TypeError("marker_symbol must be of type float.")
+            raise TypeError("marker_symbol must be of type str.")
 
     @property
     def marker_size(self):
@@ -498,12 +495,10 @@ class StyleData(Observable):
 
     @marker_size.setter
     def marker_size(self, size):
-        if size == self.style_dict[self._plot_type]['MarkerSize']:
-            return
         if isinstance(size, float):
             self.style_dict[self._plot_type]['MarkerSize'] = size
         else:
-            raise TypeError("size must be of type float.")
+            raise TypeError("size must be of type int.")
 
     @property
     def marker_color(self):
@@ -511,8 +506,6 @@ class StyleData(Observable):
 
     @marker_color.setter
     def marker_color(self, hexstr):
-        if hexstr == self.style_dict[self._plot_type]['MarkerColor']:
-            return
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['MarkerColor'] = hexstr
         else:
@@ -524,12 +517,10 @@ class StyleData(Observable):
 
     @marker_alpha.setter
     def marker_alpha(self, alpha):
-        if alpha == self.style_dict[self._plot_type]['MarkerAlpha']:
-            return
-        if isinstance(alpha, float) and 0 <= alpha <= 1:
+        if isinstance(alpha, float) and 0 <= alpha <= 100:
             self.style_dict[self._plot_type]['MarkerAlpha'] = alpha
         else:
-            raise TypeError("alpha must be of type float and [0,1].")
+            raise TypeError("alpha must be of type float and [0,100].")
 
     @property
     def line_width(self):
@@ -537,8 +528,6 @@ class StyleData(Observable):
 
     @line_width.setter
     def line_width(self, width):
-        if width == self.style_dict[self._plot_type]['LineWidth']:
-            return
         if isinstance(width, float):
             self.style_dict[self._plot_type]['LineWidth'] = width
         else:
@@ -550,8 +539,6 @@ class StyleData(Observable):
 
     @line_multiplier.setter
     def line_multiplier(self, value):
-        if value == self.style_dict[self._plot_type]['LineMultiplier']:
-            return
         if value is None or isinstance(value, float):
             self.style_dict[self._plot_type]['LineMultiplier'] = value
         else:
@@ -563,8 +550,6 @@ class StyleData(Observable):
 
     @line_color.setter
     def line_color(self, hexstr):
-        if hexstr == self.style_dict[self._plot_type]['LineColor']:
-            return
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self._plot_type]['LineColor'] = hexstr
         else:
@@ -576,8 +561,6 @@ class StyleData(Observable):
 
     @cmap.setter
     def cmap(self, name):
-        if name == self.style_dict[self._plot_type]['Colormap']:
-            return
         if (name is None) or isinstance(name, str):
             self.style_dict[self._plot_type]['Colormap'] = name
         else:
@@ -589,12 +572,10 @@ class StyleData(Observable):
 
     @cbar_reverse.setter
     def cbar_reverse(self, flag):
-        if flag == self.style_dict[self._plot_type]['CbarReverse']:
-            return
-        if (flag is None) or isinstance(flag, str):
+        if (flag is None) or isinstance(flag, bool):
             self.style_dict[self._plot_type]['CbarReverse'] = flag
         else:
-            raise TypeError("flag must be of type str or None.")
+            raise TypeError("flag must be of type bool or None.")
 
     @property
     def cbar_dir(self):
@@ -602,8 +583,6 @@ class StyleData(Observable):
 
     @cbar_dir.setter
     def cbar_dir(self, new_dir):
-        if new_dir == self.style_dict[self._plot_type]['CbarDir']:
-            return
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
             self.style_dict[self._plot_type]['CbarDir'] = new_dir
         else:
@@ -615,8 +594,6 @@ class StyleData(Observable):
 
     @clim.setter
     def clim(self, value):
-        if value == self.style_dict[self._plot_type]['CLim']:
-            return
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self._plot_type]['CLim'] = value
             self.notify_observers("clim", value)
@@ -629,8 +606,6 @@ class StyleData(Observable):
 
     @clabel.setter
     def clabel(self, label):
-        if label == self.style_dict[self._plot_type]['CLabel']:
-            return
         if label is None or isinstance(label, str):
             self.style_dict[self._plot_type]['CLabel'] = label
             self.notify_observers("clabel", label)
@@ -643,8 +618,6 @@ class StyleData(Observable):
 
     @cscale.setter
     def cscale(self, scale):
-        if scale == self.style_dict[self._plot_type]['CScale']:
-            return
         if self._is_valid_scale(scale):
             self.style_dict[self._plot_type]['CScale'] = scale
             self.notify_observers("cscale", scale)
@@ -657,12 +630,10 @@ class StyleData(Observable):
 
     @resolution.setter
     def resolution(self, value):
-        if value == self.style_dict[self._plot_type]['Resolution']:
-            return
-        if value is None or isinstance(value, int):
+        if value is None or isinstance(value, float):
             self.style_dict[self._plot_type]['Resolution'] = value
         else:
-            raise TypeError("value must be an integer or None.")
+            raise TypeError("value must be an float or None.")
 
     def get_axis_label(self, ax):
         return getattr(self, f"{self.axis[ax]}label")
@@ -711,53 +682,80 @@ class StyleData(Observable):
         self.plot_axis_dict = {
             '': {
                 'axis': [False, False, False, False],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, False],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': [''],
                 },
             'field map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 },
             'gradient map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','Special']
                 },
             'correlation': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, True],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, True],
                 'spinbox': [False, False, False, True],
                 'cfield_type': ['Cluster']
                 },
             'histogram': {
                 'axis': [True, False, False, True],
+                'axis_scale': [True, True, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [3, None, None, 3],
                 'add_none': [False, False, False, True],
                 'spinbox': [True, False, False, True],
                 'cfield_type': ['Cluster']
                 },
             'scatter': {
                 'axis': [True, True, True, True],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, True, True],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'heatmap': {
                 'axis': [True, True, True, False],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'ternary map': {
                 'axis': [True, True, True, False],
+                'axis_scale': [True, True, False, False],
+                'axis_widgets': [True, True, False, False],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
                 },
             'TEC': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, True, False, False],
+                'axis_widgets': [False, True, False, False],
+                'lim_precision': [None, 3, None, None],
                 'add_none': [False, False, False, True],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Analyte'],
@@ -771,58 +769,88 @@ class StyleData(Observable):
                 },
             'variance': {
                 'axis': [False, False, False, False],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, True],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False]
                 },
             'basis vectors': {
                 'axis': [False, False, False, False],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [False, False, False, False],
+                'lim_precision': [None, None, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [True, True, False, False]
                 },
             'dimension score map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['PCA score']
                 },
             'dimension scatter': {
                 'axis': [True, True, False, True],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, False, True],
                 'spinbox': [True, True, False, True],
                 'field_type': ['PCA score']
                 }, 
             'dimension heatmap': {
                 'axis': [True, True, False, False],
+                'axis_scale': [True, True, True, True],
+                'axis_widgets': [True, True, True, True],
+                'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [True, True, False, False],
                 'field_type': ['PCA score']
                 },
             'cluster map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, False],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Cluster']
                 },
             'cluster score map': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Cluster score']
                 },
             'cluster performance': {
                 'axis': [False, False, False, True],
+                'axis_scale': [True, True, False, False],
+                'axis_widgets': [True, True, False, False],
+                'lim_precision': [3, 3, None, None],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, False],
                 'field_type': ['Cluster']
                 },
             'profile': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
                 },
             'polygon': {
                 'axis': [False, False, False, True],
+                'axis_scale': [False, False, False, False],
+                'axis_widgets': [True, True, False, True],
+                'lim_precision': [None, None, None, 3],
                 'add_none': [False, False, False, False],
                 'spinbox': [False, False, False, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
@@ -1017,6 +1045,20 @@ class StyleData(Observable):
         if isinstance(hex_color, str):
             return bool(re.fullmatch(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})", hex_color))
         return False
+    
+    # ----------------------------------------------------------------------
+    # Add central widget‑state registry
+    # ----------------------------------------------------------------------
+    # ❷ helper to update state + notify observers
+    def _set_widget_state(self, key: str, enabled: bool) -> None:
+        """
+        Record the desired enabled/disabled state of a UI control.
+        An observer in the MainWindow should translate the event
+        '<key>_enabled' → widget.setEnabled(enabled).
+        """
+        if self.widget_state.get(key) != enabled:
+            self.widget_state[key] = enabled
+            self.notify_observers(f"{key}_enabled", enabled)
 
     # -------------------------------------
     # Debugging fuctions
@@ -1205,16 +1247,16 @@ class StyleTheme():
                 'ScaleLength': None,
                 'OverlayColor': '#ffffff',
                 'Marker': 'circle',
-                'MarkerSize': 6,
+                'MarkerSize': 6.0,
                 'MarkerColor': '#1c75bc',
-                'MarkerAlpha': 30,
+                'MarkerAlpha': 30.0,
                 'LineWidth': 1.5,
-                'LineMultiplier': 1,
+                'LineMultiplier': 1.0,
                 'LineColor': '#1c75bc',
                 'Colormap': 'viridis',
                 'CbarReverse': False,
                 'CbarDir': 'vertical',
-                'Resolution': 10
+                'Resolution': 10.0
                 }
 
         # try to load one of the preferred fonts
@@ -1279,13 +1321,13 @@ class StyleTheme():
 
         styles['cluster performance']['AspectRatio'] = 0.62
 
-        styles['scatter']['AspectRatio'] = 1
+        styles['scatter']['AspectRatio'] = 1.0
         styles['scatter']['XFieldType'] = 'Analyte'
         styles['scatter']['YFieldType'] = 'Analyte'
         styles['scatter']['ZFieldType'] = 'none'
         styles['scatter']['CFieldType'] = 'none'
 
-        styles['heatmap']['AspectRatio'] = 1
+        styles['heatmap']['AspectRatio'] = 1.0
         styles['heatmap']['CLim'] = [1,1000]
         styles['heatmap']['CScale'] = 'log'
         styles['heatmap']['XFieldType'] = 'Analyte'
@@ -1297,11 +1339,11 @@ class StyleTheme():
 
         styles['dimension scatter']['LineColor'] = '#4d4d4d'
         styles['dimension scatter']['LineWidth'] = 0.5
-        styles['dimension scatter']['AspectRatio'] = 1
+        styles['dimension scatter']['AspectRatio'] = 1.0
         styles['dimension scatter']['XFieldType'] = 'PCA score'
         styles['dimension scatter']['YFieldType'] = 'PCA score'
 
-        styles['dimension heatmap']['AspectRatio'] = 1
+        styles['dimension heatmap']['AspectRatio'] = 1.0
         styles['dimension heatmap']['LineColor'] = '#ffffff'
         styles['dimension scatter']['XFieldType'] = 'PCA score'
         styles['dimension scatter']['YFieldType'] = 'PCA score'
@@ -1309,13 +1351,13 @@ class StyleTheme():
         styles['variance']['FontSize'] = 8
 
         styles['histogram']['AspectRatio'] = 0.62
-        styles['histogram']['LineWidth'] = 0
+        styles['histogram']['LineWidth'] = 0.0
         styles['histogram']['XFieldType'] = 'Analyte'
         styles['histogram']['CFieldType'] = 'none'
 
         styles['profile']['AspectRatio'] = 0.62
         styles['profile']['LineWidth'] = 1.0
-        styles['profile']['MarkerSize'] = 12
+        styles['profile']['MarkerSize'] = 12.0
         styles['profile']['MarkerColor'] = '#d3d3d3'
         styles['profile']['LineColor'] = '#d3d3d3'
 

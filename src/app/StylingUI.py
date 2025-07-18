@@ -378,137 +378,232 @@ class StylingDock(StyleData, StyleTheme):
 
     # update functions
     # -------------------------------------
-    def update_xlim_lineedits(self, new_xlim):
-        self.ui.lineEditXLB.value = new_xlim[0]
-        self.ui.lineEditXUB.value = new_xlim[1]
+    # ------------------------------------------------------------------
+    # Axes – X
+    # ------------------------------------------------------------------
+    def update_xlim_lineedits(self, value):
+        if value == [self.ui.lineEditXLB.value, self.ui.lineEditXUB.value]:
+            return
+        self.ui.lineEditXLB.value = value[0]
+        self.ui.lineEditXUB.value = value[1]
         self.schedule_update()
 
     def update_xlabel_lineedit(self, new_label):
+        if new_label == self.ui.lineEditXLabel.text():
+            return
         self.ui.lineEditXLabel.setText(new_label)
         self.schedule_update()
-        
+
     def update_xscale_combobox(self, new_scale):
+        if new_scale == self.ui.comboBoxXScale.currentText():
+            return
         self.ui.comboBoxXScale.setCurrentText(new_scale)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Axes – Y
+    # ------------------------------------------------------------------
     def update_ylim_lineedits(self, new_ylim):
+        if new_ylim == [self.ui.lineEditYLB.value, self.ui.lineEditYUB.value]:
+            return
         self.ui.lineEditYLB.value = new_ylim[0]
         self.ui.lineEditYUB.value = new_ylim[1]
         self.schedule_update()
 
     def update_ylabel_lineedit(self, new_label):
+        if new_label == self.ui.lineEditYLabel.text():
+            return
         self.ui.lineEditYLabel.setText(new_label)
         self.schedule_update()
 
     def update_yscale_combobox(self, new_scale):
+        if new_scale == self.ui.comboBoxYScale.currentText():
+            return
         self.ui.comboBoxYScale.setCurrentText(new_scale)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Axes – Z
+    # ------------------------------------------------------------------
     def update_zlim_lineedits(self, new_zlim):
+        if list(new_zlim) == [self.ui.lineEditZLB.value, self.ui.lineEditZUB.value]:
+            return
         self.ui.lineEditZLB.value = new_zlim[0]
         self.ui.lineEditZUB.value = new_zlim[1]
         self.schedule_update()
 
     def update_zlabel_lineedit(self, new_label):
+        if new_label == self.ui.lineEditZLabel.text():
+            return
         self.ui.lineEditZLabel.setText(new_label)
         self.schedule_update()
-        
+
     def update_zscale_combobox(self, new_scale):
+        if new_scale == self.ui.comboBoxZScale.currentText():
+            return
         self.ui.comboBoxZScale.setCurrentText(new_scale)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Aspect ratio & tick direction
+    # ------------------------------------------------------------------
     def update_aspect_ratio_lineedit(self, new_aspect_ratio):
+        if new_aspect_ratio == self.ui.lineEditAspectRatio.value:
+            return
         self.ui.lineEditAspectRatio.value = new_aspect_ratio
         self.schedule_update()
 
     def update_tick_dir_combobox(self, new_tick_dir):
+        if new_tick_dir == self.ui.comboBoxTickDirection.currentText():
+            return
         self.ui.comboBoxTickDirection.setCurrentText(new_tick_dir)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Scale‑bar
+    # ------------------------------------------------------------------
     def update_scale_location_combobox(self, new_scale_location):
+        if new_scale_location == self.ui.comboBoxScaleLocation.currentText():
+            return
         self.ui.comboBoxScaleLocation.setCurrentText(new_scale_location)
         self.schedule_update()
 
     def update_scale_length_lineedit(self, new_scale_length):
+        if new_scale_length == self.ui.lineEditScaleLength.value:
+            return
         self.ui.lineEditScaleLength.value = new_scale_length
         self.schedule_update()
 
     def update_overlay_color_toolbutton(self, new_color):
-        self.ui.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % new_color)
+        desired = f"background-color: {new_color};"
+        if desired == self.ui.toolButtonOverlayColor.styleSheet():
+            return
+        self.ui.toolButtonOverlayColor.setStyleSheet(desired)
         self.schedule_update()
 
     def update_show_mass_checkbox(self, new_value):
+        if new_value == self.ui.checkBoxShowMass.isChecked():
+            return
         self.ui.checkBoxShowMass.setChecked(new_value)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Marker
+    # ------------------------------------------------------------------
     def update_marker_symbol_combobox(self, new_marker_symbol):
+        if new_marker_symbol == self.ui.comboBoxMarker.currentText():
+            return
         self.ui.comboBoxMarker.setCurrentText(new_marker_symbol)
         self.schedule_update()
 
     def update_marker_size_spinbox(self, new_marker_size):
+        if new_marker_size == self.ui.doubleSpinBoxMarkerSize.value():
+            return
         self.ui.doubleSpinBoxMarkerSize.setValue(new_marker_size)
         self.schedule_update()
 
     def update_marker_color_toolbutton(self, new_color):
-        self.ui.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % new_color)
+        desired = f"background-color: {new_color};"
+        if desired == self.ui.toolButtonMarkerColor.styleSheet():
+            return
+        self.ui.toolButtonMarkerColor.setStyleSheet(desired)
         self.schedule_update()
 
     def update_marker_alpha_slider(self, new_alpha):
+        if new_alpha == self.ui.horizontalSliderMarkerAlpha.value():
+            return
         self.ui.horizontalSliderMarkerAlpha.setValue(new_alpha)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Line
+    # ------------------------------------------------------------------
     def update_line_width_combobox(self, new_line_width):
+        if new_line_width == self.ui.doubleSpinBoxLineWidth.value():
+            return
         self.ui.doubleSpinBoxLineWidth.setValue(new_line_width)
         self.schedule_update()
 
     def update_line_multiplier_lineedit(self, new_multiplier):
+        if new_multiplier == self.ui.lineEditLengthMultiplier.value:
+            return
         self.ui.lineEditLengthMultiplier.value = new_multiplier
         self.schedule_update()
 
     def update_line_color_toolbutton(self, new_color):
-        self.ui.toolButtonLineColor.setStyleSheet("background-color: %s;" % new_color)
+        desired = f"background-color: {new_color};"
+        if desired == self.ui.toolButtonLineColor.styleSheet():
+            return
+        self.ui.toolButtonLineColor.setStyleSheet(desired)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Font
+    # ------------------------------------------------------------------
     def update_font_family_combobox(self, new_font_family):
+        if new_font_family == self.ui.fontComboBox.currentText():
+            return
         self.ui.fontComboBox.setCurrentText(new_font_family)
         self.schedule_update()
 
     def update_font_size_spinbox(self, new_font_size):
+        if new_font_size == self.ui.doubleSpinBoxFontSize.value():
+            return
         self.ui.doubleSpinBoxFontSize.blockSignals(True)
         self.ui.doubleSpinBoxFontSize.setValue(new_font_size)
         self.ui.doubleSpinBoxFontSize.blockSignals(False)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Colormap / colour‑bar
+    # ------------------------------------------------------------------
     def update_cmap_combobox(self, new_colormap):
+        if new_colormap == self.ui.comboBoxFieldColormap.currentText():
+            return
         self.ui.comboBoxFieldColormap.setCurrentText(new_colormap)
         self.schedule_update()
 
     def update_cbar_reverse_checkbox(self, new_value):
+        if new_value == self.ui.checkBoxReverseColormap.isChecked():
+            return
         self.ui.checkBoxReverseColormap.setChecked(new_value)
         self.schedule_update()
 
     def update_cbar_direction_combobox(self, new_cbar_direction):
+        if new_cbar_direction == self.ui.comboBoxCbarDirection.currentText():
+            return
         self.ui.comboBoxCbarDirection.setCurrentText(new_cbar_direction)
         self.schedule_update()
 
     def update_clim_lineedits(self, new_xlim):
+        if list(new_xlim) == [self.ui.lineEditCLB.value, self.ui.lineEditCUB.value]:
+            return
         self.ui.lineEditCLB.value = new_xlim[0]
         self.ui.lineEditCUB.value = new_xlim[1]
         self.schedule_update()
 
     def update_clabel_lineedit(self, new_label):
+        if new_label == self.ui.lineEditCLabel.text():
+            return
         self.ui.lineEditCLabel.setText(new_label)
         self.schedule_update()
-        
+
     def update_cscale_combobox(self, new_scale):
+        if new_scale == self.ui.comboBoxCScale.currentText():
+            return
         self.ui.comboBoxCScale.setCurrentText(new_scale)
         self.schedule_update()
 
+    # ------------------------------------------------------------------
+    # Heat‑map resolution
+    # ------------------------------------------------------------------
     def update_resolution_spinbox(self, new_resolution):
+        if new_resolution == self.ui.spinBoxHeatmapResolution.value():
+            return
         self.ui.spinBoxHeatmapResolution.setValue(new_resolution)
-
-        if self.plot_type == "heatmap":
+        if self.plot_type.lower() == "heatmap":
             self.schedule_update()
+
 
     # general style functions
     # -------------------------------------
@@ -964,26 +1059,13 @@ class StylingDock(StyleData, StyleTheme):
         ui = self.ui
         data = ui.data[self.app_data.sample_id]
 
-        # tab_id = ui.toolBox.currentIndex()
-        # if self.plot_type is None:
-        #     self.plot_type = ui.plot_types[tab_id][ui.plot_types[tab_id][0]+1]
-        #     ui.comboBoxPlotType.blockSignals(True)
-        #     ui.comboBoxPlotType.clear()
-        #     ui.comboBoxPlotType.addItems(ui.plot_types[tab_id][1:])
-        #     ui.comboBoxPlotType.setCurrentText(plot_type)
-        #     ui.comboBoxPlotType.blockSignals(False)
-        # elif plot_type == '':
-        #     return
-
         self.signal_state = True
 
         style = self.style_dict[self.plot_type]
 
         # toggle actionSwapAxes
         match self.plot_type:
-            case 'field map' | 'gradient map':
-                ui.actionSwapAxes.setEnabled(True)
-            case 'scatter' | 'heatmap':
+            case 'field map' | 'gradient map'| 'scatter' | 'heatmap':
                 ui.actionSwapAxes.setEnabled(True)
             case _:
                 ui.actionSwapAxes.setEnabled(False)
@@ -994,95 +1076,69 @@ class StylingDock(StyleData, StyleTheme):
         # axes properties
         # for map plots, check to see that 'X' and 'Y' are initialized
         if self.plot_type.lower() in self.map_plot_types:
-            xmin,xmax,xscale,xlabel = self.get_axis_values(data,'Analyte','Xc')
-            ymin,ymax,yscale,ylabel = self.get_axis_values(data,'Analyte','Yc')
+            xmin,xmax,xscale,_ = self.get_axis_values(data,'Analyte','Xc')
+            ymin,ymax,yscale,_ = self.get_axis_values(data,'Analyte','Yc')
 
             # set style dictionary values for X and Y
-            style['XLim'] = [xmin, xmax]
-            style['XScale'] = xscale
-            style['XLabel'] = 'X'
+            self.xlim = [xmin, xmax]
+            self.xlabel = 'X'
             style['XFieldType'] = 'Coordinate'
             style['XField'] = 'Xc'
 
-            style['YLim'] = [ymin, ymax]
-            style['YScale'] = yscale
-            style['YLabel'] = 'Y'
+            self.ylim = [ymin, ymax]
+            self.ylabel = 'Y'
             style['YFieldType'] = 'Coordinate'
             style['YField'] = 'Yc'
 
-            style['AspectRatio'] = data.aspect_ratio
+            self.aspect_ratio = data.aspect_ratio
 
-            # do not round axes limits for maps
-            ui.lineEditXLB.precision = None
-            ui.lineEditXUB.precision = None
-            ui.lineEditXLB.value = style['XLim'][0]
-            ui.lineEditXUB.value = style['XLim'][1]
 
-            ui.lineEditYLB.value = style['YLim'][0]
-            ui.lineEditYUB.value = style['YLim'][1]
-
-            ui.lineEditZLB.value = style['ZLim'][0]
-            ui.lineEditZUB.value = style['ZLim'][1]
+            if self.scale_length is None:
+                self.scale_length = self.default_scale_length()
         else:
             # round axes limits for everything that isn't a map
-            ui.lineEditXLB.value = style['XLim'][0]
-            ui.lineEditXUB.value = style['XLim'][1]
+            # Non-map plots might still need axes
+            self.xlim = style.get('XLim')
+            self.yscale = style.get('ZScale')
 
-            ui.lineEditYLB.value = style['YLim'][0]
-            ui.lineEditYUB.value = style['YLim'][1]
+            self.ylim = style.get('YLim')
+            self.yscale = style.get('ZScale')
 
-            ui.lineEditZLB.value = style['ZLim'][0]
-            ui.lineEditZUB.value = style['ZLim'][1]
+            self.scale_length = None
 
-        ui.comboBoxXScale.setCurrentText(style['XScale'])
-        ui.lineEditXLabel.setText(style['XLabel'])
+        # do not round axes limits for maps
+        ui.lineEditXLB.precision = None
+        ui.lineEditXUB.precision = None
 
-        ui.comboBoxYScale.setCurrentText(style['YScale'])
-        ui.lineEditYLabel.setText(style['YLabel'])
+        # Set Z axis details if available
+        self.zlabel = style.get('ZLabel')
+        self.zscale = style.get('ZScale')
+        self.zlim = style.get('ZLim')
 
-        ui.comboBoxYScale.setCurrentText(style['ZScale'])
-        ui.lineEditZLabel.setText(style['ZLabel'])
-
-        ui.lineEditAspectRatio.setText(str(style['AspectRatio']))
+        self.aspect_ratio = data.aspect_ratio
 
         # annotation properties
-        #ui.fontComboBox.setCurrentFont(style['Font'])
-        ui.doubleSpinBoxFontSize.blockSignals(True)
-        ui.doubleSpinBoxFontSize.setValue(style['FontSize'])
-        ui.doubleSpinBoxFontSize.blockSignals(False)
+        # Font
+        self.font_size = style.get('FontSize')
 
         # scalebar properties
-        ui.comboBoxScaleLocation.setCurrentText(style['ScaleLocation'])
-        ui.comboBoxScaleDirection.setCurrentText(style['ScaleDir'])
-        if (style['ScaleLength'] is None) and (self.plot_type in self.map_plot_types):
-            style['ScaleLength'] = self.default_scale_length()
-
-            ui.lineEditScaleLength.value = style['ScaleLength']
-        else:
-            ui.lineEditScaleLength.value = None
+        self.scale_dir = style.get('ScaleDir')
+        self.scale_location = style.get('ScaleLocation')
             
-        ui.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % style['OverlayColor'])
+        self.overlay_color = style.get('OverlayColor')
 
-        # marker properties
-        ui.comboBoxMarker.setCurrentText(style['Marker'])
+        # Marker
+        self.marker = style.get('Marker')
+        self.marker_size = style.get('MarkerSize')
+        self.marker_alpha = style.get('MarkerAlpha')
+        self.marker_color = style.get('MarkerColor')
 
-        ui.doubleSpinBoxMarkerSize.blockSignals(True)
-        ui.doubleSpinBoxMarkerSize.setValue(style['MarkerSize'])
-        ui.doubleSpinBoxMarkerSize.blockSignals(False)
-
-        ui.horizontalSliderMarkerAlpha.setValue(int(style['MarkerAlpha']))
-        ui.labelMarkerAlpha.setText(str(ui.horizontalSliderMarkerAlpha.value()))
-
-        # line properties
-        ui.doubleSpinBoxLineWidth.setValue(style['LineWidth'])
-        ui.lineEditLengthMultiplier.value = style['LineMultiplier']
-        ui.toolButtonLineColor.setStyleSheet("background-color: %s;" % style['LineColor'])
+        # Line
+        self.line_width = style.get('LineWidth')
+        self.line_color = style.get('LineColor')
+        self.line_multiplier = style.get('LineMultiplier')
 
         # color properties
-        ui.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % style['MarkerColor'])
-        add_none = True
-        if self.plot_type in self.map_plot_types:
-            add_none = False
         ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, ax=3)
         if self.app_data.c_field_type is None or self.app_data.c_field_type == '':
             ui.comboBoxFieldTypeC.setCurrentIndex(1)
@@ -1103,16 +1159,17 @@ class StylingDock(StyleData, StyleTheme):
         else:
             self.app_data.c_field = ui.comboBoxFieldC.currentText()
 
-        ui.comboBoxFieldColormap.setCurrentText(style['Colormap'])
-        ui.checkBoxReverseColormap.blockSignals(True)
-        ui.checkBoxReverseColormap.setChecked(style['CbarReverse'])
-        ui.checkBoxReverseColormap.blockSignals(False)
+        self.cmap = style.get('Colormap')
+        self.cbar_reverse = style.get('CbarReverse')
+        
         field = self.app_data.c_field
         if field in list(data.processed_data.column_attributes.keys()):
-            style['CLim'] = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
-            style['CLabel'] = data.processed_data.get_attribute(field,'label')
-        ui.lineEditCLB.value = style['CLim'][0]
-        ui.lineEditCUB.value = style['CLim'][1]
+            self.clim = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
+            self.clabel = data.processed_data.get_attribute(field,'label')
+        else:
+            self.clim = style['CLim']
+            self.clabel = style['CLabel']
+        
         if self.app_data.c_field_type == 'cluster':
             # set color field to active cluster method
             ui.comboBoxFieldC.setCurrentText(ui.cluster_dict['active method'])
@@ -1122,21 +1179,18 @@ class StylingDock(StyleData, StyleTheme):
             ui.comboBoxCScale.addItem('discrete')
             ui.comboBoxCScale.setCurrentText('discrete')
 
-            style['CScale'] = 'discrete'
+            self.cscale = 'discrete'
         else:
             # set color scale options to linear/log
             ui.comboBoxCScale.clear()
             ui.comboBoxCScale.addItems(self.app_data.scale_options)
-            style['CScale'] = 'linear'
-            ui.comboBoxCScale.setCurrentText(style['CScale'])
+            self.cscale = 'linear'
+            ui.comboBoxCScale.setCurrentText(self.cscale)
             
-        ui.comboBoxCScale.setCurrentText(style['CScale'])
-        ui.comboBoxCbarDirection.setCurrentText(style['CbarDir'])
-        ui.lineEditCLabel.setText(style['CLabel'])
+        self.cbar_dir = style.get('CbarDir')
+        self.clabel = style['CLabel']
 
-        ui.spinBoxHeatmapResolution.blockSignals(True)
-        ui.spinBoxHeatmapResolution.setValue(style['Resolution'])
-        ui.spinBoxHeatmapResolution.blockSignals(False)
+        self.resolution = style.get('Resolution')
 
         # turn properties on/off based on plot type and style settings
         self.toggle_style_widgets()
@@ -1154,6 +1208,15 @@ class StylingDock(StyleData, StyleTheme):
         data = self.ui.data[self.app_data.sample_id]
         style = self.style_dict[self.plot_type]
         
+        self.signal_state = True
+
+        # toggle actionSwapAxes
+        match self.plot_type:
+            case 'field map' | 'gradient map' | 'scatter' | 'heatmap':
+                self._set_widget_state("swap_axes", True)
+            case _:
+                self._set_widget_state("swap", False)
+
         if self.plot_type.lower() in self.map_plot_types:
             # Set X and Y axis values for map plots
             xmin, xmax, xscale, xlabel = self.get_axis_values(data, 'Analyte', 'Xc')
@@ -1177,33 +1240,33 @@ class StylingDock(StyleData, StyleTheme):
                 self.scale_length = self.default_scale_length()
         else:
             # Non-map plots might still need axes
-            self.xlim = style.get('XLim', [0, 1])
-            self.ylim = style.get('YLim', [0, 1])
-            self.zlim = style.get('ZLim', [0, 1])
+            self.xlim = style.get('XLim')
+            self.ylim = style.get('YLim')
+            self.zlim = style.get('ZLim')
         
         # Set Z axis details if available
-        self.zlabel = style.get('ZLabel', 'Z')
-        self.zscale = style.get('ZScale', 'linear')
+        self.zlabel = style.get('ZLabel')
+        self.zscale = style.get('ZScale')
 
         # Font and annotation
-        self.font_size = style.get('FontSize', 12.0)
-        self.scale_dir = style.get('ScaleDir', 'none')
-        self.scale_location = style.get('ScaleLocation', 'southeast')
+        self.font_size = style.get('FontSize')
+        self.scale_dir = style.get('ScaleDir')
+        self.scale_location = style.get('ScaleLocation')
         if self.scale_length is None and self.plot_type.lower() in self.map_plot_types:
             self.scale_length = self.default_scale_length()
 
-        self.overlay_color = style.get('OverlayColor', '#000000')
+        self.overlay_color = style.get('OverlayColor')
 
         # Marker
-        self.marker = style.get('Marker', 'o')
-        self.marker_size = style.get('MarkerSize', 5.0)
-        self.marker_alpha = style.get('MarkerAlpha', 1.0)
-        self.marker_color = style.get('MarkerColor', '#000000')
+        self.marker = style.get('Marker')
+        self.marker_size = style.get('MarkerSize')
+        self.marker_alpha = style.get('MarkerAlpha')
+        self.marker_color = style.get('MarkerColor')
 
         # Line
-        self.line_width = style.get('LineWidth', 1.0)
-        self.line_color = style.get('LineColor', '#000000')
-        self.line_multiplier = style.get('LineMultiplier', 1.0)
+        self.line_width = style.get('LineWidth')
+        self.line_color = style.get('LineColor')
+        self.line_multiplier = style.get('LineMultiplier')
 
         # Colorbar/Colormap
         field = self.app_data.c_field
@@ -1311,7 +1374,7 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.plot_flag = False
         for ax in range(4):
             if self.plot_axis_dict[self.plot_type]['axis'][ax]:
-                self.update_field(ax, self.axis_widget_dict['parentbox'][ax].currentText())
+                self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
         self.ui.plot_flag = True
 
         if self.plot_type != '':
@@ -1820,13 +1883,9 @@ class StylingDock(StyleData, StyleTheme):
     # -------------------------------------
     def update_scale_direction_combobox(self, new_dir):
         """Sets scale direction on figure"""        
+        if new_dir == self.ui.comboBoxScaleDirection.currentText():
+            return
         self.ui.comboBoxScaleDirection.setCurrentText(new_dir)
-        self.toggle_scale_widgets()
-
-        self.schedule_update()
-
-    def update_scale_direction(self):
-        self.scale_direction = self.ui.comboBoxScaleDirection.currentText()
         self.toggle_scale_widgets()
 
         self.schedule_update()

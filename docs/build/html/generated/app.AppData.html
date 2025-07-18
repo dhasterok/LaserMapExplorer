@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -444,17 +444,6 @@ notifying observers (such as UI widgets) when relevant properties change.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="app.AppData.AppData.scale_options">
-<span class="sig-name descname"><span class="pre">scale_options</span></span><a class="headerlink" href="#app.AppData.AppData.scale_options" title="Link to this definition">#</a></dt>
-<dd><p>Available scaling options for data visualization.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1145,113 +1134,113 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference internal" href="#id0" title="app.AppData.AppData.apply_noise_red"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_noise_red</span></code></a></dt><dd><p>(str): Whether to apply noise reduction.</p>
+<dt><a class="reference internal" href="#id0" title="app.AppData.AppData.apply_noise_red"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_noise_red</span></code></a></dt><dd><p>str : Whether to apply noise reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.c_field" title="app.AppData.AppData.c_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field</span></code></a></dt><dd><p>(str): Field associated with color on many plots.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.c_field" title="app.AppData.AppData.c_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field</span></code></a></dt><dd><p>str : Field associated with color on many plots.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.c_field_type" title="app.AppData.AppData.c_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field_type</span></code></a></dt><dd><p>(str): Field type for color field or map data.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.c_field_type" title="app.AppData.AppData.c_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field_type</span></code></a></dt><dd><p>str : Field type for color field or map data.</p>
 </dd>
-<dt><a class="reference internal" href="#id1" title="app.AppData.AppData.cluster_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_distance</span></code></a></dt><dd><p>(str): The distance metric used in clustering.</p>
+<dt><a class="reference internal" href="#id1" title="app.AppData.AppData.cluster_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_distance</span></code></a></dt><dd><p>str : The distance metric used in clustering.</p>
 </dd>
-<dt><a class="reference internal" href="#id2" title="app.AppData.AppData.cluster_exponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_exponent</span></code></a></dt><dd><p>(float): The exponent used in fuzzy c-means clustering.</p>
+<dt><a class="reference internal" href="#id2" title="app.AppData.AppData.cluster_exponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_exponent</span></code></a></dt><dd><p>float : The exponent used in fuzzy c-means clustering.</p>
 </dd>
-<dt><a class="reference internal" href="#id4" title="app.AppData.AppData.cluster_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method</span></code></a></dt><dd><p>(str): The current clustering method used for data analysis.</p>
+<dt><a class="reference internal" href="#id4" title="app.AppData.AppData.cluster_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method</span></code></a></dt><dd><p>str : The current clustering method used for data analysis.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>(list): The available clustering methods.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>list : The available clustering methods.</p>
 </dd>
-<dt><a class="reference internal" href="#id5" title="app.AppData.AppData.cluster_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_seed</span></code></a></dt><dd><p>(int): The random seed used for clustering.</p>
+<dt><a class="reference internal" href="#id5" title="app.AppData.AppData.cluster_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_seed</span></code></a></dt><dd><p>int : The random seed used for clustering.</p>
 </dd>
-<dt><a class="reference internal" href="#id6" title="app.AppData.AppData.corr_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_method</span></code></a></dt><dd><p>(str): The method used for correlation plots.</p>
+<dt><a class="reference internal" href="#id6" title="app.AppData.AppData.corr_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_method</span></code></a></dt><dd><p>str : The method used for correlation plots.</p>
 </dd>
-<dt><a class="reference internal" href="#id7" title="app.AppData.AppData.corr_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_squared</span></code></a></dt><dd><p>(bool): Whether to use squared correlation values.</p>
+<dt><a class="reference internal" href="#id7" title="app.AppData.AppData.corr_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_squared</span></code></a></dt><dd><p>bool : Whether to use squared correlation values.</p>
 </dd>
-<dt><a class="reference internal" href="#id8" title="app.AppData.AppData.default_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_hist_num_bins</span></code></a></dt><dd><p>(int): The default number of histogram bins.</p>
+<dt><a class="reference internal" href="#id8" title="app.AppData.AppData.default_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_hist_num_bins</span></code></a></dt><dd><p>int : The default number of histogram bins.</p>
 </dd>
-<dt><a class="reference internal" href="#id9" title="app.AppData.AppData.dim_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_method</span></code></a></dt><dd><p>(str): The method used for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#id9" title="app.AppData.AppData.dim_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_method</span></code></a></dt><dd><p>str : The method used for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#id10" title="app.AppData.AppData.dim_red_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_precondition</span></code></a></dt><dd><p>(bool): Whether to precondition the dimensionality reduction with PCA.</p>
+<dt><a class="reference internal" href="#id10" title="app.AppData.AppData.dim_red_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_precondition</span></code></a></dt><dd><p>bool : Whether to precondition the dimensionality reduction with PCA.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x" title="app.AppData.AppData.dim_red_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x</span></code></a></dt><dd><p>(int): The x-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x" title="app.AppData.AppData.dim_red_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x</span></code></a></dt><dd><p>int : The x-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x_max" title="app.AppData.AppData.dim_red_x_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x_max</span></code></a></dt><dd><p>(int): The maximum x-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x_max" title="app.AppData.AppData.dim_red_x_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x_max</span></code></a></dt><dd><p>int : The maximum x-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y" title="app.AppData.AppData.dim_red_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y</span></code></a></dt><dd><p>(int): The y-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y" title="app.AppData.AppData.dim_red_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y</span></code></a></dt><dd><p>int : The y-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y_max" title="app.AppData.AppData.dim_red_y_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y_max</span></code></a></dt><dd><p>(int): The maximum y-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y_max" title="app.AppData.AppData.dim_red_y_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y_max</span></code></a></dt><dd><p>int : The maximum y-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#id11" title="app.AppData.AppData.edge_detection_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detection_method</span></code></a></dt><dd><p>(str): The method used for edge detection.</p>
+<dt><a class="reference internal" href="#id11" title="app.AppData.AppData.edge_detection_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detection_method</span></code></a></dt><dd><p>str : The method used for edge detection.</p>
 </dd>
-<dt><a class="reference internal" href="#id12" title="app.AppData.AppData.equalize_color_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equalize_color_scale</span></code></a></dt><dd><p>(bool): Whether to equalize the color scale for histograms.</p>
+<dt><a class="reference internal" href="#id12" title="app.AppData.AppData.equalize_color_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equalize_color_scale</span></code></a></dt><dd><p>bool : Whether to equalize the color scale for histograms.</p>
 </dd>
-<dt><a class="reference internal" href="#id13" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>(dict): A dictionary of field names and their types for the current sample.</p>
+<dt><a class="reference internal" href="#id13" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>dict : A dictionary of field names and their types for the current sample.</p>
 </dd>
-<dt><a class="reference internal" href="#id18" title="app.AppData.AppData.gradient_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_flag</span></code></a></dt><dd><p>(bool): Whether to plot the gradient.</p>
+<dt><a class="reference internal" href="#id18" title="app.AppData.AppData.gradient_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_flag</span></code></a></dt><dd><p>bool : Whether to plot the gradient.</p>
 </dd>
-<dt><a class="reference internal" href="#id19" title="app.AppData.AppData.heatmap_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heatmap_style</span></code></a></dt><dd><p>(str): The style of heatmap to use.</p>
+<dt><a class="reference internal" href="#id19" title="app.AppData.AppData.heatmap_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heatmap_style</span></code></a></dt><dd><p>str : The style of heatmap to use.</p>
 </dd>
-<dt><a class="reference internal" href="#id20" title="app.AppData.AppData.hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_bin_width</span></code></a></dt><dd><p>(float): The width of histogram bins.</p>
+<dt><a class="reference internal" href="#id20" title="app.AppData.AppData.hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_bin_width</span></code></a></dt><dd><p>float : The width of histogram bins.</p>
 </dd>
-<dt><a class="reference internal" href="#id21" title="app.AppData.AppData.hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_num_bins</span></code></a></dt><dd><p>(int): The number of histogram bins.</p>
+<dt><a class="reference internal" href="#id21" title="app.AppData.AppData.hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_num_bins</span></code></a></dt><dd><p>int : The number of histogram bins.</p>
 </dd>
-<dt><a class="reference internal" href="#id22" title="app.AppData.AppData.hist_plot_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_plot_style</span></code></a></dt><dd><p>(str): The style of histogram plot to use.</p>
+<dt><a class="reference internal" href="#id22" title="app.AppData.AppData.hist_plot_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_plot_style</span></code></a></dt><dd><p>str : The style of histogram plot to use.</p>
 </dd>
-<dt><a class="reference internal" href="#id24" title="app.AppData.AppData.max_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_clusters</span></code></a></dt><dd><p>(int): The maximum number of clusters allowed for testing cluster performance.</p>
+<dt><a class="reference internal" href="#id24" title="app.AppData.AppData.max_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_clusters</span></code></a></dt><dd><p>int : The maximum number of clusters allowed for testing cluster performance.</p>
 </dd>
-<dt><a class="reference internal" href="#id25" title="app.AppData.AppData.ndim_analyte_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_analyte_set</span></code></a></dt><dd><p>(str): The set of analytes used for N-Dim analysis.</p>
+<dt><a class="reference internal" href="#id25" title="app.AppData.AppData.ndim_analyte_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_analyte_set</span></code></a></dt><dd><p>str : The set of analytes used for N-Dim analysis.</p>
 </dd>
-<dt><a class="reference internal" href="#id26" title="app.AppData.AppData.ndim_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_list</span></code></a></dt><dd><p>(list): The list of analytes used for N-Dim analysis.</p>
+<dt><a class="reference internal" href="#id26" title="app.AppData.AppData.ndim_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_list</span></code></a></dt><dd><p>list : The list of analytes used for N-Dim analysis.</p>
 </dd>
-<dt><a class="reference internal" href="#id27" title="app.AppData.AppData.ndim_quantile_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_quantile_index</span></code></a></dt><dd><p>(int): The index of the quantile set used for N-Dim analysis.</p>
+<dt><a class="reference internal" href="#id27" title="app.AppData.AppData.ndim_quantile_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_quantile_index</span></code></a></dt><dd><p>int : The index of the quantile set used for N-Dim analysis.</p>
 </dd>
-<dt><a class="reference internal" href="#id28" title="app.AppData.AppData.noise_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_method</span></code></a></dt><dd><p>(str): The method used for noise reduction.</p>
+<dt><a class="reference internal" href="#id28" title="app.AppData.AppData.noise_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_method</span></code></a></dt><dd><p>str : The method used for noise reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#id29" title="app.AppData.AppData.noise_red_option1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option1</span></code></a></dt><dd><p>(int or float): The first option for noise reduction method.</p>
+<dt><a class="reference internal" href="#id29" title="app.AppData.AppData.noise_red_option1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option1</span></code></a></dt><dd><p>int | float : The first option for noise reduction method.</p>
 </dd>
-<dt><a class="reference internal" href="#id30" title="app.AppData.AppData.noise_red_option2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option2</span></code></a></dt><dd><p>(int or float): The second option for noise reduction method.</p>
+<dt><a class="reference internal" href="#id30" title="app.AppData.AppData.noise_red_option2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option2</span></code></a></dt><dd><p>int | float : The second option for noise reduction method.</p>
 </dd>
-<dt><a class="reference internal" href="#id31" title="app.AppData.AppData.norm_reference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm_reference</span></code></a></dt><dd><p>(str): The reference used for normalizing analyte and ratio data.</p>
+<dt><a class="reference internal" href="#id31" title="app.AppData.AppData.norm_reference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm_reference</span></code></a></dt><dd><p>str : The reference used for normalizing analyte and ratio data.</p>
 </dd>
-<dt><a class="reference internal" href="#id32" title="app.AppData.AppData.num_basis_for_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_basis_for_precondition</span></code></a></dt><dd><p>(int): The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
+<dt><a class="reference internal" href="#id32" title="app.AppData.AppData.num_basis_for_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_basis_for_precondition</span></code></a></dt><dd><p>int : The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="#id33" title="app.AppData.AppData.num_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_clusters</span></code></a></dt><dd><p>(int): The number of clusters to use in clustering.</p>
+<dt><a class="reference internal" href="#id33" title="app.AppData.AppData.num_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_clusters</span></code></a></dt><dd><p>int : The number of clusters to use in clustering.</p>
 </dd>
-<dt><a class="reference internal" href="#id34" title="app.AppData.AppData.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>(pd.Series): The reference chemistry for the current reference index.</p>
+<dt><a class="reference internal" href="#id34" title="app.AppData.AppData.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>pd.Series : The reference chemistry for the current reference index.</p>
 </dd>
-<dt><a class="reference internal" href="#id35" title="app.AppData.AppData.ref_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_index</span></code></a></dt><dd><p>(int): The index of the reference chemistry source used for normalization.</p>
+<dt><a class="reference internal" href="#id35" title="app.AppData.AppData.ref_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_index</span></code></a></dt><dd><p>int : The index of the reference chemistry source used for normalization.</p>
 </dd>
-<dt><a class="reference internal" href="#id36" title="app.AppData.AppData.sample_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_id</span></code></a></dt><dd><p>(str): The ID/name of the currently selected sample.</p>
+<dt><a class="reference internal" href="#id36" title="app.AppData.AppData.sample_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_id</span></code></a></dt><dd><p>str : The ID/name of the currently selected sample.</p>
 </dd>
-<dt><a class="reference internal" href="#id37" title="app.AppData.AppData.sample_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_list</span></code></a></dt><dd><p>(list): A list of sample IDs in the current sample list.</p>
+<dt><a class="reference internal" href="#id37" title="app.AppData.AppData.sample_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_list</span></code></a></dt><dd><p>list : A list of sample IDs in the current sample list.</p>
 </dd>
-<dt><a class="reference internal" href="#id38" title="app.AppData.AppData.scatter_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter_preset</span></code></a></dt><dd><p>(str): The preset for scatter plot styles.</p>
+<dt><a class="reference internal" href="#id38" title="app.AppData.AppData.scatter_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter_preset</span></code></a></dt><dd><p>str : The preset for scatter plot styles.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.selected_analytes" title="app.AppData.AppData.selected_analytes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_analytes</span></code></a></dt><dd><p>(pd.Series): The selected analytes for the current sample.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.selected_analytes" title="app.AppData.AppData.selected_analytes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_analytes</span></code></a></dt><dd><p>pd.Series : The selected analytes for the current sample.</p>
 </dd>
-<dt><a class="reference internal" href="#id39" title="app.AppData.AppData.selected_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_clusters</span></code></a></dt><dd><p>(list): The list of selected clusters for masking.</p>
+<dt><a class="reference internal" href="#id39" title="app.AppData.AppData.selected_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_clusters</span></code></a></dt><dd><p>list : The list of selected clusters for masking.</p>
 </dd>
 <dt><a class="reference internal" href="#id42" title="app.AppData.AppData.sort_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_method</span></code></a></dt><dd><p>(str): The method used to sort the sample list.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_m" title="app.AppData.AppData.ternary_color_m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_m</span></code></a></dt><dd><p>(str): The color for the centroid on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_m" title="app.AppData.AppData.ternary_color_m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_m</span></code></a></dt><dd><p>str : The color for the centroid on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_x" title="app.AppData.AppData.ternary_color_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_x</span></code></a></dt><dd><p>(str): The color for the A-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_x" title="app.AppData.AppData.ternary_color_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_x</span></code></a></dt><dd><p>str : The color for the A-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_y" title="app.AppData.AppData.ternary_color_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_y</span></code></a></dt><dd><p>(str): The color for the B-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_y" title="app.AppData.AppData.ternary_color_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_y</span></code></a></dt><dd><p>str : The color for the B-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_z" title="app.AppData.AppData.ternary_color_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_z</span></code></a></dt><dd><p>(str): The color for the C-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.ternary_color_z" title="app.AppData.AppData.ternary_color_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_z</span></code></a></dt><dd><p>str : The color for the C-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#id43" title="app.AppData.AppData.ternary_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_colormap</span></code></a></dt><dd><p>(str): The colormap used for ternary maps.</p>
+<dt><a class="reference internal" href="#id43" title="app.AppData.AppData.ternary_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_colormap</span></code></a></dt><dd><p>str : The colormap used for ternary maps.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.x_field" title="app.AppData.AppData.x_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field</span></code></a></dt><dd><p>(str): Field associated with x-axis or A-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.x_field" title="app.AppData.AppData.x_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field</span></code></a></dt><dd><p>str : Field associated with x-axis or A-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.x_field_type" title="app.AppData.AppData.x_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field_type</span></code></a></dt><dd><p>(str): Field type for x field.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.x_field_type" title="app.AppData.AppData.x_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field_type</span></code></a></dt><dd><p>str : Field type for x field.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.y_field" title="app.AppData.AppData.y_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field</span></code></a></dt><dd><p>(str): Field associated with y-axis or B-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.y_field" title="app.AppData.AppData.y_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field</span></code></a></dt><dd><p>str : Field associated with y-axis or B-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.y_field_type" title="app.AppData.AppData.y_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field_type</span></code></a></dt><dd><p>(str): Field type for y field.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.y_field_type" title="app.AppData.AppData.y_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field_type</span></code></a></dt><dd><p>str : Field type for y field.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.z_field" title="app.AppData.AppData.z_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field</span></code></a></dt><dd><p>(str): Field associated with z-axis or C-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.z_field" title="app.AppData.AppData.z_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field</span></code></a></dt><dd><p>str : Field associated with z-axis or C-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#app.AppData.AppData.z_field_type" title="app.AppData.AppData.z_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field_type</span></code></a></dt><dd><p>(str): Field type for z field.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.z_field_type" title="app.AppData.AppData.z_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field_type</span></code></a></dt><dd><p>str : Field type for z field.</p>
 </dd>
 </dl>
 </dd>
@@ -1324,7 +1313,7 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dd><p>Whether to apply noise reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1335,7 +1324,7 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dd><p>Field associated with color on many plots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1346,7 +1335,7 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dd><p>Field type for color field or map data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1357,7 +1346,7 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dd><p>The distance metric used in clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1368,7 +1357,7 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dd><p>The exponent used in fuzzy c-means clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1400,7 +1389,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The current clustering method used for data analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1411,7 +1400,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The available clustering methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1422,7 +1411,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The random seed used for clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1433,7 +1422,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The method used for correlation plots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1444,7 +1433,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>Whether to use squared correlation values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1455,7 +1444,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The default number of histogram bins.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1466,7 +1455,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The method used for dimensionality reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1477,7 +1466,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>Whether to precondition the dimensionality reduction with PCA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1488,7 +1477,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The x-axis index for dimensionality reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1499,7 +1488,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The maximum x-axis index for dimensionality reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1510,7 +1499,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The y-axis index for dimensionality reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1521,7 +1510,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The maximum y-axis index for dimensionality reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1532,7 +1521,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The method used for edge detection.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1543,7 +1532,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>Whether to equalize the color scale for histograms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1556,7 +1545,7 @@ it is separately handled and assigned the last color.</p>
 Coordinate fields are excluded from this dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1648,7 +1637,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>Whether to plot the gradient.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1659,7 +1648,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The style of heatmap to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1670,7 +1659,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The width of histogram bins.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1681,7 +1670,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The number of histogram bins.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1692,7 +1681,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The style of histogram plot to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1709,7 +1698,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The maximum number of clusters allowed for testing cluster performance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1720,7 +1709,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The set of analytes used for N-Dim analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1731,7 +1720,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The list of analytes used for N-Dim analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1742,7 +1731,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The index of the quantile set used for N-Dim analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1753,7 +1742,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The method used for noise reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1764,7 +1753,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The first option for noise reduction method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1775,7 +1764,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The second option for noise reduction method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1786,7 +1775,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The reference used for normalizing analyte and ratio data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1803,7 +1792,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1814,7 +1803,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The number of clusters to use in clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1825,7 +1814,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The reference chemistry for the current reference index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(pd.Series)</p>
+<dd class="field-odd"><p>pd.Series</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1836,7 +1825,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The index of the reference chemistry source used for normalization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1853,7 +1842,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The ID/name of the currently selected sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1864,7 +1853,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>A list of sample IDs in the current sample list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1875,7 +1864,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The preset for scatter plot styles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1886,7 +1875,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The selected analytes for the current sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(pd.Series)</p>
+<dd class="field-odd"><p>pd.Series</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1897,7 +1886,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The list of selected clusters for masking.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1953,7 +1942,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The color for the centroid on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1964,7 +1953,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The color for the A-vertex on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1975,7 +1964,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The color for the B-vertex on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1986,7 +1975,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The color for the C-vertex on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1997,7 +1986,7 @@ in the set will be returned.  If <code class="docutils literal notranslate"><spa
 <dd><p>The colormap used for ternary maps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2051,7 +2040,7 @@ and sets the number of bins based on the bin width.</p>
 <dd><p>Field associated with x-axis or A-vertex on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2062,7 +2051,7 @@ and sets the number of bins based on the bin width.</p>
 <dd><p>Field type for x field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2073,7 +2062,7 @@ and sets the number of bins based on the bin width.</p>
 <dd><p>Field associated with y-axis or B-vertex on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2084,7 +2073,7 @@ and sets the number of bins based on the bin width.</p>
 <dd><p>Field type for y field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2095,7 +2084,7 @@ and sets the number of bins based on the bin width.</p>
 <dd><p>Field associated with z-axis or C-vertex on a ternary diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2106,7 +2095,7 @@ and sets the number of bins based on the bin width.</p>
 <dd><p>Field type for z field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2147,7 +2136,6 @@ and sets the number of bins based on the bin width.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData"><code class="docutils literal notranslate"><span class="pre">AppData</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.logger_key"><code class="docutils literal notranslate"><span class="pre">AppData.logger_key</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.default_preferences"><code class="docutils literal notranslate"><span class="pre">AppData.default_preferences</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.scale_options"><code class="docutils literal notranslate"><span class="pre">AppData.scale_options</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.preferences"><code class="docutils literal notranslate"><span class="pre">AppData.preferences</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.selected_directory"><code class="docutils literal notranslate"><span class="pre">AppData.selected_directory</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.AppData.AppData.sample_list"><code class="docutils literal notranslate"><span class="pre">AppData.sample_list</span></code></a></li>

@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -398,6 +398,121 @@
                   
   <section id="module-common.Logger">
 <span id="common-logger"></span><h1>common.Logger<a class="headerlink" href="#module-common.Logger" title="Link to this heading">#</a></h1>
+<p>Created on Tues July 8 13:30 2025</p>
+<p>&#64;author: Derrick Hasterok (Adelaide University)</p>
+<p><em>Logger Module for PyQt6 Applications*</em></p>
+<p>This module provides a flexible logging system for PyQt6 GUI applications, featuring:</p>
+<ul class="simple">
+<li><p>A dockable logger UI (<cite>LoggerDock</cite>)</p></li>
+<li><p>Function and class decorators for automatic logging</p></li>
+<li><p>Optional logging of function arguments and call chains</p></li>
+<li><p>Toggle switches and UI controls for filtering and managing output</p></li>
+<li><p>Customizable color-coded prefixes (e.g., ‘UI’, ‘Error’, ‘Warning’)</p></li>
+<li><p>Runtime log control through a <cite>LoggerOptionsDialog</cite></p></li>
+</ul>
+<p><em>BASIC USAGE EXAMPLES</em></p>
+<ol class="arabic">
+<li><p><em>Log Function Calls with Arguments:</em></p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_call</span>
+
+<span class="nd">@log_call</span><span class="p">(</span><span class="s2">&quot;UI&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">button_clicked</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Button was clicked&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><em>Log All Methods in a Class:</em></p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span>
+
+<span class="nd">@auto_log_methods</span><span class="p">(</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyModel</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><em>Exclude Specific Methods:</em></p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">no_log</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="nd">@no_log</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">helper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><em>Add LoggerDock in Your QMainWindow:</em></p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">logger_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;UI&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">logger_dock</span> <span class="o">=</span> <span class="n">LoggerDock</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><em>Customize Log Colors (optional):</em></p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">log_colors</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="s2">&quot;CustomTag&quot;</span><span class="p">:</span> <span class="s2">&quot;#ffaa00&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p><strong>LOGGER OPTIONS / DOCK USER INTERFACE</strong></p>
+<ul class="simple">
+<li><p>Pause/resume toggle: Temporarily stop or resume log output.</p></li>
+<li><p>Search bar: Filter visible log messages.</p></li>
+<li><p>Gear icon: Opens LoggerOptionsDialog to enable/disable log keys and options.</p></li>
+<li><p>Save icon: Exports log to file (default “temp.log”).</p></li>
+<li><p>Clear icon: Clears current log view.</p></li>
+</ul>
+<p><strong>LOGGERCONFIG OPTIONS (GLOBAL FLAGS)</strong></p>
+<ul class="simple">
+<li><p><cite>LoggerConfig</cite> stores persistent settings accessible globally across the app.</p></li>
+<li><p><cite>LoggerConfig.set_show_args(True)</cite>: Print function arguments</p></li>
+<li><p><cite>LoggerConfig.set_show_call_chain(True)</cite>: Show simplified call stack</p></li>
+<li><p><cite>LoggerConfig.set_paused(True)</cite>: Suppress all logging output</p></li>
+</ul>
+<p>To update all logger keys at runtime:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LoggerConfig</span><span class="o">.</span><span class="n">set_options</span><span class="p">({</span><span class="s2">&quot;UI&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Custom&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+</pre></div>
+</div>
+<p><strong>EXTENDING LOGGER BEHAVIOR</strong></p>
+<p>To support more complex behaviors (e.g. conditional prefixes, advanced color mapping),
+subclass LoggerDock or modify:
+- <cite>LoggerDock.detect_color_from_message(msg)</cite>
+- <cite>LoggerConfig</cite> to store more global flags
+- <cite>auto_log_methods()</cite> to wrap only specific method names</p>
+<p><strong>RECOMMENDED STRUCTURE</strong></p>
+<ul class="simple">
+<li><p>Attach LoggerDock to your QMainWindow</p></li>
+<li><p>Set <cite>self.logger_options</cite> and optionally <cite>self.log_colors</cite></p></li>
+<li><p>Use <cite>&#64;log_call</cite> or <cite>&#64;auto_log_methods</cite> on key components, skipping any functions with <cite>&#64;no_log</cite></p></li>
+<li><p>Enable/disable features at runtime with <cite>LoggerConfig</cite></p></li>
+<li><p>Export or clear logs using the built-in toolbar</p></li>
+</ul>
+<p><em>COMMON ERROR: Missing `*args`/`**kwargs`</em>
+- If a decorated function causes a crash like:</p>
+<blockquote>
+<div><p><cite>TypeError: wrapper() takes N positional arguments but M were given</cite></p>
+</div></blockquote>
+<ul>
+<li><p>Ensure the original function accepts <a href="#id1"><span class="problematic" id="id2">*</span></a>args and <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@log_call</span><span class="p">(</span><span class="s2">&quot;UI&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">your_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
@@ -566,7 +681,7 @@ as well as global flags for displaying method arguments, call chains, and for pa
 <dd class="field-odd"><p>SearchTool : Adds text search widget to the dock</p>
 </dd>
 </dl>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></p>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
@@ -2769,14 +2884,14 @@ and adjust logging behavior options.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span>
 
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">MyModel</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyModel</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 </pre></div>
 </div>
@@ -2834,10 +2949,10 @@ If no global logger is set, output falls back to standard output using <cite>pri
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">log_call</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_call</span>
 
 <span class="nd">@log_call</span><span class="p">(</span><span class="s2">&quot;UI&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">button_clicked</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">button_clicked</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Button was clicked&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -2860,11 +2975,11 @@ If no global logger is set, output falls back to standard output using <cite>pri
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">no_log</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">no_log</span>
 
-<span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
     <span class="nd">@no_log</span>
-    <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">helper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 </pre></div>
 </div>

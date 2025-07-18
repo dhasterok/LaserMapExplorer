@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,18 +388,18 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.AppData</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">random</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">src.common.csvdict</span> <span class="k">as</span> <span class="nn">csvdict</span>
-<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">from</span> <span class="nn">src.common.Observable</span> <span class="kn">import</span> <span class="n">Observable</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.csvdict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">csvdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Observable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span>
 
 <div class="viewcode-block" id="AppData">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">AppData</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AppData</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    AppData is a central data model and state manager for the LaserMapExplorer application.</span>
 
@@ -425,8 +425,6 @@
 <span class="sd">        Identifier for logging.</span>
 <span class="sd">    default_preferences : dict</span>
 <span class="sd">        Default user preferences for units, font size, etc.</span>
-<span class="sd">    scale_options : list</span>
-<span class="sd">        Available scaling options for data visualization.</span>
 <span class="sd">    preferences : dict</span>
 <span class="sd">        Current user preferences (deep copy of default_preferences).</span>
 <span class="sd">    selected_directory : str</span>
@@ -571,7 +569,7 @@
 <span class="sd">    This class is designed to be used as a singleton or shared instance within the application,</span>
 <span class="sd">    serving as the authoritative source of state for all data analysis and visualization operations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Data&#39;</span>
@@ -587,9 +585,6 @@
             <span class="s1">&#39;FontSize&#39;</span><span class="p">:</span><span class="mi">11</span><span class="p">,</span>
             <span class="s1">&#39;TickDir&#39;</span><span class="p">:</span><span class="s1">&#39;out&#39;</span><span class="p">,</span>
         <span class="p">}</span>
-
-        <span class="c1"># options for scaling data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="s1">&#39;symlog&#39;</span><span class="p">]</span>
 
         <span class="c1"># in future will be set from preference ui</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_preferences</span><span class="p">)</span>
@@ -695,11 +690,11 @@
                 <span class="s1">&#39;option2&#39;</span><span class="p">:</span><span class="mf">75.0</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="s1">&#39;option1&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_red_options</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;option1&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_red_options</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_red_options</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">][</span><span class="s1">&#39;option1&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option1</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="s1">&#39;option2&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_red_options</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;option2&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_red_options</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_red_options</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">][</span><span class="s1">&#39;option2&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option2</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -733,7 +728,7 @@
                     <span class="s1">&#39;REE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;La&#39;</span><span class="p">,</span><span class="s1">&#39;Ce&#39;</span><span class="p">,</span><span class="s1">&#39;Pr&#39;</span><span class="p">,</span><span class="s1">&#39;Nd&#39;</span><span class="p">,</span><span class="s1">&#39;Pm&#39;</span><span class="p">,</span><span class="s1">&#39;Sm&#39;</span><span class="p">,</span><span class="s1">&#39;Eu&#39;</span><span class="p">,</span><span class="s1">&#39;Gd&#39;</span><span class="p">,</span><span class="s1">&#39;Tb&#39;</span><span class="p">,</span><span class="s1">&#39;Dy&#39;</span><span class="p">,</span><span class="s1">&#39;Ho&#39;</span><span class="p">,</span><span class="s1">&#39;Er&#39;</span><span class="p">,</span><span class="s1">&#39;Tm&#39;</span><span class="p">,</span><span class="s1">&#39;Yb&#39;</span><span class="p">,</span><span class="s1">&#39;Lu&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;metals&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Na&#39;</span><span class="p">,</span><span class="s1">&#39;Al&#39;</span><span class="p">,</span><span class="s1">&#39;Ca&#39;</span><span class="p">,</span><span class="s1">&#39;Zn&#39;</span><span class="p">,</span><span class="s1">&#39;Sc&#39;</span><span class="p">,</span><span class="s1">&#39;Cu&#39;</span><span class="p">,</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span><span class="s1">&#39;Mn&#39;</span><span class="p">,</span><span class="s1">&#39;V&#39;</span><span class="p">,</span><span class="s1">&#39;Co&#39;</span><span class="p">,</span><span class="s1">&#39;Mg&#39;</span><span class="p">,</span><span class="s1">&#39;Ni&#39;</span><span class="p">,</span><span class="s1">&#39;Cr&#39;</span><span class="p">],</span>
                 <span class="p">}</span>
-        <span class="k">if</span> <span class="s1">&#39;REE&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;REE&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_analyte_set</span> <span class="o">=</span> <span class="s1">&#39;REE&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_analyte_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
@@ -772,11 +767,11 @@
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_max_clusters</span> <span class="o">=</span> <span class="mi">10</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_clusters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">][</span><span class="s1">&#39;n_clusters&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;distance&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;distance&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">][</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_distance</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="s1">&#39;exponent&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;exponent&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">][</span><span class="s1">&#39;exponent&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_exponent</span> <span class="o">=</span> <span class="mi">0</span>
@@ -793,7 +788,7 @@
 
 <div class="viewcode-block" id="AppData.get_field">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.get_field">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the field associated with the specified axis.</span>
 <span class="sd">        </span>
@@ -816,7 +811,7 @@
 
 <div class="viewcode-block" id="AppData.set_field">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.set_field">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the field associated with the specified axis.</span>
 <span class="sd">        </span>
@@ -836,7 +831,7 @@
 
 <div class="viewcode-block" id="AppData.get_field_type">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.get_field_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the field type associated with the specified axis.</span>
 <span class="sd">        </span>
@@ -859,7 +854,7 @@
 
 <div class="viewcode-block" id="AppData.set_field_type">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.set_field_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the field type associated with the specified axis.</span>
 <span class="sd">        </span>
@@ -880,7 +875,7 @@
 
 <div class="viewcode-block" id="AppData.validate_field_type">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.validate_field_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates if the new field type exists in the current sample&#39;s processed data.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -907,7 +902,7 @@
 
 <div class="viewcode-block" id="AppData.validate_field">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.validate_field">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
         <span class="c1"># field_list = self.get_field_list(set_name=field_type)</span>
@@ -917,12 +912,12 @@
         <span class="c1"># raise ValueError(&quot;field not found.&quot;)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sort_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sort_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; (str): The method used to sort the sample list.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_method</span>
     
     <span class="nd">@sort_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sort_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sort_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_method</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -930,12 +925,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;sort_method&quot;</span><span class="p">,</span> <span class="n">new_method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ref_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The index of the reference chemistry source used for normalization.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The index of the reference chemistry source used for normalization.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_index</span>
     
     <span class="nd">@ref_index</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ref_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_index</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_index</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ref_index</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -943,20 +938,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ref_index&quot;</span><span class="p">,</span> <span class="n">new_index</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(pd.Series): The reference chemistry for the current reference index.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.Series : The reference chemistry for the current reference index.&quot;&quot;&quot;</span>
         <span class="n">chem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ref_index</span><span class="p">]</span>
         <span class="n">chem</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_ppm&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">chem</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">chem</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sample_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(list): A list of sample IDs in the current sample list.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list : A list of sample IDs in the current sample list.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_list</span>
 
     <span class="nd">@sample_list</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sample_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_list</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_list</span><span class="p">:</span>
             <span class="k">return</span>
         
@@ -969,12 +964,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;sample_id&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The ID/name of the currently selected sample.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The ID/name of the currently selected sample.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span>
     
     <span class="nd">@sample_id</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_id</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_id</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -983,12 +978,12 @@
 
     <span class="c1">### Histogram Properties ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">equalize_color_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bool): Whether to equalize the color scale for histograms.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">equalize_color_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool : Whether to equalize the color scale for histograms.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_equalize_color_scale</span>
     
     <span class="nd">@equalize_color_scale</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">equalize_color_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">equalize_color_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_equalize_color_scale</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -996,17 +991,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;equalize_color_scale&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">default_hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The default number of histogram bins.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The default number of histogram bins.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_hist_num_bins</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">hist_bin_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(float): The width of histogram bins.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist_bin_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float : The width of histogram bins.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hist_bin_width</span>
     
     <span class="nd">@hist_bin_width</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">hist_bin_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist_bin_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">width</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hist_bin_width</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1021,12 +1016,12 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The number of histogram bins.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The number of histogram bins.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hist_num_bins</span>
     
     <span class="nd">@hist_num_bins</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">num_bins</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hist_num_bins</span><span class="p">:</span>
             <span class="k">return</span>
         
@@ -1041,12 +1036,12 @@
     
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">hist_plot_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The style of histogram plot to use.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist_plot_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The style of histogram plot to use.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hist_plot_style</span>
     
     <span class="nd">@hist_plot_style</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">hist_plot_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hist_style</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist_plot_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hist_style</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">hist_style</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hist_plot_style</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">elif</span> <span class="n">hist_style</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PDF&#39;</span><span class="p">,</span><span class="s1">&#39;CDF&#39;</span><span class="p">,</span><span class="s1">&#39;log-scaling&#39;</span><span class="p">]:</span>
@@ -1056,12 +1051,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;hist_plot_style&quot;</span><span class="p">,</span> <span class="n">hist_style</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">corr_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The method used for correlation plots.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corr_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The method used for correlation plots.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_method</span>
     
     <span class="nd">@corr_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">corr_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corr_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_method</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;Pearson&#39;</span><span class="p">,</span> <span class="s1">&#39;Spearman&#39;</span><span class="p">,</span> <span class="s1">&#39;Kendall&#39;</span><span class="p">]:</span>
@@ -1071,12 +1066,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;corr_method&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">corr_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bool): Whether to use squared correlation values.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corr_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool : Whether to use squared correlation values.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_squared</span>
     
     <span class="nd">@corr_squared</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">corr_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corr_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_squared</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1084,12 +1079,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;@corr_squared&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">noise_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The method used for noise reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The method used for noise reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span>
     
     <span class="nd">@noise_red_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">noise_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_method</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1097,12 +1092,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;noise_red_method&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">noise_red_option1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int or float): The first option for noise reduction method.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_red_option1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int | float : The first option for noise reduction method.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option1</span>
     
     <span class="nd">@noise_red_option1</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">noise_red_option1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_red_option1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option1</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1110,12 +1105,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;noise_red_option1&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">noise_red_option2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int or float): The second option for noise reduction method.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_red_option2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int | float : The second option for noise reduction method.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option2</span>
     
     <span class="nd">@noise_red_option2</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">noise_red_option2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">noise_red_option2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_red_option2</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1123,12 +1118,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;noise_red_option2&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">apply_noise_red</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Whether to apply noise reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_noise_red</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Whether to apply noise reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_noise_red</span>
     
     <span class="nd">@apply_noise_red</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">apply_noise_red</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_noise_red</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_noise_red</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1136,12 +1131,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;apply_noise_red&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">gradient_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bool): Whether to plot the gradient.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gradient_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool : Whether to plot the gradient.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradient_flag</span>
     
     <span class="nd">@gradient_flag</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">gradient_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gradient_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradient_flag</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1149,12 +1144,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;gradient_flag&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">edge_detection_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The method used for edge detection.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">edge_detection_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The method used for edge detection.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_detection_method</span>
 
     <span class="nd">@edge_detection_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">edge_detection_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">edge_detection_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_detection_method</span><span class="p">:</span>
             <span class="k">return</span>
         
@@ -1162,48 +1157,48 @@
     
     <span class="c1">### Scatter Properties ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field type for x field.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field type for x field.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_field_type</span>
 
     <span class="nd">@x_field_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">x_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_field_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_field_type</span><span class="p">(</span><span class="n">new_field_type</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">y_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field type for y field.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field type for y field.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_field_type</span>
 
     <span class="nd">@y_field_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">y_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_field_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_field_type</span><span class="p">(</span><span class="n">new_field_type</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_y_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">z_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field type for z field.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field type for z field.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_field_type</span>
 
     <span class="nd">@z_field_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">z_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_field_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_field_type</span><span class="p">(</span><span class="n">new_field_type</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_z_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">c_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field type for color field or map data.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">c_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field type for color field or map data.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_field_type</span>
     
     <span class="nd">@c_field_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">c_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">c_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_field_type</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1220,12 +1215,12 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field associated with x-axis or A-vertex on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field associated with x-axis or A-vertex on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_field</span>
     
     <span class="nd">@x_field</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">x_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_field</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1233,12 +1228,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">y_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field associated with y-axis or B-vertex on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field associated with y-axis or B-vertex on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_field</span>
     
     <span class="nd">@y_field</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">y_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_field</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1246,12 +1241,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">z_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field associated with z-axis or C-vertex on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field associated with z-axis or C-vertex on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_field</span>
     
     <span class="nd">@z_field</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">z_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_field</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1259,12 +1254,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">c_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): Field associated with color on many plots.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">c_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : Field associated with color on many plots.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_field</span>
 
     <span class="nd">@c_field</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">c_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">c_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_field</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1273,12 +1268,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scatter_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The preset for scatter plot styles.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scatter_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The preset for scatter plot styles.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scatter_preset</span>
     
     <span class="nd">@scatter_preset</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">scatter_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_scatter_preset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scatter_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_scatter_preset</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_scatter_preset</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scatter_preset</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1287,12 +1282,12 @@
 
     <span class="c1">### Heatmap Properties ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">heatmap_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The style of heatmap to use.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">heatmap_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The style of heatmap to use.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_style</span>
     
     <span class="nd">@heatmap_style</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">heatmap_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_style</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">heatmap_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_style</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_style</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_style</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1301,12 +1296,12 @@
 
     <span class="c1">### Ternary Map ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ternary_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The colormap used for ternary maps.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The colormap used for ternary maps.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_colormap</span>
     
     <span class="nd">@ternary_colormap</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ternary_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_cmap</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_cmap</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_cmap</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_colormap</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1315,12 +1310,12 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ternary_color_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The color for the A-vertex on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the A-vertex on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_x</span>
     
     <span class="nd">@ternary_color_x</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ternary_color_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_x</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1328,12 +1323,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_x&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ternary_color_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The color for the B-vertex on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the B-vertex on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_y</span>
     
     <span class="nd">@ternary_color_y</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ternary_color_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_y</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1341,12 +1336,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_y&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ternary_color_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The color for the C-vertex on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the C-vertex on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_z</span>
     
     <span class="nd">@ternary_color_z</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ternary_color_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_z</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1354,12 +1349,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_z&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ternary_color_m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The color for the centroid on a ternary diagram.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the centroid on a ternary diagram.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_m</span>
     
     <span class="nd">@ternary_color_m</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ternary_color_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_m</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1368,12 +1363,12 @@
 
     <span class="c1">### Multidimensional Properties ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">norm_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The reference used for normalizing analyte and ratio data.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The reference used for normalizing analyte and ratio data.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm_reference</span>
     
     <span class="nd">@norm_reference</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">norm_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ref</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ref</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_ref</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm_reference</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1381,37 +1376,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;norm_reference&quot;</span><span class="p">,</span> <span class="n">new_ref</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ndim_analyte_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The set of analytes used for N-Dim analysis.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim_analyte_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The set of analytes used for N-Dim analysis.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_analyte_set</span>
     
     <span class="nd">@ndim_analyte_set</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ndim_analyte_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim_analyte_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_list</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_analyte_set</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="k">elif</span> <span class="n">new_list</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">elif</span> <span class="n">new_list</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;N Dim list (</span><span class="si">{</span><span class="n">new_list</span><span class="si">}</span><span class="s2">) is not a defined option.&quot;</span><span class="p">)</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_analyte_set</span> <span class="o">=</span> <span class="n">new_list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ndim_analyte_set&quot;</span><span class="p">,</span> <span class="n">new_list</span><span class="p">)</span> 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ndim_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(list): The list of analytes used for N-Dim analysis.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list : The list of analytes used for N-Dim analysis.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_list</span>
 
     <span class="nd">@ndim_list</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ndim_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_list</span> <span class="o">=</span> <span class="n">new_list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ndim_list&quot;</span><span class="p">,</span> <span class="n">new_list</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ndim_quantile_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The index of the quantile set used for N-Dim analysis.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim_quantile_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The index of the quantile set used for N-Dim analysis.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_quantile_index</span>
     
     <span class="nd">@ndim_quantile_index</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ndim_quantile_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_index</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim_quantile_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_index</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndim_quantile_index</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1420,12 +1415,12 @@
 
     <span class="c1">### Dimensional Reduction Properties ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dim_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The method used for dimensionality reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The method used for dimensionality reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_method</span>
     
     <span class="nd">@dim_red_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dim_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_method</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1433,12 +1428,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;dim_red_method&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dim_red_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The x-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The x-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x</span>
     
     <span class="nd">@dim_red_x</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dim_red_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1446,24 +1441,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;dim_red_x&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dim_red_x_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The maximum x-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_x_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The maximum x-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x_max</span>
 
     <span class="nd">@dim_red_x_max</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dim_red_x_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_max</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_x_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_max</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_max</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x_max</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x_max</span> <span class="o">=</span> <span class="n">new_max</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;dim_red_x_max&quot;</span><span class="p">,</span> <span class="n">new_max</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dim_red_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The y-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The y-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_y</span>
 
     <span class="nd">@dim_red_y</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dim_red_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_y</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1471,12 +1466,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;dim_red_x&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dim_red_y_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The maximum y-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_y_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The maximum y-axis index for dimensionality reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x_max</span>
 
     <span class="nd">@dim_red_y_max</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dim_red_y_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_max</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_y_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_max</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_max</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x_max</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_x_max</span> <span class="o">=</span> <span class="n">new_max</span>
@@ -1484,17 +1479,17 @@
 
     <span class="c1">### Cluster Properties ###</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cluster_method_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(list): The available clustering methods.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_method_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list : The available clustering methods.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cluster_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The current clustering method used for data analysis.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The current clustering method used for data analysis.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span>
     
     <span class="nd">@cluster_method</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cluster_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method_options</span><span class="p">:</span>
@@ -1505,12 +1500,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;cluster_method&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The maximum number of clusters allowed for testing cluster performance.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The maximum number of clusters allowed for testing cluster performance.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_clusters</span>
     
     <span class="nd">@max_clusters</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">max_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_clusters</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1518,12 +1513,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;max_clusters&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The number of clusters to use in clustering.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The number of clusters to use in clustering.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_clusters</span>
     
     <span class="nd">@num_clusters</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">num_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_clusters</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1533,12 +1528,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;num_clusters&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cluster_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The random seed used for clustering.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The random seed used for clustering.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_seed</span>
     
     <span class="nd">@cluster_seed</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cluster_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_seed</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1548,12 +1543,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;cluster_seed&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cluster_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(float): The exponent used in fuzzy c-means clustering.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float : The exponent used in fuzzy c-means clustering.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_exponent</span>
     
     <span class="nd">@cluster_exponent</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cluster_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_exponent</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1563,12 +1558,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;cluster_exponent&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cluster_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(str): The distance metric used in clustering.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The distance metric used in clustering.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_distance</span>
     
     <span class="nd">@cluster_distance</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cluster_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_distance</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1578,12 +1573,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;cluster_distance&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">selected_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(list): The list of selected clusters for masking.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">selected_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list : The list of selected clusters for masking.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_clusters</span>
     
     <span class="nd">@selected_clusters</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">selected_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">selected_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_list</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_list</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_clusters</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1591,12 +1586,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;selected_clusters&quot;</span><span class="p">,</span> <span class="n">new_list</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dim_red_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(bool): Whether to precondition the dimensionality reduction with PCA.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;bool : Whether to precondition the dimensionality reduction with PCA.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_precondition</span>
     
     <span class="nd">@dim_red_precondition</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dim_red_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dim_red_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim_red_precondition</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1604,12 +1599,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;dim_red_precondition&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_basis_for_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(int): The number of basis vectors to use for preconditioning in dimensionality reduction.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_basis_for_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The number of basis vectors to use for preconditioning in dimensionality reduction.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_basis_for_precondition</span>
     
     <span class="nd">@num_basis_for_precondition</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">num_basis_for_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_basis_for_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_basis_for_precondition</span><span class="p">:</span>
             <span class="k">return</span>
     
@@ -1617,8 +1612,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;num_basis_for_precondition&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">field_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(dict): A dictionary of field names and their types for the current sample.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">field_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;dict : A dictionary of field names and their types for the current sample.</span>
 
 <span class="sd">        This dictionary is used to populate field selection widgets and ensure valid selections.</span>
 <span class="sd">        Coordinate fields are excluded from this dictionary.</span>
@@ -1629,8 +1624,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_dict</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">selected_analytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;(pd.Series): The selected analytes for the current sample.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">selected_analytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.Series : The selected analytes for the current sample.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attributes</span><span class="p">({</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 
@@ -1638,7 +1633,7 @@
 
 <div class="viewcode-block" id="AppData.get_field_list">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.get_field_list">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the fields associated with a defined set</span>
 
 <span class="sd">        Set names are consistent with QComboBox.</span>
@@ -1691,7 +1686,7 @@
 
 <div class="viewcode-block" id="AppData.update_hist_bin_width">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.update_hist_bin_width">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_hist_bin_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_hist_bin_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the bin width for histograms</span>
 
 <span class="sd">        This method calculates the bin width based on the currently selected data field and type.</span>
@@ -1711,7 +1706,7 @@
 
 <div class="viewcode-block" id="AppData.update_hist_num_bins">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.update_hist_num_bins">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the number of bins for histograms</span>
 
 <span class="sd">        This method calculates the number of histogram bins based on the currently selected data field and type.</span>
@@ -1731,14 +1726,14 @@
 
 <div class="viewcode-block" id="AppData.histogram_reset_bins">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.histogram_reset_bins">[docs]</a>
-    <span class="k">def</span> <span class="nf">histogram_reset_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">histogram_reset_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets number of histogram bins to the default.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hist_num_bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_hist_num_bins</span></div>
 
 
 <div class="viewcode-block" id="AppData._set_clustering_parameters">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData._set_clustering_parameters">[docs]</a>
-    <span class="k">def</span> <span class="nf">_set_clustering_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_clustering_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets clustering parameters</span>
 
 <span class="sd">        This method updates the clustering parameters based on the current clustering</span>
@@ -1749,15 +1744,15 @@
 <span class="sd">        also updates the number of clusters and seed in the cluster dictionary for the</span>
 <span class="sd">        selected method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;distance&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;distance&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cluster_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">][</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;exponent&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;exponent&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cluster_exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_method</span><span class="p">][</span><span class="s1">&#39;exponent&#39;</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="AppData.generate_random_seed">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.generate_random_seed">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_random_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_random_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates a random seed for clustering.</span>
 
 <span class="sd">        This method generates a random integer between 0 and 1,000,000,000 to be used as</span>
@@ -1776,7 +1771,7 @@
 
 <div class="viewcode-block" id="AppData.cluster_group_changed">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.cluster_group_changed">[docs]</a>
-    <span class="k">def</span> <span class="nf">cluster_group_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_group_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the cluster dictionary and selected cluster groups.</span>
 

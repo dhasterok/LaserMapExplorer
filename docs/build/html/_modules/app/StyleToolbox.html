@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,31 +388,31 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.StyleToolbox</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QColorDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">QDoubleValidator</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QFontDatabase</span> <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="n">colormap</span>
-<span class="kn">import</span> <span class="nn">src.common.format</span> <span class="k">as</span> <span class="nn">fmt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
-<span class="kn">import</span> <span class="nn">src.common.csvdict</span> <span class="k">as</span> <span class="nn">csvdict</span>
-<span class="kn">from</span> <span class="nn">src.common.colorfunc</span> <span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
-<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">from</span> <span class="nn">src.common.Observable</span> <span class="kn">import</span> <span class="n">Observable</span>
-<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QColorDialog</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">QDoubleValidator</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QFontDatabase</span> <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">colormap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.csvdict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">csvdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.colorfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Observable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span><span class="p">,</span> <span class="n">log</span>
 
 <div class="viewcode-block" id="StyleObj">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleObj">[docs]</a>
-<span class="k">class</span> <span class="nc">StyleObj</span><span class="p">():</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StyleObj</span><span class="p">():</span>
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="StyleData">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Style&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">StyleData</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StyleData</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages plot styling for different plot types and syncs with main window UI.</span>
 
 <span class="sd">    Attributes</span>
@@ -549,17 +549,33 @@
 <span class="sd">            Prints debugging messages to stdout, by default ``False``</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Style&#39;</span>
 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">ui</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_data</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span>
         <span class="c1"># create the default style dictionary (self.style_dict for each plot type)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map_plot_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;field map&#39;</span><span class="p">,</span> <span class="s1">&#39;ternary map&#39;</span><span class="p">,</span> <span class="s1">&#39;PCA score&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster map&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster score&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_plot_types</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;field map&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ternary map&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;PCA score&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cluster map&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cluster score&#39;</span>
+        <span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">marker_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;circle&#39;</span><span class="p">:</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;square&#39;</span><span class="p">:</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;diamond&#39;</span><span class="p">:</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;triangle (up)&#39;</span><span class="p">:</span><span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;triangle (down)&#39;</span><span class="p">:</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;hexagon&#39;</span><span class="p">:</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;pentagon&#39;</span><span class="p">:</span><span class="s1">&#39;p&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marker_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;circle&#39;</span><span class="p">:</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;square&#39;</span><span class="p">:</span><span class="s1">&#39;s&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;diamond&#39;</span><span class="p">:</span><span class="s1">&#39;d&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;triangle (up)&#39;</span><span class="p">:</span><span class="s1">&#39;^&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;triangle (down)&#39;</span><span class="p">:</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;hexagon&#39;</span><span class="p">:</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pentagon&#39;</span><span class="p">:</span><span class="s1">&#39;p&#39;</span>
+        <span class="p">}</span>
 
         <span class="c1"># keep track of the plot type.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -597,22 +613,22 @@
     <span class="c1"># Styling properties</span>
     <span class="c1"># -------------------------------------</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">plot_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span>
 
     <span class="nd">@plot_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">plot_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;plot_type&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;XLim&#39;</span><span class="p">]</span>
 
     <span class="nd">@xlim</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;XLim&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_bounds</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -622,11 +638,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;xlim must be a list of two floats or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">xlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;XLabel&#39;</span><span class="p">]</span>
 
     <span class="nd">@xlabel</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">xlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;XLabel&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -636,11 +652,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;label must be of type str or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">xscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;XScale&#39;</span><span class="p">]</span>
 
     <span class="nd">@xscale</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">xscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;XScale&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_scale</span><span class="p">(</span><span class="n">scale</span><span class="p">):</span>
@@ -650,11 +666,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;scale must be linear, log, logit, or symlog.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;YLim&#39;</span><span class="p">]</span>
 
     <span class="nd">@ylim</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;YLim&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_bounds</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -664,11 +680,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ylim must be a list of two floats or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ylabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ylabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;YLabel&#39;</span><span class="p">]</span>
 
     <span class="nd">@ylabel</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">ylabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ylabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;YLabel&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -678,11 +694,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;label must be of type str or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">yscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">yscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;YScale&#39;</span><span class="p">]</span>
 
     <span class="nd">@yscale</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">yscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">yscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;YScale&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_scale</span><span class="p">(</span><span class="n">scale</span><span class="p">):</span>
@@ -692,11 +708,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;scale must be linear, log, logit, or symlog.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">zlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ZLim&#39;</span><span class="p">]</span>
 
     <span class="nd">@zlim</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">zlim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zlim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ZLim&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_bounds</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -706,11 +722,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;zlim must be a list of two floats or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">zlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ZLabel&#39;</span><span class="p">]</span>
 
     <span class="nd">@zlabel</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">zlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zlabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ZLabel&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -720,11 +736,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;label must be of type str or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">zscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ZScale&#39;</span><span class="p">]</span>
 
     <span class="nd">@zscale</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">zscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ZScale&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_scale</span><span class="p">(</span><span class="n">scale</span><span class="p">):</span>
@@ -734,11 +750,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;scale must be linear, log, logit,  or symlog.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;AspectRatio&#39;</span><span class="p">]</span>
 
     <span class="nd">@aspect_ratio</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;AspectRatio&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -748,11 +764,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;aspect_ratio must be of type float or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tick_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tick_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;TickDir&#39;</span><span class="p">]</span>
 
     <span class="nd">@tick_dir</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">tick_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dir</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tick_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dir</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_dir</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;TickDir&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -762,11 +778,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;tickdir must be of type str.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Font&#39;</span><span class="p">]</span>
 
     <span class="nd">@font</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_family</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_family</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">font_family</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Font&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">font_family</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -776,11 +792,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;font_family must be of type str.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;FontSize&#39;</span><span class="p">]</span>
 
     <span class="nd">@font_size</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;FontSize&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -790,11 +806,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;font_size must be of type float.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scale_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ScaleDir&#39;</span><span class="p">]</span>
 
     <span class="nd">@scale_dir</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">scale_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dir</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dir</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_dir</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ScaleDir&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">new_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new_dir</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">]):</span>
@@ -804,11 +820,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;new_dir must be of type str.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scale_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ScaleLocation&#39;</span><span class="p">]</span>
 
     <span class="nd">@scale_location</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">scale_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">location</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ScaleLocation&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">location</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;northeast&#39;</span><span class="p">,</span> <span class="s1">&#39;northwest&#39;</span><span class="p">,</span> <span class="s1">&#39;southwest&#39;</span><span class="p">,</span> <span class="s1">&#39;southeast&#39;</span><span class="p">]):</span>
@@ -817,11 +833,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;location must be of type str.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scale_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ScaleLength&#39;</span><span class="p">]</span>
 
     <span class="nd">@scale_length</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">scale_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;ScaleLength&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -835,11 +851,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;length must be of type float.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">overlay_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">overlay_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;OverlayColor&#39;</span><span class="p">]</span>
 
     <span class="nd">@overlay_color</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">overlay_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hexstr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">overlay_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hexstr</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">hexstr</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;OverlayColor&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">hexstr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_hex_color</span><span class="p">(</span><span class="n">hexstr</span><span class="p">):</span>
@@ -848,22 +864,22 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;color must be a hex string, #rrggbb&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">show_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_mass</span>
 
     <span class="nd">@show_mass</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">show_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_mass</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_show_mass</span> <span class="o">=</span> <span class="n">flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;show_mass&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">marker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Marker&#39;</span><span class="p">]</span>
 
     <span class="nd">@marker</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">marker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">symbol</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Marker&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -872,11 +888,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;marker_symbol must be of type float.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">marker_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;MarkerSize&#39;</span><span class="p">]</span>
 
     <span class="nd">@marker_size</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">marker_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;MarkerSize&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -885,11 +901,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;size must be of type float.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">marker_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;MarkerColor&#39;</span><span class="p">]</span>
 
     <span class="nd">@marker_color</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">marker_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hexstr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hexstr</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">hexstr</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;MarkerColor&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">hexstr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_hex_color</span><span class="p">(</span><span class="n">hexstr</span><span class="p">):</span>
@@ -898,11 +914,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;hexstr must be a hex string, #rrggbb&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">marker_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;MarkerAlpha&#39;</span><span class="p">]</span>
 
     <span class="nd">@marker_alpha</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">marker_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">alpha</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;MarkerAlpha&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">alpha</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
@@ -911,11 +927,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;alpha must be of type float and [0,1].&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">line_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;LineWidth&#39;</span><span class="p">]</span>
 
     <span class="nd">@line_width</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">line_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">width</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;LineWidth&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -924,11 +940,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;width must be of type float.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">line_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;LineMultiplier&#39;</span><span class="p">]</span>
 
     <span class="nd">@line_multiplier</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">line_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;LineMultiplier&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -937,11 +953,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;value must be of type float or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">line_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;LineColor&#39;</span><span class="p">]</span>
 
     <span class="nd">@line_color</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">line_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hexstr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hexstr</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">hexstr</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;LineColor&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">hexstr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_hex_color</span><span class="p">(</span><span class="n">hexstr</span><span class="p">):</span>
@@ -950,11 +966,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;hexstr must be a hex string, #rrggbb&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Colormap&#39;</span><span class="p">]</span>
 
     <span class="nd">@cmap</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Colormap&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -963,11 +979,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;name must be of type str or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cbar_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cbar_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CbarReverse&#39;</span><span class="p">]</span>
 
     <span class="nd">@cbar_reverse</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cbar_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cbar_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CbarReverse&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">flag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -976,11 +992,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;flag must be of type str or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cbar_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cbar_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CbarDir&#39;</span><span class="p">]</span>
 
     <span class="nd">@cbar_dir</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cbar_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dir</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cbar_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dir</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new_dir</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CbarDir&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">new_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new_dir</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="s1">&#39;vertical&#39;</span><span class="p">]):</span>
@@ -989,11 +1005,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;new_dir must be of type str.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CLim&#39;</span><span class="p">]</span>
 
     <span class="nd">@clim</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CLim&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_bounds</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -1003,11 +1019,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;clim must be a list of two floats or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">clabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CLabel&#39;</span><span class="p">]</span>
 
     <span class="nd">@clabel</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">clabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CLabel&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1017,11 +1033,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;label must be of type str or None.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cscale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CScale&#39;</span><span class="p">]</span>
 
     <span class="nd">@cscale</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;CScale&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_scale</span><span class="p">(</span><span class="n">scale</span><span class="p">):</span>
@@ -1031,11 +1047,11 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;scale must be linear, log, logit, or symlog.&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Resolution&#39;</span><span class="p">]</span>
 
     <span class="nd">@resolution</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span><span class="p">][</span><span class="s1">&#39;Resolution&#39;</span><span class="p">]:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -1045,43 +1061,43 @@
 
 <div class="viewcode-block" id="StyleData.get_axis_label">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.get_axis_label">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_axis_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_axis_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span><span class="si">}</span><span class="s2">label&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StyleData.set_axis_label">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.set_axis_label">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_axis_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">new_label</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_axis_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">new_label</span><span class="p">):</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span><span class="si">}</span><span class="s2">label&quot;</span><span class="p">,</span> <span class="n">new_label</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StyleData.get_axis_lim">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.get_axis_lim">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_axis_lim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_axis_lim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span><span class="si">}</span><span class="s2">lim&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StyleData.set_axis_lim">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.set_axis_lim">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_axis_lim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">new_lim</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_axis_lim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">new_lim</span><span class="p">):</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span><span class="si">}</span><span class="s2">lim&quot;</span><span class="p">,</span> <span class="n">new_lim</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StyleData.get_axis_scale">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.get_axis_scale">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_axis_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_axis_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span><span class="si">}</span><span class="s2">scale&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StyleData.set_axis_scale">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.set_axis_scale">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_axis_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">new_scale</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_axis_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">new_scale</span><span class="p">):</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span><span class="si">}</span><span class="s2">scale&quot;</span><span class="p">,</span> <span class="n">new_scale</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StyleData.default_scale_length">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.default_scale_length">[docs]</a>
-    <span class="k">def</span> <span class="nf">default_scale_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_scale_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets default length of a scale bar for map-type plots</span>
 
 <span class="sd">        Returns</span>
@@ -1109,7 +1125,7 @@
 
 <div class="viewcode-block" id="StyleData.default_plot_axis_dict">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.default_plot_axis_dict">[docs]</a>
-    <span class="k">def</span> <span class="nf">default_plot_axis_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_plot_axis_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_axis_dict</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;axis&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
@@ -1234,7 +1250,7 @@
     
 <div class="viewcode-block" id="StyleData.set_style_dictionary">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.set_style_dictionary">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_style_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_style_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets values in style dictionary</span>
 
 <span class="sd">        Parameters</span>
@@ -1250,12 +1266,12 @@
         <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]</span>
                 
         <span class="k">if</span> <span class="n">plot_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_plot_types</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;Xc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">column_attrributes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;Yc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">column_attrributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;Xc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">column_attrributes</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;Yc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">column_attrributes</span><span class="p">)):</span>
                 <span class="k">return</span>
 
             
-            <span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">,</span><span class="n">xscale</span><span class="p">,</span><span class="n">xlabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_axis_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span><span class="s1">&#39;Xc&#39;</span><span class="p">)</span>
-            <span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">,</span><span class="n">yscale</span><span class="p">,</span><span class="n">ylabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_axis_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span><span class="s1">&#39;Yc&#39;</span><span class="p">)</span>
+            <span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">,</span><span class="n">xscale</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_axis_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span><span class="s1">&#39;Xc&#39;</span><span class="p">)</span>
+            <span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">,</span><span class="n">yscale</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_axis_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span><span class="s1">&#39;Yc&#39;</span><span class="p">)</span>
 
             <span class="c1"># set style dictionary values for X and Y</span>
             <span class="n">style</span><span class="p">[</span><span class="s1">&#39;XLim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">]</span>
@@ -1269,7 +1285,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">style</span><span class="p">[</span><span class="s1">&#39;ScaleLength&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">plot_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_plot_types</span><span class="p">):</span>
             <span class="n">style</span><span class="p">[</span><span class="s1">&#39;ScaleLength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_scale_length</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">column_attrributes</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">column_attrributes</span><span class="p">):</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field</span>
             <span class="n">style</span><span class="p">[</span><span class="s1">&#39;CLim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="s1">&#39;plot_min&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="s1">&#39;plot_max&#39;</span><span class="p">)]</span>
             <span class="n">style</span><span class="p">[</span><span class="s1">&#39;CLabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
@@ -1282,7 +1298,7 @@
 
 <div class="viewcode-block" id="StyleData.get_axis_values">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.get_axis_values">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_axis_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_axis_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets axis values</span>
 
 <span class="sd">        Returns the axis parameters *field_type* &gt; *field* for plotting, including the minimum and maximum vales,</span>
@@ -1322,7 +1338,7 @@
     <span class="c1"># color functions </span>
 <div class="viewcode-block" id="StyleData.color_norm">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.color_norm">[docs]</a>
-    <span class="k">def</span> <span class="nf">color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize colors for colormap</span>
 
 <span class="sd">        Parameters</span>
@@ -1358,7 +1374,7 @@
     
 <div class="viewcode-block" id="StyleData.get_colormap">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.get_colormap">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the color map</span>
 
 <span class="sd">        Gets the colormap from ``MainWindow.styles`` for the current plot type and reverses or sets as discrete in needed.</span>
@@ -1393,7 +1409,7 @@
 
 <div class="viewcode-block" id="StyleData.create_custom_colormap">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.create_custom_colormap">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_custom_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_custom_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates custom colormaps</span>
 
 <span class="sd">        Custom colormaps as found in ``resources/appdata/custom_colormaps.xlsx``.</span>
@@ -1422,15 +1438,15 @@
     <span class="c1"># -------------------------------------</span>
     <span class="c1"># Validation functions</span>
     <span class="c1"># -------------------------------------</span>
-    <span class="k">def</span> <span class="nf">_is_valid_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_valid_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates if a the variable has properties consistent with bounds.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">_is_valid_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_valid_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates if a the variable is a valid string.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">scale_options</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">scale_options</span>
     
-    <span class="k">def</span> <span class="nf">_is_valid_hex_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hex_color</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_valid_hex_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hex_color</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validates if a given string is a valid hex color code.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hex_color</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;#([A-Fa-f0-9]</span><span class="si">{6}</span><span class="s2">|[A-Fa-f0-9]</span><span class="si">{3}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">hex_color</span><span class="p">))</span>
@@ -1441,7 +1457,7 @@
     <span class="c1"># -------------------------------------</span>
 <div class="viewcode-block" id="StyleData.print_properties">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleData.print_properties">[docs]</a>
-    <span class="k">def</span> <span class="nf">print_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span></div>
 </div>
@@ -1450,17 +1466,17 @@
 
 <div class="viewcode-block" id="StyleTheme">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme">[docs]</a>
-<span class="k">class</span> <span class="nc">StyleTheme</span><span class="p">():</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StyleTheme</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Style&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">ui</span>
 
     <span class="c1"># Themes</span>
     <span class="c1"># -------------------------------------</span>
 <div class="viewcode-block" id="StyleTheme.load_theme_names">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme.load_theme_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_theme_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_theme_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads theme names and adds them to the theme comboBox</span>
 <span class="sd">        </span>
 <span class="sd">        Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to</span>
@@ -1482,7 +1498,7 @@
 
 <div class="viewcode-block" id="StyleTheme.read_theme">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme.read_theme">[docs]</a>
-    <span class="k">def</span> <span class="nf">read_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads a style theme</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -1502,7 +1518,7 @@
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASEDIR</span><span class="p">,</span><span class="sa">f</span><span class="s1">&#39;resources/styles/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">.sty&#39;</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
                 <span class="n">style_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span><span class="s1">&#39;Could not load style theme.&#39;</span><span class="p">)</span>
+            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span><span class="s1">&#39;Could not load style theme.&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">style_dict</span></div>
 
@@ -1510,7 +1526,7 @@
 
 <div class="viewcode-block" id="StyleTheme.input_theme_name_dlg">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme.input_theme_name_dlg">[docs]</a>
-    <span class="k">def</span> <span class="nf">input_theme_name_dlg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style_dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_theme_name_dlg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Opens a dialog to save style theme</span>
 <span class="sd">        </span>
 <span class="sd">        Style themes are saved as a dictionary into the theme name with a ``.sty`` extension</span>
@@ -1535,14 +1551,14 @@
             <span class="k">return</span> <span class="n">name</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># throw a warning that name is not saved</span>
-            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span><span class="s1">&#39;Could not save theme.&#39;</span><span class="p">)</span>
+            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span><span class="s1">&#39;Could not save theme.&#39;</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="StyleTheme.default_style_dict">
 <a class="viewcode-back" href="../../generated/app.StyleToolbox.html#app.StyleToolbox.StyleTheme.default_style_dict">[docs]</a>
-    <span class="k">def</span> <span class="nf">default_style_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_style_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a dictionary of default plot styles for various plot types.</span>
 

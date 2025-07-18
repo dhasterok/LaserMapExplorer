@@ -8,7 +8,7 @@ import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
 from src.app.config import BASEDIR
 import src.common.CustomMplCanvas as mplc
-from src.common.DataHandling import SampleObj
+from src.common.DataHandling import LaserSampleObj, XRFSampleObj
 from src.common.Status import StatusMessageManager
 from src.common.Logger import LoggerConfig, auto_log_methods
 # -------------------------------------
@@ -346,12 +346,13 @@ class LameIO():
 
             # load sample's *.lame file
             file_path = os.path.join(self.parent.app_data.selected_directory, self.parent.app_data.csv_files[index])
-            self.parent.data[self.parent.app_data.sample_id] = SampleObj(
-                sample_id = self.parent.app_data.sample_id,
-                file_path = file_path,
-                outlier_method = outlier_method,
-                negative_method =negative_method,
-                ref_chem = self.parent.app_data.ref_chem
+            self.parent.data[self.parent.app_data.sample_id] = LaserSampleObj(
+                sample_id=self.parent.app_data.sample_id,
+                file_path=file_path,
+                outlier_method=outlier_method,
+                negative_method=negative_method,
+                ref_chem=self.parent.app_data.ref_chem,
+                ui=self.parent,
             )
 
             # connect data observers if required

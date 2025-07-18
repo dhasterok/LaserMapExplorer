@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import (
     QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView,
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
-)
-from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
+) # type: ignore
+from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon ) 
 from src.common.CustomWidgets import CustomCheckButton
 from src.app.UITheme import UIThemes
 import numpy as np
@@ -394,11 +394,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.plot_style.update_field(ax=2))
         self.spinBoxFieldZ.valueChanged.connect(lambda: self.field_spinbox_changed(ax=2))
 
-        # N-Dim Tab
-        #-------------------------
-        # setup comboBoxNDIM
-        self.comboBoxNDimAnalyteSet.clear()
-        self.comboBoxNDimAnalyteSet.addItems(list(self.app_data.ndim_list_dict.keys()))
         
         self.comboBoxRefMaterial.addItems(self.app_data.ref_list.values)          # Select analyte Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
@@ -442,12 +437,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         new_list = []
 
         # check if the list should include all options, global_list == True
-        if ax == 3 and 'cfield_type' in plot_dict.keys():
+        if ax == 3 and 'cfield_type' in plot_dict:
             # set the list based on plot_style.plot_type and available field types
-            new_list = [key for key in field_dict.keys() if key in plot_dict['cfield_type']]
-        elif 'field_type' in plot_dict.keys():
+            new_list = [key for key in field_dict if key in plot_dict['cfield_type']]
+        elif 'field_type' in plot_dict:
             # set the list based on plot_style.plot_type and available field types
-            new_list = [key for key in field_dict.keys() if key in plot_dict['field_type']]
+            new_list = [key for key in field_dict if key in plot_dict['field_type']]
         else:
             new_list = list(field_dict.keys())
 
@@ -1040,7 +1035,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # precalculate custom fields
         if hasattr(self, "calculator") and self.calculator.precalculate_custom_fields:
-            for name in self.calc_dict.keys():
+            for name in self.calc_dict:
                 if name in self.data[self.app_data.sample_id].processed_data.columns:
                     continue
                 self.calculator.comboBoxFormula.setCurrentText(name)
@@ -1057,10 +1052,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.plot_style.plot_type != 'field map':
             self.plot_style.plot_type = 'field map'
 
-        if 'Analyte' in self.app_data.field_dict.keys():
+        if 'Analyte' in self.app_data.field_dict:
             self.app_data.c_field_type = 'Analyte'
             self.app_data.c_field = self.app_data.field_dict['Analyte'][0]
-        elif 'Ratio' in self.app_data.field_dict.keys():
+        elif 'Ratio' in self.app_data.field_dict:
             self.app_data.c_field_type = 'Ratio'
             self.app_data.c_field = self.app_data.field_dict['Ratio'][0]
         else:
@@ -1075,7 +1070,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_ui_on_sample_change(self):
         # reset all plot types on change of tab to the first option
-        for key in self.field_control_settings.keys():
+        for key in self.field_control_settings:
             self.field_control_settings[key]['saved_index'] = 0
 
         self.init_tabs(enable=True)
@@ -1541,7 +1536,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         self.canvas_widget.clear_layout(self.widgetHistView.layout())
                         self.widgetHistView.layout().addWidget(hist_canvas)
                     else:
-                        canvas, self.plot_info = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
+                        canvas, self.plot_info, _ = plot_map_mpl(self, data, self.app_data, self.plot_style, field_type, field, add_histogram=False)
                 self.mpl_canvas = canvas
                 self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)
                     # I think add_tree_item is done in add_plotwidget_to_canvas, so it doesn't need to be repeated here
@@ -1574,6 +1569,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     return
                 canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.plot_style)
 
+            case 'ternary map':
+                if self.comboBoxFieldX.currentText() == self.comboBoxFieldY.currentText() or \
+                    self.comboBoxFieldX.currentText() == self.comboBoxFieldZ.currentText() or \
+                    self.comboBoxFieldY.currentText() == self.comboBoxFieldZ.currentText():
+                    return
+
+                canvas, self.plot_info = plot_ternary_map(self, data, self.app_data, self.plot_style)
 
             case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
                 if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
@@ -1612,7 +1614,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'plot_tree'):
             self.plot_tree = PlotTree(self)
 
-            if not (self.plot_tree in self.help_mapping.keys()):
+            if self.plot_tree not in self.help_mapping:
                 self.help_mapping[self.plot_tree] = 'right_toolbox'
 
             self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.plot_tree)
@@ -1632,7 +1634,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'workflow'):
             self.workflow = Workflow(self)
 
-            if not (self.workflow in self.help_mapping.keys()):
+            if self.workflow not in self.help_mapping:
                 self.help_mapping[self.workflow] = 'workflow'
 
         self.workflow.show()
@@ -1670,7 +1672,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.toolButtonBottomDock))
 
-            if not (self.mask_dock in self.help_mapping.keys()):
+            if self.mask_dock not in self.help_mapping:
                 self.help_mapping[self.mask_dock] = 'filtering'
 
             self.mask_dock.filter_tab.callback_lineEditFMin()
@@ -1694,7 +1696,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'profile'):
             self.profile_dock = ProfileDock(self)
 
-            if not (self.profile_dock in self.help_mapping.keys()):
+            if self.profile_dock not in self.help_mapping:
                 self.help_mapping[self.profile_dock] = 'profiles'
 
         self.profile_dock.show()
@@ -1708,7 +1710,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'profile'):
             self.regression_dock = RegressionDock(self)
 
-            if not (self.regression_dock in self.help_mapping.keys()):
+            if self.regression_dock not in self.help_mapping:
                 self.help_mapping[self.regression_dock] = 'regression'
 
         self.regression_dock.show()
@@ -1734,7 +1736,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.notes.update_equation_menu()
 
-            if not (self.notes in self.help_mapping.keys()):
+            if self.notes not in self.help_mapping:
                 self.help_mapping[self.notes] = 'notes'
 
         self.notes.show()
@@ -1749,9 +1751,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'calculator'):
             calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
-            self.calculator = CalculatorDock(self, filename=calc_file)
+            self.calculator = CalculatorDock(ui=self, filename=calc_file)
 
-            if not (self.calculator in self.help_mapping.keys()):
+            if self.calculator not in self.help_mapping:
                 self.help_mapping[self.calculator] = 'calculator'
 
         self.calculator.show()
@@ -1777,10 +1779,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     case 'fields':
                         self.info_tab.update({'field': tid})
         
+            if self.info_dock not in self.help_mapping:
+                self.help_mapping[self.info_dock] = 'info_tool'
         else:
             self.info_dock.show()
 
-            self.help_mapping[self.info_dock] = 'info_tool'
 
     def open_logger(self):
         """Creates or shows Logger Dock
@@ -1792,12 +1795,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(self, 'logger_dock'):
             logfile = os.path.join(BASEDIR,f'resources/log/lame.log')
             self.logger_dock = LoggerDock(logfile, self)
-            for key in self.logger_options.keys():
+            for key in self.logger_options:
                 self.logger_options[key] = True
+
+            if self.logger_dock not in self.help_mapping:
+                self.help_mapping[self.logger_dock] = 'logging_tool'
         else:
             self.logger_dock.show()
 
-        self.help_mapping[self.logger_dock] = 'logger'
 
         #self.logger.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -1860,7 +1865,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         #update self.data['norm'] with selection
         for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
-            if analyte in list(analyte_dict.keys()):
+            if analyte in analyte_dict:
                 self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
             else:
                 self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)

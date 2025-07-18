@@ -1,3 +1,4 @@
+import re
 import numpy as np
 
 def oround(val, order=2, toward=None):
@@ -101,12 +102,16 @@ def symlog(x, linear_threshold=1.0):
     values, but can be used on negative and zero values as well as positive values,
     preserves symmetry about 0.
 
-    A symlog transformation is symlog(x) = sign(x) * log_{10}(1 + |x / a|), where a is the 
-    linear threshold, region where the transformation is approximately linear.
+    A symlog transformation is
+     
+    .. math::
+        \operatorname{symlog} (x) = \operatorname{sign} (x) \log_{10} (1 + |x|/\lambda),
+
+    where :math:`\lambda` is the linear threshold, region where the transformation is approximately linear.
 
     Parameters
     ----------
-    x : numpy.array
+    x : numpy.ndarray
         the array of values to transform
     linear_threshold : float, optional
         linear threshold, often chosen as the mean, median, or standard deviation of the data
@@ -114,20 +119,26 @@ def symlog(x, linear_threshold=1.0):
 
     Returns
     -------
-    numpy.array
-        _description_
+    numpy.ndarray
+        transformed values of x into symlog space
     """    
     x = np.asarray(x)
     return np.sign(x) * np.log10(1 + np.abs(x / linear_threshold))
 
-def invsymlog(y, linthresh=1.0):
-    """Inverse symlog transform back to linear space
+def inv_symlog(x, linthresh=1.0):
+    """Inverse symlog transform back to linear space.
 
-    Converts an array back to into linear space.
+    Converts a symlog array back to into linear space,
+
+    .. math::
+        \operatorname{symlog}^{-1}(x) = \operatorname{sign} (x) \lambda (10^{|x|} - 1)
+
+    where :math:`\lambda` is the linear threshold used to control the region near zero where the
+    data behave linearly.
 
     Parameters
     ----------
-    y : numpy.array
+    x : numpy.ndarray
         the array of values to transform
     linear_threshold : float, optional
         linear threshold, often chosen as the mean, median, or standard deviation of the data
@@ -135,9 +146,88 @@ def invsymlog(y, linthresh=1.0):
 
     Returns
     -------
-    numpy.array
-        
+    numpy.ndarray
+        transformed values of x back to linear space
     :see also: symlog
     """    
-    y = np.asarray(y)
-    return np.sign(y) * linthresh * (10**np.abs(y) - 1)
+    y = np.asarray(x)
+    return np.sign(x) * linthresh * (10**np.abs(x) - 1)
+
+def logit(x, eps=1e-8):
+    """Applies the logit (log-odds) transformation to a numpy array.
+
+    The logit function is defined as,
+
+    .. math::
+        \operatorname{logit}(x) = \log [x / (1 - x)]
+
+    Values of `x` must be in the open interval (0, 1). To avoid division by zero or
+    log of zero, values are clipped to [eps, 1 - eps].
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        Input array with values between 0 and 1.
+    eps : float, optional
+        Small value used to clip inputs away from 0 and 1 to prevent numerical issues.
+        Default is 1e-8.
+
+    Returns
+    -------
+    numpy.ndarray
+        Transformed array with log-odds values.
+
+    :see also: inv_logit
+    """
+    x = np.clip(x, eps, 1 - eps)
+    return np.log(x / (1 - x))
+
+
+def inv_logit(x):
+    """Applies the inverse logit (sigmoid) transformation to a numpy array.
+
+    The inverse logit transforms the data from normal space to sigmoid space and
+    is defined as,
+
+    .. math::
+        \operatorname{logit}^{-1}(x) = [1 / (1 + e^{-x})]
+
+    This maps real-valued inputs back to the (0, 1) interval.
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        Input array of real values.
+
+    Returns
+    -------
+    numpy.ndarray
+        Transformed array with values between 0 and 1.
+
+    :see also: logit
+    """
+    return 1 / (1 + np.exp(-x))
+
+def parse_isotope(field: str):
+    """Converts an isotope into a symbol and mass.
+
+    Separates an analyte field with a symbol-mass name to its separate parts.  For
+    example, 27Al returns `Al` (symbol), `27` (mass).
+
+    Parameters
+    ----------
+    field : str
+        Field name to separate into symbol and mass.
+
+    Returns
+    -------
+    symbol : str
+        Returns the element symbol.
+    mass : int
+        Returns the isotope mass.
+    """
+    match = re.match(r"([A-Za-z]+)(\d*)", field)
+    symbol = match.group(1) if match else field
+    mass = int(match.group(2)) if match and match.group(2) else None
+
+    return symbol, mass

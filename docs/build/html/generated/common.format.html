@@ -30,7 +30,7 @@
   <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
@@ -45,6 +45,8 @@
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
+    <script>window.MathJax = {"tex": {"packages": ["base", "ams"]}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/common.format';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -404,8 +406,14 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.format.dynamic_format" title="common.format.dynamic_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dynamic_format</span></code></a>(value[, threshold, order, toward])</p></td>
 <td><p>Prepares number for display as <em>str</em></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.format.invsymlog" title="common.format.invsymlog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">invsymlog</span></code></a>(y[, linthresh])</p></td>
-<td><p>Inverse symlog transform back to linear space</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.format.inv_logit" title="common.format.inv_logit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv_logit</span></code></a>(x)</p></td>
+<td><p>Applies the inverse logit (sigmoid) transformation to a numpy array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.format.inv_symlog" title="common.format.inv_symlog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv_symlog</span></code></a>(x[, linthresh])</p></td>
+<td><p>Inverse symlog transform back to linear space.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.format.logit" title="common.format.logit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logit</span></code></a>(x[, eps])</p></td>
+<td><p>Applies the logit (log-odds) transformation to a numpy array.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.format.oround" title="common.format.oround"><code class="xref py py-obj docutils literal notranslate"><span class="pre">oround</span></code></a>(val[, order, toward])</p></td>
 <td><p>Rounds a single of value to n digits</p></td>
@@ -413,7 +421,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#common.format.oround_matrix" title="common.format.oround_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">oround_matrix</span></code></a>(val[, order, toward])</p></td>
 <td><p>Rounds a matrix of values to n digits</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.format.symlog" title="common.format.symlog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">symlog</span></code></a>(x[, linear_threshold])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.format.parse_isotope" title="common.format.parse_isotope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_isotope</span></code></a>(field)</p></td>
+<td><p>Converts an isotope into a symbol and mass.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.format.symlog" title="common.format.symlog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">symlog</span></code></a>(x[, linear_threshold])</p></td>
 <td><p>Transforms data from linear to symlog space</p></td>
 </tr>
 </tbody>
@@ -443,22 +454,76 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="common.format.invsymlog">
-<span class="sig-prename descclassname"><span class="pre">common.format.</span></span><span class="sig-name descname"><span class="pre">invsymlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linthresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/format.html#invsymlog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.format.invsymlog" title="Link to this definition">#</a></dt>
-<dd><p>Inverse symlog transform back to linear space</p>
-<p>Converts an array back to into linear space.</p>
+<dt class="sig sig-object py" id="common.format.inv_logit">
+<span class="sig-prename descclassname"><span class="pre">common.format.</span></span><span class="sig-name descname"><span class="pre">inv_logit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/format.html#inv_logit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.format.inv_logit" title="Link to this definition">#</a></dt>
+<dd><p>Applies the inverse logit (sigmoid) transformation to a numpy array.</p>
+<p>The inverse logit transforms the data from normal space to sigmoid space and
+is defined as,</p>
+<div class="math notranslate nohighlight">
+\[\operatorname{logit}^{-1}(x) = [1 / (1 + e^{-x})]\]</div>
+<p>This maps real-valued inputs back to the (0, 1) interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – Input array of real values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – Transformed array with values between 0 and 1.</p></li>
+<li><p><em>see also: logit</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.format.inv_symlog">
+<span class="sig-prename descclassname"><span class="pre">common.format.</span></span><span class="sig-name descname"><span class="pre">inv_symlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linthresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/format.html#inv_symlog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.format.inv_symlog" title="Link to this definition">#</a></dt>
+<dd><p>Inverse symlog transform back to linear space.</p>
+<p>Converts a symlog array back to into linear space,</p>
+<div class="math notranslate nohighlight">
+\[\operatorname{symlog}^{-1}(x) = \operatorname{sign} (x) \lambda (10^{|x|} - 1)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is the linear threshold used to control the region near zero where the
+data behave linearly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>y</strong> (<em>numpy.array</em>) – the array of values to transform</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – the array of values to transform</p></li>
 <li><p><strong>linear_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – linear threshold, often chosen as the mean, median, or standard deviation of the data
 or simply, by default 1.0</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><em>numpy.array</em></p></li>
+<li><p><em>numpy.ndarray</em> – transformed values of x back to linear space</p></li>
 <li><p><em>see also: symlog</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.format.logit">
+<span class="sig-prename descclassname"><span class="pre">common.format.</span></span><span class="sig-name descname"><span class="pre">logit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/format.html#logit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.format.logit" title="Link to this definition">#</a></dt>
+<dd><p>Applies the logit (log-odds) transformation to a numpy array.</p>
+<p>The logit function is defined as,</p>
+<div class="math notranslate nohighlight">
+\[\operatorname{logit}(x) = \log [x / (1 - x)]\]</div>
+<p>Values of <cite>x</cite> must be in the open interval (0, 1). To avoid division by zero or
+log of zero, values are clipped to [eps, 1 - eps].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – Input array with values between 0 and 1.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Small value used to clip inputs away from 0 and 1 to prevent numerical issues.
+Default is 1e-8.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>numpy.ndarray</em> – Transformed array with log-odds values.</p></li>
+<li><p><em>see also: inv_logit</em></p></li>
 </ul>
 </p>
 </dd>
@@ -510,27 +575,49 @@ or simply, by default 1.0</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="common.format.parse_isotope">
+<span class="sig-prename descclassname"><span class="pre">common.format.</span></span><span class="sig-name descname"><span class="pre">parse_isotope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/format.html#parse_isotope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.format.parse_isotope" title="Link to this definition">#</a></dt>
+<dd><p>Converts an isotope into a symbol and mass.</p>
+<p>Separates an analyte field with a symbol-mass name to its separate parts.  For
+example, 27Al returns <cite>Al</cite> (symbol), <cite>27</cite> (mass).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Field name to separate into symbol and mass.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>symbol</strong> (<em>str</em>) – Returns the element symbol.</p></li>
+<li><p><strong>mass</strong> (<em>int</em>) – Returns the isotope mass.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="common.format.symlog">
 <span class="sig-prename descclassname"><span class="pre">common.format.</span></span><span class="sig-name descname"><span class="pre">symlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/format.html#symlog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.format.symlog" title="Link to this definition">#</a></dt>
 <dd><p>Transforms data from linear to symlog space</p>
 <p>The advantage of a symlog transformation is that produces a log-like distribution for most
 values, but can be used on negative and zero values as well as positive values,
 preserves symmetry about 0.</p>
-<p>A symlog transformation is symlog(x) = sign(x) * log_{10}(1 + <a href="#id1"><span class="problematic" id="id2">|x / a|</span></a>), where a is the
-linear threshold, region where the transformation is approximately linear.</p>
+<p>A symlog transformation is</p>
+<div class="math notranslate nohighlight">
+\[\operatorname{symlog} (x) = \operatorname{sign} (x) \log_{10} (1 + |x|/\lambda),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is the linear threshold, region where the transformation is approximately linear.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>numpy.array</em>) – the array of values to transform</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – the array of values to transform</p></li>
 <li><p><strong>linear_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – linear threshold, often chosen as the mean, median, or standard deviation of the data
 or simply, by default 1.0</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>_description_</p>
+<dd class="field-even"><p>transformed values of x into symlog space</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.array</p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -567,9 +654,12 @@ or simply, by default 1.0</p></li>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.dynamic_format"><code class="docutils literal notranslate"><span class="pre">dynamic_format()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.invsymlog"><code class="docutils literal notranslate"><span class="pre">invsymlog()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.inv_logit"><code class="docutils literal notranslate"><span class="pre">inv_logit()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.inv_symlog"><code class="docutils literal notranslate"><span class="pre">inv_symlog()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.logit"><code class="docutils literal notranslate"><span class="pre">logit()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.oround"><code class="docutils literal notranslate"><span class="pre">oround()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.oround_matrix"><code class="docutils literal notranslate"><span class="pre">oround_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.parse_isotope"><code class="docutils literal notranslate"><span class="pre">parse_isotope()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.format.symlog"><code class="docutils literal notranslate"><span class="pre">symlog()</span></code></a></li>
 </ul>
   </nav></div>

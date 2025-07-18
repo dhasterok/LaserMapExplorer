@@ -13,12 +13,13 @@ from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
-from src.common.format import symlog
+from src.common.format import symlog, inv_logit
 from src.common.Logger import LoggerConfig, auto_log_methods
+
 
 @auto_log_methods(logger_key='Data')
 class SampleObj(Observable):
-    """Creates a sample object to store and manipulate geochemical data in map form
+    """Creates a base sample object to store and manipulate geochemical data in map form
     
     The sample object is initially constructed from the data within a *.lame.csv file and loaded into
     the ``raw_data`` dataframe.  The sample object also contains a number of properties in addition
@@ -162,20 +163,21 @@ class SampleObj(Observable):
     'polygon_mask' : (MaskObj) -- mask created from selected polygons.
     'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
     'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
-    """    
-    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None):
+    """
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
         super().__init__()
+
+        self.ui = ui
 
         self.logger_key = 'Data'
 
         self.sample_id = sample_id
         self.file_path = file_path
-        self._current_field = None
-        
+
         self._outlier_method = outlier_method
         
         self._negative_method = negative_method
-        self._smoothhing_method = smoothing_method
+        self._smoothing_method = smoothing_method
         self._updating = False
 
         self._default_lower_bound = 0.005
@@ -189,33 +191,395 @@ class SampleObj(Observable):
         self._data_min_diff_quantile = 0.005
         self._data_max_diff_quantile = 0.005
 
-        self._ref_chem = ref_chem
-
         self._nx = 0
         self._ny = 0
         self._dx = 0
         self._dy = 0
 
-        self.polygon = {}
-        self.profile = {}
-
         # filter dataframe
-        self.filter_df = pd.DataFrame()
-        self.filter_df = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+        self.filter_df = pd.DataFrame(columns=[
+            'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'
+        ])
 
-        # axis dictionary for plotting
-        self.axis_dict = {}
+        # will be AttributeDataFrame once data is loaded into them
+        self.raw_data = None
+        self.processed_data = None
 
-        # data types stored in AttributeDataFrames.column_attributes['data_type']
-        self._valid_data_types = ['Analyte','Ratio','Computed','Special','PCA score','Cluster','Cluster score']
+        self._outlier_method_options = [
+            'none',
+            'quantile criteria',
+            'quantile and distance criteria',
+            'Chauvenet criterion',
+            'log(n>x) inflection'
+        ]
 
         # matrix order set by x-y sorting, which changes when swapping axes
         self.is_swapped = False
+
+        # data types stored in AttributeDataFrames.column_attributes['data_type']
+        self._default_data_types = [
+            'Analyte',
+            'Ratio',
+            'Computed',
+            'Special',
+            'PCA score',
+            'Cluster',
+            'Cluster score'
+        ]
+        self._valid_data_types = self._default_data_types
+
+        self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
+        self._scale_options = self._default_scale_options
+
         self.order = 'F'
 
-        self.spotdata = AttributeDataFrame()
 
-        self.reset_data()
+    # --------------------------------------
+    # Define properties and setter functions
+    # --------------------------------------
+    # note properties are based on the cropped X and Y values
+    @property
+    def x(self):
+        """numpy.ndarray : Value of x-coordinate associated with map data"""
+        return self._x
+
+    @x.setter
+    def x(self, new_x):
+        if not self._updating:
+            self._updating = True
+            self._x = new_x
+            self._dx = self.x_range / new_x.nunique()
+            self._nx = new_x.nunique()
+            self._updating = False
+
+    # Define the y property
+    @property
+    def y(self):
+        """numpy.ndarray : Value of y-coordinate associated with map data"""
+        return self._y
+
+    @y.setter
+    def y(self, new_y):
+        if not self._updating:
+            self._updating = True
+            self._y = new_y
+            self._dy = self.y_range / new_y.nunique() 
+            self._ny = new_y.nunique()
+            self._updating = False
+
+    @property
+    def dx(self):
+        """float : Width of pixels in x-direction."""
+        return self._dx
+
+    @dx.setter
+    def dx(self, new_dx):
+        if not self._updating:
+            self._updating = True
+
+            # Recalculates X for self.raw_data
+            # (does not use self.processed_data because the x limits will otherwise be incorrect)
+            # X = round(self.raw_data['Xc']/self._dx)
+            X = self.raw_data['Xc']/self._dx
+            self._dx = new_dx
+            X_new = new_dx*X
+
+            # Extract cropped region and update self.processed_data
+            self._x = X_new[self.crop_mask]
+            self.processed_data['Xc'] = self._x
+            
+            self._updating = False
+
+            self.notify_observers("dx", self._dx)
+        
+    @property
+    def dy(self):
+        """float : Width of pixels in y-direction."""
+        return self._dy
+
+    @dy.setter
+    def dy(self, new_dy):
+        if not self._updating:
+            self._updating = True
+
+            # Recalculates Y for self.raw_data
+            # (does not use self.processed_data because the y limits will otherwise be incorrect)
+            Y = self.raw_data['Y']/self._dy
+            self._dy = new_dy
+            Y_new = new_dy*Y
+
+            # Extract cropped region and update self.processed_data
+            self._y = Y_new[self.crop_mask]
+            self.processed_data['Y'] = self._y
+            
+            self._updating = False
+
+            self.notify_observers("dy", self._dy)
+        
+    @property
+    def nx(self):
+        return self._nx
+    
+    @nx.setter
+    def nx(self, new_nx):
+        if new_nx == self._nx:
+            return
+
+        self._nx = new_nx
+        self.notify_observers("nx", self._nx)
+
+    @property
+    def ny(self):
+        return self._ny
+    
+    @ny.setter
+    def ny(self, new_ny):
+        if new_ny == self._ny:
+            return
+
+        self._ny = new_ny
+        self.notify_observers("ny", self._ny)   
+
+    # Cropped X-axis limits
+    @property
+    def xlim(self):
+        """list : (float, float) Limits of pixels in x-direction."""
+        return (self._x.min(), self._x.max()) if self._x is not None else (None, None)
+
+    # Cropped Y-axis limits
+    @property
+    def ylim(self):
+        """list : (float, float) Limits of pixels in y-direction."""
+        return (self._y.min(), self._y.max()) if self._y is not None else (None, None)
+
+    @property
+    def x_range(self):
+        """float : Range of pixels in x-direction."""
+        return self._x.max() - self._x.min() if self._x is not None else None
+
+    @property
+    def y_range(self):
+        """float : Range of pixels in y-direction."""
+        return self._y.max() - self._y.min() if self._y is not None else None
+    
+    @property
+    def aspect_ratio(self):
+        """float : Aspect ratio of maps (dy / dx)."""
+        if self._dx and self._dy:
+            return self._dy / self._dx
+        return None
+
+    @property
+    def array_size(self):
+        """tuple : (int, int) Size of map in pixels"""
+        return (self._y.nunique(), self._x.nunique())
+
+    @property
+    def apply_outlier_to_all(self):
+        """bool : flag that indicates whether the outlier method should be applied to all analytes."""
+        return self._apply_outlier_to_all
+    
+    @apply_outlier_to_all.setter
+    def apply_outlier_to_all(self, new_apply_outlier_to_all):
+        if new_apply_outlier_to_all == self._apply_outlier_to_all:
+            return
+    
+        self._apply_outlier_to_all = new_apply_outlier_to_all
+        self.notify_observers("apply_outlier_to_all", new_apply_outlier_to_all)
+
+    @property
+    def auto_scale_value(self):
+        return self._auto_scale_value
+    
+    @auto_scale_value.setter
+    def auto_scale_value(self, new_auto_scale_value):
+        if new_auto_scale_value == self._auto_scale_value:
+            return
+        self._auto_scale_value = new_auto_scale_value
+        self.prep_data()
+        self.notify_observers("auto_scale_value", new_auto_scale_value)
+
+
+    @property
+    def outlier_method(self):
+        """str : Method for predicting and clipping outliers."""        
+        return self._outlier_method
+
+    @outlier_method.setter
+    def outlier_method(self, method):
+        if method == self._outlier_method:
+            return
+        self._outlier_method = method
+        self.prep_data()
+        self.notify_observers("outlier_method", method)
+
+    @property
+    def negative_method(self):
+        """str : Method for negative handling."""        
+        return self._negative_method
+ 
+    @negative_method.setter
+    def negative_method(self, method):
+        if method == self._negative_method:
+            return
+        self._negative_method = method
+        self.prep_data()
+        self.notify_observers("negative_method", method)
+
+    @property
+    def data_min_quantile(self):
+        """float : minimum quantile used for autoscaling."""
+        return self._data_min_quantile
+    
+    @data_min_quantile.setter
+    def data_min_quantile(self, new_data_min_quantile):
+        if new_data_min_quantile == self._data_min_quantile:
+            return
+    
+        self._data_min_quantile = new_data_min_quantile
+        self.notify_observers("data_min_quantile", new_data_min_quantile)
+
+    @property
+    def data_max_quantile(self):
+        """float : maximum quantile used for autoscaling."""
+        return self._data_max_quantile
+    
+    @data_max_quantile.setter
+    def data_max_quantile(self, new_data_max_quantile):
+        if new_data_max_quantile == self._data_max_quantile:
+            return
+    
+        self._data_max_quantile = new_data_max_quantile
+        self.notify_observers("data_max_quantile", new_data_max_quantile)
+
+    @property
+    def data_min_diff_quantile(self):
+        """float : minimum quantile for differences used for autoscaling."""
+        return self._data_min_diff_quantile
+    
+    @data_min_diff_quantile.setter
+    def data_min_diff_quantile(self, new_data_min_diff_quantile):
+        if new_data_min_diff_quantile == self._data_min_diff_quantile:
+            return
+    
+        self._data_min_diff_quantile = new_data_min_diff_quantile
+        self.notify_observers("data_min_diff_quantile", new_data_min_diff_quantile)
+
+    @property
+    def data_max_diff_quantile(self):
+        """float : maximum quantile for differences used for autoscaling."""
+        return self._data_max_diff_quantile
+    
+    @data_max_diff_quantile.setter
+    def data_max_diff_quantile(self, new_data_max_diff_quantile):
+        if new_data_max_diff_quantile == self._data_max_diff_quantile:
+            return
+    
+        self._data_max_diff_quantile = new_data_max_diff_quantile
+        self.notify_observers("data_max_diff_quantile", new_data_max_diff_quantile)
+
+    @property
+    def crop_mask(self):
+        """numpy.ndarray: Boolean mask used to crop the raw data. True values will be used."""
+        return self._crop_mask
+    
+    @crop_mask.setter
+    def crop_mask(self, new_xlim, new_ylim):
+        self.crop=True
+
+        self._crop_mask = (
+            (self.raw_data['Xc'] >= new_xlim[0]) & 
+            (self.raw_data['Xc'] <= new_xlim[1]) &
+            (self.raw_data['Yc'] <= self.raw_data['Yc'].max() - new_ylim[0]) &
+            (self.raw_data['Yc'] >= self.raw_data['Yc'].max() - new_ylim[1])
+        )
+
+        #crop clipped_analyte_data based on self.crop_mask
+        self.raw_data[self.crop_mask].reset_index(drop=True)
+        self.processed_data = self.processed_data[self.crop_mask].reset_index(drop=True)
+
+        self.x = self.processed_data['Xc']
+        self.y = self.processed_data['Yc']
+
+        self._crop_mask = np.ones_like(self.raw_data['Xc'], dtype=bool)
+
+        self.prep_data()
+
+    @property
+    def scale_options(self):
+        """list : options for scaling the data."""
+        return self._scale_options
+
+    @scale_options.setter
+    def scale_options(self, new_list):
+        if set(new_list).issubset(self._default_scale_options):
+            self._scale_options = new_list
+        else:
+            raise ValueError("List (new_list) is not a subset of self._default_scale_options.")
+
+    @property
+    def valid_data_types(self):
+        """list : data types possible for in processed_data."""
+        return self._valid_data_types
+
+    @valid_data_types.setter
+    def valid_data_types(self, new_list):
+        if set(new_list).issubset(self._default_data_types):
+            self._valid_data_types = new_list
+        else:
+            raise ValueError("List (new_list) is not a subset of self._default_data_types.")
+
+    @property
+    def current_field(self):
+        """str : """
+        return self._current_field
+    
+    @current_field.setter
+    def current_field(self, new_field):
+        if new_field == self._current_field:
+            return
+
+        self._current_field = new_field
+        if not hasattr(self,"processed_data"):
+            return
+
+        if new_field is None:
+            # if new_field is None, use first analyte field
+            field = self.processed_data.match_attribute('data_type','Analyte')[0]
+
+            self.negative_method = self.processed_data.get_attribute(field, 'negative_method')
+            self.outlier_method = self.processed_data.get_attribute(field, 'outlier_method')
+            self.smoothing_method = self.processed_data.get_attribute(field, 'smoothing_method')
+            self.data_min_quantile = self.processed_data.get_attribute(field,'lower_bound')
+            self.data_max_quantile = self.processed_data.get_attribute(field,'upper_bound')
+            self.data_min_diff_quantile = self.processed_data.get_attribute(field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed_data.get_attribute(field,'diff_upper_bound')
+        else:
+            # use new_field
+            self.negative_method = self.processed_data.get_attribute(new_field, 'negative_method')
+            self.outlier_method = self.processed_data.get_attribute(new_field, 'outlier_method')
+            self.smoothing_method = self.processed_data.get_attribute(new_field, 'smoothing_method')
+            self.data_min_quantile = self.processed_data.get_attribute(new_field,'lower_bound')
+            self.data_max_quantile = self.processed_data.get_attribute(new_field,'upper_bound')
+            self.data_min_diff_quantile = self.processed_data.get_attribute(new_field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed_data.get_attribute(new_field,'diff_upper_bound')
+
+        self.notify_observers("apply_process_to_all_data", self._current_field)
+
+    # validation functions
+    def _is_valid_oulier_method(self, text):
+        """Validates if a the method is a valid string.
+
+        Valid outlier methods include: `'none'`, `'quantile criteria'`, 
+        `'quantile and distance criteria'`, `'chauvenet criterion'`, `'log(n>x) inflection'`.
+
+        
+        Parameters
+        ----------
+        text : str
+            Ensures the method is a valid oulier method.
+        """
+        return isinstance(text, str) and text.lower() in self._outlier_method_options
 
     def reset_data(self):
         """Reverts back to the original data.
@@ -293,10 +657,9 @@ class SampleObj(Observable):
         self.reset_data_handling()
 
     def reset_data_handling(self):
-        """
-
-        _extended_summary_
-        """        
+        """Resets processed_data back to raw before performing autoscaling.
+        
+        Any computed fields will be removed."""
         coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
         self.raw_data.set_attribute(coordinate_columns, 'units', None)
         self.raw_data.set_attribute(coordinate_columns, 'use', False)
@@ -342,351 +705,155 @@ class SampleObj(Observable):
     #             df = df[self.crop_mask].reset_index(drop=True)
     #     self.prep_data()
 
-    # --------------------------------------
-    # Define properties and setter functions
-    # --------------------------------------
-    # note properties are based on the cropped X and Y values
-    
-    @property
-    def ref_chem(self):
-        """dict: Reference chemistry"""
-        return self._ref_chem
+    def reset_resolution(self):
+        """Resets dx and dy to initial values."""        
+        self.dx = self._orig_dx
+        self.dy = self._orig_dy
+        self.update_aspect_ratio_controls()
 
-    @ref_chem.setter
-    def ref_chem(self, d):
-        self._ref_chem = d
+    def swap_xy(self):
+        """Swaps data in a SampleObj."""        
+        self.is_swapped = not self.is_swapped
 
-    @property
-    def x(self):
-        """numpy.ndarray: Value of x-coordinate associated with map data"""
-        return self._x
-
-    @x.setter
-    def x(self, new_x):
-        if not self._updating:
-            self._updating = True
-            self._x = new_x
-            self._dx = self.x_range / new_x.nunique()
-            self._nx = new_x.nunique()
-            self._updating = False
-
-    # Define the y property
-    @property
-    def y(self):
-        """numpy.ndarray: Value of y-coordinate associated with map data"""
-        return self._y
-
-    @y.setter
-    def y(self, new_y):
-        if not self._updating:
-            self._updating = True
-            self._y = new_y
-            self._dy = self.y_range / new_y.nunique() 
-            self._ny = new_y.nunique()
-            self._updating = False
-
-    @property
-    def dx(self):
-        """float: Width of pixels in x-direction."""
-        return self._dx
-
-    @dx.setter
-    def dx(self, new_dx):
-        if not self._updating:
-            self._updating = True
-
-            # Recalculates X for self.raw_data
-            # (does not use self.processed_data because the x limits will otherwise be incorrect)
-            # X = round(self.raw_data['Xc']/self._dx)
-            X = self.raw_data['Xc']/self._dx
-            self._dx = new_dx
-            X_new = new_dx*X
-
-            # Extract cropped region and update self.processed_data
-            self._x = X_new[self.crop_mask]
-            self.processed_data['Xc'] = self._x
-            
-            self._updating = False
-
-            self.notify_observers("dx", self._dx)
-        
-            
-
-    @property
-    def dy(self):
-        """float: Width of pixels in y-direction."""
-        return self._dy
-
-    @dy.setter
-    def dy(self, new_dy):
-        if not self._updating:
-            self._updating = True
-
-            # Recalculates Y for self.raw_data
-            # (does not use self.processed_data because the y limits will otherwise be incorrect)
-            Y = self.raw_data['Y']/self._dy
-            self._dy = new_dy
-            Y_new = new_dy*Y
-
-            # Extract cropped region and update self.processed_data
-            self._y = Y_new[self.crop_mask]
-            self.processed_data['Y'] = self._y
-            
-            self._updating = False
-
-            self.notify_observers("dy", self._dy)
-        
-
-    @property
-    def nx(self):
-        return self._nx
-    
-    @nx.setter
-    def nx(self, new_nx):
-        if new_nx == self._nx:
-            return
-
-        self._nx = new_nx
-        self.notify_observers("nx", self._nx)
-        
-
-    @property
-    def ny(self):
-        return self._ny
-    
-    @ny.setter
-    def ny(self, new_ny):
-        if new_ny == self._ny:
-            return
-
-        self._ny = new_ny
-        self.notify_observers("ny", self._ny)   
-        
-            
-
-    # Cropped X-axis limits
-    @property
-    def xlim(self):
-        """list: (float, float) Limits of pixels in x-direction."""
-        return (self._x.min(), self._x.max()) if self._x is not None else (None, None)
-
-    # Cropped Y-axis limits
-    @property
-    def ylim(self):
-        """list: (float, float) Limits of pixels in y-direction."""
-        return (self._y.min(), self._y.max()) if self._y is not None else (None, None)
-
-    @property
-    def x_range(self):
-        """float: Range of pixels in x-direction."""
-        return self._x.max() - self._x.min() if self._x is not None else None
-
-    @property
-    def y_range(self):
-        """float: Range of pixels in y-direction."""
-        return self._y.max() - self._y.min() if self._y is not None else None
-    
-    @property
-    def aspect_ratio(self):
-        """float: Aspect ratio of maps (dy / dx)."""
-        if self._dx and self._dy:
-            return self._dy / self._dx
-        return None
-
-    @property
-    def array_size(self):
-        """tuple: (int, int) Size of map in pixels"""
-        return (self._y.nunique(), self._x.nunique())
-
-    @property
-    def apply_outlier_to_all(self):
-        return self._apply_outlier_to_all
-    
-    @apply_outlier_to_all.setter
-    def apply_outlier_to_all(self, new_apply_outlier_to_all):
-        if new_apply_outlier_to_all == self._apply_outlier_to_all:
-            return
-    
-        self._apply_outlier_to_all = new_apply_outlier_to_all
-        self.notify_observers("apply_outlier_to_all", new_apply_outlier_to_all)
-
-    @property
-    def auto_scale_value(self):
-        return self._auto_scale_value
-    
-    @auto_scale_value.setter
-    def auto_scale_value(self, new_auto_scale_value):
-        if new_auto_scale_value == self._auto_scale_value:
-            return
-        self._auto_scale_value = new_auto_scale_value
-        self.prep_data()
-        self.notify_observers("auto_scale_value", new_auto_scale_value)
-
-
-    @property
-    def outlier_method(self):
-        """str: Method for predicting and clipping outliers."""        
-        return self._outlier_method
-
-    @outlier_method.setter
-    def outlier_method(self, method):
-        if method == self._outlier_method:
-            return
-        self._outlier_method = method
-        self.prep_data()
-        self.notify_observers("outlier_method", method)
-
-    @property
-    def negative_method(self):
-        """str: Method for negative handling."""        
-        return self._negative_method
- 
-    @negative_method.setter
-    def negative_method(self, method):
-        if method == self._negative_method:
-            return
-        self._negative_method = method
-        self.prep_data()
-        self.notify_observers("negative_method", method)
-
-    @property
-    def data_min_quantile(self):
-        return self._data_min_quantile
-    
-    @data_min_quantile.setter
-    def data_min_quantile(self, new_data_min_quantile):
-        if new_data_min_quantile == self._data_min_quantile:
-            return
-    
-        self._data_min_quantile = new_data_min_quantile
-        self.notify_observers("data_min_quantile", new_data_min_quantile)
-
-    @property
-    def data_max_quantile(self):
-        return self._data_max_quantile
-    
-    @data_max_quantile.setter
-    def data_max_quantile(self, new_data_max_quantile):
-        if new_data_max_quantile == self._data_max_quantile:
-            return
-    
-        self._data_max_quantile = new_data_max_quantile
-        self.notify_observers("data_max_quantile", new_data_max_quantile)
-
-    @property
-    def data_min_diff_quantile(self):
-        return self._data_min_diff_quantile
-    
-    @data_min_diff_quantile.setter
-    def data_min_diff_quantile(self, new_data_min_diff_quantile):
-        if new_data_min_diff_quantile == self._data_min_diff_quantile:
-            return
-    
-        self._data_min_diff_quantile = new_data_min_diff_quantile
-        self.notify_observers("data_min_diff_quantile", new_data_min_diff_quantile)
-
-    @property
-    def data_max_diff_quantile(self):
-        return self._data_max_diff_quantile
-    
-    @data_max_diff_quantile.setter
-    def data_max_diff_quantile(self, new_data_max_diff_quantile):
-        if new_data_max_diff_quantile == self._data_max_diff_quantile:
-            return
-    
-        self._data_max_diff_quantile = new_data_max_diff_quantile
-        self.notify_observers("data_max_diff_quantile", new_data_max_diff_quantile)
-
-    @property
-    def crop_mask(self):
-        """numpy.ndarray: Boolean mask used to crop the raw data. True values will be used."""
-        return self._crop_mask
-    
-    @crop_mask.setter
-    def crop_mask(self, new_xlim, new_ylim):
-        self.crop=True
-
-        self._crop_mask = (
-            (self.raw_data['Xc'] >= new_xlim[0]) & 
-            (self.raw_data['Xc'] <= new_xlim[1]) &
-            (self.raw_data['Yc'] <= self.raw_data['Yc'].max() - new_ylim[0]) &
-            (self.raw_data['Yc'] >= self.raw_data['Yc'].max() - new_ylim[1])
-        )
-
-        #crop clipped_analyte_data based on self.crop_mask
-        self.raw_data[self.crop_mask].reset_index(drop=True)
-        self.processed_data = self.processed_data[self.crop_mask].reset_index(drop=True)
-
-        self.x = self.processed_data['Xc']
-        self.y = self.processed_data['Yc']
-
-        self._crop_mask = np.ones_like(self.raw_data['Xc'], dtype=bool)
-
-        self.prep_data()
-
-
-    @property
-    def current_field(self):
-        return self._current_field
-    
-    @current_field.setter
-    def current_field(self, new_field):
-        if new_field == self._current_field:
-            return
-
-        self._current_field = new_field
-        if not hasattr(self,"processed_data"):
-            return
-
-        if new_field is None:
-            # if new_field is None, use first analyte field
-            field = self.processed_data.match_attribute('data_type','Analyte')[0]
-
-            self.negative_method = self.processed_data.get_attribute(field, 'negative_method')
-            self.outlier_method = self.processed_data.get_attribute(field, 'outlier_method')
-            self.smoothing_method = self.processed_data.get_attribute(field, 'smoothing_method')
-            self.data_min_quantile = self.processed_data.get_attribute(field,'lower_bound')
-            self.data_max_quantile = self.processed_data.get_attribute(field,'upper_bound')
-            self.data_min_diff_quantile = self.processed_data.get_attribute(field,'diff_lower_bound')
-            self.data_max_diff_quantile = self.processed_data.get_attribute(field,'diff_upper_bound')
+        if self.is_swapped:
+            self.order = 'C'
         else:
-            # use new_field
-            self.negative_method = self.processed_data.get_attribute(new_field, 'negative_method')
-            self.outlier_method = self.processed_data.get_attribute(new_field, 'outlier_method')
-            self.smoothing_method = self.processed_data.get_attribute(new_field, 'smoothing_method')
-            self.data_min_quantile = self.processed_data.get_attribute(new_field,'lower_bound')
-            self.data_max_quantile = self.processed_data.get_attribute(new_field,'upper_bound')
-            self.data_min_diff_quantile = self.processed_data.get_attribute(new_field,'diff_lower_bound')
-            self.data_max_diff_quantile = self.processed_data.get_attribute(new_field,'diff_upper_bound')
+            self.order = 'F'
 
-        self.notify_observers("apply_process_to_all_data", self._current_field)
+        self._swap_xy(self.raw_data)
+        self._swap_xy(self.processed_data)
 
-    # validation functions
-    def _is_valid_oulier_method(self, text):
-        """Validates if a the method is a valid string."""
-        return isinstance(text, str) and text.lower() in ['none', 'quantile criteria', 'quantile and distance criteria', 'chauvenet criterion', 'log(n>x) inflection']
+        self.x = self.raw_data['Xc']
+        self.y = self.raw_data['Yc']
 
-    def parse_field(self,field):
-        """Converts a field to symbol and mass.
+        # swap orientation of original dx and dy to be consistent with X and Y
+        self._orig_dx, self._orig_dy = self._orig_dy, self._orig_dx
 
-        Separates an analyte field with a element symbol-mass name to its separate parts.
+    def _swap_xy(self, df):
+        """Swaps X and Y of a dataframe
+
+        Swaps coordinates for all maps in sample dataframe.
 
         Parameters
         ----------
-        field : str
-            Field name to separate into symbol and mass.
+        df : pandas.DataFrame
+            data frame to swap X and Y coordinates
+        """
+        xtemp = df['Yc']
+        df['Yc'] = df['Xc']
+        df['Xc'] = xtemp
+
+        df = df.sort_values(['Yc','Xc'])
+
+    def update_resolution(self, axis, value):
+        """Updates DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe when the user changes the value of
+        pixel dimensions Dx or Dy
+
+        Parameter
+        ---------
+        axis : str
+            Indicates axis to update resolution, 'x' or 'y'.
+        value: float
+            Holds the new value that is used to update.
+        """
+        # update resolution based on user change
+        if axis == 'x':
+            self.dx = value
+            dx = self.dx
+        elif axis == 'y':
+            self.dy = value
+            dy = self.dy
+
+    def swap_resolution(self):
+        """Swaps DX and DY for a dataframe, updates X and Y
+
+        Recalculates X and Y for a dataframe
+        """  
+        X = round(self.raw_data['Xc']/self.dx)
+        Y = round(self.raw_data['Yc']/self.dy)
+
+        Xp = round(self.processed_data['Xc']/self.dx)
+        Yp = round(self.processed_data['Yc']/self.dy)
+
+        dx = self.dx
+        self.dx = self.dy
+        self.dy = dx
+
+        self.raw_data['Xc'] = self.dx*X
+        self.raw_data['Yc'] = self.dy*Y
+
+        self.processed_data['Xc'] = self.dx*Xp
+        self.processed_data['Yc'] = self.dy*Yp
+
+    def reset_crop(self):
+        """Reset the data to the original bounds.
+
+        Reseting the data to the original bounds results in deleting progress on analyses,
+        computations, etc.
+        """
+        # bring up dialog asking if user wishes to proceed
+        if not self.confirm_reset():
+            return
+
+        # Need to update to keep computed columns?
+        self.reset_data()
+
+    def compute_ratio(self, analyte_1, analyte_2):
+        """Compute a ratio field from two analytes.
+
+        Ratios are computed on the processed_data, after negative handling, but before autoscaling.
+
+        Parameters
+        ----------
+        analyte_1 : str
+            Analyte field to be used as numerator of ratio.
+        analyte_2 : str
+            Analyte field to be used as denominator of ratio.
+        """
+        # Create a mask where both analytes are positive
+        mask = (self.processed_data[analyte_1] > 0) & (self.processed_data[analyte_2] > 0)
+
+        # Calculate the ratio and set invalid values to NaN
+        ratio_array = np.where(mask, self.processed_data[analyte_1] / self.processed_data[analyte_2], np.nan)
+
+        # Generate the ratio column name
+        ratio_name = f'{analyte_1} / {analyte_2}'
+
+        self.add_columns('Ratio',ratio_name,ratio_array)
+        self.processed_data.set_attribute(ratio_name, 'use', True)
+
+    # ------------------------------------------
+    # Dialogs
+    # ------------------------------------------
+    def confirm_reset(self):
+        """A simple dialog that ensures the user wishes to reset data
 
         Returns
         -------
-        str, int
-            Returns the element symbol and mass.
-        """
-        match = re.match(r"([A-Za-z]+)(\d*)", field)
-        symbol = match.group(1) if match else field
-        mass = int(match.group(2)) if match.group(2) else None
+        bool
+            ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
+        """        
+        # Create a message box
+        msgBox = QMessageBox.warning(self.ui,
+            "Confirm Reset", 
+            "Resetting to the full map will delete all analyses, computed fields, and reset filters.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
 
-        return symbol, mass
+        # Show the message box and get the user's response
+        response = msgBox.exec()
 
+        # Check the user's response
+        if response == QMessageBox.StandardButton.No:
+            return False  # User chose not to proceed
+        return True  # User chose to proceed
+
+    # ------------------------------------------
+    # Methods related to the AttributeDataFrames
+    # ------------------------------------------
+    # note properties are based on the cropped X and Y values
     def add_columns(self, data_type, column_names, array, mask=None):
         """
         Add one or more columns to the sample object.
@@ -808,21 +975,108 @@ class SampleObj(Observable):
 
         return result
 
-    def create_label(self, column_name):
-        """Creates a default label for plotting
-
-        Creates a default label for plotting 
+    def delete_column(self, column_name):
+        """Deletes a column and associated attributes from the AttributeDataFrame.
 
         Parameters
         ----------
-        column_name : _type_
-            _description_
+        column_name : str
+            Name of column to remove.
+
+        Raises
+        ------
+        ValueError
+            Raises an error if the column is not a member of the AttributeDataFrame.
+        """        
+        # Check if the column exists
+        if column_name not in self.processed_data.columns:
+            raise ValueError(f"Column {column_name} does not exist in the DataFrame.")
+        
+        # Remove the column from the DataFrame
+        self.processed_data.drop(columns=[column_name], inplace=True)
+        
+        # Remove associated attributes, if any
+        if column_name in self.processed_data.column_attributes:
+            del self.processed_data.column_attributes[column_name]
+
+
+    def apply_field_filters(self):
+        """Applies filters based on field values.
+        
+        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
+        """        
+        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
+        if self.filter_df.empty:
+            self.filter_mask = np.ones_like(self.processed_data['Xc'].values, dtype=bool)
+            return
+
+        # by creating a mask based on min and max of the corresponding filter analytes
+        for index, filter_row in self.filter_df.iterrows():
+            if filter_row['use']:
+                field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+                
+                operator = filter_row['operator']
+                if operator == 'and':
+                    self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                elif operator == 'or':
+                    self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+
+    
+    def sort_data(self, method):
+        """
+        Sorts analyte columns in the raw and processed data according to the specified method.
+
+        This method retrieves a list of analytes from the `processed_data` DataFrame
+        and reorders the columns in both `raw_data` and `processed_data` based on the
+        sorting strategy provided. The sorting is performed using an external function
+        `sort_analytes`, which takes the user-defined `method` and the analyte list as inputs.
+
+        Parameters
+        ----------
+        method : str
+            Sorting method selected by the user. This is passed to `sort_analytes` and
+            determines the order in which analytes are arranged (e.g., alphabetical, PCA loadings,
+            cluster association, etc.).
+
+        Returns
+        -------
+        analyte_list : list
+            the original list of analytes found in `processed_data`.
+        sorted_analyte_list : list
+            the list of analytes sorted according to the provided method.
+        """ 
+        # retrieve analyte_list
+        analyte_list = self.processed_data.match_attribute('data_type','Analyte')
+
+        # sort analyte sort based on method chosen by user
+        sorted_analyte_list = sort_analytes(method, analyte_list)
+
+        # Check if the current order already matches the desired sorted order
+        if analyte_list == sorted_analyte_list:
+            return analyte_list, sorted_analyte_list  # No sorting needed
+
+        # Reorder the columns of the DataFrame based on self.analyte_list
+        self.raw_data.sort_columns(sorted_analyte_list)
+        if hasattr(self, "processed_data"):
+            self.processed_data.sort_columns(sorted_analyte_list)
+
+        return analyte_list, sorted_analyte_list
+
+    def create_label(self, column_name):
+        """Creates a default label for axes.
+
+        Creates a default label for axes on plots, using the column name in processed_data.
+
+        Parameters
+        ----------
+        column_name : str
+            Column in processed_data.
         """        
         data_type = self.processed_data.get_attribute(column_name,'data_type') 
         label = None
         match data_type:
             case 'Analyte' | 'Analyte (normalized)': 
-                symbol, mass = self.parse_field(column_name)
+                symbol, mass = fmt.parse_isotope(column_name)
                 if mass:
                     label = f"$^{{{mass}}}${symbol}"
                 else:
@@ -836,8 +1090,8 @@ class SampleObj(Observable):
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
                 field_2 = field.split(' / ')[1]
-                symbol_1, mass_1 = self.parse_field(field_1)
-                symbol_2, mass_2 = self.parse_field(field_2)
+                symbol_1, mass_1 = fmt.parse_isotope(field_1)
+                symbol_2, mass_2 = fmt.parse_isotope(field_2)
 
                 # numerator
                 label_1 = ''
@@ -865,151 +1119,6 @@ class SampleObj(Observable):
                     label = f"{column_name} ({unit})"
 
         return label
-
-
-    def delete_column(self, column_name):
-        """Deletes a column and associated attributes from the AttributeDataFrame.
-
-        Parameters
-        ----------
-        column_name : str
-            Name of column to remove.
-
-        Raises
-        ------
-        ValueError
-            Raises an error if the column is not a member of the AttributeDataFrame.
-        """        
-        # Check if the column exists
-        if column_name not in self.processed_data.columns:
-            raise ValueError(f"Column {column_name} does not exist in the DataFrame.")
-        
-        # Remove the column from the DataFrame
-        self.processed_data.drop(columns=[column_name], inplace=True)
-        
-        # Remove associated attributes, if any
-        if column_name in self.processed_data.column_attributes:
-            del self.processed_data.column_attributes[column_name]
-
-    def reset_resolution(self):
-        """Resets dx and dy to initial values
-        """        
-        self.dx = self._orig_dx
-        self.dy = self._orig_dy
-        self.update_aspect_ratio_controls()
-
-    def swap_xy(self):
-        """Swaps data in a SampleObj."""        
-        self.is_swapped = not self.is_swapped
-
-        if self.is_swapped:
-            self.order = 'C'
-        else:
-            self.order = 'F'
-
-        self._swap_xy(self.raw_data)
-        self._swap_xy(self.processed_data)
-
-        self.x = self.raw_data['Xc']
-        self.y = self.raw_data['Yc']
-
-        # swap orientation of original dx and dy to be consistent with X and Y
-        self._orig_dx, self._orig_dy = self._orig_dy, self._orig_dx
-
-    def _swap_xy(self, df):
-        """Swaps X and Y of a dataframe
-
-        Swaps coordinates for all maps in sample dataframe.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-            data frame to swap X and Y coordinates
-        """
-        xtemp = df['Yc']
-        df['Yc'] = df['Xc']
-        df['Xc'] = xtemp
-
-        df = df.sort_values(['Yc','Xc'])
-
-    def update_resolution(self, axis, value):
-        """Updates DX and DY for a dataframe
-
-        Recalculates X and Y for a dataframe when the user changes the value of
-        pixel dimensions Dx or Dy
-
-        Parameter
-        ---------
-        axis : str
-            Indicates axis to update resolution, 'x' or 'y'.
-        value: float
-            Holds the new value that is used to update.
-        """
-        # update resolution based on user change
-        if axis == 'x':
-            self.dx = value
-            dx = self.dx
-        elif axis == 'y':
-            self.dy = value
-            dy = self.dy
-
-    def swap_resolution(self):
-        """Swaps DX and DY for a dataframe, updates X and Y
-
-        Recalculates X and Y for a dataframe
-        """  
-        X = round(self.raw_data['Xc']/self.dx)
-        Y = round(self.raw_data['Yc']/self.dy)
-
-        Xp = round(self.processed_data['Xc']/self.dx)
-        Yp = round(self.processed_data['Yc']/self.dy)
-
-        dx = self.dx
-        self.dx = self.dy
-        self.dy = dx
-
-        self.raw_data['Xc'] = self.dx*X
-        self.raw_data['Yc'] = self.dy*Y
-
-        self.processed_data['Xc'] = self.dx*Xp
-        self.processed_data['Yc'] = self.dy*Yp
-
-    def reset_crop(self):
-        """Reset the data to the original bounds.
-
-        Reseting the data to the original bounds results in deleting progress on analyses,
-        computations, etc.
-        """
-        # bring up dialog asking if user wishes to proceed
-        if not self.confirm_reset():
-            return
-
-        # Need to update to keep computed columns?
-        self.reset_data()
-
-    def compute_ratio(self, analyte_1, analyte_2):
-        """Compute a ratio field from two analytes.
-
-        Ratios are computed on the processed_data, after negative handling, but before autoscaling.
-
-        Parameters
-        ----------
-        analyte_1 : str
-            Analyte field to be used as numerator of ratio.
-        analyte_2 : str
-            Analyte field to be used as denominator of ratio.
-        """
-        # Create a mask where both analytes are positive
-        mask = (self.processed_data[analyte_1] > 0) & (self.processed_data[analyte_2] > 0)
-
-        # Calculate the ratio and set invalid values to NaN
-        ratio_array = np.where(mask, self.processed_data[analyte_1] / self.processed_data[analyte_2], np.nan)
-
-        # Generate the ratio column name
-        ratio_name = f'{analyte_1} / {analyte_2}'
-
-        self.add_columns('Ratio',ratio_name,ratio_array)
-        self.processed_data.set_attribute(ratio_name, 'use', True)
 
     def cluster_data(self):
         """Clusters data for use with data preprocessing
@@ -1461,13 +1570,15 @@ class SampleObj(Observable):
                 #norm = self.processed_data.get_attribute(field, 'norm')
                 
                 #perform scaling for groups of analytes with same norm parameter
-                if norm == 'log':
-                    df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
-
-                elif norm == 'logit':
-                    # Handle division by zero and NaN values
-                    with np.errstate(divide='ignore', invalid='ignore'):
-                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
+                match norm:
+                    case 'log':
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
+                    case 'inv_logit':
+                        # Handle division by zero and NaN values
+                        with np.errstate(divide='ignore', invalid='ignore'):
+                            df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.inv_logit(df['array']), np.nan)
+                    case 'symlog':
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.symlog(df['array']), np.nan)
                 
                 # normalize
                 if 'normalized' in field_type:
@@ -1524,7 +1635,7 @@ class SampleObj(Observable):
         df = self.processed_data[use_analytes]
 
         #perform scaling for groups of analytes with same norm parameter
-        for norm in ['log', 'logit', 'symlog']:
+        for norm in self.scale_options:
             analyte_set = self.processed_data.match_attributes({'data_type': 'Analyte', 'use': True, 'norm': norm})
             if not analyte_set:
                 continue
@@ -1535,10 +1646,10 @@ class SampleObj(Observable):
                 df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array))
             elif norm == 'symlog':
                 df[analyte_set] = np.where(~np.isnan(tmp_array), symlog(tmp_array))
-            elif norm == 'logit':
+            elif norm == 'inv_logit':
                 # Handle division by zero and NaN values
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array / (10**6 - tmp_array)))
+                    df[analyte_set] = np.where(~np.isnan(tmp_array), inv_logit(tmp_array))
 
         # Combine the two masks to create a final mask
         nan_mask = df.notna().all(axis=1)
@@ -1690,70 +1801,6 @@ class SampleObj(Observable):
     #                     t_array = np.copy(array)
     #             return t_array
 
-    def apply_field_filters(self):
-        """Applies filters based on field values.
-        
-        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
-        """        
-        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
-        if self.filter_df.empty:
-            self.filter_mask = np.ones_like(self.processed_data['Xc'].values, dtype=bool)
-            return
-
-        # by creating a mask based on min and max of the corresponding filter analytes
-        for index, filter_row in self.filter_df.iterrows():
-            if filter_row['use']:
-                field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
-                
-                operator = filter_row['operator']
-                if operator == 'and':
-                    self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
-                elif operator == 'or':
-                    self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
-
-    def confirm_reset():
-        """A simple dialog that ensures the user wishes to reset data
-
-        Returns
-        -------
-        bool
-            ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
-        """        
-        # Create a message box
-        msgBox = QMessageBox.warning(self.parent,
-            "Confirm Reset", 
-            "Resetting to the full map will delete all analyses, computed fields, and reset filters.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.No
-        )
-
-        # Show the message box and get the user's response
-        response = msgBox.exec()
-
-        # Check the user's response
-        if response == QMessageBox.StandardButton.No:
-            return False  # User chose not to proceed
-        return True  # User chose to proceed
-    
-    def sort_data(self, method):
-        # retrieve analyte_list
-        analyte_list = self.processed_data.match_attribute('data_type','Analyte')
-
-        # sort analyte sort based on method chosen by user
-        sorted_analyte_list = sort_analytes(method, analyte_list)
-
-        # Ensure all analytes in self.analyte_list are actually columns in the DataFrame
-        # Does this ever happen?
-        # This step filters out any items in self.analyte_list that are not columns in the DataFrame
-        #columns_to_order = [analyte for analyte in analyte_list if analyte in data.raw_data.columns]
-
-        # Reorder the columns of the DataFrame based on self.analyte_list
-        self.raw_data.sort_columns(sorted_analyte_list)
-        if hasattr(self, "processed_data"):
-            self.processed_data.sort_columns(sorted_analyte_list)
-
-        return analyte_list, sorted_analyte_list
-
-
     def auto_scale(self,sample_id, field, update = False):
         """Auto-scales pixel values in map
 
@@ -1848,8 +1895,47 @@ class SampleObj(Observable):
         #         self.prep_data(sample_id, analyte_1,analyte_2)
         return True  # User chose to proceed
 
-    def sort_data(self, method):
-        # retrieve analyte_list
-        analyte_list = self.processed_data.match_attribute('data_type','Analyte')
-        sorted_analyte_list = sort_analytes(method, analyte_list)
-        return analyte_list, sorted_analyte_list
+
+
+@auto_log_methods(logger_key='Data')
+class LaserSampleObj(SampleObj):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, ui=None):
+        super().__init__(sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
+        self.ui = ui
+        self.logger_key = 'Data'
+
+        self._current_field = None
+        self._ref_chem = ref_chem
+
+        self.polygon = {}
+        self.profile = {}
+
+        # filter dataframe
+        self.filter_df = pd.DataFrame()
+        self.filter_df = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+
+        self.spotdata = AttributeDataFrame()
+
+        self.reset_data()
+
+
+    # --------------------------------------
+    # Define properties and setter functions
+    # --------------------------------------
+    # note properties are based on the cropped X and Y values
+    
+    @property
+    def ref_chem(self):
+        """dict : Reference chemistry"""
+        return self._ref_chem
+
+    @ref_chem.setter
+    def ref_chem(self, d):
+        self._ref_chem = d
+
+@auto_log_methods(logger_key='Data')
+class XRFSampleObj(SampleObj):
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
+        super().__init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
+        self.ui = ui
+        self.logger_key = 'Data'

@@ -335,6 +335,11 @@ class ScatterUI():
         self.ui = parent
         self.logger_key = "Plot"
 
+        # setup comboBoxNDIM
+        self.ui.comboBoxScatterPreset.clear()
+        self.ui.comboBoxScatterPreset.addItems(list(self.ui.app_data.scatter_preset_dict.keys()))
+        self.ui.comboBoxScatterPreset.setPlaceholderText("Select predefined plot...")
+
         self._heatmap_options = ['counts','median','median, MAD','MAD','mean','mean, std','std']
 
         self.connect_widgets()
@@ -347,29 +352,49 @@ class ScatterUI():
         self.ui.comboBoxHeatmaps.addItems(self._heatmap_options)
         self.ui.comboBoxHeatmaps.activated.connect(self.update_heatmap_style_combobox)
 
+        self.ui.toolButtonScatterSavePreset.clicked.connect(self.save_scatter_preset)
+
 
     def connect_observer(self):
         """Connects properties to observer functions."""
         self.ui.app_data.add_observer("scatter_preset", self.update_scatter_preset_combobox)
         self.ui.app_data.add_observer("heatmap_style", self.update_heatmap_style_combobox)
-        self.ui.app_data.add_observer("ternary_colormap", self.update_ternary_colormap_combobox)
-        self.ui.app_data.add_observer("ternary_color_x", self.update_ternary_color_x_toolbutton)
-        self.ui.app_data.add_observer("ternary_color_y", self.update_ternary_color_y_toolbutton)
-        self.ui.app_data.add_observer("ternary_color_z", self.update_ternary_color_z_toolbutton)
-        self.ui.app_data.add_observer("ternary_color_m", self.update_ternary_color_m_toolbutton)
 
     def connect_logger(self):
         """Connects widgets to logger."""
         self.ui.comboBoxScatterPreset.activated.connect(lambda: log(f"comboBoxScatterPreset value=[{self.ui.comboBoxScatterPreset.currentText()}]", prefix="UI"))
         self.ui.toolButtonScatterSavePreset.clicked.connect(lambda: log("toolButtonScatterSavePreset", prefix="UI"))
         self.ui.comboBoxHeatmaps.activated.connect(lambda: log(f"comboBoxHeatmaps value=[{self.ui.comboBoxHeatmaps.currentText()}]", prefix="UI"))
-        self.ui.comboBoxTernaryColormap.activated.connect(lambda: log(f"comboBoxTernaryColormap value=[{self.ui.comboBoxTernaryColormap.currentText()}]", prefix="UI"))
-        self.ui.toolButtonTCmapXColor.clicked.connect(lambda: log("toolButtonTCmapXColor", prefix="UI"))
-        self.ui.toolButtonTCmapYColor.clicked.connect(lambda: log("toolButtonTCmapYColor", prefix="UI"))
-        self.ui.toolButtonTCmapZColor.clicked.connect(lambda: log("toolButtonTCmapZColor", prefix="UI"))
-        self.ui.toolButtonTCmapMColor.clicked.connect(lambda: log("toolButtonTCmapMColor", prefix="UI"))
-        self.ui.toolButtonSaveTernaryColormap.clicked.connect(lambda: log("toolButtonSaveTernaryColormap", prefix="UI"))
-        self.ui.toolButtonTernaryMap.clicked.connect(lambda: log("toolButtonTernaryMap", prefix="UI"))
+
+    def save_scatter_preset(self):
+        """
+        Saves the current scatter fields to a file.
+
+        This method prompts the user for a name for the new list, saves the current NDim list to the
+        application's data dictionary, and exports the dictionary to a CSV file.
+
+        If the user cancels the input dialog or an error occurs during saving, a warning message is displayed.
+        """
+        # get the list name from the user
+        name, ok = QInputDialog.getText(self.ui, 'Save custom scatter preset', 'Enter name for new plot:')
+        if ok:
+            try:
+                self.ui.app_data.scatter_preset_dict[name] = [
+                    self.ui.comboBoxFieldX.currentText(),
+                    self.ui.comboBoxFieldY.currentText(),
+                    self.ui.comboBoxFieldZ.currentText(),
+                    self.ui.comboBoxFieldC.currentText(),
+                ]
+
+                # export the csv
+                csvdict.export_dict_to_csv(self.ui.app_data.scatter_preset_dict, self.ui.app_data.scatter_list_filename)
+            except:
+                QMessageBox.warning(self.ui,'Error','could not save scatter presets to file.')
+        else:
+            # throw a warning that name is not saved
+            QMessageBox.warning(self.ui,'Error','could not save scatter preset fields.')
+
+            return
 
     def update_scatter_preset_combobox(self, new_scatter_preset):
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['scatter']:
@@ -377,31 +402,6 @@ class ScatterUI():
 
     def update_heatmap_style_combobox(self, new_heatmap_style):
         self.ui.comboBoxHeatmaps.setCurrentText(new_heatmap_style)
-        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
-            self.ui.plot_style.schedule_update()
-
-    def update_ternary_colormap_combobox(self, new_ternary_colormap):
-        self.ui.comboBoxTernaryColormap.setCurrentText(new_ternary_colormap)
-        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
-            self.ui.plot_style.schedule_update()
-
-    def update_ternary_color_x_toolbutton(self, new_color):
-        self.ui.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
-        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
-            self.ui.plot_style.schedule_update()
-
-    def update_ternary_color_y_toolbutton(self, new_color):
-        self.ui.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
-        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
-            self.ui.plot_style.schedule_update()
-
-    def update_ternary_color_z_toolbutton(self, new_color):
-        self.ui.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
-        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
-            self.ui.plot_style.schedule_update()
-
-    def update_ternary_color_m_toolbutton(self, new_color):
-        self.ui.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % new_color)
         if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
             self.ui.plot_style.schedule_update()
 
@@ -413,6 +413,11 @@ class NDimUI():
         self.logger_key = "Plot"
 
         self.table_fcn = TableFcn(self)
+
+        # setup comboBoxNDIM
+        self.ui.comboBoxNDimAnalyteSet.clear()
+        self.ui.comboBoxNDimAnalyteSet.addItems(list(self.ui.app_data.ndim_list_dict.keys()))
+        self.ui.comboBoxNDimAnalyteSet.setPlaceholderText("Select preset list...")
 
         self.connect_widgets()
         self.connect_observer()

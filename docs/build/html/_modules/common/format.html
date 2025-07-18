@@ -29,7 +29,7 @@
   <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
@@ -388,11 +388,12 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.format</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <div class="viewcode-block" id="oround">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.oround">[docs]</a>
-<span class="k">def</span> <span class="nf">oround</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">oround</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rounds a single of value to n digits</span>
 
 <span class="sd">    Round a single number to the first n digits.</span>
@@ -427,7 +428,7 @@
 
 <div class="viewcode-block" id="oround_matrix">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.oround_matrix">[docs]</a>
-<span class="k">def</span> <span class="nf">oround_matrix</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">oround_matrix</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rounds a matrix of values to n digits</span>
 
 <span class="sd">    Rounds all numbers in a matrix to the first n digits.</span>
@@ -462,7 +463,7 @@
 
 <div class="viewcode-block" id="dynamic_format">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.dynamic_format">[docs]</a>
-<span class="k">def</span> <span class="nf">dynamic_format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dynamic_format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepares number for display as *str*</span>
 
 <span class="sd">    Formats a number of display as a *str*, typically in a *lineEdit* widget.</span>
@@ -495,19 +496,23 @@
 
 <div class="viewcode-block" id="symlog">
 <a class="viewcode-back" href="../../generated/common.format.html#common.format.symlog">[docs]</a>
-<span class="k">def</span> <span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">linear_threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">symlog</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">linear_threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transforms data from linear to symlog space</span>
 
 <span class="sd">    The advantage of a symlog transformation is that produces a log-like distribution for most</span>
 <span class="sd">    values, but can be used on negative and zero values as well as positive values,</span>
 <span class="sd">    preserves symmetry about 0.</span>
 
-<span class="sd">    A symlog transformation is symlog(x) = sign(x) * log_{10}(1 + |x / a|), where a is the </span>
-<span class="sd">    linear threshold, region where the transformation is approximately linear.</span>
+<span class="sd">    A symlog transformation is</span>
+<span class="sd">     </span>
+<span class="sd">    .. math::</span>
+<span class="sd">        \operatorname{symlog} (x) = \operatorname{sign} (x) \log_{10} (1 + |x|/\lambda),</span>
+
+<span class="sd">    where :math:`\lambda` is the linear threshold, region where the transformation is approximately linear.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x : numpy.array</span>
+<span class="sd">    x : numpy.ndarray</span>
 <span class="sd">        the array of values to transform</span>
 <span class="sd">    linear_threshold : float, optional</span>
 <span class="sd">        linear threshold, often chosen as the mean, median, or standard deviation of the data</span>
@@ -515,23 +520,29 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    numpy.array</span>
-<span class="sd">        _description_</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        transformed values of x into symlog space</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">linear_threshold</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="invsymlog">
-<a class="viewcode-back" href="../../generated/common.format.html#common.format.invsymlog">[docs]</a>
-<span class="k">def</span> <span class="nf">invsymlog</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">linthresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse symlog transform back to linear space</span>
+<div class="viewcode-block" id="inv_symlog">
+<a class="viewcode-back" href="../../generated/common.format.html#common.format.inv_symlog">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inv_symlog</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">linthresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse symlog transform back to linear space.</span>
 
-<span class="sd">    Converts an array back to into linear space.</span>
+<span class="sd">    Converts a symlog array back to into linear space,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \operatorname{symlog}^{-1}(x) = \operatorname{sign} (x) \lambda (10^{|x|} - 1)</span>
+
+<span class="sd">    where :math:`\lambda` is the linear threshold used to control the region near zero where the</span>
+<span class="sd">    data behave linearly.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    y : numpy.array</span>
+<span class="sd">    x : numpy.ndarray</span>
 <span class="sd">        the array of values to transform</span>
 <span class="sd">    linear_threshold : float, optional</span>
 <span class="sd">        linear threshold, often chosen as the mean, median, or standard deviation of the data</span>
@@ -539,12 +550,100 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    numpy.array</span>
-<span class="sd">        </span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        transformed values of x back to linear space</span>
 <span class="sd">    :see also: symlog</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">linthresh</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">linthresh</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logit">
+<a class="viewcode-back" href="../../generated/common.format.html#common.format.logit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">logit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies the logit (log-odds) transformation to a numpy array.</span>
+
+<span class="sd">    The logit function is defined as,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \operatorname{logit}(x) = \log [x / (1 - x)]</span>
+
+<span class="sd">    Values of `x` must be in the open interval (0, 1). To avoid division by zero or</span>
+<span class="sd">    log of zero, values are clipped to [eps, 1 - eps].</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : numpy.ndarray</span>
+<span class="sd">        Input array with values between 0 and 1.</span>
+<span class="sd">    eps : float, optional</span>
+<span class="sd">        Small value used to clip inputs away from 0 and 1 to prevent numerical issues.</span>
+<span class="sd">        Default is 1e-8.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Transformed array with log-odds values.</span>
+
+<span class="sd">    :see also: inv_logit</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="inv_logit">
+<a class="viewcode-back" href="../../generated/common.format.html#common.format.inv_logit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inv_logit</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies the inverse logit (sigmoid) transformation to a numpy array.</span>
+
+<span class="sd">    The inverse logit transforms the data from normal space to sigmoid space and</span>
+<span class="sd">    is defined as,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \operatorname{logit}^{-1}(x) = [1 / (1 + e^{-x})]</span>
+
+<span class="sd">    This maps real-valued inputs back to the (0, 1) interval.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : numpy.ndarray</span>
+<span class="sd">        Input array of real values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Transformed array with values between 0 and 1.</span>
+
+<span class="sd">    :see also: logit</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="parse_isotope">
+<a class="viewcode-back" href="../../generated/common.format.html#common.format.parse_isotope">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_isotope</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts an isotope into a symbol and mass.</span>
+
+<span class="sd">    Separates an analyte field with a symbol-mass name to its separate parts.  For</span>
+<span class="sd">    example, 27Al returns `Al` (symbol), `27` (mass).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field : str</span>
+<span class="sd">        Field name to separate into symbol and mass.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    symbol : str</span>
+<span class="sd">        Returns the element symbol.</span>
+<span class="sd">    mass : int</span>
+<span class="sd">        Returns the isotope mass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([A-Za-z]+)(\d*)&quot;</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="n">symbol</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="n">field</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="k">if</span> <span class="n">match</span> <span class="ow">and</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">mass</span></div>
 
 </pre></div>
 

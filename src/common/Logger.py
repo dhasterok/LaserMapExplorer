@@ -248,7 +248,7 @@ def describe_arg(arg):
     except Exception:
         return "<unprintable>"
 
-def auto_log_methods(logger_key: str=None, **log_options):
+def auto_log_methods(logger_key: str, **log_options):
     """Decorator that wraps all methods in a class   
 
     Parameters
@@ -455,7 +455,7 @@ class LoggerDock(CustomDockWidget):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
-        self.parent = parent
+        self.ui = parent
 
         self.log_colors = {
             "Error": "red",
@@ -463,8 +463,8 @@ class LoggerDock(CustomDockWidget):
             "UI": "blue",
             "Data": "green",
         }
-        if hasattr(parent, 'log_colors'):
-            self.log_colors.update(parent.log_colors)
+        if hasattr(self.ui, 'log_colors'):
+            self.log_colors.update(self.ui.log_colors)
 
         self.match_cursors = []
         self.current_match_index = -1
@@ -501,7 +501,7 @@ class LoggerDock(CustomDockWidget):
         # Add spacer
         spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        if hasattr(parent,'logger_options'):
+        if hasattr(self.ui,'logger_options'):
             self.action_settings = QAction()
             settings_icon = QIcon(":resources/icons/icon-gear-64.svg")
             if not settings_icon.isNull():
@@ -555,7 +555,7 @@ class LoggerDock(CustomDockWidget):
         self.setWindowTitle("LaME Logger")
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
+        self.ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
         self.visibilityChanged.connect(self.logger_visibility_change)
         self.logger_visibility_change()
@@ -679,7 +679,7 @@ class LoggerOptionsDialog(QDialog):
     options_dict : dict[str, bool]
         Dictionary of logger keys and their current enabled/disabled state.
     parent : QWidget or LoggerDock, optional
-        Parent widget for the dialog.
+        MainWindow for the dialog.
 
     Examples
     --------
@@ -698,7 +698,6 @@ class LoggerOptionsDialog(QDialog):
     def __init__(self, options_dict, parent=None):
         super().__init__(parent)
 
-        
         self.setWindowTitle("Customize Logger")
         self.setLayout(QVBoxLayout())
 

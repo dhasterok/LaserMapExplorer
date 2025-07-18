@@ -172,6 +172,11 @@ class StylingDock(StyleData, StyleTheme):
         #self.ui.spinBoxHeatmapResolution.valueChanged.connect(self.resolution_callback)
 
         # ternary colormaps
+        self._ternary_colormap = ""
+        self._ternary_color_x = ""
+        self._ternary_color_y = ""
+        self._ternary_color_z = ""
+        self._ternary_color_m = ""
         
         self.ui.comboBoxTernaryColormap.clear()
 
@@ -179,14 +184,15 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.comboBoxTernaryColormap.addItem('user defined')
 
         # dialog for adding and saving new colormaps
-        #self.ui.toolButtonSaveTernaryColormap.clicked.connect(self.ui.input_ternary_name_dlg)
+        self.ui.toolButtonSaveTernaryColormap.clicked.connect(self.input_ternary_name_dlg)
 
         # select new ternary colors
-        #self.ui.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapXColor))
-        #self.ui.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapYColor))
-        #self.ui.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapZColor))
-        #self.ui.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapMColor))
-        #self.ui.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
+        self.ui.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapXColor))
+        self.ui.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapYColor))
+        self.ui.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapZColor))
+        self.ui.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapMColor))
+        self.ui.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
+
         self.connect_observer()
         self.connect_logger()
 
@@ -231,6 +237,13 @@ class StylingDock(StyleData, StyleTheme):
         self.add_observer("clabel", self.update_clabel_lineedit)
         self.add_observer("cscale", self.update_cscale_combobox)
         self.add_observer("resolution", self.update_resolution_spinbox)
+
+        # ternary maps
+        self.add_observer("ternary_colormap", self.update_ternary_colormap)
+        self.add_observer("ternary_color_x", self.update_ternary_color_x)
+        self.add_observer("ternary_color_y", self.update_ternary_color_y)
+        self.add_observer("ternary_color_z", self.update_ternary_color_z)
+        self.add_observer("ternary_color_m", self.update_ternary_color_m)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -284,6 +297,15 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.comboBoxCbarDirection.activated.connect(lambda: log(f"comboBoxCbarDirection value=[{self.ui.comboBoxCbarDirection.currentText()}]", prefix="UI"))
         self.ui.checkBoxReverseColormap.checkStateChanged.connect(lambda: log(f"checkBoxReverseColormap value=[{self.ui.checkBoxReverseColormap.isChecked()}]", prefix="UI"))
         self.ui.spinBoxHeatmapResolution.valueChanged.connect(lambda: log(f"spinBoxHeatmapResolution value=[{self.ui.spinBoxHeatmapResolution.value()}]", prefix="UI"))
+
+        # ternary colormap
+        self.ui.comboBoxTernaryColormap.activated.connect(lambda: log(f"comboBoxTernaryColormap value=[{self.ui.comboBoxTernaryColormap.currentText()}]", prefix="UI"))
+        self.ui.toolButtonTCmapXColor.clicked.connect(lambda: log("toolButtonTCmapXColor", prefix="UI"))
+        self.ui.toolButtonTCmapYColor.clicked.connect(lambda: log("toolButtonTCmapYColor", prefix="UI"))
+        self.ui.toolButtonTCmapZColor.clicked.connect(lambda: log("toolButtonTCmapZColor", prefix="UI"))
+        self.ui.toolButtonTCmapMColor.clicked.connect(lambda: log("toolButtonTCmapMColor", prefix="UI"))
+        self.ui.toolButtonSaveTernaryColormap.clicked.connect(lambda: log("toolButtonSaveTernaryColormap", prefix="UI"))
+        self.ui.toolButtonTernaryMap.clicked.connect(lambda: log("toolButtonTernaryMap", prefix="UI"))
 
     @property
     def signal_state(self):
@@ -866,7 +888,7 @@ class StylingDock(StyleData, StyleTheme):
                 ui.toolButtonOverlayColor.setEnabled(True)
 
                 # marker properties
-                if not ui.spotdata.empty:
+                if not ui.data[self.app_data.sample_id].spotdata.empty:
                     ui.comboBoxMarker.setEnabled(True)
                     ui.doubleSpinBoxMarkerSize.setEnabled(True)
                     ui.horizontalSliderMarkerAlpha.setEnabled(True)
@@ -1096,6 +1118,8 @@ class StylingDock(StyleData, StyleTheme):
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
         else:
+            ui.lineEditXLB.precision = 3
+            ui.lineEditXUB.precision = 3
             # round axes limits for everything that isn't a map
             # Non-map plots might still need axes
             self.xlim = style.get('XLim')
@@ -1374,6 +1398,7 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.plot_flag = False
         for ax in range(4):
             if self.plot_axis_dict[self.plot_type]['axis'][ax]:
+                self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
                 self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
         self.ui.plot_flag = True
 
@@ -2253,7 +2278,7 @@ class StylingDock(StyleData, StyleTheme):
             cluster_label[i] = cluster_dict[i]['name']
 
         # mask
-        if 99 in list(cluster_dict.keys()):
+        if 99 in cluster_dict:
             color = get_rgb_color(cluster_dict[99]['color'])
             cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
             cluster_label.append(cluster_dict[99]['name'])
@@ -2322,6 +2347,84 @@ class StylingDock(StyleData, StyleTheme):
             hexcolor.append(self.style_dict['cluster map']['OverlayColor'])
 
         return hexcolor
+
+    def update_ternary_colormap(self, new_colormap=None):
+        """Updates ternary colormap used to make ternary maps.
+
+        Updates the colors for the vertices and centroid of a ternary colormap
+        that is used to produce a map-style image colored by pixel locations
+        within a ternary diagram.
+
+        Parameters
+        ----------
+        new_colormap : str, optional
+            New color map name, by default None
+        """
+        if new_colormap is None:
+             # use current value of widget
+             self.ternary_colormap = self.ui.comboBoxTernaryColormap.currentText()
+        else:
+             # update combobox with new value
+             if self.ui.comboBoxTernaryColormap.currentText() == new_colormap:
+                 return
+             # block signals to prevent infinite loop
+             self.ui.comboBoxTernaryColormap.blockSignals(True)
+             self.ui.comboBoxTernaryColormap.setCurrentText(new_colormap)
+             self.ui.comboBoxTernaryColormap.blockSignals(False)
+        
+        # update plot if required
+        if self.ui.toolBox.currentIndex() == self.ui.left_tab['scatter'] and self.plot_type == 'ternary map':
+            self.schedule_update()
+
+    def update_ternary_color_x(self, new_color):
+        self.ui.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
+            self.schedule_update()
+
+    def update_ternary_color_y(self, new_color):
+        self.ui.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
+            self.schedule_update()
+
+    def update_ternary_color_z(self, new_color):
+        self.ui.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
+            self.schedule_update()
+
+    def update_ternary_color_m(self, new_color):
+        self.ui.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % new_color)
+        if self.ui.toolbox.currentIndex() == self.ui.left_tab['scatter']:
+            self.schedule_update()
+
+    def input_ternary_name_dlg(self):
+        """Opens a dialog to save new colormap
+
+        Executes on ``MainWindow.toolButtonSaveTernaryColormap`` is clicked.  Saves the current
+        colors of `MainWindow.toolButtonTCmap*Color` into
+        `resources/styles/ternary_colormaps_new.csv`.
+        """
+        name, ok = QInputDialog.getText(self.ui, 'Custom ternary colormap', 'Enter new colormap name:')
+        if ok:
+            # update colormap structure
+            self.ternary_colormaps.append({'scheme': name,
+                    'top': get_hex_color(self.ui.toolButtonTCmapXColor.palette().button().color()),
+                    'left': get_hex_color(self.ui.toolButtonTCmapYColor.palette().button().color()),
+                    'right': get_hex_color(self.ui.toolButtonTCmapZColor.palette().button().color()),
+                    'center': get_hex_color(self.ui.toolButtonTCmapMColor.palette().button().color())})
+            # update comboBox
+            self.ui.comboBoxTernaryColormap.addItem(name)
+            self.ui.comboBoxTernaryColormap.setText(name)
+            # add new row to file
+            df = pd.DataFrame.from_dict(self.ternary_colormaps)
+            try:
+                df.to_csv('resources/styles/ternary_colormaps_new.csv', index=False)
+            except Exception as e:
+                QMessageBox.warning(self.ui,'Error',f"Could not save style theme.\nError: {e}")
+
+        else:
+            QMessageBox.warning(self.ui,'Warning',f"Style theme not saved.\n")
+            return
+
 
     def ternary_colormap_changed(self):
         """Changes toolButton backgrounds associated with ternary colormap

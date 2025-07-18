@@ -935,7 +935,7 @@ class StyleData(Observable):
                 }
         }
     
-    def set_style_dictionary(self,data, app_data, plot_type=None, style=None):
+    def set_style_attributes(self,data, app_data, plot_type=None, style=None):
         """Sets values in style dictionary
 
         Parameters
@@ -951,24 +951,38 @@ class StyleData(Observable):
         style = self.style_dict[plot_type]
                 
         if plot_type.lower() in self.map_plot_types:
-            if ('Xc' not in list(data.column_attrributes)) or ('Yc' not in list(data.column_attrributes)):
-                return
-
             
             xmin,xmax,xscale,_ = self.get_axis_values(data,'Analyte','Xc')
             ymin,ymax,yscale,_ = self.get_axis_values(data,'Analyte','Yc')
 
             # set style dictionary values for X and Y
-            style['XLim'] = [xmin, xmax]
-            style['XScale'] = xscale
-            style['XLabel'] = 'X'
-            style['YLim'] = [ymin, ymax]
-            style['YScale'] = yscale
-            style['YLabel'] = 'Y'
-            style['AspectRatio'] = data.aspect_ratio
+            # set style dictionary values for X and Y
+            self.xlim = [xmin, xmax]
+            self.xlabel = 'X'
+            style['XFieldType'] = 'Coordinate'
+            style['XField'] = 'Xc'
 
-        if (style['ScaleLength'] is None) and (plot_type in self.map_plot_types):
-            style['ScaleLength'] = self.default_scale_length()
+            self.ylim = [ymin, ymax]
+            self.ylabel = 'Y'
+            style['YFieldType'] = 'Coordinate'
+            style['YField'] = 'Yc'
+
+            self.aspect_ratio = data.aspect_ratio
+
+            if self.scale_length is None:
+                self.scale_length = self.default_scale_length()
+        else:
+            ui.lineEditXLB.precision = 3
+            ui.lineEditXUB.precision = 3
+            # round axes limits for everything that isn't a map
+            # Non-map plots might still need axes
+            self.xlim = style.get('XLim')
+            self.yscale = style.get('ZScale')
+
+            self.ylim = style.get('YLim')
+            self.yscale = style.get('ZScale')
+
+            self.scale_length = None
 
         if app_data.c_field in list(data.column_attrributes):
             field = app_data.c_field

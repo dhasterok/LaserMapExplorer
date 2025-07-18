@@ -97,10 +97,10 @@ class LameBlockly(PlotViewer):
         self.preferences = copy.deepcopy(self.default_preferences)
 
         self.io = LameIO(self, connect_actions=False)
-
+        self.ui = parent
         self.plot_style = StyleData(self)
         #set style using 'default' style them
-        self.style_themes = StyleTheme(parent)
+        self.style_themes = StyleTheme(self)
         self.plot_style.style_dict = self.style_themes.default_style_dict()
         
         # # Initialise plotviewer form

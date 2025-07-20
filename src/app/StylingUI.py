@@ -1113,7 +1113,10 @@ class StylingDock(StyleData, StyleTheme):
             style['YField'] = 'Yc'
 
             self.aspect_ratio = data.aspect_ratio
-
+            
+            # do not round axes limits for maps
+            ui.lineEditXLB.precision = None
+            ui.lineEditXUB.precision = None
 
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
@@ -1130,9 +1133,7 @@ class StylingDock(StyleData, StyleTheme):
 
             self.scale_length = None
 
-        # do not round axes limits for maps
-        ui.lineEditXLB.precision = None
-        ui.lineEditXUB.precision = None
+
 
         # Set Z axis details if available
         self.zlabel = style.get('ZLabel')
@@ -2141,9 +2142,7 @@ class StylingDock(StyleData, StyleTheme):
             self.app_data.set_field_type(ax, parentbox.currentText())
         else:   # direct setting of property
             if field_type == parentbox.currentText() and field_type == self.app_data.get_field_type(ax):
-                
                 return
-            # set field type property to combobox
             self.app_data.set_field_type(ax, parentbox.currentText())
             # set combobox to field
             parentbox.setCurrentText(field_type)

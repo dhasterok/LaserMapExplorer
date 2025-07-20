@@ -65,7 +65,7 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFiles)
         dialog.setNameFilter("CSV (*.csv *.xls *.xlsx)")
-        if dialog.exec_():
+        if dialog.exec():
             file_list = dialog.selectedFiles()
             csv_files = [os.path.split(file)[1] for file in file_list if (file.endswith('.csv') | file.endswith('.xls') | file.endswith('.xlsx'))]
             if not csv_files:
@@ -217,7 +217,7 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
         context_menu.addAction(actionRenameColumn)
         context_menu.addAction(actionDeleteColumn)
         
-        context_menu.exec_(self.tableWidgetSpotData.viewport().mapToGlobal(position))
+        context_menu.exec(self.tableWidgetSpotData.viewport().mapToGlobal(position))
     
     def insert_column(self, currentColumn):
         """Insert a column into ``tableWidgetSpotData``

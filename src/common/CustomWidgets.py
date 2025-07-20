@@ -612,19 +612,51 @@ class CustomTreeView(QTreeView):
             print(f"Error while clearing model: {e}")
 
 class CustomActionMenu(QAction):
-    """A QAction with an attached menu that displays on click.
+    """
+    A custom QMenu that allows dynamic addition and removal of menu actions.
+
+    Attributes
+    ----------
+    items : dict[str, QAction]
+        A dictionary mapping action names (as strings) to their corresponding QAction objects.
+
+    Methods
+    -------
+    add_menu_item(name: str, callback: Callable, shortcut: Optional[str] = None, tooltip: Optional[str] = None) -> None
+        Add a single menu item with an optional shortcut and tooltip.
+
+    remove_menu_item(name: str) -> None
+        Remove a menu item by name if it exists.
+
+    _add_menu_items(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -> None
+        Add multiple menu items in one batch operation.
+
+    clear_menu() -> None
+        Remove all existing menu actions from the menu and clear the internal items dictionary.
+
+    update_menu(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -> None
+        Clear and rebuild the menu using the provided list of items.
+
+    get_menu_item(name: str) -> Optional[QAction]
+        Return the QAction associated with the given name, or None if not found.
+
+    get_menu_structure() -> nested list
+        Return current menu structure as a nested list.
+
+    has_submenu(name: str) -> bool
+        Check if a submenu by a specific name exists.
 
     Parameters
     ----------
     icon : str
-        Path to icon
+        Path to the icon displayed in the action.
     text : str
-        Action text
-    menu_items : list of tuple
-        List of tuples where each tuple is (displayed text, callback function) or (displayed text, submenu items).
-    parent : QObject, optional
-        Parent widget.
-    """    
+        Text label for the action.
+    menu_items : list
+        Initial list of menu items and submenus to add.
+    parent : QWidget, optional
+        Parent widget for the action and menu.
+    """
     def __init__(self, icon, text, menu_items, parent=None):
         super().__init__(QIcon(icon), text, parent)
         
@@ -645,7 +677,38 @@ class CustomActionMenu(QAction):
         self.triggered.connect(show_menu)
 
     def _add_menu_items(self, menu, items):
-        """Recursively add items and submenus to a menu."""
+        """
+        Recursively adds menu items to the given QMenu.
+
+        Parameters
+        ----------
+        menu : QMenu
+            The parent menu to which items will be added.
+        items : list of tuples
+            A list where each tuple represents a menu item.
+
+            Each tuple must be of the form:
+                (str, Callable | list | None)
+
+            - If the second element is a callable, it will be connected to the triggered signal of a QAction.
+            - If it's a list, a submenu will be created with that list as its content (recursively).
+            - If it's None, a disabled/non-interactive menu item will be added (useful as a label or placeholder).
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            items = [
+                ("Export", export_callback),
+                ("Import", [
+                    ("From CSV", import_csv_callback),
+                    ("From JSON", import_json_callback)
+                ]),
+                ("Disabled Item", None)
+            ]
+
+        """
         for item_text, callback_or_submenu in items:
             if isinstance(callback_or_submenu, list):
                 # Create a submenu
@@ -657,12 +720,156 @@ class CustomActionMenu(QAction):
                 # Add a regular action
                 menu.addAction(item_text, callback_or_submenu)
 
+    def update_menu(self, new_items):
+        """Replace the entire menu with a new structure.
+
+
+        Parameters
+        ----------
+        new_items : list of tuples
+            A list where each tuple represents a menu item.
+
+            Each tuple must be of the form:
+                (str, Callable | list | None)
+
+        :see also: _add_menu_items
+        """
+        self.clear_menu()
+        self._add_menu_items(self.menu, new_items)
+
     def update_submenu(self, submenu_name, new_items):
-        """Update a submenu with new items."""
+        """
+        Update a submenu with new items.
+        
+        Parameters
+        ----------
+        submenu_name : str
+            Name of submenu
+        new_items : items
+            A list where each tuple represents a menu item.
+
+            Each tuple must be of the form:
+                (str, Callable | list | None)
+
+        :see also: _add_menu_items
+        """
         submenu = self.submenu_references.get(submenu_name)
         if submenu:
             submenu.clear()  # Remove all current actions
             self._add_menu_items(submenu, new_items)
+
+    def clear_menu(self):
+        """Clear all actions and submenus from the menu."""
+        self.menu.clear()
+        self.submenu_references.clear()
+
+    def add_menu_item(self, text, callback_or_submenu):
+        """
+        Adds a single menu item to the specified QMenu.
+
+        Parameters:
+            menu (QMenu): The menu to which the item will be added.
+            label (str): The text label for the menu item.
+            action (Callable | None): The function to be called when the menu item is triggered.
+                If None, the menu item will be added as a non-interactive (disabled) item.
+
+        Returns:
+            QAction: The QAction object that was added to the menu.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            self.add_menu_item(file_menu, "Open", self.open_file)
+            self.add_menu_item(help_menu, "About", None)  # Adds a non-clickable item
+        """
+        self._add_menu_items(self.menu, [(text, callback_or_submenu)])
+
+
+    def remove_menu_item(self, menu_path):
+        """
+        Remove a menu item or submenu by its path.
+
+        Parameters
+        ----------
+        menu_path : list of str
+            A list representing the hierarchical path to the item.
+            For example, ['Top Level', 'Submenu', 'Item Text'] will remove
+            the action or submenu named 'Item Text' inside 'Submenu' which is
+            under 'Top Level'.
+
+        Returns
+        -------
+        bool
+            True if the item was found and removed, False otherwise.
+
+        Examples
+        --------
+        
+        To remove 'Export' from the 'File' top level,
+
+        .. code-block:: python
+
+            action.remove_menu_item(['File', 'Export'])
+
+        """
+        if not menu_path:
+            return False
+
+        menu = self.menu
+        for part in menu_path[:-1]:
+            found = None
+            for action in menu.actions():
+                if action.menu() and action.text() == part:
+                    found = action.menu()
+                    break
+            if not found:
+                return False
+            menu = found
+
+        for action in menu.actions():
+            if action.text() == menu_path[-1]:
+                menu.removeAction(action)
+                return True
+
+        return False
+
+    def get_menu_structure(self):
+        """
+        Return current menu structure as a nested list.
+         
+        This method is useful for debugging or serialization.
+
+        Returns
+        -------
+        nested list
+            Current menu structure.
+        """
+        def recurse(menu):
+            items = []
+            for action in menu.actions():
+                if action.menu():
+                    items.append((action.text(), recurse(action.menu())))
+                else:
+                    items.append((action.text(), None))
+            return items
+        return recurse(self.menu)
+    
+    def has_submenu(self, name):
+        """Check if a submenu by a specific name exists.
+        
+        Parameters
+        ----------
+        name : str
+            Submenu text to test
+
+        Returns
+        -------
+        bool
+            True if `name` is a submenu
+        """
+        return name in self.submenu_references
 
 class CustomComboBox(QComboBox):
     """

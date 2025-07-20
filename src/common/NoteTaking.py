@@ -1,8 +1,9 @@
-import re, os
+from pathlib import Path
+import re, subprocess
 from PyQt6.QtCore import ( Qt, QTimer, QSize, QUrl )
 from PyQt6.QtWidgets import (
         QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QTextEdit, QSizePolicy,
-        QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout
+        QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout, QSplitter
     )
 from PyQt6.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator, QAction )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
@@ -10,11 +11,32 @@ from datetime import datetime
 import numpy as np
 import pandas as pd   
 from rst2pdf.createpdf import RstToPdf
-from docutils.core import publish_string
+from docutils.core import publish_string, publish_file
 import src.common.format as fmt
 from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
-from src.common.Logger import LoggerConfig, auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods, log
+
+def convert_rst_to_html(rst_path: Path) -> Path:
+    """Converts an rst file to html given a file path.
+    
+    Parameters
+    ----------
+    rst_path : Posix.path
+        Path to rst file
+
+    Returns
+    -------
+    html_path : str
+        Path to compiled html file as a str.
+    """
+    html_path = rst_path.with_suffix('.html')
+    publish_file(
+        source_path=str(rst_path),
+        destination_path=str(html_path),
+        writer_name='html'
+    )
+    return html_path
 
 # -------------------------------
 # Notes functions
@@ -102,6 +124,7 @@ class Notes(CustomDockWidget):
         self.parent = parent
 
         self._notes_file = None
+
         self.options = {'MaxColumns': None, 'MaxVariance': 95}
 
         container = QWidget()
@@ -110,9 +133,9 @@ class Notes(CustomDockWidget):
         dock_layout = QVBoxLayout()   
 
         # Create toolbar
-        toolbar = QToolBar("Notes Toolbar", self)
-        toolbar.setIconSize(QSize(24, 24))
-        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+        self.toolbar = QToolBar("Notes Toolbar", self)
+        self.toolbar.setIconSize(QSize(24, 24))
+        self.toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
         # header button and menu
         header_icon = ":resources/icons/icon-heading-64.svg"
@@ -169,7 +192,7 @@ class Notes(CustomDockWidget):
             self.action_subscript.setText("Subscript")
         self.action_subscript.setToolTip("Subscript selected text")
 
-        toolbar.addSeparator()
+        self.toolbar.addSeparator()
 
         # bulleted list button
         self.action_bullet = QAction()
@@ -230,16 +253,17 @@ class Notes(CustomDockWidget):
         self.action_image.setToolTip("Insert figure")
 
         # info button and menu
-        info_icon = ":resources/icons/icon-formatted-output-64.svg"
-        info_menu_items = [
-            ('Sample info', lambda: self.insert_info('sample info')),
-            ('List analytes used', lambda: self.insert_info('analytes')),
-            ('Current plot details', lambda: self.insert_info('plot info')),
-            ('Filter table', lambda: self.insert_info('filters')),
-            ('PCA results', lambda: self.insert_info('pca results')),
-            ('Cluster results', lambda: self.insert_info('cluster results'))
-        ]
-        self.action_info = CustomActionMenu(info_icon, "Formatted Info", info_menu_items)
+        self.info_icon = ":resources/icons/icon-formatted-output-64.svg"
+        self._info_menu_items = []
+        # info_menu_items = [
+        #     ('Sample info', lambda: self.insert_info('sample info')),
+        #     ('List analytes used', lambda: self.insert_info('analytes')),
+        #     ('Current plot details', lambda: self.insert_info('plot info')),
+        #     ('Filter table', lambda: self.insert_info('filters')),
+        #     ('PCA results', lambda: self.insert_info('pca results')),
+        #     ('Cluster results', lambda: self.insert_info('cluster results'))
+        # ]
+        self.action_info = CustomActionMenu(self.info_icon, "Formatted Info", self._info_menu_items)
         self.action_info.setToolTip("Insert formatted info")
 
         # options button, opens options dialog
@@ -261,15 +285,17 @@ class Notes(CustomDockWidget):
 
         # pdf previewer
         self.action_preview_pdf = QAction()
-        preview_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
-        if not preview_icon.isNull():
-            self.action_preview_pdf.setIcon(preview_icon)
-        else:
-            self.action_preview_pdf.setText("Preview")
         self.action_preview_pdf.setToolTip("Preview PDF")
         self.action_preview_pdf.setCheckable(True)
         self.action_preview_pdf.setChecked(False)
-        self.action_preview_pdf.setEnabled(False)
+        self.action_preview_pdf.setEnabled(True)
+        self.preview_unchecked_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
+        self.preview_checked_icon = QIcon(":resources/icons/icon-show-64.svg")
+
+        self.action_recompile = QAction()
+        self.action_recompile.setToolTip("Recompile document")
+        self.recompile_icon = QIcon(":resources/icons/icon-reset-64.svg")
+        self.action_recompile.setIcon(self.recompile_icon)
 
         # Create Text Edit region for ReST Notes
         self.text_edit = QTextEdit()
@@ -282,52 +308,58 @@ class Notes(CustomDockWidget):
         self.search_widget = SearchWidget(self.text_edit, self, enable_replace=True, realtime=False)
 
         # add buttons to toolbar
-        toolbar.addAction(self.action_header)
-        toolbar.addAction(self.action_bold)
-        toolbar.addAction(self.action_italic)
-        toolbar.addAction(self.action_literal)
-        toolbar.addAction(self.action_superscript)
-        toolbar.addAction(self.action_subscript)
-        toolbar.addAction(self.action_bullet)
-        toolbar.addAction(self.action_enumerate)
+        self.toolbar.addAction(self.action_header)
+        self.toolbar.addAction(self.action_bold)
+        self.toolbar.addAction(self.action_italic)
+        self.toolbar.addAction(self.action_literal)
+        self.toolbar.addAction(self.action_superscript)
+        self.toolbar.addAction(self.action_subscript)
+        self.toolbar.addAction(self.action_bullet)
+        self.toolbar.addAction(self.action_enumerate)
 
-        toolbar.addSeparator()
-        toolbar.addAction(self.action_cite)
-        toolbar.addAction(self.action_hyperlink)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.action_cite)
+        self.toolbar.addAction(self.action_hyperlink)
 
-        toolbar.addSeparator()
-        toolbar.addAction(self.action_math)
-        toolbar.addAction(self.action_image)
-        toolbar.addAction(self.action_info)
-        toolbar.addAction(self.action_options)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.action_math)
+        self.toolbar.addAction(self.action_image)
+        self.toolbar.addAction(self.action_options)
 
-        toolbar.addSeparator()
-        toolbar.addWidget(self.search_widget)
-        toolbar.addSeparator()
+        self.toolbar.addSeparator()
+        self.toolbar.addWidget(self.search_widget)
+        self.toolbar.addSeparator()
 
-        toolbar.addAction(self.action_export)
-        toolbar.addAction(self.action_preview_pdf)
-
-        widget_layout = QHBoxLayout()
-
-        if self._notes_file is None:
-            self.file_label = QLabel("File: [load sample to display file]")
-        else:
-            self.file_label = QLabel("File: "+self._notes_file)
+        self.toolbar.addAction(self.action_export)
+        self.toolbar.addAction(self.action_recompile)
+        self.toolbar.addAction(self.action_preview_pdf)
 
         # Create a QWebEngineView
-        self.pdf_browser = QWebEngineView()
+        self.notes_browser = QWebEngineView()
 
-        # Load the PDF file
-        self.pdf_browser.setUrl(QUrl(self.notes_file))
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # Add the web view to the layout
-        widget_layout.addWidget(self.text_edit)
-        widget_layout.addWidget(self.pdf_browser)
+        self.splitter.addWidget(self.text_edit)
+        self.splitter.addWidget(self.notes_browser)
+        self.splitter.setSizes([190,190])
 
-        dock_layout.addWidget(toolbar)
-        dock_layout.addLayout(widget_layout)
-        dock_layout.addWidget(self.file_label)
+        # load notes file if it exists
+        if self._notes_file is None:
+            self.status_label = QLabel("FILE: load sample to display file")
+        else:
+            self.status_label = QLabel("FILE: "+self._notes_file)
+
+            # generate the HTML preview
+            self.update_notes_view()
+        self.status_label.setFixedHeight(22)
+
+
+
+
+        dock_layout.addWidget(self.toolbar)
+        dock_layout.addWidget(self.splitter)
+        dock_layout.addWidget(self.status_label)
 
         # Connect resize event
         #parent.resizeEvent = self.handleResizeEvent
@@ -353,8 +385,10 @@ class Notes(CustomDockWidget):
         self.action_hyperlink.triggered.connect(lambda: self.format_text('hyperlink'))
         self.action_image.triggered.connect(self.insert_image)
         self.action_options.triggered.connect(self.open_note_options)
-        self.action_export.triggered.connect(self.save_notes_to_pdf) # compile rst
-        self.action_preview_pdf.triggered.connect(self.toggle_preview_notes) # compile rst
+        self.action_export.triggered.connect(lambda _: self.save_notes_to_pdf()) # compile rst
+        self.action_preview_pdf.triggered.connect(lambda _: self.toggle_preview_notes()) # compile rst
+        self.action_preview_pdf.triggered.connect(lambda _: self.update_preview_icon())
+        self.action_recompile.triggered.connect(lambda _: self.update_notes_view())
         self.action_export.triggered.connect(lambda: self.action_preview_pdf.setEnabled(True)) # compile rst
 
         # autosave notes
@@ -367,59 +401,154 @@ class Notes(CustomDockWidget):
             except:
                 QMessageBox.warning(self, "Warning", f"Autosave could not save notes to file ({self.notes_file}).")
 
+        # initialize notes file and pdf preview
         self.notes_file = filename
-
+        self.update_preview_icon()
+        self.toggle_preview_notes()
 
     @property
     def notes_file(self):
-        """str : File name associated with the current sample.  When set, the current file will be
-        saved before changing files.  If the new file name is not ``None``, an autosave timer will
-        be set.
-        """        
+        """Path : File name associated with the current sample. When set, the current file will be
+        saved before changing files. If the new file name is not None, an autosave timer will be set.
+        """   
         return self._notes_file
 
     @notes_file.setter
     def notes_file(self, filename):
+        new_path = Path(filename) if filename else None
+
         # no need to do anything if the filename is the same
-        if self._notes_file == filename:
+        if self._notes_file == new_path:
             return
 
-        # open notes file if it exists
+        # save current file and stop autosave
         if self._notes_file is not None:
             self.save_notes_file()
             self.autosaveTimer.stop()
 
         # update filename
-        self._notes_file = filename
+        self._notes_file = new_path
 
-        if self._notes_file is None:
-            self.file_label = QLabel("File: [load sample to display file]")
+        if new_path is None:
+            self.status_label.setText("FILE: load sample to display file")
             return
         else:
-            self.file_label = QLabel("File: "+self._notes_file)
+            self.status_label.setText(f"FILE: {str(new_path)}")
 
         # start autosave
         try:
             self.autosaveTimer.timeout.connect(self.save_notes_file)
-        except:
-            QMessageBox.warning(self, "Warning", f"Autosave could not save notes to file ({self._notes_file}).")
+        except Exception:
+            self.status_label.setText(f"WARNING: Autoscave could not save notes to file (str{new_path})")
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Autosave could not save notes to file ({new_path})."
+            )
 
-        if os.path.exists(self._notes_file):
+        # Load file if it exists
+        if new_path.exists():
             try:
-                with open(self._notes_file,'r') as file:
-                    self.text_edit.setText(file.read())
-            except:
-                file_name = os.path.basename(self._notes_file)
-                self.parent.statusbar.showMessage(f'Cannot read {file_name}')
-                pass
+                self.text_edit.setText(new_path.read_text())
+            except Exception:
+                file_name = new_path.name
+                self.status_label.setText(f"Cannot read {file_name}")
 
         self.autosaveTimer.start()
+
+
+    @property
+    def info_menu_items(self):
+        """
+        list[tuple[str, Callable]]: The list of tuples defining the info menu items.
+
+        Each tuple should contain two elements:
+            - label (str): The text label to display in the menu.
+            - callback (Callable): The function to be called when the menu item is triggered.
+
+        If `self._info_menu_items` is empty, then the action is removed from the toolbar.
+
+        This property reflects the menu items shown under the "Formatted Info" button.
+        """
+        return self._info_menu_items
+
+    @info_menu_items.setter
+    def info_menu_items(self, new_menu_items):
+        if new_menu_items == self._info_menu_items:
+            return
+
+        self._info_menu_items = new_menu_items
+
+        if self.action_info:
+            self.action_info.update_menu(new_menu_items)
+
+            if self._info_menu_items and self.action_info not in self.toolbar.actions():
+                self.toolbar.insertAction(self.action_options, self.action_info)
+            elif not self._info_menu_items and self.action_info in self.toolbar.actions():
+                self.toolbar.removeAction(self.action_info)
+    
+    def update_preview_icon(self):
+        """Set preview PDF icon based on `action_preview_pdf` checked state."""
+        if self.action_preview_pdf.isChecked():
+            if self.preview_checked_icon.isNull():
+                self.action_preview_pdf.setText("Preview: On")
+            else:
+                self.action_preview_pdf.setIcon(self.preview_checked_icon)
+        else:
+            if self.preview_unchecked_icon.isNull():
+                self.action_preview_pdf.setText("Preview: On")
+            else:
+                self.action_preview_pdf.setIcon(self.preview_unchecked_icon)
+
+    def add_info_menu_item(self, label: str, callback):
+        """
+        Add a single menu item to the info menu.
+
+        If `self.action_info` is not on the toolbar, then it is added.
+
+        Parameters
+        ----------
+        label : str
+            The menu label to add
+        callback : Callable
+            The menu callback
+        """
+
+        item = (label, callback)
+        self._info_menu_items.append(item)
+        if self.action_info:
+            self.action_info.add_menu_item(label, callback)
+
+            if self.action_info not in self.toolbar.actions():
+                self.toolbar.insertAction(self.action_options, self.action_info)
+
+
+    def remove_info_menu_item(self, label):
+        """Remove a single item from the info menu.
+
+        If `self._info_menu_items` is empty after removing the last menu item, then the action
+        is removed from the toolbar.
+
+        Parameters
+        ----------
+        label : str
+            Text label of menu item to remove.
+        """
+        item_to_remove = next((item for item in self._info_menu_items if item[0] == label), None)
+        if item_to_remove:
+            self._info_menu_items.remove(item_to_remove)
+            if self.action_info:
+                self.action_info.remove_menu_item(item_to_remove)
+
+                if not self._info_menu_items and self.action_info in self.toolbar.actions():
+                    self.toolbar.removeAction(self.action_info)
+
 
     def update_equation_menu(self):
         new_items = [
                 (eq_name, lambda: self.write_equation(equation)) for eq_name, equation in self.parent.calc_dict.items()
             ]
-        self.math_action.update_submenu("Calculated field", new_items)
+        self.action_math.update_submenu("Calculated field", new_items)
 
     def write_equation(self, equation):
         cursor = self.text_edit.textCursor()
@@ -452,13 +581,13 @@ class Notes(CustomDockWidget):
         if self.notes_file is None:
             return
 
-        self.parent.statusbar.showMessage('Saving notes...')
+        self.status_label.setText('Saving notes...')
 
         # write file
         with open(self.notes_file,'w') as file:
             file.write(str(self.text_edit.toPlainText()))
 
-        self.parent.statusbar.clearMessage()
+        self.status_label.setText(f"File: {str(self.notes_file)} saved.")
 
     def _insert_image(self, filenames, halign, width, alt_text, caption):
         for fn in filenames:
@@ -480,11 +609,11 @@ class Notes(CustomDockWidget):
         """
         if filename is None:
             dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.ExistingFiles)
+            dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
             dialog.setNameFilter("Image Files (*.jpg *.png *.tif)")
             filename = []
 
-            if dialog.exec_():
+            if dialog.exec():
                 filename = dialog.selectedFiles()
             else:
                 return
@@ -740,7 +869,6 @@ class Notes(CustomDockWidget):
                 # width/height
                 # list of all analytes
                 self.text_edit.insertPlainText(':User: Your name here\n')
-                pass
             case 'analytes':
                 analytes = data.processed_data.match_attribute('data_type', 'Analyte')
                 ratios = data.processed_data.match_attribute('data_type', 'Ratio')
@@ -792,7 +920,11 @@ class Notes(CustomDockWidget):
     def print_info(self, info_data):
         formatter = NotesFormatter()
         output_rst = formatter.format(info_data)
-        self.text_edit.setPlainText(output_rst)
+
+        cursor = self.text_edit.textCursor()
+        cursor.insertText(output_rst)
+        self.text_edit.setTextCursor(cursor)
+        self.text_edit.ensureCursorVisible()
 
     def add_table_note(self, matrix, row_labels=None, col_labels=None):
         """Convert matrix to restructured text
@@ -851,36 +983,27 @@ class Notes(CustomDockWidget):
         """Converts notes *.rst file to *.pdf"""
         # save note file first to ensure all changes have been recorded
         if self.notes_file is None:
+            self.status_label.setText("WARNING: Cannot save pdf, no notes file found.")
             return
 
         self.save_notes_file()
 
-        # replace all spaces with \ space
-        filename = self.notes_file
         try:
-            pdf_file_path = filename.replace('.rst', '.pdf')
+            rst_path = Path(self.notes_file)
+            pdf_file_path = rst_path.with_suffix('.pdf')
 
-            # use rst2pdf on the command line to export the file as a pdf
-            #os.system(f"cat {filename} | rst2pdf -o --use-floating-images {os.path.splitext(filename)[0]+'.pdf'}")
-       
-            with open(filename, 'r') as file:
-                rst_content = file.read()
-            
+            # Read the .rst file content
+            rst_content = rst_path.read_text(encoding='utf-8')  # specify encoding for robustness
+
+            # Generate PDF content
             pdf = RstToPdf()
-            pdf_content = pdf.createPdf(text=rst_content, output=pdf_file_path)
-            
-            #with open(pdf_file_path, 'wb') as pdf_file:
-            #    pdf_file.write(pdf_content)
-            
-            self.parent.statusBar.showMessage("PDF successfully generated...")
-            
-            # view pdf
-            if self.action_preview_pdf.isChecked():
-                self.update_pdf()
+            pdf_content = pdf.createPdf(text=rst_content, output=str(pdf_file_path))  # ensure output path is a string
+
+            self.status_label.setText(f"Saved: {str(pdf_file_path)}")
 
         except Exception as e:
-            # if it doesn't work
-            QMessageBox.warning(self, "Error", "Could not save to pdf.\n"+str(e))
+            self.status_label.setText(f"ERROR: Could not save notes to pdf ({pdf_file_path})")
+            QMessageBox.warning(self, "Error", f"Could not save to pdf.\n{str(e)}")
 
     def to_rst_table(self, df):
         """Converts a Pandas DataFrame to a reST table string.
@@ -927,7 +1050,7 @@ class Notes(CustomDockWidget):
         Opens the note options dialog.
         """
         dialog = NoteOptionsDialog(self)
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             columns, variance = dialog.get_options()
             if columns:
                 print(f"Number of Columns: {columns}")
@@ -938,16 +1061,53 @@ class Notes(CustomDockWidget):
         """Shows/hides the PDF preview browser"""
         if self.action_preview_pdf.isChecked():
             # show previewer
-            self.pdf_browser.show()
+            self.notes_browser.show()
+            self.notes_browser.setMinimumWidth(int(self.text_edit.width() / 2))
 
-            self.update_pdf()
+            self.update_notes_view()
         else:
             # hide previewer
-            self.pdf_browser.hide()
+            self.notes_browser.hide()
 
-    def update_pdf(self):
-        """Opens the compiled PDF, ``self.notes_file``, for viewing"""
-        self.pdf_browser.setUrl(QUrl(self.notes_file))
+    def update_notes_view(self):
+        """Compiles the .rst file to HTML and displays it in QWebEngineView."""
+        if not self.notes_file:
+            self.status_label.setText("ERROR: no notes file found, cannot render preview.")
+            return
+
+        try:
+            self.save_notes_file()
+        except Exception as e:
+            self.status_label.setText(f"ERROR: Failed to save {str(self.notes_file)}")
+            return
+        
+        html_file = convert_rst_to_html(self.notes_file)
+        if not html_file.exists():
+            self.status_label.setText(f"WARNING: HTML not generated: {html_file}")
+            return
+
+        self.notes_browser.setUrl(QUrl.fromLocalFile(str(html_file)))
+        self.status_label.setText(f"Rendered: {str(html_file)}")
+        log(f"Rendered: {str(html_file)}", "NOTES")
+
+        if self.action_export.isChecked():
+            self.save_notes_to_pdf()
+
+    # def update_pdf(self):
+    #     """Opens the compiled PDF, ``self.notes_file``, for viewing"""
+    #     if not self.notes_file:
+    #         return
+
+    #     pdf_file = self.notes_file.with_suffix('.pdf')  # changes .rst to .pdf
+
+    #     if not pdf_file.exists():
+    #         print(f"PDF not found at: {pdf_file}")
+    #         return
+
+    #     subprocess.run(["open", str(pdf_file)])
+
+    #     self.notes_browser.setUrl(QUrl.fromLocalFile(str(pdf_file)))
+    #     print(self.notes_file)
 
 class NoteOptionsDialog(QDialog):
     """Opens when ``Notes.action_options`` is triggered.
@@ -1001,7 +1161,7 @@ class NoteOptionsDialog(QDialog):
         
         # Dialog buttons (Accept and Cancel)
         self.dialog_buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self
         )
         self.dialog_buttons.accepted.connect(self.update_options_dict)
         self.dialog_buttons.rejected.connect(self.reject)

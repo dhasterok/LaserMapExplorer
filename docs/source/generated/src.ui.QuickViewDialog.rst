@@ -1,4 +1,4 @@
-﻿src.ui.QuickViewDialog
+src.ui.QuickViewDialog
 ======================
 
 .. automodule:: src.ui.QuickViewDialog

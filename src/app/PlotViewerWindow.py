@@ -241,7 +241,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
                 # Save functionality for pyqtgraph
                 export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
                 export.show(canvas.getItem(0, 0).getViewBox())
-                export.exec_()
+                export.exec()
                 
     def save_plot(self, action):
         """Sorts analyte table in dialog"""        

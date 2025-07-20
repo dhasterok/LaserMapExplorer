@@ -1,4 +1,5 @@
 import sys, os, re, copy, random, darkdetect
+from datetime import datetime
 from PyQt6.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF )
 from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
@@ -1727,12 +1728,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             NoteTaking
         """            
         if not hasattr(self, 'notes'):
-            if hasattr(self,'selected_directory') and self.app_data.sample_id != '':
+            if hasattr(self.app_data,'selected_directory') and self.app_data.sample_id != '':
                 notes_file = os.path.join(self.app_data.selected_directory,f"{self.app_data.sample_id}.rst")
             else:
                 notes_file = None
 
             self.notes = Notes(self, notes_file)
+            info_menu_items = [
+                ('Sample info', lambda: self.insert_info_note('sample info')),
+                ('List analytes used', lambda: self.insert_info_note('analytes')),
+                ('Current plot details', lambda: self.insert_info_note('plot info')),
+                ('Filter table', lambda: self.insert_info_note('filters')),
+                ('PCA results', lambda: self.insert_info_note('pca results')),
+                ('Cluster results', lambda: self.insert_info_note('cluster results'))
+            ]
+            self.notes.info_menu_items = info_menu_items
 
             self.notes.update_equation_menu()
 
@@ -1741,6 +1751,71 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.notes.show()
         #self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+
+    def insert_info_note(self, infotype):
+        data = self.data[self.app_data.sample_id]
+
+        match infotype:
+            case 'sample info':
+                text = f'**Sample ID: {self.app_data.sample_id}**\n'
+                text += '*' * (len(self.app_data.sample_id) + 15) + '\n'
+                text += f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n'
+                text += ':User: Your name here\n\n'
+                self.notes.print_info(text)
+            case 'analytes':
+                analytes = data.processed_data.match_attribute('data_type', 'Analyte')
+                ratios = data.processed_data.match_attribute('data_type', 'Ratio')
+                text = ''
+                if analytes:
+                    text += ':analytes collected: '+', '.join(analytes)
+                    text += '\n'
+                if ratios:
+                    text += ':ratios computed: '+', '.join(ratios)
+                    text += '\n'
+                text += '\n'
+                self.notes.print_info(text)
+            case 'plot info':
+                if self.plot_info:
+                    text = ['\n\n:plot type: '+self.plot_info['plot_type'],
+                            ':plot name: '+self.plot_info['plot_name']+'\n']
+                    text = '\n'.join(text)
+                    self.notes.print_info(text)
+            case 'filters':
+                rst_table = self.notes.to_rst_table(data.filter_df)
+
+                self.notes.print_info(rst_table)
+            case 'pca results':
+                if not self.pca_results:
+                    return
+
+                # Retrieve analytes matching specified attributes
+                analytes = data.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
+                analytes = np.insert(analytes, 0, 'lambda')  # Insert 'lambda' at the start of the analytes array
+
+                # Calculate explained variance in percentage
+                explained_variance = self.pca_results.explained_variance_ratio_ * 100
+
+                # Retrieve PCA score headers matching the attribute condition
+                header = data.processed_data.match_attributes({'data_type': 'PCA score'})
+
+                # Create a matrix with explained variance and PCA components
+                matrix = np.vstack([explained_variance, self.pca_results.components_])
+
+                # Filter matrix and header based on the MaxVariance option
+                variance_mask = np.cumsum(explained_variance) <= self.options['MaxVariance']
+                matrix = matrix[:, variance_mask]  # Keep columns where variance is <= MaxVariance
+                header = np.array(header)[variance_mask]  # Apply the same filter to the header
+
+                # Limit the number of columns based on MaxColumns option
+                if self.options['MaxColumns'] is not None and  matrix.shape[1] > self.options['MaxColumns']:
+                    header = np.concatenate([[analytes[0]], header[:self.options['MaxColumns']]])  # Include 'lambda' in header
+                    matrix = matrix[:, :self.options['MaxColumns']]  # Limit matrix columns
+
+                # add PCA results to table
+                self.add_table_note(matrix, row_labels=analytes, col_labels=header)
+            case 'cluster results':
+                if not self.parent.cluster_results:
+                    return
 
 
     def open_calculator(self):

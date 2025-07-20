@@ -164,7 +164,11 @@ class StyleData(Observable):
         self.logger_key = 'Style'
 
 
-        self.ui = parent.ui
+        if hasattr(parent,"ui"):
+            self.ui = parent.ui
+        else:
+            self.ui = parent
+
         self.app_data = parent.app_data
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
@@ -1150,7 +1154,7 @@ class StyleTheme():
     def __init__(self, parent=None):
 
         self.logger_key = 'Style'
-        self.ui = parent.ui
+        self.ui = parent
 
     # Themes
     # -------------------------------------

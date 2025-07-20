@@ -20,4 +20,3 @@
    PreferencesWindow
    QuickViewDialog
    SpotImportDialog
-   resources_rc

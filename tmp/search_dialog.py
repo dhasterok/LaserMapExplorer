@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
 
     def show_search_help(self):
         search_dialog = SearchHelpDialog()
-        search_dialog.exec_()
+        search_dialog.exec()
 
 class SearchHelpDialog(QMainWindow):
     def __init__(self):
@@ -72,4 +72,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

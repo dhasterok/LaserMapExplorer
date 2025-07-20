@@ -1,8 +1,14 @@
-src.common.NoteTaking
+﻿src.common.NoteTaking
 =====================
 
 .. automodule:: src.common.NoteTaking
 
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      convert_rst_to_html
    
    .. rubric:: Classes
 
@@ -10,4 +16,5 @@ src.common.NoteTaking
    
       NoteOptionsDialog
       Notes
+      NotesFormatter
    

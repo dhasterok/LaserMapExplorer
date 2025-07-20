@@ -1005,14 +1005,14 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
         case 'pca scatter' | 'pca heatmap':
             scatter_dict['x'] = data.get_vector('pca score', f'PC{app_data.dim_red_x}', norm=plot_style.xscale)
             scatter_dict['y'] = data.get_vector('pca score', f'PC{app_data.dim_red_y}', norm=plot_style.yscale)
-            if (app_data.c_field_type is None) or (app_data.c_field != ''):
+            if app_data.c_field_type and app_data.c_field and app_data.c_field.lower() not in ['', 'none']:
                 scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field)
         case _:
             scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=plot_style.xscale)
             scatter_dict['y'] = data.get_vector(app_data.y_field_type, app_data.y_field, norm=plot_style.yscale)
-            if (app_data.c_field_type is not None) and (app_data.c_field != ''):
+            if app_data.z_field_type and app_data.z_field and app_data.z_field.lower() not in ['', 'none']:
                 scatter_dict['z'] = data.get_vector(app_data.z_field_type, app_data.z_field, norm=plot_style.zscale)
-            elif (app_data.z_field_type is not None) and (app_data.z_field != ''):
+            if app_data.c_field_type and app_data.c_field and app_data.c_field.lower() not in ['', 'none']:
                 scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=plot_style.cscale)
 
     # set axes widgets
@@ -1077,7 +1077,8 @@ def plot_scatter(parent, data, app_data, plot_style, canvas=None):
 
     # get data for plotting
     scatter_dict = get_scatter_data(data, app_data, plot_style)
-    if (scatter_dict['x']['field'] == '') or (scatter_dict['y']['field'] == ''):
+    if (scatter_dict['x']['field'] == '') or (scatter_dict['y']['field'] == '') \
+        or scatter_dict['x']['field'] == scatter_dict['y']['field']:
         return
 
     plot_flag = False
@@ -1088,7 +1089,9 @@ def plot_scatter(parent, data, app_data, plot_style, canvas=None):
     match plot_type.split()[-1]:
         # scatter
         case 'scatter':
-            if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == ''):
+            if (scatter_dict['z']['field'] is None) or (scatter_dict['z']['field'] == '') \
+                or scatter_dict['z']['field'] == scatter_dict['x']['field'] \
+                or scatter_dict['z']['field'] == scatter_dict['y']['field']:
                 # biplot
                 plot_info = biplot(
                     canvas, data, app_data, plot_style,

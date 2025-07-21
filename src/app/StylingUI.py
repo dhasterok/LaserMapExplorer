@@ -64,6 +64,8 @@ class StylingDock(StyleData, StyleTheme):
         
         self.ui.comboBoxMarker.clear()
         self.ui.comboBoxMarker.addItems(self.marker_dict.keys())
+        self.ui.comboBoxMarker.setCurrentIndex(0)
+        self.ui.comboBoxMarker.activated.connect(lambda _: self.update_marker_symbol())
 
         self._plot_type = "field map"
 
@@ -158,18 +160,17 @@ class StylingDock(StyleData, StyleTheme):
         #self.ui.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
         #self.ui.lineEditScaleLength.editingFinished.connect(lambda: setattr(self, 'scale_length', self.ui.lineEditScaleLength.value))
         #overlay color
-        #self.ui.comboBoxMarker.activated.connect(self.marker_symbol_callback)
-        #self.ui.doubleSpinBoxMarkerSize.valueChanged.connect(self.marker_size_callback)
+        self.ui.doubleSpinBoxMarkerSize.valueChanged.connect(lambda _: self.update_marker_size())
         #self.ui.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
         # lines
-        #self.ui.doubleSpinBoxLineWidth.valueChanged.connect(self.line_width_callback)
+        self.ui.doubleSpinBoxLineWidth.valueChanged.connect(lambda _: self.update_line_width())
         #self.ui.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
         # colors
         # marker color
         #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
         #self.ui.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
         # resolution
-        #self.ui.spinBoxHeatmapResolution.valueChanged.connect(self.resolution_callback)
+        self.ui.spinBoxHeatmapResolution.valueChanged.connect(lambda _: self.update_resolution())
 
         # ternary colormaps
         self._ternary_colormap = ""
@@ -223,11 +224,11 @@ class StylingDock(StyleData, StyleTheme):
         self.add_observer("scale_length", self.update_scale_length_lineedit)
         self.add_observer("overlay_color", self.update_overlay_color_toolbutton)
         self.add_observer("show_mass", self.update_show_mass_checkbox)
-        self.add_observer("marker_symbol", self.update_marker_symbol_combobox)
-        self.add_observer("marker_size", self.update_marker_size_spinbox)
+        self.add_observer("marker_symbol", self.update_marker_symbol)
+        self.add_observer("marker_size", self.update_marker_size)
         self.add_observer("marker_color", self.update_marker_color_toolbutton)
         self.add_observer("marker_alpha", self.update_marker_alpha_slider)
-        self.add_observer("line_width", self.update_line_width_combobox)
+        self.add_observer("line_width", self.update_line_width)
         self.add_observer("line_multiplier", self.update_line_multiplier_lineedit)
         self.add_observer("line_color", self.update_line_color_toolbutton)
         self.add_observer("cmap", self.update_cmap_combobox)
@@ -236,7 +237,7 @@ class StylingDock(StyleData, StyleTheme):
         self.add_observer("clim", self.update_clim_lineedits)
         self.add_observer("clabel", self.update_clabel_lineedit)
         self.add_observer("cscale", self.update_cscale_combobox)
-        self.add_observer("resolution", self.update_resolution_spinbox)
+        self.add_observer("resolution", self.update_resolution)
 
         # ternary maps
         self.add_observer("ternary_colormap", self.update_ternary_colormap)
@@ -512,16 +513,51 @@ class StylingDock(StyleData, StyleTheme):
     # ------------------------------------------------------------------
     # Marker
     # ------------------------------------------------------------------
-    def update_marker_symbol_combobox(self, new_marker_symbol):
-        if new_marker_symbol == self.ui.comboBoxMarker.currentText():
-            return
-        self.ui.comboBoxMarker.setCurrentText(new_marker_symbol)
+    def update_marker_symbol(self, new_marker=None):
+        """
+        Updates marker symbol combobox and triggers plot update.
+
+        If `new_marker` is None, it uses the current text of the combobox to set `self.marker`.
+        If `new_marker` is provided, it updates the `ui.comboBoxMarker` state accordingly.
+
+        Parameters
+        ----------
+        new_marker : float, optional
+            New marker for the combobox, by default None
+        """
+        if not new_marker:
+            self.new_marker = self.ui.comboBoxMarker.currentText()
+        else:
+            if new_marker == self.ui.comboBoxMarker.currentText():
+                return
+            
+            self.ui.comboBoxMarker.blockSignals(True)
+            self.ui.comboBoxMarker.setCurrentText(new_marker)
+            self.ui.comboBoxMarker.blockSignals(False)
+
         self.schedule_update()
 
-    def update_marker_size_spinbox(self, new_marker_size):
-        if new_marker_size == self.ui.doubleSpinBoxMarkerSize.value():
-            return
-        self.ui.doubleSpinBoxMarkerSize.setValue(new_marker_size)
+    def update_marker_size(self, new_size=None):
+        """
+        Updates marker size double spinbox and triggers plot update.
+
+        If `new_size` is None, it uses the current value of the spinbox to set `self.marker_size`.
+        If `new_size` is provided, it updates the `ui.doubleSpinBoxMarkerSize` state accordingly.
+
+        Parameters
+        ----------
+        new_size : float, optional
+            New size for the spinbox, by default None
+        """
+        if new_size:
+            self.marker_size = self.ui.doubleSpinBoxMarkerSize.value()
+        else:
+            if new_size == self.ui.doubleSpinBoxMarkerSize.value():
+                return
+            self.ui.doubleSpinBoxMarkerSize.blockSignals(True)
+            self.ui.doubleSpinBoxMarkerSize.setValue(new_size)
+            self.ui.doubleSpinBoxMarkerSize.blockSignals(False)
+
         self.schedule_update()
 
     def update_marker_color_toolbutton(self, new_color):
@@ -540,10 +576,28 @@ class StylingDock(StyleData, StyleTheme):
     # ------------------------------------------------------------------
     # Line
     # ------------------------------------------------------------------
-    def update_line_width_combobox(self, new_line_width):
-        if new_line_width == self.ui.doubleSpinBoxLineWidth.value():
-            return
-        self.ui.doubleSpinBoxLineWidth.setValue(new_line_width)
+    def update_line_width(self, new_width=None):
+        """
+        Updates line width double spinbox and triggers plot update.
+
+        If `new_width` is None, it uses the current value of the spinbox to set `self.line_width`.
+        If `new_width` is provided, it updates the `ui.doubleSpinBoxLineWidth` state accordingly.
+
+        Parameters
+        ----------
+        new_width : float, optional
+            New width for the spinbox, by default None
+        """
+        if not new_width:
+            self.line_width = self.ui.doubleSpinBoxLineWidth.value()
+        else:
+            if new_width == self.ui.doubleSpinBoxLineWidth.value():
+                return
+
+            self.ui.doubleSpinBoxLineWidth.blockSignals(True)
+            self.ui.doubleSpinBoxLineWidth.setValue(new_width)
+            self.ui.doubleSpinBoxLineWidth.blockSignals(False)
+
         self.schedule_update()
 
     def update_line_multiplier_lineedit(self, new_multiplier):
@@ -619,11 +673,19 @@ class StylingDock(StyleData, StyleTheme):
     # ------------------------------------------------------------------
     # Heat‑map resolution
     # ------------------------------------------------------------------
-    def update_resolution_spinbox(self, new_resolution):
-        if new_resolution == self.ui.spinBoxHeatmapResolution.value():
-            return
-        self.ui.spinBoxHeatmapResolution.setValue(new_resolution)
-        if self.plot_type.lower() == "heatmap":
+    def update_resolution(self, new_resolution=None):
+
+        if new_resolution:
+            self.resolution = self.ui.spinBoxHeatmapResolution.value()
+        else:
+            if new_resolution == self.ui.spinBoxHeatmapResolution.value():
+                return
+            
+            self.ui.spinBoxHeatmapResolution.blockSignals(True)
+            self.ui.spinBoxHeatmapResolution.setValue(new_resolution)
+            self.ui.spinBoxHeatmapResolution.blockSignals(False)
+
+        if self.plot_type.lower() == "heatmap" and self.ui.toolbox:
             self.schedule_update()
 
 
@@ -1989,28 +2051,6 @@ class StylingDock(StyleData, StyleTheme):
 
     # markers
     # -------------------------------------
-    def marker_symbol_callback(self):
-        """Updates marker symbol
-
-        Updates marker symbols on current plot on change of ``MainWindow.comboBoxMarker.currentText()``.
-        """
-        if self.marker == self.ui.comboBoxMarker.currentText():
-            return
-        self.marker = self.ui.comboBoxMarker.currentText()
-
-        self.schedule_update()
-
-    def marker_size_callback(self):
-        """Updates marker size
-
-        Updates marker size on current plot on change of ``MainWindow.doubleSpinBoxMarkerSize.value()``.
-        """
-        if self.marker_size == self.ui.doubleSpinBoxMarkerSize.value():
-            return
-        self.marker_size = self.ui.doubleSpinBoxMarkerSize.value()
-
-        self.schedule_update()
-
     def slider_alpha_changed(self):
         """Updates transparency on scatter plots.
 
@@ -2024,16 +2064,6 @@ class StylingDock(StyleData, StyleTheme):
 
     # lines
     # -------------------------------------
-    def line_width_callback(self):
-        """Updates line width
-
-        Updates line width on current plot on change of ``MainWindow.doubleSpinBoxLineWidth.value().
-        """
-        if self.line_width == float(self.ui.doubleSpinBoxLineWidth.value()):
-            return
-
-        self.line_width = float(self.ui.doubleSpinBoxLineWidth.value())
-        self.schedule_update()
 
     def length_multiplier_callback(self):
         """Updates line length multiplier
@@ -2087,15 +2117,6 @@ class StylingDock(StyleData, StyleTheme):
         self.marker_color = color
 
         # update plot
-        self.schedule_update()
-
-    def resolution_callback(self):
-        """Updates heatmap resolution
-
-        Updates the resolution of heatmaps when ``MainWindow.spinBoxHeatmapResolution`` is changed.
-        """
-        self.resolution = self.ui.spinBoxHeatmapResolution.value()
-
         self.schedule_update()
 
     # updates scatter styles when ColorByField comboBox is changed

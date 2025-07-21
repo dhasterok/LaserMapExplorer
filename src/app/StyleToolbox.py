@@ -7,11 +7,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods, log
+
+VALID_MARKERS = {k for k in Line2D.markers if isinstance(k, str) and k.strip()}
 
 class StyleObj():
     pass
@@ -180,7 +183,7 @@ class StyleData(Observable):
             'cluster score'
         ]
 
-        self.marker_dict = {
+        self._marker_dict = {
             'circle':'o',
             'square':'s',
             'diamond':'d',
@@ -226,6 +229,28 @@ class StyleData(Observable):
     # -------------------------------------
 
     @property
+    def marker_dict(self):
+        return self._marker_dict
+    
+    @marker_dict.setter
+    def marker_dict(self, new_dict):
+        if not isinstance(new_dict, dict):
+            raise TypeError("marker_dict must be a dictionary")
+
+        invalid = {k: v for k, v in new_dict.items() if v not in VALID_MARKERS}
+        if invalid:
+            raise ValueError(
+                f"Invalid marker values: {invalid}. "
+                f"Allowed markers are: {sorted(VALID_MARKERS)}"
+            )
+
+        self._marker_dict = new_dict
+
+        # at the moment, this is not needed though if the user was ever able to update the
+        # marker dictionary, this should allow it to automatically run an observer function.
+        self.notify_observers("marker_dict", self._marker_dict)
+        
+    @property
     def plot_type(self):
         return self._plot_type
 
@@ -236,30 +261,30 @@ class StyleData(Observable):
 
     @property
     def xfield(self):
-        return self.style_dict[self._plot_type]['XField']
+        return self.style_dict[self.plot_type]['XField']
 
     @xfield.setter
     def xfield(self, value):
-        self.style_dict[self._plot_type]['XField'] = value
+        self.style_dict[self.plot_type]['XField'] = value
         self.notify_observers("xfield", value)
 
     @property
     def xfield_type(self):
-        return self.style_dict[self._plot_type]['XFieldType']
+        return self.style_dict[self.plot_type]['XFieldType']
 
     @xfield_type.setter
     def xfield_type(self, value):
-        self.style_dict[self._plot_type]['XFieldType'] = value
+        self.style_dict[self.plot_type]['XFieldType'] = value
         self.notify_observers("xfield_type", value)
     
     @property
     def xlim(self):
-        return self.style_dict[self._plot_type]['XLim']
+        return self.style_dict[self.plot_type]['XLim']
 
     @xlim.setter
     def xlim(self, value):
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['XLim'] = value
+            self.style_dict[self.plot_type]['XLim'] = value
             self.notify_observers("xlim", value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
@@ -267,213 +292,213 @@ class StyleData(Observable):
 
     @property
     def xlabel(self):
-        return self.style_dict[self._plot_type]['XLabel']
+        return self.style_dict[self.plot_type]['XLabel']
 
     @xlabel.setter
     def xlabel(self, label):
         if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['XLabel'] = label
+            self.style_dict[self.plot_type]['XLabel'] = label
             self.notify_observers("xlabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
     @property
     def xscale(self):
-        return self.style_dict[self._plot_type]['XScale']
+        return self.style_dict[self.plot_type]['XScale']
 
     @xscale.setter
     def xscale(self, scale):
         if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['XScale'] = scale
+            self.style_dict[self.plot_type]['XScale'] = scale
             self.notify_observers("xscale", scale)
         else:
             raise TypeError("scale must be linear, log, logit, or symlog.")
         
     @property
     def yfield(self):
-        return self.style_dict[self._plot_type]['YField']
+        return self.style_dict[self.plot_type]['YField']
 
     @yfield.setter
     def yfield(self, value):
-        self.style_dict[self._plot_type]['YField'] = value      
+        self.style_dict[self.plot_type]['YField'] = value      
         self.notify_observers("yfield", value)
 
     @property
     def yfield_type(self):
-        return self.style_dict[self._plot_type]['YFieldType']
+        return self.style_dict[self.plot_type]['YFieldType']
 
     @yfield_type.setter
     def yfield_type(self, value):
-        self.style_dict[self._plot_type]['YFieldType'] = value
+        self.style_dict[self.plot_type]['YFieldType'] = value
         self.notify_observers("yfield_type", value)
 
     @property
     def ylim(self):
-        return self.style_dict[self._plot_type]['YLim']
+        return self.style_dict[self.plot_type]['YLim']
 
     @ylim.setter
     def ylim(self, value):
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['YLim'] = value
+            self.style_dict[self.plot_type]['YLim'] = value
             self.notify_observers("ylim", value)
         else:
             raise ValueError("ylim must be a list of two floats or None.")
 
     @property
     def ylabel(self):
-        return self.style_dict[self._plot_type]['YLabel']
+        return self.style_dict[self.plot_type]['YLabel']
 
     @ylabel.setter
     def ylabel(self, label):
         if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['YLabel'] = label
+            self.style_dict[self.plot_type]['YLabel'] = label
             self.notify_observers("ylabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
     @property
     def yscale(self):
-        return self.style_dict[self._plot_type]['YScale']
+        return self.style_dict[self.plot_type]['YScale']
 
     @yscale.setter
     def yscale(self, scale):
         if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['YScale'] = scale
+            self.style_dict[self.plot_type]['YScale'] = scale
             self.notify_observers("yscale", scale)
         else:
             raise TypeError("scale must be linear, log, logit, or symlog.")
 
     @property
     def zlim(self):
-        return self.style_dict[self._plot_type]['ZLim']
+        return self.style_dict[self.plot_type]['ZLim']
 
     @zlim.setter
     def zlim(self, value):
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['ZLim'] = value
+            self.style_dict[self.plot_type]['ZLim'] = value
             self.notify_observers("zlim", value)
         else:
             raise ValueError("zlim must be a list of two floats or None.")
 
     @property
     def zlabel(self):
-        return self.style_dict[self._plot_type]['ZLabel']
+        return self.style_dict[self.plot_type]['ZLabel']
 
     @zlabel.setter
     def zlabel(self, label):
         if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['ZLabel'] = label
+            self.style_dict[self.plot_type]['ZLabel'] = label
             self.notify_observers("zlabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
     @property
     def zscale(self):
-        return self.style_dict[self._plot_type]['ZScale']
+        return self.style_dict[self.plot_type]['ZScale']
 
     @zscale.setter
     def zscale(self, scale):
         if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['ZScale'] = scale
+            self.style_dict[self.plot_type]['ZScale'] = scale
             self.notify_observers("zscale", scale)
         else:
             raise TypeError("scale must be linear, log, logit,  or symlog.")
 
     @property
     def aspect_ratio(self):
-        return self.style_dict[self._plot_type]['AspectRatio']
+        return self.style_dict[self.plot_type]['AspectRatio']
 
     @aspect_ratio.setter
     def aspect_ratio(self, value):
         if value is None or isinstance(value, float):
-            self.style_dict[self._plot_type]['AspectRatio'] = value
+            self.style_dict[self.plot_type]['AspectRatio'] = value
             self.notify_observers("aspect_ratio", value)
         else:
             raise TypeError("aspect_ratio must be of type float or None.")
 
     @property
     def tick_dir(self):
-        return self.style_dict[self._plot_type]['TickDir']
+        return self.style_dict[self.plot_type]['TickDir']
 
     @tick_dir.setter
     def tick_dir(self, new_dir):
         if isinstance(new_dir, str):
-            self.style_dict[self._plot_type]['TickDir'] = new_dir
+            self.style_dict[self.plot_type]['TickDir'] = new_dir
             self.notify_observers("tick_dir", new_dir)
         else:
             raise TypeError("tickdir must be of type str.")
 
     @property
     def font(self):
-        return self.style_dict[self._plot_type]['Font']
+        return self.style_dict[self.plot_type]['Font']
 
     @font.setter
     def font(self, font_family):
         if isinstance(font_family, str):
-            self.style_dict[self._plot_type]['Font'] = font_family
+            self.style_dict[self.plot_type]['Font'] = font_family
             self.notify_observers("font_family", font_family)
         else:
             raise TypeError("font_family must be of type str.")
 
     @property
     def font_size(self):
-        return self.style_dict[self._plot_type]['FontSize']
+        return self.style_dict[self.plot_type]['FontSize']
 
     @font_size.setter
     def font_size(self, value):
         if isinstance(value, float):
-            self.style_dict[self._plot_type]['FontSize'] = value
+            self.style_dict[self.plot_type]['FontSize'] = value
             self.notify_observers("font_size", value)
         else:
             raise TypeError("font_size must be of type float.")
 
     @property
     def scale_dir(self):
-        return self.style_dict[self._plot_type]['ScaleDir']
+        return self.style_dict[self.plot_type]['ScaleDir']
 
     @scale_dir.setter
     def scale_dir(self, new_dir):
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
-            self.style_dict[self._plot_type]['ScaleDir'] = new_dir
+            self.style_dict[self.plot_type]['ScaleDir'] = new_dir
             self.notify_observers("scale_dir", new_dir)
         else:
             raise TypeError("new_dir must be of type str.")
 
     @property
     def scale_location(self):
-        return self.style_dict[self._plot_type]['ScaleLocation']
+        return self.style_dict[self.plot_type]['ScaleLocation']
 
     @scale_location.setter
     def scale_location(self, location):
         if (location is not None) and isinstance(location, str) and (location in ['northeast', 'northwest', 'southwest', 'southeast']):
-            self.style_dict[self._plot_type]['ScaleLocation'] = location
+            self.style_dict[self.plot_type]['ScaleLocation'] = location
         else:
             raise TypeError("location must be of type str.")
 
     @property
     def scale_length(self):
-        return self.style_dict[self._plot_type]['ScaleLength']
+        return self.style_dict[self.plot_type]['ScaleLength']
 
     @scale_length.setter
     def scale_length(self, length):
         if length is None or isinstance(length, float):
             x_range = self.xlim[1] - self.xlim[0] if self.xlim else None
             y_range = self.ylim[1] - self.ylim[0] if self.ylim else None
-            scale_dir = self.style_dict[self._plot_type]['ScaleDir']
+            scale_dir = self.style_dict[self.plot_type]['ScaleDir']
             if (length is None) or ((length <= 0) or (scale_dir == 'horizontal' and x_range and length > x_range) or (scale_dir == 'vertical' and y_range and length > y_range)):
                 length = self.default_scale_length()
-            self.style_dict[self._plot_type]['ScaleLength'] = length
+            self.style_dict[self.plot_type]['ScaleLength'] = length
         else:
             raise TypeError("length must be of type float.")
 
     @property
     def overlay_color(self):
-        return self.style_dict[self._plot_type]['OverlayColor']
+        return self.style_dict[self.plot_type]['OverlayColor']
 
     @overlay_color.setter
     def overlay_color(self, hexstr):
         if hexstr is None or self._is_valid_hex_color(hexstr):
-            self.style_dict[self._plot_type]['OverlayColor'] = hexstr
+            self.style_dict[self.plot_type]['OverlayColor'] = hexstr
         else:
             raise TypeError("color must be a hex string, #rrggbb")
 
@@ -488,160 +513,171 @@ class StyleData(Observable):
 
     @property
     def marker(self):
-        return self.style_dict[self._plot_type]['Marker']
+        return self.style_dict[self.plot_type]['Marker']
 
     @marker.setter
     def marker(self, symbol):
         if isinstance(symbol, str):
-            self.style_dict[self._plot_type]['Marker'] = symbol
+            self.style_dict[self.plot_type]['Marker'] = symbol
         else:
             raise TypeError("marker_symbol must be of type str.")
 
     @property
     def marker_size(self):
-        return self.style_dict[self._plot_type]['MarkerSize']
+        return self.style_dict[self.plot_type]['MarkerSize']
 
     @marker_size.setter
     def marker_size(self, size):
         if isinstance(size, float):
-            self.style_dict[self._plot_type]['MarkerSize'] = size
+            self.style_dict[self.plot_type]['MarkerSize'] = size
         else:
             raise TypeError("size must be of type int.")
 
     @property
     def marker_color(self):
-        return self.style_dict[self._plot_type]['MarkerColor']
+        return self.style_dict[self.plot_type]['MarkerColor']
 
     @marker_color.setter
     def marker_color(self, hexstr):
         if hexstr is None or self._is_valid_hex_color(hexstr):
-            self.style_dict[self._plot_type]['MarkerColor'] = hexstr
+            self.style_dict[self.plot_type]['MarkerColor'] = hexstr
         else:
             raise TypeError("hexstr must be a hex string, #rrggbb")
 
     @property
     def marker_alpha(self):
-        return self.style_dict[self._plot_type]['MarkerAlpha']
+        return self.style_dict[self.plot_type]['MarkerAlpha']
 
     @marker_alpha.setter
     def marker_alpha(self, alpha):
         if isinstance(alpha, float) and 0 <= alpha <= 100:
-            self.style_dict[self._plot_type]['MarkerAlpha'] = alpha
+            self.style_dict[self.plot_type]['MarkerAlpha'] = alpha
         else:
             raise TypeError("alpha must be of type float and [0,100].")
 
     @property
     def line_width(self):
-        return self.style_dict[self._plot_type]['LineWidth']
+        return self.style_dict[self.plot_type]['LineWidth']
 
     @line_width.setter
     def line_width(self, width):
         if isinstance(width, float):
-            self.style_dict[self._plot_type]['LineWidth'] = width
+            self.style_dict[self.plot_type]['LineWidth'] = width
         else:
             raise TypeError("width must be of type float.")
 
     @property
     def line_multiplier(self):
-        return self.style_dict[self._plot_type]['LineMultiplier']
+        return self.style_dict[self.plot_type]['LineMultiplier']
 
     @line_multiplier.setter
     def line_multiplier(self, value):
         if value is None or isinstance(value, float):
-            self.style_dict[self._plot_type]['LineMultiplier'] = value
+            self.style_dict[self.plot_type]['LineMultiplier'] = value
         else:
             raise TypeError("value must be of type float or None.")
 
     @property
     def line_color(self):
-        return self.style_dict[self._plot_type]['LineColor']
+        return self.style_dict[self.plot_type]['LineColor']
 
     @line_color.setter
     def line_color(self, hexstr):
         if hexstr is None or self._is_valid_hex_color(hexstr):
-            self.style_dict[self._plot_type]['LineColor'] = hexstr
+            self.style_dict[self.plot_type]['LineColor'] = hexstr
         else:
             raise TypeError("hexstr must be a hex string, #rrggbb")
 
     @property
     def cmap(self):
-        return self.style_dict[self._plot_type]['Colormap']
+        return self.style_dict[self.plot_type]['Colormap']
 
     @cmap.setter
     def cmap(self, name):
         if (name is None) or isinstance(name, str):
-            self.style_dict[self._plot_type]['Colormap'] = name
+            self.style_dict[self.plot_type]['Colormap'] = name
         else:
             raise TypeError("name must be of type str or None.")
 
     @property
     def cbar_reverse(self):
-        return self.style_dict[self._plot_type]['CbarReverse']
+        return self.style_dict[self.plot_type]['CbarReverse']
 
     @cbar_reverse.setter
     def cbar_reverse(self, flag):
         if (flag is None) or isinstance(flag, bool):
-            self.style_dict[self._plot_type]['CbarReverse'] = flag
+            self.style_dict[self.plot_type]['CbarReverse'] = flag
         else:
             raise TypeError("flag must be of type bool or None.")
 
     @property
     def cbar_dir(self):
-        return self.style_dict[self._plot_type]['CbarDir']
+        return self.style_dict[self.plot_type]['CbarDir']
 
     @cbar_dir.setter
     def cbar_dir(self, new_dir):
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
-            self.style_dict[self._plot_type]['CbarDir'] = new_dir
+            self.style_dict[self.plot_type]['CbarDir'] = new_dir
         else:
             raise TypeError("new_dir must be of type str.")
 
     @property
     def clim(self):
-        return self.style_dict[self._plot_type]['CLim']
+        return self.style_dict[self.plot_type]['CLim']
 
     @clim.setter
     def clim(self, value):
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self._plot_type]['CLim'] = value
+            self.style_dict[self.plot_type]['CLim'] = value
             self.notify_observers("clim", value)
         else:
             raise ValueError("clim must be a list of two floats or None.")
 
     @property
     def clabel(self):
-        return self.style_dict[self._plot_type]['CLabel']
+        return self.style_dict[self.plot_type]['CLabel']
 
     @clabel.setter
     def clabel(self, label):
         if label is None or isinstance(label, str):
-            self.style_dict[self._plot_type]['CLabel'] = label
+            self.style_dict[self.plot_type]['CLabel'] = label
             self.notify_observers("clabel", label)
         else:
             raise TypeError("label must be of type str or None.")
 
     @property
     def cscale(self):
-        return self.style_dict[self._plot_type]['CScale']
+        return self.style_dict[self.plot_type]['CScale']
 
     @cscale.setter
     def cscale(self, scale):
         if self._is_valid_scale(scale):
-            self.style_dict[self._plot_type]['CScale'] = scale
+            self.style_dict[self.plot_type]['CScale'] = scale
             self.notify_observers("cscale", scale)
         else:
             raise TypeError("scale must be linear, log, logit, or symlog.")
 
     @property
     def resolution(self):
-        return self.style_dict[self._plot_type]['Resolution']
+        """int : Resolution for heatmaps.
+        
+        Raises
+        ------
+        TypeError
+            Value must be float or None.
+        """
+        return self.style_dict[self.plot_type]['Resolution']
 
     @resolution.setter
     def resolution(self, value):
-        if value is None or isinstance(value, float):
-            self.style_dict[self._plot_type]['Resolution'] = value
+        if value is None or isinstance(value, int):
+            if value == self.style_dict[self.plot_type]['Resolution']:
+                return
+            self.style_dict[self.plot_type]['Resolution'] = value
         else:
-            raise TypeError("value must be an integer or None.")
+            raise TypeError("value must be an int or None.")
+
+        self.notify_observers("resolution", value)
 
     ### Ternary Map ###
     @property
@@ -740,7 +776,7 @@ class StyleData(Observable):
         float
             Length of scalebar dependent on direction of scalebar.
         """        
-        if (self._plot_type not in self.map_plot_types) or (self.scale_dir == 'none'):
+        if (self.plot_type not in self.map_plot_types) or (self.scale_dir == 'none'):
             return None
 
         x_range = self.xlim[1] - self.xlim[0]
@@ -818,7 +854,7 @@ class StyleData(Observable):
                 'axis_widgets': [True, True, True, True],
                 'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, True, False],
-                'spinbox': [True, True, True, True],
+                'spinbox': [True, True, True, False],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'ternary map': {
@@ -950,7 +986,7 @@ class StyleData(Observable):
             Style dictionary for the current plot type. Defaults to ``None``
         """
         if not plot_type:
-            plot_type = self._plot_type
+            plot_type = self.plot_type
         
         style = self.style_dict[plot_type]
                 
@@ -1352,7 +1388,7 @@ class StyleTheme():
                 'Colormap': 'viridis',
                 'CbarReverse': False,
                 'CbarDir': 'vertical',
-                'Resolution': 10.0
+                'Resolution': int(10)
                 }
 
         # try to load one of the preferred fonts

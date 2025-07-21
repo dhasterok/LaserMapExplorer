@@ -79,13 +79,15 @@ class PlotTree(CustomDockWidget):
 
         self.actionRemovePlot = QAction(parent=self)
         self.actionRemovePlot.setFont(font)
-        self.actionRemovePlot.setIcon(QIcon(":/resources/icons/icon-delete-64.svg"))
+        icon_remove = QIcon(":resources/icons/icon-delete-64.svg")
+        self.actionRemovePlot.setIcon(icon_remove)
         self.actionRemovePlot.setObjectName("actionRemovePlot")
         self.actionRemovePlot.setToolTip("Remove selected plot from plot tree")
 
         self.actionRemoveAllPlots = QAction(parent=self)
         self.actionRemoveAllPlots.setFont(font)
-        self.actionRemoveAllPlots.setIcon(QIcon(":/resources/icons/icon-delete-all-64.svg"))
+        icon_remove_all = QIcon(":resources/icons/icon-delete-all-64.svg")
+        self.actionRemoveAllPlots.setIcon(icon_remove_all)
         self.actionRemoveAllPlots.setObjectName("actionRemoveAllPlots")
         self.actionRemoveAllPlots.setToolTip("Remove all plots from plot tree")
 

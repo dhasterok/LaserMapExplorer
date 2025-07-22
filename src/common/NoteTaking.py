@@ -2,7 +2,7 @@ from pathlib import Path
 import re, subprocess
 from PyQt6.QtCore import ( Qt, QTimer, QSize, QUrl )
 from PyQt6.QtWidgets import (
-        QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QTextEdit, QSizePolicy,
+        QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QSizePolicy,
         QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout, QSplitter
     )
 from PyQt6.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator, QAction )
@@ -13,6 +13,7 @@ import pandas as pd
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string, publish_file
 import src.common.format as fmt
+from src.common.CodingWidgets import CodeEditor, RstHighlighter
 from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
 from src.common.Logger import LoggerConfig, auto_log_methods, log
@@ -115,18 +116,39 @@ class Notes(CustomDockWidget):
         Parent must be an instance of QMainWindow.
     """        
     def __init__(self, parent=None, filename=None, title='Notes'):
-        if not isinstance(parent, QMainWindow):
+        if not parent or not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.logger_key = 'Notes'
 
-        self.parent = parent
+        self.ui = parent
+        self.title = title
 
         self._notes_file = None
 
         self.options = {'MaxColumns': None, 'MaxVariance': 95}
 
+        self.setupUI()
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        self.connect_widgets()
+
+        # autosave notes
+        self.autosaveTimer = QTimer()
+        self.autosaveTimer.setInterval(300000)
+
+        if self.notes_file is not None:
+            try:
+                self.autosaveTimer.timeout.connect(self.notes_file)
+            except:
+                QMessageBox.warning(self, "Warning", f"Autosave could not save notes to file ({self.notes_file}).")
+
+        # initialize notes file and pdf preview
+        self.notes_file = filename
+        self.update_preview_icon()
+        self.toggle_preview_notes()
+
+    def setupUI(self):
         container = QWidget()
 
         # Create the layout within parent.tabWorkflow
@@ -136,6 +158,10 @@ class Notes(CustomDockWidget):
         self.toolbar = QToolBar("Notes Toolbar", self)
         self.toolbar.setIconSize(QSize(24, 24))
         self.toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+
+        self.action_wrap = QAction("Toggle Word Wrap", self)
+        self.action_wrap.setCheckable(True)
+        self.action_wrap.setChecked(True)
 
         # header button and menu
         header_icon = ":resources/icons/icon-heading-64.svg"
@@ -236,7 +262,7 @@ class Notes(CustomDockWidget):
             ('Inline math', lambda: self.format_text('inline math')),
             ('Display math', lambda: self.format_text('display math')),
             ('Calculated field', [
-                (eq_name, callback) for eq_name, callback in self.parent.calc_dict.items()
+                (eq_name, callback) for eq_name, callback in self.ui.calc_dict.items()
             ])
         ]
         self.action_math = CustomActionMenu(math_icon, "Insert equation", math_menu_items, self)
@@ -298,11 +324,14 @@ class Notes(CustomDockWidget):
         self.action_recompile.setIcon(self.recompile_icon)
 
         # Create Text Edit region for ReST Notes
-        self.text_edit = QTextEdit()
+        self.text_edit = CodeEditor()
         self.text_edit.setFont(QFont("Monaco", 10))
         self.text_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.text_edit.setMaximumSize(QSize(524287, 524287))
         self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
+
+        # Syntax highlighting
+        self.highlighter = RstHighlighter(self.text_edit.document())
 
         # Create search
         self.search_widget = SearchWidget(self.text_edit, self, enable_replace=True, realtime=False)
@@ -369,11 +398,12 @@ class Notes(CustomDockWidget):
         self.setWidget(container)
 
         self.setFloating(True)
-        self.setWindowTitle(title)
+        self.setWindowTitle(self.title)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
+    def connect_widgets(self):
+        self.action_wrap.triggered.connect(lambda checked: self.text_edit.setWordWrap(checked))
         self.action_bold.triggered.connect(lambda: self.format_text('bold'))
         self.action_italic.triggered.connect(lambda: self.format_text('italic'))
         self.action_literal.triggered.connect(lambda: self.format_text('literal'))
@@ -391,20 +421,6 @@ class Notes(CustomDockWidget):
         self.action_recompile.triggered.connect(lambda _: self.update_notes_view())
         self.action_export.triggered.connect(lambda: self.action_preview_pdf.setEnabled(True)) # compile rst
 
-        # autosave notes
-        self.autosaveTimer = QTimer()
-        self.autosaveTimer.setInterval(300000)
-
-        if self.notes_file is not None:
-            try:
-                self.autosaveTimer.timeout.connect(self.notes_file)
-            except:
-                QMessageBox.warning(self, "Warning", f"Autosave could not save notes to file ({self.notes_file}).")
-
-        # initialize notes file and pdf preview
-        self.notes_file = filename
-        self.update_preview_icon()
-        self.toggle_preview_notes()
 
     @property
     def notes_file(self):
@@ -486,6 +502,16 @@ class Notes(CustomDockWidget):
                 self.toolbar.insertAction(self.action_options, self.action_info)
             elif not self._info_menu_items and self.action_info in self.toolbar.actions():
                 self.toolbar.removeAction(self.action_info)
+
+    def toggleWrap(self, state):
+        """Toggles word wrapping in text editing widget.
+        
+        Parameters
+        ----------
+        state : bool
+            `True` turns wrapping on
+        """
+        self.text_edit.setWordWrap(state == Qt.CheckState.Checked)
     
     def update_preview_icon(self):
         """Set preview PDF icon based on `action_preview_pdf` checked state."""
@@ -546,7 +572,7 @@ class Notes(CustomDockWidget):
 
     def update_equation_menu(self):
         new_items = [
-                (eq_name, lambda: self.write_equation(equation)) for eq_name, equation in self.parent.calc_dict.items()
+                (eq_name, lambda: self.write_equation(equation)) for eq_name, equation in self.ui.calc_dict.items()
             ]
         self.action_math.update_submenu("Calculated field", new_items)
 
@@ -698,7 +724,7 @@ class Notes(CustomDockWidget):
 
         #code to make bulleted list here
         # Split the selected text into lines
-        lines = selected_text.split('\u2029')  # QTextEdit uses Unicode Paragraph Separator for newlines
+        lines = selected_text.split('\u2029')  # QPlainTextEdit uses Unicode Paragraph Separator for newlines
 
         # Create the formatted list
         formatted_list = "\n".join(f"{symbol} {line.strip()}" for line in lines if line.strip())
@@ -849,73 +875,6 @@ class Notes(CustomDockWidget):
             updated_text = f"{plain_text.rstrip()}\n\n{references_section}\n\n{hyperlink_text}\n"
 
         self.text_edit.setPlainText(updated_text)
-
-    def insert_info(self, infotype):
-        """Adds preformatted notes
-
-        Parameters
-        ----------
-        infotype : str
-            Name of preformatted information
-        """
-
-        data = self.parent.data[self.parent.app_data.sample_id]
-
-        match infotype:
-            case 'sample info':
-                self.text_edit.insertPlainText(f'**Sample ID: {self.parent.app_data.sample_id}**\n')
-                self.text_edit.insertPlainText('*' * (len(self.parent.app_data.sample_id) + 15) + '\n')
-                self.text_edit.insertPlainText(f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n')
-                # width/height
-                # list of all analytes
-                self.text_edit.insertPlainText(':User: Your name here\n')
-            case 'analytes':
-                analytes = data.processed_data.match_attribute('data_type', 'Analyte')
-                ratios = data.processed_data.match_attribute('data_type', 'Ratio')
-                if analytes:
-                    self.text_edit.insertPlainText('\n\n:analytes used: '+', '.join(analytes))
-                if ratios:
-                    self.text_edit.insertPlainText('\n\n:ratios used: '+', '.join(ratios))
-            case 'plot info':
-                text = ['\n\n:plot type: '+self.parent.plot_info['plot_type'],
-                        ':plot name: '+self.parent.plot_info['plot_name']+'\n']
-                self.text_edit.insertPlainText('\n'.join(text))
-            case 'filters':
-                rst_table = self.to_rst_table(data.filter_df)
-
-                self.text_edit.insertPlainText(rst_table)
-            case 'pca results':
-                if not self.parent.pca_results:
-                    return
-
-                # Retrieve analytes matching specified attributes
-                analytes = data.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
-                analytes = np.insert(analytes, 0, 'lambda')  # Insert 'lambda' at the start of the analytes array
-
-                # Calculate explained variance in percentage
-                explained_variance = self.parent.pca_results.explained_variance_ratio_ * 100
-
-                # Retrieve PCA score headers matching the attribute condition
-                header = data.processed_data.match_attributes({'data_type': 'PCA score'})
-
-                # Create a matrix with explained variance and PCA components
-                matrix = np.vstack([explained_variance, self.parent.pca_results.components_])
-
-                # Filter matrix and header based on the MaxVariance option
-                variance_mask = np.cumsum(explained_variance) <= self.options['MaxVariance']
-                matrix = matrix[:, variance_mask]  # Keep columns where variance is <= MaxVariance
-                header = np.array(header)[variance_mask]  # Apply the same filter to the header
-
-                # Limit the number of columns based on MaxColumns option
-                if self.options['MaxColumns'] is not None and  matrix.shape[1] > self.options['MaxColumns']:
-                    header = np.concatenate([[analytes[0]], header[:self.options['MaxColumns']]])  # Include 'lambda' in header
-                    matrix = matrix[:, :self.options['MaxColumns']]  # Limit matrix columns
-
-                # add PCA results to table
-                self.add_table_note(matrix, row_labels=analytes, col_labels=header)
-            case 'cluster results':
-                if not self.parent.cluster_results:
-                    return
 
     def print_info(self, info_data):
         formatter = NotesFormatter()
@@ -1123,7 +1082,7 @@ class NoteOptionsDialog(QDialog):
         super(NoteOptionsDialog, self).__init__(parent)
         self.setWindowTitle("Note Options")
 
-        self.parent = parent
+        self.ui = parent
 
         if parent is None:
             self.options = {'MaxColumns': None, 'MaxVariance': 95}
@@ -1180,8 +1139,8 @@ class NoteOptionsDialog(QDialog):
 
     def update_options_dict(self):
         """Updates notes option dictionary upon accept """        
-        if self.parent is not None:
-            self.parent.options = self.options
+        if self.ui is not None:
+            self.ui.options = self.options
         self.accept()
 
     def get_options(self):

@@ -41,6 +41,8 @@ class CustomLineEdit(QLineEdit):
         self._precision = precision
         self._threshold = threshold
         self._toward = toward
+        self._lower_bound = None
+        self._upper_bound = None
         self.textChanged.connect(self._update_value_from_text)
         self.setValidator(validator)
         self.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -63,6 +65,10 @@ class CustomLineEdit(QLineEdit):
             The new value to store and display.
         """
         # ensure value is a float rather than integer
+        if self._lower_bound is not None:
+            new_value = max(self._lower_bound, new_value)
+        if self._upper_bound is not None:
+            new_value = min(self._upper_bound, new_value)
         self._value = new_value
         self._update_text_from_value()
 
@@ -130,6 +136,13 @@ class CustomLineEdit(QLineEdit):
         self._toward = val
         self._update_text_from_value
 
+    def set_bounds(self, lower=None, upper=None):
+        """Set optional lower and upper bounds for the value."""
+        self._lower_bound = lower
+        self._upper_bound = upper
+        # Apply clamping if value already exists
+        self.value = self._value
+
     def _update_text_from_value(self):
         """
         Update the displayed text based on internal value and formatting rules.
@@ -147,8 +160,15 @@ class CustomLineEdit(QLineEdit):
         Update the internal value from the current text, if valid.
         """
         try:
-            self._value = float(self.text())
+            new_val = float(self.text())
+            # Clamp if bounds are defined
+            if self._lower_bound is not None:
+                new_val = max(self._lower_bound, new_val)
+            if self._upper_bound is not None:
+                new_val = min(self._upper_bound, new_val)
+            self._value = new_val
         except ValueError:
+            # ignore error
             pass
 
 class CustomTableWidget(QTableWidget):

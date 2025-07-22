@@ -36,6 +36,14 @@ class StylingDock(StyleData, StyleTheme):
             'ubound': [parent.lineEditXUB, parent.lineEditYUB, parent.lineEditZUB, parent.lineEditCUB],
         }
 
+        # toggles signals from widgets, if false, blocks widgets from sending signals
+        self._signal_state = True
+
+        # initial plot type
+        self._plot_type = "field map"
+
+        # used to schedule plot updates
+        self.scheduler = Scheduler(callback=self.ui.update_SV)
 
         # initialize style themes and associated widgets
         parent.comboBoxStyleTheme.clear()
@@ -47,13 +55,6 @@ class StylingDock(StyleData, StyleTheme):
 
         self.style_dict = self.default_style_dict()
 
-        # toggles signals from widgets, if false, blocks widgets from sending signals
-        self._signal_state = True
-
-        # used to schedule plot updates
-        self.scheduler = Scheduler(callback=self.ui.update_SV)
-
-        self.ui.fontComboBox.setCurrentFont(QFont(self.default_plot_style['Font'], 11))
 
         self.ui.comboBoxHistType.activated.connect(self.schedule_update)
         self.ui.toolButtonNDimAnalyteAdd.clicked.connect(self.schedule_update)
@@ -62,48 +63,39 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.toolButtonNDimDown.clicked.connect(self.schedule_update)
         self.ui.toolButtonNDimRemove.clicked.connect(self.schedule_update)
         
-        self.ui.comboBoxMarker.clear()
-        self.ui.comboBoxMarker.addItems(self.marker_dict.keys())
-        self.ui.comboBoxMarker.setCurrentIndex(0)
-        self.ui.comboBoxMarker.activated.connect(lambda _: self.update_marker_symbol())
-
-        self._plot_type = "field map"
 
         self.ui.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeX.currentText(), self.ui.comboBoxFieldX.currentText(), 'x'))
         self.ui.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeY.currentText(), self.ui.comboBoxFieldY.currentText(), 'y'))
         self.ui.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeZ.currentText(), self.ui.comboBoxFieldZ.currentText(), 'z'))
-
-        # comboBox with plot type
-        # overlay and annotation properties
-        #self.ui.checkBoxShowMass.stateChanged.connect(self.ui.update_show_mass)
-        #self.ui.toolButtonOverlayColor.clicked.connect(self.overlay_color_callback)
-        #self.ui.toolButtonMarkerColor.clicked.connect(self.marker_color_callback)
-        #self.ui.toolButtonLineColor.clicked.connect(self.line_color_callback)
-        #self.ui.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
-        #self.ui.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
-        #self.ui.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
-        #self.toolButtonOverlayColor.setStyleSheet("background-color: white;")
-
-        # add list of colormaps to comboBoxFieldColormap and set callbacks
-        self.ui.comboBoxFieldColormap.clear()
-        self.ui.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
-        #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-        #self.ui.checkBoxReverseColormap.stateChanged.connect(self.colormap_direction_callback)
 
         # callback functions
         self.ui.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self, 'plot_type', self.ui.comboBoxPlotType.currentText()))
         self.ui.actionUpdatePlot.triggered.connect(lambda: self.update_plot_type(force=True))
 
 
-        # axes
-        #self.ui.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x',self.ui.lineEditXLabel.text()))
-        #self.ui.lineEditYLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('y',self.ui.lineEditYLabel.text()))
-        #self.ui.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z',self.ui.lineEditZLabel.text()))
-        #self.ui.lineEditCLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c',self.ui.lineEditCLabel.text()))
 
-        #self.ui.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxXScale,'x'))
-        #self.ui.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxYScale,'y'))
-        #self.ui.comboBoxCScale.activated.connect(lambda: self.axis_scale_callback(self.ui.comboBoxCScale,'c'))
+        self.connect_widgets()
+        self.connect_observer()
+        self.connect_logger()
+
+        self.ternary_colormap_changed()
+
+        self._signal_state = False
+
+        self.set_style_widgets()
+
+    def connect_widgets(self):
+        # axes
+        # ---
+        self.ui.lineEditXLabel.editingFinished.connect(lambda _: self.update_axis_label('x'))
+        self.ui.lineEditYLabel.editingFinished.connect(lambda _: self.update_axis_label('y'))
+        self.ui.lineEditZLabel.editingFinished.connect(lambda _: self.update_axis_label('z'))
+        self.ui.lineEditCLabel.editingFinished.connect(lambda _: self.update_axis_label('c'))
+
+        self.ui.comboBoxXScale.activated.connect(lambda _: self.update_axis_scale('x'))
+        self.ui.comboBoxYScale.activated.connect(lambda _: self.update_axis_scale('y'))
+        self.ui.comboBoxZScale.activated.connect(lambda _: self.update_axis_scale('y'))
+        self.ui.comboBoxCScale.activated.connect(lambda _: self.update_axis_scale('c'))
 
         self.ui.lineEditXLB.setValidator(QDoubleValidator())
         self.ui.lineEditXLB.precision = 3
@@ -132,47 +124,84 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.lineEditAspectRatio.setValidator(QDoubleValidator())
         self.ui.lineEditAspectRatio.precision = 3
         self.ui.lineEditAspectRatio.toward = 1
+        self.ui.lineEditAspectRatio.set_bounds(0.0,None)
 
-        #self.ui.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, float(self.ui.lineEditXLB.text())))
-        #self.ui.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, float(self.ui.lineEditXUB.text())))
-        #self.ui.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, float(self.ui.lineEditYLB.text())))
-        #self.ui.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, float(self.ui.lineEditYUB.text())))
-        #self.ui.lineEditZLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 0, float(self.ui.lineEditZLB.text())))
-        #self.ui.lineEditZUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 1, float(self.ui.lineEditZUB.text())))
-        #self.ui.lineEditCLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, float(self.ui.lineEditCLB.text())))
-        #self.ui.lineEditCUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, float(self.ui.lineEditCUB.text())))
+        self.ui.lineEditXLB.editingFinished.connect(lambda _: self.update_axis_limits('x'))
+        self.ui.lineEditXUB.editingFinished.connect(lambda _: self.update_axis_limits('x'))
+        self.ui.lineEditYLB.editingFinished.connect(lambda _: self.update_axis_limits('y'))
+        self.ui.lineEditYUB.editingFinished.connect(lambda _: self.update_axis_limits('y'))
+        self.ui.lineEditZLB.editingFinished.connect(lambda _: self.update_axis_limits('z'))
+        self.ui.lineEditZUB.editingFinished.connect(lambda _: self.update_axis_limits('z'))
+        self.ui.lineEditCLB.editingFinished.connect(lambda _: self.update_axis_limits('c'))
+        self.ui.lineEditCUB.editingFinished.connect(lambda _: self.update_axis_limits('c'))
 
-        #self.ui.lineEditAspectRatio.editingFinished.connect(self.aspect_ratio_callback)
-        #self.ui.comboBoxTickDirection.activated.connect(self.tickdir_callback)
-        # annotations
-        #self.ui.fontComboBox.activated.connect(self.font_callback)
-        #self.ui.doubleSpinBoxFontSize.valueChanged.connect(self.font_size_callback)
-        # ---------
-        # These are tools are for future use, when individual annotations can be added
-        self.ui.tableWidgetAnnotation.setVisible(False)
-        self.ui.toolButtonAnnotationDelete.setVisible(False)
-        self.ui.toolButtonAnnotationSelectAll.setVisible(False)
-        # ---------
+        self.ui.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
+        self.ui.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
+        self.ui.toolButtonZAxisReset.clicked.connect(lambda: self.axis_reset_callback('z'))
+        self.ui.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
 
-        # scales
-        #self.ui.lineEditScaleLength.setValidator(QDoubleValidator())
-        #self.ui.comboBoxScaleDirection.activated.connect(self.update_scale_direction)
-        #self.ui.comboBoxScaleLocation.activated.connect(self.scale_location_callback)
-        #self.ui.lineEditScaleLength.editingFinished.connect(lambda: setattr(self, 'scale_length', self.ui.lineEditScaleLength.value))
+        self.ui.lineEditAspectRatio.editingFinished.connect(lambda _:self.update_aspect_ratio)
+        self.ui.comboBoxTickDirection.activated.connect(lambda _: self.update_tick_dir())
+
+        # annotations and scales
+        # ---
+        self.ui.lineEditScaleLength.setValidator(QDoubleValidator())
+        self.ui.lineEditScaleLength.precision = 3
+        self.ui.lineEditScaleLength.toward = 1
+        self.ui.lineEditScaleLength.set_bounds(0.0,None)
+
+        self.ui.lineEditLengthMultiplier.setValidator(QDoubleValidator())
+        self.ui.lineEditLengthMultiplier.precision = 3
+        self.ui.lineEditLengthMultiplier.toward = 1
+        self.ui.lineEditLengthMultiplier.set_bounds(0.0,100)
+
         #overlay color
+        self.ui.comboBoxScaleDirection.activated.connect(lambda _: self.update_scale_direction())
+        self.ui.comboBoxScaleLocation.activated.connect(lambda _: self.update_scale_location())
+        self.ui.lineEditScaleLength.setValidator(QDoubleValidator())
+        self.ui.lineEditScaleLength.editingFinished.connect(lambda _: self.update_scale_length())
+
+        self.ui.fontComboBox.setCurrentFont(QFont(self.default_plot_style['Font'], 11))
+        self.ui.fontComboBox.activated.connect(lambda _: self.update_font_family())
+        self.ui.doubleSpinBoxFontSize.valueChanged.connect(lambda _: self.update_font_size())
+
+        # overlay and annotation properties
+        self.ui.checkBoxShowMass.stateChanged.connect(lambda _: self.update_show_mass())
+        self.ui.toolButtonOverlayColor.clicked.connect(lambda _: self.update_overlay_color())
+        self.ui.toolButtonOverlayColor.setStyleSheet("background-color: white;")
+
+        # add list of colormaps to comboBoxFieldColormap and set callbacks
+        self.ui.comboBoxFieldColormap.clear()
+        self.ui.comboBoxFieldColormap.addItems(list(self.custom_color_dict.keys())+self.mpl_colormaps)
+        self.ui.comboBoxFieldColormap.activated.connect(lambda _: self.update_field_colormap())
+        self.ui.checkBoxReverseColormap.stateChanged.connect(lambda _: self.update_cbar_direction())
+
+
+        # markers and lines
+        # ---
+        self.ui.comboBoxMarker.clear()
+        self.ui.comboBoxMarker.addItems(self.marker_dict.keys())
+        self.ui.comboBoxMarker.setCurrentIndex(0)
+        self.ui.comboBoxMarker.activated.connect(lambda _: self.update_marker_symbol())
         self.ui.doubleSpinBoxMarkerSize.valueChanged.connect(lambda _: self.update_marker_size())
-        #self.ui.horizontalSliderMarkerAlpha.sliderReleased.connect(self.slider_alpha_changed)
-        # lines
+        self.ui.horizontalSliderMarkerAlpha.sliderReleased.connect(lambda _: self.update_marker_transparency())
+        self.ui.toolButtonMarkerColor.setStyleSheet("background-color: white;")
+        self.ui.toolButtonMarkerColor.clicked.connect(lambda _: self.update_marker_color())
+
         self.ui.doubleSpinBoxLineWidth.valueChanged.connect(lambda _: self.update_line_width())
-        #self.ui.lineEditLengthMultiplier.editingFinished.connect(self.length_multiplier_callback)
-        # colors
+        self.ui.lineEditLengthMultiplier.editingFinished.connect(lambda _: self.update_length_multiplier())
+        self.ui.toolButtonLineColor.setStyleSheet("background-color: white;")
+        self.ui.toolButtonLineColor.clicked.connect(lambda _: self.update_line_color())
         # marker color
-        #self.ui.comboBoxFieldColormap.activated.connect(self.field_colormap_callback)
-        #self.ui.comboBoxCbarDirection.activated.connect(self.cbar_direction_callback)
+
+        # colors
+        self.ui.comboBoxFieldColormap.activated.connect(lambda _: self.update_field_colormap())
+        self.ui.comboBoxCbarDirection.activated.connect(lambda _: self.update_cbar_direction())
         # resolution
         self.ui.spinBoxHeatmapResolution.valueChanged.connect(lambda _: self.update_resolution())
 
         # ternary colormaps
+        # ---
         self._ternary_colormap = ""
         self._ternary_color_x = ""
         self._ternary_color_y = ""
@@ -180,63 +209,60 @@ class StylingDock(StyleData, StyleTheme):
         self._ternary_color_m = ""
         
         self.ui.comboBoxTernaryColormap.clear()
-
         self.ui.comboBoxTernaryColormap.addItems(self.color_schemes)
         self.ui.comboBoxTernaryColormap.addItem('user defined')
+        self.ui.comboBoxTernaryColormap.setCurrentIndex(0)
 
         # dialog for adding and saving new colormaps
         self.ui.toolButtonSaveTernaryColormap.clicked.connect(self.input_ternary_name_dlg)
 
-        # select new ternary colors
         self.ui.toolButtonTCmapXColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapXColor))
         self.ui.toolButtonTCmapYColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapYColor))
         self.ui.toolButtonTCmapZColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapZColor))
         self.ui.toolButtonTCmapMColor.clicked.connect(lambda: self.button_color_select(self.ui.toolButtonTCmapMColor))
         self.ui.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
 
-        self.connect_observer()
-        self.connect_logger()
-
-        self.ternary_colormap_changed()
-
-        self._signal_state = False
-
-        self.set_style_widgets()
+        # ---------
+        # These are tools are for future use, when individual annotations can be added
+        self.ui.tableWidgetAnnotation.setVisible(False)
+        self.ui.toolButtonAnnotationDelete.setVisible(False)
+        self.ui.toolButtonAnnotationSelectAll.setVisible(False)
+        # ---------
 
     def connect_observer(self):
         """Connects properties to observer functions."""
         self.add_observer("plot_type", self.update_plot_type)
-        self.add_observer("xlim", self.update_xlim_lineedits)
-        self.add_observer("xlabel", self.update_xlabel_lineedit)
-        self.add_observer("xscale", self.update_xscale_combobox)
-        self.add_observer("ylim", self.update_ylim_lineedits)
-        self.add_observer("ylabel", self.update_ylabel_lineedit)
-        self.add_observer("yscale", self.update_yscale_combobox)
-        self.add_observer("zlim", self.update_zlim_lineedits)
-        self.add_observer("zlabel", self.update_zlabel_lineedit)
-        self.add_observer("zscale", self.update_zscale_combobox)
-        self.add_observer("aspect_ratio", self.update_aspect_ratio_lineedit)
-        self.add_observer("tick_dir", self.update_tick_dir_combobox)
-        self.add_observer("font_family", self.update_font_family_combobox)
-        self.add_observer("font_size", self.update_font_size_spinbox)
-        self.add_observer("scale_dir", self.update_scale_direction_combobox)
-        self.add_observer("scale_location", self.update_scale_location_combobox)
-        self.add_observer("scale_length", self.update_scale_length_lineedit)
-        self.add_observer("overlay_color", self.update_overlay_color_toolbutton)
-        self.add_observer("show_mass", self.update_show_mass_checkbox)
+        self.add_observer("xlim", self.update_axis_limits)
+        self.add_observer("xlabel", self.update_axis_label)
+        self.add_observer("xscale", self.update_axis_scale)
+        self.add_observer("ylim", self.update_axis_limits)
+        self.add_observer("ylabel", self.update_axis_label)
+        self.add_observer("yscale", self.update_axis_scale)
+        self.add_observer("zlim", self.update_axis_limits)
+        self.add_observer("zlabel", self.update_axis_label)
+        self.add_observer("zscale", self.update_axis_scale)
+        self.add_observer("aspect_ratio", self.update_aspect_ratio)
+        self.add_observer("tick_dir", self.update_tick_dir)
+        self.add_observer("font_family", self.update_font_family)
+        self.add_observer("font_size", self.update_font_size)
+        self.add_observer("scale_dir", self.update_scale_direction)
+        self.add_observer("scale_location", self.update_scale_location)
+        self.add_observer("scale_length", self.update_scale_length)
+        self.add_observer("overlay_color", self.update_overlay_color)
+        self.add_observer("show_mass", self.update_show_mass)
         self.add_observer("marker_symbol", self.update_marker_symbol)
         self.add_observer("marker_size", self.update_marker_size)
-        self.add_observer("marker_color", self.update_marker_color_toolbutton)
-        self.add_observer("marker_alpha", self.update_marker_alpha_slider)
+        self.add_observer("marker_color", self.update_marker_color)
+        self.add_observer("marker_alpha", self.update_marker_transparency)
         self.add_observer("line_width", self.update_line_width)
-        self.add_observer("line_multiplier", self.update_line_multiplier_lineedit)
-        self.add_observer("line_color", self.update_line_color_toolbutton)
-        self.add_observer("cmap", self.update_cmap_combobox)
-        self.add_observer("cbar_reverse", self.update_cbar_reverse_checkbox)
-        self.add_observer("cbar_direction", self.update_cbar_direction_combobox)
-        self.add_observer("clim", self.update_clim_lineedits)
-        self.add_observer("clabel", self.update_clabel_lineedit)
-        self.add_observer("cscale", self.update_cscale_combobox)
+        self.add_observer("length_multiplier", self.update_length_multiplier)
+        self.add_observer("line_color", self.update_line_color)
+        self.add_observer("cmap", self.update_field_colormap)
+        self.add_observer("cbar_reverse", self.update_cbar_reverse)
+        self.add_observer("cbar_direction", self.update_cbar_direction)
+        self.add_observer("clim", self.update_axis_limits)
+        self.add_observer("clabel", self.update_axis_label)
+        self.add_observer("cscale", self.update_axis_scale)
         self.add_observer("resolution", self.update_resolution)
 
         # ternary maps
@@ -401,113 +427,229 @@ class StylingDock(StyleData, StyleTheme):
 
     # update functions
     # -------------------------------------
-    # ------------------------------------------------------------------
-    # Axes – X
-    # ------------------------------------------------------------------
-    def update_xlim_lineedits(self, value):
-        if value == [self.ui.lineEditXLB.value, self.ui.lineEditXUB.value]:
-            return
-        self.ui.lineEditXLB.value = value[0]
-        self.ui.lineEditXUB.value = value[1]
-        self.schedule_update()
-
-    def update_xlabel_lineedit(self, new_label):
-        if new_label == self.ui.lineEditXLabel.text():
-            return
-        self.ui.lineEditXLabel.setText(new_label)
-        self.schedule_update()
-
-    def update_xscale_combobox(self, new_scale):
-        if new_scale == self.ui.comboBoxXScale.currentText():
-            return
-        self.ui.comboBoxXScale.setCurrentText(new_scale)
-        self.schedule_update()
 
     # ------------------------------------------------------------------
-    # Axes – Y
+    # Axes
     # ------------------------------------------------------------------
-    def update_ylim_lineedits(self, new_ylim):
-        if new_ylim == [self.ui.lineEditYLB.value, self.ui.lineEditYUB.value]:
-            return
-        self.ui.lineEditYLB.value = new_ylim[0]
-        self.ui.lineEditYUB.value = new_ylim[1]
+    def update_axis_limits(self, ax: str, new_lim: tuple=None):
+
+        lower = getattr(self.ui, f"lineEdit{ax.upper()}LB")
+        upper = getattr(self.ui, f"lineEdit{ax.upper()}UB")
+
+        ui_lim = [lower.value, upper.value]
+
+        if not new_lim:
+            setattr(self, f"{ax}lim", ui_lim)
+        else:
+            if list(new_lim) == ui_lim:
+                return
+            lower.blockSignals(True)
+            upper.blockSignals(True)
+            lower.value = new_lim[0]
+            upper.value = new_lim[1]
+            lower.blockSignals(False)
+            lower.blockSignals(False)
+
         self.schedule_update()
 
-    def update_ylabel_lineedit(self, new_label):
-        if new_label == self.ui.lineEditYLabel.text():
-            return
-        self.ui.lineEditYLabel.setText(new_label)
+    def update_axis_label(self, ax: str, new_text: str=None):
+        
+        ui_label = getattr(self.ui, f"lineEdit{ax.upper()}Label")
+
+        if not new_text:
+            setattr(self, f"{ax}label", ui_label.text)
+        else:
+            if new_text == ui_label.text():
+                return
+            ui_label.blockSignals(True)
+            ui_label.setText(new_text)
+            ui_label.blockSignals(False)
+
         self.schedule_update()
 
-    def update_yscale_combobox(self, new_scale):
-        if new_scale == self.ui.comboBoxYScale.currentText():
-            return
-        self.ui.comboBoxYScale.setCurrentText(new_scale)
-        self.schedule_update()
+    def update_axis_scale(self, ax: str, new_text: str=None):
+        """Update axis scale combobox and triggers plot update.
 
-    # ------------------------------------------------------------------
-    # Axes – Z
-    # ------------------------------------------------------------------
-    def update_zlim_lineedits(self, new_zlim):
-        if list(new_zlim) == [self.ui.lineEditZLB.value, self.ui.lineEditZUB.value]:
-            return
-        self.ui.lineEditZLB.value = new_zlim[0]
-        self.ui.lineEditZUB.value = new_zlim[1]
-        self.schedule_update()
+        If `new_text` is None, it uses the current value of the combobox to set `self.[ax]scale`.
+        If `new_text` is provided, it updates the `ui.comboBox[ax]Scale` state accordingly.
 
-    def update_zlabel_lineedit(self, new_label):
-        if new_label == self.ui.lineEditZLabel.text():
-            return
-        self.ui.lineEditZLabel.setText(new_label)
-        self.schedule_update()
+        Parameters
+        ----------
+        ax : str
+            Axis to update, `x`, `y`, `z`, or `c`
+        new_text : str, optional
+            New axis scale for combobox, by default None
+        """
+        scale_combo = getattr(self.ui, f"comboBox{ax.upper()}Scale")
 
-    def update_zscale_combobox(self, new_scale):
-        if new_scale == self.ui.comboBoxZScale.currentText():
-            return
-        self.ui.comboBoxZScale.setCurrentText(new_scale)
+        if not new_text:
+            setattr(self, f"{ax}_scale", scale_combo.currentText())
+        else:
+            if new_text == scale_combo.currentText():
+                return
+            
+            scale_combo.blockSignals(True)
+            scale_combo.setCurrentText(new_text)
+            scale_combo.blockSignals(False)
+
         self.schedule_update()
 
     # ------------------------------------------------------------------
     # Aspect ratio & tick direction
     # ------------------------------------------------------------------
-    def update_aspect_ratio_lineedit(self, new_aspect_ratio):
-        if new_aspect_ratio == self.ui.lineEditAspectRatio.value:
-            return
-        self.ui.lineEditAspectRatio.value = new_aspect_ratio
+    def update_aspect_ratio(self, new_value=None):
+        """
+        Updates aspect ratio line edit and triggers plot update.
+
+        If `new_value` is None, it uses the current value of the line edit to set `self.aspect_ratio`.
+        If `new_value` is provided, it updates the `ui.lineEditAspectRatio` state accordingly.
+
+        Parameters
+        ----------
+        new_value : float, optional
+            New value for the line edit, by default None
+        """
+        if not new_value:
+            self.aspect_ratio = self.ui.lineEditAspectRatio.value
+        else:
+            if new_value == self.ui.lineEditAspectRatio.value:
+                return
+
+            self.ui.lineEditAspectRatio.blockSignals(True)
+            self.ui.lineEditAspectRatio.value = new_value
+            self.ui.lineEditAspectRatio.blockSignals(False)
+
         self.schedule_update()
 
-    def update_tick_dir_combobox(self, new_tick_dir):
-        if new_tick_dir == self.ui.comboBoxTickDirection.currentText():
-            return
-        self.ui.comboBoxTickDirection.setCurrentText(new_tick_dir)
+    def update_tick_dir(self, new_dir=None):
+        """
+        Updates tick direction combobox and triggers plot update.
+
+        If `new_dir` is None, it uses the current text of the combobox to set `self.tick_dir`.
+        If `new_dir` is provided, it updates the `ui.comboBoxTickDirection` state accordingly.
+
+        Parameters
+        ----------
+        new_dir : float, optional
+            New direction for the combobox, by default None
+        """
+        if not new_dir:
+            self.new_dir = self.ui.comboBoxTickDirection.currentText()
+        else:
+            if new_dir == self.ui.comboBoxTickDirection.currentText():
+                return
+
+            self.ui.comboBoxTickDirection.blockSignals(True)
+            self.ui.comboBoxTickDirection.setCurrentText(new_dir)
+            self.ui.comboBoxTickDirection.blockSignals(False)
+
         self.schedule_update()
 
     # ------------------------------------------------------------------
     # Scale‑bar
     # ------------------------------------------------------------------
-    def update_scale_location_combobox(self, new_scale_location):
-        if new_scale_location == self.ui.comboBoxScaleLocation.currentText():
-            return
-        self.ui.comboBoxScaleLocation.setCurrentText(new_scale_location)
+    def update_scale_direction(self, new_text=None):
+        """
+        Updates scale direction combobox and triggers plot update.
+
+        If `new_text` is None, it uses the current text of the combobox to set `self.scale_dir`.
+        If `new_text` is provided, it updates the `ui.comboBoxScaleDirection` state accordingly.
+
+        Parameters
+        ----------
+        new_text : float, optional
+            New direction for the combobox, by default None
+        """
+        if not new_text:
+            self.scale_dir = self.ui.comboBoxScaleDirection.currentText()
+        else:
+            if new_text == self.ui.comboBoxScaleDirection.currentText():
+                return
+
+            self.ui.comboBoxScaleDirection.blockSignals(True)
+            self.ui.comboBoxScaleDirection.setCurrentText(new_text)
+            self.ui.comboBoxScaleDirection.blockSignals(False)
+
         self.schedule_update()
 
-    def update_scale_length_lineedit(self, new_scale_length):
-        if new_scale_length == self.ui.lineEditScaleLength.value:
-            return
-        self.ui.lineEditScaleLength.value = new_scale_length
+    def update_scale_location(self, new_text=None):
+        """
+        Updates scale location combobox and triggers plot update.
+
+        If `new_text` is None, it uses the current text of the combobox to set `self.scale_location`.
+        If `new_text` is provided, it updates the `ui.comboBoxScaleLocation` state accordingly.
+
+        Parameters
+        ----------
+        new_text : float, optional
+            New location for the combobox, by default None
+        """
+        if not new_text:
+            self.scale_location = self.ui.comboBoxScaleLocation.currentText()
+        else:
+            if new_text == self.ui.comboBoxScaleLocation.currentText():
+                return
+
+            self.ui.comboBoxScaleLocation.blockSignals(True)
+            self.ui.comboBoxScaleLocation.setCurrentText(new_text)
+            self.ui.comboBoxScaleLocation.blockSignals(False)
+            self.toggle_scale_widgets()
+
         self.schedule_update()
 
-    def update_overlay_color_toolbutton(self, new_color):
-        desired = f"background-color: {new_color};"
-        if desired == self.ui.toolButtonOverlayColor.styleSheet():
-            return
-        self.ui.toolButtonOverlayColor.setStyleSheet(desired)
+    def update_scale_length(self, new_value=None):
+        """
+        Updates scale length line edit and triggers plot update.
+
+        If `new_value` is None, it uses the current text of the line edit to set `self.scale_location`.
+        If `new_value` is provided, it updates the `ui.comboBoxScaleLocation` state accordingly.
+
+        Parameters
+        ----------
+        new_value : float, optional
+            New location for the combobox, by default None
+        """
+        if not new_value:
+            self.scale_length = self.ui.lineEditScaleLength.value
+        else:
+            if new_value == self.ui.lineEditScaleLength.value:
+                return
+
+            self.ui.lineEditScaleLength.blockSignals(True)
+            self.ui.lineEditScaleLength.value = new_value
+            self.ui.lineEditScaleLength.blockSignals(False)
+
         self.schedule_update()
 
-    def update_show_mass_checkbox(self, new_value):
-        if new_value == self.ui.checkBoxShowMass.isChecked():
+    def update_overlay_color(self, new_color=None):
+        self.overlay_color = f"background-color: {new_color};"
+        if new_color == self.ui.toolButtonOverlayColor.styleSheet():
             return
-        self.ui.checkBoxShowMass.setChecked(new_value)
+        self.ui.toolButtonOverlayColor.setStyleSheet(new_color)
+        self.schedule_update()
+
+    def update_show_mass(self, new_state=None):
+        """
+        Updates show mass checkbox and triggers plot update.
+
+        If `new_state` is None, it uses the current state of the checkbox to set `self.checkBoxShowMass`.
+        If `new_state` is provided, it updates the `ui.checkBoxShowMass` state accordingly.
+
+        Parameters
+        ----------
+        new_state : bool, optional
+            New state for the checkbox, by default None
+        """
+        if not new_state:
+            self.show_mass = self.ui.checkBoxShowMass.isChecked()
+        else:
+            if new_state == self.ui.checkBoxShowMass.isChecked():
+                return
+
+            self.ui.checkBoxShowMass.blockSignals(True)
+            self.ui.checkBoxShowMass.setChecked(new_state)
+            self.ui.checkBoxShowMass.blockSignals(False)
+
         self.schedule_update()
 
     # ------------------------------------------------------------------
@@ -522,7 +664,7 @@ class StylingDock(StyleData, StyleTheme):
 
         Parameters
         ----------
-        new_marker : float, optional
+        new_marker : str, optional
             New marker for the combobox, by default None
         """
         if not new_marker:
@@ -537,76 +679,113 @@ class StylingDock(StyleData, StyleTheme):
 
         self.schedule_update()
 
-    def update_marker_size(self, new_size=None):
+    def update_marker_size(self, new_value=None):
         """
         Updates marker size double spinbox and triggers plot update.
 
-        If `new_size` is None, it uses the current value of the spinbox to set `self.marker_size`.
-        If `new_size` is provided, it updates the `ui.doubleSpinBoxMarkerSize` state accordingly.
+        If `new_value` is None, it uses the current value of the spinbox to set `self.marker_size`.
+        If `new_value` is provided, it updates the `ui.doubleSpinBoxMarkerSize` state accordingly.
 
         Parameters
         ----------
-        new_size : float, optional
+        new_value : float, optional
             New size for the spinbox, by default None
         """
-        if new_size:
+        if new_value:
             self.marker_size = self.ui.doubleSpinBoxMarkerSize.value()
         else:
-            if new_size == self.ui.doubleSpinBoxMarkerSize.value():
+            if new_value == self.ui.doubleSpinBoxMarkerSize.value():
                 return
             self.ui.doubleSpinBoxMarkerSize.blockSignals(True)
-            self.ui.doubleSpinBoxMarkerSize.setValue(new_size)
+            self.ui.doubleSpinBoxMarkerSize.setValue(new_value)
             self.ui.doubleSpinBoxMarkerSize.blockSignals(False)
 
         self.schedule_update()
 
-    def update_marker_color_toolbutton(self, new_color):
+    def update_marker_color(self, new_color=None):
         desired = f"background-color: {new_color};"
         if desired == self.ui.toolButtonMarkerColor.styleSheet():
             return
         self.ui.toolButtonMarkerColor.setStyleSheet(desired)
+
         self.schedule_update()
 
-    def update_marker_alpha_slider(self, new_alpha):
-        if new_alpha == self.ui.horizontalSliderMarkerAlpha.value():
-            return
-        self.ui.horizontalSliderMarkerAlpha.setValue(new_alpha)
+    def update_marker_transparency(self, new_value=None):
+        """
+        Updates marker transparency (alpha) slider and triggers plot update.
+
+        If `new_value` is None, it uses the current value of the slider to set `self.marker_alpha`.
+        If `new_value` is provided, it updates the `ui.horizontalSliderMarkerAlpha` state accordingly.
+
+        Parameters
+        ----------
+        new_value : float, optional
+            New transparency for the slider, by default None
+        """
+        if not new_value:
+            self.ui.horizontalSliderMarkerAlpha.value()
+        else:
+            if new_value == self.ui.horizontalSliderMarkerAlpha.value():
+                return
+
+            self.ui.horizontalSliderMarkerAlpha.blockSignals(True)
+            self.ui.horizontalSliderMarkerAlpha.setValue(new_value)
+            self.ui.horizontalSliderMarkerAlpha.blockSignals(False)
+
         self.schedule_update()
 
     # ------------------------------------------------------------------
     # Line
     # ------------------------------------------------------------------
-    def update_line_width(self, new_width=None):
+    def update_line_width(self, new_value=None):
         """
         Updates line width double spinbox and triggers plot update.
 
-        If `new_width` is None, it uses the current value of the spinbox to set `self.line_width`.
-        If `new_width` is provided, it updates the `ui.doubleSpinBoxLineWidth` state accordingly.
+        If `new_value` is None, it uses the current value of the spinbox to set `self.line_width`.
+        If `new_value` is provided, it updates the `ui.doubleSpinBoxLineWidth` state accordingly.
 
         Parameters
         ----------
-        new_width : float, optional
+        new_value : float, optional
             New width for the spinbox, by default None
         """
-        if not new_width:
+        if not new_value:
             self.line_width = self.ui.doubleSpinBoxLineWidth.value()
         else:
-            if new_width == self.ui.doubleSpinBoxLineWidth.value():
+            if new_value == self.ui.doubleSpinBoxLineWidth.value():
                 return
 
             self.ui.doubleSpinBoxLineWidth.blockSignals(True)
-            self.ui.doubleSpinBoxLineWidth.setValue(new_width)
+            self.ui.doubleSpinBoxLineWidth.setValue(new_value)
             self.ui.doubleSpinBoxLineWidth.blockSignals(False)
 
         self.schedule_update()
 
-    def update_line_multiplier_lineedit(self, new_multiplier):
-        if new_multiplier == self.ui.lineEditLengthMultiplier.value:
-            return
-        self.ui.lineEditLengthMultiplier.value = new_multiplier
+    def update_length_multiplier(self, new_value=None):
+        """
+        Updates line multiplier line edit and triggers plot update.
+
+        If `new_value` is None, it uses the current value of the line edit to set `self.length_multiplier`.
+        If `new_value` is provided, it updates the `ui.lineEditLengthMultiplier` state accordingly.
+
+        Parameters
+        ----------
+        new_value : float, optional
+            New mulitiplier for the line edit, by default None
+        """
+        if not new_value:
+            self.length_multiplier = self.ui.lineEditLengthMultipler.value
+        else:
+            if new_value == self.ui.lineEditLengthMultiplier.value:
+                return
+
+            self.ui.lineEditLengthMultiplier.blockSignals(True)
+            self.ui.lineEditLengthMultiplier.value = new_value
+            self.ui.lineEditLengthMultiplier.blockSignals(False)
+
         self.schedule_update()
 
-    def update_line_color_toolbutton(self, new_color):
+    def update_line_color(self, new_color=None):
         desired = f"background-color: {new_color};"
         if desired == self.ui.toolButtonLineColor.styleSheet():
             return
@@ -616,58 +795,116 @@ class StylingDock(StyleData, StyleTheme):
     # ------------------------------------------------------------------
     # Font
     # ------------------------------------------------------------------
-    def update_font_family_combobox(self, new_font_family):
-        if new_font_family == self.ui.fontComboBox.currentText():
-            return
-        self.ui.fontComboBox.setCurrentText(new_font_family)
+    def update_font_family(self, new_font=None):
+        """
+        Updates font family combobox and triggers plot update.
+
+        If `new_text` is None, it uses the current text of the combobox to set `self.font`.
+        If `new_text` is provided, it updates the `ui.fontComboBox` state accordingly.
+
+        Parameters
+        ----------
+        new_font : str, optional
+            New font family for the combobox, by default None
+        """
+        if not new_font:
+            self.font = self.ui.fontComboBox.currentText()
+        else:
+            if new_font == self.ui.fontComboBox.currentText():
+                return
+
+            self.ui.fontComboBox.blockSignals(True)
+            self.ui.fontComboBox.setCurrentText(new_font)
+            self.ui.fontComboBox.blockSignals(False)
+
         self.schedule_update()
 
-    def update_font_size_spinbox(self, new_font_size):
-        if new_font_size == self.ui.doubleSpinBoxFontSize.value():
-            return
-        self.ui.doubleSpinBoxFontSize.blockSignals(True)
-        self.ui.doubleSpinBoxFontSize.setValue(new_font_size)
-        self.ui.doubleSpinBoxFontSize.blockSignals(False)
+    def update_font_size(self, new_value=None):
+        """
+        Updates font size spinbox and triggers plot update.
+
+        If `new_value` is None, it uses the current value of the spinbox to set `self.font_size`.
+        If `new_value` is provided, it updates the `ui.doubleSpinBoxFontSize` state accordingly.
+
+        Parameters
+        ----------
+        new_value : float, optional
+            New font size for the spinbox, by default None
+        """
+        if not new_value:
+            self.font_size = self.ui.doubleSpinBoxFontSize.value()
+        else:
+            if new_value == self.ui.doubleSpinBoxFontSize.value():
+                return
+
+            self.ui.doubleSpinBoxFontSize.blockSignals(True)
+            self.ui.doubleSpinBoxFontSize.setValue(new_value)
+            self.ui.doubleSpinBoxFontSize.blockSignals(False)
+
         self.schedule_update()
 
     # ------------------------------------------------------------------
     # Colormap / colour‑bar
     # ------------------------------------------------------------------
-    def update_cmap_combobox(self, new_colormap):
-        if new_colormap == self.ui.comboBoxFieldColormap.currentText():
-            return
-        self.ui.comboBoxFieldColormap.setCurrentText(new_colormap)
+    def update_field_colormap(self, new_text=None):
+        """
+        Updates colormap combobox, usually associated with fields, and triggers plot update.
+
+        If `new_text` is None, it uses the current text of the combobox to set `self.cmap`.
+        If `new_text` is provided, it updates the `ui.comboBoxFieldColormap` state accordingly.
+
+        Parameters
+        ----------
+        new_text : str, optional
+            New colormap for the combobox, by default None
+        """
+        if not new_text:
+            self.cmap = self.ui.comboBoxFieldColormap.currentText()
+        else:
+            if new_text == self.ui.comboBoxFieldColormap.currentText():
+                return
+
+            self.ui.comboBoxFieldColormap.blockSignals(True)
+            self.ui.comboBoxFieldColormap.setCurrentText(new_text)
+            self.ui.comboBoxFieldColormap.blockSignals(False)
+
         self.schedule_update()
 
-    def update_cbar_reverse_checkbox(self, new_value):
-        if new_value == self.ui.checkBoxReverseColormap.isChecked():
-            return
-        self.ui.checkBoxReverseColormap.setChecked(new_value)
+    def update_cbar_reverse(self, new_value):
+        if not new_value:
+            self.cbar_reverse = self.ui.checkBoxReverseColormap.isChecked()
+        else:
+            if new_value == self.ui.checkBoxReverseColormap.isChecked():
+                return
+
+            self.ui.checkBoxReverseColormap.blockSignals(True)
+            self.ui.checkBoxReverseColormap.setChecked(new_value)
+            self.ui.checkBoxReverseColormap.blockSignals(False)
+
         self.schedule_update()
 
-    def update_cbar_direction_combobox(self, new_cbar_direction):
-        if new_cbar_direction == self.ui.comboBoxCbarDirection.currentText():
-            return
-        self.ui.comboBoxCbarDirection.setCurrentText(new_cbar_direction)
-        self.schedule_update()
+    def update_cbar_direction(self, new_text=None):
+        """
+        Updates colormap direction combobox and triggers plot update.
 
-    def update_clim_lineedits(self, new_xlim):
-        if list(new_xlim) == [self.ui.lineEditCLB.value, self.ui.lineEditCUB.value]:
-            return
-        self.ui.lineEditCLB.value = new_xlim[0]
-        self.ui.lineEditCUB.value = new_xlim[1]
-        self.schedule_update()
+        If `new_text` is None, it uses the current text of the combobox to set `self.cbar_dir`.
+        If `new_text` is provided, it updates the `ui.comboBoxCbarDirection` state accordingly.
 
-    def update_clabel_lineedit(self, new_label):
-        if new_label == self.ui.lineEditCLabel.text():
-            return
-        self.ui.lineEditCLabel.setText(new_label)
-        self.schedule_update()
+        Parameters
+        ----------
+        new_text : str, optional
+            New colormap direction for the combobox, by default None
+        """
+        if not new_text:
+            self.cbar_dir = self.ui.comboBoxCbarDirection.currentText()
+        else:
+            if new_text == self.ui.comboBoxCbarDirection.currentText():
+                return
 
-    def update_cscale_combobox(self, new_scale):
-        if new_scale == self.ui.comboBoxCScale.currentText():
-            return
-        self.ui.comboBoxCScale.setCurrentText(new_scale)
+            self.ui.comboBoxCbarDirection.blockSignals(True)
+            self.ui.comboBoxCbarDirection.setCurrentText(new_text)
+            self.ui.comboBoxCbarDirection.blockSignals(False)
+
         self.schedule_update()
 
     # ------------------------------------------------------------------
@@ -1223,7 +1460,7 @@ class StylingDock(StyleData, StyleTheme):
         # Line
         self.line_width = style.get('LineWidth')
         self.line_color = style.get('LineColor')
-        self.line_multiplier = style.get('LineMultiplier')
+        self.length_multiplier = style.get('LineMultiplier')
 
         # color properties
         ui.update_field_type_combobox_options(ui.comboBoxFieldTypeC, ui.comboBoxFieldC, ax=3)
@@ -1353,7 +1590,7 @@ class StylingDock(StyleData, StyleTheme):
         # Line
         self.line_width = style.get('LineWidth')
         self.line_color = style.get('LineColor')
-        self.line_multiplier = style.get('LineMultiplier')
+        self.length_multiplier = style.get('LineMultiplier')
 
         # Colorbar/Colormap
         field = self.app_data.c_field
@@ -1826,7 +2063,7 @@ class StylingDock(StyleData, StyleTheme):
         Parameters
         ----------
         ax : str
-            axis to reset values, can be ``x``, ``y``, and ``c``
+            axis to reset values, can be `x`, `y`, `z` and `c`
 
         """
         data = self.ui.data[self.app_data.sample_id]
@@ -1890,43 +2127,9 @@ class StylingDock(StyleData, StyleTheme):
         self.schedule_update()
 
 
-    def aspect_ratio_callback(self):
-        """Update aspect ratio
-
-        Updates ``MainWindow.style`` dictionary after user change
-        """
-        if self.aspect_ratio == self.ui.lineEditAspectRatio.value:
-            return
-
-        self.aspect_ratio = self.ui.lineEditAspectRatio.value
-        self.schedule_update()
-
-    def tickdir_callback(self):
-        """Updates tick directions in style dictionary from change of ``MainWindow.comboBoxTickDirection``."""        
-        if self.tick_dir == self.ui.comboBoxTickDirection.currentText():
-            return
-
-        self.tick_dir = self.ui.comboBoxTickDirection.currentText()
-        self.schedule_update()
 
     # text and annotations
     # -------------------------------------
-    def font_callback(self):
-        """Updates figure fonts"""        
-        if self.font == self.ui.fontComboBox.currentFont().family():
-            return
-
-        self.font = self.ui.fontComboBox.currentFont().family()
-        self.schedule_update()
-
-    def font_size_callback(self):
-        """Updates figure font sizes"""        
-        if self.font_size == self.ui.doubleSpinBoxFontSize.value():
-            return
-
-        self.font_size = self.ui.doubleSpinBoxFontSize.value()
-        self.schedule_update()
-
     def update_figure_font(self, canvas, font_name):
         """updates figure fonts without the need to recreate the figure.
 
@@ -1947,36 +2150,8 @@ class StylingDock(StyleData, StyleTheme):
         except:
             print('Unable to update figure font.')
 
-    def toggle_mass(self, labels):
-        """Removes mass from labels
-
-        Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
-
-        Parameters
-        ----------
-        labels : str
-            Input labels
-
-        Returns
-        -------
-        list
-            Output labels with or without mass
-        """
-        if not self.show_mass:
-            labels = [re.sub(r'\d', '', col) for col in labels]
-
-        return labels
-
     # scales
     # -------------------------------------
-    def update_scale_direction_combobox(self, new_dir):
-        """Sets scale direction on figure"""        
-        if new_dir == self.ui.comboBoxScaleDirection.currentText():
-            return
-        self.ui.comboBoxScaleDirection.setCurrentText(new_dir)
-        self.toggle_scale_widgets()
-
-        self.schedule_update()
 
     def toggle_scale_widgets(self):
         """Toggles state of scale widgets.
@@ -2000,13 +2175,6 @@ class StylingDock(StyleData, StyleTheme):
                 self.scale_length = self.default_scale_length()
 
 
-    def scale_location_callback(self):
-        """Sets scalebar location on map from ``MainWindow.comboBoxScaleLocation``"""        
-        if self.scale_location == self.ui.comboBoxScaleLocation.currentText():
-            return
-
-        self.scale_location = self.ui.comboBoxScaleLocation.currentText()
-        self.schedule_update()
 
     def scale_length_callback(self):
         """Updates length of scalebar on map-type plots
@@ -2049,40 +2217,8 @@ class StylingDock(StyleData, StyleTheme):
         # update plot
         self.schedule_update()
 
-    # markers
-    # -------------------------------------
-    def slider_alpha_changed(self):
-        """Updates transparency on scatter plots.
-
-        Executes on change of ``MainWindow.horizontalSliderMarkerAlpha.value()``.
-        """
-        self.ui.labelMarkerAlpha.setText(str(self.ui.horizontalSliderMarkerAlpha.value()))
-
-        if self.ui.horizontalSliderMarkerAlpha.isEnabled():
-            self.marker_alpha = float(self.ui.horizontalSliderMarkerAlpha.value())
-            self.schedule_update()
-
     # lines
     # -------------------------------------
-
-    def length_multiplier_callback(self):
-        """Updates line length multiplier
-
-        Used when plotting vector components in multidimensional plots.  Values entered by the user must be (0,10]
-        """
-        if not float(self.ui.lineEditLengthMultiplier.text()):
-            self.ui.lineEditLengthMultiplier.values = self.line_multiplier
-
-        value = float(self.ui.lineEditLengthMultiplier.text())
-        if self.line_multiplier == value:
-            return
-        elif (value < 0) or (value >= 100):
-            self.ui.lineEditLengthMultiplier.values = self.line_multiplier
-            return
-
-        self.line_multiplier = value
-        self.schedule_update()
-
     def line_color_callback(self):
         """Updates color of plot markers
 
@@ -2311,34 +2447,8 @@ class StylingDock(StyleData, StyleTheme):
         return cluster_color, cluster_label, cmap
 
 
-    
-
-    def cbar_direction_callback(self):
-        """Sets the colorbar direction
-
-        Sets the colorbar direction in ``MainWindow.styles`` for the current plot type.
-        """
-        if self.cbar_dir == self.ui.comboBoxCbarDirection.currentText():
-            return
-        self.cbar_dir = self.ui.comboBoxCbarDirection.currentText()
-
-        self.schedule_update()
-
-    def cbar_label_callback(self):
-        """Sets color label
-
-        Sets the color label in ``MainWindow.styles`` for the current plot type.
-        """
-        if self.clabel == self.ui.lineEditCLabel.text():
-            return
-        self.clabel = self.ui.lineEditCLabel.text()
-
-        if self.ui.comboBoxCLabel.isEnabled():
-            self.schedule_update()
-
     # cluster styles
     # -------------------------------------
-
     def set_default_cluster_colors(self,n, mask=False):
         """Sets cluster group to default colormap
 

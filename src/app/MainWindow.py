@@ -26,7 +26,7 @@ from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 from src.app.PlotTree import PlotTree
 from src.app.CanvasWidget import CanvasWidget
-from src.app.DataAnalysis import ClusteringUI, DimensionalReductionUI
+from src.app.DataAnalysis import ClusterPage, DimensionalReductionUI
 from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessingUI
@@ -252,7 +252,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.canvas_widget = CanvasWidget(self)
 
-        self.init_tabs(enable=False)
 
         # Initialize PreprocessingUI
         self.preprocess = PreprocessingUI(self)
@@ -267,7 +266,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dimensional_reduction = DimensionalReductionUI(self)
 
         # Initialise class from DataAnalysis
-        self.clustering = ClusteringUI(self)
+        self.ClusterPage = ClusterPage(parent=self, page_index=self.left_tab['multidim'])
+        self.reindex_left_tab()
+
+        self.init_tabs(enable=False)
 
         # connect actions to docks
         #-------------------------
@@ -596,7 +598,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.ScatterPage.setEnabled(False)
             self.NDIMPage.setEnabled(False)
             self.MultidimensionalPage.setEnabled(False)
-            self.ClusteringPage.setEnabled(False)
+            self.ClusterPage.setEnabled(False)
             if hasattr(self, "special_tools"):
                 self.special_tools.setEnabled(False)
             if hasattr(self, "mask_dock"):
@@ -616,7 +618,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.ScatterPage.setEnabled(True)
             self.NDIMPage.setEnabled(True)
             self.MultidimensionalPage.setEnabled(True)
-            self.ClusteringPage.setEnabled(True)
+            self.ClusterPage.setEnabled(True)
             if hasattr(self,"special_tools"):
                 self.special_tools.setEnabled(True)
             if hasattr(self, "mask_dock"):
@@ -644,7 +646,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # run clustering before changing plot_type if user selects clustering tab
         if tab_id == self.left_tab['cluster'] :
-            self.clustering.compute_clusters_update_groups()
+            self.ClusterPage.compute_clusters_update_groups()
             plot_clusters(self,data,self.app_data,self.plot_style)
         # run dim red before changing plot_type if user selects dim red tab
         if tab_id == self.left_tab['multidim'] :
@@ -655,7 +657,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.plot_type = self.field_control_settings[tab_id]['plot_list'][self.field_control_settings[tab_id]['saved_index']]
 
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.clustering.toggle_cluster_widgets()
+            self.ClusterPage.toggle_cluster_widgets()
 
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -1584,12 +1586,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
             case 'cluster map' | 'cluster score map':
-                self.clustering.compute_clusters_update_groups()
+                self.ClusterPage.compute_clusters_update_groups()
                 canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.plot_style)
 
             case 'cluster performance':
                 # compute performace as a function of number of clusters
-                self.clustering.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
+                self.ClusterPage.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
                 canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.plot_style)
 
         # add canvas to layout

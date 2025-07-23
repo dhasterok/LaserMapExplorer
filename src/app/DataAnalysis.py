@@ -1,4 +1,12 @@
-from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon )
+from PyQt6.QtCore import ( Qt, QSize, QRect )
+from PyQt6.QtWidgets import (
+    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QToolButton, QWidget,
+    QGroupBox, QLabel, QSpinBox, QDoubleSpinBox, QSlider, QSpacerItem, QComboBox,
+    QCheckBox, QSizePolicy
+)
+from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon, )
+from src.common.CustomWidgets import ( CustomLineEdit, CustomSlider )
+from src.app.UITheme import default_font
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
@@ -9,11 +17,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from src.common.Logger import log, auto_log_methods
 
+
+
 @auto_log_methods(logger_key="Analysis")
 class Clustering():
-    def __init__(self, parent):
+    def __init__(self):
         self.logger_key = "Analysis"
-        self.parent = parent
 
         self._distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
         self._cluster_methods = ['k-means', 'fuzzy c-means']
@@ -130,7 +139,7 @@ class Clustering():
 
 
 @auto_log_methods(logger_key="Analysis")
-class ClusteringUI(Clustering):
+class ClusterPage(QWidget, Clustering):
     """
     Manages the clustering interface and links app_data updates to the MainWindow UI.
 
@@ -144,56 +153,175 @@ class ClusteringUI(Clustering):
     Methods
     -------
     """
-    def __init__(self, parent):
-        super().__init__(self)
-        self.logger_key = "Analysis"
-        self.ui = parent
+    def __init__(self, parent=None, page_index=None):
+        super().__init__()
 
+        if parent is None:
+            return
+
+        self.ui = parent
+        self.logger_key = "Analysis"
         self.update_cluster_flag = True
 
+        self.setupUI(page_index)
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
 
+    def setupUI(self, page_index):
+        self.setGeometry(QRect(0, 0, 300, 506))
+        self.setObjectName("ClusteringPage")
+
+        page_layout = QVBoxLayout(self)
+        page_layout.setContentsMargins(0, 0, 0, 0)
+        page_layout.setObjectName("verticalLayout_83")
+
+        self.scrollAreaClustering = QScrollArea(parent=self)
+        self.scrollAreaClustering.setFrameShape(QFrame.Shape.NoFrame)
+        self.scrollAreaClustering.setFrameShadow(QFrame.Shadow.Plain)
+        self.scrollAreaClustering.setWidgetResizable(True)
+        self.scrollAreaClustering.setObjectName("scrollAreaClustering")
+
+        self.scrollAreaWidgetContentsClustering = QWidget()
+        self.scrollAreaWidgetContentsClustering.setGeometry(QRect(0, 0, 300, 506))
+        self.scrollAreaWidgetContentsClustering.setObjectName("scrollAreaWidgetContentsClustering")
+        scroll_layout = QVBoxLayout(self.scrollAreaWidgetContentsClustering)
+        scroll_layout.setContentsMargins(6, 6, 6, 6)
+        scroll_layout.setObjectName("scroll_layout")
+
+
+        self.groupBoxClustering = QGroupBox(parent=self.scrollAreaWidgetContentsClustering)
+        self.groupBoxClustering.setTitle("")
+        self.groupBoxClustering.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.groupBoxClustering.setObjectName("groupBoxClustering")
+
+        self.cluster_form_layout = QFormLayout(self.groupBoxClustering)
+        self.cluster_form_layout.setObjectName("cluster_form_layout")
+
+        self.comboBoxClusterMethod = QComboBox(parent=self.groupBoxClustering)
+        self.comboBoxClusterMethod.setMaximumSize(QSize(150, 16777215))
+        self.comboBoxClusterMethod.setFont(default_font())
+        self.comboBoxClusterMethod.setObjectName("comboBoxClusterMethod")
+        self.cluster_form_layout.addRow("Method", self.comboBoxClusterMethod)
+
+        self.spinBoxClusterMax = QSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxClusterMax.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxClusterMax.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxClusterMax.setMinimum(3)
+        self.spinBoxClusterMax.setMaximum(98)
+        self.spinBoxClusterMax.setProperty("value", 10)
+        self.spinBoxClusterMax.setObjectName("spinBoxClusterMax")
+        self.cluster_form_layout.addRow("Max. clusters", self.spinBoxClusterMax)
+
+        self.spinBoxNClusters = QSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxNClusters.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxNClusters.setFont(default_font())
+        self.spinBoxNClusters.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxNClusters.setKeyboardTracking(False)
+        self.spinBoxNClusters.setMinimum(1)
+        self.spinBoxNClusters.setMaximum(98)
+        self.spinBoxNClusters.setProperty("value", 5)
+        self.spinBoxNClusters.setObjectName("spinBoxNClusters")
+        self.cluster_form_layout.addRow("No. clusters", self.spinBoxNClusters)
+
+        self.sliderClusterExponent = CustomSlider(parent=self.groupBoxClustering, orientation="horizontal", label_position="low")
+        self.sliderClusterExponent.label.setFont(default_font())
+        self.sliderClusterExponent.slider.setFont(default_font())
+        self.sliderClusterExponent.slider.setTickPosition(QSlider.TickPosition.NoTicks)
+        self.sliderClusterExponent.min_value = 1.0
+        self.sliderClusterExponent.max_value = 3.0
+        self.sliderClusterExponent.step = 0.1 
+        self.sliderClusterExponent.setTickInterval(1)
+        self.sliderClusterExponent.setObjectName("sliderClusterExponent")
+        self.cluster_form_layout.addRow("Exponent", self.sliderClusterExponent)
+
+        self.comboBoxClusterDistance = QComboBox(parent=self.groupBoxClustering)
+        self.comboBoxClusterDistance.setMaximumSize(QSize(150, 16777215))
+        self.comboBoxClusterDistance.setFont(default_font())
+        self.comboBoxClusterDistance.setObjectName("comboBoxClusterDistance")
+        self.cluster_form_layout.addRow("Distance", self.comboBoxClusterDistance)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+
+        self.toolButtonRandomSeed = QToolButton(parent=self.groupBoxClustering)
+        self.toolButtonRandomSeed.setMinimumSize(QSize(32, 32))
+        self.toolButtonRandomSeed.setMaximumSize(QSize(32, 32))
+        self.toolButtonRandomSeed.setFont(default_font())
+        seed_icon = QIcon(":/resources/icons/icon-randomize-64.svg")
+        self.toolButtonRandomSeed.setIcon(seed_icon)
+        self.toolButtonRandomSeed.setIconSize(QSize(24, 24))
+        self.toolButtonRandomSeed.setObjectName("toolButtonRandomSeed")
+        self.horizontalLayout.addWidget(self.toolButtonRandomSeed)
+
+        self.lineEditSeed = CustomLineEdit(parent=self.groupBoxClustering)
+        self.lineEditSeed.setMaximumSize(QSize(150, 16777215))
+        self.lineEditSeed.setFont(default_font())
+        self.lineEditSeed.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditSeed.setObjectName("lineEditSeed")
+        self.lineEditSeed.setValidator(QIntValidator(0,1000000000))
+        self.horizontalLayout.addWidget(self.lineEditSeed)
+        self.cluster_form_layout.addRow("Seed", self.horizontalLayout)
+
+        self.checkBoxWithPCA = QCheckBox(parent=self.groupBoxClustering)
+        self.checkBoxWithPCA.setFont(default_font())
+        self.checkBoxWithPCA.setText("")
+        self.checkBoxWithPCA.setObjectName("checkBoxWithPCA")
+        self.cluster_form_layout.addRow("PCA", self.checkBoxWithPCA)
+
+        self.spinBoxPCANumBasis = QSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxPCANumBasis.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxPCANumBasis.setFont(default_font())
+        self.spinBoxPCANumBasis.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxPCANumBasis.setKeyboardTracking(False)
+        self.spinBoxPCANumBasis.setObjectName("spinBoxPCANumBasis")
+        self.cluster_form_layout.addRow("No. basis", self.spinBoxPCANumBasis)
+
+        scroll_layout.addWidget(self.groupBoxClustering)
+        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        scroll_layout.addItem(spacer)
+        self.scrollAreaClustering.setWidget(self.scrollAreaWidgetContentsClustering)
+
+        page_layout.addWidget(self.scrollAreaClustering)
+
+        cluster_icon = QIcon(":/resources/icons/icon-cluster-64.svg")
+        if not page_index:
+            self.ui.toolBox.addItem(self, cluster_icon, "Clustering")
+        else:
+            self.ui.toolBox.insertItem(page_index+1, self, cluster_icon, "Clustering")
+
     def connect_widgets(self):
         """Connect clustering widgets to UI."""
         # Clustering ui widgets
-        self.ui.spinBoxClusterMax.valueChanged.connect(lambda _: self.update_max_clusters())
-        self.ui.spinBoxNClusters.valueChanged.connect(lambda _: self.update_num_clusters())
+        self.spinBoxClusterMax.valueChanged.connect(lambda _: self.update_max_clusters())
+        self.spinBoxNClusters.valueChanged.connect(lambda _: self.update_num_clusters())
 
-        self.ui.comboBoxClusterDistance.clear()
-        self.ui.comboBoxClusterDistance.addItems(self._distance_metrics)
+        self.comboBoxClusterDistance.clear()
+        self.comboBoxClusterDistance.addItems(self._distance_metrics)
         self.ui.app_data.cluster_distance = self._distance_metrics[0]
-        self.ui.comboBoxClusterDistance.activated.connect(lambda _: self.update_cluster_distance())
+        self.comboBoxClusterDistance.activated.connect(lambda _: self.update_cluster_distance())
 
         # cluster exponent
-        self.ui.horizontalSliderClusterExponent.setMinimum(10)  # Represents 1.0 (since 10/10 = 1.0)
-        self.ui.horizontalSliderClusterExponent.setMaximum(30)  # Represents 3.0 (since 30/10 = 3.0)
-        self.ui.horizontalSliderClusterExponent.setSingleStep(1)  # Represents 0.1 (since 1/10 = 0.1)
-        self.ui.horizontalSliderClusterExponent.setTickInterval(1)
-        self.ui.horizontalSliderClusterExponent.valueChanged.connect(lambda value: self.ui.labelClusterExponent.setText(str(value/10)))
-        self.ui.horizontalSliderClusterExponent.sliderReleased.connect(lambda: setattr(self.ui.app_data, "cluster_exponent",float(self.ui.horizontalSliderClusterExponent.value()/10)))
+        self.sliderClusterExponent.sliderReleased.connect(lambda _: self.update_cluster_exponent())
 
         # starting seed
-        self.ui.lineEditSeed.setValidator(QIntValidator(0,1000000000))
-        self.ui.lineEditSeed.editingFinished.connect(lambda _: self.update_cluster_seed())
-        self.ui.toolButtonRandomSeed.clicked.connect(lambda _: self.ui.app_data.generate_random_seed())
+        self.lineEditSeed.editingFinished.connect(lambda _: self.update_cluster_seed())
+        self.toolButtonRandomSeed.clicked.connect(lambda _: self.ui.app_data.generate_random_seed())
 
         # cluster method
-        self.ui.comboBoxClusterMethod.clear()
-        self.ui.comboBoxClusterMethod.addItems(self.ui.app_data.cluster_method_options)
+        self.comboBoxClusterMethod.clear()
+        self.comboBoxClusterMethod.addItems(self.ui.app_data.cluster_method_options)
         self.ui.app_data.cluster_method = self.ui.app_data.cluster_method_options[0]
-        self.ui.comboBoxClusterMethod.activated.connect(lambda _: self.update_cluster_method())
+        self.comboBoxClusterMethod.activated.connect(lambda _: self.update_cluster_method())
 
-        self.ui.checkBoxWithPCA.setChecked(self.ui.app_data.dim_red_precondition)
-        self.ui.checkBoxWithPCA.setToolTip("Use dimensional reduction scores for clustering.")
-        self.ui.checkBoxWithPCA.stateChanged.connect(lambda _: self.update_dim_red_precondition())
+        self.checkBoxWithPCA.setChecked(self.ui.app_data.dim_red_precondition)
+        self.checkBoxWithPCA.setToolTip("Use dimensional reduction scores for clustering.")
+        self.checkBoxWithPCA.stateChanged.connect(lambda _: self.update_dim_red_precondition())
 
-        self.ui.spinBoxPCANumBasis.setMinimum(1)
-        self.ui.spinBoxPCANumBasis.setMaximum(1)
-        self.ui.spinBoxPCANumBasis.setValue(self.ui.app_data.num_basis_for_precondition)
-        self.ui.spinBoxPCANumBasis.valueChanged.connect(lambda _: self.update_num_basis_for_precondition())
-
+        self.spinBoxPCANumBasis.setMinimum(1)
+        self.spinBoxPCANumBasis.setMaximum(1)
+        self.spinBoxPCANumBasis.setValue(self.ui.app_data.num_basis_for_precondition)
+        self.spinBoxPCANumBasis.valueChanged.connect(lambda _: self.update_num_basis_for_precondition())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -201,21 +329,21 @@ class ClusteringUI(Clustering):
         self.ui.app_data.add_observer("max_clusters", self.update_max_clusters)
         self.ui.app_data.add_observer("num_clusters", self.update_num_clusters)
         self.ui.app_data.add_observer("cluster_seed", self.update_cluster_seed)
-        self.ui.app_data.add_observer("cluster_exponent", self.update_cluster_exponent_slider)
+        self.ui.app_data.add_observer("cluster_exponent", self.update_cluster_exponent)
         self.ui.app_data.add_observer("cluster_distance", self.update_cluster_distance)
         self.ui.app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition)
         self.ui.app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition)
 
     def connect_logger(self):
         """Connects widgets to logger."""
-        self.ui.comboBoxClusterMethod.activated.connect(lambda: log(f"comboBoxClusterMethod value=[{self.ui.comboBoxClusterMethod.currentText()}]", prefix="UI"))
-        self.ui.spinBoxNClusters.valueChanged.connect(lambda: log(f"spinBoxNClusters value=[{self.ui.spinBoxNClusters.value()}]", prefix="UI"))
-        self.ui.horizontalSliderClusterExponent.valueChanged.connect(lambda: log(f"horizontalSliderClusterExponent value=[{self.ui.horizontalSliderClusterExponent.value()}]", prefix="UI"))
-        self.ui.comboBoxClusterDistance.activated.connect(lambda: log(f"comboBoxClusterDistance value=[{self.ui.comboBoxClusterDistance.currentText()}]", prefix="UI"))
-        self.ui.lineEditSeed.editingFinished.connect(lambda: log(f"lineEditSeed value=[{self.ui.lineEditSeed.value}]", prefix="UI"))
-        self.ui.toolButtonRandomSeed.clicked.connect(lambda: log("toolButtonRandomSeed", prefix="UI"))
-        self.ui.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.ui.checkBoxWithPCA.isChecked()}]", prefix="UI"))
-        self.ui.spinBoxPCANumBasis.valueChanged.connect(lambda: log(f"spinBoxPCANumBasis value=[{self.ui.spinBoxPCANumBasis.value()}]", prefix="UI"))
+        self.comboBoxClusterMethod.activated.connect(lambda: log(f"comboBoxClusterMethod value=[{self.comboBoxClusterMethod.currentText()}]", prefix="UI"))
+        self.spinBoxNClusters.valueChanged.connect(lambda: log(f"spinBoxNClusters value=[{self.spinBoxNClusters.value()}]", prefix="UI"))
+        self.sliderClusterExponent.valueChanged.connect(lambda: log(f"horizontalSliderClusterExponent value=[{self.sliderClusterExponent.value()}]", prefix="UI"))
+        self.comboBoxClusterDistance.activated.connect(lambda: log(f"comboBoxClusterDistance value=[{self.comboBoxClusterDistance.currentText()}]", prefix="UI"))
+        self.lineEditSeed.editingFinished.connect(lambda: log(f"lineEditSeed value=[{self.lineEditSeed.value}]", prefix="UI"))
+        self.toolButtonRandomSeed.clicked.connect(lambda: log("toolButtonRandomSeed", prefix="UI"))
+        self.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.checkBoxWithPCA.isChecked()}]", prefix="UI"))
+        self.spinBoxPCANumBasis.valueChanged.connect(lambda: log(f"spinBoxPCANumBasis value=[{self.spinBoxPCANumBasis.value()}]", prefix="UI"))
 
     def toggle_cluster_widgets(self):
         """Toggle visibility of cluster widgets based on the current clustering method.
@@ -227,53 +355,53 @@ class ClusteringUI(Clustering):
         # toggle visibility of widgets based on the current plot type
         match self.ui.plot_style.plot_type:
             case 'cluster map' | 'cluster score map':
-                self.ui.labelClusterMax.hide()
-                self.ui.spinBoxClusterMax.hide()
-                self.ui.labelNClusters.show()
-                self.ui.spinBoxNClusters.show()
+                self.labelClusterMax.hide()
+                self.spinBoxClusterMax.hide()
+                self.labelNClusters.show()
+                self.spinBoxNClusters.show()
             case 'cluster performance':
-                self.ui.labelClusterMax.show()
-                self.ui.spinBoxClusterMax.show()
-                self.ui.labelNClusters.hide()
-                self.ui.spinBoxNClusters.hide()
+                self.labelClusterMax.show()
+                self.spinBoxClusterMax.show()
+                self.labelNClusters.hide()
+                self.spinBoxNClusters.hide()
 
         # enable/disable widgets based on the current clustering method
         match self.ui.app_data.cluster_method:
             case 'k-means':
-                self.ui.spinBoxNClusters.setEnabled(True)
-                self.ui.spinBoxClusterMax.setEnabled(True)
-                self.ui.comboBoxClusterDistance.setEnabled(True)
-                self.ui.horizontalSliderClusterExponent.setEnabled(False)
+                self.spinBoxNClusters.setEnabled(True)
+                self.spinBoxClusterMax.setEnabled(True)
+                self.comboBoxClusterDistance.setEnabled(True)
+                self.sliderClusterExponent.setEnabled(False)
             case 'fuzzy c-means':
-                self.ui.spinBoxNClusters.setEnabled(True)
-                self.ui.spinBoxClusterMax.setEnabled(True)
-                self.ui.comboBoxClusterDistance.setEnabled(False)
-                self.ui.horizontalSliderClusterExponent.setEnabled(True)
+                self.spinBoxNClusters.setEnabled(True)
+                self.spinBoxClusterMax.setEnabled(True)
+                self.comboBoxClusterDistance.setEnabled(False)
+                self.sliderClusterExponent.setEnabled(True)
             case _:
                 ValueError(f"Unknown clustering method {self.ui.app_data.cluster_method}")
         
         if 'PCA score' in self.ui.app_data.field_dict:
-            self.ui.checkBoxWithPCA.setEnabled(True)
-            self.ui.labelClusterWithPCA.setEnabled(True)
+            self.checkBoxWithPCA.setEnabled(True)
+            self.labelClusterWithPCA.setEnabled(True)
         else:
-            self.ui.checkBoxWithPCA.setEnabled(False)
-            self.ui.labelClusterWithPCA.setEnabled(False)
+            self.checkBoxWithPCA.setEnabled(False)
+            self.labelClusterWithPCA.setEnabled(False)
 
         # enable/disable widgets based on the current clustering method
-        self.ui.labelNClusters.setEnabled(self.ui.spinBoxNClusters.isEnabled())
-        self.ui.labelClusterMax.setEnabled(self.ui.spinBoxClusterMax.isEnabled())
-        self.ui.labelClusterDistance.setEnabled(self.ui.comboBoxClusterDistance.isEnabled())
-        self.ui.labelClusterExponent.setEnabled(self.ui.horizontalSliderClusterExponent.isEnabled())
-        self.ui.labelExponent.setEnabled(self.ui.horizontalSliderClusterExponent.isEnabled())
+        self.labelNClusters.setEnabled(self.spinBoxNClusters.isEnabled())
+        self.labelClusterMax.setEnabled(self.spinBoxClusterMax.isEnabled())
+        self.labelClusterDistance.setEnabled(self.comboBoxClusterDistance.isEnabled())
+        self.labelClusterExponent.setEnabled(self.sliderClusterExponent.isEnabled())
+        self.labelExponent.setEnabled(self.sliderClusterExponent.isEnabled())
 
         # if PCA is not used for clustering, disable the PCA widgets
-        if self.ui.checkBoxWithPCA.isChecked() and self.ui.checkBoxWithPCA.isEnabled():
-            self.ui.spinBoxPCANumBasis.setMaximum(self.ui.data[self.ui.app_data.sample_id].processed_data.get_attribute('PCA score').shape[1])
-            self.ui.spinBoxPCANumBasis.setEnabled(True)
-            self.ui.labelPCANumBasis.setEnabled(True)
+        if self.checkBoxWithPCA.isChecked() and self.checkBoxWithPCA.isEnabled():
+            self.spinBoxPCANumBasis.setMaximum(self.ui.data[self.ui.app_data.sample_id].processed_data.get_attribute('PCA score').shape[1])
+            self.spinBoxPCANumBasis.setEnabled(True)
+            self.labelPCANumBasis.setEnabled(True)
         else:
-            self.ui.spinBoxPCANumBasis.setEnabled(False)
-            self.ui.labelPCANumBasis.setEnabled(False)
+            self.spinBoxPCANumBasis.setEnabled(False)
+            self.labelPCANumBasis.setEnabled(False)
 
 
     def update_cluster_method(self, new_method=None):
@@ -289,9 +417,9 @@ class ClusteringUI(Clustering):
             New clustering method.
         """
         if not new_method:
-            self.ui.app_data.cluster_method = self.ui.comboBoxClusterMethod.currentText()
+            self.ui.app_data.cluster_method = self.comboBoxClusterMethod.currentText()
         else:
-            self.ui.comboBoxClusterMethod.setCurrentText(new_method)
+            self.comboBoxClusterMethod.setCurrentText(new_method)
 
         self.toggle_cluster_widgets()
 
@@ -312,9 +440,9 @@ class ClusteringUI(Clustering):
             The maximum number of clusters that will be used to produce a cluster performance plot.
         """
         if not max_clusters:
-            self.ui.app_data.max_clusters = self.ui.spinBoxClusterMax.value()
+            self.ui.app_data.max_clusters = self.spinBoxClusterMax.value()
         else:
-            self.ui.spinBoxClusterMax.setValue(int(max_clusters))
+            self.spinBoxClusterMax.setValue(int(max_clusters))
             if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
                 self.ui.plot_style.schedule_update()
 
@@ -331,9 +459,9 @@ class ClusteringUI(Clustering):
             The number of clusters for clustering analysis.
         """
         if not num_clusters:
-            self.ui.app_data.num_clusters = self.ui.spinBoxNClusters.value()
+            self.ui.app_data.num_clusters = self.spinBoxNClusters.value()
         else:
-            self.ui.spinBoxNClusters.setValue(int(num_clusters))
+            self.spinBoxNClusters.setValue(int(num_clusters))
 
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
@@ -352,17 +480,31 @@ class ClusteringUI(Clustering):
             The random seed for clustering. If not provided, the current value of the line edit is used.
             If provided, the line edit is updated with the new seed value.
         """
-        if not new_seed:
-            self.ui.app_data.cluster_seed = self.ui.lineEditSeed.value
+        if new_seed is None:
+            self.ui.app_data.cluster_seed = self.lineEditSeed.value
         else:
-            self.ui.lineEditSeed.setText(str(new_seed))
+            if new_seed == int(self.ui.lineEditSeed.text()):
+                return
+
+            self.lineEditSeed.blockSignals(True)
+            self.lineEditSeed.setText(str(new_seed))
+            self.lineEditSeed.blockSignals(False)
 
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
-    def update_cluster_exponent_slider(self, new_cluster_exponent):
-        self.ui.horizontalSliderClusterExponent.setValue(int(new_cluster_exponent*10))
-        self.ui.labelClusterExponent.setText(str(new_cluster_exponent))
+    def update_cluster_exponent(self, new_value=None):
+        if new_value is None:
+            self.ui.app_data.cluster_exponent = self.sliderClusterExponent.value()
+        else:
+            if new_value == self.sliderClusterExponent.value():
+                return
+        
+            # this may cause a problem with the internal changing of the exponent label.
+            self.sliderClusterExponent.blockSignals(True)
+            self.sliderClusterExponent.setValue(new_value)
+            self.sliderClusterExponent.blockSignals(False)
+
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 
@@ -379,9 +521,9 @@ class ClusteringUI(Clustering):
             The new distance metric used for clustering. If not provided, the current text of the combo box is used.
         """
         if not new_distance:
-            self.ui.app_data.cluster_distance = self.ui.comboBoxClusterDistance.currentText()
+            self.ui.app_data.cluster_distance = self.comboBoxClusterDistance.currentText()
         else:
-            self.ui.comboBoxClusterDistance.setCurrentText(new_distance)
+            self.comboBoxClusterDistance.setCurrentText(new_distance)
 
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
@@ -400,9 +542,9 @@ class ClusteringUI(Clustering):
             of the checkbox is used. If provided, the checkbox state is updated with the new value
         """
         if new_value is None:
-            self.ui.app_data.dim_red_precondition = self.ui.checkBoxWithPCA.isChecked()
+            self.ui.app_data.dim_red_precondition = self.checkBoxWithPCA.isChecked()
         else:
-            self.ui.checkBoxWithPCA.setChecked(new_value)
+            self.checkBoxWithPCA.setChecked(new_value)
 
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
@@ -421,9 +563,9 @@ class ClusteringUI(Clustering):
             If provided, the spin box is updated with the new value.
         """
         if not new_value:
-            self.ui.app_data.num_basis_for_precondition = self.ui.spinBoxPCANumBasis.value()
+            self.ui.app_data.num_basis_for_precondition = self.spinBoxPCANumBasis.value()
         else:
-            self.ui.spinBoxPCANumBasis.setValue(int(new_value))
+            self.spinBoxPCANumBasis.setValue(int(new_value))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
             self.ui.plot_style.schedule_update()
 

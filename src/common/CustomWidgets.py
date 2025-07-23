@@ -1246,21 +1246,38 @@ class CustomSlider(QWidget):
     sliderReleased = pyqtSignal(int)
     sliderPressed = pyqtSignal(int)
 
-    def __init__(self, min_value=0, max_value=100, step=1, initial_value=50, parent=None):
+    def __init__(self, min_value=0, max_value=100, step=1, initial_value=50, precision=1, orientation="horizontal", label_position="low", parent=None):
         super().__init__(parent)
         
-        self.layout = QVBoxLayout()
+        self._min_value = min_value
+        self._max_value = max_value
+        self._step = step
+        self._precision = precision
+        self._scale = int(1 / step)  
+
+        if orientation == "horizontal":
+            self.layout = QHBoxLayout()
+        elif orientation == "vertical":
+            self.layout = QVBoxLayout()
+        else:
+            raise ValueError("Orientation must be 'horizontal' or 'vertical'.")
         
         # Create label to display slider value
-        self.label = QLabel(f"Value: {initial_value}")
+        self.label = CustomLineEdit(self,value=initial_value, precision=precision)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # Create slider
-        self.slider = QSlider(Qt.Orientation.Horizontal)
-        self.slider.setMinimum(min_value)
-        self.slider.setMaximum(max_value)
-        self.slider.setSingleStep(step)
-        self.slider.setValue(initial_value)
+        if orientation == "horizontal":
+            self.slider = QSlider(Qt.Orientation.Horizontal, parent=self)
+        else:
+            self.slider = QSlider(Qt.Orientation.Vertical, parent=self)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(int((self.max_value - self.min_value) * self._scale))
+        self.slider.setSingleStep(1)
+        self.slider.setValue(int((initial_value - self.min_value) * self._scale))
+
+        # connect label to slider
+        self.label.editingFinished.connect(self.handle_label_change)
         
         # Connect slider movement to label update
         self.slider.valueChanged.connect(self.update_label)
@@ -1272,56 +1289,114 @@ class CustomSlider(QWidget):
         self.slider.sliderPressed.connect(self.sliderPressed.emit)
         
         # Add widgets to layout
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.slider)
+        if (label_position == "low" and orientation == "horizontal") or (label_position == "high" and orientation == "vertical"):
+            self.layout.addWidget(self.label)
+            self.layout.addWidget(self.slider)
+        elif (label_position == "high" and orientation == "horizontal") or (label_position == "low" and orientation == "vertical"):
+            self.layout.addWidget(self.slider)
+            self.layout.addWidget(self.label)
+        else:
+            raise ValueError("Label position must be 'low' or 'high'.")
         
         self.setLayout(self.layout)
+
+    @property
+    def min_value(self):
+        return self._min_value
+
+    @min_value.setter
+    def min_value(self, new_value):
+        if not new_value or not isinstance(new_value, float):
+            raise TypeError('CustomSlider minimum value must be a float.')
+
+        if new_value == self._min_value:
+            return
+        elif new_value > self.max_value:
+            raise ValueError("CustomSlider minimum bound must be greater than the maximum bound.")
+
+        self._min_value = new_value
+        self._update_slider_range()
+
+    @property
+    def max_value(self):
+        return self._max_value
+
+    @max_value.setter
+    def max_value(self, new_value):
+        if not new_value or not isinstance(new_value, float):
+            raise TypeError('CustomSlider maximum bound must be a float.')
+
+        if new_value == self._max_value:
+            return
+        elif new_value < self.min_value:
+            raise ValueError("CustomSlider maximum bound must be greater than the minimum bound.")
+        
+        self._max_value = new_value
+        self._update_slider_range()
+
+    @property
+    def step(self):
+        return self._step
     
-    def update_label(self, value):
+    @step.setter
+    def step(self, new_value):
+        if not new_value or not isinstance(new_value, float):
+            raise TypeError('CustomSlider step must be a float.')
+
+        if new_value == self._step:
+            return
+
+        self._step = new_value
+        self._scale = int(1 / self._step)
+        self._update_slider_range()
+
+    def _update_slider_range(self):
+        """Update slider range and current value based on min, max, step."""
+        self._scale = int(1 / self._step)
+
+        self.slider.blockSignals(True)  # avoid emitting signals while adjusting
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(int((self.max_value - self.min_value) * self._scale))
+        self.slider.setSingleStep(1)
+        # Optionally: clamp current value if needed
+        current_value = self.value()
+        clamped_value = max(min(current_value, self.max_value), self.min_value)
+        self.setValue(clamped_value)
+        self.slider.blockSignals(False)
+
+    def handle_label_change(self):
         """
-        Updates the label text to display the current slider value.
+        Updates the slider value from the label after editing is finished.
+        """
+        try:
+            value = float(self.label.value)
+        except (ValueError, TypeError):
+            return
+
+        # Clamp to range
+        value = max(min(value, self.max_value), self.min_value)
+        int_value = int(round((value - self.min_value) * self._scale))
+        self.slider.setValue(int_value)
+    
+    def update_label(self, int_value):
+        """
+        Updates the label value to display the slider's value.
 
         Parameters
         ----------
         value : int
             Current value of the slider.
         """
-        self.label.setText(f"{value}")
+        true_value = self.min_value + (int_value / self._scale)
+        self.label.setValue(true_value)
     
-    def setMinimum(self, value):
-        """
-        Sets the minimum value of the slider.
-
-        Parameters
-        ----------
-        value : int
-            Minimum value.
-        """
-        self.slider.setMinimum(value)
+    def setTickInterval(self, new_interval):
+        if self._scale <= 0:
+            return
+        tick_interval = int(new_interval * self._scale)
+        self.slider.setTickInterval(tick_interval) 
     
-    def setMaximum(self, value):
-        """
-        Sets the maximum value of the slider.
-
-        Parameters
-        ----------
-        value : int
-            Maximum value.
-        """
-        self.slider.setMaximum(value)
-    
-    def setStep(self, value):
-        """
-        Sets the step size of the slider.
-
-        Parameters
-        ----------
-        value : int
-            Step size.
-        """
-        self.slider.setSingleStep(value)
-    
-    def setValue(self, value):
+    def setValue(self, float_value):
         """
         Sets the slider value.
 
@@ -1330,7 +1405,8 @@ class CustomSlider(QWidget):
         value : int
             Desired slider value.
         """
-        self.slider.setValue(value)
+        int_value = int(round((float_value - self.min_value) * self._scale))
+        self.slider.setValue(int_value)
     
     def value(self):
         """
@@ -1341,7 +1417,7 @@ class CustomSlider(QWidget):
         int
             Current slider value.
         """
-        return self.slider.value()
+        return self.min_value + (self.slider.value() / self._scale)
 
 
 class DoubleSlider(QWidget):

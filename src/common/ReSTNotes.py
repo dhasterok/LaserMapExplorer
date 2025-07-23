@@ -325,7 +325,6 @@ class Notes(CustomDockWidget):
 
         # Create Text Edit region for ReST Notes
         self.text_edit = CodeEditor()
-        self.text_edit.setFont(QFont("Monaco", 10))
         self.text_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.text_edit.setMaximumSize(QSize(524287, 524287))
         self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
@@ -377,7 +376,7 @@ class Notes(CustomDockWidget):
         if self._notes_file is None:
             self.status_label = QLabel("FILE: load sample to display file")
         else:
-            self.status_label = QLabel("FILE: "+self._notes_file)
+            self.status_label = QLabel("FILE: "+str(self._notes_file))
 
             # generate the HTML preview
             self.update_notes_view()

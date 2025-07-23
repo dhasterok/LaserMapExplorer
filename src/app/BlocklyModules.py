@@ -36,7 +36,7 @@ from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialTools import SpecialFunctions as specfun
-from src.common.NoteTaking import Notes
+from src.common.ReSTNotes import Notes
 from src.common.Browser import Browser
 from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame

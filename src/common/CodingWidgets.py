@@ -1,4 +1,5 @@
 import re, json
+from typing import Callable
 from dataclasses import dataclass
 from PyQt6.QtWidgets import ( 
         QWidget, QWidget, QPlainTextEdit, QTextEdit
@@ -27,6 +28,10 @@ class LineNumberArea(QWidget):
 class CodeEditor(QPlainTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # set font to monospaced
+        self.setFont(QFont("Monaco", 10))
+
         self.lineNumberArea = LineNumberArea(self)
 
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
@@ -45,7 +50,7 @@ class CodeEditor(QPlainTextEdit):
     
     @highlight_line.setter
     def highlight_line(self, new_state):
-        if not isinstance(new_state, 'bool'):
+        if not isinstance(new_state, bool):
             raise TypeError("Highlight line should be a bool.")
         self._highlight_line = new_state
         self.highlightCurrentLine()
@@ -149,19 +154,17 @@ def save_highlight_rules(rules, filepath):
         json.dump([r.to_dict() for r in rules], f, indent=2)
 
 def load_highlight_rules(filepath):
-    """_summary_
-
-    _extended_summary_
+    """Load highlighting rules.
 
     Parameters
     ----------
-    filepath : _type_
+    filepath : path
         _description_
 
     Returns
     -------
-    _type_
-        _description_
+    dict
+        Highlight rules
 
     Example
     -------
@@ -177,6 +180,290 @@ def load_highlight_rules(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
     return [HighlightRule.from_dict(d) for d in data]
+
+
+@dataclass
+class HighlightRule:
+    def __init__(
+        self,
+        name: str,
+        pattern: str,
+        color: str=None,
+        background: str=None,
+        font_family: str=None,
+        font_weight: int=None,
+        style: str="normal",
+        underline: bool=False,
+        group: int = 0,
+        context_trigger: str=None,
+        context_apply: str=None,
+    ):
+        self.name = name # name of rule
+
+        self.pattern = pattern # pattern to match
+        self.color = color
+        self.background = background
+        self.font_family = font_family
+        self.font_weight = font_weight
+        self.style = style
+        self.underline = underline
+        self.group = group
+
+        # Context-sensitive additions
+        self.context_trigger = context_trigger
+        self.context_apply = context_apply
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "pattern": self.pattern,
+            "color": self.color,
+            "background": self.background,
+            "font_family": self.font_family,
+            "font_weight": self.font_weight,
+            "style": self.style,
+            "underline": self.underline,
+            "group": self.group,
+            "context_trigger": self.context_trigger,
+            "context_apply": self.context_apply,
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            name=data["name"],
+            pattern=data["pattern"],
+            color=data.get("color", "#000000"),
+            style=data.get("style", "normal"),
+            background=data.get("background"),
+            font_family=data.get("font_family"),
+            underline=data.get("underline", False),
+            group=data.get("group", 0),
+            context_trigger=data.get("context_trigger"),
+            context_apply=data.get("context_apply"),
+        )
+
+# Define the rules for the Ayu Light theme
+RST_HIGHLIGHT_RULES = [
+    HighlightRule( # Bold
+        name="bold",
+        pattern=r"(?<!\S)\*\*(?!\s)(.+?)(?<!\s)\*\*(?=\s|[.,;!?)]|$)",
+        color=AYU_LIGHT_THEME["red"],
+        style="bold",
+        group=0,
+    ),
+    HighlightRule( # Italic
+        name="italic",
+        pattern=r"(?<!\S)\*([^\s*][^*\n]*?)\*(?=\s|[.,;!?)]|$)",
+        color=AYU_LIGHT_THEME["red"],
+        style="italic",
+        group = 0,
+    ),
+    HighlightRule( # Inline code
+        name="literal.inline",
+        pattern=r"(?<!\S)``([^`\n]+)``(?=\s|[.,;!?)]|$)",
+        color=AYU_LIGHT_THEME["green"],
+        font_family="Courier New",
+        style="normal",
+        group=0,
+    ),  
+    HighlightRule(
+        name="literal.block",
+        pattern="",  # No inline pattern
+        color=AYU_LIGHT_THEME["green"],
+        context_trigger=r"^::$",
+        context_apply=r"^\s{2,}",
+    ),
+    HighlightRule( # Directive
+        name="directive",
+        pattern=r"^\s*\.\. .*?::",    
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal",
+        group=0,
+    ),         
+    HighlightRule( # Directive option
+        name="directive.option",
+        pattern=r"(:\w+:)",
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal",
+        group=1,
+    ),
+    HighlightRule( # Titles
+        name="title",
+        pattern=r"^(?P<text>.+)\n(?P<line>=+|-+)$", 
+        color=AYU_LIGHT_THEME["orange"],
+        style="bold"
+    ),  
+    HighlightRule( # Block quotes
+        name="block.quote",
+        pattern=r"(?m)^\s{3,}.*$",      
+        color=AYU_LIGHT_THEME["grey"]
+    ),
+    HighlightRule( # Links
+        name="link",
+        pattern=r"`[^`]+? <[^>]+?>`_",  
+        color=AYU_LIGHT_THEME["link"],
+        underline=True
+    ),
+    HighlightRule( # Unordered list bullets
+        name="list",
+        pattern=r'^\s*([-+*])(?=\s)',   
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal"
+    ),
+    HighlightRule( # numbered list items like 1. or 1)
+        name="enumerate",
+        pattern=r'^\s*\d+[\.\)](?=\s)', 
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal"
+    ),
+    HighlightRule( # reST table lines like +---+ or ===
+        name="table",
+        pattern=r'^[-+|=]{3,}$',        
+        color=AYU_LIGHT_THEME["purple"],
+        style="normal"
+    ),
+    HighlightRule( # table borders: + or |
+        name="table border",
+        pattern=r'^[+|]',               
+        color=AYU_LIGHT_THEME["purple"],
+        style="normal"
+    ),
+    HighlightRule(
+        name="directive.figure",
+        pattern=r"^\\s*\\.\\. figure::",
+        color=AYU_LIGHT_THEME["blue"],
+        context_trigger="^\\s*\\.\\. figure::",
+        context_apply="directive.option",
+    ),
+    HighlightRule(
+        name="directive.option",
+        pattern=r"^\\s*:[a-zA-Z-]+:\\s+.*",
+        color=AYU_LIGHT_THEME["blue"],
+    ),
+]
+
+FONT_WEIGHT_MAP = {
+    "thin": QFont.Weight.Thin,
+    "extra_light": QFont.Weight.ExtraLight,
+    "light": QFont.Weight.Light,
+    "normal": QFont.Weight.Normal,
+    "medium": QFont.Weight.Medium,
+    "demi_bold": QFont.Weight.DemiBold,
+    "bold": QFont.Weight.Bold,
+    "extra_bold": QFont.Weight.ExtraBold,
+    "black": QFont.Weight.Black,
+}
+
+class RstHighlighter(QSyntaxHighlighter):
+    def __init__(self, document, highlight_rules=None):
+        super().__init__(document)
+        self.highlight_rules = []
+        if highlight_rules:
+            self.highlight_rules = highlight_rules
+        else:
+            self.highlight_rules = RST_HIGHLIGHT_RULES
+
+        self.in_context = False
+
+    def _make_format(self, rule: HighlightRule) -> QTextCharFormat:
+        fmt = QTextCharFormat()
+        fmt.setForeground(QColor(rule.color))
+        if rule.font_family:
+            fmt.setFontFamily(rule.font_family)
+        if rule.style == "italic":
+            fmt.setFontItalic(True)
+        elif rule.style in FONT_WEIGHT_MAP:
+            fmt.setFontWeight(FONT_WEIGHT_MAP[rule.style])
+        else:
+            pass # ignore invalid rule.style
+        if rule.underline:
+            fmt.setFontUnderline(True)
+        if rule.background:
+            fmt.setBackground(QColor(rule.background))
+        return fmt
+
+    def _apply_rule_to_text(self, text, rule):
+        try:
+            matches = re.finditer(rule.pattern, text)
+            fmt = self._make_format(rule)
+            for match in matches:
+                group = match.group(rule.group if rule.group else 0)
+                start = match.start(rule.group if rule.group else 0)
+                end = start + len(group)
+                self.setFormat(start, end - start, fmt)
+        except re.error as e:
+            # Regex failed silently. Optionally log or debug.
+            pass
+
+    def highlightBlock(self, text):
+        # Track context triggers
+        if self.in_context:
+            context_rule = self.context_rule
+
+            # End context block if it no longer applies
+            if context_rule and context_rule.context_apply:
+                for rule in self.highlight_rules:
+                    if rule.name == context_rule.context_apply:
+                        self._apply_rule_to_text(text, rule)
+                        break
+
+                if text.strip() == "":
+                    self.in_context = False
+                    self.context_rule = None
+            else:
+                self.in_context = False
+                self.context_rule = None
+
+        else:
+            for rule in self.highlight_rules:
+                if rule.context_trigger:
+                    if re.match(rule.context_trigger, text):
+                        self.in_context = True
+                        self.context_rule = rule
+                        self.setFormat(0, len(text), self._make_format(rule))
+                        return  # highlight only the trigger line
+                elif rule.pattern:
+                    self._apply_rule_to_text(text, rule)
+
+
+
+    # def highlightBlock(self, text: str):
+    #     # First: handle standard inline patterns
+    #     for rule in self.highlight_rules:
+    #         if rule.pattern:
+    #             for match in re.finditer(rule.pattern, text):
+    #                 start, end = match.start(rule.group), match.end(rule.group)
+    #                 self.setFormat(start, end - start, self.format_for_rule(rule))
+
+    #     # Second: handle context-sensitive rules
+    #     for rule in self.highlight_rules:
+    #         if rule.context_trigger:
+    #             if rule.context_trigger(text):
+    #                 rule.context_active = True
+    #                 return  # skip highlighting the trigger line itself
+
+    #             elif rule.context_active:
+    #                 if rule.context_apply and rule.context_apply(text):
+    #                     self.setFormat(0, len(text), self.format_for_rule(rule))
+    #                     return
+    #                 else:
+    #                     rule.context_active = False
+
+class ContextSensitiveHighlightRule:
+    def __init__(self, name: str, trigger: Callable[[str], bool], apply: Callable[[str], bool], format: QTextCharFormat):
+        """
+        Parameters:
+        - name: Name of the rule
+        - trigger: Function that returns True when a line indicates the start of a context
+        - apply: Function that returns True for lines that should be styled after trigger is activated
+        - format: QTextCharFormat to apply to matching lines
+        """
+        self.name = name
+        self.trigger = trigger
+        self.apply = apply
+        self.format = format
+        self.active = False  # Whether we are inside the block
 
 # def qformat_from_style(style: dict) -> QTextCharFormat:
 #     fmt = QTextCharFormat()
@@ -236,166 +523,6 @@ def load_highlight_rules(filepath):
 #                 fmt = qformat_from_style(style)
 #                 self.setFormat(offset, length, fmt)
 #             offset += length
-
-@dataclass
-class HighlightRule:
-    """_summary_
-
-    Notes
-    -----
-
-    - group=0: highlights the whole match
-    - group=1: highlights the first capture group
-    - group=N: for other specific groups
-
-    """
-    name: str
-    pattern: str # A compiled re.Pattern
-    color: str = AYU_LIGHT_THEME["text"]
-    style: str = "normal"
-    background: str = None
-    font_family: str = None
-    underline: bool = False
-    group: int = 0     # Which capture group to apply formatting to
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "pattern": self.pattern,
-            "color": self.color,
-            "style": self.style,
-            "background": self.background,
-            "font_family": self.font_family,
-            "underline": self.underline,
-            "group": self.group
-        }
-
-    def to_qtextcharformat(self) -> QTextCharFormat:
-        fmt = QTextCharFormat()
-        fmt.setForeground(QColor(self.color))
-        fmt.setForeground(QColor(self.color))
-        font_style = {
-            "bold": QFont.Weight.Bold,
-            "italic": QFont.Style.StyleItalic,
-            "normal": QFont.Style.StyleNormal
-        }
-        if self.style == "bold":
-            fmt.setFontWeight(QFont.Weight.Bold)
-        elif self.style == "italic":
-            fmt.setFontItalic(True)
-        if self.underline == "underline":
-            fmt.setFontUnderline(True)
-        if self.background:
-            fmt.setBackground(QColor(self.background))
-        if self.font_family:
-            fmt.setFontFamily(self.font_family)
-        return fmt
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            name=data["name"],
-            pattern=data["pattern"],
-            color=data.get("color", "#000000"),
-            style=data.get("style", "normal"),
-            background=data.get("background"),
-            font_family=data.get("font_family"),
-            underline=data.get("underline", False)
-        )
-
-# Define the rules for the Ayu Light theme
-RST_HIGHLIGHT_RULES = [
-    HighlightRule( # Bold
-        name="bold",
-        pattern=r"\*\*[^*\n]+?\*\*",
-        color=AYU_LIGHT_THEME["red"],
-        style="bold",
-        group=0,
-    ),
-    HighlightRule( # Italic
-        name="italic",
-        pattern=r"(?<!\*)\*[^\s*][^*\n]*?\*(?!\*)",
-        color=AYU_LIGHT_THEME["red"],
-        style="italic",
-        group = 0,
-    ),
-    HighlightRule( # Inline code
-        name="inline code",
-        pattern=r"``[^`\n]+?``",
-        color=AYU_LIGHT_THEME["green"],
-        font_family="Courier New",
-        group=0,
-    ),  
-    HighlightRule( # Directive
-        name="directive",
-        pattern=r"^\s*\.\. .*?::",    
-        color=AYU_LIGHT_THEME["orange"],
-        style="bold",
-        group=0,
-    ),         
-    HighlightRule( # Titles
-        name="title",
-        pattern=r"^(?P<text>.+)\n(?P<line>=+|-+)$", 
-        color=AYU_LIGHT_THEME["orange"],
-        style="bold"
-    ),  
-    HighlightRule( # Block quotes
-        name="block quote",
-        pattern=r"(?m)^\s{3,}.*$",      
-        color=AYU_LIGHT_THEME["grey"]
-    ),
-    HighlightRule( # Links
-        name="link",
-        pattern=r"`[^`]+? <[^>]+?>`_",  
-        color=AYU_LIGHT_THEME["link"],
-        underline=True
-    ),
-    HighlightRule( # Unordered list bullets
-        name="list",
-        pattern=r'^\s*([-+*])(?=\s)',   
-        color=AYU_LIGHT_THEME["orange"],
-        style="normal"
-    ),
-    HighlightRule( # numbered list items like 1. or 1)
-        name="enumerate",
-        pattern=r'^\s*\d+[\.\)](?=\s)', 
-        color=AYU_LIGHT_THEME["orange"],
-        style="normal"
-    ),
-    HighlightRule( # reST table lines like +---+ or ===
-        name="table",
-        pattern=r'^[-+|=]{3,}$',        
-        color=AYU_LIGHT_THEME["purple"],
-        style="normal"
-    ),
-    HighlightRule( # table borders: + or |
-        name="table border",
-        pattern=r'^[+|]',               
-        color=AYU_LIGHT_THEME["purple"],
-        style="normal"
-    ),
-]
-
-class RstHighlighter(QSyntaxHighlighter):
-    def __init__(self, parent, rules=None):
-        super().__init__(parent)
-        self.rules = []
-        if rules is None:
-            rules = []  # your default list here
-        for rule in rules:
-            compiled = re.compile(rule.pattern, re.MULTILINE)
-            fmt = rule.to_qtextcharformat()
-            self.rules.append((compiled, fmt, rule.group))
-
-    def highlightBlock(self, text):
-        for pattern, fmt, group in self.rules:
-            for match in pattern.finditer(text):
-                if group <= (match.lastindex or 0):
-                    start, end = match.span(group)
-                else:
-                    start, end = match.span(0)
-                self.setFormat(start, end - start, fmt)
-
 # class MarkdownHighlighter(QSyntaxHighlighter):
 #     def __init__(self, parent):
 #         super().__init__(parent)

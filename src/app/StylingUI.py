@@ -438,7 +438,7 @@ class StylingDock(StyleData, StyleTheme):
 
         ui_lim = [lower.value, upper.value]
 
-        if not new_lim:
+        if new_lim is None:
             setattr(self, f"{ax}lim", ui_lim)
         else:
             if list(new_lim) == ui_lim:
@@ -456,8 +456,8 @@ class StylingDock(StyleData, StyleTheme):
         
         ui_label = getattr(self.ui, f"lineEdit{ax.upper()}Label")
 
-        if not new_text:
-            setattr(self, f"{ax}label", ui_label.text)
+        if new_text is None:
+            setattr(self, f"{ax}label", ui_label.text())
         else:
             if new_text == ui_label.text():
                 return
@@ -482,7 +482,7 @@ class StylingDock(StyleData, StyleTheme):
         """
         scale_combo = getattr(self.ui, f"comboBox{ax.upper()}Scale")
 
-        if not new_text:
+        if  new_text is None:
             setattr(self, f"{ax}_scale", scale_combo.currentText())
         else:
             if new_text == scale_combo.currentText():
@@ -509,7 +509,7 @@ class StylingDock(StyleData, StyleTheme):
         new_value : float, optional
             New value for the line edit, by default None
         """
-        if not new_value:
+        if new_value is None:
             self.aspect_ratio = self.ui.lineEditAspectRatio.value
         else:
             if new_value == self.ui.lineEditAspectRatio.value:
@@ -533,7 +533,7 @@ class StylingDock(StyleData, StyleTheme):
         new_dir : float, optional
             New direction for the combobox, by default None
         """
-        if not new_dir:
+        if new_dir is None:
             self.new_dir = self.ui.comboBoxTickDirection.currentText()
         else:
             if new_dir == self.ui.comboBoxTickDirection.currentText():
@@ -560,7 +560,7 @@ class StylingDock(StyleData, StyleTheme):
         new_text : float, optional
             New direction for the combobox, by default None
         """
-        if not new_text:
+        if new_text is None:
             self.scale_dir = self.ui.comboBoxScaleDirection.currentText()
         else:
             if new_text == self.ui.comboBoxScaleDirection.currentText():
@@ -584,7 +584,7 @@ class StylingDock(StyleData, StyleTheme):
         new_text : float, optional
             New location for the combobox, by default None
         """
-        if not new_text:
+        if new_text is None:
             self.scale_location = self.ui.comboBoxScaleLocation.currentText()
         else:
             if new_text == self.ui.comboBoxScaleLocation.currentText():
@@ -640,7 +640,7 @@ class StylingDock(StyleData, StyleTheme):
         new_state : bool, optional
             New state for the checkbox, by default None
         """
-        if not new_state:
+        if new_state is None:
             self.show_mass = self.ui.checkBoxShowMass.isChecked()
         else:
             if new_state == self.ui.checkBoxShowMass.isChecked():
@@ -667,7 +667,7 @@ class StylingDock(StyleData, StyleTheme):
         new_marker : str, optional
             New marker for the combobox, by default None
         """
-        if not new_marker:
+        if new_marker is None:
             self.new_marker = self.ui.comboBoxMarker.currentText()
         else:
             if new_marker == self.ui.comboBoxMarker.currentText():
@@ -691,7 +691,7 @@ class StylingDock(StyleData, StyleTheme):
         new_value : float, optional
             New size for the spinbox, by default None
         """
-        if new_value:
+        if new_value is None:
             self.marker_size = self.ui.doubleSpinBoxMarkerSize.value()
         else:
             if new_value == self.ui.doubleSpinBoxMarkerSize.value():
@@ -722,7 +722,7 @@ class StylingDock(StyleData, StyleTheme):
         new_value : float, optional
             New transparency for the slider, by default None
         """
-        if not new_value:
+        if new_value is None:
             self.ui.horizontalSliderMarkerAlpha.value()
         else:
             if new_value == self.ui.horizontalSliderMarkerAlpha.value():
@@ -749,7 +749,7 @@ class StylingDock(StyleData, StyleTheme):
         new_value : float, optional
             New width for the spinbox, by default None
         """
-        if not new_value:
+        if new_value is None:
             self.line_width = self.ui.doubleSpinBoxLineWidth.value()
         else:
             if new_value == self.ui.doubleSpinBoxLineWidth.value():
@@ -773,7 +773,7 @@ class StylingDock(StyleData, StyleTheme):
         new_value : float, optional
             New mulitiplier for the line edit, by default None
         """
-        if not new_value:
+        if new_value is None:
             self.length_multiplier = self.ui.lineEditLengthMultipler.value
         else:
             if new_value == self.ui.lineEditLengthMultiplier.value:
@@ -807,7 +807,7 @@ class StylingDock(StyleData, StyleTheme):
         new_font : str, optional
             New font family for the combobox, by default None
         """
-        if not new_font:
+        if new_font is None:
             self.font = self.ui.fontComboBox.currentText()
         else:
             if new_font == self.ui.fontComboBox.currentText():
@@ -831,7 +831,7 @@ class StylingDock(StyleData, StyleTheme):
         new_value : float, optional
             New font size for the spinbox, by default None
         """
-        if not new_value:
+        if new_value is None:
             self.font_size = self.ui.doubleSpinBoxFontSize.value()
         else:
             if new_value == self.ui.doubleSpinBoxFontSize.value():
@@ -858,7 +858,7 @@ class StylingDock(StyleData, StyleTheme):
         new_text : str, optional
             New colormap for the combobox, by default None
         """
-        if not new_text:
+        if new_text is None:
             self.cmap = self.ui.comboBoxFieldColormap.currentText()
         else:
             if new_text == self.ui.comboBoxFieldColormap.currentText():
@@ -868,10 +868,13 @@ class StylingDock(StyleData, StyleTheme):
             self.ui.comboBoxFieldColormap.setCurrentText(new_text)
             self.ui.comboBoxFieldColormap.blockSignals(False)
 
+        self.toggle_style_widgets()
+        self.style_dict[self.ui.comboBoxPlotType.currentText()]['Colormap'] = self.ui.comboBoxFieldColormap.currentText()
+
         self.schedule_update()
 
     def update_cbar_reverse(self, new_value):
-        if not new_value:
+        if new_value is None:
             self.cbar_reverse = self.ui.checkBoxReverseColormap.isChecked()
         else:
             if new_value == self.ui.checkBoxReverseColormap.isChecked():
@@ -895,7 +898,7 @@ class StylingDock(StyleData, StyleTheme):
         new_text : str, optional
             New colormap direction for the combobox, by default None
         """
-        if not new_text:
+        if new_text is None:
             self.cbar_dir = self.ui.comboBoxCbarDirection.currentText()
         else:
             if new_text == self.ui.comboBoxCbarDirection.currentText():
@@ -910,16 +913,16 @@ class StylingDock(StyleData, StyleTheme):
     # ------------------------------------------------------------------
     # Heat‑map resolution
     # ------------------------------------------------------------------
-    def update_resolution(self, new_resolution=None):
+    def update_resolution(self, new_value=None):
 
-        if new_resolution:
+        if new_value is None:
             self.resolution = self.ui.spinBoxHeatmapResolution.value()
         else:
-            if new_resolution == self.ui.spinBoxHeatmapResolution.value():
+            if new_value == self.ui.spinBoxHeatmapResolution.value():
                 return
             
             self.ui.spinBoxHeatmapResolution.blockSignals(True)
-            self.ui.spinBoxHeatmapResolution.setValue(new_resolution)
+            self.ui.spinBoxHeatmapResolution.setValue(new_value)
             self.ui.spinBoxHeatmapResolution.blockSignals(False)
 
         if self.plot_type.lower() == "heatmap" and self.ui.toolbox:
@@ -2383,30 +2386,7 @@ class StylingDock(StyleData, StyleTheme):
 
         # update plot
         self.schedule_update()
-        
-    def field_colormap_callback(self):
-        """Sets the color map
-
-        Sets the colormap in ``MainWindow.styles`` for the current plot type, set from ``MainWindow.comboBoxFieldColormap``.
-        """
-        if self.cmap == self.ui.comboBoxFieldColormap.currentText():
-            return
-
-        self.toggle_style_widgets()
-        self.style_dict[self.ui.comboBoxPlotType.currentText()]['Colormap'] = self.ui.comboBoxFieldColormap.currentText()
-
-        self.schedule_update()
     
-    def colormap_direction_callback(self):
-        """Set colormap direction (normal/reverse)
-
-        Reverses colormap if ``MainWindow.checkBoxReverseColormap.isChecked()`` is ``True``."""
-        if self.cbar_reverse == self.ui.checkBoxReverseColormap.isChecked():
-            return
-
-        self.cbar_reverse = self.ui.checkBoxReverseColormap.isChecked()
-
-        self.schedule_update()
 
     def get_cluster_colormap(self, cluster_dict, alpha=100):
         """Converts hex colors to a colormap

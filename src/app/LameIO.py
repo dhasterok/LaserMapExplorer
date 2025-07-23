@@ -61,7 +61,15 @@ class LameIO():
             if dialog.exec():
                 file_list = dialog.selectedFiles()
                 parent.app_data.selected_directory = os.path.dirname(os.path.abspath(file_list[0]))
+                # Bring the dock to front after operation
+                if hasattr(self.parent,'workflow_dock'):
+                    self.parent.workflow_dock.raise_()
+                    self.parent.workflow_dock.activateWindow()
             else:
+                # Bring the dock to front after operation
+                if hasattr(self.parent,'workflow_dock'):
+                    self.parent.workflow_dock.raise_()
+                    self.parent.workflow_dock.activateWindow()
                 return
         else:
             parent.app_data.selected_directory = os.path.dirname(os.path.abspath(path))
@@ -102,8 +110,16 @@ class LameIO():
             dialog.setDirectory(BASEDIR)
             if dialog.exec():
                 parent.app_data.selected_directory = dialog.selectedFiles()[0]
+                # Bring the dock to front after operation
+                if hasattr(self.parent,'workflow_dock'):
+                    self.parent.workflow_dock.raise_()
+                    self.parent.workflow_dock.activateWindow()
             else:
                 self.status_manager.show_message("Open directory canceled.")
+                # Bring the dock to front after operation
+                if hasattr(self.parent,'workflow_dock'):
+                    self.parent.workflow_dock.raise_()
+                    self.parent.workflow_dock.activateWindow()
                 return
         else:
             parent.app_data.selected_directory = path
@@ -117,6 +133,7 @@ class LameIO():
         # update sample_list
         self.parent.app_data.sample_list = [os.path.splitext(file)[0].replace('.lame','') for file in self.parent.app_data.csv_files]
         self.status_manager.show_message("Sample list updated.")
+        
 
     def import_spots(self):
         """Import a data file with spot data."""

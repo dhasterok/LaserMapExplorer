@@ -21,3 +21,4 @@ cp -r docs/_build/jsdoc docs/source/_static
 # Rebuild blockly workflow
 cd blockly
 npx webpack --config webpack.config.js
+cd ..

@@ -1057,8 +1057,6 @@ class StyleData(Observable):
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
         else:
-            ui.lineEditXLB.precision = 3
-            ui.lineEditXUB.precision = 3
             # round axes limits for everything that isn't a map
             # Non-map plots might still need axes
             self.xlim = style.get('XLim')
@@ -1069,7 +1067,7 @@ class StyleData(Observable):
 
             self.scale_length = None
 
-        if app_data.c_field in list(data.column_attrributes):
+        if app_data.c_field in list(data.processed_data.column_attributes):
             field = app_data.c_field
             style['CLim'] = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
             style['CLabel'] = data.processed_data.get_attribute(field,'label')
@@ -1163,7 +1161,7 @@ class StyleData(Observable):
         -------
         matplotlib.colormap.ListedColormap : colormap
         """
-        if hasattr(self,'ui') and hasattr(self,'ui'):
+        if hasattr(self.ui,'canvasWindow') and hasattr(self.ui,'canvas_tab'):
             if self.ui.canvasWindow.currentIndex() == self.ui.canvas_tab['qv']:
                 plot_type = 'field map'
 

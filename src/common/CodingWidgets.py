@@ -1,18 +1,33 @@
 import re, json
+from pathlib import Path
 from typing import Callable
 from dataclasses import dataclass
 from PyQt6.QtWidgets import ( 
-        QWidget, QWidget, QPlainTextEdit, QTextEdit
+        QWidget, QDialog, QDialogButtonBox, QPlainTextEdit, QTextEdit, QCheckBox, QPushButton,
+        QVBoxLayout, QHBoxLayout, QColorDialog, QFormLayout, QLineEdit, QMessageBox, QListWidget,
+        QLabel, QComboBox, QCheckBox, QFontComboBox, QTableWidget, QTableWidgetItem, QHeaderView,
+        QMenu, QMenuBar, QToolBar
     )
 from PyQt6.QtGui import (
-    QFont, QCursor, QPainter,
-    QColor, QTextFormat, QTextCharFormat, QSyntaxHighlighter,
+    QFont, QCursor, QPainter, QTextCursor, QKeyEvent, QAction, QIcon,
+    QColor, QTextFormat, QTextCharFormat, QSyntaxHighlighter
 )
 from PyQt6.QtCore import Qt, QRect, QSize
-from pygments import lex
-from pygments.token import Token
-from pygments.lexers.markup import RstLexer, MarkdownLexer
-from pygments.lexers.python import Python3Lexer
+
+#from pygments import lex
+#from pygments.token import Token
+#from pygments.lexers.markup import MarkdownLexer
+#from pygments.lexers.python import Python3Lexer
+def default_font():
+    # set default font for application
+    font = QFont()
+    font.setPointSize(11)
+    font.setStyleStrategy(QFont.StyleStrategy.PreferDefault)
+
+    return font
+
+BASE_PATH = Path(__file__).parents[2] 
+ICON_PATH = BASE_PATH / "resources/icons"
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):
@@ -44,6 +59,25 @@ class CodeEditor(QPlainTextEdit):
 
         self.highlightCurrentLine()
 
+        # auto format settings
+        self.default_settings = {
+            'auto_list': {'phrase': "Auto bullet and numbering", 'enabled': True},
+            'tab_indent': {'phrase': "Convert tabs to spaces", 'enabled': True},
+            'quick_indent': {'phrase': "Shortcut indenting (Ctrl/⌘ + <, >)", 'enabled': True},
+            'block_indent': {'phrase': "Auto indent blocks", 'enabled': True},
+        }
+        # Make a working copy so defaults aren't overwritten
+        self.settings = {
+            key: value.copy() for key, value in self.default_settings.items()
+        }
+
+        # Allows for tabs to be included in the editor
+        self.setTabChangesFocus(False)
+
+        # Sample rules
+        self.rules = RST_HIGHLIGHT_RULES
+        self.highlighter = RstHighlighter(self.document(), self.rules)
+
     @property
     def highlight_line(self):
         return self._highlight_line
@@ -54,6 +88,138 @@ class CodeEditor(QPlainTextEdit):
             raise TypeError("Highlight line should be a bool.")
         self._highlight_line = new_state
         self.highlightCurrentLine()
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if self.settings['block_indent']['enabled']:
+            ctrl_or_cmd = event.modifiers() & (Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.MetaModifier)
+            if ctrl_or_cmd:
+                key = event.key()
+            
+            # Indent (Ctrl+.)
+            if key == Qt.Key.Key_Period:  # '>' is shift+period
+                self._indent_selection()
+                return
+            # Un-indent (Ctrl+,)
+            elif key == Qt.Key.Key_Comma:  # '<' is shift+comma
+                self._unindent_selection()
+                return
+
+        if self.settings['tab_indent']['enabled']:
+            if event.key() == Qt.Key.Key_Tab and not event.modifiers():
+                self.textCursor().insertText(" " * 4)
+            elif event.key() == Qt.Key.Key_Backtab:
+                cursor = self.textCursor()
+                cursor.movePosition(
+                    QTextCursor.MoveOperation.StartOfBlock,
+                    QTextCursor.MoveMode.KeepAnchor
+                )
+                selected = cursor.selectedText()
+                if selected.startswith("    "):
+                    cursor.removeSelectedText()
+                    cursor.insertText(selected[4:])
+
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            cursor = self.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock, QTextCursor.MoveMode.KeepAnchor)
+            current_line = cursor.selectedText()
+
+            # Get leading whitespace
+            indent_match = re.match(r'^([ \t]*)', current_line)
+            leading_ws = indent_match.group(1).replace('\t', '    ') if indent_match else ''
+
+            next_prefix = ''
+            is_list = False
+            if self.settings['auto_list']['enabled']: 
+                # Detect unordered bullet
+                bullet_match = re.match(r'^([ \t]*)([-*+#])(\.|\s+)(.*)', current_line)
+                # Detect ordered list: numeric or lettered
+                enum_match = re.match(r'^([ \t]*)([0-9]+|[a-zA-Z])(\.)(\s+)(.*)', current_line)
+
+                if bullet_match and bullet_match.group(4).strip():
+                    is_list = True
+                    indent = bullet_match.group(1)
+                    bullet = bullet_match.group(2)
+                    sep = bullet_match.group(3)
+                    # repeat the bullet with same separator and indentation
+                    next_prefix = f"{bullet}{sep}"
+                elif enum_match and enum_match.group(5).strip():
+                    is_list = True
+                    indent = enum_match.group(1)
+                    enum = enum_match.group(2)
+                    punct = enum_match.group(3)
+                    space = enum_match.group(4)
+
+                    if enum.isdigit():
+                        next_enum = str(int(enum) + 1)
+                    elif len(enum) == 1 and enum.isalpha():
+                        if enum.islower():
+                            next_enum = chr(((ord(enum) - ord('a') + 1) % 26) + ord('a'))
+                        else:
+                            next_enum = chr(((ord(enum) - ord('A') + 1) % 26) + ord('A'))
+                    else:
+                        next_enum = enum  # fallback
+
+                    next_prefix = f"{indent}{next_enum}{punct}{space}"
+
+                if is_list:
+                    self.insertPlainText(next_prefix) 
+
+            # Insert newline and prefix
+            if self.settings['block_indent']['enabled'] and not is_list:
+                self.insertPlainText(leading_ws)
+
+        super().keyPressEvent(event)
+
+    def _indent_selection(self):
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
+            cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+        start = cursor.selectionStart()
+        end = cursor.selectionEnd()
+        
+        cursor.beginEditBlock()
+
+        cursor.setPosition(start)
+        while cursor.position() < end:
+            cursor.movePosition(QTextCursor.MoveOperation.StartOfLine)
+            cursor.insertText("    ")  # 4 spaces indent
+            cursor.movePosition(QTextCursor.MoveOperation.Down)
+            end += 4  # Adjust end position as we added chars
+
+        cursor.endEditBlock()
+
+
+    def _unindent_selection(self):
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
+            cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+        start = cursor.selectionStart()
+        end = cursor.selectionEnd()
+
+        cursor.beginEditBlock()
+
+        cursor.setPosition(start)
+        while cursor.position() < end:
+            cursor.movePosition(QTextCursor.MoveOperation.StartOfLine)
+            cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+            line_text = cursor.selectedText()
+
+            # Remove up to 4 leading spaces or one tab
+            new_line = line_text
+            if new_line.startswith("    "):
+                new_line = new_line[4:]
+            elif new_line.startswith("\t"):
+                new_line = new_line[1:]
+
+            if new_line != line_text:
+                cursor.insertText(new_line)
+
+                # Adjust end position because line got shorter
+                end -= (len(line_text) - len(new_line))
+
+            cursor.movePosition(QTextCursor.MoveOperation.Down)
+
+        cursor.endEditBlock()
 
     def lineNumberAreaWidth(self):
         digits = len(str(max(1, self.blockCount())))
@@ -115,6 +281,37 @@ class CodeEditor(QPlainTextEdit):
                 extraSelections.append(selection)
 
         self.setExtraSelections(extraSelections)
+
+    def open_settings_dialog(self):
+        dialog = EditorSettingsDialog(settings=self.settings,
+                                      default_settings=self.default_settings)
+        if dialog.exec():
+            print("Updated settings:", self.settings)
+
+    def setHighlighter(self, highlighter):
+        self.highlighter = highlighter
+
+    def toggle_highlighter(self, enable):
+        if hasattr(self, "highlighter") and self.highlighter:
+            self.highlighter.setDocument(self.document() if enable else None)
+
+    def open_highlight_dialog(self):
+        if hasattr(self, "highlighter") and self.highlighter:
+            self.highlighter.open_highlight_dialog()
+
+    def save_all_settings(self):
+        with open("all_settings.json", "w") as f:
+            json.dump({
+                'editor_settings': self.settings,
+                'highlighting_rules': self.highlighting_rules
+            }, f, indent=2)
+
+    def load_all_settings(self):
+        if os.path.exists("all_settings.json"):
+            with open("all_settings.json", "r") as f:
+                data = json.load(f)
+                self.settings.update(data.get('editor_settings', {}))
+                self.highlighting_rules.update(data.get('highlighting_rules', {}))
 
 # Ayu Light palette colors
 AYU_LIGHT_THEME = {
@@ -245,6 +442,27 @@ class HighlightRule:
 
 # Define the rules for the Ayu Light theme
 RST_HIGHLIGHT_RULES = [
+
+    HighlightRule(
+        name="literal.block",
+        pattern="",  # No inline pattern
+        color=AYU_LIGHT_THEME["green"],
+        context_trigger=r"^::$",
+        context_apply=r"^\s{2,}",
+    ),
+    
+    HighlightRule( # Titles
+        name="title",
+        pattern=r"^(?P<text>.+)\n(?P<line>=+|-+)$", 
+        color=AYU_LIGHT_THEME["orange"],
+        style="bold"
+    ),  
+    HighlightRule( # Block quotes
+        name="block.quote",
+        #pattern=r"(?m)^\s{3,}.*$",      
+        pattern=r"(?m)^(?!\s{3,}(:\w+:|\*|$)).{3,}.*$",
+        color=AYU_LIGHT_THEME["text"]
+    ),
     HighlightRule( # Bold
         name="bold",
         pattern=r"(?<!\S)\*\*(?!\s)(.+?)(?<!\s)\*\*(?=\s|[.,;!?)]|$)",
@@ -267,38 +485,6 @@ RST_HIGHLIGHT_RULES = [
         style="normal",
         group=0,
     ),  
-    HighlightRule(
-        name="literal.block",
-        pattern="",  # No inline pattern
-        color=AYU_LIGHT_THEME["green"],
-        context_trigger=r"^::$",
-        context_apply=r"^\s{2,}",
-    ),
-    HighlightRule( # Directive
-        name="directive",
-        pattern=r"^\s*\.\. .*?::",    
-        color=AYU_LIGHT_THEME["orange"],
-        style="normal",
-        group=0,
-    ),         
-    HighlightRule( # Directive option
-        name="directive.option",
-        pattern=r"(:\w+:)",
-        color=AYU_LIGHT_THEME["orange"],
-        style="normal",
-        group=1,
-    ),
-    HighlightRule( # Titles
-        name="title",
-        pattern=r"^(?P<text>.+)\n(?P<line>=+|-+)$", 
-        color=AYU_LIGHT_THEME["orange"],
-        style="bold"
-    ),  
-    HighlightRule( # Block quotes
-        name="block.quote",
-        pattern=r"(?m)^\s{3,}.*$",      
-        color=AYU_LIGHT_THEME["grey"]
-    ),
     HighlightRule( # Links
         name="link",
         pattern=r"`[^`]+? <[^>]+?>`_",  
@@ -307,7 +493,7 @@ RST_HIGHLIGHT_RULES = [
     ),
     HighlightRule( # Unordered list bullets
         name="list",
-        pattern=r'^\s*([-+*])(?=\s)',   
+        pattern=r'^\s*([-+*#])(\.|\s+)',   
         color=AYU_LIGHT_THEME["orange"],
         style="normal"
     ),
@@ -329,17 +515,47 @@ RST_HIGHLIGHT_RULES = [
         color=AYU_LIGHT_THEME["purple"],
         style="normal"
     ),
-    HighlightRule(
-        name="directive.figure",
-        pattern=r"^\\s*\\.\\. figure::",
-        color=AYU_LIGHT_THEME["blue"],
-        context_trigger="^\\s*\\.\\. figure::",
-        context_apply="directive.option",
+    HighlightRule( # Directive
+        name="directive",
+        pattern=r"^\s*\.\. .*?::",    
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal",
+        group=0,
     ),
     HighlightRule(
-        name="directive.option",
-        pattern=r"^\\s*:[a-zA-Z-]+:\\s+.*",
+        name="directive.substitution",
+        pattern=r"^\s*(\.\.)\s+(\|.*?\|)\s+(image::)",  # capture all pieces
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal",
+        group=1  # can use 0 or 1 depending on what part you want colored
+    ),
+    HighlightRule(
+        name="directive.substitution.name",
+        pattern=r"^\s*(\.\.)\s+(\|.*?\|)\s+(image::)",  # reuse
         color=AYU_LIGHT_THEME["blue"],
+        style="italic",
+        group=2  # the `|name|`
+    ),
+    HighlightRule(
+        name="directive.substitution.keyword",
+        pattern=r"^\s*(\.\.)\s+(\|.*?\|)\s+(image::)",  # reuse
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal",
+        group=3,  # the `image::`
+    ),
+    HighlightRule(  # Directive argument (e.g., a filename in image::)
+        name="directive.argument",
+        pattern=r"^\s*\.\.\s+(?:\|.*?\|\s+)?(?:\w+::)\s+(.*)$",  # Matches filename after directive
+        color=AYU_LIGHT_THEME["green"],
+        style="normal",
+        group=1,
+    ),
+    HighlightRule( # Directive option
+        name="directive.option",
+        pattern=r"(:\w+:)",
+        color=AYU_LIGHT_THEME["orange"],
+        style="normal",
+        group=1,
     ),
 ]
 
@@ -355,6 +571,13 @@ FONT_WEIGHT_MAP = {
     "black": QFont.Weight.Black,
 }
 
+KNOWN_DIRECTIVES = {
+    'note', 'warning', 'attention', 'caution', 'danger', 'error',
+    'hint', 'important', 'tip', 'admonition', 'image', 'figure',
+    'include', 'code-block', 'literalinclude', 'seealso', 'contents',
+    'table', 'csv-table', 'list-table', 'rubric', 'topic', 'sidebar',
+}
+
 class RstHighlighter(QSyntaxHighlighter):
     def __init__(self, document, highlight_rules=None):
         super().__init__(document)
@@ -364,7 +587,13 @@ class RstHighlighter(QSyntaxHighlighter):
         else:
             self.highlight_rules = RST_HIGHLIGHT_RULES
 
+        # for directives or other special blocks
         self.in_context = False
+
+        # format for invalid directive keywords
+        self.invalid_directive_format = QTextCharFormat()
+        self.invalid_directive_format.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SpellCheckUnderline)
+        self.invalid_directive_format.setUnderlineColor(Qt.GlobalColor.red)
 
     def _make_format(self, rule: HighlightRule) -> QTextCharFormat:
         fmt = QTextCharFormat()
@@ -392,13 +621,19 @@ class RstHighlighter(QSyntaxHighlighter):
                 start = match.start(rule.group if rule.group else 0)
                 end = start + len(group)
                 self.setFormat(start, end - start, fmt)
+
+                # Extra syntax checks 
+                if rule.name == "directive": #if it's a directive rule
+                    directive_name = group.strip().split("::")[0].replace("..", "").strip()
+                    if directive_name not in KNOWN_DIRECTIVES:
+                        self.setFormat(start, end - start, self.invalid_directive_format)
         except re.error as e:
             # Regex failed silently. Optionally log or debug.
             pass
 
     def highlightBlock(self, text):
         # Track context triggers
-        if self.in_context:
+        if self.in_context: # rules within context blocks
             context_rule = self.context_rule
 
             # End context block if it no longer applies
@@ -415,7 +650,7 @@ class RstHighlighter(QSyntaxHighlighter):
                 self.in_context = False
                 self.context_rule = None
 
-        else:
+        else: # rules outside context blocks
             for rule in self.highlight_rules:
                 if rule.context_trigger:
                     if re.match(rule.context_trigger, text):
@@ -426,6 +661,10 @@ class RstHighlighter(QSyntaxHighlighter):
                 elif rule.pattern:
                     self._apply_rule_to_text(text, rule)
 
+    def open_highlight_dialog(self):
+        dialog = HighlightRulesDialog(rules=self.highlight_rules, parent=None)
+        if dialog.exec():
+            print("Updated settings:", self.highlight_rules)
 
 
     # def highlightBlock(self, text: str):
@@ -597,3 +836,307 @@ class ContextSensitiveHighlightRule:
 #     """Enable or disable word wrap."""
 #     mode = QPlainTextEdit.LineWrapMode.WidgetWidth if enabled else QPlainTextEdit.LineWrapMode.NoWrap
 #     self.setLineWrapMode(mode)
+
+class EditorSettingsDialog(QDialog):
+    def __init__(self, settings, default_settings, parent=None):
+        super().__init__(parent)
+        self.setFont(default_font())
+        self.setWindowTitle("Editor Settings")
+
+        self.settings = settings
+        self.default_settings = default_settings
+
+        layout = QVBoxLayout()
+        self.table = QTableWidget(len(settings), 2)
+        self.table.setHorizontalHeaderLabels(["Setting", "Enabled"])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.table.verticalHeader().setVisible(False)
+
+        for row, (key, opt) in enumerate(settings.items()):
+            label_item = QTableWidgetItem(opt["phrase"])
+            label_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            self.table.setItem(row, 0, label_item)
+
+            checkbox = QCheckBox()
+            checkbox.setChecked(opt["enabled"])
+            checkbox.stateChanged.connect(self._make_checkbox_handler(key))
+            cell_widget = QWidget()
+            layout_checkbox = QHBoxLayout(cell_widget)
+            layout_checkbox.addWidget(checkbox)
+            layout_checkbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            layout_checkbox.setContentsMargins(0, 0, 0, 0)
+            self.table.setCellWidget(row, 1, cell_widget)
+
+        layout.addWidget(self.table)
+
+        button_layout = QHBoxLayout()
+        reset_btn = QPushButton("Reset")
+        reset_btn.setToolTip('Reset to default options')
+        reset_btn.clicked.connect(self._reset_defaults)
+        save_btn = QPushButton("Save")
+        save_btn.setToolTip('Save options to file')
+        save_btn.clicked.connect(self._save_settings)
+        load_btn = QPushButton("Load")
+        load_btn.setToolTip('Load options from file')
+        load_btn.clicked.connect(self._load_settings)
+        ok_btn = QPushButton("OK")
+        ok_btn.setToolTip('Close dialog')
+        ok_btn.clicked.connect(self.accept)
+
+        for b in [reset_btn, save_btn, load_btn, ok_btn]:
+            button_layout.addWidget(b)
+
+        layout.addLayout(button_layout)
+        self.setLayout(layout)
+
+    def _make_checkbox_handler(self, key):
+        def handler(state):
+            self.settings[key]['enabled'] = bool(state)
+        return handler
+
+    def _reset_defaults(self):
+        for row, key in enumerate(self.settings):
+            default_state = self.default_settings[key]["enabled"]
+            checkbox = self._get_checkbox(row)
+            checkbox.setChecked(default_state)
+
+    def _get_checkbox(self, row):
+        return self.table.cellWidget(row, 1).layout().itemAt(0).widget()
+
+    def _save_settings(self):
+        path = "editor_settings.json"
+        with open(path, "w") as f:
+            json.dump(self.settings, f, indent=2)
+        print(f"Settings saved to {path}")
+
+    def _load_settings(self):
+        path = "editor_settings.json"
+        if os.path.exists(path):
+            with open(path, "r") as f:
+                data = json.load(f)
+                for row, key in enumerate(self.settings):
+                    if key in data:
+                        self.settings[key]["enabled"] = data[key]["enabled"]
+                        self._get_checkbox(row).setChecked(data[key]["enabled"])
+            print(f"Settings loaded from {path}")
+
+class HighlightRulesDialog(QDialog):
+    def __init__(self, rules, parent=None):
+        super().__init__(parent)
+        self.setFont(default_font())
+        self.rules = rules
+        self.setWindowTitle("Edit Highlight Rules")
+        self.layout = QHBoxLayout(self)
+        self.scheme = AYU_LIGHT_THEME
+        self.rule_list = QListWidget()
+        for rule in self.rules:
+            self.rule_list.addItem(rule.name)
+
+        self.form = QFormLayout()
+        self.name_edit = QLineEdit()
+        self.pattern_edit = QLineEdit()
+        self.color_label = QLabel()
+        self.bg_color_label = QLabel()
+        self.family_combo = QFontComboBox()
+        if rule.font_family:
+            self.family_combo.setCurrentFont(QFont(rule.font_family))
+        self.style_combo = QComboBox()
+        self.style_combo.clear()
+        self.style_combo.addItem("italic")
+        self.style_combo.addItems(list(FONT_WEIGHT_MAP.keys()))
+        self.style_combo.setCurrentText("normal")
+        self.underline_checkbox = QCheckBox()
+        self.underline_checkbox.setChecked(False)
+        self.group_edit = QLineEdit()
+        self.trigger_edit = QLineEdit()
+        self.block_edit = QLineEdit()
+
+        self.color_button = QPushButton("Change Color")
+        self.color_button.setFont(default_font())
+        self.color_button.clicked.connect(self.choose_color)
+
+        self.bg_color_button = QPushButton("Change Background Color")
+        self.bg_color_button.setFont(default_font())
+        self.bg_color_button.clicked.connect(self.choose_color)
+
+        self.form.addRow("Name", self.name_edit)
+        self.form.addRow("Pattern", self.pattern_edit)
+        self.form.addRow("Color", self.color_button)
+        self.form.addRow("Background Color", self.bg_color_button)
+        self.form.addRow("Font Family", self.family_combo)
+        self.form.addRow("Font Style", self.style_combo)
+        self.form.addRow("Underline", self.underline_checkbox)
+        self.form.addRow("Group", self.group_edit)
+        self.form.addRow("Trigger", self.trigger_edit)
+        self.form.addRow("Context", self.block_edit)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+
+        self.button_box.accepted.connect(self.save_rule)
+        self.button_box.rejected.connect(self.reject)
+
+        right_layout = QVBoxLayout()
+        right_layout.addLayout(self.form)
+        right_layout.addWidget(self.button_box)
+
+        self.layout.addWidget(self.rule_list)
+        self.layout.addLayout(right_layout)
+
+        self.rule_list.currentRowChanged.connect(self.load_rule)
+        self.current_rule_index = 0
+        self.load_rule(0)
+
+    def load_rule(self, index):
+        self.current_rule_index = index
+        rule = self.rules[index]
+        self.name_edit.setText(rule.name)
+        self.pattern_edit.setText(rule.pattern)
+        if rule.color:
+            self.color_button.setText(rule.color)
+            self.color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {rule.color};" )
+        else:
+            self.color_button.setText("None")
+            self.color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {self.scheme['text']};" )
+        if rule.background:
+            self.bg_color_button.setText(rule.background)
+            self.bg_color_button.setStyleSheet( f"background-color: {rule.background}; color: {self.scheme['text']};" )
+        else:
+            self.bg_color_button.setText("None")
+            self.bg_color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {self.scheme['text']};" )
+        self.family_combo.setCurrentText(rule.font_family or "")
+        self.style_combo.setCurrentText(rule.style or "")
+        self.underline_checkbox.setChecked(rule.underline)
+        self.group_edit.setText(str(rule.group))
+        self.trigger_edit.setText(str(rule.context_trigger))
+        self.block_edit.setText(str(rule.context_apply))
+
+    def choose_text_color(self):
+        color = self.choose_color()
+        if color.isValid():
+            self.color_button.setText(color.name())
+            self.color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {color.name()};" )
+
+    def choose_bg_color(self):
+        color = self.choose_color()
+        if color.isValid():
+            self.bg_color_button.setText(color.name())
+            self.bg_color_button.setStyleSheet( f"background-color: {color.name()}; color: {self.scheme['text']};" )
+
+    def choose_color(self):
+        color = QColorDialog.getColor()
+        return color
+
+    def save_rule(self):
+        name = self.name_edit.text().strip()
+
+        # Check for valid regex first
+        pattern = self.pattern_edit.text()
+        try:
+            re.compile(pattern)
+        except re.error as e:
+            QMessageBox.warning(self, "Invalid Regex", f"The regex pattern is invalid:\n\n{e}")
+            return  # Do not proceed with saving
+
+        # Check if we're editing an existing rule or adding a new one
+        existing_names = [r.name for r in self.rules]
+        is_new = name not in existing_names
+
+        if is_new:
+            rule = HighlightRule(name=name, pattern=pattern)
+            self.rules.append(rule)
+            self.current_rule_index = len(self.rules) - 1
+        else:
+            rule = self.rules[self.current_rule_index]
+            rule.name = name
+            rule.pattern = pattern
+
+        # Update remaining rule attributes
+        rule.color = self.color_button.text() or None
+        rule.background = self.bg_color_button.text() or None
+        rule.font_family = self.family_combo.currentFont().family() or None
+        rule.style = self.style_combo.currentText() or None
+        rule.underline = self.underline_checkbox.isChecked()
+        rule.group = int(self.group_edit.text() or 0)
+        rule.context_trigger = self.trigger_edit.text()
+        rule.context_apply = self.block_edit.text()
+
+        self.accept()
+
+    def open_highlight_dialog(self):
+        dialog = HighlightRulesDialog(self.rules, self)
+        if dialog.exec():
+            self.highlighter.rehighlight()
+
+class CodeEditorMenu:
+    def __init__(self, editor: CodeEditor, menu_bar: QMenuBar):
+        self.editor = editor
+        self.menu_bar = menu_bar
+        self._init_menu()
+
+    def _init_menu(self):
+        tools_menu = self._get_or_create_menu("Tools")
+
+
+class CodeEditorMenu:
+    def __init__(self, editor: CodeEditor, menu_bar: QMenuBar):
+        self.editor = editor
+        self.menu_bar = menu_bar
+        self._init_menu()
+
+    def _init_menu(self):
+        edit_menu = self._get_or_create_menu("Edit")
+
+        settings_action = QAction("Editor Settings", self.editor)
+        settings_action.triggered.connect(self.editor.open_settings_dialog)
+        edit_menu.addAction(settings_action)
+
+        toggle_highlighter_action = QAction("Toggle Syntax Highlighter", self.editor)
+        toggle_highlighter_action.setCheckable(True)
+        toggle_highlighter_action.setChecked(True)
+        toggle_highlighter_action.toggled.connect(self.editor.toggle_highlighter)
+        edit_menu.addAction(toggle_highlighter_action)
+
+        highlight_action = QAction("Highlight Rules", self.editor)
+        highlight_action.triggered.connect(self.editor.open_highlight_dialog)
+        edit_menu.addAction(highlight_action)
+
+    def _get_or_create_menu(self, title: str) -> QMenu:
+        for action in self.menu_bar.actions():
+            if action.text() == title:
+                return action.menu()
+        new_menu = self.menu_bar.addMenu(title)
+        return new_menu
+
+class CodeEditorToolbar:
+    def __init__(self, editor: CodeEditor, toolbar: QToolBar):
+        self.editor = editor
+        self.toolbar = toolbar
+
+        self._init_toolbar()
+
+    def _init_toolbar(self):
+        settings_icon = QIcon(str(ICON_PATH / "icon-gear-64.svg"))
+        settings_action = QAction("Format Settings", self.editor)
+        settings_action.setIcon(settings_icon)
+        settings_action.setToolTip("Editor Settings")
+        settings_action.setFont(default_font())
+        settings_action.triggered.connect(self.editor.open_settings_dialog)
+
+        highlight_icon = QIcon(str(ICON_PATH / "icon-spotlight-64.svg"))
+        toggle_action = QAction("Highlight", self.editor)
+        toggle_action.setIcon(highlight_icon)
+        toggle_action.setCheckable(True)
+        toggle_action.setChecked(True)
+        toggle_action.setFont(default_font())
+        toggle_action.toggled.connect(self.editor.toggle_highlighter)
+
+        colors_icon = QIcon(str((ICON_PATH / "icon-style-palette-64.svg")))
+        highlight_action = QAction("Highlight Rules", self.editor)
+        highlight_action.setIcon(colors_icon)
+        highlight_action.setToolTip("Highlighting Rules")
+        highlight_action.setFont(default_font())
+        highlight_action.triggered.connect(self.editor.open_highlight_dialog)
+
+        self.toolbar.addAction(settings_action)
+        self.toolbar.addAction(toggle_action)
+        self.toolbar.addAction(highlight_action)

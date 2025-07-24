@@ -154,8 +154,8 @@ class CanvasWidget():
             ui.PreprocessPage.setEnabled(True)
             ui.ScatterPage.setEnabled(True)
             ui.NDIMPage.setEnabled(True)
-            ui.MultidimensionalPage.setEnabled(True)
-            ui.ClusteringPage.setEnabled(True)
+            ui.DimRedPage.setEnabled(True)
+            ui.ClusterPage.setEnabled(True)
             if hasattr(ui, "spot_tools"):
                 ui.spot_tools.setEnabled(True)
             if hasattr(ui, "special_tools"):
@@ -199,8 +199,8 @@ class CanvasWidget():
             ui.PreprocessPage.setEnabled(False)
             ui.ScatterPage.setEnabled(False)
             ui.NDIMPage.setEnabled(False)
-            ui.MultidimensionalPage.setEnabled(False)
-            ui.ClusteringPage.setEnabled(False)
+            ui.DimRedPage.setEnabled(False)
+            ui.ClusterPage.setEnabled(False)
             if hasattr(ui, "spot_tools"):
                 ui.spot_tools.setEnabled(False)
             if hasattr(ui, "special_tools"):
@@ -239,8 +239,8 @@ class CanvasWidget():
             ui.PreprocessPage.setEnabled(False)
             ui.ScatterPage.setEnabled(False)
             ui.NDIMPage.setEnabled(False)
-            ui.MultidimensionalPage.setEnabled(False)
-            ui.ClusteringPage.setEnabled(False)
+            ui.DimRedPage.setEnabled(False)
+            ui.ClusterPage.setEnabled(False)
             if hasattr(ui, "spot_tools"):
                 ui.spot_tools.setEnabled(False)
             if hasattr(ui, "special_tools"):

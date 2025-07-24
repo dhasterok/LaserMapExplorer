@@ -69,7 +69,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     if hasattr(plot_style,'set_style_widgets'): 
         plot_style.set_style_widgets() # update ui widgets and style dictionary
     else:
-        plot_style.set_style_dictionary(data, app_data) # update style dictionary
+        plot_style.set_style_attributes(data, app_data) # update style dictionary
 
     # get data for current map
     #scale = data.processed_data.get_attribute(field, 'norm')

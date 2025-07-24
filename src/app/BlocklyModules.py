@@ -95,9 +95,10 @@ class LameBlockly(PlotViewer):
          # preferences
         self.default_preferences = {'Units':{'Concentration': 'ppm', 'Distance': 'µm', 'Temperature':'°C', 'Pressure':'MPa', 'Date':'Ma', 'FontSize':11, 'TickDir':'out'}}
         self.preferences = copy.deepcopy(self.default_preferences)
-
+        # Workflow dock
+        self.workflow_dock = parent
         self.io = LameIO(self, connect_actions=False)
-        self.ui = parent
+        
         self.plot_style = StyleData(self)
         #set style using 'default' style them
         self.style_themes = StyleTheme(self)

@@ -42,7 +42,8 @@ class BlocklyBridge(QObject):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
         if plot_type in self.lame_blockly.plot_style.style_dict.keys():
-            self.lame_blockly.plot_style.set_style_dictionary(data = self.lame_blockly.data[self.lame_blockly.app_data.sample_id], app_data =self.lame_blockly.app_data, plot_type = plot_type)
+            self.lame_blockly.plot_style.plot_type = plot_type
+            self.lame_blockly.plot_style.set_style_attributes(data = self.lame_blockly.data[self.lame_blockly.app_data.sample_id], app_data =self.lame_blockly.app_data, plot_type = plot_type)
             style = self.lame_blockly.plot_style.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)

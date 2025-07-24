@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
         QMenu, QDockWidget, QHeaderView, QToolButton, QSlider, QVBoxLayout, QHBoxLayout, QLabel,
+        QSizePolicy,
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
@@ -1265,6 +1266,8 @@ class CustomSlider(QWidget):
         # Create label to display slider value
         self.label = CustomLineEdit(self,value=initial_value, precision=precision)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label.setMaximumWidth(30)
+        self.label.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         
         # Create slider
         if orientation == "horizontal":
@@ -1275,6 +1278,7 @@ class CustomSlider(QWidget):
         self.slider.setMaximum(int((self.max_value - self.min_value) * self._scale))
         self.slider.setSingleStep(1)
         self.slider.setValue(int((initial_value - self.min_value) * self._scale))
+        self.slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         # connect label to slider
         self.label.editingFinished.connect(self.handle_label_change)

@@ -1598,7 +1598,7 @@ class StylingDock(StyleData, StyleTheme):
                 if ui.comboBoxCorrelationMethod.currentText() == 'none':
                     ui.comboBoxCorrelationMethod.setCurrentText('Pearson')
             case 'cluster performance' | 'cluster map' | 'cluster score ':
-                self.ui.clustering.toggle_cluster_widgets()
+                self.ui.ClusterPage.toggle_cluster_widgets()
             case _:
                 ui.actionSwapAxes.setEnabled(False)
 

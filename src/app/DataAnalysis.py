@@ -234,6 +234,7 @@ class ClusterPage(QWidget, Clustering):
         self.sliderClusterExponent.setTickInterval(1)
         self.sliderClusterExponent.setObjectName("sliderClusterExponent")
         self.cluster_form_layout.addRow("Exponent", self.sliderClusterExponent)
+        self.cluster_form_layout.labelForField(self.sliderClusterExponent).setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
 
         self.comboBoxClusterDistance = QComboBox(parent=self.groupBoxClustering)
         self.comboBoxClusterDistance.setMaximumSize(QSize(150, 16777215))
@@ -288,7 +289,7 @@ class ClusterPage(QWidget, Clustering):
         if not page_index:
             self.ui.toolBox.addItem(self, cluster_icon, "Clustering")
         else:
-            self.ui.toolBox.insertItem(page_index+1, self, cluster_icon, "Clustering")
+            self.ui.toolBox.insertItem(page_index, self, cluster_icon, "Clustering")
 
     def connect_widgets(self):
         """Connect clustering widgets to UI."""
@@ -355,14 +356,14 @@ class ClusterPage(QWidget, Clustering):
         # toggle visibility of widgets based on the current plot type
         match self.ui.plot_style.plot_type:
             case 'cluster map' | 'cluster score map':
-                self.labelClusterMax.hide()
+                self.cluster_form_layout.labelForField(self.spinBoxClusterMax).hide()
                 self.spinBoxClusterMax.hide()
-                self.labelNClusters.show()
+                self.cluster_form_layout.labelForField(self.spinBoxNClusters).hide()
                 self.spinBoxNClusters.show()
             case 'cluster performance':
-                self.labelClusterMax.show()
+                self.cluster_form_layout.labelForField(self.spinBoxClusterMax).show()
                 self.spinBoxClusterMax.show()
-                self.labelNClusters.hide()
+                self.cluster_form_layout.labelForField(self.spinBoxNClusters).show()
                 self.spinBoxNClusters.hide()
 
         # enable/disable widgets based on the current clustering method
@@ -382,26 +383,26 @@ class ClusterPage(QWidget, Clustering):
         
         if 'PCA score' in self.ui.app_data.field_dict:
             self.checkBoxWithPCA.setEnabled(True)
-            self.labelClusterWithPCA.setEnabled(True)
+            #self.labelClusterWithPCA.setEnabled(True)
         else:
             self.checkBoxWithPCA.setEnabled(False)
-            self.labelClusterWithPCA.setEnabled(False)
+            #self.labelClusterWithPCA.setEnabled(False)
 
         # enable/disable widgets based on the current clustering method
-        self.labelNClusters.setEnabled(self.spinBoxNClusters.isEnabled())
-        self.labelClusterMax.setEnabled(self.spinBoxClusterMax.isEnabled())
-        self.labelClusterDistance.setEnabled(self.comboBoxClusterDistance.isEnabled())
-        self.labelClusterExponent.setEnabled(self.sliderClusterExponent.isEnabled())
-        self.labelExponent.setEnabled(self.sliderClusterExponent.isEnabled())
+        # self.labelNClusters.setEnabled(self.spinBoxNClusters.isEnabled())
+        # self.labelClusterMax.setEnabled(self.spinBoxClusterMax.isEnabled())
+        # self.labelClusterDistance.setEnabled(self.comboBoxClusterDistance.isEnabled())
+        # self.labelClusterExponent.setEnabled(self.sliderClusterExponent.isEnabled())
+        # self.labelExponent.setEnabled(self.sliderClusterExponent.isEnabled())
 
         # if PCA is not used for clustering, disable the PCA widgets
         if self.checkBoxWithPCA.isChecked() and self.checkBoxWithPCA.isEnabled():
             self.spinBoxPCANumBasis.setMaximum(self.ui.data[self.ui.app_data.sample_id].processed_data.get_attribute('PCA score').shape[1])
             self.spinBoxPCANumBasis.setEnabled(True)
-            self.labelPCANumBasis.setEnabled(True)
+            #self.labelPCANumBasis.setEnabled(True)
         else:
             self.spinBoxPCANumBasis.setEnabled(False)
-            self.labelPCANumBasis.setEnabled(False)
+            #self.labelPCANumBasis.setEnabled(False)
 
 
     def update_cluster_method(self, new_method=None):
@@ -598,8 +599,7 @@ class ClusterPage(QWidget, Clustering):
 
 @auto_log_methods(logger_key="Analysis")
 class DimensionalReduction():
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self):
         self.logger_key = "Analysis"
 
         self.dim_red_methods = ['PCA: Principal component analysis', 'MDS: Multidimensional scaling', 'LDA: Linear discriminant analysis', 'FA: Factor analysis']
@@ -642,30 +642,89 @@ class DimensionalReduction():
 
 
 @auto_log_methods(logger_key="Analysis")
-class DimensionalReductionUI(DimensionalReduction):
-    def __init__(self, parent):
-        super().__init__(self)
-        self.logger_key = "Analysis"
+class DimensionalReductionPage(QWidget, DimensionalReduction):
+    def __init__(self, parent=None, page_index=None):
+        super().__init__()
+
+        if parent is None:
+            return
 
         self.ui = parent
+        self.logger_key = "Analysis"
 
-        # Dimensional reduction ui widgets
-        self.ui.comboBoxDimRedTechnique.clear()
-        self.ui.comboBoxDimRedTechnique.addItems(self.dim_red_methods)
-        self.ui.app_data.dim_red_method = self.dim_red_methods[0]
-        self.ui.spinBoxPCX.valueChanged.connect(lambda: setattr(self.ui.app_data, "dim_red_x",self.ui.spinBoxPCX.value()))
-        self.ui.spinBoxPCY.valueChanged.connect(lambda: setattr(self.ui.app_data, "dim_red_y",self.ui.spinBoxPCY.value()))
-
-        self.ui.comboBoxDimRedTechnique.activated.connect(lambda: log(f"comboBoxDimRedTechnique value=[{self.ui.comboBoxDimRedTechnique.currentText()}]", prefix="UI"))
-        self.ui.spinBoxPCX.valueChanged.connect(lambda: log(f"spinBoxPCX value=[{self.ui.spinBoxPCX.value()}]", prefix="UI"))
-        self.ui.spinBoxPCY.valueChanged.connect(lambda: log(f"spinBoxPCY value=[{self.ui.spinBoxPCY.value()}]", prefix="UI"))
-
+        self.setupUI(page_index)
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
 
+    def setupUI(self, page_index):
+        self.setGeometry(QRect(0, 0, 300, 506))
+        self.setObjectName("MultidimensionalPage")
+
+        page_layout = QVBoxLayout(self)
+        page_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.scrollAreaMultiDim = QScrollArea(parent=self)
+        self.scrollAreaMultiDim.setFont(default_font())
+        self.scrollAreaMultiDim.setFrameShape(QFrame.Shape.NoFrame)
+        self.scrollAreaMultiDim.setFrameShadow(QFrame.Shadow.Plain)
+        self.scrollAreaMultiDim.setWidgetResizable(True)
+        self.scrollAreaMultiDim.setObjectName("scrollAreaMultiDim")
+
+        self.scrollAreaWidgetContentsMultiDim = QWidget()
+        self.scrollAreaWidgetContentsMultiDim.setGeometry(QRect(0, 0, 300, 506))
+        self.scrollAreaWidgetContentsMultiDim.setObjectName("scrollAreaWidgetContentsMultiDim")
+
+        scroll_area_layout = QVBoxLayout(self.scrollAreaWidgetContentsMultiDim)
+        scroll_area_layout.setContentsMargins(6, 6, 6, 6)
+        scroll_area_layout.setObjectName("verticalLayout_82")
+        self.groupBoxMultidim = QGroupBox(parent=self.scrollAreaWidgetContentsMultiDim)
+        self.groupBoxMultidim.setTitle("")
+        self.groupBoxMultidim.setObjectName("groupBoxMultidim")
+
+        self.multidim_form_layout = QFormLayout(self.groupBoxMultidim)
+        self.multidim_form_layout.setContentsMargins(3, 3, 3, 3)
+        self.multidim_form_layout.setObjectName("multidim_form_layout")
+
+        self.comboBoxDimRedTechnique = QComboBox(parent=self.groupBoxMultidim)
+        self.comboBoxDimRedTechnique.setFont(default_font())
+        self.comboBoxDimRedTechnique.setObjectName("comboBoxDimRedTechnique")
+        self.multidim_form_layout.addRow("Method", self.comboBoxDimRedTechnique)
+
+        self.spinBoxPCX = QSpinBox(parent=self.groupBoxMultidim)
+        self.spinBoxPCX.setFont(default_font())
+        self.spinBoxPCX.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxPCX.setKeyboardTracking(False)
+        self.spinBoxPCX.setObjectName("spinBoxPCX")
+        self.multidim_form_layout.addRow("PC X", self.spinBoxPCX)
+
+        self.spinBoxPCY = QSpinBox(parent=self.groupBoxMultidim)
+        self.spinBoxPCY.setFont(default_font())
+        self.spinBoxPCY.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxPCY.setKeyboardTracking(False)
+        self.spinBoxPCY.setObjectName("spinBoxPCY")
+        self.multidim_form_layout.addRow("PC Y", self.spinBoxPCY)
+
+        scroll_area_layout.addWidget(self.groupBoxMultidim)
+        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        scroll_area_layout.addItem(spacer)
+        self.scrollAreaMultiDim.setWidget(self.scrollAreaWidgetContentsMultiDim)
+        page_layout.addWidget(self.scrollAreaMultiDim)
+
+        multidim_icon = QIcon(":/resources/icons/icon-dimensional-analysis-64.svg")
+        if not page_index:
+            self.ui.toolBox.addItem(self, multidim_icon, "Dimensional Reduction")
+        else:
+            self.ui.toolBox.insertItem(page_index, self, multidim_icon, "Dimensional Reduction")
+
     def connect_widgets(self):
-        pass
+        # Dimensional reduction ui widgets
+        self.comboBoxDimRedTechnique.clear()
+        self.comboBoxDimRedTechnique.addItems(self.dim_red_methods)
+        self.ui.app_data.dim_red_method = self.dim_red_methods[0]
+
+        self.spinBoxPCX.valueChanged.connect(lambda: setattr(self.ui.app_data, "dim_red_x",self.spinBoxPCX.value()))
+        self.spinBoxPCY.valueChanged.connect(lambda: setattr(self.ui.app_data, "dim_red_y",self.spinBoxPCY.value()))
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -677,34 +736,27 @@ class DimensionalReductionUI(DimensionalReduction):
 
     def connect_logger(self):
         """Connects widgets to logger."""
-        self.ui.comboBoxNDimAnalyte.activated.connect(lambda: log(f"comboBoxNDimAnalyte value=[{self.ui.comboBoxNDimAnalyte.currentText()}]", prefix="UI"))
-        self.ui.toolButtonNDimAnalyteAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.ui.comboBoxNDimAnalyteSet.activated.connect(lambda: log(f"comboBoxNDimAnalyteSet value=[{self.ui.comboBoxNDimAnalyteSet.currentText()}]", prefix="UI"))
-        self.ui.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.ui.comboBoxNDimQuantiles.activated.connect(lambda: log(f"comboBoxNDimQuantiles value=[{self.ui.comboBoxNDimQuantiles.currentText()}]", prefix="UI"))
-        self.ui.toolButtonNDimSelectAll.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.ui.toolButtonNDimUp.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.ui.toolButtonNDimDown.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.ui.toolButtonNDimSaveList.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.ui.toolButtonNDimRemove.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.comboBoxDimRedTechnique.currentTextChanged.connect(lambda: log(f"comboBoxDimRedTechnique, value=[{self.comboBoxDimRedTechnique.currentText()}]",prefix="UI"))
+        self.spinBoxPCX.valueChanged.connect(lambda: log(f"spinBoxPCX value=[{self.spinBoxPCX.value()}]", prefix="UI"))
+        self.spinBoxPCY.valueChanged.connect(lambda: log(f"spinBoxPCY value=[{self.spinBoxPCY.value()}]", prefix="UI"))
 
     def update_dim_red_method_combobox(self, new_method):
-        self.ui.comboBoxNoiseReductionMethod.setCurrentText(new_method)
+        self.comboBoxDimRedTechnique.setCurrentText(new_method)
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['multidim']:
             self.ui.plot_style.schedule_update()
 
     def update_dim_red_x_spinbox(self, new_value):
-        self.ui.spinBoxPCX.setValue(int(new_value))
+        self.spinBoxPCX.setValue(int(new_value))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['multidim']:
             self.ui.plot_style.schedule_update()
 
     def update_dim_red_y_spinbox(self, new_value):
-        self.ui.spinBoxPCY.setValue(int(new_value))
+        self.spinBoxPCY.setValue(int(new_value))
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['multidim']:
             self.ui.plot_style.schedule_update()
 
     def update_dim_red_x_max_spinbox(self, new_value):
-        self.ui.spinBoxPCX.setMaximum(int(new_value))
+        self.spinBoxPCX.setMaximum(int(new_value))
 
     def update_dim_red_y_max_spinbox(self, new_value):
-        self.ui.spinBoxPCY.setMaximum(int(new_value))
+        self.spinBoxPCY.setMaximum(int(new_value))

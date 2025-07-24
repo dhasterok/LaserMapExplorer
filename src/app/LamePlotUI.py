@@ -443,7 +443,16 @@ class NDimUI():
 
     def connect_logger(self):
         """Connects widgets to logger."""
-        pass
+        self.ui.comboBoxNDimAnalyte.activated.connect(lambda: log(f"comboBoxNDimAnalyte value=[{self.ui.comboBoxNDimAnalyte.currentText()}]", prefix="UI"))
+        self.ui.toolButtonNDimAnalyteAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.ui.comboBoxNDimAnalyteSet.activated.connect(lambda: log(f"comboBoxNDimAnalyteSet value=[{self.ui.comboBoxNDimAnalyteSet.currentText()}]", prefix="UI"))
+        self.ui.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.ui.comboBoxNDimQuantiles.activated.connect(lambda: log(f"comboBoxNDimQuantiles value=[{self.ui.comboBoxNDimQuantiles.currentText()}]", prefix="UI"))
+        self.ui.toolButtonNDimSelectAll.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.ui.toolButtonNDimUp.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.ui.toolButtonNDimDown.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.ui.toolButtonNDimSaveList.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
+        self.ui.toolButtonNDimRemove.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
 
     def update_ndim_analyte_set_combobox(self, new_ndim_analyte_set):
         self.ui.comboBoxNDimAnalyteSet.setCurrentText(new_ndim_analyte_set)

@@ -26,7 +26,7 @@ from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.common.TableFunctions import TableFcn as TableFcn
 from src.app.PlotTree import PlotTree
 from src.app.CanvasWidget import CanvasWidget
-from src.app.DataAnalysis import ClusterPage, DimensionalReductionUI
+from src.app.DataAnalysis import ClusterPage, DimensionalReductionPage
 from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.ImageProcessing import ImageProcessingUI
@@ -244,6 +244,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # code is more resilient if toolbox indices for each page is not hard coded
         # will need to change case text if the page text is changed
+
+        # Initialize dimentionality reduction class 
+        self.DimRedPage = DimensionalReductionPage(parent=self)
+
+        # Initialize class from DataAnalysis
+        self.ClusterPage = ClusterPage(parent=self)
+
         self.reindex_left_tab()
         self.reindex_style_tab()
         self.reindex_canvas_tab()
@@ -261,13 +268,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.correlation = CorrelationUI(self)
         self.scatter = ScatterUI(self)
         self.ndimensional = NDimUI(self)
-
-        # Initialise dimentionality reduction class 
-        self.dimensional_reduction = DimensionalReductionUI(self)
-
-        # Initialise class from DataAnalysis
-        self.ClusterPage = ClusterPage(parent=self, page_index=self.left_tab['multidim'])
-        self.reindex_left_tab()
 
         self.init_tabs(enable=False)
 
@@ -295,7 +295,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.crop_tool = CropTool(self)
         self.table_fcn = TableFcn(self)
         #self.clustertool = Clustering(self)
-        #self.dimredtool = DimensionalReduction(self)
         self.noise_reduction = ImageProcessingUI(self)
 
         self.actionQuit_LaME.triggered.connect(self.quit)
@@ -592,7 +591,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.spot_tools.setEnabled(False)
             self.ScatterPage.setEnabled(False)
             self.NDIMPage.setEnabled(False)
-            self.MultidimensionalPage.setEnabled(False)
+            self.DimRedPage.setEnabled(False)
             self.ClusterPage.setEnabled(False)
             if hasattr(self, "special_tools"):
                 self.special_tools.setEnabled(False)
@@ -612,7 +611,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.spot_tools.setEnabled(True)
             self.ScatterPage.setEnabled(True)
             self.NDIMPage.setEnabled(True)
-            self.MultidimensionalPage.setEnabled(True)
+            self.DimRedPage.setEnabled(True)
             self.ClusterPage.setEnabled(True)
             if hasattr(self,"special_tools"):
                 self.special_tools.setEnabled(True)
@@ -646,7 +645,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # run dim red before changing plot_type if user selects dim red tab
         if tab_id == self.left_tab['multidim'] :
             if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
-                self.dimensional_reduction.compute_dim_red(data, self.app_data)
+                self.DimRedPage.compute_dim_red(data, self.app_data)
         # update the plot type comboBox options
         self.update_plot_type_combobox_options()
         self.plot_style.plot_type = self.field_control_settings[tab_id]['plot_list'][self.field_control_settings[tab_id]['saved_index']]
@@ -1578,7 +1577,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
                 if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
-                    self.dimensional_reduction.compute_dim_red(data, self.app_data)
+                    self.DimRedPage.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.plot_style)
 
             case 'cluster map' | 'cluster score map':

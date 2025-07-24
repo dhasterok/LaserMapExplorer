@@ -548,13 +548,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if parent combobox is supplied, get the field list associated with current field type
         else:
             field_type = parentbox.currentText()
-            if 'normalized' in field_type:
-                field_type = field_type.replace(' (normalized)','')
-
-        field_list = self.app_data.field_dict[field_type]
-
-        if field_type == 'Analyte':
-            _, field_list = self.data[self.app_data.sample_id].sort_data(self.app_data.sort_method)
+            
+        field_list = self.app_data.get_field_list(field_type)
 
         # add 'none' as first option if required
         if add_none:
@@ -1138,10 +1133,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update c_field_type and c_field
         self.app_data.c_field_type = 'Analyte'
         field = ''
-        if self.app_data.selected_analytes is None:
+        selected_analytes = self.app_data.selected_fields(field_type='Analyte')
+        if len(selected_analytes) == 0:
             field = data.processed_data.match_attribute('data_type','Analyte')[0]
         else:
-            field = self.app_data.selected_analytes[0]
+            field = selected_analytes[0]
         self.app_data.c_field = field
 
         # hist_bin_width and should be updated along with hist_num_bins

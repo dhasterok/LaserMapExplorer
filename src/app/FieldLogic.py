@@ -135,7 +135,7 @@ class FieldLogicUI():
         if parentBox is None:
             fields = self.get_field_list('Analyte')
         else:
-            fields = self.get_field_list(set_name=parentBox.currentText())
+            fields = self.get_field_list(field_type=parentBox.currentText())
 
         childBox.clear()
         childBox.addItems(fields)

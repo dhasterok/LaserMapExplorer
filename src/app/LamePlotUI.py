@@ -428,17 +428,17 @@ class NDimUI():
         self.ui.comboBoxNDimQuantiles.setCurrentIndex(self.ui.app_data.ndim_quantile_index)
         self.ui.comboBoxNDimQuantiles.activated.connect(lambda _: self.update_ndim_quantile_index())
         
-        self.ui.toolButtonNDimAnalyteAdd.clicked.connect(lambda: self.update_ndim_table('analyteAdd'))
-        self.ui.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: self.update_ndim_table('analyteSetAdd'))
-        self.ui.toolButtonNDimUp.clicked.connect(lambda: self.table_fcn.move_row_up(self.ui.tableWidgetNDim))
-        self.ui.toolButtonNDimDown.clicked.connect(lambda: self.table_fcn.move_row_down(self.ui.tableWidgetNDim))
-        self.ui.toolButtonNDimSelectAll.clicked.connect(self.ui.tableWidgetNDim.selectAll)
-        self.ui.toolButtonNDimRemove.clicked.connect(lambda: self.table_fcn.delete_row(self.ui.tableWidgetNDim))
-        self.ui.toolButtonNDimSaveList.clicked.connect(self.save_ndim_list)
+        self.ui.toolButtonNDimAnalyteAdd.clicked.connect(lambda _: self.update_ndim_table('analyteAdd'))
+        self.ui.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda _ : self.update_ndim_table('analyteSetAdd'))
+        self.ui.toolButtonNDimUp.clicked.connect(lambda _: self.table_fcn.move_row_up(self.ui.tableWidgetNDim))
+        self.ui.toolButtonNDimDown.clicked.connect(lambda _: self.table_fcn.move_row_down(self.ui.tableWidgetNDim))
+        self.ui.toolButtonNDimSelectAll.clicked.connect(lambda _: self.ui.tableWidgetNDim.selectAll())
+        self.ui.toolButtonNDimRemove.clicked.connect(lambda _: self.table_fcn.delete_row(self.ui.tableWidgetNDim))
+        self.ui.toolButtonNDimSaveList.clicked.connect(lambda _: self.save_ndim_list())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("ndim_analyte_set", self.update_ndim_analyte_set_combobox)
+        self.ui.app_data.add_observer("ndim_analyte_set", self.update_ndim_analyte_set)
         self.ui.app_data.add_observer("ndim_quantile_index", self.update_ndim_quantile_index)
 
     def connect_logger(self):
@@ -454,7 +454,8 @@ class NDimUI():
         self.ui.toolButtonNDimSaveList.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
         self.ui.toolButtonNDimRemove.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
 
-    def update_ndim_analyte_set_combobox(self, new_ndim_analyte_set):
+    def update_ndim_analyte_set(self, new_ndim_analyte_set):
+
         self.ui.comboBoxNDimAnalyteSet.setCurrentText(new_ndim_analyte_set)
         if self.ui.toolBox.currentIndex() == self.ui.left_tab['ndim']:
             self.ui.plot_style.schedule_update()
@@ -520,7 +521,6 @@ class NDimUI():
         new_index : int, optional
             New index into ``self.app_data.ndim_quantile_index``, by default None
         """
-
         if new_index is None:
             self.ui.app_data.ndim_quantile_index = self.ui.comboBoxNDimQuantiles.currentIndex()
         else:

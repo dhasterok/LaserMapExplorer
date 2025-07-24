@@ -1414,8 +1414,8 @@ def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
     add_colorbar(plot_style, canvas, h[3])
 
     # axes
-    xmin, xmax, xscale, xlbl = plot_style.get_axis_values(x['type'],x['field'])
-    ymin, ymax, yscale, ylbl = plot_style.get_axis_values(y['type'],y['field'])
+    xmin, xmax, xscale, xlbl = plot_style.get_axis_values(data, x['type'],x['field'])
+    ymin, ymax, yscale, ylbl = plot_style.get_axis_values(data, y['type'],y['field'])
 
     # labels
     font = {'size':plot_style.font_size}

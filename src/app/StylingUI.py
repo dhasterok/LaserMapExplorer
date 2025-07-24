@@ -55,7 +55,6 @@ class StylingDock(StyleData, StyleTheme):
 
         self.style_dict = self.default_style_dict()
 
-
         self.ui.comboBoxHistType.activated.connect(self.schedule_update)
         self.ui.toolButtonNDimAnalyteAdd.clicked.connect(self.schedule_update)
         self.ui.toolButtonNDimAnalyteSetAdd.clicked.connect(self.schedule_update)
@@ -63,16 +62,15 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.toolButtonNDimDown.clicked.connect(self.schedule_update)
         self.ui.toolButtonNDimRemove.clicked.connect(self.schedule_update)
         
-
         self.ui.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeX.currentText(), self.ui.comboBoxFieldX.currentText(), 'x'))
         self.ui.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeY.currentText(), self.ui.comboBoxFieldY.currentText(), 'y'))
         self.ui.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(self.ui.comboBoxFieldTypeZ.currentText(), self.ui.comboBoxFieldZ.currentText(), 'z'))
 
         # callback functions
         self.ui.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self, 'plot_type', self.ui.comboBoxPlotType.currentText()))
+
+        self.ui.actionUpdatePlot.triggered.connect(lambda: setattr(self.ui,"plot_flag",True)) # hopefully solve issues when plot stops updating
         self.ui.actionUpdatePlot.triggered.connect(lambda: self.update_plot_type(force=True))
-
-
 
         self.connect_widgets()
         self.connect_observer()
@@ -184,7 +182,7 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.comboBoxMarker.setCurrentIndex(0)
         self.ui.comboBoxMarker.activated.connect(lambda _: self.update_marker_symbol())
         self.ui.doubleSpinBoxMarkerSize.valueChanged.connect(lambda _: self.update_marker_size())
-        self.ui.horizontalSliderMarkerAlpha.sliderReleased.connect(lambda _: self.update_marker_transparency())
+        self.ui.horizontalSliderMarkerAlpha.sliderReleased.connect(lambda: self.update_marker_transparency())
         self.ui.toolButtonMarkerColor.setStyleSheet("background-color: white;")
         self.ui.toolButtonMarkerColor.clicked.connect(lambda _: self.update_marker_color())
 
@@ -668,7 +666,7 @@ class StylingDock(StyleData, StyleTheme):
             New marker for the combobox, by default None
         """
         if new_marker is None:
-            self.new_marker = self.ui.comboBoxMarker.currentText()
+            self.marker = self.ui.comboBoxMarker.currentText()
         else:
             if new_marker == self.ui.comboBoxMarker.currentText():
                 return
@@ -723,7 +721,7 @@ class StylingDock(StyleData, StyleTheme):
             New transparency for the slider, by default None
         """
         if new_value is None:
-            self.ui.horizontalSliderMarkerAlpha.value()
+            self.marker_alpha = self.ui.horizontalSliderMarkerAlpha.value()
         else:
             if new_value == self.ui.horizontalSliderMarkerAlpha.value():
                 return
@@ -931,8 +929,6 @@ class StylingDock(StyleData, StyleTheme):
 
     # general style functions
     # -------------------------------------
- 
-
     def disable_style_widgets(self):
         """Disables all style related widgets."""        
         ui = self.ui
@@ -1021,6 +1017,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.lineEditScaleLength.setEnabled(True)
                 ui.toolButtonOverlayColor.setEnabled(True)
 
+                ui.checkBoxShowMass.setEnabled(True)
+
                 # marker properties
                 if ui.app_data.sample_id != '' and len(ui.data[ui.app_data.sample_id].spotdata) != 0:
                     ui.comboBoxMarker.setEnabled(True)
@@ -1046,6 +1044,8 @@ class StylingDock(StyleData, StyleTheme):
                 # axes properties
                 ui.comboBoxTickDirection.setEnabled(True)
 
+                ui.checkBoxShowMass.setEnabled(True)
+
                 # color properties
                 ui.comboBoxFieldColormap.setEnabled(True)
                 ui.lineEditCLB.setEnabled(True)
@@ -1063,6 +1063,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.lineEditYLabel.setEnabled(True)
                 ui.lineEditAspectRatio.setEnabled(True)
                 ui.comboBoxTickDirection.setEnabled(True)
+
+                ui.checkBoxShowMass.setEnabled(True)
 
                 # marker properties
                 ui.horizontalSliderMarkerAlpha.setEnabled(True)
@@ -1099,6 +1101,8 @@ class StylingDock(StyleData, StyleTheme):
                     ui.lineEditZLabel.setEnabled(True)
                 ui.lineEditAspectRatio.setEnabled(True)
                 ui.comboBoxTickDirection.setEnabled(True)
+
+                ui.checkBoxShowMass.setEnabled(True)
 
                 # marker properties
                 ui.comboBoxMarker.setEnabled(True)
@@ -1151,6 +1155,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.lineEditAspectRatio.setEnabled(True)
                 ui.comboBoxTickDirection.setEnabled(True)
 
+                ui.checkBoxShowMass.setEnabled(True)
+
                 # line properties
                 if ui.comboBoxFieldZ.currentText() == '':
                     ui.doubleSpinBoxLineWidth.setEnabled(True)
@@ -1183,6 +1189,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.lineEditYLabel.setEnabled(True)
                 ui.lineEditZLabel.setEnabled(True)
 
+                ui.checkBoxShowMass.setEnabled(True)
+
                 # scalebar properties
                 ui.comboBoxScaleDirection.setEnabled(True)
                 ui.comboBoxScaleLocation.setEnabled(True)
@@ -1206,6 +1214,8 @@ class StylingDock(StyleData, StyleTheme):
                     ui.lineEditYLabel.setEnabled(True)
                 ui.lineEditAspectRatio.setEnabled(True)
                 ui.comboBoxTickDirection.setEnabled(True)
+
+                ui.checkBoxShowMass.setEnabled(True)
 
                 # scalebar properties
                 ui.lineEditScaleLength.setEnabled(True)
@@ -1232,6 +1242,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.lineEditScaleLength.setEnabled(True)
                 ui.toolButtonOverlayColor.setEnabled(True)
 
+                ui.checkBoxShowMass.setEnabled(False)
+
                 # marker properties
                 ui.comboBoxMarker.setEnabled(True)
                 ui.doubleSpinBoxMarkerSize.setEnabled(True)
@@ -1255,6 +1267,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.comboBoxScaleLocation.setEnabled(True)
                 ui.lineEditScaleLength.setEnabled(True)
                 ui.toolButtonOverlayColor.setEnabled(True)
+
+                ui.checkBoxShowMass.setEnabled(False)
 
                 # marker properties
                 # if len(ui.spotdata) != 0:
@@ -1282,6 +1296,8 @@ class StylingDock(StyleData, StyleTheme):
                 ui.lineEditXUB.setEnabled(True)
                 ui.lineEditAspectRatio.setEnabled(True)
                 ui.comboBoxTickDirection.setEnabled(True)
+
+                ui.checkBoxShowMass.setEnabled(True)
 
                 # scalebar properties
                 ui.lineEditScaleLength.setEnabled(True)

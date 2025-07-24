@@ -510,7 +510,11 @@ class StyleData(Observable):
 
     @show_mass.setter
     def show_mass(self, flag):
+        if flag == self._show_mass:
+            return
+
         self._show_mass = flag
+
         self.notify_observers("show_mass", flag)
 
     @property
@@ -554,10 +558,10 @@ class StyleData(Observable):
 
     @marker_alpha.setter
     def marker_alpha(self, alpha):
-        if isinstance(alpha, float) and 0 <= alpha <= 100:
+        if isinstance(alpha, int) and 0 <= alpha <= 100:
             self.style_dict[self.plot_type]['MarkerAlpha'] = alpha
         else:
-            raise TypeError("alpha must be of type float and [0,100].")
+            raise TypeError("alpha must be of type int and [0,100].")
 
     @property
     def line_width(self):
@@ -1424,7 +1428,7 @@ class StyleTheme():
                 'Marker': 'circle',
                 'MarkerSize': 6.0,
                 'MarkerColor': '#1c75bc',
-                'MarkerAlpha': 30.0,
+                'MarkerAlpha': int(30),
                 'LineWidth': 1.5,
                 'LineMultiplier': 1.0,
                 'LineColor': '#1c75bc',

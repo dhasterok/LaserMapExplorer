@@ -17,8 +17,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from src.common.Logger import log, auto_log_methods
 
-
-
 @auto_log_methods(logger_key="Analysis")
 class Clustering():
     def __init__(self):

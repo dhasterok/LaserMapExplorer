@@ -1148,16 +1148,16 @@ class AppData(Observable):
         if 'coordinate' in self._field_dict:
             self._field_dict.pop("coordinate")
         return self._field_dict
-
+    
     @property
-    def selected_analytes(self):
-        """pd.Series : The selected analytes for the current sample."""
+    def selected_fields(self, field_type='Analyte'):
+        """list : The selected fields for the current sample."""
         if self.data and self.sample_id != '':
-            return self.data[self.sample_id].processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
+            return self.data[self.sample_id].processed_data.match_attributes({'data_type':field_type, 'use': True}).values
+        else:
+            return []
 
-        return None
-
-    def get_field_list(self, set_name='Analyte', filter_type='all'):
+    def get_field_list(self, field_type='Analyte', filter_type='all'):
         """Gets the fields associated with a defined set
 
         Set names are consistent with QComboBox.
@@ -1171,7 +1171,7 @@ class AppData(Observable):
 
         Parameters
         ----------
-        set_name : str, optional
+        field_type : str, optional
             name of set list, by default 'Analyte'
         filter_type : str, optional
             Filters data to columns selected for analysis, by default 'all'
@@ -1189,24 +1189,19 @@ class AppData(Observable):
         if filter_type not in ['all', 'used']:
             raise ValueError("filter must be 'all' or 'used'.")
 
-        set_fields = []
-        match set_name:
-            case 'Analyte' | 'Analyte (normalized)':
-                if filter_type == 'used':
-                    set_fields = data.match_attributes({'data_type': 'Analyte', 'use': True})
-                else:
-                    set_fields = data.match_attribute('data_type', 'Analyte')
-            case 'Ratio' | 'Ratio (normalized)':
-                if filter_type == 'used':
-                    set_fields = data.match_attributes({'data_type': 'Ratio', 'use': True})
-                else:
-                    set_fields = data.match_attribute('data_type', 'Ratio')
-            case 'None':
-                return []
-            case _:
-                set_fields = data.match_attribute('data_type', set_name)
+        if 'normalized' in field_type:
+            field_type = field_type.replace(' (normalized)','')
 
-        return set_fields
+        field_list = self.field_dict[field_type]
+
+        if field_type == 'Analyte':
+            _, field_list = self.data[self.sample_id].sort_data(self.sort_method)
+
+        # filter list by selected analytes
+        if filter_type == 'used':
+            field_list = [f for f in field_list if f in self.selected_fields(field_type)]
+        
+        return field_list
 
     def update_hist_bin_width(self):
         """Updates the bin width for histograms

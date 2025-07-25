@@ -109,6 +109,7 @@ subclass LoggerDock or modify:
         ...
 """
 import sys, functools, inspect, types
+from pathlib import Path
 
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
@@ -450,12 +451,13 @@ class LoggerDock(CustomDockWidget):
     :see also: SearchTool : Adds text search widget to the dock
     ```
     """  
-    def __init__(self, file='temp.log', parent=None):
+    def __init__(self, file: Path | str='temp.log', parent=None):
         if not isinstance(parent, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(parent)
         self.ui = parent
+        self.file = Path(file).resolve()
 
         self.log_colors = {
             "Error": "red",

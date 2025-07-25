@@ -61,10 +61,11 @@ class CodeEditor(QPlainTextEdit):
 
         # auto format settings
         self.default_settings = {
-            'auto_list': {'phrase': "Auto bullet and numbering", 'enabled': True},
+            'auto_heading': {'phrase': "Auto complete heading", 'enabled': True},
             'tab_indent': {'phrase': "Convert tabs to spaces", 'enabled': True},
             'quick_indent': {'phrase': "Shortcut indenting (Ctrl/⌘ + <, >)", 'enabled': True},
             'block_indent': {'phrase': "Auto indent blocks", 'enabled': True},
+            'auto_list': {'phrase': "Auto bullet and numbering", 'enabled': True},
         }
         # Make a working copy so defaults aren't overwritten
         self.settings = {
@@ -90,19 +91,35 @@ class CodeEditor(QPlainTextEdit):
         self.highlightCurrentLine()
 
     def keyPressEvent(self, event: QKeyEvent):
+        cursor = self.textCursor()
+
+        # Handle heading underline auto-complete
+        if (
+            self.settings['auto_heading']['enabled']
+            and event.key() == Qt.Key.Key_Tab
+            and not event.modifiers()
+        ):
+            cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+            current_line = cursor.selectedText()
+
+            match = re.match(r'^([=\-+~#\*])\1{2,}$', current_line)
+            if match:
+                self.repeat_heading_char(match.group(1))
+                return
+
         if self.settings['block_indent']['enabled']:
             ctrl_or_cmd = event.modifiers() & (Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.MetaModifier)
             if ctrl_or_cmd:
                 key = event.key()
             
-            # Indent (Ctrl+.)
-            if key == Qt.Key.Key_Period:  # '>' is shift+period
-                self._indent_selection()
-                return
-            # Un-indent (Ctrl+,)
-            elif key == Qt.Key.Key_Comma:  # '<' is shift+comma
-                self._unindent_selection()
-                return
+                # Indent (Ctrl+.)
+                if key == Qt.Key.Key_Period:  # '>' is shift+period
+                    self._indent_selection()
+                    return
+                # Un-indent (Ctrl+,)
+                elif key == Qt.Key.Key_Comma:  # '<' is shift+comma
+                    self._unindent_selection()
+                    return
 
         if self.settings['tab_indent']['enabled']:
             if event.key() == Qt.Key.Key_Tab and not event.modifiers():
@@ -220,6 +237,27 @@ class CodeEditor(QPlainTextEdit):
             cursor.movePosition(QTextCursor.MoveOperation.Down)
 
         cursor.endEditBlock()
+
+    def repeat_heading_char(self, char):
+        cursor = self.textCursor()
+
+        # Move to the previous line and get the line's text
+        cursor.movePosition(QTextCursor.MoveOperation.Up)
+        cursor.movePosition(QTextCursor.MoveOperation.StartOfLine)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfLine, QTextCursor.MoveMode.KeepAnchor)
+        prev_line = cursor.selectedText()
+        underline = char * len(prev_line)
+
+        # Move back down and select just the current line's text (not the newline)
+        cursor.movePosition(QTextCursor.MoveOperation.Down)
+        cursor.movePosition(QTextCursor.MoveOperation.StartOfLine)
+        cursor.movePosition(QTextCursor.MoveOperation.EndOfLine, QTextCursor.MoveMode.KeepAnchor)
+
+        # Replace only the text on this line, leaving the line itself and its newline intact
+        cursor.setCharFormat(QTextCharFormat())  # Reset format
+        cursor.insertText(underline)  # No newline here
+
+        self.setTextCursor(cursor)
 
     def lineNumberAreaWidth(self):
         digits = len(str(max(1, self.blockCount())))
@@ -444,28 +482,62 @@ class HighlightRule:
 RST_HIGHLIGHT_RULES = [
 
     HighlightRule(
-        name="literal.block",
-        pattern="",  # No inline pattern
-        color=AYU_LIGHT_THEME["green"],
-        context_trigger=r"^::$",
-        context_apply=r"^\s{2,}",
+        name="literal.trigger",
+        pattern=r"::$",  # No inline pattern
+        color=AYU_LIGHT_THEME["orange"],
+        group=0,
     ),
-    
+    HighlightRule(
+        name="literal.block",
+        pattern=r"(?m)^ {3,}.*$",  # No inline pattern
+        color=AYU_LIGHT_THEME["green"],
+        group=0,
+    ),
+    HighlightRule(
+        name="field_list",
+        pattern=r"(?m)^(\s*):(\w+):",  # No inline pattern
+        color=AYU_LIGHT_THEME["red"],
+        group=2,
+        #context_trigger=,
+        #context_apply=r"^\s{2,}",
+    ),
+    HighlightRule(
+        name="field_list.value",
+        pattern=r"^(:[^:\s]+:)(\s+.*)$",
+        color=AYU_LIGHT_THEME["purple"],
+        group=2,  
+    ),
+    HighlightRule(
+        name="definition_term",
+        pattern=r"(?m)^([^\s].+?)\n {2,}.+",
+        group=1,
+        color=AYU_LIGHT_THEME["text"],
+        style="bold"
+    ),
+    HighlightRule(
+        name="definition_text",
+        pattern=r"(?m)^ {2,}.+",
+        color=AYU_LIGHT_THEME["teal"]
+    ),
     HighlightRule( # Titles
         name="title",
-        pattern=r"^(?P<text>.+)\n(?P<line>=+|-+)$", 
+        pattern=r"^([^\w\s]+)$", 
         color=AYU_LIGHT_THEME["orange"],
-        style="bold"
+        style="bold",
+        group=0
     ),  
-    HighlightRule( # Block quotes
-        name="block.quote",
-        #pattern=r"(?m)^\s{3,}.*$",      
-        pattern=r"(?m)^(?!\s{3,}(:\w+:|\*|$)).{3,}.*$",
-        color=AYU_LIGHT_THEME["text"]
-    ),
+    # HighlightRule( # Block quotes
+    #     name="block.quote",
+    #     #pattern=r"(?m)^\s{3,}.*$",      
+    #     #pattern=r"(?ms)(?<=\n)\n([ ]{2,}.*(?:\n[ ]{2,}.*)*)",
+    #     pattern=r"(?m)^ {2,}[^:].*$",
+    #     color=AYU_LIGHT_THEME["text"],
+    #     #context_trigger=r"^$",
+    #     #context_apply=r"^( {2,}.*)$",
+    # ),
     HighlightRule( # Bold
         name="bold",
-        pattern=r"(?<!\S)\*\*(?!\s)(.+?)(?<!\s)\*\*(?=\s|[.,;!?)]|$)",
+        pattern=r"(?<!\S)\*\*(?![\s*])(.+?)(?<![\s*])\*\*(?=\s|[.,;!?)]|$)",
         color=AYU_LIGHT_THEME["red"],
         style="bold",
         group=0,
@@ -617,21 +689,32 @@ class RstHighlighter(QSyntaxHighlighter):
             matches = re.finditer(rule.pattern, text)
             fmt = self._make_format(rule)
             for match in matches:
-                group = match.group(rule.group if rule.group else 0)
-                start = match.start(rule.group if rule.group else 0)
-                end = start + len(group)
-                self.setFormat(start, end - start, fmt)
+                # Use group=rule.group if defined, otherwise group=0
+                group_index = rule.group if rule.group else 0
 
-                # Extra syntax checks 
-                if rule.name == "directive": #if it's a directive rule
-                    directive_name = group.strip().split("::")[0].replace("..", "").strip()
-                    if directive_name not in KNOWN_DIRECTIVES:
-                        self.setFormat(start, end - start, self.invalid_directive_format)
+                try:
+                    group = match.group(group_index)
+                    start = match.start(group_index)
+                    end = start + len(group)
+
+                    # Print debug info
+                    print(f"[{rule.name}] Match group({group_index}): {group!r} at ({start}, {end}) in line: {text!r}")
+
+                    self.setFormat(start, end - start, fmt)
+
+                    # Extra syntax checks 
+                    if rule.name == "directive": 
+                        directive_name = group.strip().split("::")[0].replace("..", "").strip()
+                        if directive_name not in KNOWN_DIRECTIVES:
+                            self.setFormat(start, end - start, self.invalid_directive_format)
+
+                except IndexError as e:
+                    print(f"Group index {group_index} not found in match: {match.groups()}")
         except re.error as e:
-            # Regex failed silently. Optionally log or debug.
-            pass
+            print(f"Regex error in rule {rule.name}: {e}")
 
     def highlightBlock(self, text):
+        print(f"Highlighting: {text!r}")
         # Track context triggers
         if self.in_context: # rules within context blocks
             context_rule = self.context_rule

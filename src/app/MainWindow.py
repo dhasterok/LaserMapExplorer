@@ -42,7 +42,7 @@ from src.common.ReSTNotes import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
-from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
+from src.app.config import BASEDIR, APPDATA_PATH, ICONPATH, SSPATH, load_stylesheet
 from src.common.colorfunc import get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
@@ -211,9 +211,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.addPermanentWidget(self.labelInvalidValues)
 
         # Create a button to hide/show the dock
-        self.toolButtonLeftDock = CustomCheckButton(QIcon(':/resources/icons/icon-left_toolbar_hide-64.svg'), QIcon(':/resources/icons/icon-left_toolbar_show-64.svg'), parent=self)
-        self.toolButtonRightDock = CustomCheckButton(QIcon(':/resources/icons/icon-right_toolbar_hide-64.svg'), QIcon(':/resources/icons/icon-right_toolbar_show-64.svg'), parent=self)
-        self.toolButtonBottomDock = CustomCheckButton(QIcon(':/resources/icons/icon-bottom_toolbar_hide-64.svg'), QIcon(':/resources/icons/icon-bottom_toolbar_show-64.svg'), parent=self)
+        self.toolButtonLeftDock = CustomCheckButton(
+            QIcon(str(ICONPATH / 'icon-left_toolbar_hide-64.svg')),
+            QIcon(str(ICONPATH / 'icon-left_toolbar_show-64.svg')),
+            parent=self
+        )
+        self.toolButtonRightDock = CustomCheckButton(
+            QIcon(str(ICONPATH / 'icon-right_toolbar_hide-64.svg')),
+            QIcon(str(ICONPATH / 'icon-right_toolbar_show-64.svg')),
+            parent=self
+        )
+        self.toolButtonBottomDock = CustomCheckButton(
+            QIcon(str(ICONPATH / 'icon-bottom_toolbar_hide-64.svg')),
+            QIcon(str(ICONPATH / 'icon-bottom_toolbar_show-64.svg')),
+            parent=self
+        )
 
         self.dockWidgetLeftToolbox.show()
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetLeftToolbox)
@@ -245,10 +257,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # code is more resilient if toolbox indices for each page is not hard coded
         # will need to change case text if the page text is changed
 
-        # Initialize dimentionality reduction class 
+        # Initialize dimentionality reduction class from DataAnalysis
         self.DimRedPage = DimensionalReductionPage(parent=self)
 
-        # Initialize class from DataAnalysis
+        # Initialize cluster class from DataAnalysis
         self.ClusterPage = ClusterPage(parent=self)
 
         self.reindex_left_tab()
@@ -286,7 +298,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.info_tab = {}
         self.actionInfo.triggered.connect(lambda _: self.open_info_dock())
 
-        self.io = LameIO(parent=self, connect_actions=True)
+        self.io = LameIO(ui=self, connect_actions=True)
 
         self.actionHelp.setCheckable(True)
         self.actionHelp.toggled.connect(lambda _: self.toggle_help_mode())
@@ -631,6 +643,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
             self.ClusterPage.toggle_cluster_widgets()
 
+        self.plot_flag = True
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
         # trigger update to plot
@@ -1065,7 +1078,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if hasattr(self,'notes'):
             # change notes file to new sample.  This will initiate the new file and autosave timer.
-            self.notes.notes_file = os.path.join(self.app_data.selected_directory,self.app_data.sample_id+'.rst')
+            self.notes.notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
+
 
         if hasattr(self,"info_dock"):
             self.info_dock.update_tab_widget()
@@ -1704,7 +1718,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """            
         if not hasattr(self, 'notes'):
             if hasattr(self.app_data,'selected_directory') and self.app_data.sample_id != '':
-                notes_file = os.path.join(self.app_data.selected_directory,f"{self.app_data.sample_id}.rst")
+                notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
             else:
                 notes_file = None
 
@@ -1800,7 +1814,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         custom fields.
         """            
         if not hasattr(self, 'calculator'):
-            calc_file = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
+            calc_file = APPDATA_PATH / "calculator.txt"
             self.calculator = CalculatorDock(ui=self, filename=calc_file)
 
             if self.calculator not in self.help_mapping:
@@ -1843,7 +1857,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         passed and record changes to the data.
         """            
         if not hasattr(self, 'logger_dock'):
-            logfile = os.path.join(BASEDIR,f'resources/log/lame.log')
+            logfile = BASEDIR / 'resources' / 'log' / 'lame.log'
             self.logger_dock = LoggerDock(logfile, self)
             for key in self.logger_options:
                 self.logger_options[key] = True

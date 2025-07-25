@@ -1,8 +1,9 @@
-import os, copy, random
+import copy, random
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
-from src.app.config import BASEDIR
+from src.app.config import APPDATA_PATH
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods
 
@@ -195,12 +196,12 @@ class AppData(Observable):
 
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
-        self.selected_directory = ''
+        self.selected_directory = Path()
 
         self._sort_method = 'mass'
 
         # reference chemistry
-        self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
+        self.ref_data = pd.read_excel(APPDATA_PATH / 'earthref.xlsx')
         self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
         self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
         self._ref_index = 0
@@ -312,9 +313,9 @@ class AppData(Observable):
 
         self._scatter_preset = ""
         # get scatter presets list
-        self.scatter_list_filename = 'resources/app_data/scatter_presets.csv'
+        self.scatter_list_path = APPDATA_PATH / 'scatter_presets.csv'
         try:
-            self.scatter_preset_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,self.scatter_list_filename))
+            self.scatter_preset_dict = csvdict.import_csv_to_dict(self.scatter_list_path)
         except FileNotFoundError:
             self.scatter_preset_dict = {}
 
@@ -323,9 +324,9 @@ class AppData(Observable):
         self._norm_reference = ""
 
         # get N-Dim lists
-        self.ndim_list_filename = 'resources/app_data/TEC_presets.csv'
+        self.ndim_list_path = APPDATA_PATH / 'TEC_presets.csv'
         try:
-            self.ndim_list_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,self.ndim_list_filename))
+            self.ndim_list_dict = csvdict.import_csv_to_dict(self.ndim_list_path)
         except FileNotFoundError:
             self.ndim_list_dict = {
                     'majors': ['Si','Ti','Al','Fe','Mn','Mg','Ca','Na','K','P'],

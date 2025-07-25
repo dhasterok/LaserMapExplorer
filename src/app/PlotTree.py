@@ -9,6 +9,8 @@ from src.app.UITheme import default_font
 import src.common.CustomMplCanvas as mplc
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
+from src.app.config import ICONPATH
+
 # -------------------------------
 # Plot Selector (tree) functions
 # -------------------------------
@@ -60,6 +62,7 @@ class PlotTree(CustomDockWidget):
         toolbar.setMovable(False)
         container_layout.addWidget(toolbar)
 
+        print(ICONPATH)
         sort_icon = ":resources/icons/icon-sort-64.svg"
         sortmenu_items = [
             ("alphabetical", lambda: self.sort_tree("alphabetical")),

@@ -1150,7 +1150,6 @@ class AppData(Observable):
             self._field_dict.pop("coordinate")
         return self._field_dict
     
-    @property
     def selected_fields(self, field_type='Analyte'):
         """list : The selected fields for the current sample."""
         if self.data and self.sample_id != '':

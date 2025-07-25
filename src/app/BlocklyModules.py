@@ -127,10 +127,10 @@ class LameBlockly(PlotViewer):
         # # Clustering
         # #-------------------------
         # Initialise dimentionality reduction class 
-        self.dimensional_reduction = DimensionalReduction(self)
+        self.dimensional_reduction = DimensionalReduction()
 
         # Initialise class from DataAnalysis
-        self.clustering = Clustering(self)
+        self.clustering = Clustering()
 
 
         # distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']

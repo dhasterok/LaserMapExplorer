@@ -7,6 +7,8 @@ import { sample_ids,fieldTypeList, updateSampleIds, spot_data } from './globals'
 import {enableSampleIDsBlockFunction} from './custom_blocks'
 
 
+// ========== Exposing update functions for Python-side call ==========
+
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variableaxis_and_labels
@@ -174,33 +176,64 @@ function updateFieldTypeList(newFieldTypeList) {
 }
 window.updateFieldTypeList = updateFieldTypeList;
 
+// =========================================================================
+
+// ========== Blockly-side functions ==========
 
 /**
- * Function to update the Field dropdown
- * @param {*} block 
- * @param {*} newValue 
+ * Updates the FieldType dropdown for a given axis (ax=3 for C) and plot type.
+ * Also triggers update of the Field dropdown.
+ * @param {Blockly.Block} block 
+ * @param {string} plotType 
+ * @param {number} axisNum  // e.g., 3 for 'C'
  */
-export function updateFieldDropdown(block, newValue) {
-    const fieldTypeValue = newValue || block.getFieldValue('fieldType');
-    window.blocklyBridge.getFieldList(fieldTypeValue).then((response) => {
+export function updateFieldTypeDropdown(block, plotType, axisNum=3) {
+    window.blocklyBridge.getFieldTypeList(axisNum.toString(), plotType).then((response) => {
         const options = response.map(option => [option, option]);
-        if (block) {
-            const dropdown = block.getField('field');
-            if (dropdown) {
-                if (options.length > 0) {
-                    dropdown.menuGenerator_ = options;
-                    dropdown.setValue(options[0][1]);
-                } else {
-                    dropdown.menuGenerator_ = [['Select...', '']];
-                    dropdown.setValue('');
-                }
-                dropdown.forceRerender();
+        const fieldTypeDropdown = block.getField('fieldType');
+        if (fieldTypeDropdown) {
+            if (options.length > 0) {
+                fieldTypeDropdown.menuGenerator_ = options;
+                fieldTypeDropdown.setValue(options[0][1]);
+            } else {
+                fieldTypeDropdown.menuGenerator_ = [['Select...', '']];
+                fieldTypeDropdown.setValue('');
             }
+            fieldTypeDropdown.forceRerender();
+        }
+        // Once fieldType is updated, update fields accordingly
+        updateFieldDropdown(block, options.length > 0 ? options[0][1] : '');
+    }).catch(error => {
+        console.error('Error fetching field type list:', error);
+    });
+}
+
+/**
+ * Updates the Field dropdown for a given fieldType (which must be set!).
+ * @param {Blockly.Block} block 
+ * @param {string} fieldTypeValue 
+ */
+export function updateFieldDropdown(block, fieldTypeValue) {
+    const typeValue = fieldTypeValue || block.getFieldValue('fieldType');
+    window.blocklyBridge.getFieldList(typeValue).then((response) => {
+        const options = response.map(option => [option, option]);
+        const fieldDropdown = block.getField('field');
+        if (fieldDropdown) {
+            if (options.length > 0) {
+                fieldDropdown.menuGenerator_ = options;
+                fieldDropdown.setValue(options[0][1]);
+            } else {
+                fieldDropdown.menuGenerator_ = [['Select...', '']];
+                fieldDropdown.setValue('');
+            }
+            fieldDropdown.forceRerender();
         }
     }).catch(error => {
         console.error('Error fetching field list:', error);
     });
 }
+
+
 
 
 /**

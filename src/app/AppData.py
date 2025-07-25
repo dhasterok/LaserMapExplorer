@@ -157,8 +157,8 @@ class AppData(Observable):
         Validates if the new field type exists in the current sample's processed data.
     validate_field(field_type, new_field)
         Validates if the new field exists for the given field type.
-    get_field_list(set_name='Analyte', filter_type='all')
-        Gets the fields associated with a defined set.
+    get_field_list(field_type='Analyte', filter_type='all')
+        Gets the fields associated with a field_type.
     update_hist_bin_width()
         Updates the bin width for histograms.
     update_hist_num_bins()
@@ -1153,7 +1153,7 @@ class AppData(Observable):
     def selected_fields(self, field_type='Analyte'):
         """list : The selected fields for the current sample."""
         if self.data and self.sample_id != '':
-            return self.data[self.sample_id].processed_data.match_attributes({'data_type':field_type, 'use': True}).values
+            return self.data[self.sample_id].processed_data.match_attributes({'data_type':field_type, 'use': True})
         else:
             return []
 
@@ -1202,6 +1202,44 @@ class AppData(Observable):
             field_list = [f for f in field_list if f in self.selected_fields(field_type)]
         
         return field_list
+    
+    def get_field_type_list(self,ax, plot_style):
+        """Updates the field type options in the UI
+        
+        This method updates the field type options in the UI based on the currently selected sample.
+        It retrieves the field types for the selected sample and updates the UI accordingly.
+        """
+        if self.sample_id == '':
+            return
+        
+        plot_type = plot_style.plot_type
+        plot_dict = plot_style.plot_axis_dict[plot_type]
+        field_dict = self.field_dict
+
+        new_list = []
+
+        # check if the list should include all options, global_list == True
+        if ax == 3 and 'cfield_type' in plot_dict:
+            # set the list based on plot_style.plot_type and available field types
+            new_list = [key for key in field_dict if key in plot_dict['cfield_type']]
+        elif 'field_type' in plot_dict:
+            # set the list based on plot_style.plot_type and available field types
+            new_list = [key for key in field_dict if key in plot_dict['field_type']]
+        else:
+            new_list = list(field_dict.keys())
+
+        if 'normalized' not in new_list:
+            if 'Analyte' in new_list:
+                new_list.insert(new_list.index('Analyte')+1, 'Analyte (normalized)')
+
+            if 'Ratio' in new_list:
+                new_list.insert(new_list.index('Ratio')+1, 'Ratio (normalized)')
+
+        # add 'None' as first option if required.
+        if plot_dict['add_none'][ax]:
+            new_list.insert(0,'none')
+        
+        return new_list
 
     def update_hist_bin_width(self):
         """Updates the bin width for histograms

@@ -1203,6 +1203,8 @@ class StyleData(Observable):
         cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
 
         return cmap
+    
+    
 
     # -------------------------------------
     # Validation functions

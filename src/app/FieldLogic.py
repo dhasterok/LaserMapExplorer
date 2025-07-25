@@ -132,10 +132,10 @@ class FieldLogicUI():
         if self.data is None:
             return
 
-        if parentBox is None:
-            fields = self.get_field_list('Analyte')
+        if parentBox is None or parentBox.currentText() == '':
+            fields = self.app_data.get_field_list('Analyte')
         else:
-            fields = self.get_field_list(field_type=parentBox.currentText())
+            fields = self.app_data.get_field_list(parentBox.currentText())
 
         childBox.clear()
         childBox.addItems(fields)
@@ -150,49 +150,6 @@ class FieldLogicUI():
 
         # get a named list of current fields for sample
 
-    # gets the set of fields
-    def get_field_list(self, set_name='Analyte', filter='all'):
-        """Gets the fields associated with a defined set
-
-        Set names are consistent with QComboBox.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            name of set list, options include ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calcualated Field``,
-            ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``, Defaults to ``Analyte``
-        filter : str, optional
-            Optionally filters data to columns selected for analysis, options are ``'all'`` and ``'used'``,
-            by default `'all'`
-
-        Returns
-        -------
-        list
-            Set_fields, a list of fields within the input set
-        """
-        if self.data is None:
-            return
-
-        if filter not in ['all', 'used']:
-            raise ValueError("filter must be 'all' or 'used'.")
-
-        match set_name:
-            case 'Analyte' | 'Analyte (normalized)':
-                if filter == 'used':
-                    set_fields = self.data.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
-                else:
-                    set_fields = self.data.processed_data.match_attribute('data_type', 'Analyte')
-            case 'Ratio' | 'Ratio (normalized)':
-                if filter == 'used':
-                    set_fields = self.data.processed_data.match_attributes({'data_type': 'Ratio', 'use': True})
-                else:
-                    set_fields = self.data.processed_data.match_attribute('data_type', 'Ratio')
-            case 'None':
-                return []
-            case _:
-                set_fields = self.data.processed_data.match_attribute('data_type', set_name.lower())
-
-        return set_fields    
 
 # Analyte GUI
 # -------------------------------

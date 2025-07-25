@@ -51,7 +51,7 @@ import json
 
 class LameBlockly(PlotViewer):
     def __init__(self,parent, *args, **kwargs):
-        super().__init__(self)
+        super().__init__(self, *args, **kwargs)
         # setup initial logging options
         # self.logger = LogCounter()
         self.logger_options = {

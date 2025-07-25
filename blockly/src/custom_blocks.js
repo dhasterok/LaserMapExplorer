@@ -906,7 +906,7 @@ const plot_map = {
         this.setHelpUrl('');
         this.setColour(285);
 
-        this.plotType = 'field_map'
+        this.plotType = 'field map'
         // Add default blocks to Styling input only in the toolbox
         if (!this.isInFlyout) {
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];

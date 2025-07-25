@@ -1629,7 +1629,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.workflow.show()
 
-
         #self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def open_mask_dock(self, tab_name=None, *args, **kwargs):

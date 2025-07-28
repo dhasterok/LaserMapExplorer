@@ -128,7 +128,7 @@ RST_HIGHLIGHT_RULES = [
         font_weight="normal",
     ),
     HighlightRule( name="citation.full",
-        foreground=LIGHT_THEME["blue"],
+        foreground=LIGHT_THEME["text"],
         font_weight="normal",
     ),
     HighlightRule( name="heading.title",
@@ -153,7 +153,6 @@ RST_HIGHLIGHT_RULES = [
         foreground=LIGHT_THEME["text"],
     ),
     HighlightRule( name="blockquote",
-        foreground=LIGHT_THEME["orange"],
         font_italic=True,
     ),
     HighlightRule( name="literal.marker",
@@ -172,17 +171,29 @@ RST_HIGHLIGHT_RULES = [
         foreground=LIGHT_THEME["text"],
         font_weight="normal",
     ),
+    HighlightRule( name="directive.marker",
+        foreground=LIGHT_THEME["blue"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="directive.keyword",
+        foreground=LIGHT_THEME["blue"],
+        font_weight="normal",
+    ),
     HighlightRule( name="directive.option",
-        foreground=LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["sunflower"],
         font_weight="normal",
     ),
     HighlightRule( name="directive.body",
-        foreground=LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["text"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="directive.inline",
+        foreground=LIGHT_THEME["sunflower"],
         font_weight="normal",
     ),
     HighlightRule(
         name="substitution",
-        foreground=LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["teal"],
         font_weight="normal",
         font_italic=True,
     ),
@@ -371,6 +382,7 @@ RST_BLOCK_RULES = {
         (re.compile(r"(?<!\S)\*([^\s*][^*\n]*?)\*(?=\s|[.,;:!?)]|$)"), "italic", 0),
         (re.compile(r"(?<!\S)``([^`\n]+)``(?=\s|[.,;:!?)]|$)"),"literal.inline", 0),
         (re.compile(r"(?<!\S)`([^`\n]+)`(?=\s|[.,;:!?)]|$)"),"interpreted.inline", 0),
+        (re.compile(r":\w+:`[^`]+`"), "directive.inline", 0),
         (re.compile(r"`[^`]+`_|[\w-]+_(?=[\s.,;:!?)]|$)"), "link", 0),
         (re.compile(r"_`[^`]+`|[\w-]+_(?=[\s.,;:!?)]|$)"), "hyperline.name", 0),
         (re.compile(r"\[(?!\d+$)([a-zA-Z0-9_.-]+)\]_(?=[\s.,;:!?)]|$)"), "citation.key", 0),
@@ -390,8 +402,8 @@ RST_BLOCK_RULES = {
         (re.compile(r" (\s*\w*)"), "line.block", 0),  # body of the line block
     ],
     "field_list": [
-        (re.compile(r"^(:[^:]+:)\s+(.*)?"), "field.name", 1),              # Match just the field name
-        (re.compile(r"^(:[^:]+:)\s+(.*)?"), "field.body", 2),       # Match and color just the value part
+        (re.compile(r"^(:[^:]+:)\s*(.*)?"), "field.name", 1),              # Match just the field name
+        (re.compile(r"^(:[^:]+:)\s*(.*)?"), "field.body", 2),       # Match and color just the value part
         (re.compile(r"^\s{2,}.*"), "field.body", 0),               # Match indented body
     ],
     "bullet_list": [
@@ -404,7 +416,7 @@ RST_BLOCK_RULES = {
         (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 1),           # formats .. marker
         #(re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.substitution", 2),    # the substitution is formatted by the substitution rule
         (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.keyword", 3),          # formats directive::
-        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 5),         # formats argument
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 4),         # formats argument
         (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.argument", 5),         # formats argument
         (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.option", 2),                           # formats :option:
         (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.body", 3),                             # formats the body
@@ -451,9 +463,43 @@ RST_BLOCK_RULES = {
     ],
 }
 
+# mostly complete.  missing a few directives that are unlikely to be used often.
 RST_KNOWN_DIRECTIVES = {
-    'note', 'warning', 'attention', 'caution', 'danger', 'error',
-    'hint', 'important', 'tip', 'admonition', 'image', 'figure',
-    'include', 'code-block', 'literalinclude', 'seealso', 'contents',
-    'table', 'csv-table', 'list-table', 'rubric', 'topic', 'sidebar',
+    'note': ['class', 'name'],
+    'warning': ['class', 'name'],
+    'attention': ['class', 'name'],
+    'caution': ['class', 'name'],
+    'danger': ['class', 'name'],
+    'error': ['class', 'name'],
+    'hint': ['class', 'name'],
+    'important': ['class', 'name'],
+    'tip': ['class', 'name'],
+    'admonition': ['class', 'name'],
+    'image': [ 'align', 'alt', 'loading', 'scale', 'target', 'height', 'width' ],
+    'figure': [ 'align', 'figclass', 'figname', 'figwidth' ],
+    'raw': ['class', 'encoding', 'file', 'url'],
+    'include': ['code', 'encoding', 'end-before', 'end-line', 'literal', 'number-lines', 'parser', 'start-after', 'start-line', 'tab-width'],
+    'code': ['class', 'name', 'number-lines'],
+    'literalinclude': None,
+    'seealso': None,
+    'contents': None,
+    'math': ['class', 'name'],
+    'table': ['class', 'name', 'align', 'width', 'widths'],
+    'csv-table': ['class', 'name', 'align', 'delim', 'encoding', 'escape', 'file', 'header', 'header-rows', 'keepsake', 'quote', 'stub-columns', 'url', 'width', 'widths'],
+    'list-table': ['class', 'name', 'align', 'header-rows', 'stub-columns', 'width', 'widths'],
+    'contents': ['class', 'backlinks', 'depth', 'local'],
+    'sectnum': ['depth', 'prefix', 'suffix', 'start'],
+    'section-numbering': ['depth', 'prefix', 'suffix', 'start'],
+    'header': None,
+    'footer': None,
+    'rubric': ['class', 'name'],
+    'compound-paragraph': ['class', 'name'],
+    'topic': None,
+    'sidebar': ['class', 'name', 'subtitle'],
+    'pull-quote': None,
+    'highlights': None,
+    'container': ['name'],
+    'replace': None,
+    'unicode': ['ltrim', 'rtrim', 'trim'],
+    'date': None,
 }

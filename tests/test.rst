@@ -156,6 +156,18 @@ body row 2            Cells may span columns
 Directives
 ~~~~~~~~~~
 
+Directives are a way to introduce specific formatting into reST compiled documents, including figures, images, LaTeX style math, code, unicode for special characters, and formatted tables to name a few of the potentially more features.  It is also possible to introduce raw text formatting and even construct your own specific directives, though they may not compile unless you have a custom compiler for parsing them.
+
+A directive should be written in the following format
+
+.. |substitution| keyword:: argument
+    :option1: value1    
+    :option2: value2    
+
+    directive body text    
+
+If syntax highlighting is working, the keyword in the description above should be identified as an error because there is no directive named keyword.  Only a few of the directives, (image, replacement text, unicode and date) have substitutions.
+
 In-line substitution
 
 Autoscaling (|icon-autoscale|) addresses a common

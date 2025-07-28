@@ -6,10 +6,10 @@ from PyQt6.QtWidgets import (
         QWidget, QDialog, QDialogButtonBox, QPlainTextEdit, QTextEdit, QCheckBox, QPushButton,
         QVBoxLayout, QHBoxLayout, QColorDialog, QFormLayout, QLineEdit, QMessageBox, QListWidget,
         QLabel, QComboBox, QCheckBox, QFontComboBox, QTableWidget, QTableWidgetItem, QHeaderView,
-        QMenu, QMenuBar, QToolBar
+        QMenu, QMenuBar, QToolBar, QToolTip,
     )
 from PyQt6.QtGui import (
-    QFont, QCursor, QPainter, QTextCursor, QKeyEvent, QAction, QIcon,
+    QFont, QCursor, QPainter, QTextCursor, QKeyEvent, QAction, QIcon, QTextBlockUserData,
     QColor, QTextFormat, QTextCharFormat, QSyntaxHighlighter
 )
 from PyQt6.QtCore import Qt, QRect, QSize
@@ -54,6 +54,10 @@ class CodeEditor(QPlainTextEdit):
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
 
+        # for syntax hints
+        self.hover_regions = []
+        self.setMouseTracking(True)
+
         self.updateLineNumberAreaWidth(0)
 
         self._highlight_line = True
@@ -78,7 +82,7 @@ class CodeEditor(QPlainTextEdit):
 
         # Sample rules
         self.rules = RST_HIGHLIGHT_RULES
-        self.highlighter = RstHighlighter(self.document(), self.rules)
+        self.highlighter = RstHighlighter(self, self.rules)
 
     @property
     def highlight_line(self):
@@ -363,7 +367,21 @@ class CodeEditor(QPlainTextEdit):
                     data = json.load(f)
                     self.rules.update(data.get('highlight_rules', {}))
 
+    def mouseMoveEvent(self, event):
+        pos = event.position().toPoint()
+        cursor = self.cursorForPosition(pos)
+        block = cursor.block()
+        block_number = block.blockNumber()
+        column = cursor.position() - block.position()
 
+        for (bn, start, end, tip) in self.hover_regions:
+            if bn == block_number and start <= column < end:
+                QToolTip.showText(event.globalPosition().toPoint(), tip, self)
+                break
+        else:
+            QToolTip.hideText()
+
+        super().mouseMoveEvent(event)
 
 def save_highlight_rules(rules, filepath):
     """_summary_
@@ -415,11 +433,16 @@ def load_highlight_rules(filepath):
         data = json.load(f)
     return [HighlightRule.from_dict(d) for d in data]
 
-
+class RstBlockData(QTextBlockUserData):
+    def __init__(self):
+        super().__init__()
+        self.block_type = None
+        self.active_directive = None
 
 class RstHighlighter(QSyntaxHighlighter):
-    def __init__(self, document, rules=None):
-        super().__init__(document)
+    def __init__(self, editor, rules=None):
+        super().__init__(editor.document())
+        self.editor = editor
 
         if rules:
             self.rules = rules
@@ -428,8 +451,6 @@ class RstHighlighter(QSyntaxHighlighter):
 
         # Map of HighlightRule.name -> QTextCharFormat
         self.formats = self._build_formats(self.rules)
-
-        self.current_block_type = None  # For tracking current multiline block
 
     def _build_formats(self, rules):
         formats = {}
@@ -451,9 +472,12 @@ class RstHighlighter(QSyntaxHighlighter):
         return formats
 
     def highlightBlock(self, text: str):
+        block_data = RstBlockData()
+        self.setCurrentBlockUserData(block_data)
+
         self.setCurrentBlockState(-1)
         current_priority = -1
-        current_block_type = None
+        self.editor.hover_regions = []
 
         # Step 1a: Try to identify the starting block type
         for btype, rules in sorted(RST_BLOCK_TYPES.items(), key=lambda x: -x[1]['priority']):
@@ -464,14 +488,15 @@ class RstHighlighter(QSyntaxHighlighter):
                 priority = rules["priority"]
                 if priority > current_priority:
                     current_priority = priority
-                    current_block_type = btype
+                    block_data.block_type = btype
 
-        print(f"Line: {text.strip()} | BlockType: {current_block_type} | Priority: {current_priority}")
+        #print(f"Line: {text.strip()} | BlockType: {block_data.block_type} | Priority: {current_priority}")
+
         # Step 1b: If no block type is identified, check definition
         # definition lists require special handling because they can only be
         # identified retrospectively as they otherwise appear as a paragraph
         # unless the line below is indented.
-        if current_block_type is None and self.currentBlock().next().isValid():
+        if block_data.block_type is None and self.currentBlock().next().isValid():
             btype = "definition_list"
             rules = RST_BLOCK_TYPES['definition_list']
             next_text = self.currentBlock().next().text()
@@ -481,32 +506,34 @@ class RstHighlighter(QSyntaxHighlighter):
                 priority = rules["priority"]
                 if priority > current_priority:
                     current_priority = priority
-                    current_block_type = btype
+                    block_data.block_type = btype
 
         # Step 2: If no block start, try to continue previous block
         prev_state = self.previousBlockState()
-        if current_block_type is None and prev_state != -1:
-            #print(f"The current block type is {current_block_type}")
+        if block_data.block_type is None and prev_state != -1:
+            #print(f"The current block type is {block_data.block_type}")
             for btype, rules in RST_BLOCK_TYPES.items():
                 if rules["priority"] == prev_state:
                     line_pattern = rules.get("line")
                     #print(f"Block type: {btype}, Line test: {line_pattern}, Text: {text}")
                     if line_pattern and line_pattern.match(text):
-                        current_block_type = btype
+                        block_data.block_type = btype
                         current_priority = rules["priority"]
                         self.setCurrentBlockState(current_priority)  # <- Set state again here
-                        #print(f"PrevState: {prev_state}, Continuing as: {current_block_type}")
+                        #print(f"PrevState: {prev_state}, Continuing as: {block_data.block_type}")
                         break
 
-        if current_block_type:
+        if block_data.block_type:
             self.setCurrentBlockState(current_priority)
+            if block_data.block_type != "directive":
+                self.active_directive = None
 
         # Step 3: Apply block-specific highlighting
-        if current_block_type and current_block_type in RST_BLOCK_RULES:
-            for rule in RST_BLOCK_RULES[current_block_type]:
+        if block_data.block_type and block_data.block_type in RST_BLOCK_RULES:
+            for rule in RST_BLOCK_RULES[block_data.block_type]:
                 if len(rule) == 3:
                     pattern, fmt_name, group = rule
-                    print(f"Using {current_block_type} group {group} rule")
+                    #print(f"Using {block_data.block_type} group {group} rule")
                 else:
                     pattern, fmt_name = rule
                     group = 0  # Default to the whole match if no group specified
@@ -515,24 +542,95 @@ class RstHighlighter(QSyntaxHighlighter):
                     for match in pattern.finditer(text):
                         try:
                             start, end = match.span(group)
-                            print(f"Applying {fmt_name} group {group} start: {start} length: {end - start} text: {text[start:end]!r}")
+                            matched_text = text[start:end]
+
+                            isinvalid, hover_text = self.validate_match(fmt_name, matched_text, block_data)
+
+                            #print(f"Applying {fmt_name} group {group} start: {start} length: {end - start} text: {text[start:end]!r}")
+                            fmt = self.formats[fmt_name]
+                            if isinvalid:
+                                fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SpellCheckUnderline)
+                                fmt.setUnderlineColor(QColor(LIGHT_THEME["error"]))
+
+                                # Add to hover regions
+                                
+                                block_number = self.currentBlock().blockNumber()
+                                self.editor.hover_regions.append((block_number, start, end, hover_text))
+
                             self.setFormat(start, end - start, self.formats[fmt_name])
                         except IndexError:
                             continue  # Group didn't exist in match, skip
 
         # Step 4: Apply global and body rules if not literal or comment
-        if current_block_type not in ("literal_block", "comment"):
+        if block_data.block_type not in ("literal_block", "comment"):
             for pattern, fmt_name, group in RST_BLOCK_RULES.get("global", []):
                 if fmt_name in self.formats:
                     for match in pattern.finditer(text):
                         start, end = match.span()
-                        print(f"Applying {fmt_name} start: {start} length: {end-start} text: {text[start:end]!r}")
+                        #print(f"Applying {fmt_name} start: {start} length: {end-start} text: {text[start:end]!r}")
                         self.setFormat(start, end-start, self.formats[fmt_name])
+
             # for pattern, fmt_name in RST_BLOCK_RULES.get("body", []):
             #     if fmt_name in self.formats:
             #         for match in pattern.finditer(text):
             #             start, end = match.span()
             #             self.setFormat(start, end-start, self.formats[fmt_name])
+
+        # # Step 5: Check syntax
+        # if btype == "directive": 
+        #     directive_name = group.strip().split("::")[0].replace("..", "").strip()
+        #     if directive_name not in RST_KNOWN_DIRECTIVES:
+        #         self.setFormat(start, end - start, self.invalid_directive_format)
+
+    def validate_match(self, fmt_name: str, matched_text: str, block_data: RstBlockData):
+        """Determine whether a match is invalid based on formatting and block context.
+        
+        Parameters
+        ----------
+        fmt_name : str
+            Name of formatting rule that will be checked for syntax accuracy
+        matched_text : str
+            The matched text fitting the regex pattern on the current line
+        block_data : RstBlockData
+            The current block data
+            
+        Returns
+        -------
+        invalid : bool
+            Flag indicating valid (False) or invalid (True) syntax
+        hover_text : str
+            Text to display if syntax check is invalid
+        """
+        isinvalid = False
+        hover_text = None
+        # test for known directive types
+
+        if fmt_name == "directive.keyword" and block_data.block_type and block_data.block_type == "directive":
+            # remove "::" from directive
+            directive_name = ''
+            if matched_text.endswith("::"):
+                directive_name = matched_text[:-2].rstrip()
+                print(directive_name)
+
+            isinvalid = (directive_name not in RST_KNOWN_DIRECTIVES)
+            if isinvalid:
+                hover_text = f"Unknown directive: {directive_name}"
+
+            block_data.active_directive = directive_name if not isinvalid else None
+
+        elif fmt_name == "directive.option":
+            # remove ":" from start and end of option
+            option_text = matched_text.strip().strip(':')
+
+            if block_data.active_directive:
+                valid_options = RST_KNOWN_DIRECTIVES.get(block_data.active_directive)
+                if valid_options is not None:
+                    optname = option_text.split(':')[0]
+                    isinvalid = optname not in valid_options
+                if isinvalid:
+                    hover_text = f"Unknown option ({optname}) for directive {self.active_directive}"
+
+        return isinvalid, hover_text
 
     def open_highlight_dialog(self):
         dialog = HighlightRulesDialog(rules=self.rules, parent=None)

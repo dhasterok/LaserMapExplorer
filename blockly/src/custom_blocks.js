@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {updateFieldDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain, listSelectorChanged} from './helper_functions'
+import {updateFieldDropdown,updateFieldTypeDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain, listSelectorChanged} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -539,7 +539,7 @@ const field_select = {
         this.setTooltip('Select fields for analysis');
         this.setHelpUrl('');
         this.setColour(160);  // Adjust color as needed
-        this.setOutput(true, null);
+        this.setOutput(true, null); 
 
         // Initialize the 'field' dropdown options based on the default 'fieldType' value
         const initialFieldType = this.getFieldValue('fieldType');
@@ -883,20 +883,10 @@ const plot_map = {
             .setAlign(Blockly.inputs.Align.CENTRE);
 
         
-        // Create the 'Field type' dropdown with options
         this.appendDummyInput('NAME')
             .appendField('Field type')
-            .appendField(new Blockly.FieldDropdown(
-                [
-                    ['Analyte', 'Analyte'],
-                    ['Analyte (Normalised)', 'Analyte (Normalised)'],
-                    ['PCA Score', 'PCA Score'],
-                    ['Cluster', 'Cluster']
-                ],
-                updateFieldDropdown.bind(this, null)  // Bind the update function
-            ), 'fieldType');
-        
-        //Create the 'field' dropdown, initially empty
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldType');
+
         this.appendDummyInput('FIELD')
             .appendField('Field')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
@@ -916,26 +906,27 @@ const plot_map = {
         this.setHelpUrl('');
         this.setColour(285);
 
-        this.plotType = 'field_map'
+        this.plotType = 'field map'
         // Add default blocks to Styling input only in the toolbox
         if (!this.isInFlyout) {
-            const initialFieldType = this.getFieldValue('fieldType');
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
-            updateFieldDropdown(this,initialFieldType);
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
             updateStylingChain(this);
-            // 3) Attach validators to fieldType and field
+            //  Attach validators to fieldType and field
+            // Default: axisNum = 3 for 'C' axis; adjust as needed
+            const axisNum = 3;
+            updateFieldTypeDropdown(this, this.plotType, axisNum);
+
+            // Attach validators to dropdowns
             const fieldTypeDropdown = this.getField('fieldType');
             fieldTypeDropdown.setValidator((newValue) => {
-                // update style dictionaries
-                updateStylingChain(this);
+                updateFieldDropdown(this, newValue);  // When fieldType changes, update fields
+                updateStylingChain(this); // Optional: update styles as needed
                 return newValue;
             });
-
             const fieldDropdown = this.getField('field');
             fieldDropdown.setValidator((newValue) => {
-                // update style dictionaries
                 updateStylingChain(this);
                 return newValue;
             });

@@ -181,6 +181,7 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
         if self.parent.data or self.parent.app_data.sample_id == '':
             self.sample_id = self.parent.app_data.sample_id
             self.data = self.parent.data[self.sample_id]
+            self.app_data = self.parent.app_data
         else:
             self.sample_id = ''
             self.data = None
@@ -964,7 +965,7 @@ class FieldTab(FieldLogicUI):
         if not parent.data:
             return
         self.data = parent.data
-
+        self.app_data = parent.app_data
         self.field_tab = QWidget()
         self.field_tab.setObjectName("Field Tab")
         tab_layout = QVBoxLayout(self.field_tab)
@@ -1024,7 +1025,8 @@ class FieldTab(FieldLogicUI):
         self.field_type_combobox.activated.connect(self.update_field_table)
 
         self.update_field_combobox(self.field_type_combobox, self.field_combobox)
-
+        self.update_field_type_combobox(self.field_type_combobox)
+        
         # when field combobox is updated
         self.field_combobox.activated.connect(self.update_field_table)
 

@@ -444,32 +444,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         old_list = parentbox.allItems()
         old_field_type = parentbox.currentText()
 
-        plot_type = self.plot_style.plot_type
-        plot_dict = self.plot_style.plot_axis_dict[plot_type]
         field_dict = self.app_data.field_dict
+        # get field type options from app_data
+        new_list = self.app_data.get_field_type_list(ax, self.plot_style) 
 
-        new_list = []
-
-        # check if the list should include all options, global_list == True
-        if ax == 3 and 'cfield_type' in plot_dict:
-            # set the list based on plot_style.plot_type and available field types
-            new_list = [key for key in field_dict if key in plot_dict['cfield_type']]
-        elif 'field_type' in plot_dict:
-            # set the list based on plot_style.plot_type and available field types
-            new_list = [key for key in field_dict if key in plot_dict['field_type']]
-        else:
-            new_list = list(field_dict.keys())
-
-        if 'normalized' not in new_list:
-            if 'Analyte' in new_list:
-                new_list.insert(new_list.index('Analyte')+1, 'Analyte (normalized)')
-
-            if 'Ratio' in new_list:
-                new_list.insert(new_list.index('Ratio')+1, 'Ratio (normalized)')
-
-        # add 'None' as first option if required.
-        if plot_dict['add_none'][ax]:
-            new_list.insert(0,'none')
 
         # if the list hasn't changed then don't change anything
         if old_list and new_list == old_list:
@@ -1650,7 +1628,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.help_mapping[self.workflow] = 'workflow'
 
         self.workflow.show()
-
 
         #self.workflow.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 

@@ -228,52 +228,48 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
 
         code += subBlocksCode + '\n';
     }
+    
     // 5) Plot
-    code += `self.plot_correlation(corr_method = ${corr_method},squared =${r_2})\n`;
+    code += `canvas, plot_info = plot_correlation(corr_method = ${corr_method},squared =${r_2})\n`;
+    code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
     code += `self.plot_viewer.show()`
     return code;
 };
 
 pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
-  // Retrieve the stored type from the block
-  const hist_type = generator.quote_(block.getFieldValue('HistType'));
-  // Retrieve the stored fieldType from the block
-  const field_type = generator.quote_(block.getFieldValue('fieldType'));
-  // Retrieve the stored field from the block
-  const field = generator.quote_(block.getFieldValue('field'));
+    // Retrieve block fields
+    const hist_type = generator.quote_(block.getFieldValue('HistType'));
+    const field_type = generator.quote_(block.getFieldValue('fieldType'));
+    const field = generator.quote_(block.getFieldValue('field'));
+    const plot_type = generator.quote_('histogram');
 
-  const plot_type = generator.quote_('histogram');
-  let code = '';
-  code += `style_dict = {}\n`;
-  code += '\n';
-  
-  // Insert sub-block statements
-  let subBlocksCode = generator.statementToCode(block, 'styling') || ''
+    let code = '';
 
-  // remove *all* leading spaces:
-  subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
+    // Insert sub-block statements for styling
+    let subBlocksCode = generator.statementToCode(block, 'styling') || '';
+    // Remove all leading spaces from each line
+    subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
+    code += subBlocksCode + '\n';
 
-  code += subBlocksCode + '\n';
+    // Get nBins from histogramOptions, fallback to 100 if unset/blank/0
+    let nBinsVal = '100';
+    const histOptionsBlock = block.getInputTargetBlock('histogramOptions');
+    if (histOptionsBlock && histOptionsBlock.type === 'histogram_options') {
+        const userNBins = histOptionsBlock.getFieldValue('nBins');
+        // Accept only positive integers, fallback to 100 otherwise
+        nBinsVal = (userNBins && Number(userNBins) > 0) ? userNBins : '100';
+    }
+    code += 
+    `self.plot_style.plot_type =${plot_type}\n` +
+    `self.app_data.x_field =${field}\n` +
+    `self.app_data.x_field_type =${field_type}\n`+
+    `self.app_data.hist_num_bins=${nBinsVal}\n`;
+    // Plot command
+    code += `canvas, plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
+    code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
+    code += `self.show()\n`;
 
-  // update self.plot_style.style.style_dict with `style_dict`
-  code += `if (style_dict):\n` +
-  generator.INDENT +`self.plot_style.style_dict[${plot_type}] = {**self.plot_style.style_dict[${plot_type}], **style_dict}\n`+
-  generator.INDENT +`print(self.plot_style.style_dict[${plot_type}])\n`+
-  generator.INDENT +`self.plot_style.set_style_dictionary(data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_type =${plot_type})\n`+
-  generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
-
-  // 5) Get nBins from "histogramOptions" or default to 100
-  let nBinsVal = '100';
-  const histOptionsBlock = block.getInputTargetBlock('histogramOptions');
-  if (histOptionsBlock && histOptionsBlock.type === 'histogram_options') {
-    // If user left it blank or typed 0, we still fallback to "100"
-    const userNBins = histOptionsBlock.getFieldValue('nBins') || '100';
-    nBinsVal = userNBins;
-  }
-  // 5) Plot
-  code += `self.plot_histogram(hist_type =${hist_type}, field_type =${field_type},field =${field}, n_bins = ${nBinsVal})\n`;
-  code += `self.plot_viewer.show()\n`
-  return code;
+    return code;
 };
 
 

@@ -61,8 +61,14 @@ class BlocklyBridge(QObject):
     @pyqtSlot(str, result=list)
     def getFieldList(self, field_type):
         print('get_field_list')
-        return self.lame_blockly.get_field_list(field_type)
+        return self.lame_blockly.app_data.get_field_list(field_type)
     
+    @pyqtSlot(str,str, result=list)
+    def getFieldTypeList(self, ax, plot_type):
+        print('get_field_list')
+        self.lame_blockly.plot_style.plot_type = plot_type
+        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.plot_style)
+
     @pyqtSlot(result=str)
     def getBaseDir(self):
         return BASEDIR
@@ -134,8 +140,8 @@ class Workflow(CustomDockWidget):
     def __init__(self,main_window = None):
         if not isinstance(main_window, QMainWindow):
             raise TypeError("main_window must be an instance of QMainWindow.")
-
         super().__init__(main_window)
+        self.setParent(None)  # Make it a real top-level window
         
         container = QWidget()
 
@@ -220,7 +226,7 @@ class Workflow(CustomDockWidget):
         api_file.close()
         self.web_view.page().runJavaScript(api_script)
         #Load the Blockly HTML page
-        self.web_view.setUrl(QUrl.fromLocalFile(BASEDIR + '/blockly/index.html'))
+        self.web_view.setUrl(QUrl.fromLocalFile(str(BASEDIR / 'blockly/index.html')))
         # Add the web view to the layout
         dock_layout.addWidget(self.web_view)
 

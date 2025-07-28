@@ -51,7 +51,7 @@ import json
 
 class LameBlockly(PlotViewer):
     def __init__(self,parent, *args, **kwargs):
-        super().__init__(self)
+        super().__init__(self, *args, **kwargs)
         # setup initial logging options
         # self.logger = LogCounter()
         self.logger_options = {
@@ -127,10 +127,10 @@ class LameBlockly(PlotViewer):
         # # Clustering
         # #-------------------------
         # Initialise dimentionality reduction class 
-        self.dimensional_reduction = DimensionalReduction(self)
+        self.dimensional_reduction = DimensionalReduction()
 
         # Initialise class from DataAnalysis
-        self.clustering = Clustering(self)
+        self.clustering = Clustering()
 
 
         # distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']

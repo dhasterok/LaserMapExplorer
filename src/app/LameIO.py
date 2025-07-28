@@ -64,14 +64,7 @@ class LameIO():
                 file_list = dialog.selectedFiles()
                 file_list = [Path(f) for f in file_list]
                 ui.app_data.selected_directory = file_list[0].resolve().parent
-
-                if hasattr(self.ui, 'workflow_dock'):
-                    self.ui.workflow_dock.raise_()
-                    self.ui.workflow_dock.activateWindow()
             else:
-                if hasattr(self.ui, 'workflow_dock'):
-                    self.ui.workflow_dock.raise_()
-                    self.ui.workflow_dock.activateWindow()
                 return
         else:
             path = Path(path).resolve()
@@ -116,14 +109,8 @@ class LameIO():
             if dialog.exec():
                 selected_dir = Path(dialog.selectedFiles()[0])
                 ui.app_data.selected_directory = selected_dir
-                if hasattr(self.ui, 'workflow_dock'):
-                    self.ui.workflow_dock.raise_()
-                    self.ui.workflow_dock.activateWindow()
             else:
                 self.status_manager.show_message("Open directory canceled.")
-                if hasattr(self.ui, 'workflow_dock'):
-                    self.ui.workflow_dock.raise_()
-                    self.ui.workflow_dock.activateWindow()
                 return
         else:
             ui.app_data.selected_directory = Path(path)

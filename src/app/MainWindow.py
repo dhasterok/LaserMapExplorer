@@ -38,7 +38,7 @@ from src.common.Regression import RegressionDock
 from src.common.Polygon import PolygonManager
 from src.app.SpotTools import SpotPage
 from src.app.SpecialTools import SpecialPage
-from src.common.ReSTNotes import Notes
+from src.common.reSTNotes import Notes
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock

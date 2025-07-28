@@ -38,7 +38,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
 
-        preload_file = "docs/source/left_toolbox.rst"  # Adjust path as needed
+        #preload_file = "docs/source/left_toolbox.rst"  # Adjust path as needed
+        preload_file = "tests/test.rst"  # Adjust path as needed
         try:
             with open(preload_file, 'r', encoding='utf-8') as f:
                 content = f.read()

@@ -339,18 +339,29 @@ class CodeEditor(QPlainTextEdit):
             self.highlighter.open_highlight_dialog()
 
     def save_all_settings(self):
-        with open("all_settings.json", "w") as f:
+        with open("editor.json", "w") as f:
             json.dump({
-                'editor_settings': self.settings,
-                'highlighting_rules': self.highlighting_rules
+                'editor_settings': self.settings
+            }, f, indent=2)
+        with open("highlight_rules.json","w") as f:
+            json.dump({
+                'highlight_rules': self.rules
             }, f, indent=2)
 
     def load_all_settings(self):
-        if os.path.exists("all_settings.json"):
-            with open("all_settings.json", "r") as f:
-                data = json.load(f)
-                self.settings.update(data.get('editor_settings', {}))
-                self.highlighting_rules.update(data.get('highlighting_rules', {}))
+        settings_path = Path("all_settings.json")
+        editor_path = Path("editor.json")
+        highlight_path = Path("highlight_rules.json")
+
+        if settings_path.exists():
+            if editor_path.exists():
+                with editor_path.open("r") as f:
+                    data = json.load(f)
+                    self.settings.update(data.get('editor_settings', {}))
+            if highlight_path.exists():
+                with highlight_path.open("r") as f:
+                    data = json.load(f)
+                    self.rules.update(data.get('highlight_rules', {}))
 
 
 
@@ -445,7 +456,7 @@ class RstHighlighter(QSyntaxHighlighter):
         current_block_type = None
 
         # Step 1a: Try to identify the starting block type
-        for btype, rules in RST_BLOCK_TYPES.items():
+        for btype, rules in sorted(RST_BLOCK_TYPES.items(), key=lambda x: -x[1]['priority']):
             if btype == "definition_list":
                 continue
             start_pattern = rules["start"]
@@ -559,22 +570,22 @@ class ContextSensitiveHighlightRule:
 #     return fmt
 
 # PYGMENTS_RST_STYLE = {
-#     Token.Text:                     {'color': AYU_LIGHT_THEME['text']},                  # standard text
+#     Token.Text:                     {'color': LIGHT_THEME['text']},                  # standard text
 #     Token.Whitespace:               {'color': '#999999'},
-#     Token.Punctuation:              {'color': AYU_LIGHT_THEME['orange']},                # punctuation characters, *, -, +, =, etc.
-#     Token.Generic.Emph:             {'color': AYU_LIGHT_THEME['red'], 'font_italic': True},   # *font_italic*
-#     Token.Generic.Strong:           {'color': AYU_LIGHT_THEME['red'], 'bold': True},     # **bold**
-#     Token.Literal.String:           {'color': AYU_LIGHT_THEME['green']},                 # for ``inline literals``
-#     Token.Name.Tag:                 {'color': AYU_LIGHT_THEME['blue']},                  # for directives, e.g., .. note::, .. code:: python
-#     Token.Name.Builtin:             {'color': AYU_LIGHT_THEME['link']},
-#     Token.Operator:                 {'color': AYU_LIGHT_THEME['purple']},
-#     Token.Comment:                  {'color': AYU_LIGHT_THEME['grey'], 'font_italic': True},
-#     Token.Generic.Subheading:       {'color': AYU_LIGHT_THEME['text'], 'bold': True},
-#     Token.Generic.Heading:          {'color': AYU_LIGHT_THEME['text'], 'bold': True},
+#     Token.Punctuation:              {'color': LIGHT_THEME['orange']},                # punctuation characters, *, -, +, =, etc.
+#     Token.Generic.Emph:             {'color': LIGHT_THEME['red'], 'font_italic': True},   # *font_italic*
+#     Token.Generic.Strong:           {'color': LIGHT_THEME['red'], 'bold': True},     # **bold**
+#     Token.Literal.String:           {'color': LIGHT_THEME['green']},                 # for ``inline literals``
+#     Token.Name.Tag:                 {'color': LIGHT_THEME['blue']},                  # for directives, e.g., .. note::, .. code:: python
+#     Token.Name.Builtin:             {'color': LIGHT_THEME['link']},
+#     Token.Operator:                 {'color': LIGHT_THEME['purple']},
+#     Token.Comment:                  {'color': LIGHT_THEME['grey'], 'font_italic': True},
+#     Token.Generic.Subheading:       {'color': LIGHT_THEME['text'], 'bold': True},
+#     Token.Generic.Heading:          {'color': LIGHT_THEME['text'], 'bold': True},
 #     Token.Name.Attribute:           {'color': '#ffd580'},
-#     Token.Comment.Special:          {'color': AYU_LIGHT_THEME['grey']},
-#     Token.Literal.Number:           {'color': AYU_LIGHT_THEME['teal']},
-#     Token.Keyword:                  {'color': AYU_LIGHT_THEME['blue']},
+#     Token.Comment.Special:          {'color': LIGHT_THEME['grey']},
+#     Token.Literal.Number:           {'color': LIGHT_THEME['teal']},
+#     Token.Keyword:                  {'color': LIGHT_THEME['blue']},
 #     Token.Name.Function:            {'color': '#ffd580'},
 #     Token.Name.Variable:            {'color': '#ffd580'},
 #     Token.Generic.Error:            {'color': '#ff0000'},                           # for error messages
@@ -744,21 +755,22 @@ class EditorSettingsDialog(QDialog):
         return self.table.cellWidget(row, 1).layout().itemAt(0).widget()
 
     def _save_settings(self):
-        path = "editor_settings.json"
-        with open(path, "w") as f:
-            json.dump(self.settings, f, indent=2)
-        print(f"Settings saved to {path}")
+        path = Path("editor_settings.json")
+        if path.exists():
+            with path.open("w") as f:
+                json.dump(self.settings, f, indent=2)
+            print(f"Settings saved to {path}")
 
     def _load_settings(self):
-        path = "editor_settings.json"
-        if os.path.exists(path):
-            with open(path, "r") as f:
+        path = Path("editor_settings.json")
+        if path.exists():
+            with path.open("r") as f:
                 data = json.load(f)
                 for row, key in enumerate(self.settings):
                     if key in data:
                         self.settings[key]["enabled"] = data[key]["enabled"]
                         self._get_checkbox(row).setChecked(data[key]["enabled"])
-            print(f"Settings loaded from {path}")
+            print(f"Settings loaded from {str(path)}")
 
 class HighlightRulesDialog(QDialog):
     def __init__(self, rules, parent=None):
@@ -767,7 +779,7 @@ class HighlightRulesDialog(QDialog):
         self.rules = rules
         self.setWindowTitle("Edit Highlight Rules")
         self.layout = QHBoxLayout(self)
-        self.scheme = AYU_LIGHT_THEME
+        self.scheme = LIGHT_THEME
         self.rule_list = QListWidget()
         for rule in self.rules:
             self.rule_list.addItem(rule.name)
@@ -805,7 +817,7 @@ class HighlightRulesDialog(QDialog):
         self.form.addRow("Italic", self.font_italic_checkbox)
         self.form.addRow("Underline", self.underline_checkbox)
 
-        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Save)
 
         self.button_box.accepted.connect(self.save_rule)
         self.button_box.rejected.connect(self.reject)
@@ -826,8 +838,8 @@ class HighlightRulesDialog(QDialog):
         rule = self.rules[index]
         self.name_edit.setText(rule.name)
         if rule.foreground:
-            self.fg_color_button.setText(rule.color)
-            self.fg_color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {rule.color};" )
+            self.fg_color_button.setText(rule.foreground)
+            self.fg_color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {rule.foreground};" )
         else:
             self.fg_color_button.setText("None")
             self.fg_color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {self.scheme['text']};" )
@@ -838,7 +850,7 @@ class HighlightRulesDialog(QDialog):
             self.bg_color_button.setText("None")
             self.bg_color_button.setStyleSheet( f"background-color: {self.scheme['background']}; color: {self.scheme['text']};" )
         self.family_combo.setCurrentText(rule.font_family or "")
-        self.font_weight_combo.setCurrentText(rule.style or "")
+        self.font_weight_combo.setCurrentText(rule.font_weight or "")
         self.font_italic_checkbox.setChecked(rule.font_italic)
         self.underline_checkbox.setChecked(rule.underline)
 

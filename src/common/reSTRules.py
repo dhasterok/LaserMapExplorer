@@ -2,20 +2,28 @@ import re
 from dataclasses import dataclass
 from PyQt6.QtGui import QFont
 
-# Ayu Light palette colors
-AYU_LIGHT_THEME = {
+# Light palette colors
+LIGHT_THEME = {
+    "brown": "#7b3915",
     "red": "#f07171",
     "orange": "#fa8d3e",
+    "sunflower": "#f2af4a",
     "yellow": "#ffd580",
     "green": "#87b300",
     "teal": "#4cc09a",
-    "dark_blue": "#112f4e",
-    "blue": "#399ee6",
+    "light_teal": "#87e0c3",
+    "dark_blue": "#153a5f",
+    "blue": "#3990d7",
+    "light_blue": "#82bceb",
     "link": "#56b4d5",
+    "purple": "#a986cf",
+    "light_purple": "#cfc1e2",
+    "black": "#111122",
     "grey": "#acaeb1",
-    "purple": "#bda0db",
+    "light_grey": "#dde0e4",
     "text": "#5c6167",
     "background": "#f9f9f9",
+    "error": "#e65050",
 }
 
 @dataclass
@@ -23,7 +31,7 @@ class HighlightRule:
     def __init__(
         self,
         name: str,
-        foreground: str=AYU_LIGHT_THEME['text'],
+        foreground: str=LIGHT_THEME['text'],
         background: str=None,
         font_family: str=None,
         font_weight: str="normal",
@@ -55,7 +63,7 @@ class HighlightRule:
     def from_dict(cls, data):
         return cls(
             name=data["name"],
-            foreground=data.get("format",{}).get("foreground", AYU_LIGHT_THEME['text']),
+            foreground=data.get("format",{}).get("foreground", LIGHT_THEME['text']),
             background=data.get("format",{}).get("background", None),
             font_family=data.get("format",{}).get("font_family", None),
             font_weight=data.get("format",{}).get("font_weight", "normal"),
@@ -66,202 +74,173 @@ class HighlightRule:
 # Define the rules for the Ayu Light theme
 RST_HIGHLIGHT_RULES = [
     HighlightRule( name="brackets.round",
-        foreground=AYU_LIGHT_THEME["yellow"],
+        foreground=LIGHT_THEME["yellow"],
         font_weight="bold"
     ),
     HighlightRule( name="brackets.square",
-        foreground=AYU_LIGHT_THEME["yellow"],
+        foreground=LIGHT_THEME["yellow"],
         font_weight="bold"
     ),
     HighlightRule( name="brackets.curly",
-        foreground=AYU_LIGHT_THEME["yellow"],
+        foreground=LIGHT_THEME["yellow"],
         font_weight="bold"
     ),
     HighlightRule( name="brackets.angle",
-        foreground=AYU_LIGHT_THEME["yellow"],
+        foreground=LIGHT_THEME["yellow"],
         font_weight="bold"
     ),
     HighlightRule( name="bold",
-        foreground=AYU_LIGHT_THEME["red"],
+        foreground=LIGHT_THEME["red"],
         font_weight="bold",
     ),
     HighlightRule( name="italic",
-        foreground=AYU_LIGHT_THEME["red"],
+        foreground=LIGHT_THEME["red"],
         font_italic=True,
     ),
     HighlightRule( name="bullet",
-        #pattern=r'^\s*([-+*#])(\.|\s+)',   
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["green"],
         font_weight="normal"
     ),
     HighlightRule( name="interpreted.inline",
-        #pattern=r"(?<!\S)``([^`\n]+)``(?=\s|[.,;!?)]|$)",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["dark_blue"],
         font_family="Courier New",
         font_weight="normal",
     ),  
     HighlightRule( name="literal.inline",
-        #pattern=r"(?<!\S)``([^`\n]+)``(?=\s|[.,;!?)]|$)",
-        foreground=AYU_LIGHT_THEME["dark_blue"],
+        foreground=LIGHT_THEME["green"],
         font_family="Courier New",
         font_weight="normal",
     ),  
     HighlightRule( name="comment.firstline",
-        foreground=AYU_LIGHT_THEME["grey"],
+        foreground=LIGHT_THEME["grey"],
         font_italic=True
     ),
     HighlightRule( name="comment.multiline",
-        foreground=AYU_LIGHT_THEME["grey"],
+        foreground=LIGHT_THEME["grey"],
         font_italic=True
     ),
-    HighlightRule( name="citation.reference",
-        foreground=AYU_LIGHT_THEME["green"],
+    HighlightRule( name="citation.key",
+        foreground=LIGHT_THEME["teal"],
         font_weight="italic",
     ),
-    HighlightRule( name="citation.definition",
-        foreground=AYU_LIGHT_THEME["green"],
+    HighlightRule( name="citation.marker",
+        foreground=LIGHT_THEME["orange"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="citation.full",
+        foreground=LIGHT_THEME["blue"],
         font_weight="normal",
     ),
     HighlightRule( name="heading.title",
+        foreground=LIGHT_THEME["black"],
         font_weight="bold",
     ),  
     HighlightRule( name="heading.underline",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["orange"],
         font_weight="bold",
     ),  
     HighlightRule( name="line.marker",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["orange"],
     ),
     HighlightRule( name="line.block",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["green"],
     ),
     HighlightRule( name="field.name",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["black"],
+        font_weight="bold",
     ),
     HighlightRule( name="field.body",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["text"],
     ),
     HighlightRule( name="blockquote",
-        foreground=AYU_LIGHT_THEME["orange"],
+        foreground=LIGHT_THEME["orange"],
+        font_italic=True,
     ),
     HighlightRule( name="literal.marker",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["orange"],
     ),
     HighlightRule( name="literal.block",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["green"],
     ),
     HighlightRule(
         name="definition.term",
-        #pattern=r"^\s*$\n([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)\n(?=[ \t]{2,})",
-        foreground=AYU_LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["black"],
         font_weight="bold",
     ),
     HighlightRule(
         name="definition.body",
-        #pattern=r"^\s*$\n([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)\n(?=[ \t]{2,})",
-        foreground=AYU_LIGHT_THEME["green"],
-        font_weight="normal",
-        font_italic=True,
-    ),
-    HighlightRule( name="directive.marker",
-        foreground=AYU_LIGHT_THEME["yellow"],
+        foreground=LIGHT_THEME["text"],
         font_weight="normal",
     ),
-    # directive.substitution is handled by substitution
-    #HighlightRule( name="directive.substitution",
-    #    foreground=AYU_LIGHT_THEME["teal"],
-    #    font_weight="normal",
-    #),
-    HighlightRule( name="directive.keyword",
-        foreground=AYU_LIGHT_THEME["orange"],
+    HighlightRule( name="directive.option",
+        foreground=LIGHT_THEME["green"],
         font_weight="normal",
     ),
-    HighlightRule( name="directive.argument", # Directive argument (e.g., a filename in image::)
-        foreground=AYU_LIGHT_THEME["green"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.option",# Directive option
-        foreground=AYU_LIGHT_THEME["purple"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.body",# Directive option
-        foreground=AYU_LIGHT_THEME["dark_blue"],
+    HighlightRule( name="directive.body",
+        foreground=LIGHT_THEME["green"],
         font_weight="normal",
     ),
     HighlightRule(
         name="substitution",
-        foreground=AYU_LIGHT_THEME["red"],
+        foreground=LIGHT_THEME["green"],
         font_weight="normal",
         font_italic=True,
     ),
-
-    HighlightRule( name="link",
-        foreground=AYU_LIGHT_THEME["link"],
+    HighlightRule( name="hyperlink.marker",
+        foreground=LIGHT_THEME["orange"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="hyperlink.name",
+        foreground=LIGHT_THEME["link"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="hyperlink.target",
+        foreground=LIGHT_THEME["light_blue"],
+        font_weight="normal",
         underline=True
     ),
-    HighlightRule( name="table.divider",# reST table lines like +---+ or ===
-        #pattern=r'^[-+|=]{3,}$',        
-        foreground=AYU_LIGHT_THEME["purple"],
+    HighlightRule( name="link",
+        foreground=LIGHT_THEME["link"],
+        underline=True
+    ),
+    HighlightRule( name="table.line",   
+        foreground=LIGHT_THEME["purple"],
         font_weight="normal"
     ),
     HighlightRule(
-        name="table.cells",
-        #pattern=r"(?=(?:.*\|.*){2,})\|",  # Only match '|' if there are 2 or more on the line
-        foreground=AYU_LIGHT_THEME["purple"],
+        name="table.divider",
+        foreground=LIGHT_THEME["purple"],
         font_weight="normal",
     ),
-    # HighlightRule( name="table.cell.divider",# table borders: + or |
-    #     #pattern=r"(?<!^)\|",               
-    #     foreground=AYU_LIGHT_THEME["purple"],
-    #     font_weight="normal"
-    # ),
-    HighlightRule( name="table.simple.border",
-        #pattern=r"^[=+\-]{2,}( [=+\-]{2,})*$",
-        #pattern=r"^\s*(\+(?:[-=]+\+)+)",
-        foreground=AYU_LIGHT_THEME["purple"],
-        font_weight="normal"
-    ),
-    HighlightRule( name="table.simple.row",
-        #pattern=r"^(\w.*\w)(\s+\w.*\w)*$",
-        foreground=AYU_LIGHT_THEME["text"],
-    ),
-    HighlightRule( name="inline.role",
-        #pattern=r":\w+:`[^`]+`",
-        foreground=AYU_LIGHT_THEME["link"],
-        font_weight="italic",
-    ),
-    HighlightRule( name="footnote.reference",
-        foreground=AYU_LIGHT_THEME["purple"],
-        font_weight="italic",
-    ),
-    HighlightRule( name="footnote.definition",
-        #pattern=r"^\.\. \[\d+\]",
-        foreground=AYU_LIGHT_THEME["purple"],
+    HighlightRule(
+        name="table.value",
+        foreground=LIGHT_THEME["text"],
         font_weight="normal",
+    ),
+    HighlightRule( name="footnote.key",
+        foreground=LIGHT_THEME["orange"],
+        font_weight="italic",
+    ),
+    HighlightRule( name="footnote.marker",
+        foreground=LIGHT_THEME["light_blue"],
+        font_weight="italic",
+    ),
+    HighlightRule( name="footnote.body",
+        foreground=LIGHT_THEME["error"],
+        font_weight="italic",
     ),
     HighlightRule(
         name="cross.reference",
         #pattern=r":(ref|doc):`[^`]+`",
-        foreground=AYU_LIGHT_THEME["link"],
-        underline=True
+        foreground=LIGHT_THEME["link"],
     ),
     HighlightRule(
         name="cross.reference.target",
         #pattern=r":(?:ref|doc):`([^`]+)`",
-        foreground=AYU_LIGHT_THEME["link"],
-        underline=True,
-        #group=1
-    ),
-    HighlightRule( name="anchor.definition",
-        foreground=AYU_LIGHT_THEME["link"],
-        underline=True,
-    ),
-    HighlightRule( name="anchor.inline",
-        foreground=AYU_LIGHT_THEME["link"],
-        underline=True
+        foreground=LIGHT_THEME["link"],
     ),
     HighlightRule( name="paragraph",
-        foreground=AYU_LIGHT_THEME['text'],
+        foreground=LIGHT_THEME['text'],
     ),
 ]
 
@@ -279,13 +258,13 @@ FONT_WEIGHT_MAP = {
 
 RST_BLOCK_TYPES = {
     "bullet_list": {
-        "priority": 10,
+        "priority": 65,
         "start": re.compile(r"^\s*([-+*•‣⁃#])(\.|\s+)"),
         "line": re.compile(r"^\s*([-+*•‣⁃#])(\.|\s+)"),
         "end": None,
     },
     "enumerated_list": {
-        "priority": 10,
+        "priority": 65,
         "start": re.compile(r"^\s*\d+[\.\)] "),
         "line": re.compile(r"^\s*\d+[\.\)] "),
         "end": None,
@@ -297,61 +276,75 @@ RST_BLOCK_TYPES = {
         "priority": 100  # Very high so it overrides others
     },
     "definition_list": {
-        "priority": 8,
+        "priority": 55,
         "start": re.compile(r"^\S.*\n\s{2,}\S"),
         "line": re.compile(r"^\s{2,}\S"),
         "end": re.compile(r"^\S"),
     },
+    "definition_list": {
+        "priority": 55,
+        "start": re.compile(r"^[^\s].+$"),  # non-indented line
+        "line": re.compile(r"^\s{2,}.*"),   # indented line
+        "end": re.compile(r"^[^\s].+$"),    # next non-indented line
+    },
     "field_list": {
-        "priority": 9,
+        "priority": 60,
         "start": re.compile(r"^:\w.*?:"),
         "line": re.compile(r"^\s{2,}.*"),
         "end": re.compile(r"^\S"),
     },
     "literal_block": {
-        "priority": 20,
+        "priority": 95,
         "start": re.compile(r"^(.*?)(::)\s*$"),
         "line": re.compile(r"^(\s{2,}.*|$)"),
         "end": re.compile(r"^[^\s].+"),
     },
     "line_block": {
-        "priority": 9,
-        "start": re.compile(r"^\| "),
-        "line": re.compile(r"^\| "),
-        "end": re.compile(r"^\S"),
+        "priority": 60,
+        "start": re.compile(r"^\| (?!.*\|$)"),
+        "line": re.compile(r"^\| (?!.*\|$)"),
+        "end": re.compile(r"^(?!\| )"),
     },
     "blockquote": {
-        "priority": 2,
+        "priority": 5,
         "start": re.compile(r"^$"),
         "line": re.compile(r"^\s{2,}.*"),
         "end": re.compile(r"^\S"),
     },
-    "table": {
-        "priority": 15,
-        "start": re.compile(r"^(\+[-|=]+)+\+$"),
-        "line": re.compile(r"^[\s|+=-]{3,}$"),
-        "end": re.compile(r"^\S"),
+    "table_complex": {
+        "priority": 85,
+        "start": re.compile(r"^\+(?:[-=]+?\+)+$"),
+        #"line": re.compile(r"^\|.*\|$"),
+        "line": re.compile(r"^[\|\+].*"),
+        "end": re.compile(r"^(?![\s\|\+]).*"),
+    },
+    "table_simple": {
+        "priority": 85,
+        "start": re.compile(r"^(=+\s+)+=+\s*$"),
+        "line": re.compile(r"^(?=.*\S).*$"),
+        "end": re.compile(r"^\s*$"),
     },
     "footnote": {
-        "priority": 12,
-        "start": re.compile(r"^\[\d+\]"),
+        "priority": 75,
+        "start": re.compile(r"^\.\.\s+\[(\d+|[#*†‡§¶♠♥♦♣])\]"),
         "line": re.compile(r"^\s+"),
         "end": re.compile(r"^\S"),
     },
     "citation": {
-        "priority": 12,
-        "start": re.compile(r"^\s*\.\.\s+\[[^\]]+\]"),
+        "priority": 70,
+        "start": re.compile(r"^(\.\.)\s+(\[([a-zA-Z0-9_.-]+)\])\s*(.+)?$"),
         "line": re.compile(r"^\s+"),
         "end": re.compile(r"^\S"),
+        #"end": re.compile(r"^(?:\S|$)"),
     },
     "hyperlink_target": {
-        "priority": 14,
-        "start": re.compile(r"^\.\. _.*:"),
+        "priority": 80,
+        "start": re.compile(r"^(\.\.)\s+_(.+?)(:)(?:\s+(.*))?$"),
         "line": None,
         "end": None,
     },
     "directive": {
-        "priority": 18,
+        "priority": 90,
         #pattern=r"^\s*(\.\.)\s+(\|.*?\|)\s+(image::)",  # capture all pieces
         "start": re.compile(r"^\.\.\s*(?:\s*\|[^|]+\|\s*)?\s+\S+::(\s+)?(.*)?$"),
         "line": re.compile(r"^\s*$|\s+"), # this doesn't capture blank lines properly
@@ -360,14 +353,8 @@ RST_BLOCK_TYPES = {
     "comment": {
         "priority": 1,
         "start": re.compile(r"^\.\.($|\s)"),
-        "line": re.compile(r"^\s{2,}.*"),
+        "line": re.compile(r"^\s{2,}.+"),
         "end": re.compile(r"^\S"),
-    },
-    "definition_list": {
-        "priority": 8,
-        "start": re.compile(r"^[^\s].+$"),  # non-indented line
-        "line": re.compile(r"^\s{2,}.*"),   # indented line
-        "end": re.compile(r"^[^\s].+$"),    # next non-indented line
     },
 }
 
@@ -380,20 +367,19 @@ RST_BLOCK_RULES = {
         (re.compile(r'^[\=\~\^\"\+\-\'\*]{3,}\s*$'), "heading.underline", 0),
     ],
     "global": [
+        (re.compile(r"(?<!\S)\*\*(?![\s*])(.+?)(?<![\s*])\*\*(?=\s|[.,;:!?)]|$)"), "bold", 0),
+        (re.compile(r"(?<!\S)\*([^\s*][^*\n]*?)\*(?=\s|[.,;:!?)]|$)"), "italic", 0),
+        (re.compile(r"(?<!\S)``([^`\n]+)``(?=\s|[.,;:!?)]|$)"),"literal.inline", 0),
+        (re.compile(r"(?<!\S)`([^`\n]+)`(?=\s|[.,;:!?)]|$)"),"interpreted.inline", 0),
+        (re.compile(r"`[^`]+`_|[\w-]+_(?=[\s.,;:!?)]|$)"), "link", 0),
+        (re.compile(r"_`[^`]+`|[\w-]+_(?=[\s.,;:!?)]|$)"), "hyperline.name", 0),
+        (re.compile(r"\[(?!\d+$)([a-zA-Z0-9_.-]+)\]_(?=[\s.,;:!?)]|$)"), "citation.key", 0),
+        (re.compile(r"\[(\d+|[#*†‡§¶♠♥♦♣])\]_(\s+|$)"), "footnote.key", 0),
+        (re.compile(r"\|[^|\s]+\|"), "substitution",0),
         (re.compile(r"[()]"), "brackets.round", 0),
         (re.compile(r"[\[\]]"), "brackets.square", 0),
         (re.compile(r"[{}]"), "brackets.curly", 0),
         (re.compile(r"[<>]"), "brackets.angle", 0),
-        (re.compile(r"(?<!\S)\*\*(?![\s*])(.+?)(?<![\s*])\*\*(?=\s|[.,;!?)]|$)"), "bold", 0),
-        (re.compile(r"(?<!\S)\*([^\s*][^*\n]*?)\*(?=\s|[.,;!?)]|$)"), "italic", 0),
-        (re.compile(r"(?<!\S)``([^`\n]+)``(?=\s|[.,;!?)]|$)"),"literal.inline", 0),
-        (re.compile(r"(?<!\S)`([^`\n]+)`(?=\s|[.,;!?)]|$)"),"interpreted.inline", 0),
-        (re.compile(r"`[^`]+? <[^>]+?>`_(\s+|$)"), "link", 0),
-        (re.compile(r"\[[^\]]+\]_( |$)"), "citation.reference", 0),
-        (re.compile(r"^\s*\.\.\s+_[^:]+:\s*$"), "anchor.definition", 0),
-        (re.compile(r"\b\w+_(\s+|$)"), "anchor.inline", 0),
-        (re.compile(r"\[\d+\]_(\s+|$)"), "footnote.reference", 0),
-        (re.compile(r"\|[^|\s]+\|"), "substitution",0),
     ],
     "literal_block": [
         (re.compile(r"(::)\s*$"), "literal.marker", 1),  # Highlight ::
@@ -404,8 +390,8 @@ RST_BLOCK_RULES = {
         (re.compile(r" (\s*\w*)"), "line.block", 0),  # body of the line block
     ],
     "field_list": [
-        (re.compile(r"^(:[^:]+:)"), "field.name", 1),            # Match just the field name
-        (re.compile(r"^(:[^:]+:)\s+(.*)"), "field.body", 2),   # Match and color just the value part
+        (re.compile(r"^(:[^:]+:)\s+(.*)?"), "field.name", 1),              # Match just the field name
+        (re.compile(r"^(:[^:]+:)\s+(.*)?"), "field.body", 2),       # Match and color just the value part
         (re.compile(r"^\s{2,}.*"), "field.body", 0),               # Match indented body
     ],
     "bullet_list": [
@@ -415,15 +401,25 @@ RST_BLOCK_RULES = {
         (re.compile(r"^(\s*\d+[\.\)]) "), "bullet", 0),
     ],
     "directive": [
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.marker", 1),           # formats .. marker
-        #(re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.substitution", 2),    # the substitution is formatted by the substitution rule
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.keyword", 3),          # formats directive::
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.argument", 4),         # formats argument
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 1),           # formats .. marker
+        #(re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.substitution", 2),    # the substitution is formatted by the substitution rule
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.keyword", 3),          # formats directive::
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 5),         # formats argument
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.argument", 5),         # formats argument
         (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.option", 2),                           # formats :option:
         (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.body", 3),                             # formats the body
     ],
+    "footnote": [
+        (re.compile(r"^(\.\.)\s+(\[(\d+|[#*†‡§¶♠♥♦♣])\])\s*(.+)?$"), "footnote.marker", 1),
+        (re.compile(r"^(\.\.)\s+(\[(\d+|[#*†‡§¶♠♥♦♣])\])\s*(.+)?$"), "footnote.key", 2),
+        (re.compile(r"^(\.\.)\s+(\[(\d+|[#*†‡§¶♠♥♦♣])\])\s*(.+)?$"), "footnote.body", 4),
+        (re.compile(r"^\s{2,}.+"), "footnote.body", 0),
+    ],
     "citation": [
-        (re.compile(r"^\s*\.\.\s+\[[^\]]+\]"), "citation.definition", 0),
+        (re.compile(r"^(\.\.)\s+(\[([a-zA-Z0-9_.-]+)\])\s*(.+)?$"), "citation.marker", 1),
+        (re.compile(r"^(\.\.)\s+(\[([a-zA-Z0-9_.-]+)\])\s*(.+)?$"), "citation.key", 2),
+        (re.compile(r"^(\.\.)\s+(\[([a-zA-Z0-9_.-]+)\])\s*(.+)?$"), "citation.full", 4),
+        (re.compile(r"^\s{2,}.+"), "citation.full", 0),
     ],
     "comment": [
         (re.compile(r"^\.\.($|\s).*"), "comment.firstline", 0),
@@ -432,32 +428,27 @@ RST_BLOCK_RULES = {
     "blockquote": [
         (re.compile(r"^\s{2,}.*"), "blockquote", 0),
     ],
-    "table": [
+    # table rules have to be listed in a specific order so that the formatting is correct
+    "table_complex": [
+        (re.compile(r"\S*"), "table.value", 0),             # values within the table cells (i.e., the data)
+        (re.compile(r"[+\|-]"), "table.divider", 0),        # formats the vertical dividers
+        (re.compile(r"^(\+[-|=]+)+\+$"), "table.line", 0),  # reST table lines like +---+ or ===
+    ],
+    "table_simple": [
         #pattern=,        
-        (re.compile(r"^\+[-+|=]{3,}+"), "table.divider", 0),
-        (re.compile(r"[+\|-]"), "table.cells", 0),
+        (re.compile(r"\S*"), "table.value", 0),             # values within the table cells (i.e., the data)
+        (re.compile(r"^([-=]+\s+)+[-=]+\s*$"), "table.line", 0),    # lines === === or --- --- in the table
     ],
     "definition_list": [
         (re.compile(r"^\S.+$"), "definition.term", 0),
         (re.compile(r"^\s{2,}.*"), "definition.body", 0),
     ],
-    # name="link",
-    # name="table.simple.border"
-    #     #pattern=r"^[=+\-]{2,}( [=+\-]{2,})*$",
-    #     #pattern=r"^\s*(\+(?:[-=]+\+)+)",
-    # name="table.simple.row",
-    #     #pattern=r"^(\w.*\w)(\s+\w.*\w)*$",
-    # name="inline.role",
-    #     #pattern=r":\w+:`[^`]+`",
-    # name="footnote.reference",
-    # name="footnote.definition",
-    #     #pattern=r"^\.\. \[\d+\]",
-    # name="cross.reference",
-    #     #pattern=r":(ref|doc):`[^`]+`",
-    # name="cross.reference.target",
-    #     #pattern=r":(?:ref|doc):`([^`]+)`",
-    # name="anchor.definition",
-    # name="anchor.inline",
+    "hyperlink_target": [
+        (re.compile(r"^(\.\.)\s+(_.+?)(:)(?:\s+(.*))?$"), "hyperlink.marker", 1),
+        (re.compile(r"^(\.\.)\s+(_.+?)(:)(?:\s+(.*))?$"), "hyperlink.name", 2),
+        (re.compile(r"^(\.\.)\s+(_.+?)(:)(?:\s+(.*))?$"), "hyperlink.marker", 3),
+        (re.compile(r"^(\.\.)\s+(_.+?)(:)(?:\s+(.*))?$"), "hyperlink.target", 4),
+    ],
 }
 
 RST_KNOWN_DIRECTIVES = {

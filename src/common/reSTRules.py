@@ -163,6 +163,37 @@ RST_HIGHLIGHT_RULES = [
         font_weight="normal",
         font_italic=True,
     ),
+    HighlightRule( name="directive.marker",
+        foreground=AYU_LIGHT_THEME["yellow"],
+        font_weight="normal",
+    ),
+    # directive.substitution is handled by substitution
+    #HighlightRule( name="directive.substitution",
+    #    foreground=AYU_LIGHT_THEME["teal"],
+    #    font_weight="normal",
+    #),
+    HighlightRule( name="directive.keyword",
+        foreground=AYU_LIGHT_THEME["orange"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="directive.argument", # Directive argument (e.g., a filename in image::)
+        foreground=AYU_LIGHT_THEME["green"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="directive.option",# Directive option
+        foreground=AYU_LIGHT_THEME["purple"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="directive.body",# Directive option
+        foreground=AYU_LIGHT_THEME["dark_blue"],
+        font_weight="normal",
+    ),
+    HighlightRule(
+        name="substitution",
+        foreground=AYU_LIGHT_THEME["red"],
+        font_weight="normal",
+        font_italic=True,
+    ),
 
     HighlightRule( name="link",
         foreground=AYU_LIGHT_THEME["link"],
@@ -194,35 +225,6 @@ RST_HIGHLIGHT_RULES = [
         #pattern=r"^(\w.*\w)(\s+\w.*\w)*$",
         foreground=AYU_LIGHT_THEME["text"],
     ),
-    HighlightRule( name="directive.marker",
-        foreground=AYU_LIGHT_THEME["yellow"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.substitution",
-        foreground=AYU_LIGHT_THEME["teal"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.keyword",
-        foreground=AYU_LIGHT_THEME["orange"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.argument", # Directive argument (e.g., a filename in image::)
-        foreground=AYU_LIGHT_THEME["green"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.option",# Directive option
-        foreground=AYU_LIGHT_THEME["purple"],
-        font_weight="normal",
-    ),
-    HighlightRule( name="directive.body",# Directive option
-        foreground=AYU_LIGHT_THEME["dark_blue"],
-        font_weight="normal",
-    ),
-    # HighlightRule( name="directive.option.continued",
-    #     pattern=r"^\s{4,}:\w+:.*$",
-    #     foreground=AYU_LIGHT_THEME["orange"],
-    #     font_weight="normal",
-    # ),
     HighlightRule( name="inline.role",
         #pattern=r":\w+:`[^`]+`",
         foreground=AYU_LIGHT_THEME["link"],
@@ -238,29 +240,18 @@ RST_HIGHLIGHT_RULES = [
         font_weight="normal",
     ),
     HighlightRule(
-        name="substitution",
-        foreground=AYU_LIGHT_THEME["red"],
-        font_weight="normal",
-        font_italic=True,
+        name="cross.reference",
+        #pattern=r":(ref|doc):`[^`]+`",
+        foreground=AYU_LIGHT_THEME["link"],
+        underline=True
     ),
-    # HighlightRule(
-    #     name="cross.reference",
-    #     pattern=r":(ref|doc):`[^`]+`",
-    #     foreground=AYU_LIGHT_THEME["link"],
-    #     underline=True
-    # ),
-    # HighlightRule(
-    #     name="cross.reference.target",
-    #     pattern=r":(?:ref|doc):`([^`]+)`",
-    #     foreground=AYU_LIGHT_THEME["link"],
-    #     underline=True,
-    #     #group=1
-    # ),
-    # HighlightRule( name="substitution.definition",
-    #     pattern=r"^\s*\.\.\s+\|[^|]+\|\s+replace::",
-    #     foreground=AYU_LIGHT_THEME["blue"],
-    #     font_weight="italic",
-    # ),
+    HighlightRule(
+        name="cross.reference.target",
+        #pattern=r":(?:ref|doc):`([^`]+)`",
+        foreground=AYU_LIGHT_THEME["link"],
+        underline=True,
+        #group=1
+    ),
     HighlightRule( name="anchor.definition",
         foreground=AYU_LIGHT_THEME["link"],
         underline=True,
@@ -424,12 +415,12 @@ RST_BLOCK_RULES = {
         (re.compile(r"^(\s*\d+[\.\)]) "), "bullet", 0),
     ],
     "directive": [
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.marker", 1),      # matches `.. image::`
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.substitution", 2),      # matches `.. image::`
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.keyword", 3),      # matches `.. image::`
-        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.argument", 4),      # matches `.. image::`
-        (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.option", 2),              # matches `:alt:`, `:width:`
-        (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.body", 3),     # matches the values after the options
+        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.marker", 1),           # formats .. marker
+        #(re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.substitution", 2),    # the substitution is formatted by the substitution rule
+        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.keyword", 3),          # formats directive::
+        (re.compile("^(\.\.)\s*(\|[^|]+\|\s*)?(\S+::)(?:\s+(.*))?$"), "directive.argument", 4),         # formats argument
+        (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.option", 2),                           # formats :option:
+        (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.body", 3),                             # formats the body
     ],
     "citation": [
         (re.compile(r"^\s*\.\.\s+\[[^\]]+\]"), "citation.definition", 0),
@@ -444,12 +435,29 @@ RST_BLOCK_RULES = {
     "table": [
         #pattern=,        
         (re.compile(r"^\+[-+|=]{3,}+"), "table.divider", 0),
-        (re.compile(r"[|+-]"), "table.cells", 0),
+        (re.compile(r"[+\|-]"), "table.cells", 0),
     ],
     "definition_list": [
         (re.compile(r"^\S.+$"), "definition.term", 0),
         (re.compile(r"^\s{2,}.*"), "definition.body", 0),
     ],
+    # name="link",
+    # name="table.simple.border"
+    #     #pattern=r"^[=+\-]{2,}( [=+\-]{2,})*$",
+    #     #pattern=r"^\s*(\+(?:[-=]+\+)+)",
+    # name="table.simple.row",
+    #     #pattern=r"^(\w.*\w)(\s+\w.*\w)*$",
+    # name="inline.role",
+    #     #pattern=r":\w+:`[^`]+`",
+    # name="footnote.reference",
+    # name="footnote.definition",
+    #     #pattern=r"^\.\. \[\d+\]",
+    # name="cross.reference",
+    #     #pattern=r":(ref|doc):`[^`]+`",
+    # name="cross.reference.target",
+    #     #pattern=r":(?:ref|doc):`([^`]+)`",
+    # name="anchor.definition",
+    # name="anchor.inline",
 }
 
 RST_KNOWN_DIRECTIVES = {

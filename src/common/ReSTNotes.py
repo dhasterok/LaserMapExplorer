@@ -329,9 +329,6 @@ class Notes(CustomDockWidget):
         self.text_edit.setMaximumSize(QSize(524287, 524287))
         self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
 
-        # Syntax highlighting
-        self.highlighter = RstHighlighter(self.text_edit.document())
-
         # Create search
         self.search_widget = SearchWidget(self.text_edit, self, enable_replace=True, realtime=False)
 

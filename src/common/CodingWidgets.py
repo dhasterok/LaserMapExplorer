@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
         QWidget, QDialog, QDialogButtonBox, QPlainTextEdit, QTextEdit, QCheckBox, QPushButton,
         QVBoxLayout, QHBoxLayout, QColorDialog, QFormLayout, QLineEdit, QMessageBox, QListWidget,
         QLabel, QComboBox, QCheckBox, QFontComboBox, QTableWidget, QTableWidgetItem, QHeaderView,
-        QMenu, QMenuBar, QToolBar, QToolTip,
+        QMenu, QMenuBar, QToolBar, QToolTip, QSlider
     )
 from PyQt6.QtGui import (
     QFont, QCursor, QPainter, QTextCursor, QKeyEvent, QAction, QIcon, QTextBlockUserData,
@@ -82,7 +82,7 @@ class CodeEditor(QPlainTextEdit):
 
         # Sample rules
         self.rules = RST_HIGHLIGHT_RULES
-        self.highlighter = RstHighlighter(self, self.rules)
+        self.highlighter = RstHighlighter(self, True, self.rules)
 
     @property
     def highlight_line(self):
@@ -324,10 +324,19 @@ class CodeEditor(QPlainTextEdit):
                 extraSelections.append(selection)
 
         self.setExtraSelections(extraSelections)
+    
+    def update_font_size(self, new_size):
+        font = self.font()
+        font.setPointSize(new_size)
+
+        self.setFont(font)
 
     def open_settings_dialog(self):
-        dialog = EditorSettingsDialog(settings=self.settings,
-                                      default_settings=self.default_settings)
+        dialog = EditorSettingsDialog(
+            settings=self.settings,
+            default_settings=self.default_settings,
+            parent=self
+        )
         if dialog.exec():
             print("Updated settings:", self.settings)
 
@@ -335,8 +344,11 @@ class CodeEditor(QPlainTextEdit):
         self.highlighter = highlighter
 
     def toggle_highlighter(self, enable):
-        if hasattr(self, "highlighter") and self.highlighter:
-            self.highlighter.setDocument(self.document() if enable else None)
+        if hasattr(self, "highlighter"):
+            self.highlighter.enable_highlighting = enable
+            self.highlighter.rehighlight()
+        # if hasattr(self, "highlighter") and self.highlighter:
+        #     self.highlighter.setDocument(self.document() if enable else None)
 
     def open_highlight_dialog(self):
         if hasattr(self, "highlighter") and self.highlighter:
@@ -368,16 +380,18 @@ class CodeEditor(QPlainTextEdit):
                     self.rules.update(data.get('highlight_rules', {}))
 
     def mouseMoveEvent(self, event):
-        pos = event.position().toPoint()
-        cursor = self.cursorForPosition(pos)
+        cursor = self.cursorForPosition(event.pos())
         block = cursor.block()
-        block_number = block.blockNumber()
-        column = cursor.position() - block.position()
+        pos_in_block = cursor.position() - block.position()
+        data = block.userData()
 
-        for (bn, start, end, tip) in self.hover_regions:
-            if bn == block_number and start <= column < end:
-                QToolTip.showText(event.globalPosition().toPoint(), tip, self)
-                break
+        if isinstance(data, RstBlockData):
+            for start, end, hover_text in data.hover_regions:
+                if start <= pos_in_block <= end:
+                    QToolTip.showText(event.globalPosition().toPoint(), hover_text, self)
+                    break
+            else:
+                QToolTip.hideText()
         else:
             QToolTip.hideText()
 
@@ -438,9 +452,10 @@ class RstBlockData(QTextBlockUserData):
         super().__init__()
         self.block_type = None
         self.active_directive = None
+        self.hover_regions = []  # [(start, end, hover_text)]
 
 class RstHighlighter(QSyntaxHighlighter):
-    def __init__(self, editor, rules=None):
+    def __init__(self, editor, enable, rules=None):
         super().__init__(editor.document())
         self.editor = editor
 
@@ -448,6 +463,8 @@ class RstHighlighter(QSyntaxHighlighter):
             self.rules = rules
         else:
             self.rules = RST_HIGHLIGHT_RULES  # From your definition
+
+        self.enable_highlighting = enable
 
         # Map of HighlightRule.name -> QTextCharFormat
         self.formats = self._build_formats(self.rules)
@@ -471,13 +488,22 @@ class RstHighlighter(QSyntaxHighlighter):
             formats[rule.name] = fmt
         return formats
 
+    def _default_format(self):
+        fmt = QTextCharFormat()
+        fmt.setForeground(QColor(LIGHT_THEME['text']))
+        font = QFont()
+        font.setFamily("Monaco")
+        font.setPointSize(10)
+        fmt.setFont(font)
+        fmt.setFontItalic(False)
+        fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.NoUnderline)
+        return fmt
+
     def highlightBlock(self, text: str):
         block_data = RstBlockData()
-        self.setCurrentBlockUserData(block_data)
 
         self.setCurrentBlockState(-1)
         current_priority = -1
-        self.editor.hover_regions = []
 
         # Step 1a: Try to identify the starting block type
         for btype, rules in sorted(RST_BLOCK_TYPES.items(), key=lambda x: -x[1]['priority']):
@@ -525,8 +551,24 @@ class RstHighlighter(QSyntaxHighlighter):
 
         if block_data.block_type:
             self.setCurrentBlockState(current_priority)
-            if block_data.block_type != "directive":
-                self.active_directive = None
+        else:
+            # Possibly a continuation of a directive block
+            prev_data = self.currentBlock().previous().userData()
+            if isinstance(prev_data, RstBlockData) and prev_data.block_type == "directive":
+                if text.strip().startswith(":") or text.startswith("  "):  # looks like an option or continuation
+                    block_data.block_type = "directive"
+                    block_data.active_directive = prev_data.active_directive
+                    self.setCurrentBlockState(RST_BLOCK_TYPES["directive"]["priority"])
+
+        # Walk backwards to find active directive if still None
+        if block_data.block_type == "directive" and not block_data.active_directive:
+            block = self.currentBlock().previous()
+            while block.isValid():
+                data = block.userData()
+                if isinstance(data, RstBlockData) and data.active_directive:
+                    block_data.active_directive = data.active_directive
+                    break
+                block = block.previous()
 
         # Step 3: Apply block-specific highlighting
         if block_data.block_type and block_data.block_type in RST_BLOCK_RULES:
@@ -547,17 +589,19 @@ class RstHighlighter(QSyntaxHighlighter):
                             isinvalid, hover_text = self.validate_match(fmt_name, matched_text, block_data)
 
                             #print(f"Applying {fmt_name} group {group} start: {start} length: {end - start} text: {text[start:end]!r}")
-                            fmt = self.formats[fmt_name]
+                            if self.enable_highlighting:
+                                fmt = QTextCharFormat(self.formats[fmt_name])
+                            else:
+                                fmt = self._default_format()
+
                             if isinvalid:
-                                fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SpellCheckUnderline)
+                                fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.DashUnderline)
                                 fmt.setUnderlineColor(QColor(LIGHT_THEME["error"]))
 
                                 # Add to hover regions
-                                
-                                block_number = self.currentBlock().blockNumber()
-                                self.editor.hover_regions.append((block_number, start, end, hover_text))
+                                block_data.hover_regions.append((start, end, hover_text))
 
-                            self.setFormat(start, end - start, self.formats[fmt_name])
+                            self.setFormat(start, end - start, fmt)
                         except IndexError:
                             continue  # Group didn't exist in match, skip
 
@@ -568,7 +612,12 @@ class RstHighlighter(QSyntaxHighlighter):
                     for match in pattern.finditer(text):
                         start, end = match.span()
                         #print(f"Applying {fmt_name} start: {start} length: {end-start} text: {text[start:end]!r}")
-                        self.setFormat(start, end-start, self.formats[fmt_name])
+
+                        if self.enable_highlighting:
+                            fmt = QTextCharFormat(self.formats[fmt_name])
+                        else:
+                            fmt = self._default_format()
+                        self.setFormat(start, end-start, fmt)
 
             # for pattern, fmt_name in RST_BLOCK_RULES.get("body", []):
             #     if fmt_name in self.formats:
@@ -581,6 +630,11 @@ class RstHighlighter(QSyntaxHighlighter):
         #     directive_name = group.strip().split("::")[0].replace("..", "").strip()
         #     if directive_name not in RST_KNOWN_DIRECTIVES:
         #         self.setFormat(start, end - start, self.invalid_directive_format)
+
+            active_directive = None
+        if block_data.block_type == "directive":
+            print(f"[{self.currentBlock().blockNumber()}] {text.strip()} → type={block_data.block_type}, active={block_data.active_directive}")
+        self.setCurrentBlockUserData(block_data)
 
     def validate_match(self, fmt_name: str, matched_text: str, block_data: RstBlockData):
         """Determine whether a match is invalid based on formatting and block context.
@@ -605,30 +659,51 @@ class RstHighlighter(QSyntaxHighlighter):
         hover_text = None
         # test for known directive types
 
-        if fmt_name == "directive.keyword" and block_data.block_type and block_data.block_type == "directive":
+        if fmt_name == "directive.keyword" and block_data.block_type == "directive":
             # remove "::" from directive
             directive_name = ''
-            if matched_text.endswith("::"):
-                directive_name = matched_text[:-2].rstrip()
-                print(directive_name)
+            directive_name = matched_text.strip().removesuffix("::")
+            print(directive_name)
 
             isinvalid = (directive_name not in RST_KNOWN_DIRECTIVES)
             if isinvalid:
                 hover_text = f"Unknown directive: {directive_name}"
+                block_data.active_directive = None
+            else:
+                block_data.active_directive = directive_name
 
-            block_data.active_directive = directive_name if not isinvalid else None
-
-        elif fmt_name == "directive.option":
-            # remove ":" from start and end of option
+        elif fmt_name == "directive.option" and block_data.block_type == "directive":
             option_text = matched_text.strip().strip(':')
-
             if block_data.active_directive:
-                valid_options = RST_KNOWN_DIRECTIVES.get(block_data.active_directive)
-                if valid_options is not None:
-                    optname = option_text.split(':')[0]
-                    isinvalid = optname not in valid_options
+                valid_options = RST_KNOWN_DIRECTIVES.get(block_data.active_directive, [])
+                optname = option_text.split(':')[0]
+                isinvalid = optname not in valid_options
                 if isinvalid:
-                    hover_text = f"Unknown option ({optname}) for directive {self.active_directive}"
+                    hover_text = f"Unknown option ({optname}) for directive '{block_data.active_directive}'"
+        elif fmt_name == "heading.adornment":
+
+            # Ensure all charcters in the header adornments are the same
+            hline = self.currentBlock().text()
+            hline_chars = set(hline.strip())
+
+            isinvalid = len(hline_chars) != 1
+            if isinvalid:
+                hover_text = f"Heading adornment has mixed characters ({hline_chars})"
+                return isinvalid, hover_text
+
+            # Determine if the underline is shorter than the title
+            # Make sure there is a next block to check underline
+            next_block = self.currentBlock().previous()
+            if next_block.isValid():
+                heading_text = next_block.text()
+                # A heading underline is only valid if it uses a single repeated character
+                if heading_text:
+                    # Compare lengths
+                    title_len = len(heading_text.strip())
+                    line_len = len(hline.strip())
+                    isinvalid = line_len < title_len
+                    if isinvalid:
+                        hover_text = f"Header adornment is too short (needs to be at least {title_len} characters)"
 
         return isinvalid, hover_text
 
@@ -796,6 +871,27 @@ class EditorSettingsDialog(QDialog):
         self.default_settings = default_settings
 
         layout = QVBoxLayout()
+
+        if parent is not None:
+            slider_layout = QHBoxLayout()
+            layout.addLayout(slider_layout)
+
+            slider_label = QLabel()
+            slider_label.setText("Font size")
+
+            self.font_size_slider = QSlider()
+            self.font_size_slider.setOrientation(Qt.Orientation.Horizontal)
+            self.font_size_slider.setMinimum(6)
+            self.font_size_slider.setMaximum(24)
+            self.font_size_slider.setSingleStep(1)
+            self.font_size_slider.setTickInterval(4)
+            font = parent.font()
+            self.font_size_slider.setValue(font.pointSize())
+            self.font_size_slider.valueChanged.connect(lambda new_size: parent.update_font_size(new_size))
+
+            slider_layout.addWidget(slider_label)
+            slider_layout.addWidget(self.font_size_slider)
+
         self.table = QTableWidget(len(settings), 2)
         self.table.setHorizontalHeaderLabels(["Setting", "Enabled"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)

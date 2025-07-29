@@ -3,14 +3,14 @@ ReST Test File (Title)
 ======================
 
 Introduction
-************
+**********
 
 This file is used to test syntax highlighting in reStructuredText (reST). Each of th lines below is used to test whether the rules for highlighting syntax work properly and whether the syntax checker correctly identifies errors to the docutils reST specifications (v.10184) which can be found on the `reStructedText Markup Specification`_ web-based documentation.
 
 .. _reSTructuredText Markup Specification: https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html
 
 Specific Tests
-**************
+***+****=*****
 
 Brackets
 ++++++++
@@ -25,13 +25,13 @@ While brackets do not necessarily have a special role in all cases, it is helpfu
 Headings
 ++++++++
 
-Headings can be created with any non-numeric printing character, however, there are a subset that are recommended.  At the moment, the highlighting rules only allow for `= * - + ~ ^ ' "`.
+Headings can be created with any non-numeric printing character, however, there are a subset that are recommended.  At the moment, the highlighting rules only allow for `= * - + ~ ^ ' "`.  The level of heading is assigned in order of use of the symbols, though no specific order of the symbols is required, i.e., the title level above could started with a `*` rather than an `=`.  ReST only allows for 6 heading levels (there are 8 checked here for syntax, though you could use `# % & [ }` if you desired).
 
-Subheading
-~~~~~~~~~~
+Subheading test
+~~~~~~~~~~~~~~~
 
-Subsubheading
--------------
+Subsubheading test
+------------------
 
 Inline Markup
 +++++++++++++
@@ -168,15 +168,6 @@ A directive should be written in the following format
 
 If syntax highlighting is working, the keyword in the description above should be identified as an error because there is no directive named keyword.  Only a few of the directives, (image, replacement text, unicode and date) have substitutions.
 
-In-line substitution
-
-Autoscaling (|icon-autoscale|) addresses a common
-
-directive with substitution
-
-.. |icon-autoscale| image:: _static/icons/icon-autoscale-64.png
-    :height: 2.5ex
-
 .. code:: python
 
   def function():
@@ -189,8 +180,18 @@ Directive, with options
     :align: center
     :alt: LaME interface: left toolbox, preprocessing tab
     :width: 315
+    :invalid-option: this option should cause a syntax error
 
     *Preprocessing* tab with tools for data enhancement and noise reduction.
+
+Some directives have substitutions.  These substitutions allow the user to insert something into the text.  It can be used to simplify common phrases, introduce images, etc.  The substitution can be defined before or after it's first use in the document.
+
+This is an example of a substitution (|icon-autoscale|) where the text enclosed in `|` is replaced with the image below when compiled.
+
+.. |icon-autoscale| image:: _static/icons/icon-autoscale-64.png
+    :height: 2.5ex
+
+Substitutions can also be done inline, though there are only a few directives that allow inline substitution (math, code, raw).  Example in-line substitution, :math:`\partial C / \partial t = D \nabla^2 C`.
 
 
 Referencing

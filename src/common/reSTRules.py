@@ -102,14 +102,14 @@ RST_HIGHLIGHT_RULES = [
         font_weight="normal"
     ),
     HighlightRule( name="interpreted.inline",
-        foreground=LIGHT_THEME["dark_blue"],
-        font_family="Courier New",
-        font_weight="normal",
-    ),  
-    HighlightRule( name="literal.inline",
         foreground=LIGHT_THEME["green"],
         font_family="Courier New",
-        font_weight="normal",
+        font_weight="bold",
+    ),  
+    HighlightRule( name="literal.inline",
+        foreground=LIGHT_THEME["dark_blue"],
+        font_family="Courier New",
+        font_weight="bold",
     ),  
     HighlightRule( name="comment.firstline",
         foreground=LIGHT_THEME["grey"],
@@ -135,7 +135,7 @@ RST_HIGHLIGHT_RULES = [
         foreground=LIGHT_THEME["black"],
         font_weight="bold",
     ),  
-    HighlightRule( name="heading.underline",
+    HighlightRule( name="heading.adornment",
         foreground=LIGHT_THEME["orange"],
         font_weight="bold",
     ),  
@@ -188,7 +188,7 @@ RST_HIGHLIGHT_RULES = [
         font_weight="normal",
     ),
     HighlightRule( name="directive.inline",
-        foreground=LIGHT_THEME["sunflower"],
+        foreground=LIGHT_THEME["blue"],
         font_weight="normal",
     ),
     HighlightRule(
@@ -282,7 +282,11 @@ RST_BLOCK_TYPES = {
     },
     "heading":{
         "priority": 100,
-        "start": re.compile(r"^(?P<char>[=\-~^\"+\'\*])\1{2,}\s*$"),  # Or custom
+        #"start": re.compile(r"^(?P<char>[=\-~^\"+\'\*])\1{3,}\s*$"),  # stricter rule, does not allow for mixed characters
+        "start": re.compile(r"^(?P<char>[=\-~^\"+\'\*]){3,}\s*$"),  # looser rule, allows for mixed characters.  While this is
+                                                                    # syntactically incorrect, it makes it easier for the user
+                                                                    # to find intended headings, though the highlighter also
+                                                                    # flags the line as an error.
         "line": None,
         "priority": 100  # Very high so it overrides others
     },
@@ -323,7 +327,7 @@ RST_BLOCK_TYPES = {
         "end": re.compile(r"^\S"),
     },
     "table_complex": {
-        "priority": 85,
+        "priority": 105,
         "start": re.compile(r"^\+(?:[-=]+?\+)+$"),
         #"line": re.compile(r"^\|.*\|$"),
         "line": re.compile(r"^[\|\+].*"),
@@ -375,14 +379,14 @@ RST_BLOCK_RULES = {
     # ],
     "heading": [
         (re.compile(r'^\S.*'), "heading.title", 0),
-        (re.compile(r'^[\=\~\^\"\+\-\'\*]{3,}\s*$'), "heading.underline", 0),
+        (re.compile(r'^[\=\~\^\"\+\-\'\*]{3,}\s*$'), "heading.adornment", 0),
     ],
     "global": [
         (re.compile(r"(?<!\S)\*\*(?![\s*])(.+?)(?<![\s*])\*\*(?=\s|[.,;:!?)]|$)"), "bold", 0),
         (re.compile(r"(?<!\S)\*([^\s*][^*\n]*?)\*(?=\s|[.,;:!?)]|$)"), "italic", 0),
-        (re.compile(r"(?<!\S)``([^`\n]+)``(?=\s|[.,;:!?)]|$)"),"literal.inline", 0),
-        (re.compile(r"(?<!\S)`([^`\n]+)`(?=\s|[.,;:!?)]|$)"),"interpreted.inline", 0),
-        (re.compile(r":\w+:`[^`]+`"), "directive.inline", 0),
+        (re.compile(r"(:\w+:)(`[^`]+`)"), "directive.inline", 1),
+        (re.compile(r"``([^`\n]+)``(?=\s|[.,;:!?)]|$)"),"literal.inline", 0),
+        (re.compile(r"`([^`\n]+)`(?=\s|[.,;:!?)]|$)"),"interpreted.inline", 0),
         (re.compile(r"`[^`]+`_|[\w-]+_(?=[\s.,;:!?)]|$)"), "link", 0),
         (re.compile(r"_`[^`]+`|[\w-]+_(?=[\s.,;:!?)]|$)"), "hyperline.name", 0),
         (re.compile(r"\[(?!\d+$)([a-zA-Z0-9_.-]+)\]_(?=[\s.,;:!?)]|$)"), "citation.key", 0),
@@ -476,7 +480,7 @@ RST_KNOWN_DIRECTIVES = {
     'tip': ['class', 'name'],
     'admonition': ['class', 'name'],
     'image': [ 'align', 'alt', 'loading', 'scale', 'target', 'height', 'width' ],
-    'figure': [ 'align', 'figclass', 'figname', 'figwidth' ],
+    'figure': [ 'align', 'alt', 'loading', 'scale', 'target', 'height', 'width', 'figclass', 'figname', 'figwidth' ],
     'raw': ['class', 'encoding', 'file', 'url'],
     'include': ['code', 'encoding', 'end-before', 'end-line', 'literal', 'number-lines', 'parser', 'start-after', 'start-line', 'tab-width'],
     'code': ['class', 'name', 'number-lines'],

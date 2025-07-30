@@ -21,6 +21,7 @@ While brackets do not necessarily have a special role in all cases, it is helpfu
 * square [square], [] word
 * curly {curly}, {} word
 * angle <word> <> word
+* pipe |word| || word
 
 Headings
 ++++++++

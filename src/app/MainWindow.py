@@ -38,7 +38,7 @@ from src.common.Regression import RegressionDock
 from src.common.Polygon import PolygonManager
 from src.app.SpotTools import SpotPage
 from src.app.SpecialTools import SpecialPage
-from src.common.reSTNotes import Notes
+from src.common.rest import NotesDock
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
@@ -1078,7 +1078,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if hasattr(self,'notes'):
             # change notes file to new sample.  This will initiate the new file and autosave timer.
-            self.notes.notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
+            self.notes_dock.notes.notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
 
 
         if hasattr(self,"info_dock"):
@@ -1721,7 +1721,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 notes_file = None
 
-            self.notes = Notes(self, notes_file)
+            self.notes_dock = NotesDock(self, notes_file)
             info_menu_items = [
                 ('Sample info', lambda: self.insert_info_note('sample info')),
                 ('List analytes used', lambda: self.insert_info_note('analytes')),
@@ -1730,15 +1730,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 ('PCA results', lambda: self.insert_info_note('pca results')),
                 ('Cluster results', lambda: self.insert_info_note('cluster results'))
             ]
-            self.notes.info_menu_items = info_menu_items
+            self.notes_dock.notes.info_menu_items = info_menu_items
 
-            self.notes.update_equation_menu()
+            self.notes_dock.notes.update_equation_menu()
 
-            if self.notes not in self.help_mapping:
-                self.help_mapping[self.notes] = 'notes'
+            if self.notes_dock not in self.help_mapping:
+                self.help_mapping[self.notes_dock] = 'notes'
 
-        self.notes.show()
-        #self.notes.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
+        self.notes_dock.show()
+        #self.notes_dock.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
     def insert_info_note(self, infotype):
         data = self.data[self.app_data.sample_id]
@@ -1749,7 +1749,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 text += '*' * (len(self.app_data.sample_id) + 15) + '\n'
                 text += f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n'
                 text += ':User: Your name here\n\n'
-                self.notes.print_info(text)
+                self.notes_dock.notes.print_info(text)
             case 'analytes':
                 analytes = data.processed_data.match_attribute('data_type', 'Analyte')
                 ratios = data.processed_data.match_attribute('data_type', 'Ratio')
@@ -1761,17 +1761,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     text += ':ratios computed: '+', '.join(ratios)
                     text += '\n'
                 text += '\n'
-                self.notes.print_info(text)
+                self.notes_dock.notes.print_info(text)
             case 'plot info':
                 if self.plot_info:
                     text = ['\n\n:plot type: '+self.plot_info['plot_type'],
                             ':plot name: '+self.plot_info['plot_name']+'\n']
                     text = '\n'.join(text)
-                    self.notes.print_info(text)
+                    self.notes_dock.notes.print_info(text)
             case 'filters':
-                rst_table = self.notes.to_rst_table(data.filter_df)
+                rst_table = self.notes_dock.notes.to_rst_table(data.filter_df)
 
-                self.notes.print_info(rst_table)
+                self.notes_dock.notes.print_info(rst_table)
             case 'pca results':
                 if not self.pca_results:
                     return

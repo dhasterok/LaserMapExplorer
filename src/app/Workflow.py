@@ -54,9 +54,9 @@ class BlocklyBridge(QObject):
         # Return the style dictionary as a JSON string
         return json.dumps(style_serializable)
     
-    @pyqtSlot(str,str, result=float)
-    def getHistogramRange(self, fieldType, field):
-        return self.lame_blockly.histogram_get_range(fieldType, field)
+    @pyqtSlot(str,str,str,int, result=float)
+    def getHistogramRange(self, fieldType, field, hist_type, n_bins):
+        return self.lame_blockly.histogram_get_range(fieldType, field, hist_type, n_bins)
     
     @pyqtSlot(str, result=list)
     def getFieldList(self, field_type):

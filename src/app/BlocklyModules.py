@@ -36,7 +36,7 @@ from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialTools import SpecialFunctions as specfun
-from src.common.reSTNotes import Notes
+from src.common.ReSTNotes import Notes
 from src.common.Browser import Browser
 from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
@@ -109,6 +109,9 @@ class LameBlockly(PlotViewer):
         self.update_bins = False
 
         self.showMass = False
+
+        # Block ID
+        self.block_id = None
         # # Noise reduction
         # self.noise_reduction = ip(self)
 
@@ -368,7 +371,7 @@ class LameBlockly(PlotViewer):
     # -------------------------------------
     # Histogram functions and plotting
     # -------------------------------------
-    def histogram_get_range(self, field_type, field):
+    def histogram_get_range(self, field_type, field, hist_type, n_bins):
         """Updates the bin width
 
         Generally called when the number of bins is changed by the user.  Updates the plot.
@@ -377,11 +380,14 @@ class LameBlockly(PlotViewer):
         if (field_type == '') or (field == ''):
             return
 
-        # get currently selected data
-        current_plot_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
-
+        self.plot_style.plot_type = 'histogram'
+        self.app_data.x_field =field
+        self.app_data.x_field_type =field_type
+        self.app_data.hist_plot_style = hist_type
+        self.app_data.hist_num_bins = n_bins
+        plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)
         # update bin width
-        range = (np.nanmax(current_plot_df['array']) - np.nanmin(current_plot_df['array']))
+        range = (self.plot_style.xlim[1] - self.plot_style.xlim[0]) 
 
         return  range
 
@@ -561,7 +567,7 @@ class LameBlockly(PlotViewer):
                 ymin, ymax = canvas.axes.get_ylim()
                 d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
                 self.data[self.app_data.sample_id].axis_dict[x['field']].update(d)
-                # self.plot_style.set_axis_widgets('y', x['field'])
+                # self.plot_style.set_axis_attributes('y', x['field'])
 
             # grab probablility axes limits
             _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
@@ -747,22 +753,22 @@ class LameBlockly(PlotViewer):
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-                # self.plot_style.set_axis_widgets('x', scatter_dict['x']['field'])
+                # self.plot_style.set_axis_attributes('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
-                # self.plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
+                # self.plot_style.set_axis_attributes('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
-                # self.plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
+                # self.plot_style.set_axis_attributes('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
             if scatter_dict['c']['field'] not in self.data[self.app_data.sample_id].axis_dict:
                 self.plot_style.set_color_axis_widgets()
-                # self.plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
+                # self.plot_style.set_axis_attributes('c', scatter_dict['c']['field'])
 
         return scatter_dict
 
@@ -1173,3 +1179,12 @@ class LameBlockly(PlotViewer):
             Calls the JavaScript function to refresh the analyteSavedListsDropdown in Blockly.
             """
             self.blockly.runJavaScript("refreshListsDropdown({type});")
+
+    def update_styles(self):
+        """
+        Calls the JavaScript function to update the style widgets in Blockly.
+        """
+        if self.block_id:
+            self.blockly.runJavaScript(
+                f"updateStylingChain(workspace.getBlockById('{self.block_id}'))"
+            )

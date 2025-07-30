@@ -85,6 +85,8 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
             self.sv_widget = plot_info['figure']
             self.update_canvas(self.sv_widget)
             self.sv_widget.show()
+            self.raise_
+            self.activateWindow()
 
 
     def clear_layout(self, layout):

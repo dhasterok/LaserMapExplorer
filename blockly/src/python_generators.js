@@ -197,14 +197,15 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
 
     let code = subBlocksCode + '\n';
-  
+    const block_id = generator.quote_(block.id);
+    code += `self.block_id = ${block_id}\n`;
     // update self.style.style_dict with `style_dict`
     code += 
     `self.plot_style.plot_type =${plot_type}\n` +
     `self.app_data.c_field =${field}\n` +
     `self.app_data.c_field_type =${field_type}\n`;
     // generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
-
+    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     // 5) Plot
     code += `canvas, plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`
@@ -215,10 +216,11 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
 pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     // Retrieve the stored field from the block
     const r_2 = generator.quote_(block.getFieldValue('rSquared'));
-
+    const plot_type = generator.quote_('field map');
     const corr_method = generator.quote_(block.getFieldValue('method'));
     let code = '';
-    
+    const block_id = generator.quote_(block.id);
+    code += `self.block_id = ${block_id}\n`;
     // Insert sub-block statements
     let subBlocksCode = generator.statementToCode(block, 'exportTable') || ''
 
@@ -230,21 +232,26 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     }
     
     // 5) Plot
-    code += `canvas, plot_info = plot_correlation(corr_method = ${corr_method},squared =${r_2})\n`;
+    code +=`self.plot_style.plot_type =${plot_type}\n` ;
+    code +=`self.app_data.corr_method =${corr_method}\n`;
+    code +=`self.app_data.corr_squared =${r_2}\n`;
+    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
+    code += `canvas, plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
-    code += `self.plot_viewer.show()`
+    code += `self.show()`
     return code;
 };
 
 pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     // Retrieve block fields
-    const hist_type = generator.quote_(block.getFieldValue('HistType'));
+    const hist_type = generator.quote_(block.getFieldValue('histType'));
     const field_type = generator.quote_(block.getFieldValue('fieldType'));
     const field = generator.quote_(block.getFieldValue('field'));
     const plot_type = generator.quote_('histogram');
 
     let code = '';
-
+    const block_id = generator.quote_(block.id);
+    code += `self.block_id = ${block_id}\n`;
     // Insert sub-block statements for styling
     let subBlocksCode = generator.statementToCode(block, 'styling') || '';
     // Remove all leading spaces from each line
@@ -263,8 +270,10 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     `self.plot_style.plot_type =${plot_type}\n` +
     `self.app_data.x_field =${field}\n` +
     `self.app_data.x_field_type =${field_type}\n`+
+    `self.app_data.hist_plot_style = ${hist_type}\n` +
     `self.app_data.hist_num_bins=${nBinsVal}\n`;
     // Plot command
+    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
     code += `self.show()\n`;

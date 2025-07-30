@@ -317,17 +317,19 @@ export function isBlockInChain(chainRoot, blockId) {
 export function updateHistogramOptions(plotBlock) {
     // 1) Get the first block connected to "histogramOptions".
     const histogramOptions = getConnectedBlocks(plotBlock, 'histogramOptions');
-    const field = plotBlock.getFieldValue('field');
-    const fieldType = plotBlock.getFieldValue('fieldType');
+    const field = plotBlock.field;
+    const fieldType = plotBlock.fieldType;
+    const histType = plotBlock.histType;
+    const histNumBins = plotBlock.histNumBins;
     if (!(field == "" || fieldType == "")){
         // 2) Fetch histogram range via the bridge.
-        window.blocklyBridge.getHistogramRange(fieldType, field, (range) => {
+        window.blocklyBridge.getHistogramRange(fieldType, field, histType, histNumBins, (range) => {
             if (range === undefined || range === null) {
                 console.error('Histogram range not available.');
                 return;
             }
 
-            // 3) Traverse the chain of histogramOptions blocks
+            // 3) Traverses the chain of histogramOptions blocks
             for (const block of histogramOptions) {
                 // 4) Identify the block by type and update it
                 switch (block.type) {
@@ -454,7 +456,9 @@ export function updateStylingChain(plotBlock) {
       }
     });
 }
-  
+// Expose updateStylingChain function to Python
+window.updateStylingChain = updateStylingChain;
+
 /**
  * 
  * @param {*} block 

@@ -1056,20 +1056,25 @@ class StyleData(Observable):
             style['YFieldType'] = 'Coordinate'
             style['YField'] = 'Yc'
 
-            self.aspect_ratio = data.aspect_ratio
-
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
         else:
             # round axes limits for everything that isn't a map
             # Non-map plots might still need axes
             self.xlim = style.get('XLim')
-            self.yscale = style.get('ZScale')
+            self.yscale = style.get('XScale')
 
             self.ylim = style.get('YLim')
-            self.yscale = style.get('ZScale')
+            self.yscale = style.get('YScale')
 
             self.scale_length = None
+
+        # Set Z axis details if available
+        self.zlabel = style.get('ZLabel')
+        self.zscale = style.get('ZScale')
+        self.zlim = style.get('ZLim')
+
+        self.aspect_ratio = data.aspect_ratio
 
         if app_data.c_field in list(data.processed_data.column_attributes):
             field = app_data.c_field
@@ -1116,6 +1121,50 @@ class StyleData(Observable):
             return amin, amax, scale, label, pmin, pmax
 
         return amin, amax, scale, label
+    
+    def set_axis_attributes(self, ax, field):
+        """Sets axis attributes in the style toolbox
+
+        Updates axes limits and labels.
+
+        Parameters
+        ----------
+        ax : str
+            Axis 'x', 'y', or 'z'
+        field : str
+            Field plotted on axis, used as column name to ``MainWindow.data.processed_data`` dataframe.
+        """
+        data = self.ui.data[self.app_data.sample_id]
+
+        if field == '':
+            return
+
+        match ax:
+            case 'x':
+                xmin = data.processed_data.get_attribute(field,'plot_min')
+                xmax = data.processed_data.get_attribute(field,'plot_max')
+                self.xlim = [xmin, xmax]
+                self.xlabel = data.processed_data.get_attribute(field,'label')
+                self.xscale = data.processed_data.get_attribute(field,'norm')
+            case 'y':
+                if self.plot_type == 'histogram':
+                    ymin = data.processed_data.get_attribute(field,'p_min')
+                    ymax = data.processed_data.get_attribute(field,'p_max')
+                    self.ylim = [ymin, ymax]
+                    self.ylabel = self.app_data.hist_plot_style
+                    self.yscale = 'linear'
+                else:
+                    ymin = data.processed_data.get_attribute(field,'plot_min')
+                    ymax = data.processed_data.get_attribute(field,'plot_max')
+                    self.ylim = [ymin, ymax]
+                    self.ylabel = data.processed_data.get_attribute(field,'label')
+                    self.yscale = data.processed_data.get_attribute(field,'norm')
+            case 'z':
+                zmin = data.processed_data.get_attribute(field,'plot_min')
+                zmax = data.processed_data.get_attribute(field,'plot_max')
+                self.zlim = [zmin, zmax]
+                self.zlabel = data.processed_data.get_attribute(field,'label')
+                self.zscale = data.processed_data.get_attribute(field,'norm')   
     
     # color functions 
     def color_norm(self, N=None):

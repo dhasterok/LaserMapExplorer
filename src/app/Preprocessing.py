@@ -175,7 +175,7 @@ class PreprocessingUI():
                 # update x axis limits in style_dict 
                 self.ui.plot_style.initialize_axis_values(self.ui.data, self.ui.plot_info['field_type'], self.ui.plot_info['field'])
                 # update limits in styling tabs
-                self.ui.plot_style.set_axis_widgets("x",field)
+                self.ui.plot_style.set_axis_attributes("x",field)
 
     def update_dy_lineedit(self,value):
         """Updates ``MainWindow.lineEditDY.value``
@@ -196,7 +196,7 @@ class PreprocessingUI():
                 # update x axis limits in style_dict 
                 self.ui.plot_style.initialize_axis_values(self.ui.plot_info['field_type'], self.ui.plot_info['field'])
                 # update limits in styling tabs
-                self.ui.plot_style.set_axis_widgets("y",field)
+                self.ui.plot_style.set_axis_attributes("y",field)
 
 
     def update_data_min_quantile(self,value):

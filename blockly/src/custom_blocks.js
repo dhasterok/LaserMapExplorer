@@ -960,9 +960,9 @@ const plot_correlation = {
         this.appendDummyInput()
             .appendField('Method')
             .appendField(new Blockly.FieldDropdown([
-                ['Pearson', 'pearson'],
-                ['Spearman', 'spearman'],
-                ['Kendall', 'kendall']
+                ['Pearson', 'Pearson'],
+                ['Spearman', 'Spearman'],
+                ['Kendall', 'Kendall']
             ]), 'method');
         this.appendDummyInput()
             .appendField('R^2')
@@ -993,7 +993,7 @@ const plot_histogram = {
                 ['PDF', 'PDF'],
                 ['CDF', 'CDF'],
                 ['log-scaling', 'log-scaling'],
-            ]), 'HistType');
+            ]), 'histType');
 
         // Field type dropdown
         this.appendDummyInput('FIELD_TYPE')
@@ -1026,6 +1026,10 @@ const plot_histogram = {
         this.setHelpUrl('');
         this.setColour(285);
         this.plotType = 'histogram'
+        this.field = this.getFieldValue('field');
+        this.fieldType = this.getFieldValue('fieldType');
+        this.histType = this.getFieldValue('histType');
+        this.histNumBins = 100;
         // Add default blocks for styling only if not in flyout
         if (!this.isInFlyout) {
             const initialFieldType = this.getFieldValue('fieldType');
@@ -1041,28 +1045,31 @@ const plot_histogram = {
             updateFieldDropdown(this,initialFieldType);
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
-            updateStylingChain(this);
-            // update style dictionaries
             updateHistogramOptions(this);
+            // update style dictionaries
+            updateStylingChain(this);
+            
 
             // 3) Attach validators to fieldType and field
             const fieldTypeDropdown = this.getField('fieldType');
             fieldTypeDropdown.setValidator((newValue) => {
-                // update style dictionaries
-                updateStylingChain(this);
+                this.fieldType = String(newValue);
                 // update style dictionaries
                 updateHistogramOptions(this);
+                // update style dictionaries
+                updateStylingChain(this);
+                
                 return newValue;
             });
 
             const fieldDropdown = this.getField('field');
             fieldDropdown.setValidator((newValue) => {
-                // update style dictionaries
-                updateStylingChain(this);
-                // update style dictionaries
+                this.field = String(newValue);
                 updateHistogramOptions(this);
-                return newValue;
-            });
+                updateStylingChain(this);
+
+            return newValue;
+        });
         }
         this.setOnChange(function(event) {
             // 1) If no workspace or block is in the flyout, do nothing

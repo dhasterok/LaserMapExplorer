@@ -1936,53 +1936,6 @@ class StylingDock(StyleData, StyleTheme):
         self.ui.lineEditCUB.value = data.processed_data.get_attribute(field,'plot_max')
         self.ui.comboBoxCScale.setCurrentText(data.processed_data.get_attribute(field,'norm'))
 
-    def set_axis_widgets(self, ax, field):
-        """Sets axis widgets in the style toolbox
-
-        Updates axes limits and labels.
-
-        Parameters
-        ----------
-        ax : str
-            Axis 'x', 'y', or 'z'
-        field : str
-            Field plotted on axis, used as column name to ``MainWindow.data.processed_data`` dataframe.
-        """
-        data = self.ui.data[self.app_data.sample_id]
-
-        if field == '':
-            return
-
-        match ax:
-            case 'x':
-                if field == 'Xc':
-                    self.ui.lineEditXLB.value = data.processed_data.get_attribute(field,'plot_min')
-                    self.ui.lineEditXUB.value = data.processed_data.get_attribute(field,'plot_max')
-                else:
-                    self.ui.lineEditXLB.value = data.processed_data.get_attribute(field,'plot_min')
-                    self.ui.lineEditXUB.value = data.processed_data.get_attribute(field,'plot_max')
-                self.ui.lineEditXLabel.setText(data.processed_data.get_attribute(field,'label'))
-                self.ui.comboBoxXScale.setCurrentText(data.processed_data.get_attribute(field,'norm'))
-            case 'y':
-                if self.ui.comboBoxPlotType.currentText() == 'histogram':
-                    self.ui.lineEditYLB.value = data.processed_data.get_attribute(field,'p_min')
-                    self.ui.lineEditYUB.value = data.processed_data.get_attribute(field,'p_max')
-                    self.ui.lineEditYLabel.setText(self.ui.comboBoxHistType.currentText())
-                    self.ui.comboBoxYScale.setCurrentText('linear')
-                else:
-                    if field == 'Xc':
-                        self.ui.lineEditYLB.value = data.processed_data.get_attribute(field,'plot_min')
-                        self.ui.lineEditYUB.value = data.processed_data.get_attribute(field,'plot_max')
-                    else:
-                        self.ui.lineEditYLB.value = data.processed_data.get_attribute(field,'plot_min')
-                        self.ui.lineEditYUB.value = data.processed_data.get_attribute(field,'plot_max')
-                    self.ui.lineEditYLabel.setText(data.processed_data.get_attribute(field,'label'))
-                    self.ui.comboBoxYScale.setCurrentText(data.processed_data.get_attribute(field,'norm'))
-            case 'z':
-                self.ui.lineEditZLB.value = data.processed_data.get_attribute(field,'plot_min')
-                self.ui.lineEditZUB.value = data.processed_data.get_attribute(field,'plot_max')
-                self.ui.lineEditZLabel.setText(data.processed_data.get_attribute(field,'label'))
-                self.ui.comboBoxZScale.setCurrentText(data.processed_data.get_attribute(field,'norm'))
 
     def axis_reset_callback(self, ax):
         """Resets axes widgets and plot axes to auto values
@@ -2013,13 +1966,13 @@ class StylingDock(StyleData, StyleTheme):
                 case 'field map' | 'cluster map' | 'cluster score map' | 'pca score':
                     field = ax.upper()
                     data.processed_data.prep_data(field)
-                    self.set_axis_widgets(ax, field)
+                    self.set_axis_attributes(ax, field)
                 case 'histogram':
                     field = self.ui.comboBoxFieldC.currentText()
                     if ax == 'x':
                         field_type = self.ui.comboBoxFieldTypeC.currentText()
                         data.processed_data.prep_data(field)
-                        self.set_axis_widgets(ax, field)
+                        self.set_axis_attributes(ax, field)
                     else:
                         data.processed_data.set_attribute(field, 'p_min', None)
                         data.processed_data.set_attribute(field, 'p_max', None)
@@ -2038,7 +1991,7 @@ class StylingDock(StyleData, StyleTheme):
                     if (field_type == '') | (field == ''):
                         return
                     data.processed_data.prep_data(field)
-                    self.set_axis_widgets(ax, field)
+                    self.set_axis_attributes(ax, field)
 
                 case 'PCA scatter' | 'PCA heatmap':
                     field_type = 'PCA score'
@@ -2047,7 +2000,7 @@ class StylingDock(StyleData, StyleTheme):
                     else:
                         field = self.ui.spinBoxPCY.currentText()
                     data.processed_data.prep_data(field)
-                    self.set_axis_widgets(ax, field)
+                    self.set_axis_attributes(ax, field)
 
                 case _:
                     return

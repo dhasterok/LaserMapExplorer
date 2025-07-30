@@ -66,11 +66,6 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     # create plot canvas
     canvas = mplc.MplCanvas(parent=parent)
 
-    if hasattr(plot_style,'set_style_widgets'): 
-        plot_style.set_style_widgets() # update ui widgets and style dictionary
-    else:
-        plot_style.set_style_attributes(data, app_data) # update style dictionary
-
     # get data for current map
     #scale = data.processed_data.get_attribute(field, 'norm')
     map_df = data.get_map_data(field, field_type)
@@ -461,7 +456,7 @@ def plot_histogram(parent, data, app_data, plot_style):
     canvas : MplCanvas
         The Matplotlib canvas containing the plotted histogram.
     """
-    
+
     plot_data = None
     #print('plot histogram')
     # create Mpl canvas
@@ -611,7 +606,7 @@ def plot_histogram(parent, data, app_data, plot_style):
             ymin, ymax = canvas.axes.get_ylim()
             data.processed_data.set_attribute(x['field'], 'p_min', fmt.oround(ymin,order=2,toward=0))
             data.processed_data.set_attribute(x['field'], 'p_max', fmt.oround(ymax,order=2,toward=1))
-            plot_style.set_axis_widgets('y', x['field'])
+            plot_style.set_axis_attributes('y', x['field'])
 
         # grab probablility axes limits
         _, _, _, _, ymin, ymax = plot_style.get_axis_values(data, x['type'],x['field'],ax='p')
@@ -1019,22 +1014,22 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
         if scatter_dict['x']['field'] not in data.processed_data.column_attributes:
             plot_style.initialize_axis_values(data,scatter_dict['x']['type'], scatter_dict['x']['field'])
-            plot_style.set_axis_widgets(data,'x', scatter_dict['x']['field'])
+            plot_style.set_axis_attributes(data,'x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
         if scatter_dict['y']['field'] not in data.processed_data.column_attributes:
             plot_style.initialize_axis_values(data,scatter_dict['y']['type'], scatter_dict['y']['field'])
-            plot_style.set_axis_widgets('y', scatter_dict['y']['field'])
+            plot_style.set_axis_attributes('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
         if scatter_dict['z']['field'] not in data.processed_data.column_attributes:
             plot_style.initialize_axis_values(data,scatter_dict['z']['type'], scatter_dict['z']['field'])
-            plot_style.set_axis_widgets('z', scatter_dict['z']['field'])
+            plot_style.set_axis_attributes('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
         if scatter_dict['c']['field'] not in data.processed_data.column_attributes:
             plot_style.set_color_axis_widgets()
-            plot_style.set_axis_widgets('c', scatter_dict['c']['field'])
+            plot_style.set_axis_attributes('c', scatter_dict['c']['field'])
 
     return scatter_dict
 

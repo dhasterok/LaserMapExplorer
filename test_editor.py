@@ -2,9 +2,8 @@ import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QWidget, QFileDialog, QMenu, QToolBar
 )
-from PyQt6.QtGui import QAction, QFont, QColor, QTextCursor, QKeyEvent
-from PyQt6.QtCore import Qt
-from src.common.CodingWidgets import CodeEditor, RstHighlighter, RST_HIGHLIGHT_RULES, HighlightRulesDialog, EditorSettingsDialog, CodeEditorMenu, CodeEditorToolbar
+from PyQt6.QtGui import QAction
+from src.common.CodingWidgets import CodeEditor, CodeEditorMenu, CodeEditorToolbar
 import re
 
 class MainWindow(QMainWindow):

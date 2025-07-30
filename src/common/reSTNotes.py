@@ -3,7 +3,7 @@ import re, subprocess
 from PyQt6.QtCore import ( Qt, QTimer, QSize, QUrl )
 from PyQt6.QtWidgets import (
         QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QSizePolicy,
-        QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout, QSplitter
+        QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout, QSplitter, QTabWidget,
     )
 from PyQt6.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator, QAction )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
@@ -17,6 +17,9 @@ from src.common.CodingWidgets import CodeEditor, RstHighlighter
 from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
 from src.common.Logger import LoggerConfig, auto_log_methods, log
+
+BASE_PATH = Path(__file__).parents[2] 
+ICON_PATH = BASE_PATH / "resources/icons"
 
 def convert_rst_to_html(rst_path: Path) -> Path:
     """Converts an rst file to html given a file path.
@@ -90,8 +93,22 @@ class NotesFormatter:
 # -------------------------------
 # Notes functions
 # -------------------------------
-@auto_log_methods(logger_key='Notes')
-class Notes(CustomDockWidget):
+class NotesMainWindow(QMainWindow):
+    """A reSTructuredText editor built with PyQt6
+
+    This is the main window environment for the reST Notes editor.
+
+    :seealso: NotesWidget
+    """
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("reST Editor")
+
+        self.notes = NotesWidget(ui=self)
+        self.setCentralWidget(self.notes)
+
+
+class NotesDock(CustomDockWidget):
     """A dock that can be used to take notes in ReStructured Text (ReST) including formatted output.
 
     Notes are automatically saved at regular intervals and upon close of the dock.  The
@@ -114,23 +131,53 @@ class Notes(CustomDockWidget):
     ------
     TypeError
         Parent must be an instance of QMainWindow.
-    """        
-    def __init__(self, parent=None, filename=None, title='Notes'):
-        if not parent or not isinstance(parent, QMainWindow):
-            raise TypeError("Parent must be an instance of QMainWindow.")
+    """
+    def __init__(self, parent:QMainWindow, filename: str|Path|None=None, title: str='reST Editor'):
+        super().__init__()
+        self.setWindowTitle(title)
 
-        super().__init__(parent)
+        self.notes = NotesWidget(ui=self, filename=filename)
+
+        self.setWidget(self.notes)
+
+        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        self.setFloating(True)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
+
+class NotesTab(QWidget):
+    def __init__(self, tab_widget: QTabWidget, filename: str|Path|None=None, title: str="reST Editor"):
+        if not tab_widget or not isinstance(tab_widget, QTabWidget):
+            raise TypeError("Parent must be an instance of QTabWidget.") 
+        super().__init__()
+        self.setObjectName("tab_reSTNotes")
+
+        self.tab_widget = tab_widget
+
+        self.notes = NotesWidget(ui=tab_widget, filename=filename)
+
+        tab_layout = QVBoxLayout()
+        tab_layout.setContentsMargins(6, 6, 6, 6)
+
+        tab_layout.addWidget(self.notes)
+
+        self.setLayout(tab_layout)
+
+        notes_icon = QIcon(str(ICON_PATH / "icon-notes-64.svg"))
+        self.tab_widget.addTab(self, notes_icon, title)
+
+@auto_log_methods("Notes")
+class NotesWidget(QWidget):
+    def __init__(self, ui=None, filename: str|Path|None=None):
+        super().__init__()
         self.logger_key = 'Notes'
 
-        self.ui = parent
-        self.title = title
+        self.ui = ui
 
         self._notes_file = None
 
         self.options = {'MaxColumns': None, 'MaxVariance': 95}
 
         self.setupUI()
-        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
         self.connect_widgets()
 
         # autosave notes
@@ -149,10 +196,9 @@ class Notes(CustomDockWidget):
         self.toggle_preview_notes()
 
     def setupUI(self):
-        container = QWidget()
 
         # Create the layout within parent.tabWorkflow
-        dock_layout = QVBoxLayout()   
+        widget_layout = QVBoxLayout()   
 
         # Create toolbar
         self.toolbar = QToolBar("Notes Toolbar", self)
@@ -164,7 +210,7 @@ class Notes(CustomDockWidget):
         self.action_wrap.setChecked(True)
 
         # header button and menu
-        header_icon = ":resources/icons/icon-heading-64.svg"
+        header_icon = str(ICON_PATH / "icon-heading-64.svg")
         header_menu_items = [
             ('H1', lambda: self.format_header('H1')),
             ('H2', lambda: self.format_header('H2')),
@@ -175,7 +221,7 @@ class Notes(CustomDockWidget):
 
         # bold button
         self.action_bold = QAction()
-        bold_icon = QIcon(":resources/icons/icon-bold-64.svg")
+        bold_icon = QIcon(str(ICON_PATH / "icon-bold-64.svg"))
         if not bold_icon.isNull():
             self.action_bold.setIcon(bold_icon)
         else:
@@ -184,7 +230,7 @@ class Notes(CustomDockWidget):
 
         # italic button
         self.action_italic = QAction()
-        italic_icon = QIcon(":resources/icons/icon-italics-64.svg")
+        italic_icon = QIcon(str(ICON_PATH / "icon-italics-64.svg"))
         if not italic_icon.isNull():
             self.action_italic.setIcon(italic_icon)
         else:
@@ -193,7 +239,7 @@ class Notes(CustomDockWidget):
 
         # literal button
         self.action_literal = QAction()
-        literal_icon = QIcon(":resources/icons/icon-literal-64.svg")
+        literal_icon = QIcon(str(ICON_PATH / "icon-literal-64.svg"))
         if not literal_icon.isNull():
             self.action_literal.setIcon(literal_icon)
         else:
@@ -202,7 +248,7 @@ class Notes(CustomDockWidget):
 
         # superscript button
         self.action_superscript = QAction()
-        superscript_icon = QIcon(":resources/icons/icon-superscript-64.svg")
+        superscript_icon = QIcon(str(ICON_PATH / "icon-superscript-64.svg"))
         if not superscript_icon.isNull():
             self.action_superscript.setIcon(superscript_icon)
         else:
@@ -211,7 +257,7 @@ class Notes(CustomDockWidget):
 
         # subscript button
         self.action_subscript = QAction()
-        subscript_icon = QIcon(":resources/icons/icon-subscript-64.svg")
+        subscript_icon = QIcon(str(ICON_PATH / "icon-subscript-64.svg"))
         if not subscript_icon.isNull():
             self.action_subscript.setIcon(subscript_icon)
         else:
@@ -222,7 +268,7 @@ class Notes(CustomDockWidget):
 
         # bulleted list button
         self.action_bullet = QAction()
-        bullet_icon = QIcon(":resources/icons/icon-bullet-list-64.svg")
+        bullet_icon = QIcon(str(ICON_PATH / "icon-bullet-list-64.svg"))
         if not bullet_icon.isNull():
             self.action_bullet.setIcon(bullet_icon)
         else:
@@ -231,7 +277,7 @@ class Notes(CustomDockWidget):
 
         # numbered list button
         self.action_enumerate = QAction()
-        enumerate_icon = QIcon(":resources/icons/icon-numbered-list-64.svg")
+        enumerate_icon = QIcon(str(ICON_PATH / "icon-numbered-list-64.svg"))
         if not enumerate_icon.isNull():
             self.action_enumerate.setIcon(enumerate_icon)
         else:
@@ -240,7 +286,7 @@ class Notes(CustomDockWidget):
 
         # citation button
         self.action_cite = QAction()
-        cite_icon = QIcon(":resources/icons/icon-cite-64.svg")
+        cite_icon = QIcon(str(ICON_PATH / "icon-cite-64.svg"))
         if not cite_icon.isNull():
             self.action_cite.setIcon(cite_icon)
         else:
@@ -249,7 +295,7 @@ class Notes(CustomDockWidget):
 
         # hyperlink button
         self.action_hyperlink = QAction()
-        hyperlink_icon = QIcon(":resources/icons/icon-hyperlink-64.svg")
+        hyperlink_icon = QIcon(str(ICON_PATH / "icon-hyperlink-64.svg"))
         if not hyperlink_icon.isNull():
             self.action_hyperlink.setIcon(hyperlink_icon)
         else:
@@ -257,21 +303,20 @@ class Notes(CustomDockWidget):
         self.action_hyperlink.setToolTip("Insert hyperlink")
 
         # math button and menu
-        math_icon = ":resources/icons/icon-equation-64.svg"
+        math_icon = str(ICON_PATH / "icon-equation-64.svg")
         math_menu_items = [
             ('Inline math', lambda: self.format_text('inline math')),
             ('Display math', lambda: self.format_text('display math')),
-            ('Calculated field', [
-                (eq_name, callback) for eq_name, callback in self.ui.calc_dict.items()
-            ])
+            # ('Calculated field', [
+            #     (eq_name, callback) for eq_name, callback in self.ui.calc_dict.items()
+            # ])
         ]
         self.action_math = CustomActionMenu(math_icon, "Insert equation", math_menu_items, self)
         self.action_math.setToolTip("Insert equation")
 
-
         # image button
         self.action_image = QAction()
-        image_icon = QIcon(":resources/icons/icon-image-dark-64.svg")
+        image_icon = QIcon(str(ICON_PATH / "icon-image-dark-64.svg"))
         if not image_icon.isNull():
             self.action_image.setIcon(image_icon)
         else:
@@ -279,7 +324,7 @@ class Notes(CustomDockWidget):
         self.action_image.setToolTip("Insert figure")
 
         # info button and menu
-        self.info_icon = ":resources/icons/icon-formatted-output-64.svg"
+        self.info_icon = str(ICON_PATH / "icon-formatted-output-64.svg")
         self._info_menu_items = []
         # info_menu_items = [
         #     ('Sample info', lambda: self.insert_info('sample info')),
@@ -294,7 +339,7 @@ class Notes(CustomDockWidget):
 
         # options button, opens options dialog
         self.action_options = QAction()
-        options_icon = QIcon(":resources/icons/icon-gear-64.svg")
+        options_icon = QIcon(str(ICON_PATH / "icon-gear-64.svg"))
         if not options_icon.isNull():
             self.action_options.setIcon(options_icon)
         else:
@@ -302,7 +347,7 @@ class Notes(CustomDockWidget):
         self.action_options.setToolTip("Options")
         # export as rst2pdf button
         self.action_export = QAction()
-        export_icon = QIcon(":resources/icons/icon-pdf-64.svg")
+        export_icon = QIcon(str(ICON_PATH / "icon-pdf-64.svg"))
         if not export_icon.isNull():
             self.action_export.setIcon(export_icon)
         else:
@@ -315,22 +360,27 @@ class Notes(CustomDockWidget):
         self.action_preview_pdf.setCheckable(True)
         self.action_preview_pdf.setChecked(False)
         self.action_preview_pdf.setEnabled(True)
-        self.preview_unchecked_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
-        self.preview_checked_icon = QIcon(":resources/icons/icon-show-64.svg")
+        self.preview_unchecked_icon = QIcon(str(ICON_PATH / "icon-show-hide-64.svg"))
+        self.preview_checked_icon = QIcon(str(ICON_PATH / "icon-show-64.svg"))
 
         self.action_recompile = QAction()
         self.action_recompile.setToolTip("Recompile document")
-        self.recompile_icon = QIcon(":resources/icons/icon-reset-64.svg")
+        self.recompile_icon = QIcon(str(ICON_PATH / "icon-reset-64.svg"))
         self.action_recompile.setIcon(self.recompile_icon)
 
         # Create Text Edit region for ReST Notes
-        self.text_edit = CodeEditor()
-        self.text_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.text_edit.setMaximumSize(QSize(524287, 524287))
-        self.text_edit.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
+        self.editor = CodeEditor()
+        self.editor.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.editor.setMaximumSize(QSize(524287, 524287))
+        self.editor.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
+
+        settings_icon = QIcon(str(ICON_PATH / "icon-gear-edit-64.svg"))
+        self.action_editor = QAction("Format Settings", self.editor)
+        self.action_editor.setIcon(settings_icon)
+        self.action_editor.setToolTip("Editor Settings")
 
         # Create search
-        self.search_widget = SearchWidget(self.text_edit, self, enable_replace=True, realtime=False)
+        self.search_widget = SearchWidget(self.editor, self, enable_replace=True, realtime=False)
 
         # add buttons to toolbar
         self.toolbar.addAction(self.action_header)
@@ -358,6 +408,7 @@ class Notes(CustomDockWidget):
         self.toolbar.addAction(self.action_export)
         self.toolbar.addAction(self.action_recompile)
         self.toolbar.addAction(self.action_preview_pdf)
+        self.toolbar.addAction(self.action_editor)
 
         # Create a QWebEngineView
         self.notes_browser = QWebEngineView()
@@ -365,7 +416,7 @@ class Notes(CustomDockWidget):
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # Add the web view to the layout
-        self.splitter.addWidget(self.text_edit)
+        self.splitter.addWidget(self.editor)
         self.splitter.addWidget(self.notes_browser)
         self.splitter.setSizes([190,190])
 
@@ -379,27 +430,15 @@ class Notes(CustomDockWidget):
             self.update_notes_view()
         self.status_label.setFixedHeight(22)
 
-
-
-
-        dock_layout.addWidget(self.toolbar)
-        dock_layout.addWidget(self.splitter)
-        dock_layout.addWidget(self.status_label)
-
-        # Connect resize event
-        #parent.resizeEvent = self.handleResizeEvent
+        widget_layout.addWidget(self.toolbar)
+        widget_layout.addWidget(self.splitter)
+        widget_layout.addWidget(self.status_label)
 
         # Set layout to the container
-        container.setLayout(dock_layout)
-        self.setWidget(container)
-
-        self.setFloating(True)
-        self.setWindowTitle(self.title)
-        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
-
+        self.setLayout(widget_layout)
 
     def connect_widgets(self):
-        self.action_wrap.triggered.connect(lambda checked: self.text_edit.setWordWrap(checked))
+        self.action_wrap.triggered.connect(lambda checked: self.editor.setWordWrap(checked))
         self.action_bold.triggered.connect(lambda: self.format_text('bold'))
         self.action_italic.triggered.connect(lambda: self.format_text('italic'))
         self.action_literal.triggered.connect(lambda: self.format_text('literal'))
@@ -416,6 +455,7 @@ class Notes(CustomDockWidget):
         self.action_preview_pdf.triggered.connect(lambda _: self.update_preview_icon())
         self.action_recompile.triggered.connect(lambda _: self.update_notes_view())
         self.action_export.triggered.connect(lambda: self.action_preview_pdf.setEnabled(True)) # compile rst
+        self.action_editor.triggered.connect(self.editor.open_settings_dialog)
 
 
     @property
@@ -461,7 +501,7 @@ class Notes(CustomDockWidget):
         # Load file if it exists
         if new_path.exists():
             try:
-                self.text_edit.setText(new_path.read_text())
+                self.editor.setText(new_path.read_text())
             except Exception:
                 file_name = new_path.name
                 self.status_label.setText(f"Cannot read {file_name}")
@@ -507,7 +547,7 @@ class Notes(CustomDockWidget):
         state : bool
             `True` turns wrapping on
         """
-        self.text_edit.setWordWrap(state == Qt.CheckState.Checked)
+        self.editor.setWordWrap(state == Qt.CheckState.Checked)
     
     def update_preview_icon(self):
         """Set preview PDF icon based on `action_preview_pdf` checked state."""
@@ -567,13 +607,14 @@ class Notes(CustomDockWidget):
 
 
     def update_equation_menu(self):
-        new_items = [
-                (eq_name, lambda: self.write_equation(equation)) for eq_name, equation in self.ui.calc_dict.items()
-            ]
-        self.action_math.update_submenu("Calculated field", new_items)
+        pass
+        # new_items = [
+        #         (eq_name, lambda: self.write_equation(equation)) for eq_name, equation in self.ui.calc_dict.items()
+        #     ]
+        # self.action_math.update_submenu("Calculated field", new_items)
 
     def write_equation(self, equation):
-        cursor = self.text_edit.textCursor()
+        cursor = self.editor.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.EndOfLine)
 
         equation_text = equation
@@ -607,17 +648,17 @@ class Notes(CustomDockWidget):
 
         # write file
         with open(self.notes_file,'w') as file:
-            file.write(str(self.text_edit.toPlainText()))
+            file.write(str(self.editor.toPlainText()))
 
         self.status_label.setText(f"File: {str(self.notes_file)} saved.")
 
     def _insert_image(self, filenames, halign, width, alt_text, caption):
         for fn in filenames:
-            self.text_edit.insertPlainText(f"\n\n.. figure:: {fn}\n")
-            self.text_edit.insertPlainText(f"    :align: {halign}\n")
-            self.text_edit.insertPlainText(f"    :alt: {alt_text}\n")
-            self.text_edit.insertPlainText(f"    :width: {width}mm\n")
-            self.text_edit.insertPlainText(f"\n    {caption}\n")
+            self.editor.insertPlainText(f"\n\n.. figure:: {fn}\n")
+            self.editor.insertPlainText(f"    :align: {halign}\n")
+            self.editor.insertPlainText(f"    :alt: {alt_text}\n")
+            self.editor.insertPlainText(f"    :width: {width}mm\n")
+            self.editor.insertPlainText(f"\n    {caption}\n")
 
     def insert_image(self, filename=None, halign="center", width=150, alt_text=None, caption=None):
         """Adds a generic placeholder image to notes
@@ -685,7 +726,7 @@ class Notes(CustomDockWidget):
                 symbol = '-'
 
         # Get the current text cursor
-        cursor = self.text_edit.textCursor()
+        cursor = self.editor.textCursor()
 
         # Get the current line number and position
         line_number = cursor.blockNumber()
@@ -709,7 +750,7 @@ class Notes(CustomDockWidget):
             Type of formatting, ``bullet`` or ``enumerate``
         """
 
-        cursor = self.text_edit.textCursor()
+        cursor = self.editor.textCursor()
         selected_text = cursor.selectedText()
 
         match style:
@@ -743,7 +784,7 @@ class Notes(CustomDockWidget):
             ``subscript``, ``superscript``, ``inline math``, ``display math``,
             ``citation``, and ``hyperlink``
         """
-        cursor = self.text_edit.textCursor()
+        cursor = self.editor.textCursor()
         selected_text = cursor.selectedText()
 
         match style:
@@ -782,11 +823,11 @@ class Notes(CustomDockWidget):
         Parameters
         ----------
         cursor : QCursor
-            defined by ``self.text_edit.textCursor()``
+            defined by ``self.editor.textCursor()``
         key : str
             selected text to be used for the citation key
         """        
-        cursor = self.text_edit.textCursor()
+        cursor = self.editor.textCursor()
         key = cursor.selectedText()
 
         # Define the citation text
@@ -801,7 +842,7 @@ class Notes(CustomDockWidget):
 
         # Search for "References" section
         # Get the entire document text
-        full_text = self.text_edit.toPlainText()
+        full_text = self.editor.toPlainText()
         
         # Locate the "References" section
         references_index = full_text.find("References\n==========")
@@ -834,7 +875,7 @@ class Notes(CustomDockWidget):
         Parameters
         ----------
         cursor : QCursor
-            defined by ``self.text_edit.textCursor()``
+            defined by ``self.editor.textCursor()``
         key : str
             selected text to be used for the citation key
         url : str
@@ -852,7 +893,7 @@ class Notes(CustomDockWidget):
         cursor.insertText(reference_text)
 
         # Search for "References" section
-        plain_text = self.text_edit.toPlainText()
+        plain_text = self.editor.toPlainText()
         references_section = "References\n=========="
         hyperlink_text = f".. _{key}: {url}"
 
@@ -870,16 +911,16 @@ class Notes(CustomDockWidget):
             # Add "References" at the end if it doesn't exist
             updated_text = f"{plain_text.rstrip()}\n\n{references_section}\n\n{hyperlink_text}\n"
 
-        self.text_edit.setPlainText(updated_text)
+        self.editor.setPlainText(updated_text)
 
     def print_info(self, info_data):
         formatter = NotesFormatter()
         output_rst = formatter.format(info_data)
 
-        cursor = self.text_edit.textCursor()
+        cursor = self.editor.textCursor()
         cursor.insertText(output_rst)
-        self.text_edit.setTextCursor(cursor)
-        self.text_edit.ensureCursorVisible()
+        self.editor.setTextCursor(cursor)
+        self.editor.ensureCursorVisible()
 
     def add_table_note(self, matrix, row_labels=None, col_labels=None):
         """Convert matrix to restructured text
@@ -922,7 +963,7 @@ class Notes(CustomDockWidget):
                 table += f" {col:{int(width)}} |"
             table += "\n"
 
-        self.text_edit.insertPlainText(table)
+        self.editor.insertPlainText(table)
 
 
     # CSV tables
@@ -1017,7 +1058,7 @@ class Notes(CustomDockWidget):
         if self.action_preview_pdf.isChecked():
             # show previewer
             self.notes_browser.show()
-            self.notes_browser.setMinimumWidth(int(self.text_edit.width() / 2))
+            self.notes_browser.setMinimumWidth(int(self.editor.width() / 2))
 
             self.update_notes_view()
         else:

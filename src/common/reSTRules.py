@@ -89,6 +89,10 @@ RST_HIGHLIGHT_RULES = [
         foreground=LIGHT_THEME["yellow"],
         font_weight="bold"
     ),
+    HighlightRule( name="brackets.pipe",
+        foreground=LIGHT_THEME["yellow"],
+        font_weight="bold"
+    ),
     HighlightRule( name="bold",
         foreground=LIGHT_THEME["red"],
         font_weight="bold",
@@ -98,7 +102,7 @@ RST_HIGHLIGHT_RULES = [
         font_italic=True,
     ),
     HighlightRule( name="bullet",
-        foreground=LIGHT_THEME["green"],
+        foreground=LIGHT_THEME["orange"],
         font_weight="normal"
     ),
     HighlightRule( name="interpreted.inline",
@@ -121,7 +125,7 @@ RST_HIGHLIGHT_RULES = [
     ),
     HighlightRule( name="citation.key",
         foreground=LIGHT_THEME["teal"],
-        font_weight="italic",
+        font_weight="normal",
     ),
     HighlightRule( name="citation.marker",
         foreground=LIGHT_THEME["orange"],
@@ -177,6 +181,10 @@ RST_HIGHLIGHT_RULES = [
     ),
     HighlightRule( name="directive.keyword",
         foreground=LIGHT_THEME["blue"],
+        font_weight="normal",
+    ),
+    HighlightRule( name="directive.argument",
+        foreground=LIGHT_THEME["teal"],
         font_weight="normal",
     ),
     HighlightRule( name="directive.option",
@@ -396,6 +404,7 @@ RST_BLOCK_RULES = {
         (re.compile(r"[\[\]]"), "brackets.square", 0),
         (re.compile(r"[{}]"), "brackets.curly", 0),
         (re.compile(r"[<>]"), "brackets.angle", 0),
+        (re.compile(r"(?<!\w)\||\|(?!\w)"), "brackets.pipe", 0),
     ],
     "literal_block": [
         (re.compile(r"(::)\s*$"), "literal.marker", 1),  # Highlight ::
@@ -419,8 +428,8 @@ RST_BLOCK_RULES = {
     "directive": [
         (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 1),           # formats .. marker
         #(re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.substitution", 2),    # the substitution is formatted by the substitution rule
-        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.keyword", 3),          # formats directive::
-        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 4),         # formats argument
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.keyword", 3),          # formats directive
+        (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.marker", 4),         # formats ::
         (re.compile(r"^(\.\.)\s*(\|[^|]+\|\s*)?(\S+)(::)(?:\s+(.*))?$"), "directive.argument", 5),         # formats argument
         (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.option", 2),                           # formats :option:
         (re.compile(r"^(\s{2,})(\s*:\w+:\s*)?(.+)$"), "directive.body", 3),                             # formats the body

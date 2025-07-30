@@ -1,15 +1,14 @@
 import re, json
 from pathlib import Path
-from typing import Callable
 from dataclasses import dataclass
 from PyQt6.QtWidgets import ( 
         QWidget, QDialog, QDialogButtonBox, QPlainTextEdit, QTextEdit, QCheckBox, QPushButton,
-        QVBoxLayout, QHBoxLayout, QColorDialog, QFormLayout, QLineEdit, QMessageBox, QListWidget,
+        QVBoxLayout, QHBoxLayout, QColorDialog, QFormLayout, QLineEdit, QListWidget,
         QLabel, QComboBox, QCheckBox, QFontComboBox, QTableWidget, QTableWidgetItem, QHeaderView,
         QMenu, QMenuBar, QToolBar, QToolTip, QSlider
     )
 from PyQt6.QtGui import (
-    QFont, QCursor, QPainter, QTextCursor, QKeyEvent, QAction, QIcon, QTextBlockUserData,
+    QFont, QPainter, QTextCursor, QKeyEvent, QAction, QIcon, QTextBlockUserData,
     QColor, QTextFormat, QTextCharFormat, QSyntaxHighlighter
 )
 from PyQt6.QtCore import Qt, QRect, QSize
@@ -331,11 +330,17 @@ class CodeEditor(QPlainTextEdit):
 
         self.setFont(font)
 
+    def update_font(self, new_family):
+        font = self.font()
+        font.setFamily(new_family)
+
+        self.setFont(font)
+
     def open_settings_dialog(self):
         dialog = EditorSettingsDialog(
             settings=self.settings,
             default_settings=self.default_settings,
-            parent=self
+            editor=self
         )
         if dialog.exec():
             print("Updated settings:", self.settings)
@@ -713,21 +718,6 @@ class RstHighlighter(QSyntaxHighlighter):
             print("Updated settings:", self.rules)
 
 
-class ContextSensitiveHighlightRule:
-    def __init__(self, name: str, trigger: Callable[[str], bool], apply: Callable[[str], bool], format: QTextCharFormat):
-        """
-        Parameters:
-        - name: Name of the rule
-        - trigger: Function that returns True when a line indicates the start of a context
-        - apply: Function that returns True for lines that should be styled after trigger is activated
-        - format: QTextCharFormat to apply to matching lines
-        """
-        self.name = name
-        self.trigger = trigger
-        self.apply = apply
-        self.format = format
-        self.active = False  # Whether we are inside the block
-
 # def qformat_from_style(style: dict) -> QTextCharFormat:
 #     fmt = QTextCharFormat()
 #     if 'color' in style:
@@ -862,8 +852,8 @@ class ContextSensitiveHighlightRule:
 #     self.setLineWrapMode(mode)
 
 class EditorSettingsDialog(QDialog):
-    def __init__(self, settings, default_settings, parent=None):
-        super().__init__(parent)
+    def __init__(self, settings, default_settings, editor=None):
+        super().__init__(editor)
         self.setFont(default_font())
         self.setWindowTitle("Editor Settings")
 
@@ -872,12 +862,16 @@ class EditorSettingsDialog(QDialog):
 
         layout = QVBoxLayout()
 
-        if parent is not None:
-            slider_layout = QHBoxLayout()
-            layout.addLayout(slider_layout)
+        if editor is not None:
+            font_layout = QFormLayout()
+            layout.addLayout(font_layout)
 
-            slider_label = QLabel()
-            slider_label.setText("Font size")
+            self.mono_font_combobox = QFontComboBox()
+            self.mono_font_combobox.setFontFilters(QFontComboBox.FontFilter.MonospacedFonts)
+            self.mono_font_combobox.activated.connect(lambda: editor.update_font(self.mono_font_combobox.currentText()))
+            self.mono_font_combobox.setCurrentFont(editor.font())
+            font_layout.addRow("Font family", self.mono_font_combobox)
+
 
             self.font_size_slider = QSlider()
             self.font_size_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -885,12 +879,22 @@ class EditorSettingsDialog(QDialog):
             self.font_size_slider.setMaximum(24)
             self.font_size_slider.setSingleStep(1)
             self.font_size_slider.setTickInterval(4)
-            font = parent.font()
-            self.font_size_slider.setValue(font.pointSize())
-            self.font_size_slider.valueChanged.connect(lambda new_size: parent.update_font_size(new_size))
+            self.font_size_slider.setValue(editor.font().pointSize())
+            self.font_size_slider.valueChanged.connect(lambda new_size: editor.update_font_size(new_size))
+            font_layout.addRow("Font size", self.font_size_slider)
 
-            slider_layout.addWidget(slider_label)
-            slider_layout.addWidget(self.font_size_slider)
+            self.highlight_checkbox = QCheckBox()
+            if editor.highlighter.enable_highlighting:
+                self.highlight_checkbox.setCheckState(Qt.CheckState.Checked)
+            else:
+                self.highlight_checkbox.setCheckState(Qt.CheckState.Unchecked)
+            self.highlight_checkbox.checkStateChanged.connect(lambda: editor.toggle_highlighter(self.highlight_checkbox.isChecked()))
+            font_layout.addRow("Syntax highlighting", self.highlight_checkbox)
+
+            self.highlight_button = QPushButton()
+            self.highlight_button.setText("Highlight Style")
+            self.highlight_button.clicked.connect(editor.open_highlight_dialog)
+            layout.addWidget(self.highlight_button)
 
         self.table = QTableWidget(len(settings), 2)
         self.table.setHorizontalHeaderLabels(["Setting", "Enabled"])
@@ -1132,7 +1136,7 @@ class CodeEditorToolbar:
         self._init_toolbar()
 
     def _init_toolbar(self):
-        settings_icon = QIcon(str(ICON_PATH / "icon-gear-64.svg"))
+        settings_icon = QIcon(str(ICON_PATH / "icon-gear-edit-64.svg"))
         settings_action = QAction("Format Settings", self.editor)
         settings_action.setIcon(settings_icon)
         settings_action.setToolTip("Editor Settings")

@@ -174,7 +174,6 @@ class NotesWidget(QWidget):
         self.ui = ui
 
         self._notes_file = None
-
         self.options = {'MaxColumns': None, 'MaxVariance': 95}
 
         self.setupUI()
@@ -194,6 +193,9 @@ class NotesWidget(QWidget):
         self.notes_file = filename
         self.update_preview_icon()
         self.toggle_preview_notes()
+
+        if filename:
+            self.notes_file = filename
 
     def setupUI(self):
 
@@ -420,14 +422,7 @@ class NotesWidget(QWidget):
         self.splitter.addWidget(self.notes_browser)
         self.splitter.setSizes([190,190])
 
-        # load notes file if it exists
-        if self._notes_file is None:
-            self.status_label = QLabel("FILE: load sample to display file")
-        else:
-            self.status_label = QLabel("FILE: "+str(self._notes_file))
-
-            # generate the HTML preview
-            self.update_notes_view()
+        self.status_label = QLabel()
         self.status_label.setFixedHeight(22)
 
         widget_layout.addWidget(self.toolbar)
@@ -487,6 +482,9 @@ class NotesWidget(QWidget):
         else:
             self.status_label.setText(f"FILE: {str(new_path)}")
 
+            # generate the HTML preview
+            self.update_notes_view()
+
         # start autosave
         try:
             self.autosaveTimer.timeout.connect(self.save_notes_file)
@@ -501,7 +499,13 @@ class NotesWidget(QWidget):
         # Load file if it exists
         if new_path.exists():
             try:
-                self.editor.setText(new_path.read_text())
+                file_name = new_path.name
+                text = new_path.read_text()
+                if text == '':
+                    self.status_label.setText(f"File ({file_name}) is empty.")
+                else:
+                    self.editor.setText(new_path.read_text())
+                    self.status_label.setText(f"File ({file_name}) loaded successfully.")
             except Exception:
                 file_name = new_path.name
                 self.status_label.setText(f"Cannot read {file_name}")

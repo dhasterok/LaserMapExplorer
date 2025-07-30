@@ -1,6 +1,8 @@
 import darkdetect
 from pathlib import Path
 from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtCore import QObject, pyqtSignal
+
 from src.app.config import ICONPATH, load_stylesheet
 
 def default_font():
@@ -10,6 +12,26 @@ def default_font():
     font.setStyleStrategy(QFont.StyleStrategy.PreferDefault)
 
     return font
+
+class ThemeManager(QObject):
+    themeChanged = pyqtSignal(str)  # 'dark' or 'light'
+
+    def __init__(self):
+        super().__init__()
+        self.current_theme = 'light'
+
+    def set_theme(self, theme):
+        if theme == self.current_theme:
+            return
+        self.current_theme = theme
+        self.apply_theme()
+        self.themeChanged.emit(theme)
+
+    def apply_theme(self):
+        if self.current_theme == 'dark':
+            app.setStyleSheet(open('dark.qss').read())
+        else:
+            app.setStyleSheet(open('light.qss').read())
 
 class UIThemes():
     def __init__(self, app, parent):

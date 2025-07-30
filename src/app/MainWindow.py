@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QSplashScreen, QApplication, QMainWindow, QSizePolicy
 ) # type: ignore
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon ) 
-from src.common.CustomWidgets import CustomCheckButton
+from src.common.CustomWidgets import CustomToolButton
 from src.app.UITheme import UIThemes
 import numpy as np
 import pandas as pd
@@ -211,19 +211,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.addPermanentWidget(self.labelInvalidValues)
 
         # Create a button to hide/show the dock
-        self.toolButtonLeftDock = CustomCheckButton(
-            QIcon(str(ICONPATH / 'icon-left_toolbar_hide-64.svg')),
-            QIcon(str(ICONPATH / 'icon-left_toolbar_show-64.svg')),
+        self.toolButtonLeftDock = CustomToolButton(
+            light_icon_unchecked='icon-left_toolbar_hide-64.svg',
+            light_icon_checked='icon-left_toolbar_show-64.svg',
             parent=self
         )
-        self.toolButtonRightDock = CustomCheckButton(
-            QIcon(str(ICONPATH / 'icon-right_toolbar_hide-64.svg')),
-            QIcon(str(ICONPATH / 'icon-right_toolbar_show-64.svg')),
+        self.toolButtonRightDock = CustomToolButton(
+            light_icon_unchecked='icon-right_toolbar_hide-64.svg',
+            light_icon_checked='icon-right_toolbar_show-64.svg',
             parent=self
         )
-        self.toolButtonBottomDock = CustomCheckButton(
-            QIcon(str(ICONPATH / 'icon-bottom_toolbar_hide-64.svg')),
-            QIcon(str(ICONPATH / 'icon-bottom_toolbar_show-64.svg')),
+        self.toolButtonBottomDock = CustomToolButton(
+            light_icon_unchecked='icon-bottom_toolbar_hide-64.svg',
+            light_icon_checked='icon-bottom_toolbar_show-64.svg',
             parent=self
         )
 
@@ -1721,7 +1721,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 notes_file = None
 
-            self.notes_dock = NotesDock(self, notes_file)
+            self.notes_dock = NotesDock(self, filename=notes_file)
             info_menu_items = [
                 ('Sample info', lambda: self.insert_info_note('sample info')),
                 ('List analytes used', lambda: self.insert_info_note('analytes')),

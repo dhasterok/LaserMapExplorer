@@ -1,3 +1,4 @@
+from pathlib import Path
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
         QMenu, QDockWidget, QHeaderView, QToolButton, QSlider, QVBoxLayout, QHBoxLayout, QLabel,
@@ -12,6 +13,7 @@ import src.common.format as fmt
 import pandas as pd
 
 from src.common.colorfunc import is_valid_hex_color
+from src.app.config import ICONPATH
 
 class CustomLineEdit(QLineEdit):
     """Custom line edit widget, when the only input should be of type float
@@ -1171,45 +1173,120 @@ class ToggleSwitch(QWidget):
     thumb_pos = pyqtProperty(float, get_thumb_pos, set_thumb_pos)
 
 
-class CustomCheckButton(QToolButton):
-    """A button that changes icons when checked
+class CustomToolButton(QToolButton):
+    """A button that changes icons when checked or the theme changes from light to dark
+
+    Attributes
+    ----------
+    self._light_icon_unchecked : QIcon
+        Icon for light, unchecked state
+    self._light_icon_checked : QIcon
+        Icon for light, checked state
+    self._dark_icon_unchecked : QIcon
+        Icon for dark, unchecked state
+    self._dark_icon_checked : QIcon
+        Icon for dark, checked state
+    self._current_theme : str
+        "light" or "dark" color theme
 
     Parameters
     ----------
-    icon_unchecked : QIcon
-        Unchecked icon.
-    icon_checked : QIcon
-        Checked icon.
+    light_icon_unchecked : str
+        Unchecked icon filename for light color theme.
+    light_icon_checked : str | None
+        Checked icon filename for light color theme.  If None, the icon is not checkable
+    dark_icon_unchecked : str
+        Unchecked icon filename for dark color theme.
+    dark_icon_checked : str | None
+        Checked icon filename for dark color theme. If None, the icon is not checkable
+    button_size : int
+        Size of button in pt.
+    icon_size : int
+        Size of icon on button in pt.
     parent : QToolButton
         Tool button to set icons.
 
     Methods
     -------
+    set_theme()
+        Updates light or dark theme icons
     update_icon()
         Update the icon based on the button's checked state.
     """
-    def __init__(self, icon_unchecked: QIcon, icon_checked: QIcon, parent=None):
+    def __init__(
+        self,
+        light_icon_unchecked: str,
+        light_icon_checked: str | None=None,
+        dark_icon_unchecked: str | None=None,
+        dark_icon_checked: str | None=None,
+        button_size: int = 24,
+        icon_size: int = 16,
+        parent=None,
+    ):
         super().__init__(parent)
 
-        # icons for checked and unchecked states
-        self.icon_checked = icon_checked
-        self.icon_unchecked = icon_unchecked
+        def load_icon(filename: str | None, fallback: QIcon = None) -> QIcon:
+            """Sets up the QIcon for a given light/dark, checked/unchecked state.
 
-        # button properties
-        self.setFixedSize(24, 24)
-        self.setIconSize(QSize(18, 18))
+            Parameters
+            ----------
+            filename : str | None
+                Icon filename for a state
+            fallback : QIcon, optional
+                Fallback icon for a state, by default None
 
-        # initialize checked state and icon
-        self.setCheckable(True)
+            Returns
+            -------
+            QIcon
+                Icon to use for a given states
+            """
+            if filename:
+                path = ICONPATH / filename
+                if path.exists():
+                    return QIcon(str(path))
+                else:
+                    print(f"[Warning] Icon not found: {path}")
+            return fallback if fallback else QIcon()
+
+        # Load icons
+        self._light_icon_unchecked = load_icon(light_icon_unchecked)
+        self._dark_icon_unchecked = load_icon(dark_icon_unchecked, self._light_icon_unchecked)
+
+        if light_icon_checked:
+            self.setCheckable(True)
+            self._light_icon_checked = load_icon(light_icon_checked, self._light_icon_unchecked)
+            self._dark_icon_checked = load_icon(dark_icon_checked, self._light_icon_checked)
+        else:
+            self.setCheckable(False)
+            self._light_icon_checked = None
+            self._dark_icon_checked = None
+
+        self._current_theme = "light"
+
+        # Button visual setup
+        self.setFixedSize(button_size, button_size)
+        self.setIconSize(QSize(icon_size, icon_size))
+
         self.setChecked(False)
         self.update_icon()
-    
+
+    def set_theme(self, theme: str):
+        """Updates the icon to light/dark theme."""
+        if theme in ["light", "dark"]:
+            self._current_theme = theme
+            self.update_icon()
+
     def update_icon(self):
-        """Update the icon based on the button's checked state."""
-        if self.isChecked():
-            self.setIcon(self.icon_checked)
-        else:
-            self.setIcon(self.icon_unchecked)
+        """Update the icon based on the button's checked state and theme."""
+        icon = None
+        match self._current_theme:
+            case "light":
+                icon = self._light_icon_checked if self.isCheckable() and self.isChecked() else self._light_icon_unchecked
+            case "dark":
+                icon = self._dark_icon_checked if self.isCheckable() and self.isChecked() else self._dark_icon_unchecked
+
+        if icon:
+            self.setIcon(icon)
 
 class CustomSlider(QWidget):
     """

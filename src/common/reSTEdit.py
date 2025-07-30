@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from src.common.rest import NotesMainWindow
+from src.common.reSTNotes import NotesMainWindow
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 ) # type: ignore
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon ) 
 from src.common.CustomWidgets import CustomToolButton
-from src.app.UITheme import UIThemes
+from src.app.UITheme import UIThemes, ThemeManager
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
@@ -138,6 +138,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.mpl_canvas = None # will hold the current canvas
 
+        self.theme_manager = ThemeManager(self.app)
+
     @no_log
     def connect_logger(self):
         """Connects user interactions with widgets to the logger"""        
@@ -213,22 +215,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Create a button to hide/show the dock
         self.toolButtonLeftDock = CustomToolButton(
             text="Left Dock",
-            light_icon_unchecked='icon-left_toolbar_hide-64.svg',
-            light_icon_checked='icon-left_toolbar_show-64.svg',
+            light_icon_unchecked='icon-left-toolbar-hide-64.svg',
+            light_icon_checked='icon-left-toolbar-show-64.svg',
             parent=self
         )
         self.toolButtonLeftDock.setChecked(True)
         self.toolButtonRightDock = CustomToolButton(
             text="Right Dock",
-            light_icon_unchecked='icon-right_toolbar_hide-64.svg',
-            light_icon_checked='icon-right_toolbar_show-64.svg',
+            light_icon_unchecked='icon-right-toolbar-hide-64.svg',
+            light_icon_checked='icon-right-toolbar-show-64.svg',
             parent=self
         )
         self.toolButtonRightDock.setChecked(True)
         self.toolButtonBottomDock = CustomToolButton(
             text="BottomDock",
-            light_icon_unchecked='icon-bottom_toolbar_hide-64.svg',
-            light_icon_checked='icon-bottom_toolbar_show-64.svg',
+            light_icon_unchecked='icon-bottom-toolbar-hide-64.svg',
+            light_icon_checked='icon-bottom-toolbar-show-64.svg',
             parent=self
         )
         self.toolButtonBottomDock.setChecked(True)

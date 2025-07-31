@@ -113,12 +113,12 @@ from pathlib import Path
 
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
-        QMainWindow, QLineEdit, QTextEdit, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
+        QMainWindow, QTextEdit, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
         QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox, QToolButton, QWidgetAction
     )
-from PyQt6.QtGui import QIcon, QAction, QFont, QTextCursor, QTextCharFormat, QColor, QTextDocument
+from PyQt6.QtGui import QFont, QColor
 
-from src.common.CustomWidgets import CustomDockWidget, ToggleSwitch
+from src.common.CustomWidgets import CustomDockWidget, CustomAction, ToggleSwitch
 from src.common.SearchTool import SearchWidget
 
 _global_logger = None
@@ -492,43 +492,39 @@ class LoggerDock(CustomDockWidget):
         self.log_toggle.stateChanged.connect(lambda: LoggerConfig.set_paused(not self.log_toggle.isChecked()))
 
         # Export button
-        self.action_save = QAction()
-        save_icon = QIcon(":resources/icons/icon-save-file-64.svg")
-        if not save_icon.isNull():
-            self.action_save.setIcon(save_icon)
-        else:
-            self.action_save.setText("Save")
+        self.action_save = CustomAction(
+            text="Save",
+            light_icon_unchecked="icon-save-file-64.svg",
+            parent=toolbar,
+        )
         self.action_save.setToolTip("Save log to file")
 
         # Add spacer
         spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         if hasattr(self.ui,'logger_options'):
-            self.action_settings = QAction()
-            settings_icon = QIcon(":resources/icons/icon-gear-64.svg")
-            if not settings_icon.isNull():
-                self.action_settings.setIcon(settings_icon)
-            else:
-                self.action_settings.setText("Settings")
+            self.action_settings = CustomAction(
+                text="Settings",
+                light_icon_unchecked="icon-gear-64.svg",
+                dark_icon_unchecked="icons-gear-dark-64.svg",
+                parent=toolbar,
+            )
             self.action_settings.setToolTip("Logger settings")
 
-        self.action_clear = QAction()
-        clear_icon = QIcon(":resources/icons/icon-delete-64.svg")
-        if not clear_icon.isNull():
-            self.action_clear.setIcon(clear_icon)
-        else:
-            self.action_clear.setText("Clear")
+        self.action_clear = CustomAction(
+            text="Clear",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=toolbar,
+        )
         self.action_clear.setToolTip("Clear log")
 
         # Create QTextEdit for logging
-        self.text_edit = QTextEdit()
+        self.text_edit = QPlainTextEdit()
         self.text_edit.setReadOnly(True)
         self.text_edit.setFont(QFont("Monaco",10))
 
         # Create search bar
-        self.text_edit = QTextEdit()
-        self.text_edit.setReadOnly(True)
-        self.text_edit.setFont(QFont("Monaco",10))
         self.search_widget = SearchWidget(self.text_edit, self, enable_replace=False, realtime=False)
 
         toolbar.addAction(self.actionLogToggle)

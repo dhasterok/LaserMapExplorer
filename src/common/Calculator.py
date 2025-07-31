@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
 
-from PyQt6.QtCore import Qt, QSize, QUrl
+from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
-        QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
-        QToolBar, QComboBox, QToolButton, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
+        QMainWindow, QPlainTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
+        QToolBar, QComboBox, QCheckBox, QPushButton,
         QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy, QScrollArea
     )
 
@@ -146,7 +146,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         screen_layout = QVBoxLayout()
         screen_layout.setContentsMargins(3,3,3,3)
 
-        self.calc_text_edit = QTextEdit()
+        self.calc_text_edit = QPlainTextEdit()
         self.calc_text_edit.textChanged.connect(self.calc_set_add_formula)
         screen_layout.addWidget(self.calc_text_edit)
 
@@ -441,7 +441,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         name = self.comboBoxFormula.currentText()
 
         self.calc_text_edit.clear()
-        self.calc_text_edit.setText(self.calc_dict[name])
+        self.calc_text_edit.setPlainText(self.calc_dict[name])
 
         self.add_formula = False
     

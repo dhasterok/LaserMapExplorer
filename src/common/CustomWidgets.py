@@ -932,6 +932,8 @@ class CustomAction(QAction):
 
     Parameters
     ----------
+    text: str
+        Text to display by widget
     light_icon_unchecked : str
         Unchecked icon filename for light color theme.
     light_icon_checked : str | None

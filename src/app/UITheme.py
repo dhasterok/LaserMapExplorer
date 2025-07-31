@@ -3,7 +3,7 @@ from pathlib import Path
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from src.app.config import ICONPATH, load_stylesheet
+from src.app.config import ICONPATH, RESOURCE_PATH, load_stylesheet
 
 def default_font():
     # set default font for application
@@ -16,9 +16,11 @@ def default_font():
 class ThemeManager(QObject):
     themeChanged = pyqtSignal(str)  # 'dark' or 'light'
 
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
         self.current_theme = 'light'
+
+        self.app = app
 
     def set_theme(self, theme):
         if theme == self.current_theme:
@@ -29,9 +31,9 @@ class ThemeManager(QObject):
 
     def apply_theme(self):
         if self.current_theme == 'dark':
-            app.setStyleSheet(open('dark.qss').read())
+            self.app.setStyleSheet(open(RESOURCE_PATH / 'styles' / 'dark.qss').read())
         else:
-            app.setStyleSheet(open('light.qss').read())
+            self.app.setStyleSheet(open(RESOURCE_PATH / 'styles' / 'light.qss').read())
 
 class UIThemes():
     def __init__(self, app, parent):
@@ -83,14 +85,6 @@ class UIThemes():
         parent.actionSwapAxes.setIcon(QIcon(str(ICONPATH / 'icon-swap-dark-64.svg')))
         parent.toolButtonSwapResolution.setIcon(QIcon(str(ICONPATH / 'icon-swap-resolution-dark-64.svg')))
         # Notes
-        if hasattr(parent,'notes') and parent.notes.isVisible():
-            parent.notes.header_button.setIcon(QIcon(str(ICONPATH / 'icon-heading-dark-64.svg')))
-            parent.notes.bold_button.setIcon(QIcon(str(ICONPATH / 'icon-bold-dark-64.svg')))
-            parent.notes.italic_button.setIcon(QIcon(str(ICONPATH / 'icon-italics-dark-64.svg')))
-            parent.notes.bullet_button.setIcon(QIcon(str(ICONPATH / 'icon-bullet-list-dark-64.svg')))
-            parent.notes.number_button.setIcon(QIcon(str(ICONPATH / 'icon-numbered-list-dark-64.svg')))
-            parent.notes.image_button.setIcon(QIcon(str(ICONPATH / 'icon-image-64.svg')))
-            parent.notes.save_button.setIcon(QIcon(str(ICONPATH / 'icon-pdf-dark-64.svg')))
         # Reset Buttons
         parent.toolButtonXAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
         parent.toolButtonYAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
@@ -98,11 +92,6 @@ class UIThemes():
         parent.toolButtonCAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
         #parent.toolButtonClusterColorReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        # Plot Tree
-        if hasattr(parent,"plot_tree"):
-            parent.plot_tree.actionSortMenu.setIcon(QIcon(str(ICONPATH / 'icon-sort-dark-64.svg')))
-            parent.plot_tree.actionRemovePlot.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-            parent.plot_tree.actionRemoveAllPlots.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
         # Samples
         parent.toolBox.setItemIcon(parent.left_tab['sample'],QIcon(str(ICONPATH / 'icon-atom-dark-64.svg')))
         parent.toolButtonScaleEqualize.setIcon(QIcon(str(ICONPATH / 'icon-histeq-dark-64.svg')))
@@ -148,11 +137,6 @@ class UIThemes():
         #parent.toolButtonPlotProfile.setIcon(QIcon(str(ICONPATH / 'icon-profile-dark-64.svg')))
         #parent.toolButtonPointDown.setIcon(QIcon(str(ICONPATH / 'icon-down-arrow-dark-64.svg')))
         #parent.toolButtonPointUp.setIcon(QIcon(str(ICONPATH / 'icon-up-arrow-dark-64.svg')))
-        # Browser
-        if hasattr(parent, 'browser'):
-            parent.browser.home_button.setIcon(QIcon(str(ICONPATH / 'icon-home-dark-64.svg')))
-            parent.browser.forward_button.setIcon(QIcon(str(ICONPATH / 'icon-forward-arrow-dark-64.svg')))
-            parent.browser.back_button.setIcon(QIcon(str(ICONPATH / 'icon-back-arrow-dark-64.svg')))
         # Group Box Plot Tools
         parent.toolButtonHome.setIcon(QIcon(str(ICONPATH / 'icon-home-dark-64.svg')))
         parent.toolButtonRemoveAllMVPlots.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
@@ -190,20 +174,6 @@ class UIThemes():
         parent.actionSwapAxes.setIcon(QIcon(str(ICONPATH / 'icon-swap-64.svg')))
         parent.toolButtonSwapResolution.setIcon(QIcon(str(ICONPATH / 'icon-swap-resolution-64.svg')))
         # Notes
-        if hasattr(parent,'notes') and parent.notes.isVisible():
-            parent.notes.header_button.setIcon(QIcon(str(ICONPATH / 'icon-heading-64.svg')))
-            parent.notes.bold_button.setIcon(QIcon(str(ICONPATH / 'icon-bold-64.svg')))
-            parent.notes.italic_button.setIcon(QIcon(str(ICONPATH / 'icon-italics-64.svg')))
-            parent.notes.literal_button.setIcon(QIcon(str(ICONPATH / 'icon-literal-64.svg')))
-            parent.notes.subscript_button.setIcon(QIcon(str(ICONPATH / 'icon-subscript-64.svg')))
-            parent.notes.superscript_button.setIcon(QIcon(str(ICONPATH / 'icon-superscript-64.svg')))
-            parent.notes.math_button.setIcon(QIcon(str(ICONPATH / 'icon-equation-64.svg')))
-            parent.notes.hyperlink_button.setIcon(QIcon(str(ICONPATH / 'icon-hyperlink-64.svg')))
-            parent.notes.cite_button.setIcon(QIcon(str(ICONPATH / 'icon-cite-64.svg')))
-            parent.notes.bullet_button.setIcon(QIcon(str(ICONPATH / 'icon-bullet-list-64.svg')))
-            parent.notes.number_button.setIcon(QIcon(str(ICONPATH / 'icon-numbered-list-64.svg')))
-            parent.notes.image_button.setIcon(QIcon(str(ICONPATH / 'icon-image-dark-64.svg')))
-            parent.notes.save_button.setIcon(QIcon(str(ICONPATH / 'icon-pdf-64.svg')))
         # Reset Buttons
         parent.toolButtonXAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
         parent.toolButtonYAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
@@ -212,12 +182,6 @@ class UIThemes():
         if hasattr(parent,"mask_dock"):
             parent.mask_dock.actionClusterColorReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
         parent.toolButtonHistogramReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
-        # Plot Tree
-        if hasattr(parent,"plot_tree"):
-            parent.plot_tree.actionSortMenu.setIcon(QIcon(str(ICONPATH / 'icon-sort-64.svg')))
-            parent.plot_tree.actionRemovePlot.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-            parent.plot_tree.actionRemoveAllPlots.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-
         # Samples
         parent.toolBox.setItemIcon(parent.left_tab['sample'],QIcon(str(ICONPATH / 'icon-atom-64.svg')))
         parent.toolButtonScaleEqualize.setIcon(QIcon(str(ICONPATH / 'icon-histeq-64.svg')))
@@ -264,11 +228,6 @@ class UIThemes():
         #parent.toolButtonPlotProfile.setIcon(QIcon(str(ICONPATH / 'icon-profile-64.svg')))
         #parent.toolButtonPointDown.setIcon(QIcon(str(ICONPATH / 'icon-down-arrow-64.svg')))
         #parent.toolButtonPointUp.setIcon(QIcon(str(ICONPATH / 'icon-up-arrow-64.svg')))
-        # Browser
-        if hasattr(parent, 'browser'):
-            parent.browser.home_button.setIcon(QIcon(str(ICONPATH / 'icon-home-64.svg')))
-            parent.browser.forward_button.setIcon(QIcon(str(ICONPATH / 'icon-forward-arrow-64.svg')))
-            parent.browser.back_button.setIcon(QIcon(str(ICONPATH / 'icon-back-arrow-64.svg')))
         # Group Box Plot Tools
         parent.toolButtonHome.setIcon(QIcon(str(ICONPATH / 'icon-home-64.svg')))
         parent.toolButtonRemoveAllMVPlots.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))

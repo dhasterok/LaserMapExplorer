@@ -209,7 +209,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // 5) Plot
     code += `canvas, plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`
-    code += `self.show()`
+    code += `self.show()\n`
     return code;
 };
 
@@ -238,7 +238,7 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
-    code += `self.show()`
+    code += `self.show()\n`
     return code;
 };
 

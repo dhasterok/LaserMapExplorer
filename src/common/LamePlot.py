@@ -576,6 +576,7 @@ def plot_histogram(parent, data, app_data, plot_style):
                     alpha=plot_style.marker_alpha/100,
                     density=True
                 )
+            canvas.data = pd.DataFrame(plot_data, columns=['x','y'])
         else:
             # Filter out NaN and zero values
             filtered_data = x['array'][~np.isnan(x['array']) & (x['array'] > 0)]
@@ -655,7 +656,6 @@ def plot_histogram(parent, data, app_data, plot_style):
         'cluster_groups': clusters,
         'view': [True,False],
         'position': [],
-        'data': plot_data
     }
 
     return canvas, plot_info

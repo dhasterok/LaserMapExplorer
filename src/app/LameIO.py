@@ -439,3 +439,30 @@ class LameIO():
         df.to_csv(directory / output_filename, index=False)
         
         return df
+    
+    def save_data(self, data, filename=None):
+        """Saves data to a file
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            Data to be saved
+        filename : str
+            Filename to save data to
+
+        Returns
+        -------
+        None
+        """ 
+        if filename is None:
+            #open dialog to get name of file
+            file_name, _ = QFileDialog.getSaveFileName(self.ui, "Save File", "", "CSV Files (*.csv);;All Files (*)")
+        if file_name:
+            with open(file_name, 'wb') as file:
+                # self.save_data holds data used for current plot 
+                data.to_csv(file,index = False)
+            
+            self.status_manager.show_message("Plot Data saved successfully")
+            return
+        
+        self.status_manager.show_message("Plot Data save failed")

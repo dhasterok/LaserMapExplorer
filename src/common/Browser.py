@@ -2,13 +2,13 @@ import os
 from PyQt6.QtCore import ( Qt, QUrl, QEvent, pyqtSlot, QSize )
 from PyQt6.QtWidgets import ( 
     QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDockWidget, QGroupBox,
-    QLabel, QLineEdit
+    QLabel, QLineEdit, QToolBar
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtGui import QIcon, QMouseEvent
-from src.common.CustomWidgets import CustomToolButton
+from src.common.CustomWidgets import CustomAction, CustomToolButton
 from src.common.Logger import LoggerConfig, auto_log_methods
     
 # WebEngineView - Web engine for viewing userguide help pages
@@ -132,11 +132,9 @@ class Browser(QDockWidget):
 
         self.dock_layout = QVBoxLayout(container)
 
-        toolbar = QGroupBox("")
-        toolbar_layout = QHBoxLayout(toolbar)
-        toolbar_layout.setContentsMargins(5, 5, 5, 5)  # Adjust margins as needed
-        toolbar_layout.setSpacing(5)  # Spacing between buttons
-        toolbar.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        toolbar = QToolBar("Browser Toolbar", self)
+        toolbar.setIconSize(QSize(32, 32))
+        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
         # self.groupBoxBrowserControl = QtWidgets.QGroupBox(self.container)
         # self.groupBoxBrowserControl.setMinimumSize(QtCore.QSize(0, 40))
@@ -145,17 +143,29 @@ class Browser(QDockWidget):
         # self.groupBoxBrowserControl.setObjectName("groupBoxBrowserControl")
         
         # Run button
-        self.home_button = CustomToolButton(light_icon_unchecked="icon-home-64.svg", dark_icon_unchecked="icon-home-dark-64.svg")
-        self.home_button.setText("Home")
-        self.home_button.setToolTip("Return to LaME documentation homepage")
+        self.home_action = CustomAction(
+            text="Home",
+            light_icon_unchecked="icon-home-64.svg",
+            dark_icon_unchecked="icon-home-dark-64.svg",
+            parent=toolbar,
+        )
+        self.home_action.setToolTip("Return to LaME documentation homepage")
 
-        self.back_button = CustomToolButton(light_icon_unchecked="icon-back-arrow-64.svg", dark_icon_unchecked="icon-back-arrow-dark-64.svg")
-        self.back_button.setText("Back")
-        self.back_button.setToolTip("Return to the previous page")
+        self.back_action = CustomAction(
+            text="Back",
+            light_icon_unchecked="icon-back-arrow-64.svg",
+            dark_icon_unchecked="icon-back-arrow-dark-64.svg",
+            parent=toolbar,
+        )
+        self.back_action.setToolTip("Return to the previous page")
 
-        self.forward_button = CustomToolButton(light_icon_unchecked="icon-forward-arrow-64.svg", dark_icon_unchecked="icon-forward-arrow-dark-64.svg")
-        self.forward_button.setText("Forward")
-        self.forward_button.setToolTip("Return to the next page")
+        self.forward_action = CustomAction(
+            text="Forward",
+            light_icon_unchecked="icon-forward-arrow-64.svg",
+            dark_icon_unchecked="icon-forward-arrow-dark-64.svg",
+            parent=toolbar,
+        )
+        self.forward_action.setToolTip("Return to the next page")
 
         self.location_label = QLabel()
         self.browser_location = QLineEdit()
@@ -163,11 +173,11 @@ class Browser(QDockWidget):
         self.browser_location.setMaximumSize(QSize(16777215, 20))
         self.browser_location.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
-        toolbar_layout.addWidget(self.home_button)
-        toolbar_layout.addWidget(self.back_button)
-        toolbar_layout.addWidget(self.forward_button)
-        toolbar_layout.addWidget(self.location_label)
-        toolbar_layout.addWidget(self.browser_location)
+        toolbar.addAction(self.home_action)
+        toolbar.addAction(self.back_action)
+        toolbar.addAction(self.forward_action)
+        toolbar.addWidget(self.location_label)
+        toolbar.addWidget(self.browser_location)
 
         self.dock_layout.addWidget(toolbar)
 
@@ -185,10 +195,10 @@ class Browser(QDockWidget):
         self.open_browser()
 
         # connect widget slots
-        self.home_button.clicked.connect(self.go_to_home)
+        self.home_action.triggered.connect(self.go_to_home)
         self.browser_location.editingFinished.connect(self.go_to_page)
-        self.back_button.clicked.connect(self.engine.back)
-        self.forward_button.clicked.connect(self.engine.forward)
+        self.back_action.triggered.connect(self.engine.back)
+        self.forward_action.triggered.connect(self.engine.forward)
 
         # install event filter for help
         for widget in self.help_mapping.keys():

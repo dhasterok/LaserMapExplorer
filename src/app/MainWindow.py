@@ -212,20 +212,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Create a button to hide/show the dock
         self.toolButtonLeftDock = CustomToolButton(
+            text="Left Dock",
             light_icon_unchecked='icon-left_toolbar_hide-64.svg',
             light_icon_checked='icon-left_toolbar_show-64.svg',
             parent=self
         )
+        self.toolButtonLeftDock.setChecked(True)
         self.toolButtonRightDock = CustomToolButton(
+            text="Right Dock",
             light_icon_unchecked='icon-right_toolbar_hide-64.svg',
             light_icon_checked='icon-right_toolbar_show-64.svg',
             parent=self
         )
+        self.toolButtonRightDock.setChecked(True)
         self.toolButtonBottomDock = CustomToolButton(
+            text="BottomDock",
             light_icon_unchecked='icon-bottom_toolbar_hide-64.svg',
             light_icon_checked='icon-bottom_toolbar_show-64.svg',
             parent=self
         )
+        self.toolButtonBottomDock.setChecked(True)
 
         self.dockWidgetLeftToolbox.show()
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetLeftToolbox)

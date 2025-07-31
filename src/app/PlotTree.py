@@ -1,9 +1,9 @@
 import re, darkdetect
 
 from PyQt6.QtCore import ( Qt, QSize )
-from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem, QAction, QIcon )
-from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QHBoxLayout, QLabel, QComboBox, QToolBar ) 
-from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomActionMenu
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
+from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar ) 
+from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomAction, CustomActionMenu
 from src.app.UITheme import default_font
 
 import src.common.CustomMplCanvas as mplc
@@ -63,7 +63,7 @@ class PlotTree(CustomDockWidget):
         container_layout.addWidget(toolbar)
 
         print(ICONPATH)
-        sort_icon = ":resources/icons/icon-sort-64.svg"
+        sort_icon = ":resources/icons/"
         sortmenu_items = [
             ("alphabetical", lambda: self.sort_tree("alphabetical")),
             ("atomic number", lambda: self.sort_tree("atomic number")),
@@ -73,24 +73,29 @@ class PlotTree(CustomDockWidget):
         ]
 
         self.actionSortMenu = CustomActionMenu(
-            icon=sort_icon,
             text="Sort fields for Quick View",
             menu_items=sortmenu_items,
+            light_icon_unchecked="icon-sort-64.svg",
+            dark_icon_unchecked="icon-sort-dark-64.svg",
             parent=self
         )
         self.actionSortMenu.setToolTip("Choose a method for sorting the analyte fields")
 
-        self.actionRemovePlot = QAction(parent=self)
-        self.actionRemovePlot.setFont(font)
-        icon_remove = QIcon(":resources/icons/icon-delete-64.svg")
-        self.actionRemovePlot.setIcon(icon_remove)
+        self.actionRemovePlot = CustomAction(
+            text="Remove Plot",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=self,
+        )
         self.actionRemovePlot.setObjectName("actionRemovePlot")
         self.actionRemovePlot.setToolTip("Remove selected plot from plot tree")
 
-        self.actionRemoveAllPlots = QAction(parent=self)
-        self.actionRemoveAllPlots.setFont(font)
-        icon_remove_all = QIcon(":resources/icons/icon-delete-all-64.svg")
-        self.actionRemoveAllPlots.setIcon(icon_remove_all)
+        self.actionRemoveAllPlots = CustomAction(
+            text="Remove All",
+            light_icon_unchecked="icon-delete-all-64.svg",
+            dark_icon_unchecked="icon-delete-all-dark-64.svg",
+            parent=self,
+        )
         self.actionRemoveAllPlots.setObjectName("actionRemoveAllPlots")
         self.actionRemoveAllPlots.setToolTip("Remove all plots from plot tree")
 

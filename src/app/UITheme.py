@@ -163,10 +163,6 @@ class UIThemes():
         parent.toolButtonDistance.setIcon(QIcon(str(ICONPATH / 'icon-distance-dark-64.svg')))
         # Calculator
         parent.actionCalculator.setIcon(QIcon(str(ICONPATH / 'icon-calculator-dark-64.svg')))
-        if hasattr(parent,'calculator'):
-            #parent.actionCalculate.setIcon(QIcon(str(ICONPATH / 'icon-run-64.svg')))
-            #parent.toolButtonFormulaDelete.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-            pass
         # Style Toolbox
         parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(str(ICONPATH / 'icon-axes-dark-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(str(ICONPATH / 'icon-text-and-scales-dark-64.svg')))
@@ -283,9 +279,6 @@ class UIThemes():
         parent.toolButtonDistance.setIcon(QIcon(str(ICONPATH / 'icon-distance-64.svg')))
         # Calculator
         parent.actionCalculator.setIcon(QIcon(str(ICONPATH / 'icon-calculator-64.svg')))
-        if hasattr(parent,'calculator'):
-            parent.calculator.actionCalculate.setIcon(QIcon(str(ICONPATH / 'icon-run-64.svg')))
-            parent.calculator.toolButtonFormulaDelete.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
         # Style Toolbox
         parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(str(ICONPATH / 'icon-axes-64.svg')))
         parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(str(ICONPATH / 'icon-text-and-scales-64.svg')))

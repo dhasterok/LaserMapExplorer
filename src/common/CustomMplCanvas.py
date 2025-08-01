@@ -16,10 +16,7 @@ from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToo
 import matplotlib as mpl
 from src.app.config import BASEDIR
 
-# set the directory where figures are saved
-save_dir = BASEDIR / "saved" / "figure"
-save_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
-mpl.rcParams['savefig.directory'] = str(save_dir)
+
 # Matplotlib Canvas object
 # -------------------------------
 class SimpleMplCanvas(FigureCanvas):
@@ -77,8 +74,6 @@ class MplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
-        # Create a FigureManagerQT for your canvas
-        self.manager = FigureManagerQT(self, num=1)
         if parent is None:
             return
         self.parent = parent
@@ -133,9 +128,9 @@ class MplCanvas(FigureCanvas):
         self.ui.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.ui.toolButtonZoom.isChecked()))   
         self.ui.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
         
-        SaveMenu_items = ['Figure', 'Data']
+        SaveMenu_items = ['figure', 'data']
         SaveMenu = QMenu()
-        SaveMenu.triggered.connect(self.save_plot)
+        SaveMenu.triggered.connect(lambda action: self.save_plot(action.text()))
         self.ui.toolButtonSave.setMenu(SaveMenu)
         for item in SaveMenu_items:
             SaveMenu.addAction(item)
@@ -282,29 +277,27 @@ class MplCanvas(FigureCanvas):
             # trigger update to plot        
             self.plot_style.schedule_update()
 
-        if function == 'save':
-            if isinstance(canvas,MplCanvas):
-                self.mpl_toolbar.save_figure()
-        #     elif isinstance(canvas,GraphicsLayoutWidget):
-        #         # Save functionality for pyqtgraph
-        #         export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
-        #         export.show(canvas.getItem(0, 0).getViewBox())
-        #         export.exec()
+
                 
-    def save_plot(self, action):
+    def save_plot(self, method, filename= None):
         """Sorts analyte table in dialog"""        
         # get save method (Figure/Data)
-        method = action.text()
-        if method == 'Figure':
-            self.mpl_toolbar.save_figure()
+        
+        if method == 'figure':
+            if filename:
+                self.parent.io.save_figure(self.figure, filename)
+            else:
+                self.parent.io.save_figure(self.figure, self.plot_name)
 
             # elif isinstance(canvas,GraphicsLayoutWidget):
             #     # Save functionality for pyqtgraph
             #     export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
             #     export.show(canvas.getItem(0, 0).getViewBox())
 
-        elif method == 'Data':
-            if isinstance(self.data, pd.DataFrame):
+        if method == 'data':
+            if filename:
+                self.parent.io.save_data(self.data, filename)
+            else:
                 self.parent.io.save_data(self.data, self.plot_name)
                     
 

@@ -144,7 +144,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     plot_name = field
     canvas.plot_name = plot_name
     # set title to set default name when saving figure
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': field_type,
         'sample_id': app_data.sample_id,
@@ -680,7 +680,7 @@ def plot_histogram(parent, data, app_data, plot_style):
     canvas.fig.tight_layout()
     plot_name = app_data.c_field_type+'_'+app_data.c_field
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Histogram',
         'sample_id': app_data.sample_id,
@@ -980,7 +980,7 @@ def plot_correlation(parent, data, app_data, plot_style):
         plot_name = method
 
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Correlation',
         'sample_id': app_data.sample_id,
@@ -1290,7 +1290,7 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
     plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
     canvas.data = plot_data
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1404,7 +1404,7 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
     canvas.data = plot_data
     plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1494,7 +1494,7 @@ def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
     plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
     canvas.data = pd.DataFrame(np.vstack((x['array'],y['array'])).T, columns = ['x','y'])
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1564,7 +1564,7 @@ def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
     canvas.data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
     plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1671,7 +1671,7 @@ def plot_ternary_map(parent, data, app_data, plot_style):
 
     plot_name = f'{afield}_{bfield}_{cfield}_ternarymap'
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1858,7 +1858,7 @@ def plot_ndim(parent, data, app_data, plot_style):
     plot_style.update_figure_font(canvas, plot_style.font)
     canvas.data = pd.DataFrame(plot_data)
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -2023,7 +2023,7 @@ def plot_pca(parent, data, app_data, plot_style):
     plot_style.update_figure_font(canvas, plot_style.font)
     canvas.data = plot_data
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Multidimensional Analysis',
         'sample_id': app_data.sample_id,
@@ -2301,7 +2301,7 @@ def plot_clusters(parent, data, app_data, plot_style):
     plot_style.update_figure_font(canvas, plot_style.font)
     canvas.data = canvas.data = pd.DataFrame(plot_data)
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Multidimensional Analysis',
         'sample_id': app_data.sample_id,
@@ -2436,7 +2436,7 @@ def cluster_performance_plot(parent, data, app_data, plot_style):
     plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
     canvas.data = pd.DataFrame(plot_data)
     canvas.plot_name = plot_name
-    canvas.manager.set_window_title(plot_name)
+    
     plot_info = {
         'tree': 'Multidimensional Analysis',
         'sample_id': app_data.sample_id,

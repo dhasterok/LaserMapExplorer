@@ -900,6 +900,11 @@ const plot_map = {
             .setCheck('Polygons')
             .appendField('Polygons');
 
+        // Checkbox for Show Map
+        this.appendDummyInput('SHOW_MAP')
+            .appendField('Show Map')
+            .appendField(new Blockly.FieldCheckbox('TRUE'), 'SHOW_MAP');
+
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setTooltip('Configure and render a plot with specified type and settings.');
@@ -2047,15 +2052,36 @@ const export_data = {
             ]), 'FILE_TYPE');
         this.appendDummyInput()
             .appendField('File Name')
-            .appendField(new Blockly.FieldTextInput('data_export'), 'FILE_NAME');
+            .appendField(new Blockly.FieldTextInput('path/filename'), 'FILE_NAME');
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(60);
+        this.setColour(70);
         this.setTooltip('Exports data to the specified file type.');
         this.setHelpUrl('');
     }
 };
 Blockly.Blocks['export_data'] = export_data;
+
+const export_figure = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField('Export Figure as')
+            .appendField(new Blockly.FieldDropdown([
+                ['PNG', 'png'],
+                ['SVG', 'svg'],
+                ['PDF', 'pdf']
+            ]), 'FILE_TYPE');
+        this.appendDummyInput()
+            .appendField('File Name')
+            .appendField(new Blockly.FieldTextInput('path/filename'), 'FILE_NAME');
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(70);
+        this.setTooltip('Exports the plotted figure to the specified file type.');
+        this.setHelpUrl('');
+    }
+};
+Blockly.Blocks['export_figure'] = export_figure;
 
 const profiling = {
     init: function() {

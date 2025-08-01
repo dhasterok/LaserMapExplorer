@@ -207,9 +207,12 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
     code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     // 5) Plot
-    code += `canvas, plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
-    code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`
-    code += `self.show()\n`
+    code += `self.canvas, self.plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
+    code += `self.add_plotwidget_to_plot_viewer(self.plot_info)\n`
+    const showMap = block.getFieldValue('SHOW_MAP') === 'TRUE';
+    if (showMap) {
+    code += `self.show()\n`;
+    }
     return code;
 };
 
@@ -304,8 +307,37 @@ pythonGenerator.forBlock['export_table'] = function(block, generator) {
   
 };
 
+pythonGenerator.forBlock['export_figure'] = function(block, generator) {
+    const filetype = block.getFieldValue('FILE_TYPE');
+    const filename = block.getFieldValue('FILE_NAME');
+    let code = '';
+    if (filename === "path/filename"){
+        code = `self.canvas.save_plot('figure')\n`;
+    }
+    else{
+        const full_filename = `${filename}.${filetype}`;
+        // Assuming `self.figure` or `self.canvas.figure` holds the figure object
+        code = `self.canvas.save_plot('figure', '${full_filename}')\n`;
+    }
+    
+    return code;
+};
 
-
+pythonGenerator.forBlock['export_data'] = function(block, generator) {
+    const filetype = block.getFieldValue('FILE_TYPE');
+    const filename = block.getFieldValue('FILE_NAME');
+    let code = '';
+    if (filename === "path/filename"){
+        code = `self.canvas.save_plot('data')\n`;
+    }
+    else{
+        const full_filename = `${filename}.${filetype}`;
+        // Assuming `self.figure` or `self.canvas.figure` holds the figure object
+        code = `self.canvas.save_plot('data', '${full_filename}')\n`;
+    }
+    
+    return code;
+};
 
 
 

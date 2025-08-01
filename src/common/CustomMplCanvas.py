@@ -3,17 +3,23 @@ from PyQt6.QtCore import (
     Qt, QSize
 )
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QDialog, QInputDialog, QDialogButtonBox
+    QVBoxLayout, QDialog, QInputDialog, QDialogButtonBox, QMenu
 )
 import numpy as np
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt import FigureManagerQT
 from matplotlib.figure import Figure
-
+import pandas as pd
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
+import matplotlib as mpl
+from src.app.config import BASEDIR
 
-
+# set the directory where figures are saved
+save_dir = BASEDIR / "saved" / "figure"
+save_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+mpl.rcParams['savefig.directory'] = str(save_dir)
 # Matplotlib Canvas object
 # -------------------------------
 class SimpleMplCanvas(FigureCanvas):
@@ -71,6 +77,8 @@ class MplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
+        # Create a FigureManagerQT for your canvas
+        self.manager = FigureManagerQT(self, num=1)
         if parent is None:
             return
         self.parent = parent
@@ -82,8 +90,8 @@ class MplCanvas(FigureCanvas):
             self.ui = parent
         
         # Hold the data of the canvas as a pandas DataFrame
-        self.data = None
-        
+        self._data = None
+        self._plot_name = None
         # for placing text annotations
         # --------------------
         self.setCursorPosition()
@@ -121,13 +129,48 @@ class MplCanvas(FigureCanvas):
         # enable distance mode by default
         self.ui.toolButtonDistance.clicked.connect( self.enable_distance_mode)
         self.ui.toolButtonHome.clicked.connect( self.enable_distance_mode)
-        self.ui.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.toolButtonPan.isChecked()))
-        self.ui.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.toolButtonZoom.isChecked()))   
+        self.ui.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.ui.toolButtonPan.isChecked()))
+        self.ui.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.ui.toolButtonZoom.isChecked()))   
         self.ui.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
         
-        if hasattr(self.ui, 'toolButtonPopFigure'):
-            self.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
+        SaveMenu_items = ['Figure', 'Data']
+        SaveMenu = QMenu()
+        SaveMenu.triggered.connect(self.save_plot)
+        self.ui.toolButtonSave.setMenu(SaveMenu)
+        for item in SaveMenu_items:
+            SaveMenu.addAction(item)
 
+
+        if hasattr(self.ui, 'toolButtonPopFigure'):
+            self.ui.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
+
+    @property
+    def plot_name(self):
+        """Return the stored pandas DataFrame."""
+        return self._plot_name
+
+    @plot_name.setter
+    def plot_name(self, value):
+        """Set the plot_name only if it is a str."""
+        if value is None or isinstance(value, str):
+            self._plot_name = value
+        else:
+            raise TypeError("plot_name must be a str or None")
+    
+    @property
+    def data(self):
+        """Return the stored pandas DataFrame."""
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        """Set the data only if it is a pandas DataFrame."""
+        if value is None or isinstance(value, pd.DataFrame):
+            self._data = value
+        else:
+            raise TypeError("data must be a pandas DataFrame or None")
+    
+    
     def toolbar_plotting(self,function,view,enable=None):
         """Controls functionality of the toolbar
 
@@ -152,9 +195,9 @@ class MplCanvas(FigureCanvas):
                 pass
 
         if function == 'home':
-            self.toolButtonPan.setChecked(False)
-            self.toolButtonZoom.setChecked(False)
-            self.toolButtonAnnotate.setChecked(False)
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 canvas.restore_view()
@@ -163,8 +206,8 @@ class MplCanvas(FigureCanvas):
             #     canvas.getItem(0, 0).getViewBox().autoRange()
 
         if function == 'pan':
-            self.toolButtonZoom.setChecked(False)
-            self.toolButtonAnnotate.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 # Toggle pan mode in Matplotlib
@@ -177,8 +220,8 @@ class MplCanvas(FigureCanvas):
             #     canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
         if function == 'zoom':
-            self.toolButtonPan.setChecked(False)
-            self.toolButtonAnnotate.setChecked(False)
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 # Toggle zoom mode in Matplotlib
@@ -192,12 +235,12 @@ class MplCanvas(FigureCanvas):
             #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
 
         if function == 'annotate':
-            self.toolButtonPan.setChecked(False)
-            self.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
         
         if function == 'distance':
-            self.toolButtonPan.setChecked(False)
-            self.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
 
 
         if function == 'preference':
@@ -227,9 +270,9 @@ class MplCanvas(FigureCanvas):
                     canvas.showAxis('bottom', False)
         
         if function == 'pop':
-            self.toolButtonPan.setChecked(False)
-            self.toolButtonZoom.setChecked(False)
-            self.toolButtonAnnotate.setChecked(False)
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
@@ -261,9 +304,8 @@ class MplCanvas(FigureCanvas):
             #     export.show(canvas.getItem(0, 0).getViewBox())
 
         elif method == 'Data':
-            if self.data:
-
-                self.parent.io.save_data(self.data)
+            if isinstance(self.data, pd.DataFrame):
+                self.parent.io.save_data(self.data, self.plot_name)
                     
 
 

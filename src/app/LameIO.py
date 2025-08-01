@@ -441,28 +441,63 @@ class LameIO():
         return df
     
     def save_data(self, data, filename=None):
-        """Saves data to a file
+        """
+        Saves data to a file in CSV, Excel, or Parquet format.
 
         Parameters
         ----------
         data : pandas.DataFrame
             Data to be saved
-        filename : str
+        filename : str or Path, optional
             Filename to save data to
 
         Returns
         -------
         None
-        """ 
+        """
+        save_dir = BASEDIR / "saved" / "data"
+        save_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+        filters = "CSV Files (*.csv);;Excel Files (*.xlsx);;Parquet Files (*.parquet);;All Files (*)"
+
+        # Always work with Path
         if filename is None:
-            #open dialog to get name of file
-            file_name, _ = QFileDialog.getSaveFileName(self.ui, "Save File", "", "CSV Files (*.csv);;All Files (*)")
-        if file_name:
-            with open(file_name, 'wb') as file:
-                # self.save_data holds data used for current plot 
-                data.to_csv(file,index = False)
-            
-            self.status_manager.show_message("Plot Data saved successfully")
-            return
-        
+            file_name_str, selected_filter = QFileDialog.getSaveFileName(
+                self.ui, "Save File", str(save_dir), filters)
+            file_name = Path(file_name_str) if file_name_str else None
+        elif str(filename).endswith(('.csv', '.xlsx', '.parquet')):
+            file_name = Path(filename)
+            selected_filter = None
+        else:
+            file_name_str, selected_filter = QFileDialog.getSaveFileName(
+                self.ui, "Save File", str(save_dir / filename), filters)
+            file_name = Path(file_name_str) if file_name_str else None
+
+        if file_name and file_name.name != '':
+            ext = file_name.suffix.lower()
+            # Enforce extension based on selected filter (optional)
+            if selected_filter:
+                if "CSV" in selected_filter and ext != '.csv':
+                    file_name = file_name.with_suffix('.csv')
+                elif "Excel" in selected_filter and ext != '.xlsx':
+                    file_name = file_name.with_suffix('.xlsx')
+                elif "Parquet" in selected_filter and ext != '.parquet':
+                    file_name = file_name.with_suffix('.parquet')
+
+            try:
+                if file_name.suffix == '.csv':
+                    data.to_csv(file_name, index=False)
+                elif file_name.suffix == '.xlsx':
+                    data.to_excel(file_name, index=False)
+                elif file_name.suffix == '.parquet':
+                    data.to_parquet(file_name, index=False)
+                else:
+                    # Default to CSV if unknown format
+                    data.to_csv(file_name, index=False)
+
+                self.status_manager.show_message("Plot Data saved successfully")
+                return
+            except Exception as e:
+                self.status_manager.show_message(f"Plot Data save failed: {e}")
+                return
+
         self.status_manager.show_message("Plot Data save failed")

@@ -14,7 +14,7 @@ from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
-
+from matplotlib.backends.backend_qt import new_figure_manager
 import src.common.CustomMplCanvas as mplc
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -74,7 +74,7 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     aspect_ratio = data.aspect_ratio
 
     # store map_df to save_data if data needs to be exported
-    parent.save_data = map_df.copy()
+    canvas.data = map_df.copy()
 
     # equalized color bins to CDF function
     if app_data.equalize_color_scale:
@@ -117,7 +117,6 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
     # white plot screen when uncommented.
     # canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
-    canvas.array = reshaped_array
 
     canvas.axes.tick_params(direction=None,
         labelbottom=False, labeltop=False, labelright=False, labelleft=False,
@@ -142,11 +141,14 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
     # add small histogram
     if add_histogram:
         hist_canvas = plot_small_histogram(parent, data, app_data, plot_style, map_df)
-
+    plot_name = field
+    canvas.plot_name = plot_name
+    # set title to set default name when saving figure
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': field_type,
         'sample_id': app_data.sample_id,
-        'plot_name': field,
+        'plot_name': plot_name,
         'plot_type': 'field map',
         'field_type': field_type,
         'field': field,
@@ -154,7 +156,8 @@ def plot_map_mpl(parent, data, app_data, plot_style, field_type, field, add_hist
         'style': plot_style.style_dict[plot_style.plot_type],
         'cluster_groups': None,
         'view': [True,False],
-        'position': None
+        'position': None,
+        'data': canvas.data
         }
     
     if add_histogram:
@@ -519,6 +522,7 @@ def plot_histogram(parent, data, app_data, plot_style):
         cluster_group = data.processed_data.loc[:,method]
         clusters = app_data.cluster_dict[method]['selected_clusters']
 
+        hist_dfs = []
         # Plot histogram for all clusters
         for i in clusters:
             cluster_data = x['array'][cluster_group == i]
@@ -540,6 +544,17 @@ def plot_histogram(parent, data, app_data, plot_style):
                         alpha=plot_style.marker_alpha/100,
                         density=True
                     )
+                # plot_data: (n, bins, patches)
+                counts, bin_edges, _ = plot_data
+                # Store histogram data for each cluster
+                df = pd.DataFrame({
+                    'bin_left': bin_edges[:-1],
+                    'bin_right': bin_edges[1:],
+                    'bin_center': 0.5 * (bin_edges[:-1] + bin_edges[1:]),
+                    f'prob_{cluster_label[int(i)]}': counts
+                })
+                df['cluster'] = cluster_label[int(i)]
+                hist_dfs.append(df)
             else:
                 # Filter out NaN and zero values
                 filtered_data = cluster_data[~np.isnan(cluster_data) & (cluster_data > 0)]
@@ -553,7 +568,20 @@ def plot_histogram(parent, data, app_data, plot_style):
 
                 # Plot the data
                 canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+                
+                # Store data
+                df = pd.DataFrame({
+                    'log_value': log_values,
+                    'log_count': log_counts,
+                    'cluster': cluster_label[int(i)]
+                })
+                hist_dfs.append(df)
 
+        # Combine all clusters to one DataFrame
+        if hist_dfs:
+            canvas.data = pd.concat(hist_dfs, ignore_index=True)
+        else:
+            canvas.data = None
         # Add a legend
         add_colorbar(plot_style, canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=plot_style.marker_alpha/100)
         #canvas.axes.legend()
@@ -576,7 +604,13 @@ def plot_histogram(parent, data, app_data, plot_style):
                     alpha=plot_style.marker_alpha/100,
                     density=True
                 )
-            canvas.data = pd.DataFrame(plot_data, columns=['x','y'])
+            counts, bin_edges, _ = plot_data
+            canvas.data = pd.DataFrame({
+                'bin_left': bin_edges[:-1],
+                'bin_right': bin_edges[1:],
+                'bin_center': 0.5 * (bin_edges[:-1] + bin_edges[1:]),
+                'probability': counts
+            })
         else:
             # Filter out NaN and zero values
             filtered_data = x['array'][~np.isnan(x['array']) & (x['array'] > 0)]
@@ -591,7 +625,10 @@ def plot_histogram(parent, data, app_data, plot_style):
             # Plot the data
             #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
             canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=plot_style.marker_alpha/100)
-
+            canvas.data = pd.DataFrame({
+            'value': sorted_data,
+            'count': counts
+            })
     # axes
     # label font
     if 'font' == '':
@@ -641,11 +678,13 @@ def plot_histogram(parent, data, app_data, plot_style):
     plot_style.update_figure_font(canvas, plot_style.font)
 
     canvas.fig.tight_layout()
-
+    plot_name = app_data.c_field_type+'_'+app_data.c_field
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Histogram',
         'sample_id': app_data.sample_id,
-        'plot_name': app_data.c_field_type+'_'+app_data.c_field,
+        'plot_name': plot_name,
         'field_type': app_data.c_field_type,
         'field': app_data.c_field,
         'plot_type': plot_style.plot_type,
@@ -656,6 +695,7 @@ def plot_histogram(parent, data, app_data, plot_style):
         'cluster_groups': clusters,
         'view': [True,False],
         'position': [],
+        'data': canvas.data
     }
 
     return canvas, plot_info
@@ -897,13 +937,13 @@ def plot_correlation(parent, data, app_data, plot_style):
     square_flag = app_data.corr_squared
     if square_flag:
         cax = canvas.axes.imshow(correlation_matrix**2, cmap=plot_style.get_colormap(), norm=norm)
-        canvas.array = correlation_matrix**2
+        canvas_array = correlation_matrix**2
     else:
         cax = canvas.axes.imshow(correlation_matrix, cmap=plot_style.get_colormap(), norm=norm)
-        canvas.array = correlation_matrix
+        canvas_array = correlation_matrix
         
     # store correlation_matrix to save_data if data needs to be exported
-    parent.save_data = canvas.array
+    canvas.data = pd.DataFrame(canvas_array, columns = columns, index = columns)
 
     canvas.axes.spines['top'].set_visible(False)
     canvas.axes.spines['bottom'].set_visible(False)
@@ -939,6 +979,8 @@ def plot_correlation(parent, data, app_data, plot_style):
     else:
         plot_name = method
 
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Correlation',
         'sample_id': app_data.sample_id,
@@ -953,7 +995,7 @@ def plot_correlation(parent, data, app_data, plot_style):
         'cluster_groups': [],
         'view': [True,False],
         'position': [],
-        'data': correlation_matrix,
+        'data': canvas.data
     }
 
     return canvas, plot_info
@@ -1246,7 +1288,9 @@ def biplot(canvas, data, app_data, plot_style, x, y, c):
         canvas.axes.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
     plot_name = f"{x['field']}_{y['field']}_{'scatter'}"
-
+    canvas.data = plot_data
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1357,8 +1401,10 @@ def ternary_scatter(canvas, data, app_data, plot_style, x, y, z, c):
     # axes limits
     canvas.axes.set_xlim(-1.01,1.01)
     canvas.axes.set_ylim(-0.01,1)
-
+    canvas.data = plot_data
     plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'ternscatter'}"
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1446,6 +1492,9 @@ def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
         canvas.axes.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
     plot_name = f"{x['field']}_{y['field']}_{'heatmap'}"
+    canvas.data = pd.DataFrame(np.vstack((x['array'],y['array'])).T, columns = ['x','y'])
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1458,7 +1507,7 @@ def hist2dbiplot(canvas, data, app_data, plot_style, x, y):
         'cluster_groups': [],
         'view': [True,False],
         'position': [],
-        'data': pd.DataFrame(np.vstack((x['array'],y['array'])).T, columns = ['x','y'])
+        'data': canvas.data
     }
 
     return plot_info
@@ -1512,8 +1561,10 @@ def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
         # cb.set_label(c['label'])
 
         # #tp.ternhex(hexbin_df=hexbin_df, plotfield='n', cmap=plot_style.cmap, orientation='vertical')
-
+    canvas.data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
     plot_name = f"{x['field']}_{y['field']}_{z['field']}_{'heatmap'}"
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1526,7 +1577,7 @@ def hist2dternplot(canvas, data, app_data, plot_style, x, y, z, c):
         'cluster_groups': [],
         'view': [True,False],
         'position': [],
-        'data' : pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
+        'data' : canvas.data
     }
 
     return plot_info
@@ -1588,7 +1639,7 @@ def plot_ternary_map(parent, data, app_data, plot_style):
     map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=data.order)
 
     canvas.axes.imshow(map_data, aspect=data.aspect_ratio)
-    canvas.array = map_data
+    canvas.data = pd.DataFrame(map_data.reshape(M*N,3), columns = ['x','y','z'])
 
     # add scalebar
     add_scalebar(data, app_data, plot_style, canvas.axes)
@@ -1619,6 +1670,8 @@ def plot_ternary_map(parent, data, app_data, plot_style):
         t2.ax.fill(hb['xv'], hb['yv'], color=cv[i]/255, edgecolor='none')
 
     plot_name = f'{afield}_{bfield}_{cfield}_ternarymap'
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1631,7 +1684,7 @@ def plot_ternary_map(parent, data, app_data, plot_style):
         'cluster_groups': [],
         'view': [True,False],
         'position': [],
-        'data': map_data
+        'data': canvas.data
     }
 
     return canvas, plot_info
@@ -1803,7 +1856,9 @@ def plot_ndim(parent, data, app_data, plot_style):
         plot_name = f"{plot_type}_all"
 
     plot_style.update_figure_font(canvas, plot_style.font)
-
+    canvas.data = pd.DataFrame(plot_data)
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Geochemistry',
         'sample_id': app_data.sample_id,
@@ -1816,7 +1871,7 @@ def plot_ndim(parent, data, app_data, plot_style):
         'cluster_groups': cluster_dict,
         'view': [True,False],
         'position': [],
-        'data': plot_data
+        'data': canvas.data
     }
 
     return canvas, plot_info
@@ -1871,7 +1926,6 @@ def plot_score_map(parent,data, app_data, plot_style):
     reshaped_array = np.reshape(data.processed_data[field].values, data.array_size, order=data.order)
 
     cax = canvas.axes.imshow(reshaped_array, cmap=plot_style.cmap, aspect=data.aspect_ratio, interpolation='none')
-    canvas.array = reshaped_array
 
         # Add a colorbar
     add_colorbar(plot_style, canvas, cax, field)
@@ -1967,7 +2021,9 @@ def plot_pca(parent, data, app_data, plot_style):
             return
 
     plot_style.update_figure_font(canvas, plot_style.font)
-
+    canvas.data = plot_data
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Multidimensional Analysis',
         'sample_id': app_data.sample_id,
@@ -2243,7 +2299,9 @@ def plot_clusters(parent, data, app_data, plot_style):
             return
 
     plot_style.update_figure_font(canvas, plot_style.font)
-
+    canvas.data = canvas.data = pd.DataFrame(plot_data)
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Multidimensional Analysis',
         'sample_id': app_data.sample_id,
@@ -2376,7 +2434,9 @@ def cluster_performance_plot(parent, data, app_data, plot_style):
     plot_type = plot_style.plot_type
     plot_name = f"{plot_type}_{method}"
     plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
-
+    canvas.data = pd.DataFrame(plot_data)
+    canvas.plot_name = plot_name
+    canvas.manager.set_window_title(plot_name)
     plot_info = {
         'tree': 'Multidimensional Analysis',
         'sample_id': app_data.sample_id,
@@ -2445,7 +2505,6 @@ def plot_cluster_map(parent, data, app_data, plot_style):
 
     #cax = canvas.axes.imshow(self.array.astype('float'), cmap=plot_style.cmap, norm=norm, aspect = data.aspect_ratio)
     cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=data.aspect_ratio)
-    canvas.array = reshaped_array
     #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
     add_colorbar(plot_style, canvas, cax, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)

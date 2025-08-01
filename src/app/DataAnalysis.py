@@ -1,11 +1,11 @@
 from PyQt6.QtCore import ( Qt, QSize, QRect )
 from PyQt6.QtWidgets import (
-    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QToolButton, QWidget,
+    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QWidget,
     QGroupBox, QLabel, QSpinBox, QDoubleSpinBox, QSlider, QSpacerItem, QComboBox,
     QCheckBox, QSizePolicy
 )
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon, )
-from src.common.CustomWidgets import ( CustomLineEdit, CustomSlider )
+from src.common.CustomWidgets import ( CustomLineEdit, CustomSlider, CustomToolButton )
 from src.app.UITheme import default_font
 import pandas as pd
 import numpy as np
@@ -243,13 +243,7 @@ class ClusterPage(QWidget, Clustering):
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
 
-        self.toolButtonRandomSeed = QToolButton(parent=self.groupBoxClustering)
-        self.toolButtonRandomSeed.setMinimumSize(QSize(32, 32))
-        self.toolButtonRandomSeed.setMaximumSize(QSize(32, 32))
-        self.toolButtonRandomSeed.setFont(default_font())
-        seed_icon = QIcon(":/resources/icons/icon-randomize-64.svg")
-        self.toolButtonRandomSeed.setIcon(seed_icon)
-        self.toolButtonRandomSeed.setIconSize(QSize(24, 24))
+        self.toolButtonRandomSeed = CustomToolButton(text="Randomize", light_icon_unchecked="icon-randomize-64.svg", parent=self.groupBoxClustering)
         self.toolButtonRandomSeed.setObjectName("toolButtonRandomSeed")
         self.horizontalLayout.addWidget(self.toolButtonRandomSeed)
 

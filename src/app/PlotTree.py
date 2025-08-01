@@ -1,9 +1,9 @@
 import re, darkdetect
 
 from PyQt6.QtCore import ( Qt, QSize )
-from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem, QAction, QIcon )
-from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QHBoxLayout, QLabel, QComboBox, QToolBar ) 
-from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomActionMenu
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
+from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar ) 
+from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomAction, CustomActionMenu
 from src.app.UITheme import default_font
 
 import src.common.CustomMplCanvas as mplc
@@ -62,8 +62,6 @@ class PlotTree(CustomDockWidget):
         toolbar.setMovable(False)
         container_layout.addWidget(toolbar)
 
-        print(ICONPATH)
-        sort_icon = ":resources/icons/icon-sort-64.svg"
         sortmenu_items = [
             ("alphabetical", lambda: self.sort_tree("alphabetical")),
             ("atomic number", lambda: self.sort_tree("atomic number")),
@@ -71,33 +69,37 @@ class PlotTree(CustomDockWidget):
             ("compatibility", lambda: self.sort_tree("compatibility")),
             ("radius", lambda: self.sort_tree("radius")),
         ]
-
-        self.actionSortMenu = CustomActionMenu(
-            icon=sort_icon,
+        self.action_sort = CustomActionMenu(
             text="Sort fields for Quick View",
             menu_items=sortmenu_items,
+            light_icon_unchecked="icon-sort-64.svg",
+            dark_icon_unchecked="icon-sort-dark-64.svg",
             parent=self
         )
-        self.actionSortMenu.setToolTip("Choose a method for sorting the analyte fields")
+        self.action_sort.setToolTip("Choose a method for sorting the analyte fields")
 
-        self.actionRemovePlot = QAction(parent=self)
-        self.actionRemovePlot.setFont(font)
-        icon_remove = QIcon(":resources/icons/icon-delete-64.svg")
-        self.actionRemovePlot.setIcon(icon_remove)
-        self.actionRemovePlot.setObjectName("actionRemovePlot")
-        self.actionRemovePlot.setToolTip("Remove selected plot from plot tree")
+        self.action_remove_plot = CustomAction(
+            text="Remove Plot",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=self,
+        )
+        self.action_remove_plot.setObjectName("actionRemovePlot")
+        self.action_remove_plot.setToolTip("Remove selected plot from plot tree")
 
-        self.actionRemoveAllPlots = QAction(parent=self)
-        self.actionRemoveAllPlots.setFont(font)
-        icon_remove_all = QIcon(":resources/icons/icon-delete-all-64.svg")
-        self.actionRemoveAllPlots.setIcon(icon_remove_all)
-        self.actionRemoveAllPlots.setObjectName("actionRemoveAllPlots")
-        self.actionRemoveAllPlots.setToolTip("Remove all plots from plot tree")
+        self.action_remove_all = CustomAction(
+            text="Remove All",
+            light_icon_unchecked="icon-delete-all-64.svg",
+            dark_icon_unchecked="icon-delete-all-dark-64.svg",
+            parent=self,
+        )
+        self.action_remove_all.setObjectName("actionRemoveAllPlots")
+        self.action_remove_all.setToolTip("Remove all plots from plot tree")
 
-        toolbar.addAction(self.actionSortMenu)
+        toolbar.addAction(self.action_sort)
         toolbar.addSeparator()
-        toolbar.addAction(self.actionRemovePlot)
-        toolbar.addAction(self.actionRemoveAllPlots)
+        toolbar.addAction(self.action_remove_plot)
+        toolbar.addAction(self.action_remove_all)
 
         # TreeView
         self.treeView = CustomTreeView(parent=self)
@@ -109,9 +111,9 @@ class PlotTree(CustomDockWidget):
 
     def connect_logger(self):
         """Connects logger to actions in the plot tree."""
-        self.actionSortMenu.triggered.connect(lambda: log("PlotTree.actionSortMenu", prefix="UI"))
-        self.actionRemovePlot.triggered.connect(lambda: log("PlotTree.actionRemovePlot", prefix="UI"))
-        self.actionRemoveAllPlots.triggered.connect(lambda: log("PlotTree.actionRemoveAllPlots", prefix="UI"))
+        self.action_sort.triggered.connect(lambda: log("PlotTree.actionSortMenu", prefix="UI"))
+        self.action_remove_plot.triggered.connect(lambda: log("PlotTree.actionRemovePlot", prefix="UI"))
+        self.action_remove_all.triggered.connect(lambda: log("PlotTree.actionRemoveAllPlots", prefix="UI"))
 
     def initialize_tree(self):
         """Initialize ``self.treeView`` with the top level items."""        

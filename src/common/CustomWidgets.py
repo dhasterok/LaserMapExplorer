@@ -13,6 +13,7 @@ import src.common.format as fmt
 import pandas as pd
 
 from src.common.colorfunc import is_valid_hex_color
+from src.app.UITheme import default_font
 from src.app.config import ICONPATH
 
 class CustomLineEdit(QLineEdit):
@@ -634,266 +635,6 @@ class CustomTreeView(QTreeView):
         except Exception as e:
             print(f"Error while clearing model: {e}")
 
-class CustomActionMenu(QAction):
-    """
-    A custom QMenu that allows dynamic addition and removal of menu actions.
-
-    Attributes
-    ----------
-    items : dict[str, QAction]
-        A dictionary mapping action names (as strings) to their corresponding QAction objects.
-
-    Methods
-    -------
-    add_menu_item(name: str, callback: Callable, shortcut: Optional[str] = None, tooltip: Optional[str] = None) -> None
-        Add a single menu item with an optional shortcut and tooltip.
-
-    remove_menu_item(name: str) -> None
-        Remove a menu item by name if it exists.
-
-    _add_menu_items(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -> None
-        Add multiple menu items in one batch operation.
-
-    clear_menu() -> None
-        Remove all existing menu actions from the menu and clear the internal items dictionary.
-
-    update_menu(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -> None
-        Clear and rebuild the menu using the provided list of items.
-
-    get_menu_item(name: str) -> Optional[QAction]
-        Return the QAction associated with the given name, or None if not found.
-
-    get_menu_structure() -> nested list
-        Return current menu structure as a nested list.
-
-    has_submenu(name: str) -> bool
-        Check if a submenu by a specific name exists.
-
-    Parameters
-    ----------
-    icon : str
-        Path to the icon displayed in the action.
-    text : str
-        Text label for the action.
-    menu_items : list
-        Initial list of menu items and submenus to add.
-    parent : QWidget, optional
-        Parent widget for the action and menu.
-    """
-    def __init__(self, icon, text, menu_items, parent=None):
-        super().__init__(QIcon(icon), text, parent)
-        
-        # Create the main menu
-        self.menu = QMenu(parent)
-
-        # Dictionary to hold references to dynamically updatable submenus
-        self.submenu_references = {}
-
-        # Populate the menu
-        self._add_menu_items(self.menu, menu_items)
-
-        # Function to display the menu
-        def show_menu():
-            self.menu.exec(QCursor.pos())
-
-        # Connect the action to the show_menu function
-        self.triggered.connect(show_menu)
-
-    def _add_menu_items(self, menu, items):
-        """
-        Recursively adds menu items to the given QMenu.
-
-        Parameters
-        ----------
-        menu : QMenu
-            The parent menu to which items will be added.
-        items : list of tuples
-            A list where each tuple represents a menu item.
-
-            Each tuple must be of the form:
-                (str, Callable | list | None)
-
-            - If the second element is a callable, it will be connected to the triggered signal of a QAction.
-            - If it's a list, a submenu will be created with that list as its content (recursively).
-            - If it's None, a disabled/non-interactive menu item will be added (useful as a label or placeholder).
-
-        Example
-        -------
-
-        .. code-block:: python
-
-            items = [
-                ("Export", export_callback),
-                ("Import", [
-                    ("From CSV", import_csv_callback),
-                    ("From JSON", import_json_callback)
-                ]),
-                ("Disabled Item", None)
-            ]
-
-        """
-        for item_text, callback_or_submenu in items:
-            if isinstance(callback_or_submenu, list):
-                # Create a submenu
-                submenu = QMenu(item_text, menu)
-                self.submenu_references[item_text] = submenu  # Store a reference
-                self._add_menu_items(submenu, callback_or_submenu)
-                menu.addMenu(submenu)
-            else:
-                # Add a regular action
-                menu.addAction(item_text, callback_or_submenu)
-
-    def update_menu(self, new_items):
-        """Replace the entire menu with a new structure.
-
-
-        Parameters
-        ----------
-        new_items : list of tuples
-            A list where each tuple represents a menu item.
-
-            Each tuple must be of the form:
-                (str, Callable | list | None)
-
-        :see also: _add_menu_items
-        """
-        self.clear_menu()
-        self._add_menu_items(self.menu, new_items)
-
-    def update_submenu(self, submenu_name, new_items):
-        """
-        Update a submenu with new items.
-        
-        Parameters
-        ----------
-        submenu_name : str
-            Name of submenu
-        new_items : items
-            A list where each tuple represents a menu item.
-
-            Each tuple must be of the form:
-                (str, Callable | list | None)
-
-        :see also: _add_menu_items
-        """
-        submenu = self.submenu_references.get(submenu_name)
-        if submenu:
-            submenu.clear()  # Remove all current actions
-            self._add_menu_items(submenu, new_items)
-
-    def clear_menu(self):
-        """Clear all actions and submenus from the menu."""
-        self.menu.clear()
-        self.submenu_references.clear()
-
-    def add_menu_item(self, text, callback_or_submenu):
-        """
-        Adds a single menu item to the specified QMenu.
-
-        Parameters:
-            menu (QMenu): The menu to which the item will be added.
-            label (str): The text label for the menu item.
-            action (Callable | None): The function to be called when the menu item is triggered.
-                If None, the menu item will be added as a non-interactive (disabled) item.
-
-        Returns:
-            QAction: The QAction object that was added to the menu.
-
-        Example
-        -------
-
-        .. code-block:: python
-
-            self.add_menu_item(file_menu, "Open", self.open_file)
-            self.add_menu_item(help_menu, "About", None)  # Adds a non-clickable item
-        """
-        self._add_menu_items(self.menu, [(text, callback_or_submenu)])
-
-
-    def remove_menu_item(self, menu_path):
-        """
-        Remove a menu item or submenu by its path.
-
-        Parameters
-        ----------
-        menu_path : list of str
-            A list representing the hierarchical path to the item.
-            For example, ['Top Level', 'Submenu', 'Item Text'] will remove
-            the action or submenu named 'Item Text' inside 'Submenu' which is
-            under 'Top Level'.
-
-        Returns
-        -------
-        bool
-            True if the item was found and removed, False otherwise.
-
-        Examples
-        --------
-        
-        To remove 'Export' from the 'File' top level,
-
-        .. code-block:: python
-
-            action.remove_menu_item(['File', 'Export'])
-
-        """
-        if not menu_path:
-            return False
-
-        menu = self.menu
-        for part in menu_path[:-1]:
-            found = None
-            for action in menu.actions():
-                if action.menu() and action.text() == part:
-                    found = action.menu()
-                    break
-            if not found:
-                return False
-            menu = found
-
-        for action in menu.actions():
-            if action.text() == menu_path[-1]:
-                menu.removeAction(action)
-                return True
-
-        return False
-
-    def get_menu_structure(self):
-        """
-        Return current menu structure as a nested list.
-         
-        This method is useful for debugging or serialization.
-
-        Returns
-        -------
-        nested list
-            Current menu structure.
-        """
-        def recurse(menu):
-            items = []
-            for action in menu.actions():
-                if action.menu():
-                    items.append((action.text(), recurse(action.menu())))
-                else:
-                    items.append((action.text(), None))
-            return items
-        return recurse(self.menu)
-    
-    def has_submenu(self, name):
-        """Check if a submenu by a specific name exists.
-        
-        Parameters
-        ----------
-        name : str
-            Submenu text to test
-
-        Returns
-        -------
-        bool
-            True if `name` is a submenu
-        """
-        return name in self.submenu_references
-
 class CustomComboBox(QComboBox):
     """
     A QComboBox subclass with support for dynamic item updates before showing the popup.
@@ -1173,6 +914,123 @@ class ToggleSwitch(QWidget):
     thumb_pos = pyqtProperty(float, get_thumb_pos, set_thumb_pos)
 
 
+class CustomAction(QAction):
+    """An action that changes icons when checked or the theme changes from light to dark
+
+    Attributes
+    ----------
+    self._light_icon_unchecked : QIcon
+        Icon for light, unchecked state
+    self._light_icon_checked : QIcon
+        Icon for light, checked state
+    self._dark_icon_unchecked : QIcon
+        Icon for dark, unchecked state
+    self._dark_icon_checked : QIcon
+        Icon for dark, checked state
+    self._current_theme : str
+        "light" or "dark" color theme
+
+    Parameters
+    ----------
+    text: str
+        Text to display by widget
+    light_icon_unchecked : str
+        Unchecked icon filename for light color theme.
+    light_icon_checked : str | None
+        Checked icon filename for light color theme.  If None, the icon is not checkable
+    dark_icon_unchecked : str
+        Unchecked icon filename for dark color theme.
+    dark_icon_checked : str | None
+        Checked icon filename for dark color theme. If None, the icon is not checkable
+    button_size : int
+        Size of button in pt.
+    icon_size : int
+        Size of icon on button in pt.
+    parent : QToolButton
+        Tool button to set icons.
+
+    Methods
+    -------
+    set_theme()
+        Updates light or dark theme icons
+    update_icon()
+        Update the icon based on the button's checked state.
+    """
+    def __init__(
+        self,
+        text: str,
+        light_icon_unchecked: str,
+        light_icon_checked: str | None=None,
+        dark_icon_unchecked: str | None=None,
+        dark_icon_checked: str | None=None,
+        parent=None,
+    ):
+        super().__init__(text, parent)
+
+        def load_icon(filename: str | None, fallback: QIcon = None) -> QIcon:
+            """Sets up the QIcon for a given light/dark, checked/unchecked state.
+
+            Parameters
+            ----------
+            filename : str | None
+                Icon filename for a state
+            fallback : QIcon, optional
+                Fallback icon for a state, by default None
+
+            Returns
+            -------
+            QIcon
+                Icon to use for a given states
+            """
+            if filename:
+                path = ICONPATH / filename
+                if path.exists():
+                    return QIcon(str(path))
+                else:
+                    print(f"[Warning] Icon not found: {path}")
+            return fallback if fallback else QIcon()
+
+        # Load icons
+        self._light_icon_unchecked = load_icon(light_icon_unchecked)
+        self._dark_icon_unchecked = load_icon(dark_icon_unchecked, self._light_icon_unchecked)
+
+        if light_icon_checked:
+            self.setCheckable(True)
+            self._light_icon_checked = load_icon(light_icon_checked, self._light_icon_unchecked)
+            self._dark_icon_checked = load_icon(dark_icon_checked, self._light_icon_checked)
+        else:
+            self.setCheckable(False)
+            self._light_icon_checked = None
+            self._dark_icon_checked = None
+
+        self._current_theme = "light"
+
+        # Button visual setup
+        self.setFont(default_font())
+
+        self.setChecked(False)
+        self.update_icon()
+
+        self.triggered.connect(self.update_icon)
+
+    def set_theme(self, theme: str):
+        """Updates the icon to light/dark theme."""
+        if theme in ["light", "dark"]:
+            self._current_theme = theme
+            self.update_icon()
+
+    def update_icon(self):
+        """Update the icon based on the button's checked state and theme."""
+        icon = None
+        match self._current_theme:
+            case "light":
+                icon = self._light_icon_checked if self.isCheckable() and self.isChecked() else self._light_icon_unchecked
+            case "dark":
+                icon = self._dark_icon_checked if self.isCheckable() and self.isChecked() else self._dark_icon_unchecked
+
+        if icon:
+            self.setIcon(icon)
+
 class CustomToolButton(QToolButton):
     """A button that changes icons when checked or the theme changes from light to dark
 
@@ -1215,15 +1073,18 @@ class CustomToolButton(QToolButton):
     """
     def __init__(
         self,
+        text: str,
         light_icon_unchecked: str,
         light_icon_checked: str | None=None,
         dark_icon_unchecked: str | None=None,
         dark_icon_checked: str | None=None,
-        button_size: int = 24,
-        icon_size: int = 16,
+        button_size: int = 32,
+        icon_size: int = 26,
         parent=None,
     ):
         super().__init__(parent)
+
+        self.setText(text)
 
         def load_icon(filename: str | None, fallback: QIcon = None) -> QIcon:
             """Sets up the QIcon for a given light/dark, checked/unchecked state.
@@ -1266,9 +1127,12 @@ class CustomToolButton(QToolButton):
         # Button visual setup
         self.setFixedSize(button_size, button_size)
         self.setIconSize(QSize(icon_size, icon_size))
+        self.setFont(default_font())
 
         self.setChecked(False)
         self.update_icon()
+
+        self.clicked.connect(self.update_icon)
 
     def set_theme(self, theme: str):
         """Updates the icon to light/dark theme."""
@@ -1333,10 +1197,11 @@ class CustomSlider(QWidget):
         self._precision = precision
         self._scale = int(1 / step)  
 
+        layout = None
         if orientation == "horizontal":
-            self.layout = QHBoxLayout()
+            layout = QHBoxLayout()
         elif orientation == "vertical":
-            self.layout = QVBoxLayout()
+            layout = QVBoxLayout()
         else:
             raise ValueError("Orientation must be 'horizontal' or 'vertical'.")
         
@@ -1371,15 +1236,15 @@ class CustomSlider(QWidget):
         
         # Add widgets to layout
         if (label_position == "low" and orientation == "horizontal") or (label_position == "high" and orientation == "vertical"):
-            self.layout.addWidget(self.label)
-            self.layout.addWidget(self.slider)
+            layout.addWidget(self.label)
+            layout.addWidget(self.slider)
         elif (label_position == "high" and orientation == "horizontal") or (label_position == "low" and orientation == "vertical"):
-            self.layout.addWidget(self.slider)
-            self.layout.addWidget(self.label)
+            layout.addWidget(self.slider)
+            layout.addWidget(self.label)
         else:
             raise ValueError("Label position must be 'low' or 'high'.")
         
-        self.setLayout(self.layout)
+        self.setLayout(layout)
 
     @property
     def min_value(self):
@@ -1469,7 +1334,7 @@ class CustomSlider(QWidget):
             Current value of the slider.
         """
         true_value = self.min_value + (int_value / self._scale)
-        self.label.setValue(true_value)
+        self.label.value = true_value
     
     def setTickInterval(self, new_interval):
         if self._scale <= 0:
@@ -1543,7 +1408,7 @@ class DoubleSlider(QWidget):
     def __init__(self, min_value=0, max_value=100, step=1, initial_left=25, initial_right=75, parent=None):
         super().__init__(parent)
         
-        self.layout = QVBoxLayout()
+        layout = QVBoxLayout()
         
         # Create horizontal layout for sliders
         self.slider_layout = QHBoxLayout()
@@ -1603,10 +1468,10 @@ class DoubleSlider(QWidget):
         self.input_layout.addStretch()
         self.input_layout.addWidget(self.right_input)
         
-        self.layout.addLayout(self.slider_layout)
-        self.layout.addLayout(self.input_layout)
+        layout.addLayout(self.slider_layout)
+        layout.addLayout(self.input_layout)
         
-        self.setLayout(self.layout)
+        self.setLayout(layout)
     
     def update_values(self):
         """
@@ -1712,3 +1577,264 @@ class DoubleSlider(QWidget):
             (left_value, right_value)
         """
         return self.left_slider.value(), self.right_slider.value()
+
+class CustomActionMenu(CustomAction):
+    """
+    A custom QMenu that allows dynamic addition and removal of menu actions.
+
+    Attributes
+    ----------
+    items : dict[str, QAction]
+        A dictionary mapping action names (as strings) to their corresponding QAction objects.
+
+    Methods
+    -------
+    add_menu_item(name: str, callback: Callable, shortcut: Optional[str] = None, tooltip: Optional[str] = None) -> None
+        Add a single menu item with an optional shortcut and tooltip.
+
+    remove_menu_item(name: str) -> None
+        Remove a menu item by name if it exists.
+
+    _add_menu_items(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -> None
+        Add multiple menu items in one batch operation.
+
+    clear_menu() -> None
+        Remove all existing menu actions from the menu and clear the internal items dictionary.
+
+    update_menu(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -> None
+        Clear and rebuild the menu using the provided list of items.
+
+    get_menu_item(name: str) -> Optional[QAction]
+        Return the QAction associated with the given name, or None if not found.
+
+    get_menu_structure() -> nested list
+        Return current menu structure as a nested list.
+
+    has_submenu(name: str) -> bool
+        Check if a submenu by a specific name exists.
+
+    Parameters
+    ----------
+    icon : str
+        Path to the icon displayed in the action.
+    text : str
+        Text label for the action.
+    menu_items : list
+        Initial list of menu items and submenus to add.
+    parent : QWidget, optional
+        Parent widget for the action and menu.
+    """
+    def __init__(self, text, menu_items, light_icon_unchecked: str, dark_icon_unchecked: str|None=None, parent=None):
+        super().__init__(text, light_icon_unchecked=light_icon_unchecked, dark_icon_unchecked=dark_icon_unchecked, parent=parent)
+        
+        # Create the main menu
+        self.menu = QMenu(parent)
+
+        # Dictionary to hold references to dynamically updatable submenus
+        self.submenu_references = {}
+
+        # Populate the menu
+        self._add_menu_items(self.menu, menu_items)
+
+        # Function to display the menu
+        def show_menu():
+            self.menu.exec(QCursor.pos())
+
+        # Connect the action to the show_menu function
+        self.triggered.connect(show_menu)
+
+    def _add_menu_items(self, menu, items):
+        """
+        Recursively adds menu items to the given QMenu.
+
+        Parameters
+        ----------
+        menu : QMenu
+            The parent menu to which items will be added.
+        items : list of tuples
+            A list where each tuple represents a menu item.
+
+            Each tuple must be of the form:
+                (str, Callable | list | None)
+
+            - If the second element is a callable, it will be connected to the triggered signal of a QAction.
+            - If it's a list, a submenu will be created with that list as its content (recursively).
+            - If it's None, a disabled/non-interactive menu item will be added (useful as a label or placeholder).
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            items = [
+                ("Export", export_callback),
+                ("Import", [
+                    ("From CSV", import_csv_callback),
+                    ("From JSON", import_json_callback)
+                ]),
+                ("Disabled Item", None)
+            ]
+
+        """
+        for item_text, callback_or_submenu in items:
+            if isinstance(callback_or_submenu, list):
+                # Create a submenu
+                submenu = QMenu(item_text, menu)
+                self.submenu_references[item_text] = submenu  # Store a reference
+                self._add_menu_items(submenu, callback_or_submenu)
+                menu.addMenu(submenu)
+            else:
+                # Add a regular action
+                menu.addAction(item_text, callback_or_submenu)
+
+    def update_menu(self, new_items):
+        """Replace the entire menu with a new structure.
+
+
+        Parameters
+        ----------
+        new_items : list of tuples
+            A list where each tuple represents a menu item.
+
+            Each tuple must be of the form:
+                (str, Callable | list | None)
+
+        :see also: _add_menu_items
+        """
+        self.clear_menu()
+        self._add_menu_items(self.menu, new_items)
+
+    def update_submenu(self, submenu_name, new_items):
+        """
+        Update a submenu with new items.
+        
+        Parameters
+        ----------
+        submenu_name : str
+            Name of submenu
+        new_items : items
+            A list where each tuple represents a menu item.
+
+            Each tuple must be of the form:
+                (str, Callable | list | None)
+
+        :see also: _add_menu_items
+        """
+        submenu = self.submenu_references.get(submenu_name)
+        if submenu:
+            submenu.clear()  # Remove all current actions
+            self._add_menu_items(submenu, new_items)
+
+    def clear_menu(self):
+        """Clear all actions and submenus from the menu."""
+        self.menu.clear()
+        self.submenu_references.clear()
+
+    def add_menu_item(self, text, callback_or_submenu):
+        """
+        Adds a single menu item to the specified QMenu.
+
+        Parameters:
+            menu (QMenu): The menu to which the item will be added.
+            label (str): The text label for the menu item.
+            action (Callable | None): The function to be called when the menu item is triggered.
+                If None, the menu item will be added as a non-interactive (disabled) item.
+
+        Returns:
+            QAction: The QAction object that was added to the menu.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            self.add_menu_item(file_menu, "Open", self.open_file)
+            self.add_menu_item(help_menu, "About", None)  # Adds a non-clickable item
+        """
+        self._add_menu_items(self.menu, [(text, callback_or_submenu)])
+
+
+    def remove_menu_item(self, menu_path):
+        """
+        Remove a menu item or submenu by its path.
+
+        Parameters
+        ----------
+        menu_path : list of str
+            A list representing the hierarchical path to the item.
+            For example, ['Top Level', 'Submenu', 'Item Text'] will remove
+            the action or submenu named 'Item Text' inside 'Submenu' which is
+            under 'Top Level'.
+
+        Returns
+        -------
+        bool
+            True if the item was found and removed, False otherwise.
+
+        Examples
+        --------
+        
+        To remove 'Export' from the 'File' top level,
+
+        .. code-block:: python
+
+            action.remove_menu_item(['File', 'Export'])
+
+        """
+        if not menu_path:
+            return False
+
+        menu = self.menu
+        for part in menu_path[:-1]:
+            found = None
+            for action in menu.actions():
+                if action.menu() and action.text() == part:
+                    found = action.menu()
+                    break
+            if not found:
+                return False
+            menu = found
+
+        for action in menu.actions():
+            if action.text() == menu_path[-1]:
+                menu.removeAction(action)
+                return True
+
+        return False
+
+    def get_menu_structure(self):
+        """
+        Return current menu structure as a nested list.
+         
+        This method is useful for debugging or serialization.
+
+        Returns
+        -------
+        nested list
+            Current menu structure.
+        """
+        def recurse(menu):
+            items = []
+            for action in menu.actions():
+                if action.menu():
+                    items.append((action.text(), recurse(action.menu())))
+                else:
+                    items.append((action.text(), None))
+            return items
+        return recurse(self.menu)
+    
+    def has_submenu(self, name):
+        """Check if a submenu by a specific name exists.
+        
+        Parameters
+        ----------
+        name : str
+            Submenu text to test
+
+        Returns
+        -------
+        bool
+            True if `name` is a submenu
+        """
+        return name in self.submenu_references
+

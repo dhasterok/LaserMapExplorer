@@ -6,8 +6,9 @@ from PyQt6.QtWidgets import (
     QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox, QToolBar,
     QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout
 )
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt, QUrl
+from src.common.CustomWidgets import CustomAction
 import src.common.csvdict as csvdict
 from src.ui.MapImportDialog import Ui_MapImportDialog
 from src.ui.FileSelectorDialog import Ui_FileSelectorDialog
@@ -1174,14 +1175,20 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
 
         toolbar = QToolBar(self)
 
-        self.actionSelectAll = QAction(toolbar)
-        select_all_icon = QIcon(":resources/icons/icon-select-all-64.svg")
-        self.actionSelectAll.setIcon(select_all_icon)
+        self.actionSelectAll = CustomAction(
+            text="Select All",
+            light_icon_unchecked="icon-select-all-64.svg",
+            dark_icon_unchecked="icon-select-all-dark-64.svg",
+            parent=toolbar
+        )
         self.actionSelectAll.setToolTip("Select all files")
 
-        self.actionSelectNone = QAction(toolbar)
-        select_none_icon = QIcon(":resources/icons/icon-select-none-64.svg")
-        self.actionSelectNone.setIcon(select_none_icon)
+        self.actionSelectNone = CustomAction(
+            text="Select None",
+            light_icon_unchecked="icon-select-none-64.svg",
+            dark_icon_unchecked="icon-select-none-dark-64.svg",
+            parent=toolbar,
+        )
         self.actionSelectNone.setToolTip("Select all files")
 
         toolbar.addAction(self.actionSelectAll)

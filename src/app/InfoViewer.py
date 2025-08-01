@@ -1,5 +1,3 @@
-import os, re
-import numexpr as ne
 from src.app.config import BASEDIR
 import numpy as np
 import pandas as pd
@@ -7,14 +5,13 @@ from src.common.varfunc import partial_match
 import src.common.format as fmt
 from PyQt6.QtCore import Qt, QSize, QUrl
 from PyQt6.QtWidgets import (
-        QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
-        QToolBar, QComboBox, QToolButton, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
-        QGroupBox, QHBoxLayout, QSpacerItem, QSizePolicy, QTableWidgetItem, QTableWidget, QTabWidget,
-        QAbstractItemView, QFormLayout, QHeaderView, QStyledItemDelegate, QLineEdit
+        QTextEdit, QWidget, QVBoxLayout, QMessageBox, QLabel,
+        QToolBar, QComboBox, QCheckBox, QHBoxLayout, QTableWidgetItem, QTableWidget, QTabWidget,
+        QAbstractItemView, QHeaderView, QStyledItemDelegate, QLineEdit, QSpacerItem, QDialog
     )
-from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction, QDoubleValidator
+from PyQt6.QtGui import QDoubleValidator
 
-from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
+from src.common.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction
 from src.app.FieldLogic import FieldLogicUI
 
 from src.app.UITheme import default_font
@@ -171,22 +168,20 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
     def __init__(self, parent, title="Info Tools"):
         super().__init__(parent)
 
-        self.parent = parent
+        self.ui = parent
 
-        if self.parent.plot_info:
-            self.plot_info = self.parent.plot_info
+        if self.ui.plot_info:
+            self.plot_info = self.ui.plot_info
         else:
             self.plot_info = None
 
-        if self.parent.data or self.parent.app_data.sample_id == '':
-            self.sample_id = self.parent.app_data.sample_id
-            self.data = self.parent.data[self.sample_id]
-            self.app_data = self.parent.app_data
+        if self.ui.data or self.ui.app_data.sample_id == '':
+            self.sample_id = self.ui.app_data.sample_id
+            self.data = self.ui.data[self.sample_id]
+            self.app_data = self.ui.app_data
         else:
             self.sample_id = ''
             self.data = None
-
-        self.font = default_font()
 
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
         self.setObjectName("dockWidgetInfoToolbox")
@@ -243,7 +238,7 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
                 if not (field == ''):
                     update_numpy_array(self.data.get_map_data(field), self.field_tab.field_table)
             case "plot info":
-                self.plot_info_tab.update_plot_info_tab(self.parent.plot_info)
+                self.plot_info_tab.update_plot_info_tab(self.ui.plot_info)
 
 # -------------------------------
 # Plot Info Tab functions
@@ -279,22 +274,41 @@ class PlotInfoTab():
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
         tab_layout.addWidget(toolbar)
 
-        self.actionSelectAll = QAction(toolbar)
-        select_all_icon = QIcon(":resources/icons/icon-select-all-64.svg")
-        self.actionSelectAll.setIcon(select_all_icon)
+        # export metadata table
+        self.action_export_plot_info = CustomAction(
+            text="Export to notes",
+            light_icon_unchecked="icon-save-notes-64.svg",
+            parent=toolbar,
+        )
+        self.action_export_plot_info.triggered.connect(self.export_plot_info)
+        self.action_export_plot_info.setToolTip("Export plot information to notes")
+
+        self.actionSelectAll = CustomAction(
+            text="Select All",
+            light_icon_unchecked="icon-select-all-64.svg",
+            dark_icon_unchecked="icon-select-all-dark-64.svg",
+            parent=toolbar
+        )
         self.actionSelectAll.setToolTip("Select all annotations")
 
-        self.actionShowHide = QAction(toolbar)
-        show_hide_icon = QIcon(":resources/icons/icon-show-hide-64.svg")
-        self.actionShowHide.setIcon(show_hide_icon)
-        self.actionShowHide.setCheckable(True)
+        self.actionShowHide = CustomAction(
+            text="Show/Hide",
+            light_icon_unchecked="icon-show-hide-64.svg",
+            light_icon_checked="icon-show-64.svg",
+            parent=toolbar,
+        )
         self.actionShowHide.setToolTip("Toggle show/hide annotations")
 
-        self.actionRemove = QAction(toolbar)
-        remove_icon = QIcon(":resources/icons/icon-delete-64.svg")
-        self.actionRemove.setIcon(remove_icon)
+        self.actionRemove = CustomAction(
+            text="Remove",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=toolbar
+        )
         self.actionRemove.setToolTip("Remove selected annotation(s)")
 
+        toolbar.addAction(self.action_export_plot_info)
+        toolbar.addSeparator()
         toolbar.addAction(self.actionSelectAll)
         toolbar.addAction(self.actionShowHide)
         toolbar.addAction(self.actionRemove)
@@ -311,7 +325,6 @@ class PlotInfoTab():
 
         self.plot_info_text_edit = QTextEdit(self.plot_info_tab)
         self.plot_info_text_edit.setReadOnly(True)
-        self.plot_info_text_edit.setFont(self.parent.font)
 
         plot_info_layout.addWidget(self.plot_info_label)
         plot_info_layout.addWidget(self.plot_info_text_edit)
@@ -474,6 +487,13 @@ class PlotInfoTab():
             annotation.set_text(new_text)
             self.parent.canvas.draw()
 
+    def export_plot_info(self):
+        if not hasattr(self.parent.ui,"notes_dock") or not self.parent.ui.plot_info:
+            return
+        
+        notes = self.parent.ui.notes_dock.notes
+        notes.print_info(self.parent.ui.plot_info)
+
 # -------------------------------
 # Metadata Info Tab functions
 # -------------------------------
@@ -507,72 +527,80 @@ class MetadataTab():
         # Add toolbar actions
         # select field
         field_label = QLabel(self.metadata_tab)
-        field_label.setFont(self.parent.font)
         field_label.setText("Field")
 
         self.field_combobox = QComboBox(self.metadata_tab)
-        self.field_combobox.setFont(self.parent.font)
         self.field_combobox.setObjectName("field_combobox")
 
         # select all columns
-        self.actionSelectAll_columns = QAction("Select All Columns", toolbar)
-        select_columns_icon = QIcon(":resources/icons/icon-top_toolbar_show-64.svg")
-        self.actionSelectAll_columns.setIcon(select_columns_icon)
+        self.actionSelectAll_columns = CustomAction(
+            text="Select Columns",
+            light_icon_unchecked="icon-top-toolbar-hide-64.svg",
+            light_icon_checked="icon-top-toolbar-show-64.svg",
+            parent=toolbar
+        )
         self.actionSelectAll_columns.setCheckable(True)
         self.actionSelectAll_columns.toggled.connect(self.toggle_all_columns)
         self.actionSelectAll_columns.setToolTip("Select/deselect all columns")
 
         # select all rows
-        self.actionSelectAll_rows = QAction("Select All Rows", toolbar)
-        select_rows_icon = QIcon(":resources/icons/icon-left_toolbar_show-64.svg")
-        self.actionSelectAll_rows.setIcon(select_rows_icon)
-        self.actionSelectAll_rows.setCheckable(True)
+        self.actionSelectAll_rows = CustomAction(
+            text="Select Rows",
+            light_icon_unchecked="icon-left-toolbar-hide-64.svg",
+            light_icon_checked="icon-left-toolbar-show-64.svg",
+            parent=toolbar,
+        )
         self.actionSelectAll_rows.toggled.connect(self.toggle_all_rows)
         self.actionSelectAll_rows.setToolTip("Select/deselect all rows")
 
         # set the norm method for all samples
         scaling_label = QLabel(self.metadata_tab)
-        scaling_label.setFont(self.parent.font)
         scaling_label.setText("Norm")
 
         #normalising
         self.norm_combobox = QComboBox(self.metadata_tab)
-        self.norm_combobox.setMaximumSize(QSize(16777215, 16777215))
-        self.norm_combobox.setFont(self.parent.font)
         self.norm_combobox.setEditable(False)
         self.norm_combobox.addItems(['linear', 'log', 'logit', 'symlog', 'mixed'])
         # self.norm_combobox.activated.connect(lambda: self.update_norm(self.norm_combobox.currentText()))
         self.norm_combobox.setToolTip("Set the norm for all analytes")
 
         # view/hide
-        self.actionToggleView = QAction("Show/hide columns and rows", toolbar)
-        self.actionToggleView.setCheckable(True)
+        self.actionToggleView = CustomAction(
+            text="Show/hide columns and rows",
+            light_icon_unchecked="icon-show-hide-64.svg",
+            light_icon_checked="icon-show-64.svg",
+            parent=toolbar,
+        )
         self.actionToggleView.setChecked(True)
         self.actionToggleView.toggled.connect(self.toggle_view)
-        self.toggle_view_icon = QIcon()
-        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-hide-64.svg"), QIcon.Mode.Normal, QIcon.State.Off)
-        self.toggle_view_icon.addPixmap(QPixmap(":resources/icons/icon-show-64.svg"), QIcon.Mode.Normal, QIcon.State.On)
-        self.actionToggleView.setIcon(self.toggle_view_icon)
         self.actionToggleView.setToolTip("Click to toggle visibility of unselected columns/rows")
 
         # export metadata table
-        self.action_export_metadata = QAction("Export Metadata", toolbar)
+        self.action_export_metadata = CustomAction(
+            text="Export to notes",
+            light_icon_unchecked="icon-save-notes-64.svg",
+            parent=toolbar,
+        )
         self.action_export_metadata.triggered.connect(self.export_metadata)
-        export_notes_icon = QIcon(":resources/icons/icon-save-notes-64.svg")
-        self.action_export_metadata.setIcon(export_notes_icon)
         self.action_export_metadata.setToolTip("Export metadata to notes")
 
         # adjust precision
-        self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
-        sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
-        self.action_sigfigs_more.setIcon(sigfigs_more_icon)
+        self.action_sigfigs_more = CustomAction(
+            text="Increase Significant Figures",
+            light_icon_unchecked="icon-sigfigs-add-64.svg",
+            dark_icon_unchecked="icon-sigfigs-add-dark-64.svg",
+            parent=toolbar,
+        )
         self.action_sigfigs_more.triggered.connect(increase_precision)
         self.action_sigfigs_more.triggered.connect(self.update_table)
         self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
 
-        self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
-        sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
-        self.action_sigfigs_less.setIcon(sigfigs_less_icon)
+        self.action_sigfigs_less = CustomAction(
+            text="Decrease Significant Figures",
+            light_icon_unchecked="icon-sigfigs-remove-64.svg",
+            dark_icon_unchecked="icon-sigfigs-remove-dark-64.svg",
+            parent=toolbar,
+        )
         self.action_sigfigs_less.triggered.connect(decrease_precision)
         self.action_sigfigs_less.triggered.connect(self.update_table)
         self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
@@ -887,6 +915,10 @@ class MetadataTab():
                     item.setText(str(val))
 
     def export_metadata(self):
+        if not hasattr(self.parent.ui,"notes_dock"):
+            return
+        
+        notes = self.parent.ui.notes_dock
         pass
 
 # -------------------------------
@@ -916,16 +948,22 @@ class DataFrameTab():
 
         layout.addWidget(toolbar)
 
-        self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
-        sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
-        self.action_sigfigs_more.setIcon(sigfigs_more_icon)
+        self.action_sigfigs_more = CustomAction(
+            text="Increase Significant Figures",
+            light_icon_unchecked="icon-sigfigs-add-64.svg",
+            dark_icon_unchecked="icon-sigfigs-add-dark-64.svg",
+            parent=toolbar,
+        )
         self.action_sigfigs_more.triggered.connect(increase_precision)
         self.action_sigfigs_more.triggered.connect(lambda: update_dataframe(self.data.processed_data, self.data_table))
         self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
 
-        self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
-        sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
-        self.action_sigfigs_less.setIcon(sigfigs_less_icon)
+        self.action_sigfigs_less = CustomAction(
+            text="Decrease Significant Figures",
+            light_icon_unchecked="icon-sigfigs-remove-64.svg",
+            dark_icon_unchecked="icon-sigfigs-remove-dark-64.svg",
+            parent=toolbar
+        )
         self.action_sigfigs_less.triggered.connect(decrease_precision)
         self.action_sigfigs_less.triggered.connect(lambda: update_dataframe(self.data.processed_data, self.data_table))
         self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
@@ -989,16 +1027,22 @@ class FieldTab(FieldLogicUI):
         self.field_combobox = QComboBox(self.field_tab)
         self.field_combobox.setObjectName("field_combobox")
 
-        self.action_sigfigs_more = QAction("Increase Significant Figures", toolbar)
-        sigfigs_more_icon = QIcon(":resources/icons/icon-sigfigs-add-64.svg")
-        self.action_sigfigs_more.setIcon(sigfigs_more_icon)
+        self.action_sigfigs_more = CustomAction(
+            text="Increase Significant Figures",
+            light_icon_unchecked="icon-sigfigs-add-64.svg",
+            dark_icon_unchecked="icon-sigfigs-add-dark-64.svg",
+            parent=toolbar,
+        )
         self.action_sigfigs_more.triggered.connect(increase_precision)
         self.action_sigfigs_more.triggered.connect(self.update_field_table)
         self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
 
-        self.action_sigfigs_less = QAction("Decrease Significant Figures", toolbar)
-        sigfigs_less_icon = QIcon(":resources/icons/icon-sigfigs-remove-64.svg")
-        self.action_sigfigs_less.setIcon(sigfigs_less_icon)
+        self.action_sigfigs_less = CustomAction(
+            text="Decrease Significant Figures",
+            light_icon_unchecked="icon-sigfigs-remove-64.svg",
+            dark_icon_unchecked="icon-sigfigs-remove-dark-64.svg",
+            parent=toolbar
+        )
         self.action_sigfigs_less.triggered.connect(decrease_precision)
         self.action_sigfigs_less.triggered.connect(self.update_field_table)
         self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")

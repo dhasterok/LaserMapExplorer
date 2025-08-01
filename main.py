@@ -1,4 +1,5 @@
 import sys, os, darkdetect
+from pathlib import Path
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QSplashScreen, QApplication
 from PyQt6.QtGui import QPixmap, QIcon
@@ -72,7 +73,7 @@ def main():
     show_splash()
 
     # Uncomment this line to set icon to App
-    app.setWindowIcon(QIcon(os.path.join(BASEDIR, os.path.join(ICONPATH,'LaME-64.svg'))))
+    app.setWindowIcon(QIcon(str(ICONPATH / 'LaME-64.svg')))
 
     # create application data properties with notifiable observers that can be used to
     # update widgets in the UI

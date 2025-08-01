@@ -1,11 +1,6 @@
-from PyQt6.QtWidgets import (
-    QWidget, QLineEdit, QToolButton, QHBoxLayout, QMessageBox, QLabel, QTextEdit
-)
-from PyQt6.QtGui import (
-    QTextCursor, QTextCharFormat, QColor, QTextDocument, QAction
-)
-from PyQt6.QtCore import Qt
 import re
+from PyQt6.QtWidgets import ( QWidget, QLineEdit, QToolButton, QHBoxLayout, QMessageBox, QLabel, QTextEdit )
+from PyQt6.QtGui import ( QTextCursor, QTextCharFormat, QColor )
 
 class SearchWidget(QWidget):
     """

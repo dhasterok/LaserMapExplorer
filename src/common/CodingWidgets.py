@@ -27,7 +27,7 @@ def default_font():
     return font
 
 BASE_PATH = Path(__file__).parents[2] 
-ICON_PATH = BASE_PATH / "resources/icons"
+ICON_PATH = BASE_PATH / "resources" / "icons"
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):

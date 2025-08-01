@@ -5,15 +5,14 @@ import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
 
-from PyQt6.QtCore import Qt, QSize, QUrl
+from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtWidgets import (
-        QMainWindow, QTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
-        QToolBar, QComboBox, QToolButton, QDialog, QCheckBox, QDialogButtonBox, QPushButton,
+        QMainWindow, QPlainTextEdit, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QLabel,
+        QToolBar, QComboBox, QCheckBox, QPushButton,
         QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy, QScrollArea
     )
-from PyQt6.QtGui import QIcon, QAction
 
-from src.common.CustomWidgets import CustomComboBox, CustomDockWidget
+from src.common.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction, CustomToolButton
 from src.app.FieldLogic import FieldLogicUI
 from src.common.Logger import LoggerConfig, auto_log_methods
 
@@ -84,6 +83,17 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         else:
             self.calc_filename = filename
 
+        
+        self.setupUI()
+        self.connect_widgets()
+        self.connect_logger()
+
+        # update UI with pre-saved formulas
+        self.calc_load_dict()
+        self.add_formula = True
+        self.precalculate_custom_fields = False
+
+    def setupUI(self):
         # Create container
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
@@ -97,30 +107,37 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
         # calculate new field based on formula entered by user
-        self.actionCalculate = QAction()
-        self.actionCalculate.setIcon(QIcon(":resources/icons/icon-run-64.svg"))
-        self.actionCalculate.setToolTip("Calculate field")
-        toolbar.addAction(self.actionCalculate)
+        self.calculate_action = CustomAction(
+            text="Calculate",
+            light_icon_unchecked="icon-run-64.svg"
+        )
+        self.calculate_action.setToolTip("Calculate field")
 
         # save the current formula to a  dictionary
-        self.actionSave = QAction()
-        self.actionSave.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
-        self.actionSave.setToolTip("Calculate and save field")
-        toolbar.addAction(self.actionSave)
+        self.save_action = CustomAction(
+            text="Save Equation",
+            light_icon_unchecked="icon-save-file-64.svg"
+        )
+        self.save_action.setToolTip("Calculate and save field")
 
         # clear the calculator screen
-        self.actionClear = QAction()
-        self.actionClear.setIcon(QIcon(":resources/icons/icon-reject-64.svg"))
-        self.actionClear.setToolTip("Clear current formula")
-        toolbar.addAction(self.actionClear)
+        self.clear_action = CustomAction(
+            text="Clear",
+            light_icon_unchecked="icon-reject-64.svg",
+        )
+        self.clear_action.setToolTip("Clear current formula")
 
         # link the calculator to help
-        self.actionHelp = QAction()
-        self.actionHelp.setIcon(QIcon(':resources/icons/icon-info-64.svg'))
-        self.actionHelp.triggered.connect(self.calc_help)
-        self.actionHelp.setToolTip("Get help calculating fields")
-        toolbar.addAction(self.actionHelp)
+        self.help_action = CustomAction(
+            text="Help",
+            light_icon_unchecked="icon-info-64.svg",
+        )
+        self.help_action.setToolTip("Get help calculating fields")
 
+        toolbar.addAction(self.calculate_action)
+        toolbar.addAction(self.save_action)
+        toolbar.addAction(self.clear_action)
+        toolbar.addAction(self.help_action)
         calculator_layout.addWidget(toolbar)
 
         # calculator screen
@@ -129,7 +146,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         screen_layout = QVBoxLayout()
         screen_layout.setContentsMargins(3,3,3,3)
 
-        self.calc_text_edit = QTextEdit()
+        self.calc_text_edit = QPlainTextEdit()
         self.calc_text_edit.textChanged.connect(self.calc_set_add_formula)
         screen_layout.addWidget(self.calc_text_edit)
 
@@ -148,21 +165,18 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         # Equations
         equation_select_layout = QHBoxLayout()
         self.comboBoxFormula = QComboBox()
-        self.comboBoxFormula.activated.connect(self.calc_load_formula)
 
-        self.toolButtonFormulaDelete = QToolButton()
-        delete_icon = QIcon(":resources/icons/icon-delete-64.svg")
-        if not delete_icon.isNull():
-            self.toolButtonFormulaDelete.setIcon(delete_icon)
-        else:
-            self.toolButtonFormulaDelete.setText("Delete")
-        self.toolButtonFormulaDelete.setToolTip("Delete selected equation")
-        self.toolButtonFormulaDelete.clicked.connect(self.calc_delete_formula)
+        self.delete_formula_button = CustomToolButton(
+            text="Delete",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+        )
+        self.delete_formula_button.setToolTip("Delete selected equation")
+
 
         equation_select_layout.addWidget(self.comboBoxFormula)
-        equation_select_layout.addWidget(self.toolButtonFormulaDelete)
+        equation_select_layout.addWidget(self.delete_formula_button)
         calculator_layout.addLayout(equation_select_layout)
-
 
         # Field Control
         self.comboBoxFieldType = CustomComboBox()
@@ -174,16 +188,14 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         self.comboBoxField = CustomComboBox(popup_callback=lambda: self.update_field_combobox(self.comboBoxField))
         self.comboBoxField.setToolTip("Select field")
 
-        self.toolButtonAddFormula = QToolButton()
-        add_icon = QIcon(":resources/icons/icon-accept-64.svg")
-        if not add_icon.isNull():
-            self.toolButtonAddFormula.setIcon(add_icon)
-        else:
-            self.toolButtonAddFormula.setText("Select a field to add it to the formula")
-        self.toolButtonAddFormula.clicked.connect(self.calc_add_field)
+        self.add_formula_button = CustomToolButton(
+            text="Add Formula",
+            light_icon_unchecked="icon-accept-64.svg",
+        )
+        self.add_formula_button.setToolTip("Select a field to add it to the formula")
 
         field_layout.addWidget(self.comboBoxField)
-        field_layout.addWidget(self.toolButtonAddFormula)
+        field_layout.addWidget(self.add_formula_button)
         calculator_layout.addLayout(field_layout)
 
         self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField)
@@ -264,16 +276,20 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
 
         self.ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
 
+    def connect_widgets(self):
         # connect actions to methods
-        self.actionCalculate.triggered.connect(self.calculate_new_field)
-        self.actionSave.triggered.connect(lambda: self.calculate_new_field(save=True))
-        self.actionClear.triggered.connect(self.calc_text_edit.clear)
-        self.actionClear.triggered.connect(lambda: self.message_label.setText("Ready..."))
+        self.calculate_action.triggered.connect(self.calculate_new_field)
+        self.save_action.triggered.connect(lambda: self.calculate_new_field(save=True))
+        self.clear_action.triggered.connect(self.calc_text_edit.clear)
+        self.clear_action.triggered.connect(lambda: self.message_label.setText("Ready..."))
+        self.help_action.triggered.connect(self.calc_help)
 
-        # update UI with pre-saved formulas
-        self.calc_load_dict()
-        self.add_formula = True
-        self.precalculate_custom_fields = False
+        self.comboBoxFormula.activated.connect(self.calc_load_formula)
+        self.delete_formula_button.clicked.connect(self.calc_delete_formula)
+        self.add_formula_button.clicked.connect(self.calc_add_field)
+
+    def connect_logger(self):
+        pass
 
     def calc_help(self):
         """Loads the help webpage associated with the calculator in the Help tab"""
@@ -425,7 +441,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         name = self.comboBoxFormula.currentText()
 
         self.calc_text_edit.clear()
-        self.calc_text_edit.setText(self.calc_dict[name])
+        self.calc_text_edit.setPlainText(self.calc_dict[name])
 
         self.add_formula = False
     

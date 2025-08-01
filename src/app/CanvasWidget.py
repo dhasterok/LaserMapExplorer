@@ -1,13 +1,12 @@
-import os, darkdetect
+import os 
 from PyQt6.QtCore import ( Qt, QSize )
 from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout, QMessageBox,
-    QHeaderView, QMenu, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy,
+    QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy,
     QLineEdit, QLabel, QToolBar
 )
-from PyQt6.QtGui import ( QIcon, QAction, QFont )
-from src.common.CustomWidgets import CustomActionMenu
-from src.app.config import BASEDIR, ICONPATH 
+from src.common.CustomWidgets import CustomActionMenu, CustomAction
+from src.app.config import RESOURCE_PATH
 
 import numpy as np
 import pandas as pd
@@ -36,7 +35,7 @@ class CanvasWidget():
 
         self.QV_analyte_list = {}
         try:
-            self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
+            self.QV_analyte_list = csvdict.import_csv_to_dict(RESOURCE_PATH / 'styles' / 'qv_lists.csv')
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
@@ -92,7 +91,7 @@ class CanvasWidget():
         self.ui.widgetQuickView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         try:
-            self.QV_analyte_list = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/styles/qv_lists.csv'))
+            self.QV_analyte_list = csvdict.import_csv_to_dict(RESOURCE_PATH / 'styles' / 'qv_lists.csv')
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
@@ -642,10 +641,11 @@ class QuickView(QDialog):
         ]
 
         self.sort_action_menu = CustomActionMenu(
-            icon=sort_icon,
             text="Sort fields for Quick View",
             menu_items=sortmenu_items,
-            parent=self
+            light_icon_unchecked="icon-sort-64.svg",
+            dark_icon_unchecked="icon-sort-64.svg",
+            parent=toolbar,
         )
 
         self.label = QLabel()
@@ -656,25 +656,25 @@ class QuickView(QDialog):
         self.lineEditQVName.setText("")
         self.lineEditQVName.setObjectName("lineEditViewName")
 
-        self.save_action = QAction(toolbar)
+        self.save_action = CustomAction(
+            text="Save Figure",
+            light_icon_unchecked="icon-save-file-64.svg",
+            parent=toolbar,
+        )
         self.save_action.setObjectName("actionSave")
         self.save_action.setToolTip("Save current analyte list")
-        self.save_action.triggered.connect(lambda: self.apply_selected_analytes(save=True))
 
-        self.apply_action = QAction(toolbar)
+        self.apply_action = CustomAction(
+            text="Apply",
+            light_icon_unchecked="icon-add-list-64.svg",
+            dark_icon_unchecked="icon-add-list-dark-64.svg",
+            parent=toolbar
+        )
         self.apply_action.setObjectName("actionApply")
         self.apply_action.setToolTip("Apply current analyte list to Quick View")
-        self.apply_action.triggered.connect(lambda: self.apply_selected_analytes(save=False))
 
-        # Setup sort menu and associated toolButton
-        if darkdetect.isDark():
-            self.sort_action_menu.setIcon(QIcon(":resources/icons/icon-sort-dark-64.svg"))
-            self.save_action.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
-            self.apply_action.setIcon(QIcon(":resources/icons/icon-add-list-dark-64.svg"))
-        else:
-            self.sort_action_menu.setIcon(QIcon(":resources/icons/icon-sort-64.svg"))
-            self.save_action.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
-            self.apply_action.setIcon(QIcon(":resources/icons/icon-add-list-64.svg"))
+        self.save_action.triggered.connect(lambda: self.apply_selected_analytes(save=True))
+        self.apply_action.triggered.connect(lambda: self.apply_selected_analytes(save=False))
 
         toolbar.addAction(self.sort_action_menu)
         toolbar.addSeparator()
@@ -825,13 +825,14 @@ class QuickView(QDialog):
         QMessageBox.information
             If the save operation is successful.
         """
-        file_path = os.path.join(BASEDIR,'resources', 'styles', 'qv_lists.csv')
+        file_path = RESOURCE_PATH / 'styles' / 'qv_lists.csv'
+
         # Ensure directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
         # append dictionary to file of saved qv_lists
         if hasattr(self.parent, 'QV_analyte_list'):
-            csvdict.export_dict_to_csv(self.ui.QV_analyte_list, file_path)
+            csvdict.export_dict_to_csv(self.parent.QV_analyte_list, file_path)
             QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
         else:
             QMessageBox.warning(self, "Error", "Could not save analyte list.")

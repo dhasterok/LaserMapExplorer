@@ -3,9 +3,9 @@ import re, subprocess
 from PyQt6.QtCore import ( Qt, QTimer, QSize, QUrl )
 from PyQt6.QtWidgets import (
         QMainWindow, QMessageBox, QFileDialog, QWidget, QVBoxLayout, QFormLayout, QSizePolicy,
-        QLabel, QDialog, QDialogButtonBox, QToolBar, QHBoxLayout, QSplitter, QTabWidget,
+        QLabel, QDialog, QDialogButtonBox, QToolBar, QSplitter, QTabWidget,
     )
-from PyQt6.QtGui import ( QFont, QTextCursor, QIcon, QCursor, QDoubleValidator, QAction )
+from PyQt6.QtGui import ( QTextCursor, QIcon, QCursor, QDoubleValidator )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from datetime import datetime
 import numpy as np
@@ -13,8 +13,8 @@ import pandas as pd
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string, publish_file
 import src.common.format as fmt
-from src.common.CodingWidgets import CodeEditor, RstHighlighter
-from src.common.CustomWidgets import CustomLineEdit, CustomActionMenu, CustomDockWidget
+from src.common.CodingWidgets import CodeEditor
+from src.common.CustomWidgets import CustomLineEdit, CustomAction, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
@@ -59,7 +59,7 @@ class NotesFormatter:
         elif data is None:
             return '*None*'
         elif isinstance(data, bool):
-            return f'*{data}*'
+            return f'``{data}``'
         else:
             return str(data)
 
@@ -67,7 +67,7 @@ class NotesFormatter:
         lines = []
         prefix = ' ' * indent
         for key, value in d.items():
-            key_str = f"{prefix}**{key}**:"
+            key_str = f"{prefix}:{key}:"
             value_str = self.format(value)
             if isinstance(value, (dict, list)):
                 lines.append(f"{key_str}\n{value_str}")
@@ -81,9 +81,9 @@ class NotesFormatter:
         for item in items:
             item_str = self.format(item)
             if isinstance(item, (dict, list)):
-                lines.append(f"{prefix}-\n{item_str}")
+                lines.append(f"{prefix}‣\n{item_str}")
             else:
-                lines.append(f"{prefix}- {item_str}")
+                lines.append(f"{prefix}‣ {item_str}")
         return '\n'.join(lines)
 
     def format_string(self, text: str) -> str:
@@ -191,7 +191,6 @@ class NotesWidget(QWidget):
 
         # initialize notes file and pdf preview
         self.notes_file = filename
-        self.update_preview_icon()
         self.toggle_preview_notes()
 
         if filename:
@@ -207,105 +206,124 @@ class NotesWidget(QWidget):
         self.toolbar.setIconSize(QSize(24, 24))
         self.toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
 
-        self.action_wrap = QAction("Toggle Word Wrap", self)
+        self.action_wrap = CustomAction(
+            text="Wrap", 
+            light_icon_unchecked="icon-word-wrap-64.svg",
+            dark_icon_unchecked="icon-word-wrap-dark-64.svg",
+            parent=self.toolbar)
         self.action_wrap.setCheckable(True)
         self.action_wrap.setChecked(True)
 
         # header button and menu
-        header_icon = str(ICON_PATH / "icon-heading-64.svg")
         header_menu_items = [
             ('H1', lambda: self.format_header('H1')),
             ('H2', lambda: self.format_header('H2')),
-            ('H3', lambda: self.format_header('H3'))
+            ('H3', lambda: self.format_header('H3')),
+            ('H4', lambda: self.format_header('H4')),
+            ('H5', lambda: self.format_header('H5')),
+            ('H6', lambda: self.format_header('H6')),
         ]
-        self.action_header = CustomActionMenu(header_icon, "Header", header_menu_items)
+        self.action_header = CustomActionMenu(
+            "Header",
+            header_menu_items,
+            light_icon_unchecked="icon-heading-64.svg",
+            dark_icon_unchecked="icon-heading-dark-64.svg",
+        )
         self.action_header.setToolTip("Format a heading")
 
         # bold button
-        self.action_bold = QAction()
-        bold_icon = QIcon(str(ICON_PATH / "icon-bold-64.svg"))
-        if not bold_icon.isNull():
-            self.action_bold.setIcon(bold_icon)
-        else:
-            self.action_bold.setText("Bold")
+        self.action_bold = CustomAction(
+            text="Bold",
+            light_icon_unchecked="icon-bold-64.svg",
+            dark_icon_unchecked="icon-bold-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_bold.setToolTip("Bold selected text")
 
         # italic button
-        self.action_italic = QAction()
-        italic_icon = QIcon(str(ICON_PATH / "icon-italics-64.svg"))
-        if not italic_icon.isNull():
-            self.action_italic.setIcon(italic_icon)
-        else:
-            self.action_italic.setText("Italic")
+        self.action_italic = CustomAction(
+            text="Italic",
+            light_icon_unchecked="icon-italics-64.svg",
+            dark_icon_unchecked="icon-italics-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_italic.setToolTip("Italicize selected text")
 
         # literal button
-        self.action_literal = QAction()
-        literal_icon = QIcon(str(ICON_PATH / "icon-literal-64.svg"))
-        if not literal_icon.isNull():
-            self.action_literal.setIcon(literal_icon)
-        else:
-            self.action_literal.setText("Literal")
+        self.action_literal = CustomAction(
+            text="Literal",
+            light_icon_unchecked="icon-literal-64.svg",
+            dark_icon_unchecked="icon-literal-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_literal.setToolTip("Display selected text as a literal")
 
         # superscript button
-        self.action_superscript = QAction()
-        superscript_icon = QIcon(str(ICON_PATH / "icon-superscript-64.svg"))
-        if not superscript_icon.isNull():
-            self.action_superscript.setIcon(superscript_icon)
-        else:
-            self.action_superscript.setText("Subscript")
+        self.action_superscript = CustomAction(
+            text="Superscript",
+            light_icon_unchecked="icon-superscript-64.svg",
+            dark_icon_unchecked="icon-superscript-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_superscript.setToolTip("Superscript selected text")
 
         # subscript button
-        self.action_subscript = QAction()
-        subscript_icon = QIcon(str(ICON_PATH / "icon-subscript-64.svg"))
-        if not subscript_icon.isNull():
-            self.action_subscript.setIcon(subscript_icon)
-        else:
-            self.action_subscript.setText("Subscript")
+        self.action_subscript = CustomAction(
+            text="Subscript",
+            light_icon_unchecked="icon-subscript-64.svg",
+            dark_icon_unchecked="icon-subscript-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_subscript.setToolTip("Subscript selected text")
 
         self.toolbar.addSeparator()
 
         # bulleted list button
-        self.action_bullet = QAction()
-        bullet_icon = QIcon(str(ICON_PATH / "icon-bullet-list-64.svg"))
-        if not bullet_icon.isNull():
-            self.action_bullet.setIcon(bullet_icon)
-        else:
-            self.action_bullet.setText("Bulleted List")
+        bullet_menu_items = [
+            ('*', lambda: self.format_list('bullet', '*')),
+            ('+', lambda: self.format_list('bullet', '+')),
+            ('-', lambda: self.format_list('bullet', '-')),
+            ('•', lambda: self.format_list('bullet', '•')),
+            ('‣', lambda: self.format_list('bullet', '‣')),
+            ('⁃', lambda: self.format_list('bullet', '⁃')),
+        ]
+        self.action_bullet = CustomActionMenu(
+            text="Bullet",
+            menu_items=bullet_menu_items,
+            light_icon_unchecked="icon-bullet-list-64.svg",
+            dark_icon_unchecked="icon-bullet-list-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_bullet.setToolTip("Format bulleted list")
 
         # numbered list button
-        self.action_enumerate = QAction()
-        enumerate_icon = QIcon(str(ICON_PATH / "icon-numbered-list-64.svg"))
-        if not enumerate_icon.isNull():
-            self.action_enumerate.setIcon(enumerate_icon)
-        else:
-            self.action_enumerate.setText("Numbered List")
+        self.action_enumerate = CustomAction(
+            text="Enumerate",
+            light_icon_unchecked="icon-numbered-list-64.svg",
+            dark_icon_unchecked="icon-numbered-list-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_enumerate.setToolTip("Format enumerated list")
 
         # citation button
-        self.action_cite = QAction()
-        cite_icon = QIcon(str(ICON_PATH / "icon-cite-64.svg"))
-        if not cite_icon.isNull():
-            self.action_cite.setIcon(cite_icon)
-        else:
-            self.action_cite.setText("Cite")
-        self.action_cite.setToolTip("Insert citation")
+        self.action_cite = CustomAction(
+            text="Reference",
+            light_icon_unchecked="icon-cite-64.svg",
+            dark_icon_unchecked="icon-cite-dark-64.svg",
+            parent=self.toolbar,
+        )
+        self.action_cite.setToolTip("Insert citation or footnote")
 
         # hyperlink button
-        self.action_hyperlink = QAction()
-        hyperlink_icon = QIcon(str(ICON_PATH / "icon-hyperlink-64.svg"))
-        if not hyperlink_icon.isNull():
-            self.action_hyperlink.setIcon(hyperlink_icon)
-        else:
-            self.action_hyperlink.setText("Hyperlink")
+        self.action_hyperlink = CustomAction(
+            text="Hyperlink",
+            light_icon_unchecked="icon-hyperlink-64.svg",
+            dark_icon_unchecked="icon-hyperlink-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_hyperlink.setToolTip("Insert hyperlink")
 
         # math button and menu
-        math_icon = str(ICON_PATH / "icon-equation-64.svg")
         math_menu_items = [
             ('Inline math', lambda: self.format_text('inline math')),
             ('Display math', lambda: self.format_text('display math')),
@@ -313,20 +331,25 @@ class NotesWidget(QWidget):
             #     (eq_name, callback) for eq_name, callback in self.ui.calc_dict.items()
             # ])
         ]
-        self.action_math = CustomActionMenu(math_icon, "Insert equation", math_menu_items, self)
+        self.action_math = CustomActionMenu(
+            "Equation",
+            math_menu_items,
+            light_icon_unchecked="icon-equation-64.svg",
+            dark_icon_unchecked="icon-equation-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_math.setToolTip("Insert equation")
 
         # image button
-        self.action_image = QAction()
-        image_icon = QIcon(str(ICON_PATH / "icon-image-dark-64.svg"))
-        if not image_icon.isNull():
-            self.action_image.setIcon(image_icon)
-        else:
-            self.action_image.setText("Figure")
+        self.action_image = CustomAction(
+            text="Figure",
+            light_icon_unchecked="icon-image-dark-64.svg",
+            dark_icon_unchecked="icon-image-64.svg",
+            parent=self.toolbar,
+        )
         self.action_image.setToolTip("Insert figure")
 
         # info button and menu
-        self.info_icon = str(ICON_PATH / "icon-formatted-output-64.svg")
         self._info_menu_items = []
         # info_menu_items = [
         #     ('Sample info', lambda: self.insert_info('sample info')),
@@ -336,39 +359,61 @@ class NotesWidget(QWidget):
         #     ('PCA results', lambda: self.insert_info('pca results')),
         #     ('Cluster results', lambda: self.insert_info('cluster results'))
         # ]
-        self.action_info = CustomActionMenu(self.info_icon, "Formatted Info", self._info_menu_items)
+        self.action_info = CustomActionMenu(
+            "Formatted Info",
+            self._info_menu_items,
+            light_icon_unchecked="icon-formatted-output-64.svg",
+            dark_icon_unchecked="icon-formatted-output-dark-64.svg",
+            parent=self.toolbar
+        )
         self.action_info.setToolTip("Insert formatted info")
 
         # options button, opens options dialog
-        self.action_options = QAction()
-        options_icon = QIcon(str(ICON_PATH / "icon-gear-64.svg"))
-        if not options_icon.isNull():
-            self.action_options.setIcon(options_icon)
-        else:
-            self.action_options.setText("Options")
+        self.action_options = CustomAction(
+            text="Options",
+            light_icon_unchecked="icon-gear-64.svg",
+            dark_icon_unchecked="icon-gear-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_options.setToolTip("Options")
+
         # export as rst2pdf button
-        self.action_export = QAction()
-        export_icon = QIcon(str(ICON_PATH / "icon-pdf-64.svg"))
-        if not export_icon.isNull():
-            self.action_export.setIcon(export_icon)
-        else:
-            self.action_export.setText("Save")
-        self.action_export.setToolTip("Save notes as PDF (must have rst2pdf installed)")
+        self.action_export = CustomActionMenu(
+            "Save PDF",
+            self._info_menu_items,
+            light_icon_unchecked="icon-pdf-64.svg",
+            parent=self.toolbar
+        )
+        self.action_export.setToolTip("Save notes as PDF (must have docutils and rst2pdf installed)")
+
+        self.action_search = CustomAction(
+            text="Open Search",
+            light_icon_unchecked="icon-search-64.svg",
+            dark_icon_unchecked="icon-search-dark-64.svg",
+            parent=self.toolbar,
+        )
+        self.action_search.setCheckable(True)
+        self.action_search.setChecked(False)
 
         # pdf previewer
-        self.action_preview_pdf = QAction()
+        self.action_preview_pdf = CustomAction(
+            text="View PDF",
+            light_icon_unchecked="icon-show-hide-64.svg",
+            light_icon_checked="icon-show-64.svg",
+            parent=self.toolbar,
+        )
         self.action_preview_pdf.setToolTip("Preview PDF")
         self.action_preview_pdf.setCheckable(True)
         self.action_preview_pdf.setChecked(False)
         self.action_preview_pdf.setEnabled(True)
-        self.preview_unchecked_icon = QIcon(str(ICON_PATH / "icon-show-hide-64.svg"))
-        self.preview_checked_icon = QIcon(str(ICON_PATH / "icon-show-64.svg"))
 
-        self.action_recompile = QAction()
+        self.action_recompile = CustomAction(
+            text="Refresh",
+            light_icon_unchecked="icon-reset-64.svg",
+            dark_icon_unchecked="icon-reset-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_recompile.setToolTip("Recompile document")
-        self.recompile_icon = QIcon(str(ICON_PATH / "icon-reset-64.svg"))
-        self.action_recompile.setIcon(self.recompile_icon)
 
         # Create Text Edit region for ReST Notes
         self.editor = CodeEditor()
@@ -377,12 +422,15 @@ class NotesWidget(QWidget):
         self.editor.viewport().setProperty("cursor", QCursor(Qt.CursorShape.IBeamCursor))
 
         settings_icon = QIcon(str(ICON_PATH / "icon-gear-edit-64.svg"))
-        self.action_editor = QAction("Format Settings", self.editor)
+        self.action_editor = CustomAction(
+            text="Editor Settings",
+            light_icon_unchecked="icon-gear-edit-64.svg",
+            dark_icon_unchecked="icon-gear-edit-dark-64.svg",
+            parent=self.toolbar,
+        )
         self.action_editor.setIcon(settings_icon)
         self.action_editor.setToolTip("Editor Settings")
 
-        # Create search
-        self.search_widget = SearchWidget(self.editor, self, enable_replace=True, realtime=False)
 
         # add buttons to toolbar
         self.toolbar.addAction(self.action_header)
@@ -404,13 +452,20 @@ class NotesWidget(QWidget):
         self.toolbar.addAction(self.action_options)
 
         self.toolbar.addSeparator()
-        self.toolbar.addWidget(self.search_widget)
+        self.toolbar.addAction(self.action_search)
         self.toolbar.addSeparator()
 
         self.toolbar.addAction(self.action_export)
         self.toolbar.addAction(self.action_recompile)
         self.toolbar.addAction(self.action_preview_pdf)
         self.toolbar.addAction(self.action_editor)
+
+        # Create search
+        self.searchbar = QToolBar("Search and Replace", parent=self)
+
+        self.search_widget = SearchWidget(self.editor, self, enable_replace=True, realtime=False)
+        self.searchbar.addWidget(self.search_widget)
+        self.searchbar.hide()
 
         # Create a QWebEngineView
         self.notes_browser = QWebEngineView()
@@ -426,6 +481,7 @@ class NotesWidget(QWidget):
         self.status_label.setFixedHeight(22)
 
         widget_layout.addWidget(self.toolbar)
+        widget_layout.addWidget(self.searchbar)
         widget_layout.addWidget(self.splitter)
         widget_layout.addWidget(self.status_label)
 
@@ -439,15 +495,14 @@ class NotesWidget(QWidget):
         self.action_literal.triggered.connect(lambda: self.format_text('literal'))
         self.action_superscript.triggered.connect(lambda: self.format_text('superscript'))
         self.action_subscript.triggered.connect(lambda: self.format_text('subscript'))
-        self.action_bullet.triggered.connect(lambda: self.format_list('bullet'))
         self.action_enumerate.triggered.connect(lambda: self.format_list('enumerate'))
         self.action_cite.triggered.connect(lambda: self.format_text('citation'))
         self.action_hyperlink.triggered.connect(lambda: self.format_text('hyperlink'))
         self.action_image.triggered.connect(self.insert_image)
         self.action_options.triggered.connect(self.open_note_options)
         self.action_export.triggered.connect(lambda _: self.save_notes_to_pdf()) # compile rst
+        self.action_search.triggered.connect(lambda checked: self.searchbar.setVisible(checked))
         self.action_preview_pdf.triggered.connect(lambda _: self.toggle_preview_notes()) # compile rst
-        self.action_preview_pdf.triggered.connect(lambda _: self.update_preview_icon())
         self.action_recompile.triggered.connect(lambda _: self.update_notes_view())
         self.action_export.triggered.connect(lambda: self.action_preview_pdf.setEnabled(True)) # compile rst
         self.action_editor.triggered.connect(self.editor.open_settings_dialog)
@@ -552,19 +607,6 @@ class NotesWidget(QWidget):
             `True` turns wrapping on
         """
         self.editor.setWordWrap(state == Qt.CheckState.Checked)
-    
-    def update_preview_icon(self):
-        """Set preview PDF icon based on `action_preview_pdf` checked state."""
-        if self.action_preview_pdf.isChecked():
-            if self.preview_checked_icon.isNull():
-                self.action_preview_pdf.setText("Preview: On")
-            else:
-                self.action_preview_pdf.setIcon(self.preview_checked_icon)
-        else:
-            if self.preview_unchecked_icon.isNull():
-                self.action_preview_pdf.setText("Preview: On")
-            else:
-                self.action_preview_pdf.setIcon(self.preview_unchecked_icon)
 
     def add_info_menu_item(self, label: str, callback):
         """
@@ -728,6 +770,12 @@ class NotesWidget(QWidget):
                 symbol = '='
             case 'H3':
                 symbol = '-'
+            case 'H4':
+                symbol = '~'
+            case 'H5':
+                symbol = '^'
+            case 'H6':
+                symbol = '+'
 
         # Get the current text cursor
         cursor = self.editor.textCursor()
@@ -743,23 +791,25 @@ class NotesWidget(QWidget):
         # Insert the line of "="
         cursor.insertText('\n' + f'{symbol}' * (cursor.block().length() - 1))
 
-    def format_list(self, style):
+    def format_list(self, list_type, list_style=None):
         """Formats a list in the text, either bulleted or enumerated
 
         Formats selected text as bulleted or enumerated in restructured text format.
 
         Parameters
         ----------
-        style : str
+        list_type: str
             Type of formatting, ``bullet`` or ``enumerate``
+        list_style : str
+            Style or symbol for formatting list
         """
 
         cursor = self.editor.textCursor()
         selected_text = cursor.selectedText()
 
-        match style:
+        match list_type:
             case 'bullet':
-                symbol = '*'
+                symbol = list_style
             case 'enumerate':
                 symbol = '#'
 

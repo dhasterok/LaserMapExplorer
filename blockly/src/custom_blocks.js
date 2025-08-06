@@ -921,7 +921,7 @@ const plot_map = {
             //  Attach validators to fieldType and field
             // Default: axisNum = 3 for 'C' axis; adjust as needed
             const axisNum = 3;
-            updateFieldTypeDropdown(this, this.plotType, axisNum);
+            updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType');
 
             // Attach validators to dropdowns
             const fieldTypeDropdown = this.getField('fieldType');
@@ -1003,12 +1003,7 @@ const plot_histogram = {
         // Field type dropdown
         this.appendDummyInput('FIELD_TYPE')
             .appendField('Field type')
-            .appendField(new Blockly.FieldDropdown([
-                ['Analyte', 'Analyte'],
-                ['Analyte (Normalised)', 'Analyte (Normalised)'],
-                ['PCA Score', 'PCA Score'],
-                ['Cluster', 'Cluster']
-            ], updateFieldDropdown.bind(this,null)), 'fieldType');
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldType');
 
         // Field dropdown
         this.appendDummyInput('FIELD')
@@ -1053,12 +1048,14 @@ const plot_histogram = {
             updateHistogramOptions(this);
             // update style dictionaries
             updateStylingChain(this);
-            
+            const axisNum = 1;
+            updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType', 'field');
 
             // 3) Attach validators to fieldType and field
             const fieldTypeDropdown = this.getField('fieldType');
             fieldTypeDropdown.setValidator((newValue) => {
                 this.fieldType = String(newValue);
+                updateFieldDropdown(this, newValue, 'field'); // X axis
                 // update style dictionaries
                 updateHistogramOptions(this);
                 // update style dictionaries
@@ -1102,9 +1099,279 @@ const plot_histogram = {
 };
 Blockly.common.defineBlocks({ plot_histogram: plot_histogram });
 
+const plot_biplot = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Biplot')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        this.appendDummyInput('XTYPE')
+            .appendField('Field type X')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldTypeX');
+        this.appendDummyInput('XFIELD')
+            .appendField('Field X')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldX');
+        this.appendDummyInput('YTYPE')
+            .appendField('Field type Y')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldTypeY');
+        this.appendDummyInput('YFIELD')
+            .appendField('Field Y')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldY');
+        this.appendDummyInput('HEATMAP')
+            .appendField('Show Heatmap')
+            .appendField(new Blockly.FieldCheckbox('FALSE'), 'SHOW_HEATMAP');
+        // Set initial plotType
+        this.plotType = 'scatter';
+
+        const heatmapCheckbox = this.getField('SHOW_HEATMAP');
+        heatmapCheckbox.setValidator((newValue) => {
+            this.plotType = (newValue === 'TRUE') ? 'heatmap' : 'scatter';
+            updateStylingChain(this); // If you want to update styling
+            return newValue;
+        });
+
+        // Styling
+        this.appendStatementInput('styling')
+            .setCheck('styling')
+            .appendField('Styling');
+        this.appendStatementInput('extras')
+            .setCheck(['Regression', 'PCA'])
+            .appendField('Additional Plots');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Plot a biplot (scatter or heatmap) with optional regression/PCA.');
+        this.setHelpUrl('');
+        this.setColour(285);
+
+        // Add default styling blocks (only if not in flyout)
+        if (!this.isInFlyout) {
+            const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
+            addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+            updateStylingChain(this);
+            // update fieldType dropdowns for X and Y
+            updateFieldTypeDropdown(this, this.plotType, 0, 'fieldTypeX', 'fieldX');
+            updateFieldTypeDropdown(this, this.plotType, 1, 'fieldTypeY', 'fieldY');
+
+            // Attach validators to fieldType and field for X and Y
+            const fieldTypeXDropdown = this.getField('fieldTypeX');
+            fieldTypeXDropdown.setValidator((newValue) => {
+                updateFieldDropdown(this, newValue, 'fieldX'); // X axis
+                updateStylingChain(this);
+                return newValue;
+            });
+            const fieldXDropdown = this.getField('fieldX');
+            fieldXDropdown.setValidator((newValue) => {
+                updateStylingChain(this);
+                return newValue;
+            });
+
+            const fieldTypeYDropdown = this.getField('fieldTypeY');
+            fieldTypeYDropdown.setValidator((newValue) => {
+                updateFieldDropdown(this, newValue, 'fieldY'); // Y axis
+                updateStylingChain(this);
+                return newValue;
+            });
+            const fieldYDropdown = this.getField('fieldY');
+            fieldYDropdown.setValidator((newValue) => {
+                updateStylingChain(this);
+                return newValue;
+            });
+        }
+        // On change, always re-sync the style chain
+        this.setOnChange(function(event) {
+            if (!this.workspace || this.isInFlyout) return;
+            if (
+              event.type === Blockly.Events.BLOCK_CREATE ||
+              event.type === Blockly.Events.BLOCK_MOVE ||
+              event.type === Blockly.Events.BLOCK_DELETE
+            ) {
+                if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                    updateStylingChain(this);
+                }
+            }
+        });
+    }
+};
+Blockly.common.defineBlocks({ plot_biplot: plot_biplot });
 
 
+const plot_ternary = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Ternary Plot')
+            .setAlign(Blockly.inputs.Align.CENTRE);
 
+        ['X','Y','Z'].forEach(axis => {
+            this.appendDummyInput(`${axis}TYPE`)
+                .appendField(`Field type ${axis}`)
+                .appendField(new Blockly.FieldDropdown([['Select...', '']]), `fieldType${axis}`);
+            this.appendDummyInput(`${axis}FIELD`)
+                .appendField(`Field ${axis}`)
+                .appendField(new Blockly.FieldDropdown([['Select...', '']]), `field${axis}`);
+        });
+
+        this.appendDummyInput('HEATMAP')
+            .appendField('Show Heatmap')
+            .appendField(new Blockly.FieldCheckbox('FALSE'), 'SHOW_HEATMAP');
+
+        this.appendStatementInput('styling')
+            .setCheck('styling')
+            .appendField('Styling');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Ternary diagram (scatter or heatmap).');
+        this.setHelpUrl('');
+        this.setColour(285);
+
+        if (!this.isInFlyout) {
+            const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
+            addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+
+            // Attach validators for fieldType and field
+            ['X','Y','Z'].forEach(axis => {
+                const fieldTypeDropdown = this.getField(`fieldType${axis}`);
+                fieldTypeDropdown.setValidator((newValue) => {
+                    updateFieldDropdown(this, newValue, axis); // Dynamic update per axis
+                    updateStylingChain(this);
+                    return newValue;
+                });
+                const fieldDropdown = this.getField(`field${axis}`);
+                fieldDropdown.setValidator((newValue) => {
+                    updateStylingChain(this);
+                    return newValue;
+                });
+            });
+        }
+        this.setOnChange(function(event) {
+            if (!this.workspace || this.isInFlyout) return;
+            if (
+              event.type === Blockly.Events.BLOCK_CREATE ||
+              event.type === Blockly.Events.BLOCK_MOVE ||
+              event.type === Blockly.Events.BLOCK_DELETE
+            ) {
+                if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                    updateStylingChain(this);
+                }
+            }
+        });
+    }
+};
+Blockly.common.defineBlocks({ plot_ternary: plot_ternary });
+
+const plot_ternary_map = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Ternary Map')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        ['X','Y','Z'].forEach(axis => {
+            this.appendDummyInput(`${axis}TYPE`)
+                .appendField(`Field type ${axis}`)
+                .appendField(new Blockly.FieldDropdown([['Select...', '']]), `fieldType${axis}`);
+            this.appendDummyInput(`${axis}FIELD`)
+                .appendField(`Field ${axis}`)
+                .appendField(new Blockly.FieldDropdown([['Select...', '']]), `field${axis}`);
+        });
+
+        this.appendStatementInput('styling')
+            .setCheck('styling')
+            .appendField('Styling');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Ternary map.');
+        this.setHelpUrl('');
+        this.setColour(285);
+
+        if (!this.isInFlyout) {
+            const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
+            addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+
+            ['X','Y','Z'].forEach(axis => {
+                const fieldTypeDropdown = this.getField(`fieldType${axis}`);
+                fieldTypeDropdown.setValidator((newValue) => {
+                    updateFieldDropdown(this, newValue, axis);
+                    updateStylingChain(this);
+                    return newValue;
+                });
+                const fieldDropdown = this.getField(`field${axis}`);
+                fieldDropdown.setValidator((newValue) => {
+                    updateStylingChain(this);
+                    return newValue;
+                });
+            });
+        }
+        this.setOnChange(function(event) {
+            if (!this.workspace || this.isInFlyout) return;
+            if (
+              event.type === Blockly.Events.BLOCK_CREATE ||
+              event.type === Blockly.Events.BLOCK_MOVE ||
+              event.type === Blockly.Events.BLOCK_DELETE
+            ) {
+                if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                    updateStylingChain(this);
+                }
+            }
+        });
+    }
+};
+Blockly.common.defineBlocks({ plot_ternary_map: plot_ternary_map });
+
+const plot_compatibility = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Compatibility Diagram')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        this.appendDummyInput('NDIM')
+            .appendField('Fields')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimList');
+
+        this.appendDummyInput('REFERENCE')
+            .appendField('Reference Value Included?')
+            .appendField(new Blockly.FieldCheckbox('FALSE'), 'HAS_REFERENCE');
+
+        this.appendStatementInput('styling')
+            .setCheck('styling')
+            .appendField('Styling');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Plot a compatibility diagram (requires Reference Value block above).');
+        this.setHelpUrl('');
+        this.setColour(285);
+    }
+};
+Blockly.common.defineBlocks({ plot_compatibility: plot_compatibility });
+
+const plot_radar = {
+    init: function () {
+        this.appendDummyInput('header')
+            .appendField('Radar Plot')
+            .setAlign(Blockly.inputs.Align.CENTRE);
+
+        this.appendDummyInput('NDIM')
+            .appendField('Fields')
+            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimList');
+
+        this.appendDummyInput('REFERENCE')
+            .appendField('Reference Value Included?')
+            .appendField(new Blockly.FieldCheckbox('FALSE'), 'HAS_REFERENCE');
+
+        this.appendStatementInput('styling')
+            .setCheck('styling')
+            .appendField('Styling');
+
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setTooltip('Plot a radar diagram (requires Reference Value block above).');
+        this.setHelpUrl('');
+        this.setColour(285);
+    }
+};
+Blockly.common.defineBlocks({ plot_radar: plot_radar });
 
 ////// styles ////////////
 Blockly.Blocks['modify_styles'] = {

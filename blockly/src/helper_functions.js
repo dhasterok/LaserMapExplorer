@@ -383,11 +383,12 @@ export function updateStylingChain(plotBlock) {
     // 1) Get the first block connected to "Styling".
     const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
     const plotType = plotBlock.plotType
+    const argDict = plotBlock.argDict
     // If you want to explicitly set the plotType:
     // this.plotType = 'field map';
   
     // 2) Call the style widgets function with the current plotType.
-    window.blocklyBridge.invokeSetStyleWidgets(plotType, (styleStr) => {
+    window.blocklyBridge.invokeSetStyleWidgets(JSON.stringify(argDict), (styleStr) => {
       // 3a) Check if the style dictionary is empty
       const style = JSON.parse(styleStr);
       if (style.constructor === Object && Object.keys(style).length === 0) {

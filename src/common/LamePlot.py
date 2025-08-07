@@ -1055,17 +1055,14 @@ def get_scatter_data(data, app_data, plot_style, processed=True):
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
         if scatter_dict['x']['field'] not in data.processed_data.column_attributes:
-            plot_style.initialize_axis_values(data,scatter_dict['x']['type'], scatter_dict['x']['field'])
             plot_style.set_axis_attributes(data,'x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
         if scatter_dict['y']['field'] not in data.processed_data.column_attributes:
-            plot_style.initialize_axis_values(data,scatter_dict['y']['type'], scatter_dict['y']['field'])
             plot_style.set_axis_attributes('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
         if scatter_dict['z']['field'] not in data.processed_data.column_attributes:
-            plot_style.initialize_axis_values(data,scatter_dict['z']['type'], scatter_dict['z']['field'])
             plot_style.set_axis_attributes('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):

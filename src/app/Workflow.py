@@ -38,22 +38,30 @@ class BlocklyBridge(QObject):
         self.lame_blockly.execute_code(self.output_text_edit, code)
 
     @pyqtSlot(str, result=str)
-    def invokeSetStyleWidgets(self, plot_type):
-        # Call the set_style_widgets function
-        plot_type = plot_type.replace('_',' ')
+    def invokeSetStyleWidgets(self, arg_json):
+        """arg_json: JSON string with keys like plot_type, c_field, c_field_type, etc."""
+        args = json.loads(arg_json)
+        plot_type = args.get('plot_type', 'field map').replace('_',' ')
+        # Update app_data and plot_style based on dictionary
+        for key, value in args.items():
+            # You can expand this to more robust attribute validation if needed
+            if hasattr(self.lame_blockly.app_data, key):
+                setattr(self.lame_blockly.app_data, key, value)
+            elif hasattr(self.lame_blockly.plot_style, key):
+                setattr(self.lame_blockly.plot_style, key, value)
         if plot_type in self.lame_blockly.plot_style.style_dict.keys():
             self.lame_blockly.plot_style.plot_type = plot_type
-            self.lame_blockly.plot_style.set_style_attributes(data = self.lame_blockly.data[self.lame_blockly.app_data.sample_id], app_data =self.lame_blockly.app_data, plot_type = plot_type)
+            self.lame_blockly.plot_style.set_style_attributes(
+                data=self.lame_blockly.data[self.lame_blockly.app_data.sample_id],
+                app_data=self.lame_blockly.app_data,
+                plot_type=plot_type
+            )
             style = self.lame_blockly.plot_style.style_dict[plot_type]
-            print('invokeSetStyleWidgets')
-            # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
-            
         else:
             style_serializable = {}
-        # Return the style dictionary as a JSON string
         return json.dumps(style_serializable)
-    
+        
     @pyqtSlot(str,str,str,int, result=float)
     def getHistogramRange(self, fieldType, field, hist_type, n_bins):
         return self.lame_blockly.histogram_get_range(fieldType, field, hist_type, n_bins)

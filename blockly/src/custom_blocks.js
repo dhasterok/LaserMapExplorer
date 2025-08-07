@@ -912,27 +912,39 @@ const plot_map = {
         this.setColour(285);
 
         this.plotType = 'field map'
+        
+        
+        
+
+        
+        
+        
+
         // Add default blocks to Styling input only in the toolbox
         if (!this.isInFlyout) {
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
-            // update style dictionaries
-            updateStylingChain(this);
             //  Attach validators to fieldType and field
             // Default: axisNum = 3 for 'C' axis; adjust as needed
             const axisNum = 3;
-            updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType');
+            updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType', 'field');
 
             // Attach validators to dropdowns
             const fieldTypeDropdown = this.getField('fieldType');
             fieldTypeDropdown.setValidator((newValue) => {
                 updateFieldDropdown(this, newValue);  // When fieldType changes, update fields
-                updateStylingChain(this); // Optional: update styles as needed
                 return newValue;
             });
             const fieldDropdown = this.getField('field');
             fieldDropdown.setValidator((newValue) => {
-                updateStylingChain(this);
+                const c_field = newValue;
+                const c_field_type = this.getFieldValue('fieldType');
+                this.argDict = {
+                    plot_type: this.plotType,
+                    c_field: c_field,
+                    c_field_type: c_field_type,     
+                }
+                updateStylingChain(this, this.argDict);
                 return newValue;
             });
         }
@@ -1046,8 +1058,6 @@ const plot_histogram = {
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
             updateHistogramOptions(this);
-            // update style dictionaries
-            updateStylingChain(this);
             const axisNum = 1;
             updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType', 'field');
 
@@ -1058,8 +1068,6 @@ const plot_histogram = {
                 updateFieldDropdown(this, newValue, 'field'); // X axis
                 // update style dictionaries
                 updateHistogramOptions(this);
-                // update style dictionaries
-                updateStylingChain(this);
                 
                 return newValue;
             });
@@ -1067,8 +1075,17 @@ const plot_histogram = {
             const fieldDropdown = this.getField('field');
             fieldDropdown.setValidator((newValue) => {
                 this.field = String(newValue);
+
+                this.argDict = {
+                    plot_type: this.plotType,
+                    x_field: newValue,
+                    x_field_type: this.field_type,     
+                    hist_plot_type: this.histType,
+                    hist_num_bins: this.nBins,
+                }
+                
                 updateHistogramOptions(this);
-                updateStylingChain(this);
+                updateStylingChain(this, this.argDict);
 
             return newValue;
         });
@@ -1148,7 +1165,6 @@ const plot_biplot = {
         if (!this.isInFlyout) {
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
             addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
-            updateStylingChain(this);
             // update fieldType dropdowns for X and Y
             updateFieldTypeDropdown(this, this.plotType, 0, 'fieldTypeX', 'fieldX');
             updateFieldTypeDropdown(this, this.plotType, 1, 'fieldTypeY', 'fieldY');
@@ -1157,24 +1173,32 @@ const plot_biplot = {
             const fieldTypeXDropdown = this.getField('fieldTypeX');
             fieldTypeXDropdown.setValidator((newValue) => {
                 updateFieldDropdown(this, newValue, 'fieldX'); // X axis
-                updateStylingChain(this);
                 return newValue;
             });
             const fieldXDropdown = this.getField('fieldX');
             fieldXDropdown.setValidator((newValue) => {
-                updateStylingChain(this);
+                this.argDict = {
+                    plot_type: this.plotType,
+                    x_field: newValue,
+                    x_field_type: this.field_type,     
+                }
+                updateStylingChain(this, this.argDict);
                 return newValue;
             });
 
             const fieldTypeYDropdown = this.getField('fieldTypeY');
             fieldTypeYDropdown.setValidator((newValue) => {
                 updateFieldDropdown(this, newValue, 'fieldY'); // Y axis
-                updateStylingChain(this);
                 return newValue;
             });
             const fieldYDropdown = this.getField('fieldY');
             fieldYDropdown.setValidator((newValue) => {
-                updateStylingChain(this);
+                this.argDict = {
+                    plot_type: this.plotType,
+                    y_field: newValue,
+                    y_field_type: this.field_type,     
+                }
+                updateStylingChain(this, this.argDict);
                 return newValue;
             });
         }

@@ -40,24 +40,28 @@ class BlocklyBridge(QObject):
     @pyqtSlot(str, result=str)
     def invokeSetStyleWidgets(self, arg_json):
         """arg_json: JSON string with keys like plot_type, c_field, c_field_type, etc."""
-        args = json.loads(arg_json)
-        plot_type = args.get('plot_type', 'field map').replace('_',' ')
-        # Update app_data and plot_style based on dictionary
-        for key, value in args.items():
-            # You can expand this to more robust attribute validation if needed
-            if hasattr(self.lame_blockly.app_data, key):
-                setattr(self.lame_blockly.app_data, key, value)
-            elif hasattr(self.lame_blockly.plot_style, key):
-                setattr(self.lame_blockly.plot_style, key, value)
-        if plot_type in self.lame_blockly.plot_style.style_dict.keys():
-            self.lame_blockly.plot_style.plot_type = plot_type
-            self.lame_blockly.plot_style.set_style_attributes(
-                data=self.lame_blockly.data[self.lame_blockly.app_data.sample_id],
-                app_data=self.lame_blockly.app_data,
-                plot_type=plot_type
-            )
-            style = self.lame_blockly.plot_style.style_dict[plot_type]
-            style_serializable = self.convert_numpy_types(style)
+        if arg_json !='':
+            args = json.loads(arg_json)
+            
+            # Update app_data and plot_style based on dictionary
+            for key, value in args.items():
+                # You can expand this to more robust attribute validation if needed
+                if hasattr(self.lame_blockly.app_data, key):
+                    setattr(self.lame_blockly.app_data, key, value)
+                elif hasattr(self.lame_blockly.plot_style, key):
+                    setattr(self.lame_blockly.plot_style, key, value)
+            plot_type = args.get('plot_type', 'field map').replace('_',' ')
+            if plot_type in self.lame_blockly.plot_style.style_dict.keys():
+                self.lame_blockly.plot_style.plot_type = plot_type
+                self.lame_blockly.plot_style.set_style_attributes(
+                    data=self.lame_blockly.data[self.lame_blockly.app_data.sample_id],
+                    app_data=self.lame_blockly.app_data,
+                    plot_type=plot_type
+                )
+                style = self.lame_blockly.plot_style.style_dict[plot_type]
+                style_serializable = self.convert_numpy_types(style)
+            else:
+                style_serializable = {}
         else:
             style_serializable = {}
         return json.dumps(style_serializable)

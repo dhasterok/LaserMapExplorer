@@ -319,14 +319,10 @@ pythonGenerator.forBlock['plot_ternary'] = function(block, generator) {
     const showHeatmap = block.getFieldValue('SHOW_HEATMAP') === 'TRUE';
     let subBlocksCode = generator.statementToCode(block, 'styling') || '';
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
-
+    const plotType =  generator.quote_(block.plotType)
     let code = subBlocksCode + '\n';
-    code += `self.plot_style.plot_type = 'ternary'\n`;
-    code += `canvas, plot_info = plot_ternary(self, data=self.data[self.app_data.sample_id], `
-        + `field_type_x=${fields.fieldTypeX}, field_x=${fields.fieldX}, `
-        + `field_type_y=${fields.fieldTypeY}, field_y=${fields.fieldY}, `
-        + `field_type_z=${fields.fieldTypeZ}, field_z=${fields.fieldZ}, `
-        + `heatmap=${showHeatmap})\n`;
+    code += `self.plot_style.plot_type = ${plotType}\n`;
+    code += `canvas, plot_info =  plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
     code += `self.show()\n`;
     return code;

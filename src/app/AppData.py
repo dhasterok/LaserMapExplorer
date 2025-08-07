@@ -1184,7 +1184,7 @@ class AppData(Observable):
         if self.sample_id == '':
             return ['']
         
-        if field_type == '':
+        if field_type == '' or field_type == 'none':
             return ['']
 
         data = self.data[self.sample_id].processed_data

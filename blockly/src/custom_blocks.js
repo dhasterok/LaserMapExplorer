@@ -1180,9 +1180,9 @@ const plot_biplot = {
                 this.argDict = {
                     plot_type: this.plotType,
                     x_field: newValue,
-                    x_field_type: this.field_type,     
+                    x_field_type: this.getFieldValue('fieldTypeX'),     
                 }
-                updateStylingChain(this, this.argDict);
+                updateStylingChain(this);
                 return newValue;
             });
 
@@ -1196,9 +1196,9 @@ const plot_biplot = {
                 this.argDict = {
                     plot_type: this.plotType,
                     y_field: newValue,
-                    y_field_type: this.field_type,     
+                    y_field_type: this.getFieldValue('fieldTypeY'),     
                 }
-                updateStylingChain(this, this.argDict);
+                updateStylingChain(this);
                 return newValue;
             });
         }
@@ -1226,6 +1226,7 @@ const plot_ternary = {
             .appendField('Ternary Plot')
             .setAlign(Blockly.inputs.Align.CENTRE);
 
+        // Dynamically add axes fields and types
         ['X','Y','Z'].forEach(axis => {
             this.appendDummyInput(`${axis}TYPE`)
                 .appendField(`Field type ${axis}`)
@@ -1235,6 +1236,7 @@ const plot_ternary = {
                 .appendField(new Blockly.FieldDropdown([['Select...', '']]), `field${axis}`);
         });
 
+        // Now add the heatmap checkbox
         this.appendDummyInput('HEATMAP')
             .appendField('Show Heatmap')
             .appendField(new Blockly.FieldCheckbox('FALSE'), 'SHOW_HEATMAP');
@@ -1249,40 +1251,73 @@ const plot_ternary = {
         this.setHelpUrl('');
         this.setColour(285);
 
+        // Default plot type
+        this.plotType = 'scatter';
+        const axisIndexMap = { X: 0, Y: 1, Z: 1 };
         if (!this.isInFlyout) {
-            const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
+            const defaultBlocks = ['x_axis', 'y_axis', 'z_axis', 'colormap'];
             addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
 
-            // Attach validators for fieldType and field
+            // Set up validators and chain updates
             ['X','Y','Z'].forEach(axis => {
+                const axisNum = axisIndexMap[axis];
+                updateFieldTypeDropdown(this, this.plotType, axisNum, `fieldType${axis}`, `field${axis}`);
+
                 const fieldTypeDropdown = this.getField(`fieldType${axis}`);
                 fieldTypeDropdown.setValidator((newValue) => {
-                    updateFieldDropdown(this, newValue, axis); // Dynamic update per axis
-                    updateStylingChain(this);
+                    updateFieldDropdown(this, newValue, `field${axis}`);
+                    // After type changes, update the full chain with all info
                     return newValue;
                 });
+
                 const fieldDropdown = this.getField(`field${axis}`);
                 fieldDropdown.setValidator((newValue) => {
+                    this.argDict =  getTernaryArgDict(this)
+                    //update new field value in dict 
+                    this.argDict[`${axis.toLowerCase()}_field`]=newValue
                     updateStylingChain(this);
                     return newValue;
                 });
             });
+
+            // Heatmap checkbox validator (now field exists!)
+            const heatmapCheckbox = this.getField('SHOW_HEATMAP');
+            heatmapCheckbox.setValidator((newValue) => {
+                this.plotType = (newValue === 'TRUE') ? 'heatmap' : 'scatter';
+                updateStylingChain(this);
+                return newValue;
+            });
         }
+
         this.setOnChange(function(event) {
             if (!this.workspace || this.isInFlyout) return;
             if (
-              event.type === Blockly.Events.BLOCK_CREATE ||
-              event.type === Blockly.Events.BLOCK_MOVE ||
-              event.type === Blockly.Events.BLOCK_DELETE
+                event.type === Blockly.Events.BLOCK_CREATE ||
+                event.type === Blockly.Events.BLOCK_MOVE ||
+                event.type === Blockly.Events.BLOCK_DELETE
             ) {
                 if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
                     updateStylingChain(this);
                 }
             }
         });
+
+        // Helper function to gather current settings into an argDict
+        function getTernaryArgDict(block) {
+            return {
+                'plot_type': block.plotType,
+                'x_field': block.getFieldValue('fieldX'),
+                'x_field_type': block.getFieldValue('fieldTypeX'),
+                'y_field': block.getFieldValue('fieldY'),
+                'y_field_type': block.getFieldValue('fieldTypeY'),
+                'z_field': block.getFieldValue('fieldZ'),
+                'z_field_type': block.getFieldValue('fieldTypeZ'),
+            };
+        }
     }
 };
 Blockly.common.defineBlocks({ plot_ternary: plot_ternary });
+
 
 const plot_ternary_map = {
     init: function () {

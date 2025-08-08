@@ -21,6 +21,8 @@
    InfoViewer
    LameIO
    LamePlotUI
+   LameStatusBar
+   MainToolBar
    MainWindow
    MapImporter
    PlotTree

@@ -1,4 +1,4 @@
-src.app.CanvasWidget
+﻿src.app.CanvasWidget
 ====================
 
 .. automodule:: src.app.CanvasWidget
@@ -8,6 +8,13 @@ src.app.CanvasWidget
 
    .. autosummary::
    
+      CanvasToolBar
       CanvasWidget
+      MultiViewTab
+      NavigationWidgetsMV
+      NavigationWidgetsQV
+      NavigationWidgetsSV
       QuickView
+      QuickViewTab
+      SingleViewTab
    

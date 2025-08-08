@@ -41,10 +41,10 @@ class BlocklyBridge(QObject):
     def invokeSetStyleWidgets(self, plot_type):
         # Call the set_style_widgets function
         plot_type = plot_type.replace('_',' ')
-        if plot_type in self.lame_blockly.plot_style.style_dict.keys():
-            self.lame_blockly.plot_style.plot_type = plot_type
-            self.lame_blockly.plot_style.set_style_attributes(data = self.lame_blockly.data[self.lame_blockly.app_data.sample_id], app_data =self.lame_blockly.app_data, plot_type = plot_type)
-            style = self.lame_blockly.plot_style.style_dict[plot_type]
+        if plot_type in self.lame_blockly.style_data.style_dict.keys():
+            self.lame_blockly.style_data.plot_type = plot_type
+            self.lame_blockly.style_data.set_style_attributes(data = self.lame_blockly.data[self.lame_blockly.app_data.sample_id], app_data =self.lame_blockly.app_data, plot_type = plot_type)
+            style = self.lame_blockly.style_data.style_dict[plot_type]
             print('invokeSetStyleWidgets')
             # Convert NumPy types to native Python types (if any)
             style_serializable = self.convert_numpy_types(style)
@@ -66,8 +66,8 @@ class BlocklyBridge(QObject):
     @pyqtSlot(str,str, result=list)
     def getFieldTypeList(self, ax, plot_type):
         print('get_field_list')
-        self.lame_blockly.plot_style.plot_type = plot_type
-        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.plot_style)
+        self.lame_blockly.style_data.plot_type = plot_type
+        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.style_data)
 
     @pyqtSlot(result=str)
     def getBaseDir(self):

@@ -12,6 +12,7 @@
 
    Browser
    Calculator
+   CodingWidgets
    CustomMplCanvas
    CustomWidgets
    DataHandling
@@ -20,7 +21,6 @@
    Logger
    Masking
    MolecularWeightCalculator
-   NoteTaking
    Observable
    Polygon
    PolygonMatplotlib
@@ -39,6 +39,9 @@
    plot_spider
    radar
    radar_factory
+   reSTEdit
+   reSTNotes
+   reSTRules
    scalebar
    ternary_plot
    varfunc

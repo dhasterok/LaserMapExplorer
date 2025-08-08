@@ -31,15 +31,14 @@ class LameIO():
 
         self.logger_key = 'IO'
 
-
         self.connect_actions = connect_actions
         if self.connect_actions:
-            ui.actionOpenSample.triggered.connect(lambda: self.open_sample())
-            ui.actionOpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
-            ui.actionImportSpots.triggered.connect(self.import_spots)
-            ui.actionOpenProject.triggered.connect(lambda: self.open_project())
-            ui.actionSaveProject.triggered.connect(lambda: self.save_project())
-            ui.actionImportFiles.triggered.connect(lambda: self.import_files())
+            ui.actions.OpenSample.triggered.connect(lambda: self.open_sample())
+            ui.actions.OpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
+            ui.actions.ImportSpots.triggered.connect(self.import_spots)
+            ui.actions.OpenProject.triggered.connect(lambda: self.open_project())
+            ui.actions.SaveProject.triggered.connect(lambda: self.save_project())
+            ui.actions.ImportFiles.triggered.connect(lambda: self.import_files())
 
         self.ui = ui
 
@@ -197,7 +196,7 @@ class LameIO():
                 # Saving data to the directory structure
                 data_dict = {
                     'data': ui.data,
-                    'styles': ui.plot_style,
+                    'styles': ui.style_data,
                     'plot_infos': ui.plot_tree.get_plot_info_from_tree(ui.treeModel),
                     'sample_id': ui.sample_id,
                     'sample_list': ui.app_data.sample_list
@@ -259,7 +258,7 @@ class LameIO():
                         data_dict = pickle.load(file)
                     if data_dict:
                         ui.data = data_dict['data']
-                        ui.plot_style = data_dict['styles']
+                        ui.style_data = data_dict['styles']
                         ui.app_data.sample_list = data_dict['sample_ids']
                         ui.sample_id = data_dict['sample_id']
 
@@ -298,12 +297,12 @@ class LameIO():
                             ui.polygon.add_samples()
                             ui.polygon.load_polygons(project_dir, sample_id)
 
-                        ui.plot_style.color_field_type = 'Analyte'
-                        ui.comboBoxColorByField.setCurrentText(ui.plot_style.color_field_type)
+                        ui.style_data.color_field_type = 'Analyte'
+                        ui.comboBoxColorByField.setCurrentText(ui.style_data.color_field_type)
                         ui.color_by_field_callback()
 
                         fields = ui.get_field_list('Analyte')
-                        ui.plot_style.color_field = fields[0]
+                        ui.style_data.color_field = fields[0]
                         ui.comboBoxColorField.setCurrentText(fields[0])
                         ui.color_field_callback()
 
@@ -361,7 +360,7 @@ class LameIO():
 
             # Connect data observers if required
             if self.connect_actions:
-                self.ui.preprocess.connect_data_observers(self.ui.data[self.ui.app_data.sample_id])
+                self.ui.control_dock.preprocess.connect_data_observers(self.ui.data[self.ui.app_data.sample_id])
 
     
     def images_to_dataframe(self, directory):

@@ -396,8 +396,9 @@
     <span class="n">QApplication</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QToolBar</span><span class="p">,</span>
     <span class="n">QWidget</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QProgressBar</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QHBoxLayout</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QAction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QUrl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomAction</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">src.common.csvdict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">csvdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.ui.MapImportDialog</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ui_MapImportDialog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.ui.FileSelectorDialog</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ui_FileSelectorDialog</span>
@@ -1653,14 +1654,20 @@
 
         <span class="n">toolbar</span> <span class="o">=</span> <span class="n">QToolBar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">select_all_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-select-all-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">select_all_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select All&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-select-all-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-select-all-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select all files&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectNone</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">select_none_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-select-none-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectNone</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">select_none_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectNone</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select None&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-select-none-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-select-none-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectNone</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select all files&quot;</span><span class="p">)</span>
 
         <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="p">)</span>

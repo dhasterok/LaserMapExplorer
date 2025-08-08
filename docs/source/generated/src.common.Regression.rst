@@ -1,4 +1,4 @@
-﻿src.common.Regression
+src.common.Regression
 =====================
 
 .. automodule:: src.common.Regression

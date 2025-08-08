@@ -392,12 +392,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QUrl</span><span class="p">,</span> <span class="n">QEvent</span><span class="p">,</span> <span class="n">pyqtSlot</span><span class="p">,</span> <span class="n">QSize</span> <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
     <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QDockWidget</span><span class="p">,</span> <span class="n">QGroupBox</span><span class="p">,</span>
-    <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QLineEdit</span>
+    <span class="n">QLabel</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QToolBar</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWebEngineWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWebEngineView</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWebEngineCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWebEngineProfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWebEngineCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QWebEnginePage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QMouseEvent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomAction</span><span class="p">,</span> <span class="n">CustomToolButton</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
     
 <span class="c1"># WebEngineView - Web engine for viewing userguide help pages</span>
@@ -541,11 +542,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dock_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
 
-        <span class="n">toolbar</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">toolbar_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Adjust margins as needed</span>
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Spacing between buttons</span>
-        <span class="n">toolbar</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
+        <span class="n">toolbar</span> <span class="o">=</span> <span class="n">QToolBar</span><span class="p">(</span><span class="s2">&quot;Browser Toolbar&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">setMovable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Optional: Prevent toolbar from being dragged out</span>
 
         <span class="c1"># self.groupBoxBrowserControl = QtWidgets.QGroupBox(self.container)</span>
         <span class="c1"># self.groupBoxBrowserControl.setMinimumSize(QtCore.QSize(0, 40))</span>
@@ -554,29 +553,29 @@
         <span class="c1"># self.groupBoxBrowserControl.setObjectName(&quot;groupBoxBrowserControl&quot;)</span>
         
         <span class="c1"># Run button</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">home_button</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="n">home_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-home-64.svg&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">home_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">home_button</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">home_icon</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">home_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Home&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">home_button</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Return to LaME documentation homepage&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">home_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Home&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-home-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-home-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">home_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Return to LaME documentation homepage&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">back_button</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="n">back_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-back-arrow-64.svg&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">back_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">back_button</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">back_icon</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">back_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">back_button</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-back-arrow-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-back-arrow-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Return to the previous page&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">forward_button</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="n">forward_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-forward-arrow-64.svg&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">forward_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">forward_button</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">forward_icon</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">forward_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Forward&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">forward_button</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Forward&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Forward&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-forward-arrow-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-forward-arrow-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Return to the next page&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">location_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">browser_location</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">()</span>
@@ -584,11 +583,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">browser_location</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">16777215</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">browser_location</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
 
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">home_button</span><span class="p">)</span>
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">back_button</span><span class="p">)</span>
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_button</span><span class="p">)</span>
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_label</span><span class="p">)</span>
-        <span class="n">toolbar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser_location</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">home_action</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">back_action</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_action</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_label</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser_location</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dock_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
 
@@ -606,10 +605,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">open_browser</span><span class="p">()</span>
 
         <span class="c1"># connect widget slots</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">home_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">go_to_home</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">home_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">go_to_home</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">browser_location</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">go_to_page</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">back_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">back</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">forward_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">back</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span>
 
         <span class="c1"># install event filter for help</span>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">help_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -638,7 +637,7 @@
 <span class="sd">        bool</span>
 <span class="sd">            ``True`` if the event was handled, otherwise ``False``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">actionHelp</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">Help</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="c1"># Handle hover events</span>
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QEvent</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">Enter</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">help_mapping</span><span class="p">:</span>
@@ -653,7 +652,7 @@
 
             <span class="c1"># Handle mouse press events</span>
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QEvent</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">MouseButtonPress</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">actionHelp</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">Help</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CursorShape</span><span class="o">.</span><span class="n">ArrowCursor</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">help_mapping</span><span class="p">:</span>

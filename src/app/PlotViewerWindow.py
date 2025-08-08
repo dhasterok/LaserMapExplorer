@@ -234,7 +234,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
             # trigger update to plot        
-            self.plot_style.scheduler.schedule_update()
+            self.style_data.scheduler.schedule_update()
 
         if function == 'save':
             if isinstance(canvas,mplc.MplCanvas):

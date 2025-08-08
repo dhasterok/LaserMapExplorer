@@ -1,5 +1,10 @@
 import numpy as np
 import pandas as pd
+from PyQt6.QtCore import ( Qt )
+from PyQt6.QtWidgets import ( 
+    QCheckBox, QTableWidgetItem, QMessageBox, QInputDialog, QGroupBox, QFormLayout, QVBoxLayout,
+    QHBoxLayout, QAbstractSpinBox, QComboBox, QSpinBox, QDoubleSpinBox, QLabel, QWidget
+)
 import matplotlib.colors as colors
 import src.common.CustomMplCanvas as mplc
 from scipy import ndimage
@@ -115,7 +120,7 @@ class ImageProcessing():
         #self.plot.addItem(self.edge_img)
 
         overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
-        colorlist = self.parent.get_rgb_color(self.parent.plot_style.overlay_color)
+        colorlist = self.parent.get_rgb_color(self.parent.style_data.overlay_color)
         overlay_image[..., 0] = colorlist[0]  # Red channel
         overlay_image[..., 1] = colorlist[1]  # Green channel
         overlay_image[..., 2] = colorlist[2]  # Blue channel
@@ -299,17 +304,16 @@ class ImageProcessing():
             return
         else:
             if self.parent.comboBoxPlotType.currentText != 'field map':
-                self.parent.plot_style.plot_type = 'field map'
-
+                self.parent.style_data.plot_type = 'field map'
 
         canvas = mplc.MplCanvas(parent=self.parent)
 
-        norm = self.parent.plot_style.color_norm()
-        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        norm = self.parent.style_data.color_norm()
+        cax = canvas.axes.imshow(filtered_image, cmap=self.parent.style_data.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
         # set color limits
         self.parent.add_colorbar(canvas, cax)
-        cax.set_clim(self.parent.plot_style.clim[0], self.parent.plot_style.clim[1])
+        cax.set_clim(self.parent.style_data.clim[0], self.parent.style_data.clim[1])
 
         # use mask to create an alpha layer
         mask = self.parent.data[self.parent.sample_id].mask.astype(float)
@@ -338,7 +342,7 @@ class ImageProcessing():
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
-            'style': self.parent.plot_style.style_dict[self.parent.plot_style.plot_type],
+            'style': self.parent.style_data.style_dict[self.parent.style_data.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None
@@ -380,8 +384,8 @@ class ImageProcessing():
         q = np.quantile(self.grad_mag.flatten(), q=[0.025, 0.975])
         norm = colors.Normalize(q[0],q[1], clip=False)
 
-        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
-        canvas.axes.quiver(X,Y,dx,dy, color=self.parent.plot_style.overlay_color, linewidth=0.5)
+        cax = canvas.axes.imshow(self.grad_mag, cmap=self.parent.style_data.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+        canvas.axes.quiver(X,Y,dx,dy, color=self.parent.style_data.overlay_color, linewidth=0.5)
 
         # set color limits
         #self.add_colorbar(canvas, cax, style)
@@ -416,7 +420,7 @@ class ImageProcessing():
             'field_type': self.parent.comboBoxColorByField.currentText(),
             'field': field,
             'figure': canvas,
-            'style': self.parent.plot_style.style_dict[self.parent.plot_style.plot_type],
+            'style': self.parent.style_data.style_dict[self.parent.style_data.plot_type],
             'cluster_groups': None,
             'view': [True,False],
             'position': None
@@ -443,33 +447,76 @@ class ImageProcessing():
 
 
 @auto_log_methods(logger_key='Image')
-class ImageProcessingUI(ImageProcessing):
+class ImageProcessingUI(QGroupBox, ImageProcessing):
     def __init__(self, parent):
-        super().__init__(self)
+        super().__init__(parent, parent=self)
         self.logger_key = 'Image'
-
         self.ui = parent
+
+        self.setupUI()
 
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
 
+    def setupUI(self):
+
+        self.setTitle("Noise Reduction")
+        self.setObjectName("groupBoxNoiseReduction")
+
+        form_layout = QFormLayout(self)
+        form_layout.setContentsMargins(3, 3, 3, 3)
+        form_layout.setObjectName("formLayout_28")
+
+        self.comboBoxNoiseReductionMethod = QComboBox(parent=self)
+        self.comboBoxNoiseReductionMethod.setObjectName("comboBoxNoiseReductionMethod")
+        form_layout.addRow("Method", self.comboBoxNoiseReductionMethod)
+
+        self.labelNoiseOption1 = QLabel(parent=self)
+        self.labelNoiseOption1.setText("Option 1")
+        self.spinBoxNoiseOption1 = QSpinBox(parent=self)
+        self.spinBoxNoiseOption1.setMinimum(1)
+        self.spinBoxNoiseOption1.setMaximum(200)
+        self.spinBoxNoiseOption1.setProperty("value", 30)
+        self.spinBoxNoiseOption1.setObjectName("spinBoxNoiseOption1")
+        form_layout.addRow(self.labelNoiseOption1, self.spinBoxNoiseOption1)
+
+        self.labelNoiseOption2 = QLabel(parent=self)
+        self.labelNoiseOption2.setText("Option 2")
+        self.doubleSpinBoxNoiseOption2 = QDoubleSpinBox(parent=self)
+        self.doubleSpinBoxNoiseOption2.setEnabled(False)
+        self.doubleSpinBoxNoiseOption2.setDecimals(1)
+        self.doubleSpinBoxNoiseOption2.setObjectName("doubleSpinBoxNoiseOption2")
+        form_layout.addRow(self.labelNoiseOption2, self.doubleSpinBoxNoiseOption2)
+
+        self.checkBoxGradient = QCheckBox(parent=self)
+        self.checkBoxGradient.setEnabled(False)
+        self.checkBoxGradient.setText("")
+        self.checkBoxGradient.setObjectName("checkBoxGradient")
+        form_layout.addRow("Apply to analysis", self.checkBoxGradient)
+
+        self.checkBoxApplyNoiseReduction = QCheckBox(parent=self)
+        self.checkBoxApplyNoiseReduction.setEnabled(False)
+        self.checkBoxApplyNoiseReduction.setText("")
+        self.checkBoxApplyNoiseReduction.setObjectName("checkBoxApplyNoiseReduction")
+        form_layout.addRow("Gradient", self.checkBoxApplyNoiseReduction)
+
     def connect_widgets(self):
         # noise reduction
-        self.ui.comboBoxNoiseReductionMethod.clear()
-        self.ui.comboBoxNoiseReductionMethod.addItems(self._noise_reduction_methods)
-        self.ui.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
+        self.comboBoxNoiseReductionMethod.clear()
+        self.comboBoxNoiseReductionMethod.addItems(self._noise_reduction_methods)
+        self.comboBoxNoiseReductionMethod.activated.connect(self.noise_reduction_method_callback)
 
-        self.ui.spinBoxNoiseOption1.setEnabled(False)
-        self.ui.labelNoiseOption1.setEnabled(False)
-        self.ui.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
+        self.spinBoxNoiseOption1.setEnabled(False)
+        self.labelNoiseOption1.setEnabled(False)
+        self.spinBoxNoiseOption1.valueChanged.connect(self.noise_reduction_option1_callback)
 
-        self.ui.doubleSpinBoxNoiseOption2.setEnabled(False)
-        self.ui.labelNoiseOption2.setEnabled(False)
-        self.ui.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
+        self.doubleSpinBoxNoiseOption2.setEnabled(False)
+        self.labelNoiseOption2.setEnabled(False)
+        self.doubleSpinBoxNoiseOption2.valueChanged.connect(self.noise_reduction_option2_callback)
 
-        self.ui.checkBoxGradient.stateChanged.connect(self.gradient_checked_state_changed)
-        self.ui.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
+        self.checkBoxGradient.stateChanged.connect(self.gradient_checked_state_changed)
+        self.checkBoxGradient.stateChanged.connect(self.noise_reduction_method_callback)
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -477,38 +524,38 @@ class ImageProcessingUI(ImageProcessing):
 
     def connect_logger(self):
         """Connects widgets to logger."""
-        self.ui.comboBoxNoiseReductionMethod.activated.connect(lambda: log(f"comboBoxNoiseReductionMethod value=[{self.ui.comboBoxNoiseReductionMethod.currentText()}]", prefix="UI"))
-        self.ui.spinBoxNoiseOption1.valueChanged.connect(lambda: log(f"spinBoxNoiseOption1 value=[{self.ui.spinBoxNoiseOption1.value}]", prefix="UI"))
-        self.ui.doubleSpinBoxNoiseOption2.valueChanged.connect(lambda: log(f"doubleSpinBoxNoiseOption2 value=[{self.ui.doubleSpinBoxNoiseOption2.value}]", prefix="UI"))
-        self.ui.checkBoxApplyNoiseReduction.checkStateChanged.connect(lambda: log(f"checkBoxApplyNoiseReduction value=[{self.ui.checkBoxApplyNoiseReduction.isChecked()}]", prefix="UI"))
-        self.ui.checkBoxGradient.checkStateChanged.connect(lambda: log(f"checkBoxGradient value=[{self.ui.checkBoxGradient.isChecked()}]", prefix="UI"))
+        self.comboBoxNoiseReductionMethod.activated.connect(lambda: log(f"comboBoxNoiseReductionMethod value=[{self.ui.comboBoxNoiseReductionMethod.currentText()}]", prefix="UI"))
+        self.spinBoxNoiseOption1.valueChanged.connect(lambda: log(f"spinBoxNoiseOption1 value=[{self.ui.spinBoxNoiseOption1.value}]", prefix="UI"))
+        self.doubleSpinBoxNoiseOption2.valueChanged.connect(lambda: log(f"doubleSpinBoxNoiseOption2 value=[{self.ui.doubleSpinBoxNoiseOption2.value}]", prefix="UI"))
+        self.checkBoxApplyNoiseReduction.checkStateChanged.connect(lambda: log(f"checkBoxApplyNoiseReduction value=[{self.ui.checkBoxApplyNoiseReduction.isChecked()}]", prefix="UI"))
+        self.checkBoxGradient.checkStateChanged.connect(lambda: log(f"checkBoxGradient value=[{self.ui.checkBoxGradient.isChecked()}]", prefix="UI"))
 
     def update_noise_red_method_combobox(self, new_noise_red_method):
-        self.ui.comboBoxNoiseReductionMethod.setCurrentText(new_noise_red_method)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
-            self.ui.plot_style.schedule_update()
+        self.comboBoxNoiseReductionMethod.setCurrentText(new_noise_red_method)
+        if self.ui.toolBox.currentIndex() == self.ui.control_dock.tab_dict['sample']:
+            self.ui.schedule_update()
 
     def update_noise_red_option1_spinbox(self, new_noise_red_option1):
-        self.ui.spinBoxNoiseOption1.setValue(new_noise_red_option1)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
-            self.ui.plot_style.schedule_update()
+        self.spinBoxNoiseOption1.setValue(new_noise_red_option1)
+        if self.ui.toolBox.currentIndex() == self.ui.control_dock.tab_dict['sample']:
+            self.ui.schedule_update()
 
     def update_noise_red_option2_spinbox(self, new_noise_red_option2):
-        self.ui.doubleSpinBoxNoiseOption2.setValue(new_noise_red_option2)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
-            self.ui.plot_style.schedule_update()
+        self.doubleSpinBoxNoiseOption2.setValue(new_noise_red_option2)
+        if self.ui.toolBox.currentIndex() == self.ui.control_dock.tab_dict['sample']:
+            self.ui.schedule_update()
     
     def update_gradient_flag_checkbox(self, new_gradient_flag):
-        self.ui.checkBoxGradient.setChecked(new_gradient_flag)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['sample']:
-            self.ui.plot_style.schedule_update()
+        self.checkBoxGradient.setChecked(new_gradient_flag)
+        if self.ui.toolBox.currentIndex() == self.ui.control_dock.tab_dict['sample']:
+            self.ui.schedule_update()
 
     def gradient_checked_state_changed(self):
-        if self.parent.checkBoxGradient.isChecked():
-            self.parent.plot_style.plot_type = 'gradient map'
+        if self.checkBoxGradient.isChecked():
+            self.ui.style_data.plot_type = 'gradient map'
         else:
-            if self.parent.comboBoxPlotType.currentText != 'field map':
-                self.parent.plot_style.plot_type = 'field map'
+            if self.ui.comboBoxPlotType.currentText != 'field map':
+                self.ui.style_data.plot_type = 'field map'
 
     def noise_reduction_method_callback(self):
         """Sets up noise reduction controls when noise reduction method is changed.
@@ -519,81 +566,77 @@ class ImageProcessingUI(ImageProcessing):
 
         After enabling options, it runs ``noise_reduction``.
         """
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
         match algorithm:
             case 'none':
                 # turn options off
-                self.parent.labelNoiseOption1.setEnabled(False)
-                self.parent.labelNoiseOption1.setText('')
-                self.parent.spinBoxNoiseOption1.setEnabled(False)
-                self.parent.labelNoiseOption2.setEnabled(False)
-                self.parent.labelNoiseOption2.setText('')
-                self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
+                self.labelNoiseOption1.setEnabled(False)
+                self.labelNoiseOption1.setText('')
+                self.spinBoxNoiseOption1.setEnabled(False)
+                self.labelNoiseOption2.setEnabled(False)
+                self.labelNoiseOption2.setText('')
+                self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
                 self.noise_reduction(algorithm)
-                self.parent.comboBoxApplyNoiseReduction.setEnabled(False)
-                self.parent.labelApplySmoothing.setEnabled(False)
-                self.parent.checkBoxGradient.setEnabled(False)
-                self.parent.labelGradient.setEnabled(False)
+                self.checkBoxApplyNoiseReduction.setEnabled(False)
+                self.checkBoxGradient.setEnabled(False)
 
-                self.parent.actionNoiseReduction.setEnabled(False)
+                self.ui.actionNoiseReduction.setEnabled(False)
 
-                self.parent.plot_style.scheduler.schedule_update()
+                self.ui.style_data.scheduler.schedule_update()
             case _:
                 # set option 1
-                self.parent.spinBoxNoiseOption1.blockSignals(True)
-                self.parent.labelNoiseOption1.setEnabled(True)
-                self.parent.labelNoiseOption1.setText(self.noise_red_options[algorithm]['label1'])
-                self.parent.spinBoxNoiseOption1.setEnabled(True)
+                self.spinBoxNoiseOption1.blockSignals(True)
+                self.labelNoiseOption1.setEnabled(True)
+                self.labelNoiseOption1.setText(self.noise_red_options[algorithm]['label1'])
+                self.spinBoxNoiseOption1.setEnabled(True)
                 match algorithm:
                     case 'median':
-                        self.parent.spinBoxNoiseOption1.setRange(1,5)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(2)
+                        self.spinBoxNoiseOption1.setRange(1,5)
+                        self.spinBoxNoiseOption1.setSingleStep(2)
                     case 'gaussian' | 'wiener':
-                        self.parent.spinBoxNoiseOption1.setRange(1,199)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(2)
+                        self.spinBoxNoiseOption1.setRange(1,199)
+                        self.spinBoxNoiseOption1.setSingleStep(2)
                     case 'edge-preserving':
-                        self.parent.spinBoxNoiseOption1.setRange(0,200)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(5)
+                        self.spinBoxNoiseOption1.setRange(0,200)
+                        self.spinBoxNoiseOption1.setSingleStep(5)
                     case _:
-                        self.parent.spinBoxNoiseOption1.setRange(0,200)
-                        self.parent.spinBoxNoiseOption1.setSingleStep(5)
+                        self.spinBoxNoiseOption1.setRange(0,200)
+                        self.spinBoxNoiseOption1.setSingleStep(5)
 
-                self.parent.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
-                self.parent.spinBoxNoiseOption1.blockSignals(False)
-                #self.comboBoxApplyNoiseReduction.setEnabled(True)
-                #self.labelApplySmoothing.setEnabled(True)
-                self.parent.checkBoxGradient.setEnabled(True)
-                self.parent.labelGradient.setEnabled(True)
-                self.parent.actionNoiseReduction.setEnabled(True)
+                self.spinBoxNoiseOption1.setValue(int(self.noise_red_options[algorithm]['value1']))
+                self.spinBoxNoiseOption1.blockSignals(False)
+                #self.checkBoxApplyNoiseReduction.setEnabled(True)
+                self.checkBoxGradient.setEnabled(True)
+                self.ui.actionNoiseReduction.setEnabled(True)
 
-                val1 = self.parent.spinBoxNoiseOption1.value()
+                val1 = self.spinBoxNoiseOption1.value()
 
                 # set option 2
                 if self.noise_red_options[algorithm]['label2'] is None:
                     # no option 2
-                    self.parent.labelNoiseOption2.setEnabled(False)
-                    self.parent.labelNoiseOption2.setText('')
-                    self.parent.doubleSpinBoxNoiseOption2.setEnabled(False)
+                    self.labelNoiseOption2.setEnabled(False)
+                    self.labelNoiseOption2.setText('')
+                    self.doubleSpinBoxNoiseOption2.setEnabled(False)
 
                     self.noise_reduction(algorithm, val1)
                 else:
                     # yes option 2
-                    self.parent.doubleSpinBoxNoiseOption2.blockSignals(True)
-                    self.parent.labelNoiseOption2.setEnabled(True)
-                    self.parent.labelNoiseOption2.setText(self.noise_red_options[algorithm]['label2'])
-                    self.parent.doubleSpinBoxNoiseOption2.setEnabled(True)
+                    self.doubleSpinBoxNoiseOption2.blockSignals(True)
+                    self.labelNoiseOption2.setEnabled(True)
+                    self.labelNoiseOption2.setText(self.noise_red_options[algorithm]['label2'])
+                    self.doubleSpinBoxNoiseOption2.setEnabled(True)
                     match algorithm:
                         case 'edge-preserving':
-                            self.parent.doubleSpinBoxNoiseOption2.setRange(0,1)
+                            self.doubleSpinBoxNoiseOption2.setRange(0,1)
                         case 'bilateral':
-                            self.parent.doubleSpinBoxNoiseOption2.setRange(0,200)
+                            self.doubleSpinBoxNoiseOption2.setRange(0,200)
 
-                    self.parent.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
-                    self.parent.doubleSpinBoxNoiseOption2.blockSignals(False)
+                    self.doubleSpinBoxNoiseOption2.setValue(self.noise_red_options[algorithm]['value2'])
+                    self.doubleSpinBoxNoiseOption2.blockSignals(False)
 
-                    val2 = self.parent.doubleSpinBoxNoiseOption2.value()
+                    val2 = self.doubleSpinBoxNoiseOption2.value()
                     self.noise_reduction(algorithm, val1, val2)
 
     def noise_reduction_option2_callback(self):
@@ -601,17 +644,17 @@ class ImageProcessingUI(ImageProcessing):
 
         Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption2.value()`` is changed by
         the user.  Note, not all noise reduction methods have a second option."""
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
-        val1 = self.parent.spinBoxNoiseOption1.value()
-        val2 = self.parent.doubleSpinBoxNoiseOption2.value()
+        val1 = self.spinBoxNoiseOption1.value()
+        val2 = self.doubleSpinBoxNoiseOption2.value()
         self.noise_red_options[algorithm]['value2'] = val2
         self.noise_reduction(algorithm,val1,val2)
 
     def run_noise_reduction(self):
         """Gets parameters and runs noise reduction"""
 
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
         if algorithm == 'none':
             return
 
@@ -627,10 +670,10 @@ class ImageProcessingUI(ImageProcessing):
 
         Updates noise reduction applied to map(s) when ``MainWindow.spinBoxNoiseOption1.value()`` is changed by
         the user."""
-        algorithm = self.parent.comboBoxNoiseReductionMethod.currentText().lower()
+        algorithm = self.comboBoxNoiseReductionMethod.currentText().lower()
 
         # get option 1
-        val1 = self.parent.spinBoxNoiseOption1.value()
+        val1 = self.spinBoxNoiseOption1.value()
         match algorithm:
             case 'median' | 'gaussian' | 'wiener':
                 # val1 must be odd
@@ -645,11 +688,11 @@ class ImageProcessingUI(ImageProcessing):
         else:
             if algorithm == 'gaussian':
                 val2 = self.gaussian_sigma(val1)
-                self.parent.doubleSpinBoxNoiseOption2.blockSignals(True)
-                self.parent.doubleSpinBoxNoiseOption2.setValue(val2)
-                self.parent.doubleSpinBoxNoiseOption2.blockSignals(False)
+                self.doubleSpinBoxNoiseOption2.blockSignals(True)
+                self.doubleSpinBoxNoiseOption2.setValue(val2)
+                self.doubleSpinBoxNoiseOption2.blockSignals(False)
                 self.noise_red_options[algorithm]['value2'] = val2
             else:
-                val2 = self.parent.doubleSpinBoxNoiseOption2.value()
+                val2 = self.doubleSpinBoxNoiseOption2.value()
 
             self.noise_reduction(algorithm,val1,val2)

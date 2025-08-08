@@ -388,23 +388,20 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.InfoViewer</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numexpr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ne</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.varfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial_match</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QUrl</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-        <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
-        <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
-        <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTabWidget</span><span class="p">,</span>
-        <span class="n">QAbstractItemView</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QStyledItemDelegate</span><span class="p">,</span> <span class="n">QLineEdit</span>
+        <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
+        <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTabWidget</span><span class="p">,</span>
+        <span class="n">QAbstractItemView</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QStyledItemDelegate</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QDialog</span>
     <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QAction</span><span class="p">,</span> <span class="n">QDoubleValidator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QDoubleValidator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">CustomAction</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.app.FieldLogic</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldLogicUI</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.app.UITheme</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_font</span>
@@ -578,21 +575,20 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Info Tools&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_info</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">plot_info</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">app_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">default_font</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setAllowedAreas</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">DockWidgetArea</span><span class="o">.</span><span class="n">BottomDockWidgetArea</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;dockWidgetInfoToolbox&quot;</span><span class="p">)</span>
@@ -651,7 +647,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
                     <span class="n">update_numpy_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_tab</span><span class="o">.</span><span class="n">field_table</span><span class="p">)</span>
             <span class="k">case</span> <span class="s2">&quot;plot info&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span><span class="o">.</span><span class="n">update_plot_info_tab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span><span class="o">.</span><span class="n">update_plot_info_tab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span></div>
 </div>
 
 
@@ -691,22 +687,41 @@
         <span class="n">toolbar</span><span class="o">.</span><span class="n">setMovable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Optional: Prevent toolbar from being dragged out</span>
         <span class="n">tab_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">select_all_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-select-all-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">select_all_icon</span><span class="p">)</span>
+        <span class="c1"># export metadata table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_export_plot_info</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Export to notes&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-save-notes-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_export_plot_info</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">export_plot_info</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_export_plot_info</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Export plot information to notes&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select All&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-select-all-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-select-all-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select all annotations&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionShowHide</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">show_hide_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-show-hide-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionShowHide</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">show_hide_icon</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionShowHide</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionShowHide</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Show/Hide&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-show-hide-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_checked</span><span class="o">=</span><span class="s2">&quot;icon-show-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionShowHide</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Toggle show/hide annotations&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionRemove</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">remove_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-delete-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionRemove</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">remove_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRemove</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Remove&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-delete-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-delete-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionRemove</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Remove selected annotation(s)&quot;</span><span class="p">)</span>
 
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_export_plot_info</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
         <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll</span><span class="p">)</span>
         <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionShowHide</span><span class="p">)</span>
         <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionRemove</span><span class="p">)</span>
@@ -723,7 +738,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_text_edit</span> <span class="o">=</span> <span class="n">QTextEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_text_edit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_text_edit</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
 
         <span class="n">plot_info_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info_label</span><span class="p">)</span>
         <span class="n">plot_info_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info_text_edit</span><span class="p">)</span>
@@ -736,8 +750,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Annotations&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">annotations_table</span> <span class="o">=</span> <span class="n">QTableWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">annotations_table</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">([</span><span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Visible&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations_table</span> <span class="o">=</span> <span class="n">QTableWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_info_tab</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations_table</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">([</span><span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Color&quot;</span><span class="p">,</span> <span class="s2">&quot;Visible&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations_table</span><span class="o">.</span><span class="n">setEditTriggers</span><span class="p">(</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">EditTrigger</span><span class="o">.</span><span class="n">DoubleClicked</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">annotations_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations_label</span><span class="p">)</span>
@@ -896,6 +910,16 @@
             <span class="n">canvas</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="n">annotation</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_text</span>
             <span class="n">annotation</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">new_text</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PlotInfoTab.export_plot_info">
+<a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.PlotInfoTab.export_plot_info">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_plot_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s2">&quot;notes_dock&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">notes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">notes_dock</span><span class="o">.</span><span class="n">notes</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">print_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span></div>
 </div>
 
 
@@ -934,72 +958,80 @@
         <span class="c1"># Add toolbar actions</span>
         <span class="c1"># select field</span>
         <span class="n">field_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_tab</span><span class="p">)</span>
-        <span class="n">field_label</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
         <span class="n">field_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Field&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_tab</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;field_combobox&quot;</span><span class="p">)</span>
 
         <span class="c1"># select all columns</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_columns</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Select All Columns&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">select_columns_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-top_toolbar_show-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_columns</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">select_columns_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_columns</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select Columns&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-top-toolbar-hide-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_checked</span><span class="o">=</span><span class="s2">&quot;icon-top-toolbar-show-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_columns</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_columns</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_all_columns</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_columns</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select/deselect all columns&quot;</span><span class="p">)</span>
 
         <span class="c1"># select all rows</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_rows</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Select All Rows&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">select_rows_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-left_toolbar_show-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_rows</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">select_rows_icon</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_rows</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_rows</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select Rows&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-left-toolbar-hide-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_checked</span><span class="o">=</span><span class="s2">&quot;icon-left-toolbar-show-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_rows</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_all_rows</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionSelectAll_rows</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select/deselect all rows&quot;</span><span class="p">)</span>
 
         <span class="c1"># set the norm method for all samples</span>
         <span class="n">scaling_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_tab</span><span class="p">)</span>
-        <span class="n">scaling_label</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
         <span class="n">scaling_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Norm&quot;</span><span class="p">)</span>
 
         <span class="c1">#normalising</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_combobox</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_tab</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">norm_combobox</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">16777215</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">norm_combobox</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_combobox</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_combobox</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="s1">&#39;logit&#39;</span><span class="p">,</span> <span class="s1">&#39;symlog&#39;</span><span class="p">,</span> <span class="s1">&#39;mixed&#39;</span><span class="p">])</span>
         <span class="c1"># self.norm_combobox.activated.connect(lambda: self.update_norm(self.norm_combobox.currentText()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm_combobox</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Set the norm for all analytes&quot;</span><span class="p">)</span>
 
         <span class="c1"># view/hide</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Show/hide columns and rows&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Show/hide columns and rows&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-show-hide-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_checked</span><span class="o">=</span><span class="s2">&quot;icon-show-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_view</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_view_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_view_icon</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-show-hide-64.svg&quot;</span><span class="p">),</span> <span class="n">QIcon</span><span class="o">.</span><span class="n">Mode</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">QIcon</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_view_icon</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-show-64.svg&quot;</span><span class="p">),</span> <span class="n">QIcon</span><span class="o">.</span><span class="n">Mode</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">QIcon</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="n">On</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_view_icon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionToggleView</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Click to toggle visibility of unselected columns/rows&quot;</span><span class="p">)</span>
 
         <span class="c1"># export metadata table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_export_metadata</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Export Metadata&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_export_metadata</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Export to notes&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-save-notes-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_export_metadata</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">export_metadata</span><span class="p">)</span>
-        <span class="n">export_notes_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-save-notes-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_export_metadata</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">export_notes_icon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_export_metadata</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Export metadata to notes&quot;</span><span class="p">)</span>
 
         <span class="c1"># adjust precision</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Increase Significant Figures&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">sigfigs_more_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-sigfigs-add-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">sigfigs_more_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Increase Significant Figures&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-add-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-add-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">increase_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_table</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Increase the number of displayed digits&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Decrease Significant Figures&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">sigfigs_less_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-sigfigs-remove-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">sigfigs_less_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Decrease Significant Figures&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-remove-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-remove-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">decrease_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_table</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Reduce the number of displayed digits&quot;</span><span class="p">)</span>
@@ -1349,6 +1381,10 @@
 <div class="viewcode-block" id="MetadataTab.export_metadata">
 <a class="viewcode-back" href="../../generated/app.InfoViewer.html#app.InfoViewer.MetadataTab.export_metadata">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s2">&quot;notes_dock&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        
+        <span class="n">notes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">notes_dock</span>
         <span class="k">pass</span></div>
 </div>
 
@@ -1382,16 +1418,22 @@
 
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Increase Significant Figures&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">sigfigs_more_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-sigfigs-add-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">sigfigs_more_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Increase Significant Figures&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-add-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-add-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">increase_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">update_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_table</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Increase the number of displayed digits&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Decrease Significant Figures&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">sigfigs_less_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-sigfigs-remove-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">sigfigs_less_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Decrease Significant Figures&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-remove-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-remove-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">decrease_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">update_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_table</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Reduce the number of displayed digits&quot;</span><span class="p">)</span>
@@ -1434,7 +1476,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_data</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">field_tab</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">field_tab</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;Field Tab&quot;</span><span class="p">)</span>
         <span class="n">tab_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_tab</span><span class="p">)</span>
@@ -1458,16 +1500,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_tab</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;field_combobox&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Increase Significant Figures&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">sigfigs_more_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-sigfigs-add-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">sigfigs_more_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Increase Significant Figures&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-add-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-add-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">increase_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_field_table</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_more</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Increase the number of displayed digits&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Decrease Significant Figures&quot;</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
-        <span class="n">sigfigs_less_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-sigfigs-remove-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">sigfigs_less_icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Decrease Significant Figures&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-remove-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-sigfigs-remove-dark-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">toolbar</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">decrease_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_field_table</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_sigfigs_less</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Reduce the number of displayed digits&quot;</span><span class="p">)</span>
@@ -1494,7 +1542,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">field_type_combobox</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_field_table</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_type_combobox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_field_type_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_type_combobox</span><span class="p">)</span>
+        
         <span class="c1"># when field combobox is updated</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">field_combobox</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_field_table</span><span class="p">)</span>
 

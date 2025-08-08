@@ -14,5 +14,9 @@ src.app.UITheme
 
    .. autosummary::
    
+      PreferencesDialog
+      PreferencesManager
+      PreviewWidget
+      ThemeManager
       UIThemes
    

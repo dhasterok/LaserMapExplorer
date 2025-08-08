@@ -9,6 +9,5 @@
    .. autosummary::
    
       StyleData
-      StyleObj
       StyleTheme
    

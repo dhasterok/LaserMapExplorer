@@ -244,10 +244,8 @@
       
       
       
-        
-      
       <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -337,6 +335,15 @@
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
       <div class="sidebar-primary-item">
@@ -394,7 +401,7 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.LameIO.LameIO" title="app.LameIO.LameIO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LameIO</span></code></a>([parent, connect_actions])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.LameIO.LameIO" title="app.LameIO.LameIO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LameIO</span></code></a>([ui, connect_actions])</p></td>
 <td><p>Handles most I/O for the main window of LaME</p></td>
 </tr>
 </tbody>
@@ -402,7 +409,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="app.LameIO.LameIO">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.LameIO.</span></span><span class="sig-name descname"><span class="pre">LameIO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/LameIO.html#LameIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.LameIO.LameIO" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.LameIO.</span></span><span class="sig-name descname"><span class="pre">LameIO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/LameIO.html#LameIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.LameIO.LameIO" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Handles most I/O for the main window of LaME</p>
 <dl class="field-list simple">
@@ -414,7 +421,7 @@
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.LameIO.LameIO.images_to_dataframe" title="app.LameIO.LameIO.images_to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">images_to_dataframe</span></code></a>(directory)</p></td>
-<td><p>Reads image files into a data structure and saves in LaME format.</p></td>
+<td><p>Converts image files in a given directory into a DataFrame suitable for LaME analysis.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.LameIO.LameIO.import_files" title="app.LameIO.LameIO.import_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">import_files</span></code></a>()</p></td>
 <td><p>Opens an import dialog from <code class="docutils literal notranslate"><span class="pre">MapImporter</span></code> to open selected data directories.</p></td>
@@ -423,7 +430,7 @@
 <td><p>Import a data file with spot data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.LameIO.LameIO.initialize_sample_object" title="app.LameIO.LameIO.initialize_sample_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_sample_object</span></code></a>(outlier_method, ...)</p></td>
-<td><p>Initializes sample objects for each sample in the application.</p></td>
+<td><p>Initializes a <cite>LaserSampleObj</cite> for the current sample and stores it in the application's data dictionary.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.LameIO.LameIO.open_directory" title="app.LameIO.LameIO.open_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">open_directory</span></code></a>([path])</p></td>
 <td><p>Open directory with samples in *.lame.csv files.</p></td>
@@ -432,7 +439,7 @@
 <td><p>Open a project session.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.LameIO.LameIO.open_sample" title="app.LameIO.LameIO.open_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">open_sample</span></code></a>([path])</p></td>
-<td><p>Opens a single *.lame.csv file.</p></td>
+<td><p>Opens a single <a href="#id1"><span class="problematic" id="id2">*</span></a>.lame.csv file created by MapImporter.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.LameIO.LameIO.populate_spot_table" title="app.LameIO.LameIO.populate_spot_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">populate_spot_table</span></code></a>()</p></td>
 <td><p>Populates spot table when spot file is opened or sample is changed</p></td>
@@ -446,7 +453,28 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="app.LameIO.LameIO.images_to_dataframe">
 <span class="sig-name descname"><span class="pre">images_to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/LameIO.html#LameIO.images_to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.LameIO.LameIO.images_to_dataframe" title="Link to this definition">#</a></dt>
-<dd><p>Reads image files into a data structure and saves in LaME format.</p>
+<dd><p>Converts image files in a given directory into a DataFrame suitable for LaME analysis.</p>
+<p>This method:
+- Loads each image file from the directory.
+- Converts it to grayscale intensity (via the RGB max value).
+- Normalizes the intensity to a 0–100 scale.
+- Flattens the data to form columns in a DataFrame.
+- Adds X and Y coordinate columns.
+- Writes the result to a <cite>.lame.xrf.csv</cite> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the directory containing image files.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing the X, Y coordinates and intensity values from each image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If no image files are found in the specified directory.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -464,9 +492,19 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="app.LameIO.LameIO.initialize_sample_object">
 <span class="sig-name descname"><span class="pre">initialize_sample_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outlier_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">negative_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/LameIO.html#LameIO.initialize_sample_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.LameIO.LameIO.initialize_sample_object" title="Link to this definition">#</a></dt>
-<dd><p>Initializes sample objects for each sample in the application.</p>
-<p>This method creates a sample object for each sample in the application and stores it in the
-<code class="docutils literal notranslate"><span class="pre">MainWindow.data</span></code> dictionary.</p>
+<dd><p>Initializes a <cite>LaserSampleObj</cite> for the current sample and stores it in the application’s data dictionary.</p>
+<p>This method:
+- Checks whether the current sample ID exists in the data dictionary.
+- If not, loads the associated <cite>.lame</cite> file and creates a <cite>LaserSampleObj</cite>.
+- Optionally connects data observers if required.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outlier_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the method to be used for outlier detection.</p></li>
+<li><p><strong>negative_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the method to be used for handling negative values.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -475,14 +513,14 @@
 <dd><p>Open directory with samples in *.lame.csv files.</p>
 <p>Executes on <code class="docutils literal notranslate"><span class="pre">MainWindow.actionOpen</span></code> and <code class="docutils literal notranslate"><span class="pre">MainWindow.actionOpenDirectory</span></code>.  Opening a directory, enables
 the toolboxes.</p>
-<p>Alternatively, <em>open_dicrectory</em> is called after <code class="docutils literal notranslate"><span class="pre">MapImporter</span></code> successfully completes an import and the tool
+<p>Alternatively, <em>open_directory</em> is called after <code class="docutils literal notranslate"><span class="pre">MapImporter</span></code> successfully completes an import and the tool
 is closed.</p>
 <p>Opens a dialog to select directory filled with samples.  Updates sample list in
 <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxSampleID</span></code> and comboBoxes associated with analyte lists.  The first sample
 in list is loaded by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to datafiles, if <code class="docutils literal notranslate"><span class="pre">None</span></code>, an open directory dialog is openend, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em>) – Path to datafiles, if <code class="docutils literal notranslate"><span class="pre">None</span></code>, an open directory dialog is opened, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -497,10 +535,12 @@ in list is loaded by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="app.LameIO.LameIO.open_sample">
 <span class="sig-name descname"><span class="pre">open_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/LameIO.html#LameIO.open_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.LameIO.LameIO.open_sample" title="Link to this definition">#</a></dt>
-<dd><p>Opens a single *.lame.csv file.</p>
-<p>Opens files created by MapImporter.
-:param path: Path to datafile, if <code class="docutils literal notranslate"><span class="pre">None</span></code>, an open directory dialog is openend, by default <code class="docutils literal notranslate"><span class="pre">None</span></code>
-:type path: str</p>
+<dd><p>Opens a single <a href="#id3"><span class="problematic" id="id4">*</span></a>.lame.csv file created by MapImporter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em><em>, </em><em>optional</em>) – Path to datafile. If None, an open file dialog is shown. Default is None.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

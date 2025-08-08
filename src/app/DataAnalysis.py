@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QCheckBox, QSizePolicy
 )
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon, )
-from src.common.CustomWidgets import ( CustomLineEdit, CustomSlider, CustomToolButton )
+from src.common.CustomWidgets import ( CustomPage, CustomLineEdit, CustomSlider, CustomToolButton )
 from src.app.UITheme import default_font
 import pandas as pd
 import numpy as np
@@ -16,6 +16,7 @@ import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from src.common.Logger import log, auto_log_methods
+from src.app.config import ICONPATH
 
 @auto_log_methods(logger_key="Analysis")
 class Clustering():
@@ -131,13 +132,13 @@ class Clustering():
                             silhouette_scores.append(silhouette_score(array, labels, sample_size=1000))
                         print(f"{nc}: {silhouette_scores}")
             
-                        data.cluster_results[method] =cluster_results
+                        data.cluster_results[method] = cluster_results
                         data.silhouette_scores[method] = silhouette_scores
 
 
 
 @auto_log_methods(logger_key="Analysis")
-class ClusterPage(QWidget, Clustering):
+class ClusterPage(CustomPage, Clustering):
     """
     Manages the clustering interface and links app_data updates to the MainWindow UI.
 
@@ -151,13 +152,10 @@ class ClusterPage(QWidget, Clustering):
     Methods
     -------
     """
-    def __init__(self, parent=None, page_index=None):
-        super().__init__()
+    def __init__(self, dock, page_index=None):
+        super().__init__(obj_name="ClusteringPage", parent=dock)
 
-        if parent is None:
-            return
-
-        self.ui = parent
+        self.dock = dock
         self.logger_key = "Analysis"
         self.update_cluster_flag = True
 
@@ -167,28 +165,8 @@ class ClusterPage(QWidget, Clustering):
         self.connect_logger()
 
     def setupUI(self, page_index):
-        self.setGeometry(QRect(0, 0, 300, 506))
-        self.setObjectName("ClusteringPage")
 
-        page_layout = QVBoxLayout(self)
-        page_layout.setContentsMargins(0, 0, 0, 0)
-        page_layout.setObjectName("verticalLayout_83")
-
-        self.scrollAreaClustering = QScrollArea(parent=self)
-        self.scrollAreaClustering.setFrameShape(QFrame.Shape.NoFrame)
-        self.scrollAreaClustering.setFrameShadow(QFrame.Shadow.Plain)
-        self.scrollAreaClustering.setWidgetResizable(True)
-        self.scrollAreaClustering.setObjectName("scrollAreaClustering")
-
-        self.scrollAreaWidgetContentsClustering = QWidget()
-        self.scrollAreaWidgetContentsClustering.setGeometry(QRect(0, 0, 300, 506))
-        self.scrollAreaWidgetContentsClustering.setObjectName("scrollAreaWidgetContentsClustering")
-        scroll_layout = QVBoxLayout(self.scrollAreaWidgetContentsClustering)
-        scroll_layout.setContentsMargins(6, 6, 6, 6)
-        scroll_layout.setObjectName("scroll_layout")
-
-
-        self.groupBoxClustering = QGroupBox(parent=self.scrollAreaWidgetContentsClustering)
+        self.groupBoxClustering = QGroupBox(parent=self)
         self.groupBoxClustering.setTitle("")
         self.groupBoxClustering.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.groupBoxClustering.setObjectName("groupBoxClustering")
@@ -232,7 +210,6 @@ class ClusterPage(QWidget, Clustering):
         self.sliderClusterExponent.setTickInterval(1)
         self.sliderClusterExponent.setObjectName("sliderClusterExponent")
         self.cluster_form_layout.addRow("Exponent", self.sliderClusterExponent)
-        self.cluster_form_layout.labelForField(self.sliderClusterExponent).setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
 
         self.comboBoxClusterDistance = QComboBox(parent=self.groupBoxClustering)
         self.comboBoxClusterDistance.setMaximumSize(QSize(150, 16777215))
@@ -270,18 +247,15 @@ class ClusterPage(QWidget, Clustering):
         self.spinBoxPCANumBasis.setObjectName("spinBoxPCANumBasis")
         self.cluster_form_layout.addRow("No. basis", self.spinBoxPCANumBasis)
 
-        scroll_layout.addWidget(self.groupBoxClustering)
-        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        scroll_layout.addItem(spacer)
-        self.scrollAreaClustering.setWidget(self.scrollAreaWidgetContentsClustering)
+        self.addWidget(self.groupBoxClustering)
+        cluster_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.addItem(cluster_spacer)
 
-        page_layout.addWidget(self.scrollAreaClustering)
-
-        cluster_icon = QIcon(":/resources/icons/icon-cluster-64.svg")
+        cluster_icon = QIcon(str(ICONPATH / "icon-cluster-64.svg"))
         if not page_index:
-            self.ui.toolBox.addItem(self, cluster_icon, "Clustering")
+            self.dock.toolbox.addItem(self, cluster_icon, "Clustering")
         else:
-            self.ui.toolBox.insertItem(page_index, self, cluster_icon, "Clustering")
+            self.dock.toolbox.insertItem(page_index, self, cluster_icon, "Clustering")
 
     def connect_widgets(self):
         """Connect clustering widgets to UI."""
@@ -291,7 +265,7 @@ class ClusterPage(QWidget, Clustering):
 
         self.comboBoxClusterDistance.clear()
         self.comboBoxClusterDistance.addItems(self._distance_metrics)
-        self.ui.app_data.cluster_distance = self._distance_metrics[0]
+        self.dock.ui.app_data.cluster_distance = self._distance_metrics[0]
         self.comboBoxClusterDistance.activated.connect(lambda _: self.update_cluster_distance())
 
         # cluster exponent
@@ -299,33 +273,33 @@ class ClusterPage(QWidget, Clustering):
 
         # starting seed
         self.lineEditSeed.editingFinished.connect(lambda _: self.update_cluster_seed())
-        self.toolButtonRandomSeed.clicked.connect(lambda _: self.ui.app_data.generate_random_seed())
+        self.toolButtonRandomSeed.clicked.connect(lambda _: self.dock.ui.app_data.generate_random_seed())
 
         # cluster method
         self.comboBoxClusterMethod.clear()
-        self.comboBoxClusterMethod.addItems(self.ui.app_data.cluster_method_options)
-        self.ui.app_data.cluster_method = self.ui.app_data.cluster_method_options[0]
+        self.comboBoxClusterMethod.addItems(self.dock.ui.app_data.cluster_method_options)
+        self.dock.ui.app_data.cluster_method = self.dock.ui.app_data.cluster_method_options[0]
         self.comboBoxClusterMethod.activated.connect(lambda _: self.update_cluster_method())
 
-        self.checkBoxWithPCA.setChecked(self.ui.app_data.dim_red_precondition)
+        self.checkBoxWithPCA.setChecked(self.dock.ui.app_data.dim_red_precondition)
         self.checkBoxWithPCA.setToolTip("Use dimensional reduction scores for clustering.")
         self.checkBoxWithPCA.stateChanged.connect(lambda _: self.update_dim_red_precondition())
 
         self.spinBoxPCANumBasis.setMinimum(1)
         self.spinBoxPCANumBasis.setMaximum(1)
-        self.spinBoxPCANumBasis.setValue(self.ui.app_data.num_basis_for_precondition)
+        self.spinBoxPCANumBasis.setValue(self.dock.ui.app_data.num_basis_for_precondition)
         self.spinBoxPCANumBasis.valueChanged.connect(lambda _: self.update_num_basis_for_precondition())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("cluster_method", self.update_cluster_method)
-        self.ui.app_data.add_observer("max_clusters", self.update_max_clusters)
-        self.ui.app_data.add_observer("num_clusters", self.update_num_clusters)
-        self.ui.app_data.add_observer("cluster_seed", self.update_cluster_seed)
-        self.ui.app_data.add_observer("cluster_exponent", self.update_cluster_exponent)
-        self.ui.app_data.add_observer("cluster_distance", self.update_cluster_distance)
-        self.ui.app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition)
-        self.ui.app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition)
+        self.dock.ui.app_data.add_observer("cluster_method", self.update_cluster_method)
+        self.dock.ui.app_data.add_observer("max_clusters", self.update_max_clusters)
+        self.dock.ui.app_data.add_observer("num_clusters", self.update_num_clusters)
+        self.dock.ui.app_data.add_observer("cluster_seed", self.update_cluster_seed)
+        self.dock.ui.app_data.add_observer("cluster_exponent", self.update_cluster_exponent)
+        self.dock.ui.app_data.add_observer("cluster_distance", self.update_cluster_distance)
+        self.dock.ui.app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition)
+        self.dock.ui.app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -346,7 +320,7 @@ class ClusterPage(QWidget, Clustering):
         It also enables or disables widgets based on the current clustering method and whether PCA is used for clustering.
         """
         # toggle visibility of widgets based on the current plot type
-        match self.ui.plot_style.plot_type:
+        match self.dock.ui.style_data.plot_type:
             case 'cluster map' | 'cluster score map':
                 self.cluster_form_layout.labelForField(self.spinBoxClusterMax).hide()
                 self.spinBoxClusterMax.hide()
@@ -359,7 +333,7 @@ class ClusterPage(QWidget, Clustering):
                 self.spinBoxNClusters.hide()
 
         # enable/disable widgets based on the current clustering method
-        match self.ui.app_data.cluster_method:
+        match self.dock.ui.app_data.cluster_method:
             case 'k-means':
                 self.spinBoxNClusters.setEnabled(True)
                 self.spinBoxClusterMax.setEnabled(True)
@@ -371,9 +345,9 @@ class ClusterPage(QWidget, Clustering):
                 self.comboBoxClusterDistance.setEnabled(False)
                 self.sliderClusterExponent.setEnabled(True)
             case _:
-                ValueError(f"Unknown clustering method {self.ui.app_data.cluster_method}")
+                ValueError(f"Unknown clustering method {self.dock.ui.app_data.cluster_method}")
         
-        if 'PCA score' in self.ui.app_data.field_dict:
+        if 'PCA score' in self.dock.ui.app_data.field_dict:
             self.checkBoxWithPCA.setEnabled(True)
             #self.labelClusterWithPCA.setEnabled(True)
         else:
@@ -389,7 +363,7 @@ class ClusterPage(QWidget, Clustering):
 
         # if PCA is not used for clustering, disable the PCA widgets
         if self.checkBoxWithPCA.isChecked() and self.checkBoxWithPCA.isEnabled():
-            self.spinBoxPCANumBasis.setMaximum(self.ui.data[self.ui.app_data.sample_id].processed_data.get_attribute('PCA score').shape[1])
+            self.spinBoxPCANumBasis.setMaximum(self.dock.ui.app_data.current_data.processed_data.get_attribute('PCA score').shape[1])
             self.spinBoxPCANumBasis.setEnabled(True)
             #self.labelPCANumBasis.setEnabled(True)
         else:
@@ -410,15 +384,15 @@ class ClusterPage(QWidget, Clustering):
             New clustering method.
         """
         if not new_method:
-            self.ui.app_data.cluster_method = self.comboBoxClusterMethod.currentText()
+            self.dock.ui.app_data.cluster_method = self.comboBoxClusterMethod.currentText()
         else:
             self.comboBoxClusterMethod.setCurrentText(new_method)
 
         self.toggle_cluster_widgets()
 
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.toggle_cluster_widgets()
-            self.ui.plot_style.schedule_update()
+            self.dock.ui.schedule_update()
 
     def update_max_clusters(self, max_clusters=None):
         """Update the maximum number of clusters for computing cluster performance plots.
@@ -433,11 +407,11 @@ class ClusterPage(QWidget, Clustering):
             The maximum number of clusters that will be used to produce a cluster performance plot.
         """
         if not max_clusters:
-            self.ui.app_data.max_clusters = self.spinBoxClusterMax.value()
+            self.dock.ui.app_data.max_clusters = self.spinBoxClusterMax.value()
         else:
             self.spinBoxClusterMax.setValue(int(max_clusters))
-            if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-                self.ui.plot_style.schedule_update()
+            if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+                self.dock.ui.schedule_update()
 
     def update_num_clusters(self, num_clusters=None):
         """Update the number of clusters.
@@ -452,12 +426,12 @@ class ClusterPage(QWidget, Clustering):
             The number of clusters for clustering analysis.
         """
         if not num_clusters:
-            self.ui.app_data.num_clusters = self.spinBoxNClusters.value()
+            self.dock.ui.app_data.num_clusters = self.spinBoxNClusters.value()
         else:
             self.spinBoxNClusters.setValue(int(num_clusters))
 
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
 
     def update_cluster_seed(self, new_seed=None):
         """Change the random seed for clustering.
@@ -474,21 +448,21 @@ class ClusterPage(QWidget, Clustering):
             If provided, the line edit is updated with the new seed value.
         """
         if new_seed is None:
-            self.ui.app_data.cluster_seed = self.lineEditSeed.value
+            self.dock.ui.app_data.cluster_seed = self.lineEditSeed.value
         else:
-            if new_seed == int(self.ui.lineEditSeed.text()):
+            if new_seed == int(self.lineEditSeed.text()):
                 return
 
             self.lineEditSeed.blockSignals(True)
             self.lineEditSeed.setText(str(new_seed))
             self.lineEditSeed.blockSignals(False)
 
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
 
     def update_cluster_exponent(self, new_value=None):
         if new_value is None:
-            self.ui.app_data.cluster_exponent = self.sliderClusterExponent.value()
+            self.dock.ui.app_data.cluster_exponent = self.sliderClusterExponent.value()
         else:
             if new_value == self.sliderClusterExponent.value():
                 return
@@ -498,8 +472,8 @@ class ClusterPage(QWidget, Clustering):
             self.sliderClusterExponent.setValue(new_value)
             self.sliderClusterExponent.blockSignals(False)
 
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
 
     def update_cluster_distance(self, new_distance=None):
         """ Update the distance metric used for clustering.
@@ -514,12 +488,12 @@ class ClusterPage(QWidget, Clustering):
             The new distance metric used for clustering. If not provided, the current text of the combo box is used.
         """
         if not new_distance:
-            self.ui.app_data.cluster_distance = self.comboBoxClusterDistance.currentText()
+            self.dock.ui.app_data.cluster_distance = self.comboBoxClusterDistance.currentText()
         else:
             self.comboBoxClusterDistance.setCurrentText(new_distance)
 
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
 
     def update_dim_red_precondition(self, new_value=None):
         """Update the preconditioning for PCA in clustering.
@@ -535,12 +509,12 @@ class ClusterPage(QWidget, Clustering):
             of the checkbox is used. If provided, the checkbox state is updated with the new value
         """
         if new_value is None:
-            self.ui.app_data.dim_red_precondition = self.checkBoxWithPCA.isChecked()
+            self.dock.ui.app_data.dim_red_precondition = self.checkBoxWithPCA.isChecked()
         else:
             self.checkBoxWithPCA.setChecked(new_value)
 
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
 
     def update_num_basis_for_precondition(self, new_value=None):
         """Update the number of basis vectors for PCA preconditioning.
@@ -556,11 +530,11 @@ class ClusterPage(QWidget, Clustering):
             If provided, the spin box is updated with the new value.
         """
         if not new_value:
-            self.ui.app_data.num_basis_for_precondition = self.spinBoxPCANumBasis.value()
+            self.dock.ui.app_data.num_basis_for_precondition = self.spinBoxPCANumBasis.value()
         else:
             self.spinBoxPCANumBasis.setValue(int(new_value))
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['cluster']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
 
     def compute_clusters_update_groups(self):
         """
@@ -571,22 +545,22 @@ class ClusterPage(QWidget, Clustering):
         2. Invokes the clustering computation if necessary.
         3. Applies updated cluster colors and refreshes the cluster tab in the Mask Dock.
         """
-        data = self.ui.data[self.ui.app_data.sample_id]
-        method = self.ui.app_data.cluster_method
-        if self.ui.app_data.update_cluster_flag or \
+        data = self.dock.ui.app_data.current_data
+        method = self.dock.ui.app_data.cluster_method
+        if self.dock.ui.app_data.update_cluster_flag or \
                 data.processed_data[method].empty or \
                 (method not in list(data.processed_data.columns)):
             # compute clusters
-            self.ui.statusbar.showMessage('Computing clusters')
-            self.compute_clusters(data, self.ui.app_data, max_clusters = None)
+            self.dock.ui.statusbar.showMessage('Computing clusters')
+            self.compute_clusters(data, self.dock.ui.app_data, max_clusters = None)
             # update cluster colors
-            self.ui.app_data.cluster_group_changed(data, self.ui.plot_style)
+            self.dock.ui.app_data.cluster_group_changed(data, self.dock.ui.style_data)
             # enable cluster tab actions and update group table
             if hasattr(self, 'mask_dock'):
-                self.ui.mask_dock.cluster_tab.toggle_cluster_actions()
-                self.ui.mask_dock.cluster_tab.update_table_widget()
+                self.dock.ui.mask_dock.cluster_tab.toggle_cluster_actions()
+                self.dock.ui.mask_dock.cluster_tab.update_table_widget()
 
-            self.ui.statusbar.showMessage('Clustering successful')
+            self.dock.ui.statusbar.showMessage('Clustering successful')
 
 
 @auto_log_methods(logger_key="Analysis")
@@ -634,14 +608,11 @@ class DimensionalReduction():
 
 
 @auto_log_methods(logger_key="Analysis")
-class DimensionalReductionPage(QWidget, DimensionalReduction):
-    def __init__(self, parent=None, page_index=None):
-        super().__init__()
+class DimensionalReductionPage(CustomPage, DimensionalReduction):
+    def __init__(self, dock, page_index=None):
+        super().__init__(obj_name="MultidimensionalPage", parent=dock)
 
-        if parent is None:
-            return
-
-        self.ui = parent
+        self.dock = dock
         self.logger_key = "Analysis"
 
         self.setupUI(page_index)
@@ -650,27 +621,7 @@ class DimensionalReductionPage(QWidget, DimensionalReduction):
         self.connect_logger()
 
     def setupUI(self, page_index):
-        self.setGeometry(QRect(0, 0, 300, 506))
-        self.setObjectName("MultidimensionalPage")
-
-        page_layout = QVBoxLayout(self)
-        page_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.scrollAreaMultiDim = QScrollArea(parent=self)
-        self.scrollAreaMultiDim.setFont(default_font())
-        self.scrollAreaMultiDim.setFrameShape(QFrame.Shape.NoFrame)
-        self.scrollAreaMultiDim.setFrameShadow(QFrame.Shadow.Plain)
-        self.scrollAreaMultiDim.setWidgetResizable(True)
-        self.scrollAreaMultiDim.setObjectName("scrollAreaMultiDim")
-
-        self.scrollAreaWidgetContentsMultiDim = QWidget()
-        self.scrollAreaWidgetContentsMultiDim.setGeometry(QRect(0, 0, 300, 506))
-        self.scrollAreaWidgetContentsMultiDim.setObjectName("scrollAreaWidgetContentsMultiDim")
-
-        scroll_area_layout = QVBoxLayout(self.scrollAreaWidgetContentsMultiDim)
-        scroll_area_layout.setContentsMargins(6, 6, 6, 6)
-        scroll_area_layout.setObjectName("verticalLayout_82")
-        self.groupBoxMultidim = QGroupBox(parent=self.scrollAreaWidgetContentsMultiDim)
+        self.groupBoxMultidim = QGroupBox(parent=self)
         self.groupBoxMultidim.setTitle("")
         self.groupBoxMultidim.setObjectName("groupBoxMultidim")
 
@@ -697,34 +648,32 @@ class DimensionalReductionPage(QWidget, DimensionalReduction):
         self.spinBoxPCY.setObjectName("spinBoxPCY")
         self.multidim_form_layout.addRow("PC Y", self.spinBoxPCY)
 
-        scroll_area_layout.addWidget(self.groupBoxMultidim)
-        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        scroll_area_layout.addItem(spacer)
-        self.scrollAreaMultiDim.setWidget(self.scrollAreaWidgetContentsMultiDim)
-        page_layout.addWidget(self.scrollAreaMultiDim)
+        self.addWidget(self.groupBoxMultidim)
+        field_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.addItem(field_spacer)
 
-        multidim_icon = QIcon(":/resources/icons/icon-dimensional-analysis-64.svg")
+        multidim_icon = QIcon(str(ICONPATH / "icon-dimensional-analysis-64.svg"))
         if not page_index:
-            self.ui.toolBox.addItem(self, multidim_icon, "Dimensional Reduction")
+            self.dock.toolbox.addItem(self, multidim_icon, "Dimensional Reduction")
         else:
-            self.ui.toolBox.insertItem(page_index, self, multidim_icon, "Dimensional Reduction")
+            self.dock.toolbox.insertItem(page_index, self, multidim_icon, "Dimensional Reduction")
 
     def connect_widgets(self):
         # Dimensional reduction ui widgets
         self.comboBoxDimRedTechnique.clear()
         self.comboBoxDimRedTechnique.addItems(self.dim_red_methods)
-        self.ui.app_data.dim_red_method = self.dim_red_methods[0]
+        self.dock.ui.app_data.dim_red_method = self.dim_red_methods[0]
 
-        self.spinBoxPCX.valueChanged.connect(lambda: setattr(self.ui.app_data, "dim_red_x",self.spinBoxPCX.value()))
-        self.spinBoxPCY.valueChanged.connect(lambda: setattr(self.ui.app_data, "dim_red_y",self.spinBoxPCY.value()))
+        self.spinBoxPCX.valueChanged.connect(lambda: setattr(self.dock.ui.app_data, "dim_red_x",self.spinBoxPCX.value()))
+        self.spinBoxPCY.valueChanged.connect(lambda: setattr(self.dock.ui.app_data, "dim_red_y",self.spinBoxPCY.value()))
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("dim_red_method", self.update_dim_red_method_combobox)
-        self.ui.app_data.add_observer("dim_red_x", self.update_dim_red_x_spinbox)
-        self.ui.app_data.add_observer("dim_red_y", self.update_dim_red_y_spinbox)
-        self.ui.app_data.add_observer("dim_red_x_max", self.update_dim_red_x_max_spinbox)
-        self.ui.app_data.add_observer("dim_red_y_max", self.update_dim_red_y_max_spinbox)
+        self.dock.ui.app_data.add_observer("dim_red_method", self.update_dim_red_method_combobox)
+        self.dock.ui.app_data.add_observer("dim_red_x", self.update_dim_red_x_spinbox)
+        self.dock.ui.app_data.add_observer("dim_red_y", self.update_dim_red_y_spinbox)
+        self.dock.ui.app_data.add_observer("dim_red_x_max", self.update_dim_red_x_max_spinbox)
+        self.dock.ui.app_data.add_observer("dim_red_y_max", self.update_dim_red_y_max_spinbox)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -734,18 +683,18 @@ class DimensionalReductionPage(QWidget, DimensionalReduction):
 
     def update_dim_red_method_combobox(self, new_method):
         self.comboBoxDimRedTechnique.setCurrentText(new_method)
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['multidim']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['dim_red']:
+            self.dock.ui.schedule_update()
 
     def update_dim_red_x_spinbox(self, new_value):
         self.spinBoxPCX.setValue(int(new_value))
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['multidim']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['dim_red']:
+            self.dock.ui.schedule_update()
 
     def update_dim_red_y_spinbox(self, new_value):
         self.spinBoxPCY.setValue(int(new_value))
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['multidim']:
-            self.ui.plot_style.schedule_update()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['dim_red']:
+            self.dock.ui.schedule_update()
 
     def update_dim_red_x_max_spinbox(self, new_value):
         self.spinBoxPCX.setMaximum(int(new_value))

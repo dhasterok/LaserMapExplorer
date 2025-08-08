@@ -23,7 +23,7 @@ from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
-from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
+from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot, update_figure_font
 from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.app.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -38,7 +38,7 @@ from src.common.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialTools import SpecialFunctions as specfun
 from src.common.reSTNotes import NotesDock
 from src.common.Browser import Browser
-from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, STYLE_PATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -99,10 +99,10 @@ class LameBlockly(PlotViewer):
         self.workflow_dock = parent
         self.io = LameIO(self, connect_actions=False)
         
-        self.plot_style = StyleData(self)
+        self.style_data = StyleData(self)
         #set style using 'default' style them
         self.style_themes = StyleTheme(self)
-        self.plot_style.style_dict = self.style_themes.default_style_dict()
+        self.style_data.style_dict = self.style_themes.default_style_dict()
         
         # # Initialise plotviewer form
         # self.plot_viewer = PlotViewer(self)
@@ -287,12 +287,12 @@ class LameBlockly(PlotViewer):
 
     #     # set color limits
     #     if field not in self.data[self.app_data.sample_id].axis_dict:
-    #         self.plot_style.initialize_axis_values(field_type,field)
-    #         self.plot_style.set_style_dictionary()
+    #         self.style_data.initialize_axis_values(field_type,field)
+    #         self.style_data.set_style_dictionary()
 
     #     # get data for current map
     #     #scale = self.data[self.app_data.sample_id].processed_data.get_attribute(field, 'norm')
-    #     scale = self.plot_style.cscale
+    #     scale = self.style_data.cscale
     #     map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
 
     #     array_size = self.data[self.app_data.sample_id].array_size
@@ -311,17 +311,17 @@ class LameBlockly(PlotViewer):
     #     # plot map
     #     reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.app_data.sample_id].order)
             
-    #     norm = self.plot_style.color_norm()
+    #     norm = self.style_data.color_norm()
 
-    #     cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
+    #     cax = canvas.axes.imshow(reshaped_array, cmap=self.style_data.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
 
     #     self.add_colorbar(canvas, cax)
-    #     match self.plot_style.cscale:
+    #     match self.style_data.cscale:
     #         case 'linear':
-    #             clim = self.plot_style.clim
+    #             clim = self.style_data.clim
     #         case 'log':
-    #             clim = self.plot_style.clim
-    #             #clim = np.log10(self.plot_style.clim)
+    #             clim = self.style_data.clim
+    #             #clim = np.log10(self.style_data.clim)
     #         case 'logit':  
     #             print('Color limits for logit are not currently implemented')
 
@@ -359,7 +359,7 @@ class LameBlockly(PlotViewer):
     #         'field_type': field_type,
     #         'field': field,
     #         'figure': canvas,
-    #         'style': self.plot_style.style_dict[self.plot_style.plot_type],
+    #         'style': self.style_data.style_dict[self.style_data.plot_type],
     #         'cluster_groups': None,
     #         'view': [True,False],
     #         'position': None
@@ -380,14 +380,14 @@ class LameBlockly(PlotViewer):
         if (field_type == '') or (field == ''):
             return
 
-        self.plot_style.plot_type = 'histogram'
+        self.style_data.plot_type = 'histogram'
         self.app_data.x_field =field
         self.app_data.x_field_type =field_type
         self.app_data.hist_plot_style = hist_type
         self.app_data.hist_num_bins = n_bins
-        plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)
+        plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)
         # update bin width
-        range = (self.plot_style.xlim[1] - self.plot_style.xlim[0]) 
+        range = (self.style_data.xlim[1] - self.style_data.xlim[0]) 
 
         return  range
 
@@ -413,7 +413,7 @@ class LameBlockly(PlotViewer):
         # update histogram
         if self.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def plot_histogram(self, hist_type, field_type, field, n_bins):
         """Plots a histogramn in the canvas window"""
@@ -434,9 +434,9 @@ class LameBlockly(PlotViewer):
             x = self.get_scatter_data(plot_type='histogram', processed=True, field_type=field_type,field = field)['x']
 
         # determine edges
-        xmin,xmax,xscale,xlbl = self.plot_style.get_axis_values(x['type'],x['field'])
-        self.plot_style.xlim = [xmin, xmax]
-        self.plot_style.xscale = xscale
+        xmin,xmax,xscale,xlbl = self.style_data.get_axis_values(x['type'],x['field'])
+        self.style_data.xlim = [xmin, xmax]
+        self.style_data.xscale = xscale
         #if xscale == 'log':
         #    x['array'] = np.log10(x['array'])
         #    xmin = np.log10(xmin)
@@ -454,7 +454,7 @@ class LameBlockly(PlotViewer):
         #print(edges)
 
         # histogram style
-        lw = self.plot_style.line_width
+        lw = self.style_data.line_width
         if lw > 0:
             htype = 'step'
         else:
@@ -472,7 +472,7 @@ class LameBlockly(PlotViewer):
             method = self.cluster_dict['active method']
 
             # Get the cluster labels for the data
-            cluster_color, cluster_label, _ = self.plot_style.get_cluster_colormap(self.cluster_dict[method],alpha=self.plot_style.marker_alpha)
+            cluster_color, cluster_label, _ = self.style_data.get_cluster_colormap(self.cluster_dict[method],alpha=self.style_data.marker_alpha)
             cluster_group = self.data[self.app_data.sample_id].processed_data.loc[:,method]
             clusters = self.cluster_dict[method]['selected_clusters']
 
@@ -494,7 +494,7 @@ class LameBlockly(PlotViewer):
                             color=bar_color, edgecolor=ecolor,
                             linewidth=lw,
                             label=cluster_label[int(i)],
-                            alpha=self.plot_style.marker_alpha/100,
+                            alpha=self.style_data.marker_alpha/100,
                             density=True
                         )
                 else:
@@ -512,14 +512,14 @@ class LameBlockly(PlotViewer):
                     canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
 
             # Add a legend
-            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.plot_style.marker_alpha/100)
+            self.add_colorbar(canvas, None, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color, alpha=self.style_data.marker_alpha/100)
             #canvas.axes.legend()
         else:
             clusters = None
             # Regular histogram
-            bar_color = self.plot_style.marker_color
+            bar_color = self.style_data.marker_color
             if htype == 'step':
-                ecolor = self.plot_style.line_color
+                ecolor = self.style_data.line_color
             else:
                 ecolor = None
 
@@ -530,7 +530,7 @@ class LameBlockly(PlotViewer):
                         bins=edges,
                         color=bar_color, edgecolor=ecolor,
                         linewidth=lw,
-                        alpha=self.plot_style.marker_alpha/100,
+                        alpha=self.style_data.marker_alpha/100,
                         density=True
                     )
             else:
@@ -546,14 +546,14 @@ class LameBlockly(PlotViewer):
 
                 # Plot the data
                 #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
-                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.plot_style.marker_alpha/100)
+                canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=self.style_data.marker_alpha/100)
 
         # axes
         # label font
         if 'font' == '':
-            font = {'size':self.plot_style.font}
+            font = {'size':self.style_data.font}
         else:
-            font = {'font':self.plot_style.font, 'size':self.plot_style.font_size}
+            font = {'font':self.style_data.font, 'size':self.style_data.font_size}
 
         # set y-limits as p-axis min and max in self.data[self.app_data.sample_id].axis_dict
         if hist_type != 'log-scaling' :
@@ -567,17 +567,17 @@ class LameBlockly(PlotViewer):
                 ymin, ymax = canvas.axes.get_ylim()
                 d = {'pstatus':'auto', 'pmin':fmt.oround(ymin,order=2,toward=0), 'pmax':fmt.oround(ymax,order=2,toward=1)}
                 self.data[self.app_data.sample_id].axis_dict[x['field']].update(d)
-                # self.plot_style.set_axis_attributes('y', x['field'])
+                # self.style_data.set_axis_attributes('y', x['field'])
 
             # grab probablility axes limits
-            _, _, _, _, ymin, ymax = self.plot_style.get_axis_values(x['type'],x['field'],ax='p')
+            _, _, _, _, ymin, ymax = self.style_data.get_axis_values(x['type'],x['field'],ax='p')
 
             # x-axis
             canvas.axes.set_xlabel(xlbl, fontdict=font)
             if xscale == 'log':
             #    self.logax(canvas.axes, [xmin,xmax], axis='x', label=xlbl)
                 canvas.axes.set_xscale(xscale,base=10)
-            # if self.plot_style.xscale == 'linear':
+            # if self.style_data.xscale == 'linear':
             # else:
             #     canvas.axes.set_xlim(xmin,xmax)
             canvas.axes.set_xlim(xmin,xmax)
@@ -595,10 +595,10 @@ class LameBlockly(PlotViewer):
             canvas.axes.set_xlabel(r"$\log_{10}($" + f"{field}" + r"$)$", fontdict=font)
             canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{field}" + r"$)$", fontdict=font)
 
-        canvas.axes.tick_params(labelsize=self.plot_style.font_size,direction=self.plot_style.tick_dir)
-        canvas.axes.set_box_aspect(self.plot_style.aspect_ratio)
+        canvas.axes.tick_params(labelsize=self.style_data.font_size,direction=self.style_data.tick_dir)
+        canvas.axes.set_box_aspect(self.style_data.aspect_ratio)
 
-        self.plot_style.update_figure_font(canvas, self.plot_style.font)
+        update_figure_font(canvas, self.style_data.font)
 
         canvas.fig.tight_layout()
 
@@ -612,7 +612,7 @@ class LameBlockly(PlotViewer):
             'type': hist_type,
             'n_bins': n_bins,
             'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'style': self.style_data.style_dict[self.style_data.plot_type],
             'cluster_groups': clusters,
             'view': [True,False],
             'position': [],
@@ -646,22 +646,22 @@ class LameBlockly(PlotViewer):
         
         columns = correlation_matrix.columns
 
-        font = {'size':self.plot_style.font_size}
+        font = {'size':self.style_data.font_size}
 
         # mask lower triangular matrix to show only upper triangle
         mask = np.zeros_like(correlation_matrix, dtype=bool)
         mask[np.tril_indices_from(mask)] = True
         correlation_matrix = np.ma.masked_where(mask, correlation_matrix)
 
-        norm = self.plot_style.color_norm()
+        norm = self.style_data.color_norm()
 
         # plot correlation or correlation^2
         square_flag = squared
         if square_flag:
-            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.plot_style.get_colormap(), norm=norm)
+            cax = canvas.axes.imshow(correlation_matrix**2, cmap=self.style_data.get_colormap(), norm=norm)
             canvas.array = correlation_matrix**2
         else:
-            cax = canvas.axes.imshow(correlation_matrix, cmap=self.plot_style.get_colormap(), norm=norm)
+            cax = canvas.axes.imshow(correlation_matrix, cmap=self.style_data.get_colormap(), norm=norm)
             canvas.array = correlation_matrix
             
         # store correlation_matrix to save_data if data needs to be exported
@@ -676,7 +676,7 @@ class LameBlockly(PlotViewer):
         self.add_colorbar(canvas, cax)
 
         # set color limits
-        cax.set_clim(self.plot_style.clim[0], self.plot_style.clim[1])
+        cax.set_clim(self.style_data.clim[0], self.style_data.clim[1])
 
         # Set tick labels
         ticks = np.arange(len(columns))
@@ -687,14 +687,14 @@ class LameBlockly(PlotViewer):
         canvas.axes.set_yticks(ticks, minor=False)
         canvas.axes.set_xticks(ticks, minor=False)
 
-        labels = self.plot_style.toggle_mass(columns)
+        labels = self.style_data.toggle_mass(columns)
 
         canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
         canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
 
         canvas.axes.set_title('')
 
-        self.plot_style.update_figure_font(canvas, self.plot_style.font)
+        update_figure_font(canvas, self.style_data.font)
 
         if square_flag:
             plot_name = method+'_squared'
@@ -711,7 +711,7 @@ class LameBlockly(PlotViewer):
             'field_type': None,
             'field': None,
             'figure': canvas,
-            'style': self.plot_style.style_dict[self.plot_style.plot_type],
+            'style': self.style_data.style_dict[self.style_data.plot_type],
             'cluster_groups': [],
             'view': [True,False],
             'position': [],
@@ -733,42 +733,42 @@ class LameBlockly(PlotViewer):
         match plot_type:
             case 'histogram':
                 if processed or field_type != 'Analyte':
-                    scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale)
+                    scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.style_data.xscale)
                 else:
-                    scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.plot_style.xscale, processed=False)
+                    scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.style_data.xscale, processed=False)
             case 'PCA scatter' | 'PCA heatmap':
-                scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.plot_style.xscale)
-                scatter_dict['y'] = self.data[self.app_data.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.plot_style.yscale)
+                scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCX.value()}', norm=self.style_data.xscale)
+                scatter_dict['y'] = self.data[self.app_data.sample_id].get_vector('PCA score', f'PC{self.spinBoxPCY.value()}', norm=self.style_data.yscale)
                 if (field_type is None) or (self.comboBoxColorByField.currentText != ''):
                     scatter_dict['c'] = self.data[self.app_data.sample_id].get_vector(field_type, field)
             case _:
-                scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type_x, field_x, norm=self.plot_style.xscale)
-                scatter_dict['y'] = self.data[self.app_data.sample_id].get_vector(field_type_y, field_y, norm=self.plot_style.yscale)
+                scatter_dict['x'] = self.data[self.app_data.sample_id].get_vector(field_type_x, field_x, norm=self.style_data.xscale)
+                scatter_dict['y'] = self.data[self.app_data.sample_id].get_vector(field_type_y, field_y, norm=self.style_data.yscale)
                 if (field_type is not None) and (field_type != ''):
-                    scatter_dict['z'] = self.data[self.app_data.sample_id].get_vector(field_type_z, field_z, norm=self.plot_style.zscale)
+                    scatter_dict['z'] = self.data[self.app_data.sample_id].get_vector(field_type_z, field_z, norm=self.style_data.zscale)
                 elif (field_z is not None) and (field_z != ''):
-                    scatter_dict['c'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.plot_style.cscale)
+                    scatter_dict['c'] = self.data[self.app_data.sample_id].get_vector(field_type, field, norm=self.style_data.cscale)
 
         # set axes widgets
         if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['x']['field'] not in self.data[self.app_data.sample_id].axis_dict:
-                self.plot_style.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
-                # self.plot_style.set_axis_attributes('x', scatter_dict['x']['field'])
+                self.style_data.initialize_axis_values(scatter_dict['x']['type'], scatter_dict['x']['field'])
+                # self.style_data.set_axis_attributes('x', scatter_dict['x']['field'])
 
         if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
             if scatter_dict['y']['field'] not in self.data[self.app_data.sample_id].axis_dict:
-                self.plot_style.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
-                # self.plot_style.set_axis_attributes('y', scatter_dict['y']['field'])
+                self.style_data.initialize_axis_values(scatter_dict['y']['type'], scatter_dict['y']['field'])
+                # self.style_data.set_axis_attributes('y', scatter_dict['y']['field'])
 
         if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
             if scatter_dict['z']['field'] not in self.data[self.app_data.sample_id].axis_dict:
-                self.plot_style.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
-                # self.plot_style.set_axis_attributes('z', scatter_dict['z']['field'])
+                self.style_data.initialize_axis_values(scatter_dict['z']['type'], scatter_dict['z']['field'])
+                # self.style_data.set_axis_attributes('z', scatter_dict['z']['field'])
 
         if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
             if scatter_dict['c']['field'] not in self.data[self.app_data.sample_id].axis_dict:
-                self.plot_style.set_color_axis_widgets()
-                # self.plot_style.set_axis_attributes('c', scatter_dict['c']['field'])
+                self.style_data.set_color_axis_widgets()
+                # self.style_data.set_axis_attributes('c', scatter_dict['c']['field'])
 
         return scatter_dict
 
@@ -787,8 +787,8 @@ class LameBlockly(PlotViewer):
             Axes to place scalebar on.
         """        
         # add scalebar
-        direction = self.plot_style.scale_dir
-        length = self.plot_style.scale_length
+        direction = self.style_data.scale_dir
+        length = self.style_data.scale_length
         if (length is not None) and (direction != 'none'):
             if direction == 'horizontal':
                 dd = self.data[self.app_data.sample_id].dx
@@ -797,9 +797,9 @@ class LameBlockly(PlotViewer):
             sb = scalebar( width=length,
                     pixel_width=dd,
                     units=self.preferences['Units']['Distance'],
-                    location=self.plot_style.scale_location,
+                    location=self.style_data.scale_location,
                     orientation=direction,
-                    color=self.plot_style.overlay_color,
+                    color=self.style_data.overlay_color,
                     ax=ax )
 
             sb.create()
@@ -824,7 +824,7 @@ class LameBlockly(PlotViewer):
         #print("add_colorbar")
         # Add a colorbar
         cbar = None
-        if self.plot_style.cbar_dir == 'none':
+        if self.style_data.cbar_dir == 'none':
             return
 
         # discrete colormap - plot as a legend
@@ -838,45 +838,45 @@ class LameBlockly(PlotViewer):
             for i, label in enumerate(grouplabels):
                 p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
 
-            if self.plot_style.cbar_dir == 'vertical':
+            if self.style_data.cbar_dir == 'vertical':
                 canvas.axes.legend(
                         handles=p,
                         handlelength=1,
                         loc='upper left',
                         bbox_to_anchor=(1.025,1),
-                        fontsize=self.plot_style.font_size,
+                        fontsize=self.style_data.font_size,
                         frameon=False,
                         ncol=1
                     )
-            elif self.plot_style.cbar_dir == 'horizontal':
+            elif self.style_data.cbar_dir == 'horizontal':
                 canvas.axes.legend(
                         handles=p,
                         handlelength=1,
                         loc='upper center',
                         bbox_to_anchor=(0.5,-0.1),
-                        fontsize=self.plot_style.font_size,
+                        fontsize=self.style_data.font_size,
                         frameon=False,
                         ncol=3
                     )
         # continuous colormap - plot with colorbar
         else:
-            if self.plot_style.cbar_dir == 'vertical':
+            if self.style_data.cbar_dir == 'vertical':
                 if self.plot_type == 'correlation':
                     loc = 'left'
                 else:
                     loc = 'right'
                 cbar = canvas.fig.colorbar( cax,
                         ax=canvas.axes,
-                        orientation=self.plot_style.cbar_dir,
+                        orientation=self.style_data.cbar_dir,
                         location=loc,
                         shrink=0.62,
                         fraction=0.1,
                         alpha=1
                     )
-            elif self.plot_style.cbar_dir == 'horizontal':
+            elif self.style_data.cbar_dir == 'horizontal':
                 cbar = canvas.fig.colorbar( cax,
                         ax=canvas.axes,
-                        orientation=self.plot_style.cbar_dir,
+                        orientation=self.style_data.cbar_dir,
                         location='bottom',
                         shrink=0.62,
                         fraction=0.1,
@@ -884,11 +884,11 @@ class LameBlockly(PlotViewer):
                     )
             else:
                 # should never reach this point
-                assert self.plot_style.cbar_dir == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
+                assert self.style_data.cbar_dir == 'none', "Colorbar direction is set to none, but is trying to generate anyway."
                 return
 
-            cbar.set_label(self.plot_style.clabel, size=self.plot_style.font_size)
-            cbar.ax.tick_params(labelsize=self.plot_style.font_size)
+            cbar.set_label(self.style_data.clabel, size=self.style_data.font_size)
+            cbar.ax.tick_params(labelsize=self.style_data.font_size)
             cbar.set_alpha(1)
 
         # adjust tick marks if labels are given
@@ -968,7 +968,7 @@ class LameBlockly(PlotViewer):
                 if 'cluster score' in data_type_dict:
                     field_list.append('Cluster score')
 
-        # self.plot_style.toggle_style_widgets()
+        # self.style_data.toggle_style_widgets()
 
         # add None to list?
         if addNone:
@@ -1105,26 +1105,26 @@ class LameBlockly(PlotViewer):
         if "XLim" in style_dict:
             lowerVal = style_dict["XLim"][0]
             upperVal = style_dict["XLim"][1]
-            self.plot_style.axis_limit_edit_callback("x", 0, float(lowerVal), field = 'X', ui_update=False)
-            self.plot_style.axis_limit_edit_callback("x", 1, float(upperVal), field = 'X', ui_update=False)
+            self.style_data.axis_limit_edit_callback("x", 0, float(lowerVal), field = 'X', ui_update=False)
+            self.style_data.axis_limit_edit_callback("x", 1, float(upperVal), field = 'X', ui_update=False)
 
         if "YLim" in style_dict:
             lowerVal = style_dict["YLim"][0]
             upperVal = style_dict["YLim"][1]
-            self.plot_style.axis_limit_edit_callback("y", 0, float(lowerVal), field = 'Y', ui_update=False)
-            self.plot_style.axis_limit_edit_callback("y", 1, float(upperVal), field = 'Y', ui_update=False)
+            self.style_data.axis_limit_edit_callback("y", 0, float(lowerVal), field = 'Y', ui_update=False)
+            self.style_data.axis_limit_edit_callback("y", 1, float(upperVal), field = 'Y', ui_update=False)
 
         if "ZLim" in style_dict:
             lowerVal = style_dict["ZLim"][0]
             upperVal = style_dict["ZLim"][1]
-            self.plot_style.axis_limit_edit_callback("z", 0, float(lowerVal), ui_update=False)
-            self.plot_style.axis_limit_edit_callback("z", 1, float(upperVal), ui_update=False)
+            self.style_data.axis_limit_edit_callback("z", 0, float(lowerVal), ui_update=False)
+            self.style_data.axis_limit_edit_callback("z", 1, float(upperVal), ui_update=False)
 
         if "CLim" in style_dict:
             lowerVal = style_dict["CLim"][0]
             upperVal = style_dict["CLim"][1]
-            self.plot_style.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
-            self.plot_style.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)
+            self.style_data.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
+            self.style_data.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)
 
     
     

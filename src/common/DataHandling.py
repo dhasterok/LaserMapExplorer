@@ -950,8 +950,12 @@ class SampleObj(Observable):
             self.processed_data.set_attribute(column_name,'label',self.create_label(column_name))
 
             # Set min and max unmasked values
-            amin = np.min(self.processed_data[column_name][mask])
-            amax = np.max(self.processed_data[column_name][mask])
+            if mask is None:
+                amin = np.min(self.processed_data[column_name])
+                amax = np.max(self.processed_data[column_name])
+            else:
+                amin = np.min(self.processed_data[column_name][mask])
+                amax = np.max(self.processed_data[column_name][mask])
             
             if column_name not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
                 amin = fmt.oround(amin, order=2, toward=0)
@@ -1088,8 +1092,8 @@ class SampleObj(Observable):
                 else: # normalized analyte
                     label = f"{label}$_N$ ({unit})"
             case 'Ratio' | 'Ratio (normalized)':
-                field_1 = field.split(' / ')[0]
-                field_2 = field.split(' / ')[1]
+                field_1 = column_name.split(' / ')[0]
+                field_2 = column_name.split(' / ')[1]
                 symbol_1, mass_1 = fmt.parse_isotope(field_1)
                 symbol_2, mass_2 = fmt.parse_isotope(field_2)
 

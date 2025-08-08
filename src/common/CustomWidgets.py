@@ -2,7 +2,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
         QMenu, QDockWidget, QHeaderView, QToolButton, QSlider, QVBoxLayout, QHBoxLayout, QLabel,
-        QSizePolicy,
+        QSizePolicy, QScrollArea, QLayout, QColorDialog,
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
@@ -15,6 +15,84 @@ import pandas as pd
 from src.common.colorfunc import is_valid_hex_color
 from src.app.UITheme import default_font
 from src.app.config import ICONPATH
+
+class CustomPage(QWidget):
+    def __init__(
+        self,
+        obj_name: str=None,
+        layout_cls=QVBoxLayout,
+        layout_args=None,
+        scrollable=True,
+        parent=None,
+    ):
+        """
+        A QWidget that contains a QScrollArea with a single content widget
+        and layout. Simplifies putting scrollable pages into QToolBox, 
+        QTabWidget, QDockWidget, etc.
+
+        Parameters
+        ----------
+
+        layout_cls : QVBoxLayout | QHBoxLayout | QGridLayout | QFormLayout
+            Layout class for the inner content, by default QVBoxLayout
+        layout_args : dict
+            Dictionary of kwargs to pass to the layout constructor
+        scrollable : bool
+            If False, skips the scroll area and uses the content directly,
+            by default True
+        """
+        super().__init__(parent)
+        self.setObjectName(obj_name)
+        if layout_args is None:
+            layout_args = {}
+
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        if scrollable:
+            self._scroll = QScrollArea(parent=self)
+            self._scroll.setWidgetResizable(True)
+            outer_layout.addWidget(self._scroll)
+
+            self._content = QWidget()
+            self._content_layout = layout_cls(self._content, **layout_args)
+            self._content.setLayout(self._content_layout)
+
+            self._scroll.setWidget(self._content)
+        else:
+            # non-scrollable fallback: place content directly
+            self._scroll = None
+            self._content = QWidget(parent=self)
+            self._content_layout = layout_cls(self._content, **layout_args)
+            self._content.setLayout(self._content_layout)
+            outer_layout.addWidget(self._content)
+
+    @property
+    def content_widget(self):
+        return self._content
+
+    @property
+    def content_layout(self) -> QLayout:
+        return self._content_layout
+
+    def addItem(self, item):
+        """Convenience to add a child item to the inner layout."""
+        self._content_layout.addItem(item)
+
+    def addWidget(self, widget):
+        """Convenience to add a child widget to the inner layout."""
+        self._content_layout.addWidget(widget)
+
+    def addLayout(self, layout):
+        """Convenience to add a child layout to the inner layout."""
+        self._content_layout.addLayout(layout)
+
+    def setContentsMargins(self, left, top, right, bottom):
+        self._content_layout.setContentsMargins(left, top, right, bottom)
+
+    def setSpacing(self, spacing):
+        self._content_layout.setSpacing(spacing)
 
 class CustomLineEdit(QLineEdit):
     """Custom line edit widget, when the only input should be of type float
@@ -39,7 +117,15 @@ class CustomLineEdit(QLineEdit):
         Provide a validator to automatically text inputs for appropriate type and
         ranges, by default QDoubleValidator
     """        
-    def __init__(self, parent=None, value=0.0, precision=4, threshold=1e4, toward=None, validator=QDoubleValidator()):
+    def __init__(
+            self,
+            parent=None,
+            value=0.0,
+            precision=4,
+            threshold=1e4,
+            toward=None,
+            validator=QDoubleValidator()
+    ):
         super().__init__(parent)
         self._value = value
         self._precision = precision
@@ -49,7 +135,7 @@ class CustomLineEdit(QLineEdit):
         self._upper_bound = None
         self.textChanged.connect(self._update_value_from_text)
         self.setValidator(validator)
-        self.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
     @property
     def value(self):
@@ -711,8 +797,8 @@ class CustomDockWidget(QDockWidget):
     closeEvent(event: QEvent)
         Hides the dock instead of closing it when the user clicks the close button.
     """
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, parent=None, *args, **kwargs):
+        super().__init__(parent=parent)
 
         self.show()
 
@@ -967,7 +1053,7 @@ class CustomAction(QAction):
     ):
         super().__init__(text, parent)
 
-        def load_icon(filename: str | None, fallback: QIcon = None) -> QIcon:
+        def load_icon(filename: str|None, fallback: QIcon=None) -> QIcon:
             """Sets up the QIcon for a given light/dark, checked/unchecked state.
 
             Parameters
@@ -1008,6 +1094,8 @@ class CustomAction(QAction):
         # Button visual setup
         self.setFont(default_font())
 
+        self.setIconVisibleInMenu(False)
+
         self.setChecked(False)
         self.update_icon()
 
@@ -1030,6 +1118,125 @@ class CustomAction(QAction):
 
         if icon:
             self.setIcon(icon)
+
+class ColorButton(QPushButton):
+    """
+    A QPushButton subclass that allows the user to select a background color
+    via a QColorDialog. The widget tracks a history of recently selected colors
+    and emits a signal whenever the color changes.
+
+    Features:
+    - Emits `colorChanged(QColor)` when the button's color is updated.
+    - Maintains a history of recently used colors for quick access.
+    - Displays the selected color as the button background.
+
+    Attributes
+    ----------
+    permanent_text : str or None
+        Fixed text displayed on the button. If None, the button text shows
+        the selected color's hex code.
+    ui : QWidget or None
+        Reference to the parent UI component, used as the parent for the color dialog.
+    _color_history : list of QColor
+        Internal list tracking recently selected colors.
+    _max_history : int
+        Maximum number of colors to keep in the history (default = 16).
+    
+    Signals
+    -------
+    colorChanged(QColor)
+        Emitted when the button's background color changes.
+
+    Parameters
+    ----------
+    permanent_text : str or None
+        Fixed text to display on the button. If None, the button text
+        will display the color's hex code.
+    ui : QWidget or None
+        Parent UI component, used as the parent for the color dialog.
+    parent : QWidget or None
+        Parent widget in the Qt hierarchy.
+
+    Example
+    -------
+
+    btn = ColorButton("Pick Color")
+    btn.colorChanged.connect(lambda c: print("New color:", c.name()))
+
+    """
+
+    # Signal that emits the new QColor
+    colorChanged = pyqtSignal(QColor)
+
+    def __init__(self, permanent_text=None, ui=None, parent=None):
+        super().__init__(parent=parent)
+
+        self.ui = ui
+        self.permanent_text = permanent_text
+        self.setText(self.permanent_text if permanent_text else "")
+
+        self._color_history = []  # Track recently selected colors
+        self._max_history = 16    # QColorDialog supports 16 custom slots (0-15)
+
+        self.clicked.connect(self.select_color)
+
+    @property
+    def color(self):
+        """QColor : Return the current background color of the button."""
+        return self.palette().color(self.backgroundRole())
+
+    def select_color(self):
+        """
+        Open a QColorDialog to allow the user to select a color.
+
+        - Initializes the dialog with the current color.
+        - Populates the custom color slots with recent history.
+        - Updates the button background and text when a new color is selected.
+        - Emits `colorChanged(QColor)` if the color changes.
+        """
+        old_color = self.color
+        dlg = QColorDialog(self.ui)
+        dlg.setCurrentColor(old_color)
+
+        # Populate custom colors from history
+        for idx, col in enumerate(self._color_history[:self._max_history]):
+            QColorDialog.setCustomColor(idx, col)
+
+        new_color = dlg.getColor(initial=old_color, parent=self.ui)
+
+        if new_color.isValid() and new_color != old_color:
+            self._apply_color(new_color)
+            self._update_history(new_color)
+            self.colorChanged.emit(new_color)
+
+    def _apply_color(self, color: QColor):
+        """
+        Apply the given color to the button's background and update its text.
+
+        Parameters
+        ----------
+        color : QColor
+            The new color to apply.
+        """
+        self.setStyleSheet(f"background-color: {color.name()};")
+        if self.permanent_text is None:
+            self.setText(color.name())
+
+    def _update_history(self, color: QColor):
+        """
+        Add the given color to the recent history, keeping it unique
+        and limited to the maximum history size.
+
+        Parameters
+        ----------
+        color : QColor
+            The color to add to the history.
+        """
+        # Add new color at front, keep unique, maintain max length
+        if color in self._color_history:
+            self._color_history.remove(color)
+        self._color_history.insert(0, color)
+        self._color_history = self._color_history[:self._max_history]
 
 class CustomToolButton(QToolButton):
     """A button that changes icons when checked or the theme changes from light to dark
@@ -1086,7 +1293,7 @@ class CustomToolButton(QToolButton):
 
         self.setText(text)
 
-        def load_icon(filename: str | None, fallback: QIcon = None) -> QIcon:
+        def load_icon(filename: str | None, fallback: QIcon=None) -> QIcon:
             """Sets up the QIcon for a given light/dark, checked/unchecked state.
 
             Parameters

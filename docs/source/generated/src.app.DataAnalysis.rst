@@ -8,8 +8,8 @@ src.app.DataAnalysis
 
    .. autosummary::
    
+      ClusterPage
       Clustering
-      ClusteringUI
       DimensionalReduction
-      DimensionalReductionUI
+      DimensionalReductionPage
    

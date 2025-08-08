@@ -750,7 +750,7 @@
 <span class="sd">        Updates the plot once filter values have been update</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">apply_field_filters</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="FilterTab.update_filter_values">
@@ -1177,7 +1177,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_polygon_actions</span><span class="p">()</span>
 
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_polygon_actions</span><span class="p">()</span></div>
 
 
@@ -1431,7 +1431,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">spinBoxClusterGroup</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_cluster_group_callback</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonClusterColor</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_color_callback</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionClusterColorReset</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">set_default_cluster_colors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionClusterColorReset</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">set_default_cluster_colors</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">itemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_label_changed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span><span class="o">.</span><span class="n">selectionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_clusters</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actionGroupMask</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">apply_cluster_mask</span><span class="p">(</span><span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
@@ -1488,7 +1488,7 @@
 
         <span class="c1"># update plot</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">comboBoxColorByField</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;cluster&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ClusterTab.select_cluster_group_callback">
@@ -1546,7 +1546,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">cluster_name</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">hexcolor</span><span class="p">))</span>
-                    <span class="c1"># colors in table are set by plot_style.set_default_cluster_colors()</span>
+                    <span class="c1"># colors in table are set by style_data.set_default_cluster_colors()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">selectRow</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
                     
 
@@ -1598,7 +1598,7 @@
 
             <span class="c1"># update plot with new cluster name</span>
             <span class="c1"># trigger update to plot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ClusterTab.update_clusters">
@@ -1627,9 +1627,9 @@
                 <span class="n">app_data</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="n">method</span><span class="p">][</span><span class="s1">&#39;selected_clusters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="c1"># update plot</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster score&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">app_data</span><span class="o">.</span><span class="n">c_field_type</span> <span class="o">==</span> <span class="s1">&#39;cluster&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster score&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">app_data</span><span class="o">.</span><span class="n">c_field_type</span> <span class="o">==</span> <span class="s1">&#39;cluster&#39;</span><span class="p">):</span>
                 <span class="c1"># trigger update to plot</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span></div>
 
 
     
@@ -1638,7 +1638,7 @@
 
 <div class="viewcode-block" id="ClusterTab.set_default_cluster_colors">
 <a class="viewcode-back" href="../../generated/common.Masking.html#common.Masking.ClusterTab.set_default_cluster_colors">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_default_cluster_colors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">plot_style</span><span class="p">,</span><span class="n">cluster_tab</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_default_cluster_colors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">style_data</span><span class="p">,</span><span class="n">cluster_tab</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets cluster group to default colormap</span>
 
 <span class="sd">        Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in</span>
@@ -1654,7 +1654,7 @@
         <span class="c1"># cluster_tab = self.parent.mask_dock.cluster_tab</span>
 
         <span class="c1"># cluster colormap</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">get_colormap</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">rowCount</span><span class="p">())</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">get_colormap</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">rowCount</span><span class="p">())</span>
 
         <span class="c1"># set color for each cluster and place color in table</span>
         <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmap</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">N</span><span class="p">)]</span>
@@ -1667,7 +1667,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">mask</span><span class="p">:</span>
-            <span class="n">hexcolor</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot_style</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">][</span><span class="s1">&#39;OverlayColor&#39;</span><span class="p">])</span>
+            <span class="n">hexcolor</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">style_data</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">][</span><span class="s1">&#39;OverlayColor&#39;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonClusterColor</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: </span><span class="si">%s</span><span class="s2">;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetViewGroups</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spinBoxClusterGroup</span><span class="o">.</span><span class="n">value</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 

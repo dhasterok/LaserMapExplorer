@@ -1,4 +1,4 @@
-src.app.StyleToolbox
+﻿src.app.StyleToolbox
 ====================
 
 .. automodule:: src.app.StyleToolbox
@@ -9,6 +9,5 @@ src.app.StyleToolbox
    .. autosummary::
    
       StyleData
-      StyleObj
       StyleTheme
    

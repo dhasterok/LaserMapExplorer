@@ -1,4 +1,4 @@
-﻿src.common.format
+src.common.format
 =================
 
 .. automodule:: src.common.format

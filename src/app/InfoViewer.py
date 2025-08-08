@@ -337,8 +337,8 @@ class PlotInfoTab():
         self.annotations_label = QLabel(self.plot_info_tab)
         self.annotations_label.setText("Annotations")
 
-        self.annotations_table = QTableWidget(0, 3, self.plot_info_tab)
-        self.annotations_table.setHorizontalHeaderLabels(["Type", "Value", "Visible"])
+        self.annotations_table = QTableWidget(0, 4, self.plot_info_tab)
+        self.annotations_table.setHorizontalHeaderLabels(["Type", "Value", "Color", "Visible"])
         self.annotations_table.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
 
         self.annotations_layout.addWidget(self.annotations_label)

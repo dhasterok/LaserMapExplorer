@@ -404,15 +404,18 @@
 <span class="sd">        A dictionary mapping widgets to help topics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">help_mapping</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">centralwidget</span><span class="p">:</span> <span class="s1">&#39;center_pane&#39;</span><span class="p">,</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">canvasWindow</span><span class="p">:</span> <span class="s1">&#39;center_pane&#39;</span><span class="p">,</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">dockWidgetLeftToolbox</span><span class="p">:</span> <span class="s1">&#39;left_toolbox&#39;</span><span class="p">,</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="p">:</span> <span class="s1">&#39;left_toolbox&#39;</span><span class="p">,</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">dockWidgetStyling</span><span class="p">:</span> <span class="s1">&#39;right_toolbox&#39;</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">canvas_widget</span><span class="p">:</span> <span class="s1">&#39;center_pane&#39;</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">canvasWindow</span><span class="p">:</span> <span class="s1">&#39;center_pane&#39;</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">control_dock</span><span class="p">:</span> <span class="s1">&#39;left_toolbox&#39;</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">toolbox</span><span class="p">:</span> <span class="s1">&#39;left_toolbox&#39;</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">style_dock</span><span class="p">:</span> <span class="s1">&#39;right_toolbox&#39;</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">style_dock</span><span class="o">.</span><span class="n">toolbox</span><span class="p">:</span> <span class="s1">&#39;right_toolbox&#39;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;mask_dock&quot;</span><span class="p">):</span>
         <span class="n">help_mapping</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lower_tabs&#39;</span>
         <span class="n">help_mapping</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">mask_tab_widget</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lower_tabs&#39;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;plot_tree&quot;</span><span class="p">):</span>
+        <span class="n">help_mapping</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;right_toolbox&#39;</span>
 
     <span class="k">return</span> <span class="n">help_mapping</span></div>
 

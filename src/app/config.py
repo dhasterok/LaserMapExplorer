@@ -13,13 +13,13 @@ APPDATA_PATH = RESOURCE_PATH / 'app_data'
 ICONPATH = RESOURCE_PATH / 'icons'
 
 # Path to the stylesheet directory
-SSPATH = RESOURCE_PATH / 'styles'
+STYLE_PATH = RESOURCE_PATH / 'styles'
 
 def load_stylesheet(filename):
     replacements = {
         '{icon_path}': str(ICONPATH.as_posix()),  # Ensure forward slashes
     }
-    with open(SSPATH / filename, "r", encoding="utf-8") as file:
+    with open(STYLE_PATH / filename, "r", encoding="utf-8") as file:
         stylesheet = file.read()
     for key, value in replacements.items():
         stylesheet = stylesheet.replace(key, value)

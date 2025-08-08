@@ -1,8 +1,17 @@
 import numpy as np
+from PyQt6.QtCore import ( Qt, QRect, QSize )
+from PyQt6.QtWidgets import ( 
+    QCheckBox, QTableWidgetItem, QMessageBox, QInputDialog, QGroupBox, QFormLayout, QVBoxLayout,
+    QHBoxLayout, QAbstractSpinBox, QComboBox, QSpinBox, QDoubleSpinBox, QLabel, QWidget, QScrollArea,
+    QFrame, QToolButton, QSpacerItem, QSizePolicy, QAbstractItemView, QHeaderView
+)
+from PyQt6.QtGui import ( QIcon )
 from src.common.Logger import log, auto_log_methods
+from src.common.CustomWidgets import CustomPage, CustomLineEdit, CustomToolButton
+from src.app.config import ICONPATH
 
 @auto_log_methods(logger_key="Data")
-class PreprocessingUI():
+class PreprocessingUI(CustomPage):
     """
     Manages the preprocessing interface and links data updates to the MainWindow UI.
 
@@ -51,56 +60,302 @@ class PreprocessingUI():
     reset_crop(), reset_pixel_resolution()
         Resets the cropped region or the pixel resolution for the current dataset.
     """
-    def __init__(self, parent):
-        self.ui = parent
-        self.schedule_update = parent.plot_style.schedule_update()
+    def __init__(self, dock):
+        super().__init__(obj_name="PreprocessPage", parent=dock)
+
+        self.dock = dock 
         
-        self.ui.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
-
-        self.ui.comboBoxOutlierMethod.addItems(self.ui.app_data.outlier_methods)
-        if 'Chauvenet criterion' in self.ui.app_data.outlier_methods:
-            self.ui.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
-        self.ui.comboBoxOutlierMethod.activated.connect(
-            lambda: self.update_outlier_removal(self.ui.comboBoxOutlierMethod.currentText())
-        )
-
-        self.ui.comboBoxNegativeMethod.addItems(self.ui.app_data.negative_methods)
-        self.ui.comboBoxNegativeMethod.activated.connect(
-            lambda: self.update_neg_handling(self.ui.comboBoxNegativeMethod.currentText())
-        )
-
+        self.setupUI()
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
 
+    def setupUI(self):
+        # Coordinate group box
+        self.groupBoxCoordinates = QGroupBox(parent=self)
+        self.groupBoxCoordinates.setTitle("Sample dimensions")
+        self.groupBoxCoordinates.setObjectName("groupBoxSampleOptions")
+
+        form_layout_coordinates = QFormLayout(self.groupBoxCoordinates)
+        form_layout_coordinates.setContentsMargins(3, 3, 3, 3)
+
+        widget_resolution_label = QWidget(parent=self.groupBoxCoordinates)
+        layout_resolution_label = QHBoxLayout()
+        widget_resolution_label.setLayout(layout_resolution_label)
+
+        self.labelSampleResolution = QLabel(parent=self.groupBoxCoordinates)
+        self.labelSampleResolution.setObjectName("labelSampleResolution")
+        self.labelSampleResolution.setText("Resolution")
+
+        self.toolButtonResolutionReset = CustomToolButton(
+            text="Reset",
+            light_icon_unchecked="icon-reset-64.svg",
+            dark_icon_unchecked="icon-reset-dark-64.svg",
+            parent=self.groupBoxCoordinates)
+        self.toolButtonResolutionReset.setEnabled(False)
+        self.toolButtonResolutionReset.setObjectName("toolButtonResolutionReset")
+        self.toolButtonResolutionReset.setText("Reset")
+        self.toolButtonResolutionReset.setToolTip("Reset map resolution, to reset to original cropped resolution, use full map instead")
+
+        layout_resolution_label.addWidget(self.labelSampleResolution)
+        layout_resolution_label.addWidget(self.toolButtonResolutionReset)
+
+        widget_resolution = QWidget(self.groupBoxCoordinates)
+        layout_resolution = QHBoxLayout(widget_resolution)
+        widget_resolution.setLayout(layout_resolution)
+
+        self.labelResolutionNx = QLabel(parent=self.groupBoxCoordinates)
+        self.labelResolutionNx.setObjectName("labelResolutionNx")
+        self.labelResolutionNx.setText("Nx:")
+
+        self.lineEditResolutionNx = CustomLineEdit(parent=self.groupBoxCoordinates)
+        self.lineEditResolutionNx.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditResolutionNx.setReadOnly(True)
+        self.lineEditResolutionNx.setObjectName("lineEditResolutionNx")
+        self.lineEditResolutionNx.setToolTip("Number of pixels in X-direction")
+
+        self.labelResolutionNy = QLabel(parent=self.groupBoxCoordinates)
+        self.labelResolutionNy.setObjectName("labelResolutionNy")
+        self.labelResolutionNy.setText("Ny:")
+
+        self.lineEditResolutionNy = CustomLineEdit(parent=self.groupBoxCoordinates)
+        self.lineEditResolutionNy.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditResolutionNy.setReadOnly(True)
+        self.lineEditResolutionNy.setObjectName("lineEditResolutionNy")
+        self.lineEditResolutionNx.setToolTip("Number of pixels in Y-direction")
+
+        layout_resolution.addWidget(self.labelResolutionNx)
+        layout_resolution.addWidget(self.lineEditResolutionNx)
+        layout_resolution.addWidget(self.labelResolutionNy)
+        layout_resolution.addWidget(self.lineEditResolutionNy)
+
+        form_layout_coordinates.addRow(widget_resolution_label, widget_resolution)
+
+        widget_dimension_label = QWidget(parent=self.groupBoxCoordinates)
+        layout_dimension_label = QHBoxLayout()
+        widget_dimension_label.setLayout(layout_dimension_label)
+
+        self.labelPixelResolution = QLabel(parent=self.groupBoxCoordinates)
+        self.labelPixelResolution.setObjectName("labelPixelResolution")
+
+        self.toolButtonPixelResolutionReset = CustomToolButton(
+            text="Reset",
+            light_icon_unchecked="icon-reset-64.svg",
+            dark_icon_unchecked="icon-reset-dark-64.svg",
+            parent=self.groupBoxCoordinates
+        )
+        self.toolButtonPixelResolutionReset.setObjectName("toolButtonPixelResolutionReset")
+        self.toolButtonPixelResolutionReset.setToolTip("Reset pixel dimensions")
+        
+        layout_dimension_label.addWidget(self.labelPixelResolution)
+        layout_dimension_label.addWidget(self.toolButtonPixelResolutionReset)
+
+        widget_dimension = QWidget(self.groupBoxCoordinates)
+        layout_dimension = QHBoxLayout()
+        widget_dimension.setLayout(layout_dimension)
+
+        self.labelDX = QLabel(parent=self.groupBoxCoordinates)
+        self.labelDX.setText("dX:")
+
+        self.lineEditDX = CustomLineEdit(parent=self.groupBoxCoordinates)
+        self.lineEditDX.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditDX.setObjectName("lineEditDX")
+        self.lineEditDX.setToolTip("Pixel width")
+
+        self.toolButtonSwapResolution = CustomToolButton(
+            text="Swap",
+            light_icon_unchecked="icon-swap-resolution-64.svg",
+            dark_icon_unchecked="icon-swap-resolution-dark-64.svg",
+            parent=self.groupBoxCoordinates
+        )
+        self.toolButtonSwapResolution.setObjectName("toolButtonSwapResolution")
+        self.toolButtonSwapResolution.setToolTip("Swap X and Y resolution")
+        
+        self.labelDY = QLabel(parent=self.groupBoxCoordinates)
+        self.labelDY.setText("dY:")
+
+        self.lineEditDY = CustomLineEdit(parent=self.groupBoxCoordinates)
+        self.lineEditDY.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditDY.setObjectName("lineEditDY")
+        self.lineEditDY.setToolTip("Pixel height")
+
+        layout_dimension.addWidget(self.labelDX)
+        layout_dimension.addWidget(self.lineEditDX)
+        layout_dimension.addWidget(self.toolButtonSwapResolution)
+        layout_dimension.addWidget(self.labelDY)
+        layout_dimension.addWidget(self.lineEditDY)
+
+        form_layout_coordinates.addRow(widget_dimension_label, widget_dimension)
+
+        # Small histogram widget
+        self.widgetHistView = QWidget(parent=self)
+        self.widgetHistView.setMinimumSize(QSize(0, 150))
+        self.widgetHistView.setAutoFillBackground(False)
+        self.widgetHistView.setObjectName("widgetHistView")
+
+        self.checkBoxShowHistCmap = QCheckBox(parent=self)
+        self.checkBoxShowHistCmap.setText("Show with colormap")
+        self.checkBoxShowHistCmap.setChecked(True)
+        self.checkBoxShowHistCmap.setObjectName("checkBoxShowHistCmap")
+
+
+        # Autoscale group box
+        self.groupBoxAutoscale = QGroupBox(parent=self)
+        self.groupBoxAutoscale.setObjectName("groupBoxAutoscale")
+        self.groupBoxAutoscale.setTitle("Outliers and negatives")
+
+        layout_autoscale = QVBoxLayout(self.groupBoxAutoscale)
+        layout_autoscale.setContentsMargins(3, 3, 3, 3)
+
+        layout_buttons = QHBoxLayout()
+        layout_buttons.setObjectName("horizontalLayout_61")
+        
+        self.toolButtonAutoScale = CustomToolButton(
+            text="Autoscale",
+            light_icon_unchecked="icon-autoscale-64.svg",
+            parent=self.groupBoxAutoscale
+        )
+        self.toolButtonAutoScale.setCheckable(True)
+        self.toolButtonAutoScale.setChecked(True)
+        self.toolButtonAutoScale.setObjectName("toolButtonAutoScale")
+        self.toolButtonAutoScale.setToolTip("Autoscale data")
+
+        self.toolButtonScaleEqualize = CustomToolButton(
+            text="Equalize Scale",
+            light_icon_unchecked="icon-histeq-64.svg",
+            dark_icon_unchecked="icon-histeq-dark-64.svg",
+            parent=self.groupBoxAutoscale,
+        )
+        self.toolButtonScaleEqualize.setCheckable(True)
+        self.toolButtonScaleEqualize.setObjectName("toolButtonScaleEqualize")
+        self.toolButtonScaleEqualize.setToolTip("Equalize colormap to histogram")
+
+        button_spacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.checkBoxApplyAll = QCheckBox(parent=self.groupBoxAutoscale)
+        self.checkBoxApplyAll.setText("Apply All")
+        self.checkBoxApplyAll.setObjectName("checkBoxApplyAll")
+
+        self.toolButtonOutlierReset = CustomToolButton(
+            text="Reset",
+            light_icon_unchecked="icon-reset-64.svg",
+            dark_icon_unchecked="icon-reset-dark-64.svg",
+            parent=self.groupBoxAutoscale,
+        )
+        self.toolButtonOutlierReset.setObjectName("toolButtonOutlierReset")
+        self.toolButtonOutlierReset.setToolTip("Reset autoscaling and outlier handling")
+
+        layout_buttons.addWidget(self.toolButtonAutoScale)
+        layout_buttons.addWidget(self.toolButtonScaleEqualize)
+        layout_buttons.addItem(button_spacer)
+        layout_buttons.addWidget(self.checkBoxApplyAll)
+        layout_buttons.addWidget(self.toolButtonOutlierReset)
+
+        layout_autoscale.addLayout(layout_buttons)
+
+        form_layout_autoscale = QFormLayout()
+
+        self.comboBoxOutlierMethod = QComboBox(parent=self.groupBoxAutoscale)
+        self.comboBoxOutlierMethod.setObjectName("comboBoxOutlierMethod")
+        self.comboBoxOutlierMethod.setToolTip("Select method for removing outliers from analyte and ratio data")
+        form_layout_autoscale.addRow("Outlier Method", self.comboBoxOutlierMethod)
+
+        self.comboBoxNegativeMethod = QComboBox(parent=self.groupBoxAutoscale)
+        self.comboBoxNegativeMethod.setObjectName("comboBoxNegativeMethod")
+        form_layout_autoscale.addRow("Negative handling", self.comboBoxNegativeMethod)
+
+        layout_quantiles = QHBoxLayout()
+
+        self.lineEditLowerQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
+        self.lineEditLowerQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditLowerQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditLowerQuantile.setObjectName("lineEditLowerQuantile")
+
+        self.lineEditUpperQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
+        self.lineEditUpperQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditUpperQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditUpperQuantile.setObjectName("lineEditUpperQuantile")
+
+        layout_quantiles.addWidget(self.lineEditLowerQuantile)
+        layout_quantiles.addWidget(self.lineEditUpperQuantile)
+
+        form_layout_autoscale.addRow("Quantile bounds", layout_quantiles)
+
+        layout_quantiles_diff = QHBoxLayout()
+
+        self.lineEditDifferenceLowerQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
+        self.lineEditDifferenceLowerQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditDifferenceLowerQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditDifferenceLowerQuantile.setObjectName("lineEditDifferenceLowerQuantile")
+
+        self.lineEditDifferenceUpperQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
+        self.lineEditDifferenceUpperQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditDifferenceUpperQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditDifferenceUpperQuantile.setObjectName("lineEditDifferenceUpperQuantile")
+
+        layout_quantiles_diff.addWidget(self.lineEditDifferenceLowerQuantile)
+        layout_quantiles_diff.addWidget(self.lineEditDifferenceUpperQuantile)
+
+        form_layout_autoscale.addRow("Difference bound", layout_quantiles_diff)
+
+        layout_autoscale.addLayout(form_layout_autoscale)
+
+        preprocess_spacer = QSpacerItem(285, 132, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.addWidget(self.groupBoxCoordinates)
+        self.addWidget(self.widgetHistView)
+        self.addWidget(self.checkBoxShowHistCmap)
+        self.addWidget(self.groupBoxAutoscale)
+        self.addItem(preprocess_spacer)
+        
+        icon_preprocess = QIcon(str(ICONPATH / "icon-histogram-64.svg"))
+        self.dock.toolbox.addItem(self, icon_preprocess, "Preprocess")
+
     def connect_widgets(self):
-        self.ui.lineEditDX.editingFinished.connect(self.update_dx)
-        self.ui.lineEditDY.editingFinished.connect(self.update_dy)
-        self.ui.lineEditResolutionNx.editingFinished.connect(self.update_nx_lineedit)
-        self.ui.lineEditResolutionNx.editingFinished.connect(self.update_ny_lineedit)
+        self.lineEditDX.editingFinished.connect(self.update_dx)
+        self.lineEditDY.editingFinished.connect(self.update_dy)
+        self.lineEditResolutionNx.editingFinished.connect(self.update_nx_lineedit)
+        self.lineEditResolutionNx.editingFinished.connect(self.update_ny_lineedit)
+
+        self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
+        self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
+
+        self.comboBoxOutlierMethod.addItems(self.dock.ui.app_data.outlier_methods)
+        if 'Chauvenet criterion' in self.dock.ui.app_data.outlier_methods:
+            self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
+        self.comboBoxOutlierMethod.activated.connect(
+            lambda: self.update_outlier_removal(self.comboBoxOutlierMethod.currentText())
+        )
+
+        self.comboBoxNegativeMethod.addItems(self.dock.ui.app_data.negative_methods)
+        self.comboBoxNegativeMethod.activated.connect(
+            lambda: self.update_neg_handling(self.comboBoxNegativeMethod.currentText())
+        )
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
+        self.dock.ui.app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
 
     def connect_logger(self):
         """Connects widgets to logger."""
-        self.ui.lineEditResolutionNx.editingFinished.connect(lambda: log(f"lineEditResolutionNx value=[{self.ui.lineEditResolutionNx.value}]", prefix="UI"))
-        self.ui.lineEditResolutionNy.editingFinished.connect(lambda: log(f"lineEditResolutionNy value=[{self.ui.lineEditResolutionNy.value}]", prefix="UI"))
-        self.ui.toolButtonPixelResolutionReset.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
-        self.ui.lineEditDX.editingFinished.connect(lambda: log(f"lineEditDX, value=[{self.ui.lineEditDX.value}]",prefix="UI"))
-        self.ui.lineEditDY.editingFinished.connect(lambda: log(f"lineEditDY, value=[{self.ui.lineEditDY.value}]",prefix="UI"))
-        self.ui.toolButtonResolutionReset.clicked.connect(lambda: log("toolButtonsRolutionReset",prefix="UI"))
-        self.ui.toolButtonSwapResolution.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
-        self.ui.toolButtonAutoScale.clicked.connect(lambda: log(f"toolButtonAutoScale value=[{self.ui.toolButtonAutoScale.isChecked()}]", prefix="UI"))
-        self.ui.checkBoxApplyAll.checkStateChanged.connect(lambda: log(f"checkBoxApplyAll value=[{self.ui.checkBoxApplyAll.isChecked()}]", prefix="UI"))
-        self.ui.toolButtonOutlierReset.clicked.connect(lambda: log("toolButtonOutlierReset", prefix="UI"))
-        self.ui.comboBoxOutlierMethod.activated.connect(lambda: log(f"comboBoxOutlierMethod value=[{self.ui.comboBoxOutlierMethod.currentText()}]", prefix="UI"))
-        self.ui.comboBoxNegativeMethod.activated.connect(lambda: log(f"comboBoxNegativeMethod value=[{self.ui.comboBoxNegativeMethod.currentText()}]", prefix="UI"))
-        self.ui.lineEditLowerQuantile.editingFinished.connect(lambda: log(f"lineEditLowerQuantile value=[{self.ui.lineEditLowerQuantile.value}]", prefix="UI"))
-        self.ui.lineEditUpperQuantile.editingFinished.connect(lambda: log(f"lineEditUpperQuantile value=[{self.ui.lineEditUpperQuantile.value}]", prefix="UI"))
-        self.ui.lineEditDifferenceLowerQuantile.editingFinished.connect(lambda: log(f"lineEditDifferenceLowerQuantile value=[{self.ui.lineEditDifferenceLowerQuantile.value}]", prefix="UI"))
-        self.ui.lineEditDifferenceUpperQuantile.editingFinished.connect(lambda: log(f"lineEditDifferenceUpperQuantile value=[{self.ui.lineEditDifferenceUpperQuantile.value}]", prefix="UI"))
+        self.lineEditResolutionNx.editingFinished.connect(lambda: log(f"lineEditResolutionNx value=[{self.lineEditResolutionNx.value}]", prefix="UI"))
+        self.lineEditResolutionNy.editingFinished.connect(lambda: log(f"lineEditResolutionNy value=[{self.lineEditResolutionNy.value}]", prefix="UI"))
+        self.toolButtonPixelResolutionReset.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
+        self.lineEditDX.editingFinished.connect(lambda: log(f"lineEditDX, value=[{self.lineEditDX.value}]",prefix="UI"))
+        self.lineEditDY.editingFinished.connect(lambda: log(f"lineEditDY, value=[{self.lineEditDY.value}]",prefix="UI"))
+        self.toolButtonResolutionReset.clicked.connect(lambda: log("toolButtonsRolutionReset",prefix="UI"))
+        self.toolButtonSwapResolution.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
+        self.toolButtonAutoScale.clicked.connect(lambda: log(f"toolButtonAutoScale value=[{self.toolButtonAutoScale.isChecked()}]", prefix="UI"))
+        self.toolButtonScaleEqualize.clicked.connect(lambda: log(f"toolButtonScaleEqualize value=[{self.toolButtonScaleEqualize.isChecked()}]", prefix="UI"))
+        self.checkBoxShowHistCmap.checkStateChanged.connect(lambda: log(f"checkBoxShowHistCmap value=[{self.checkBoxShowHistCmap.isChecked()}]", prefix="UI"))
+        self.checkBoxApplyAll.checkStateChanged.connect(lambda: log(f"checkBoxApplyAll value=[{self.checkBoxApplyAll.isChecked()}]", prefix="UI"))
+        self.toolButtonOutlierReset.clicked.connect(lambda: log("toolButtonOutlierReset", prefix="UI"))
+        self.comboBoxOutlierMethod.activated.connect(lambda: log(f"comboBoxOutlierMethod value=[{self.comboBoxOutlierMethod.currentText()}]", prefix="UI"))
+        self.comboBoxNegativeMethod.activated.connect(lambda: log(f"comboBoxNegativeMethod value=[{self.comboBoxNegativeMethod.currentText()}]", prefix="UI"))
+        self.lineEditLowerQuantile.editingFinished.connect(lambda: log(f"lineEditLowerQuantile value=[{self.lineEditLowerQuantile.value}]", prefix="UI"))
+        self.lineEditUpperQuantile.editingFinished.connect(lambda: log(f"lineEditUpperQuantile value=[{self.lineEditUpperQuantile.value}]", prefix="UI"))
+        self.lineEditDifferenceLowerQuantile.editingFinished.connect(lambda: log(f"lineEditDifferenceLowerQuantile value=[{self.lineEditDifferenceLowerQuantile.value}]", prefix="UI"))
+        self.lineEditDifferenceUpperQuantile.editingFinished.connect(lambda: log(f"lineEditDifferenceUpperQuantile value=[{self.lineEditDifferenceUpperQuantile.value}]", prefix="UI"))
 
     def connect_data_observers(self, data):
         """Connects data notifiers to preprocess observer functions
@@ -122,10 +377,20 @@ class PreprocessingUI():
         data.add_observer("data_max_quantile", self.update_data_max_quantile)
         data.add_observer("data_min_diff_quantile", self.update_data_min_diff_quantile)
         data.add_observer("data_max_diff_quantile", self.update_data_max_diff_quantile)
+        self.dock.ui.app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
         data.add_observer("data_auto_scale_value", self.update_auto_scale_value)
         data.add_observer("apply_outlier_to_all", self.update_apply_outlier_to_all)
         data.add_observer("outlier_method", self.update_outlier_method)
         data.add_observer("outlier_method", self.update_negative_handling_method)
+
+    def update_equalize_color_scale_toolbutton(self, value):
+        self.toolButtonScaleEqualize.setChecked(value)
+
+        if self.dock.ui.style_data.plot_type == 'field map':
+            # this needs to equalize the colorscale
+            # right now it doesn't do anything
+            pass
+            self.dock.ui.schedule_update()
 
     def update_nx_lineedit(self,value):
         """Updates ``MainWindow.lineEditResolutionNx.value``
@@ -136,9 +401,9 @@ class PreprocessingUI():
         value : str
             x dimension.
         """
-        self.ui.lineEditResolutionNx.value = value
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+        self.lineEditResolutionNx.value = value
+        if self.dock.ui.control_dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
 
     def update_ny_lineedit(self,value):
         """
@@ -152,9 +417,9 @@ class PreprocessingUI():
         value : str
             y dimension.
         """
-        self.ui.lineEditResolutionNy.value = value
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+        self.lineEditResolutionNy.value = value
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
 
     def update_dx_lineedit(self,value):
         """Updates ``MainWindow.lineEditDX.value``
@@ -165,17 +430,17 @@ class PreprocessingUI():
         value : str
             x dimension.
         """
-        self.ui.lineEditDX.value = value
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+        self.lineEditDX.value = value
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
             field = 'Xc'
-            if isinstance(self.ui.plot_info, dict) \
-                and 'field_type' in self.ui.plot_info \
-                and 'field' in self.ui.plot_info:
+            if isinstance(self.dock.ui.plot_info, dict) \
+                and 'field_type' in self.dock.ui.plot_info \
+                and 'field' in self.dock.ui.plot_info:
                 # update x axis limits in style_dict 
-                self.ui.plot_style.initialize_axis_values(self.ui.data, self.ui.plot_info['field_type'], self.ui.plot_info['field'])
+                self.dock.ui.style_data.initialize_axis_values(self.dock.ui.data, self.dock.ui.plot_info['field_type'], self.dock.ui.plot_info['field'])
                 # update limits in styling tabs
-                self.ui.plot_style.set_axis_attributes("x",field)
+                self.dock.ui.style_data.set_axis_attributes("x",field)
 
     def update_dy_lineedit(self,value):
         """Updates ``MainWindow.lineEditDY.value``
@@ -186,17 +451,17 @@ class PreprocessingUI():
         value : str
             y dimension.
         """
-        self.ui.lineEditDY.value = value
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+        self.lineEditDY.value = value
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
             field = 'Yc'
-            if isinstance(self.ui.plot_info, dict) \
-                and 'field_type' in self.ui.plot_info \
-                and 'field' in self.ui.plot_info:
+            if isinstance(self.dock.ui.plot_info, dict) \
+                and 'field_type' in self.dock.ui.plot_info \
+                and 'field' in self.dock.ui.plot_info:
                 # update x axis limits in style_dict 
-                self.ui.plot_style.initialize_axis_values(self.ui.plot_info['field_type'], self.ui.plot_info['field'])
+                self.dock.ui.style_data.initialize_axis_values(self.dock.ui.plot_info['field_type'], self.dock.ui.plot_info['field'])
                 # update limits in styling tabs
-                self.ui.plot_style.set_axis_attributes("y",field)
+                self.dock.ui.style_data.set_axis_attributes("y",field)
 
 
     def update_data_min_quantile(self,value):
@@ -208,12 +473,12 @@ class PreprocessingUI():
         value : float
             Lower quantile value.
         """
-        self.ui.lineEditLowerQuantile.value = value
+        self.lineEditLowerQuantile.value = value
         self.update_labels()
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.scheduler.schedule_update()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.scheduler.schedule_update()
 
 
     def update_data_max_quantile(self,value):
@@ -227,12 +492,12 @@ class PreprocessingUI():
         value : float
             Upper quantile value.
         """
-        self.ui.lineEditUpperQuantile.value = value
+        self.lineEditUpperQuantile.value = value
         self.update_labels()
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
 
     def update_data_min_diff_quantile(self,value):
         """
@@ -245,12 +510,12 @@ class PreprocessingUI():
         value : float
             Lower difference quantile value.
         """
-        self.ui.lineEditDifferenceLowerQuantile.value = value
+        self.lineEditDifferenceLowerQuantile.value = value
         self.update_labels()
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
 
     def update_data_max_diff_quantile(self,value):
         """
@@ -263,12 +528,12 @@ class PreprocessingUI():
         value : float
             Upper difference quantile value.
         """
-        self.ui.lineEditDifferenceUpperQuantile.value = value
+        self.lineEditDifferenceUpperQuantile.value = value
         self.update_labels()
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
 
 
     def update_auto_scale_value(self,value):
@@ -280,17 +545,17 @@ class PreprocessingUI():
         value : float
             lower quantile value.
         """
-        self.ui.toolButtonAutoScale.setChecked(value)
+        self.toolButtonAutoScale.setChecked(value)
         if value:
-            self.ui.lineEditDifferenceLowerQuantile.setEnabled(True)
-            self.ui.lineEditDifferenceUpperQuantile.setEnabled(True)
+            self.lineEditDifferenceLowerQuantile.setEnabled(True)
+            self.lineEditDifferenceUpperQuantile.setEnabled(True)
         else:
-            self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-            self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+            self.lineEditDifferenceLowerQuantile.setEnabled(False)
+            self.lineEditDifferenceUpperQuantile.setEnabled(False)
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
-        if self.ui.toolBox.currentIndex() == self.ui.left_tab['process']:
-            self.ui.plot_style.schedule_update()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
+            self.dock.ui.schedule_update()
 
     def update_apply_outlier_to_all(self,value):
         """
@@ -304,16 +569,16 @@ class PreprocessingUI():
         value : bool
             Whether to apply outlier removal to all analytes.
         """
-        self.ui.checkBoxApplyAll.setChecked(value)
-        ratio = ('/' in self.ui.app_data.plot_info['field'])
+        self.checkBoxApplyAll.setChecked(value)
+        ratio = ('/' in self.dock.ui.app_data.plot_info['field'])
         if value and not ratio: 
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                self.ui.plot_tree.clear_tree_data(tree)
+                self.dock.ui.plot_tree.clear_tree_data(tree)
         elif value and not ratio:
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in [ 'Ratio', 'Ratio (normalized)']:
-                self.ui.plot_tree.clear_tree_data(tree) 
+                self.dock.ui.plot_tree.clear_tree_data(tree) 
         
     def update_outlier_method(self,method):
         """Updates ``MainWindow.comboBoxOutlierMethod.currentText()``
@@ -325,37 +590,37 @@ class PreprocessingUI():
         method : str
              Method used to remove outliers.
         """
-        if self.ui.data[self.ui.app_data.sample_id].outlier_method == method:
+        if self.dock.ui.data[self.dock.ui.app_data.sample_id].outlier_method == method:
             return
 
-        self.ui.data[self.ui.app_data.sample_id].outlier_method = method
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].outlier_method = method
 
         match method.lower():
             case 'none':
-                self.ui.lineEditLowerQuantile.setEnabled(False)
-                self.ui.lineEditUpperQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
             case 'quantile criteria':
-                self.ui.lineEditLowerQuantile.setEnabled(True)
-                self.ui.lineEditUpperQuantile.setEnabled(True)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
             case 'quantile and distance criteria':
-                self.ui.lineEditLowerQuantile.setEnabled(True)
-                self.ui.lineEditUpperQuantile.setEnabled(True)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(True)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(True)
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(True)
+                self.lineEditDifferenceUpperQuantile.setEnabled(True)
             case 'chauvenet criterion':
-                self.ui.lineEditLowerQuantile.setEnabled(False)
-                self.ui.lineEditUpperQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
             case 'log(n>x) inflection':
-                self.ui.lineEditLowerQuantile.setEnabled(False)
-                self.ui.lineEditUpperQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
     def update_negative_handling_method(self,method):
         """Auto-scales pixel values in map
@@ -370,26 +635,26 @@ class PreprocessingUI():
         method : str
             Method for dealing with negatives
         """
-        data = self.ui.data[self.ui.app_data.sample_id]
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id]
 
-        if self.ui.checkBoxApplyAll.isChecked():
+        if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
             analyte_list = data.processed_data.match_attribute('data_type', 'Analyte') + data.processed_data.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                self.ui.plot_tree.clear_tree_data(tree)
+                self.dock.ui.plot_tree.clear_tree_data(tree)
             data.prep_data()
         else:
             data.negative_method = method
-            data.prep_data(self.ui.app_data.c_field)
+            data.prep_data(self.dock.ui.app_data.c_field)
         
         self.update_invalid_data_labels()
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.schedule_update()
 
     def update_autoscale_checkbox(self, value):
         """
@@ -404,34 +669,34 @@ class PreprocessingUI():
             If None, checkbox is set True. Otherwise, set to False.
         """
         if value is None:
-            self.ui.checkBoxApplyAll.setChecked(True)
+            self.checkBoxApplyAll.setChecked(True)
         else:
-            self.ui.checkBoxApplyAll.setChecked(False)
+            self.checkBoxApplyAll.setChecked(False)
 
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.schedule_update()
 
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
 
-        data = self.ui.data[self.ui.app_data.sample_id].processed_data
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id].processed_data
 
         columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
         nan_count = any(np.isnan(data[columns]))
         
-        self.ui.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
+        self.dock.ui.statusbar.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
 
 
     def update_invalid_data_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
 
-        data = self.ui.data[self.ui.app_data.sample_id].processed_data
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id].processed_data
 
         columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
         nan_count = any(np.isnan(data[columns]))
         
-        self.ui.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
+        self.dock.ui.statusbar.labelInvalidValues.setText(f"Negative/zeros: {negative_count}, NaNs: {nan_count}")
 
     def update_outlier_removal(self, method):
         """Removes outliers from one or all analytes.
@@ -441,7 +706,7 @@ class PreprocessingUI():
         method : str
             Method used to remove outliers.
         """        
-        data = self.ui.data[self.ui.app_data.sample_id]
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id]
 
         if data.outlier_method == method:
             return
@@ -450,30 +715,30 @@ class PreprocessingUI():
 
         match method.lower():
             case 'none':
-                self.ui.lineEditLowerQuantile.setEnabled(False)
-                self.ui.lineEditUpperQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
             case 'quantile criteria':
-                self.ui.lineEditLowerQuantile.setEnabled(True)
-                self.ui.lineEditUpperQuantile.setEnabled(True)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
             case 'quantile and distance criteria':
-                self.ui.lineEditLowerQuantile.setEnabled(True)
-                self.ui.lineEditUpperQuantile.setEnabled(True)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(True)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(True)
+                self.lineEditLowerQuantile.setEnabled(True)
+                self.lineEditUpperQuantile.setEnabled(True)
+                self.lineEditDifferenceLowerQuantile.setEnabled(True)
+                self.lineEditDifferenceUpperQuantile.setEnabled(True)
             case 'chauvenet criterion':
-                self.ui.lineEditLowerQuantile.setEnabled(False)
-                self.ui.lineEditUpperQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
             case 'log(n>x) inflection':
-                self.ui.lineEditLowerQuantile.setEnabled(False)
-                self.ui.lineEditUpperQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceLowerQuantile.setEnabled(False)
-                self.ui.lineEditDifferenceUpperQuantile.setEnabled(False)
+                self.lineEditLowerQuantile.setEnabled(False)
+                self.lineEditUpperQuantile.setEnabled(False)
+                self.lineEditDifferenceLowerQuantile.setEnabled(False)
+                self.lineEditDifferenceUpperQuantile.setEnabled(False)
 
     def update_neg_handling(self, method):
         """Auto-scales pixel values in map
@@ -488,51 +753,51 @@ class PreprocessingUI():
         method : str
             Method for dealing with negatives
         """
-        data = self.ui.data[self.ui.app_data.sample_id]
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id]
 
-        if self.ui.checkBoxApplyAll.isChecked():
+        if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
             analyte_list = data.processed_data.match_attribute('data_type', 'Analyte') + data.processed_data.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
-                self.ui.plot_tree.clear_tree_data(tree)
+                self.dock.ui.plot_tree.clear_tree_data(tree)
             data.prep_data()
         else:
             data.negative_method = method
 
-            assert self.ui.app_data.c_field == self.ui.comboBoxFieldC.currentText(), f"AppData.c_field {self.ui.app_data.c_field} and MainWindow.comboBoxFieldC.currentText() {self.ui.comboBoxFieldC.currentText()} do not match"
-            data.prep_data(self.ui.app_data.c_field)
+            assert self.dock.ui.app_data.c_field == self.dock.ui.comboBoxFieldC.currentText(), f"AppData.c_field {self.dock.ui.app_data.c_field} and MainWindow.comboBoxFieldC.currentText() {self.dock.ui.comboBoxFieldC.currentText()} do not match"
+            data.prep_data(self.dock.ui.app_data.c_field)
         
         self.update_invalid_data_labels()
         if hasattr(self,"mask_dock"):
-            self.ui.mask_dock.filter_tab.update_filter_values()
+            self.dock.ui.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.schedule_update()
 
     def update_dx(self):
         """Updates the x-resolution (`dx`) of the current sample and triggers a plot update."""
-        self.ui.data[self.ui.app_data.sample_id].update_resolution('x', self.ui.lineEditDX.value)
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].update_resolution('x', self.lineEditDX.value)
+        self.dock.ui.schedule_update()
 
     def update_dy(self):
         """Updates the y-resolution (`dy`) of the current sample and triggers a plot update."""
-        self.ui.data[self.ui.app_data.sample_id].update_resolution('y', self.ui.lineEditDY.value)
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].update_resolution('y', self.lineEditDY.value)
+        self.dock.ui.schedule_update()
 
     def reset_crop(self):
         """Resets the cropping of the current sample and triggers a plot update."""
-        self.ui.data[self.ui.app_data.sample_id].reset_crop
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_crop
+        self.dock.ui.schedule_update()
 
     def update_swap_resolution(self):
         """Resets the pixel resolution of the current sample to original values and triggers a plot update."""
-        if not self.ui.data or self.ui.app_data.sample_id != '':
+        if not self.dock.ui.data or self.dock.ui.app_data.sample_id != '':
             return
 
-        self.ui.data[self.ui.app_data.sample_id].swap_resolution 
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].swap_resolution 
+        self.dock.ui.schedule_update()
 
     def reset_pixel_resolution(self):
         """
@@ -540,5 +805,5 @@ class PreprocessingUI():
 
         Does nothing if no data is loaded or the sample ID is empty.
         """
-        self.ui.data[self.ui.app_data.sample_id].reset_resolution
-        self.ui.plot_style.schedule_update()
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_resolution
+        self.dock.ui.schedule_update()

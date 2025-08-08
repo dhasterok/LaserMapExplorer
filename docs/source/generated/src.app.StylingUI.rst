@@ -1,4 +1,4 @@
-src.app.StylingUI
+﻿src.app.StylingUI
 =================
 
 .. automodule:: src.app.StylingUI
@@ -8,5 +8,9 @@ src.app.StylingUI
 
    .. autosummary::
    
+      AnnotationsPage
+      AxesPage
+      ColorsPage
+      MarkersPage
       StylingDock
    

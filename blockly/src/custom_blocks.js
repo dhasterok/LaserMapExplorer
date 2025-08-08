@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {updateFieldDropdown,updateFieldTypeDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain, listSelectorChanged} from './helper_functions'
+import {updateFieldDropdown,updateFieldTypeDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain, listSelectorChanged, updateNDimListDropdown} from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -318,13 +318,14 @@ const select_ref_val = {
       this.setTooltip('');
       this.setHelpUrl('');
       this.setColour(180);
-  
-      // Populate dropdown asynchronously
-      this.updateRefOptions();
-    },
-  
+      
+      if (!this.isInFlyout) {
+        // Populate dropdown asynchronously
+        updateRefOptions();
+    }
+    
     // Function to update the analyte options asynchronously
-    updateRefOptions: function() {
+     function updateRefOptions() {
       // Call the Python function getAnalyteList through the WebChannel
       window.blocklyBridge.getRefValueList().then((response) => {
         // Map the response to the required format for Blockly dropdowns
@@ -341,6 +342,7 @@ const select_ref_val = {
       }).catch(error => {
         console.error('Error fetching reference list:', error);
       });
+        }
     }
 };
 Blockly.common.defineBlocks({ select_ref_val: select_ref_val }); 
@@ -1378,56 +1380,132 @@ const plot_ternary_map = {
 };
 Blockly.common.defineBlocks({ plot_ternary_map: plot_ternary_map });
 
-const plot_compatibility = {
+/* ================================
+   Compatibility Diagram (TEC)
+   ================================ */
+const plot_ndim = {
     init: function () {
         this.appendDummyInput('header')
-            .appendField('Compatibility Diagram')
+            .appendField('Compatibility diagram')
             .setAlign(Blockly.inputs.Align.CENTRE);
 
+        // N-dim list selector (dynamic)
         this.appendDummyInput('NDIM')
-            .appendField('Fields')
+            .appendField('N-dim list')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimList');
 
-        this.appendDummyInput('REFERENCE')
-            .appendField('Reference Value Included?')
-            .appendField(new Blockly.FieldCheckbox('FALSE'), 'HAS_REFERENCE');
-
+        // Styling chain
         this.appendStatementInput('styling')
             .setCheck('styling')
             .appendField('Styling');
 
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setTooltip('Plot a compatibility diagram (requires Reference Value block above).');
+        this.setTooltip('TEC (spider) diagram. Requires Reference value to be set.');
         this.setHelpUrl('');
         this.setColour(285);
+
+        // Plot type is handled in generator via plot_ndim (TEC branch)
+        this.plotType = 'TEC';
+
+        if (!this.isInFlyout) {
+            // Choose sensible defaults for TEC
+            const defaultBlocks = ['font', 'line_properties', 'transparency', 'colormap'];
+            addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+
+            // Populate N-dim dropdown from app (dynamic)
+            updateNDimListDropdown(this, 'ndimList');
+
+            const ndimDropdown = this.getField('ndimList');
+            ndimDropdown.setValidator((newValue) => {
+                // Push current context to styling
+                updateStylingChain(this, getNDimArgDict(this));
+                return newValue;
+            });
+        }
+
+        // Keep styles in sync when chain mutates
+        this.setOnChange(function (event) {
+            if (!this.workspace || this.isInFlyout) return;
+            if (event.type === Blockly.Events.BLOCK_CREATE ||
+                event.type === Blockly.Events.BLOCK_MOVE ||
+                event.type === Blockly.Events.BLOCK_DELETE) {
+                if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                    updateStylingChain(this, getNDimArgDict(this));
+                }
+            }
+        });
+
+        // Helper to assemble arg dict for Python side
+        function getNDimArgDict(block) {
+            return {
+                plot_type: block.plotType,            // 'TEC'
+                ndim_list_key: block.getFieldValue('ndimList')
+            };
+        }
     }
 };
-Blockly.common.defineBlocks({ plot_compatibility: plot_compatibility });
+Blockly.common.defineBlocks({ plot_ndim: plot_ndim });
 
+/* ================================
+   Radar Plot
+   ================================ */
 const plot_radar = {
     init: function () {
         this.appendDummyInput('header')
-            .appendField('Radar Plot')
+            .appendField('Radar plot')
             .setAlign(Blockly.inputs.Align.CENTRE);
 
+        // N-dim list selector (dynamic)
         this.appendDummyInput('NDIM')
-            .appendField('Fields')
+            .appendField('N-dim list')
             .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimList');
 
-        this.appendDummyInput('REFERENCE')
-            .appendField('Reference Value Included?')
-            .appendField(new Blockly.FieldCheckbox('FALSE'), 'HAS_REFERENCE');
-
+        // Styling chain
         this.appendStatementInput('styling')
             .setCheck('styling')
             .appendField('Styling');
 
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setTooltip('Plot a radar diagram (requires Reference Value block above).');
+        this.setTooltip('Radar plot. Requires Reference value to be set.');
         this.setHelpUrl('');
         this.setColour(285);
+
+        this.plotType = 'Radar';
+
+        if (!this.isInFlyout) {
+            // Defaults for Radar
+            const defaultBlocks = ['font', 'line_properties', 'transparency', 'colormap'];
+            addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+
+            // Populate N-dim dropdown dynamically
+            updateNDimListDropdown(this, 'ndimList');
+
+            const ndimDropdown = this.getField('ndimList');
+            ndimDropdown.setValidator((newValue) => {
+                updateStylingChain(this, getNDimArgDict(this));
+                return newValue;
+            });
+        }
+
+        this.setOnChange(function (event) {
+            if (!this.workspace || this.isInFlyout) return;
+            if (event.type === Blockly.Events.BLOCK_CREATE ||
+                event.type === Blockly.Events.BLOCK_MOVE ||
+                event.type === Blockly.Events.BLOCK_DELETE) {
+                if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+                    updateStylingChain(this, getNDimArgDict(this));
+                }
+            }
+        });
+
+        function getNDimArgDict(block) {
+            return {
+                plot_type: block.plotType,          // 'Radar'
+                ndim_list_key: block.getFieldValue('ndimList')
+            };
+        }
     }
 };
 Blockly.common.defineBlocks({ plot_radar: plot_radar });

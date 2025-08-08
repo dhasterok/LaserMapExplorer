@@ -46,6 +46,7 @@ import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock
 from src.app.AppData import AppData
+from src.common.Status import StatusMessageManager
 import os
 import json
 
@@ -69,7 +70,7 @@ class LameBlockly(PlotViewer):
                 'Browser': False,
                 'UI': True
             }
-        #Initialize nested data which will hold the main sets of data for analysis
+
         self.data = {}
         self.lasermaps = {}
         self.outlier_method = 'none'
@@ -85,7 +86,10 @@ class LameBlockly(PlotViewer):
         self.app_data = AppData(self.data)
 
         self.blockly  = parent.web_view.page() # This is the QWebEngineView that displays the Blockly interface
+        
+        # set up status message manager
         self.statusLabel = parent.statusLabel
+        self.status_manager = StatusMessageManager(self)
         # Plot Selector
         #-------------------------
         self.sort_method = 'mass'
@@ -144,11 +148,7 @@ class LameBlockly(PlotViewer):
 
                 # Select analyte Tab
         #-------------------------
-        self.ref_data = pd.read_excel(os.path.join(BASEDIR,'resources/app_data/earthref.xlsx'))
-        self.ref_data = self.ref_data[self.ref_data['sigma']!=1]
-        self.ref_list = self.ref_data['layer']+' ['+self.ref_data['model']+'] '+ self.ref_data['reference']
-
-        self.ref_chem = None
+        self.ref_selected = False
 
     def change_sample(self, index, save_analysis= True):
         """Changes sample and plots first map
@@ -261,111 +261,6 @@ class LameBlockly(PlotViewer):
 
             self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
 
-
-    
-
-
-    # -------------------------------------
-    # laser map functions and plotting
-    # -------------------------------------
-    # def plot_map_mpl(self, sample_id, field_type, field):
-    #     """Create a matplotlib canvas for plotting a map
-
-    #     Create a map using ``mplc.MplCanvas``.
-
-    #     Parameters
-    #     ----------
-    #     sample_id : str
-    #         Sample identifier
-    #     field_type : str
-    #         Type of field for plotting
-    #     field : str
-    #         Field for plotting
-    #     """        
-    #     # create plot canvas
-    #     canvas = mplc.MplCanvas(parent=self, ui= self.plot_viewer)
-
-    #     # set color limits
-    #     if field not in self.data[self.app_data.sample_id].axis_dict:
-    #         self.plot_style.initialize_axis_values(field_type,field)
-    #         self.plot_style.set_style_dictionary()
-
-    #     # get data for current map
-    #     #scale = self.data[self.app_data.sample_id].processed_data.get_attribute(field, 'norm')
-    #     scale = self.plot_style.cscale
-    #     map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
-
-    #     array_size = self.data[self.app_data.sample_id].array_size
-    #     aspect_ratio = self.data[self.app_data.sample_id].aspect_ratio
-
-    #     # store map_df to save_data if data needs to be exported
-    #     self.save_data = map_df.copy()
-
-    #     # # equalized color bins to CDF function
-    #     # if self.toolButtonScaleEqualize.isChecked():
-    #     #     sorted_data = map_df['array'].sort_values()
-    #     #     cum_sum = sorted_data.cumsum()
-    #     #     cdf = cum_sum / cum_sum.iloc[-1]
-    #     #     map_df.loc[sorted_data.index, 'array'] = cdf.values
-
-    #     # plot map
-    #     reshaped_array = np.reshape(map_df['array'].values, array_size, order=self.data[self.app_data.sample_id].order)
-            
-    #     norm = self.plot_style.color_norm()
-
-    #     cax = canvas.axes.imshow(reshaped_array, cmap=self.plot_style.get_colormap(),  aspect=aspect_ratio, interpolation='none', norm=norm)
-
-    #     self.add_colorbar(canvas, cax)
-    #     match self.plot_style.cscale:
-    #         case 'linear':
-    #             clim = self.plot_style.clim
-    #         case 'log':
-    #             clim = self.plot_style.clim
-    #             #clim = np.log10(self.plot_style.clim)
-    #         case 'logit':  
-    #             print('Color limits for logit are not currently implemented')
-
-    #     cax.set_clim(clim[0], clim[1])
-
-    #     # use mask to create an alpha layer
-    #     mask = self.data[self.app_data.sample_id].mask.astype(float)
-    #     reshaped_mask = np.reshape(mask, array_size, order=self.data[self.app_data.sample_id].order)
-
-    #     alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
-    #     alphas = np.clip(alphas, .4, 1)
-
-    #     alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-    #     canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
-    #     canvas.array = reshaped_array
-
-    #     canvas.axes.tick_params(direction=None,
-    #         labelbottom=False, labeltop=False, labelright=False, labelleft=False,
-    #         bottom=False, top=False, left=False, right=False)
-
-    #     canvas.set_initial_extent()
-
-
-        
-    #     # add scalebar
-    #     self.add_scalebar(canvas.axes)
-
-    #     canvas.fig.tight_layout()
-
-    #     self.plot_info = {
-    #         'tree': field_type,
-    #         'sample_id': sample_id,
-    #         'plot_name': field,
-    #         'plot_type': 'field map',
-    #         'field_type': field_type,
-    #         'field': field,
-    #         'figure': canvas,
-    #         'style': self.plot_style.style_dict[self.plot_style.plot_type],
-    #         'cluster_groups': None,
-    #         'view': [True,False],
-    #         'position': None
-    #         }
-        
-    #     self.plot_viewer.add_plotwidget_to_plot_viewer(self.plot_info)
 
 
     # -------------------------------------
@@ -577,7 +472,9 @@ class LameBlockly(PlotViewer):
             path = 'resources/analytes_list'
         elif type =='field':
              path = 'resources/fields_list'
-        directory = os.path.join(BASEDIR, path)
+        elif type =='TEC':
+             path = 'resources/TEC_list'
+        directory = BASEDIR / path
         list_names = [str(f).replace('.txt', '') for f in os.listdir(directory) if f.endswith('.txt')]
         return list_names
     

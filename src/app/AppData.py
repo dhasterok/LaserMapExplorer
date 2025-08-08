@@ -1282,6 +1282,26 @@ class AppData(Observable):
         """Resets number of histogram bins to the default."""
         self.hist_num_bins = self.default_hist_num_bins
 
+    def update_ref_chem_index(self, ref_val):
+        """Changes reference computing normalized analytes
+
+        Sets all `self.app_data.ref_chem` to a common normalizing reference.
+
+        Parameters
+        ----------
+        ref_val : str
+            Name of reference value from combobox/dropdown
+        """
+        ref_index = self.ref_list.tolist().index(ref_val)
+
+        if ref_index:
+            self._ref_index = ref_index
+            self.data[self.sample_id].ref_chem = self.ref_chem
+
+            return ref_index
+        else:
+            raise ValueError(f"Reference value ({ref_val}) not found in reference list.")
+
     def _set_clustering_parameters(self):
         """Sets clustering parameters
 

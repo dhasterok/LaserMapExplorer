@@ -1371,7 +1371,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Name of reference value from combobox/dropdown
         """
         # update `self.app_data.ref_chem`
-        ref_index = self.update_ref_chem_combobox_BE(ref_val)
+        ref_index = self.app_data.update_ref_chem_index(ref_val)
 
         if ref_index:
             self.comboBoxRefMaterial.setCurrentIndex(ref_index)
@@ -1416,22 +1416,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.update_all_plots()
 
     # toolbar functions
-    def update_ref_chem_combobox_BE(self, ref_val):
-        """Changes reference computing normalized analytes
 
-        Sets all `self.app_data.ref_chem` to a common normalizing reference.
-
-        Parameters
-        ----------
-        ref_val : str
-            Name of reference value from combobox/dropdown
-        """
-        ref_index = self.app_data.ref_list.tolist().index(ref_val)
-
-        if ref_index:
-            self.data[self.app_data.sample_id].ref_chem = self.app_data.ref_chem
-
-            return ref_index
 
 
 

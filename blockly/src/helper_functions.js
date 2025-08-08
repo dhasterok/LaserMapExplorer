@@ -369,8 +369,22 @@ function updateBinWidthAndNBins(block, range) {
     block.setFieldValue(String(binWidthVal), 'binWidth');
   }
   
-
-
+/**
+ * Retrieve and update all blocks connected to the "Styling" input.
+ * @param {Blockly.Block} block - The plot_compatibility block instance.
+ * @param {str} fieldName - The field name to update.
+ */
+export function updateNDimListDropdown(block, fieldName) {
+    const fld = block.getField(fieldName);
+    if (!fld) return;
+    // e.g., ask Python for saved N-dim lists: [["REE set","ree"], ["HFSE set","hfse"]]
+    window.blocklyBridge.getSavedLists('ndim', (pairs) => {
+        const opts = (pairs && pairs.length) ? pairs : [['Select...', '']];
+        fld.menuGenerator_ = opts;
+        fld.setValue(opts[0][1]);
+        fld.forceRerender();
+    });
+}
 
   
 

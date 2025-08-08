@@ -438,3 +438,127 @@ class LameIO():
         df.to_csv(directory / output_filename, index=False)
         
         return df
+    
+    def save_data(self, data, filename=None):
+        """
+        Saves data to a file in CSV, Excel, or Parquet format.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            Data to be saved
+        filename : str or Path, optional
+            Filename to save data to
+
+        Returns
+        -------
+        None
+        """
+        save_dir = BASEDIR / "saved" / "data"
+        save_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+        filters = "CSV Files (*.csv);;Excel Files (*.xlsx);;Parquet Files (*.parquet);;All Files (*)"
+
+        # Always work with Path
+        if filename is None:
+            file_name_str, selected_filter = QFileDialog.getSaveFileName(
+                self.ui, "Save File", str(save_dir), filters)
+            file_name = Path(file_name_str) if file_name_str else None
+        elif str(filename).endswith(('.csv', '.xlsx', '.parquet')):
+            file_name = Path(filename)
+            selected_filter = None
+            # If filename has no parent directory, save to save_dir
+            if not file_name.is_absolute() and not file_name.parent or str(file_name.parent) == ".":
+                file_name = save_dir / file_name
+
+        else:
+            file_name_str, selected_filter = QFileDialog.getSaveFileName(
+                self.ui, "Save File", str(save_dir / filename), filters)
+            file_name = Path(file_name_str) if file_name_str else None
+
+        if file_name and file_name.name != '':
+            ext = file_name.suffix.lower()
+            # Enforce extension based on selected filter (optional)
+            if selected_filter:
+                if "CSV" in selected_filter and ext != '.csv':
+                    file_name = file_name.with_suffix('.csv')
+                elif "Excel" in selected_filter and ext != '.xlsx':
+                    file_name = file_name.with_suffix('.xlsx')
+                elif "Parquet" in selected_filter and ext != '.parquet':
+                    file_name = file_name.with_suffix('.parquet')
+
+            try:
+                if file_name.suffix == '.csv':
+                    data.to_csv(file_name, index=False)
+                elif file_name.suffix == '.xlsx':
+                    data.to_excel(file_name, index=False)
+                elif file_name.suffix == '.parquet':
+                    data.to_parquet(file_name, index=False)
+                else:
+                    # Default to CSV if unknown format
+                    data.to_csv(file_name, index=False)
+
+                self.status_manager.show_message("Plot Data saved successfully")
+                return
+            except Exception as e:
+                self.status_manager.show_message(f"Plot Data save failed: {e}")
+                return
+
+        self.status_manager.show_message("Plot Data save failed")
+
+
+    def save_figure(self, fig, filename=None):
+        """
+        Saves a matplotlib figure to file in PNG, SVG, or PDF format.
+
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The Matplotlib figure object to be saved.
+        filename : str or Path, optional
+            The filename to save the figure to.
+
+        Returns
+        -------
+        None
+        """
+        save_dir = BASEDIR / "saved" / "figure"
+        save_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+        filters = "PNG Files (*.png);;SVG Files (*.svg);;PDF Files (*.pdf);;All Files (*)"
+
+        # Always work with Path
+        if filename is None:
+            file_name_str, selected_filter = QFileDialog.getSaveFileName(
+                self.ui, "Save Figure", str(save_dir), filters)
+            file_name = Path(file_name_str) if file_name_str else None
+        elif str(filename).endswith(('.png', '.svg', '.pdf')):
+            file_name = Path(filename)
+            selected_filter = None
+            # If filename has no parent directory, save to save_dir
+            if not file_name.is_absolute() and not file_name.parent or str(file_name.parent) == ".":
+                file_name = save_dir / file_name
+
+        else:
+            file_name_str, selected_filter = QFileDialog.getSaveFileName(
+                self.ui, "Save Figure", str(save_dir / filename), filters)
+            file_name = Path(file_name_str) if file_name_str else None
+
+        if file_name and file_name.name != '':
+            ext = file_name.suffix.lower()
+            # Enforce extension based on selected filter (optional)
+            if selected_filter:
+                if "PNG" in selected_filter and ext != '.png':
+                    file_name = file_name.with_suffix('.png')
+                elif "SVG" in selected_filter and ext != '.svg':
+                    file_name = file_name.with_suffix('.svg')
+                elif "PDF" in selected_filter and ext != '.pdf':
+                    file_name = file_name.with_suffix('.pdf')
+
+            try:
+                fig.savefig(file_name)
+                self.status_manager.show_message("Figure saved successfully")
+                return
+            except Exception as e:
+                self.status_manager.show_message(f"Figure save failed: {e}")
+                return
+
+        self.status_manager.show_message("Figure save failed")

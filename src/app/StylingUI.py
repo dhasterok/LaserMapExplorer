@@ -963,7 +963,10 @@ class StylingDock(CustomDockWidget):
         else:
             if new_text == scale_combo.currentText():
                 return
-            
+            if new_text == 'discrete':
+                scale_combo.clear()
+                scale_combo.addItems(new_text)
+                
             scale_combo.blockSignals(True)
             scale_combo.setCurrentText(new_text)
             scale_combo.blockSignals(False)
@@ -2277,13 +2280,13 @@ class StylingDock(CustomDockWidget):
                 case 'field map' | 'cluster map' | 'cluster score map' | 'pca score':
                     field = ax.upper()
                     data.processed_data.prep_data(field)
-                    self.set_axis_attributes(ax, field)
+                    self.set_axis_widgets(ax, field)
                 case 'histogram':
                     field = self.ui.control_dock.comboBoxFieldC.currentText()
                     if ax == 'x':
                         field_type = self.ui.control_dock.comboBoxFieldTypeC.currentText()
                         data.processed_data.prep_data(field)
-                        self.set_axis_attributes(ax, field)
+                        self.set_axis_widgets(ax, field)
                     else:
                         data.processed_data.set_attribute(field, 'p_min', None)
                         data.processed_data.set_attribute(field, 'p_max', None)
@@ -2302,7 +2305,7 @@ class StylingDock(CustomDockWidget):
                     if (field_type == '') | (field == ''):
                         return
                     data.processed_data.prep_data(field)
-                    self.set_axis_attributes(ax, field)
+                    self.set_axis_widgets(ax, field)
 
                 case 'PCA scatter' | 'PCA heatmap':
                     field_type = 'PCA score'
@@ -2311,7 +2314,7 @@ class StylingDock(CustomDockWidget):
                     else:
                         field = self.ui.spinBoxPCY.currentText()
                     data.processed_data.prep_data(field)
-                    self.set_axis_attributes(ax, field)
+                    self.set_axis_widgets(ax, field)
 
                 case _:
                     return

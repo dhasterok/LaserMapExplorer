@@ -229,6 +229,16 @@ class SampleObj(Observable):
         self._valid_data_types = self._default_data_types
 
         self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
+
+        
+        # self._default_scale_options = {'standard':['linear', 'log', 'inv_logit', 'symlog'],
+        #                                'linear':['linear'],
+        #                                'discrete':['discrete']}
+
+        self.order = 'F'
+    
+
+
         self._scale_options = self._default_scale_options
 
         self.order = 'F'

@@ -3,15 +3,18 @@ from PyQt6.QtCore import (
     Qt, QSize
 )
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QDialog, QInputDialog, QDialogButtonBox
+    QVBoxLayout, QDialog, QInputDialog, QDialogButtonBox, QMenu
 )
 import numpy as np
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt import FigureManagerQT
 from matplotlib.figure import Figure
-
+import pandas as pd
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
+import matplotlib as mpl
+from src.app.config import BASEDIR
 
 
 # Matplotlib Canvas object
@@ -80,6 +83,10 @@ class MplCanvas(FigureCanvas):
             self.ui = ui
         else:
             self.ui = parent
+        
+        # Hold the data of the canvas as a pandas DataFrame
+        self._data = None
+        self._plot_name = None
         # for placing text annotations
         # --------------------
         self.setCursorPosition()
@@ -112,9 +119,187 @@ class MplCanvas(FigureCanvas):
             
             self.mpl_connect('motion_notify_event', self.mouseLocation)
         
+        self.mpl_toolbar = NavigationToolbar(self)
+
         # enable distance mode by default
-        if hasattr(self.ui, 'toolButtonDistance'):
-            self.ui.toolButtonDistance.clicked.connect( self.enable_distance_mode)
+        self.ui.toolButtonDistance.clicked.connect( self.enable_distance_mode)
+        self.ui.toolButtonHome.clicked.connect( self.enable_distance_mode)
+        self.ui.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.ui.toolButtonPan.isChecked()))
+        self.ui.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.ui.toolButtonZoom.isChecked()))   
+        self.ui.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
+        
+        SaveMenu_items = ['figure', 'data']
+        SaveMenu = QMenu()
+        SaveMenu.triggered.connect(lambda action: self.save_plot(action.text()))
+        self.ui.toolButtonSave.setMenu(SaveMenu)
+        for item in SaveMenu_items:
+            SaveMenu.addAction(item)
+
+
+        if hasattr(self.ui, 'toolButtonPopFigure'):
+            self.ui.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
+
+    @property
+    def plot_name(self):
+        """Return the stored pandas DataFrame."""
+        return self._plot_name
+
+    @plot_name.setter
+    def plot_name(self, value):
+        """Set the plot_name only if it is a str."""
+        if value is None or isinstance(value, str):
+            self._plot_name = value
+        else:
+            raise TypeError("plot_name must be a str or None")
+    
+    @property
+    def data(self):
+        """Return the stored pandas DataFrame."""
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        """Set the data only if it is a pandas DataFrame."""
+        if value is None or isinstance(value, pd.DataFrame):
+            self._data = value
+        else:
+            raise TypeError("data must be a pandas DataFrame or None")
+    
+    
+    def toolbar_plotting(self,function,view,enable=None):
+        """Controls functionality of the toolbar
+
+        Controls the viewing behavior, home view, pan, zoom, pop out, and saving.
+
+        Parameters
+        ----------
+        function : str
+            Button fuction
+        view : _type_
+            _description_
+        enable : _type_
+            _description_
+        """
+        
+        match view:
+            case 'SV':
+                canvas = self.sv_widget
+            case 'MV':
+                pass
+            case 'QV':
+                pass
+
+        if function == 'home':
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
+
+            if isinstance(canvas,MplCanvas):
+                canvas.restore_view()
+
+            # elif isinstance(canvas,GraphicsLayoutWidget):
+            #     canvas.getItem(0, 0).getViewBox().autoRange()
+
+        if function == 'pan':
+            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
+
+            if isinstance(canvas,MplCanvas):
+                # Toggle pan mode in Matplotlib
+                self.mpl_toolbar.pan()
+                print(self.mpl_toolbar)
+                #canvas.figure.canvas.toolbar.pan()
+
+            # elif isinstance(canvas,GraphicsLayoutWidget):
+            #     # Enable or disable panning
+            #     canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
+
+        if function == 'zoom':
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
+
+            if isinstance(canvas,MplCanvas):
+                # Toggle zoom mode in Matplotlib
+                self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
+            # elif isinstance(canvas,GraphicsLayoutWidget):
+            #     # Assuming pyqtgraph_widget is a GraphicsLayoutWidget or similar
+            #     if enable:
+
+            #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
+            #     else:
+            #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
+
+        if function == 'annotate':
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+        
+        if function == 'distance':
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+
+
+        if function == 'preference':
+            if isinstance(canvas,MplCanvas):
+                self.mpl_toolbar.edit_parameters()
+
+            # elif isinstance(canvas,GraphicsLayoutWidget):
+            #     # Assuming it's about showing/hiding axes
+            #     if enable:
+            #         canvas.showAxis('left', True)
+            #         canvas.showAxis('bottom', True)
+            #     else:
+            #         canvas.showAxis('left', False)
+            #         canvas.showAxis('bottom', False)
+
+        if function == 'axes':
+            if isinstance(canvas,MplCanvas):
+                self.mpl_toolbar.configure_subplots()
+
+            elif isinstance(canvas,GraphicsLayoutWidget):
+                # Assuming it's about showing/hiding axes
+                if enable:
+                    canvas.showAxis('left', True)
+                    canvas.showAxis('bottom', True)
+                else:
+                    canvas.showAxis('left', False)
+                    canvas.showAxis('bottom', False)
+        
+        if function == 'pop':
+            self.ui.toolButtonPan.setChecked(False)
+            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.toolButtonAnnotate.setChecked(False)
+
+            if isinstance(canvas,MplCanvas):
+                self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
+                self.pop_figure.show()
+
+            # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
+            # trigger update to plot        
+            self.plot_style.schedule_update()
+
+
+                
+    def save_plot(self, method, filename= None):
+        """Sorts analyte table in dialog"""        
+        # get save method (Figure/Data)
+        
+        if method == 'figure':
+            if filename:
+                self.parent.io.save_figure(self.figure, filename)
+            else:
+                self.parent.io.save_figure(self.figure, self.plot_name)
+
+            # elif isinstance(canvas,GraphicsLayoutWidget):
+            #     # Save functionality for pyqtgraph
+            #     export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
+            #     export.show(canvas.getItem(0, 0).getViewBox())
+
+        if method == 'data':
+            if filename:
+                self.parent.io.save_data(self.data, filename)
+            else:
+                self.parent.io.save_data(self.data, self.plot_name)
+                    
 
 
     def enable_distance_mode(self):
@@ -313,7 +498,7 @@ class MplCanvas(FigureCanvas):
         matplotlib.plot
             Handle to line
         """        
-        plot_type = self.parent.app_data.plot_info['plot_type']
+        #plot_type = self.parent.app_data.plot_info['plot_type']
         overlay_color = self.parent.style_data.overlay_color
         line_width = self.parent.style_data.line_width
 
@@ -340,7 +525,7 @@ class MplCanvas(FigureCanvas):
         matplotlib.text
             Handle to text.
         """        
-        plot_type = self.parent.app_data.plot_info['plot_type']
+        # plot_type = self.parent.app_data.plot_info['plot_type']
         style = self.parent.style_data
 
         # compute distance
@@ -475,10 +660,11 @@ class MplCanvas(FigureCanvas):
             self.dtext.remove()
 
         second_point = (event.xdata,event.ydata)
-        self.line = self.plot_line(self.first_point, second_point)
-        self.dtext = self.plot_text(self.first_point, second_point)
+        if self.first_point:
+            self.line = self.plot_line(self.first_point, second_point)
+            self.dtext = self.plot_text(self.first_point, second_point)
 
-        self.draw()
+            self.draw()
 
     def distance_reset(self):
         """Resets distance variables and clears plot

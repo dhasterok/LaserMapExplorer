@@ -186,11 +186,13 @@ window.updateFieldTypeList = updateFieldTypeList;
  * @param {Blockly.Block} block 
  * @param {string} plotType 
  * @param {number} axisNum  // e.g., 3 for 'C'
+ * @param {string} fieldTypeName  // e.g., 'fieldType' 
+ * @param {string} fieldName
  */
-export function updateFieldTypeDropdown(block, plotType, axisNum=3) {
+export function updateFieldTypeDropdown(block, plotType, axisNum=3, fieldTypeName, fieldName) {
     window.blocklyBridge.getFieldTypeList(axisNum.toString(), plotType).then((response) => {
         const options = response.map(option => [option, option]);
-        const fieldTypeDropdown = block.getField('fieldType');
+        const fieldTypeDropdown = block.getField(fieldTypeName);
         if (fieldTypeDropdown) {
             if (options.length > 0) {
                 fieldTypeDropdown.menuGenerator_ = options;
@@ -202,7 +204,7 @@ export function updateFieldTypeDropdown(block, plotType, axisNum=3) {
             fieldTypeDropdown.forceRerender();
         }
         // Once fieldType is updated, update fields accordingly
-        updateFieldDropdown(block, options.length > 0 ? options[0][1] : '');
+        updateFieldDropdown(block, options.length > 0 ? options[0][1] : '', fieldName);
     }).catch(error => {
         console.error('Error fetching field type list:', error);
     });
@@ -212,12 +214,13 @@ export function updateFieldTypeDropdown(block, plotType, axisNum=3) {
  * Updates the Field dropdown for a given fieldType (which must be set!).
  * @param {Blockly.Block} block 
  * @param {string} fieldTypeValue 
+ * @param {string} fieldName  // e.g., 'field'
  */
-export function updateFieldDropdown(block, fieldTypeValue) {
+export function updateFieldDropdown(block, fieldTypeValue, fieldName) {
     const typeValue = fieldTypeValue || block.getFieldValue('fieldType');
     window.blocklyBridge.getFieldList(typeValue).then((response) => {
         const options = response.map(option => [option, option]);
-        const fieldDropdown = block.getField('field');
+        const fieldDropdown = block.getField(fieldName);
         if (fieldDropdown) {
             if (options.length > 0) {
                 fieldDropdown.menuGenerator_ = options;
@@ -380,11 +383,12 @@ export function updateStylingChain(plotBlock) {
     // 1) Get the first block connected to "Styling".
     const stylingBlocks = getConnectedBlocks(plotBlock, 'styling');
     const plotType = plotBlock.plotType
+    const argDict = plotBlock.argDict
     // If you want to explicitly set the plotType:
     // this.plotType = 'field map';
   
     // 2) Call the style widgets function with the current plotType.
-    window.blocklyBridge.invokeSetStyleWidgets(plotType, (styleStr) => {
+    window.blocklyBridge.invokeSetStyleWidgets(JSON.stringify(argDict), (styleStr) => {
       // 3a) Check if the style dictionary is empty
       const style = JSON.parse(styleStr);
       if (style.constructor === Object && Object.keys(style).length === 0) {

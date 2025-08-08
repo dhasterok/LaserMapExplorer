@@ -1303,6 +1303,8 @@ class StyleData(Observable, StyleTheme):
             plot_type = self.plot_type
         
         style = self.style_dict[plot_type]
+
+        axis_list = ['x', 'y', 'z', 'c']
                 
         if plot_type.lower() in self.map_plot_types:
             
@@ -1324,20 +1326,15 @@ class StyleData(Observable, StyleTheme):
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
         else:
-            # round axes limits for everything that isn't a map
-            # Non-map plots might still need axes
-            self.xlim = style.get('XLim')
-            self.yscale = style.get('XScale')
+            for ax_number, exist in enumerate(self.plot_axis_dict[plot_type]['axis_widgets']):
+                ax = axis_list[ax_number]
+                if exist and (ax is not 'c'):
+    
+                    field = getattr(self.app_data,f'{ax}_field')
+                    self.set_axis_attributes(ax, field )
 
-            self.ylim = style.get('YLim')
-            self.yscale = style.get('YScale')
 
             self.scale_length = None
-
-        # Set Z axis details if available
-        self.zlabel = style.get('ZLabel')
-        self.zscale = style.get('ZScale')
-        self.zlim = style.get('ZLim')
 
         self.aspect_ratio = data.aspect_ratio
 

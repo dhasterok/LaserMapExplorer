@@ -202,17 +202,18 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += `self.block_id = ${block_id}\n`;
     // update self.style.style_dict with `style_dict`
     code += 
-    `self.plot_style.plot_type =${plot_type}\n` +
+    `self.style_data.plot_type =${plot_type}\n` +
     `self.app_data.c_field =${field}\n` +
     `self.app_data.c_field_type =${field_type}\n`;
     // generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
-    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
+    code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     // 5) Plot
-    code += `self.canvas, self.plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,plot_style =self.plot_style, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
-    code += `self.add_plotwidget_to_plot_viewer(self.plot_info)\n`
+    code += `canvas, self.plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
+    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())\n`
+    code += `self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)\n`
     const showMap = block.getFieldValue('SHOW_MAP') === 'TRUE';
     if (showMap) {
-    code += `self.show()\n`;
+    code += `self.canvas_widget.show()\n`;
     }
     return code;
 };
@@ -236,13 +237,13 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     }
     
     // 5) Plot
-    code +=`self.plot_style.plot_type =${plot_type}\n` ;
+    code +=`self.style_data.plot_type =${plot_type}\n` ;
     code +=`self.app_data.corr_method =${corr_method}\n`;
     code +=`self.app_data.corr_squared =${r_2}\n`;
-    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
-    code += `self.canvas, self.plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
+    code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
+    code += `canvas, self.plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
-    code += `self.show()\n`
+    code += `self.canvas_widget.show()\n`
     return code;
 };
 
@@ -271,16 +272,17 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
         nBinsVal = (userNBins && Number(userNBins) > 0) ? userNBins : '100';
     }
     code += 
-    `self.plot_style.plot_type =${plot_type}\n` +
+    `self.style_data.plot_type =${plot_type}\n` +
     `self.app_data.x_field =${field}\n` +
     `self.app_data.x_field_type =${field_type}\n`+
-    `self.app_data.hist_plot_style = ${hist_type}\n` +
+    `self.app_data.hist_style_data = ${hist_type}\n` +
     `self.app_data.hist_num_bins=${nBinsVal}\n`;
     // Plot command
-    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
-    code += `self.canvas,  self.plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
-    code += `self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `self.show()\n`;
+    code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
+    code += `canvas,  self.plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())\n`
+    code += `self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)\n`;
+    code += `self.canvas_widget.show()\n`;
 
     return code;
 };
@@ -298,15 +300,16 @@ pythonGenerator.forBlock['plot_biplot'] = function(block, generator) {
 
     let code = subBlocksCode + '\n' + extraCode + '\n';
     code += 
-    `self.plot_style.plot_type =${plotType}\n` +
+    `self.style_data.plot_type =${plotType}\n` +
     `self.app_data.x_field =${fx}\n` +
     `self.app_data.x_field_type =${fxType}\n`+
     `self.app_data.y_field =${fy}\n` +
     `self.app_data.y_field_type =${fyType}\n`;
-    code += 'self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
-    code += `self.canvas, self.plot_info = plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
-    code += `self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `self.show()\n`;
+    code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
+    code += `canvas, self.plot_info = plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())\n`
+    code += `self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)\n`;
+    code += `self.canvas_widget.show()\n`;
     return code;
 };
 
@@ -322,10 +325,11 @@ pythonGenerator.forBlock['plot_ternary'] = function(block, generator) {
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
     const plotType =  generator.quote_(block.plotType)
     let code = subBlocksCode + '\n';
-    code += `self.plot_style.plot_type = ${plotType}\n`;
-    code += `self.canvas, self.plot_info =  plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
-    code += `self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `self.show()\n`;
+    code += `self.style_data.plot_type = ${plotType}\n`;
+    code += `canvas, self.plot_info =  plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())\n`
+    code += `self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)\n`;
+    code += `self.canvas_widget.show()\n`;
     return code;
 };
 
@@ -340,13 +344,13 @@ pythonGenerator.forBlock['plot_ternary_map'] = function(block, generator) {
     subBlocksCode = subBlocksCode.replace(/^ +/gm, '');
 
     let code = subBlocksCode + '\n';
-    code += `self.plot_style.plot_type = 'ternary_map'\n`;
+    code += `self.style_data.plot_type = 'ternary_map'\n`;
     code += `canvas, plot_info = plot_ternary_map(self, data=self.data[self.app_data.sample_id], `
         + `field_type_x=${fields.fieldTypeX}, field_x=${fields.fieldX}, `
         + `field_type_y=${fields.fieldTypeY}, field_y=${fields.fieldY}, `
         + `field_type_z=${fields.fieldTypeZ}, field_z=${fields.fieldZ})\n`;
     code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
-    code += `self.show()\n`;
+    code += `self.canvas_widget.show()\n`;
     return code;
 };
 
@@ -364,22 +368,22 @@ pythonGenerator.forBlock['plot_ndim'] = function (block, generator) {
     let code = '';
     code += sub + '\n';
     code += `self.block_id = ${block_id}\n`;
-    code += `self.plot_style.plot_type = ${plotType}\n`;
+    code += `self.style_data.plot_type = ${plotType}\n`;
 // Set ndim list (support either a resolver or direct assignment)
     code += `if hasattr(self.app_data, 'set_ndim_list_from_key'):\n`;
     code += `    self.app_data.set_ndim_list_from_key(${ndimKey})\n`;
     code += `else:\n`;
     code += `    self.app_data.ndim_list_key = ${ndimKey}\n`;
-    code += `self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n`;
+    code += `self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n`;
 
     // Reference check (required by plot_ndim)
     code += `if not self.ref_selected:\n`;
     code += `    self.status_manager.show_message("Reference value is required above for Compatibility diagram (TEC).")\n`;
     code += `else:\n`;
-    code += `    self.canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
-    code += `    if self.canvas is not None:\n`;
+    code += `    canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `    if canvas is not None:\n`;
     code += `        self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `        self.show()\n`;
+    code += `        self.canvas_widget.show()\n`;
 
     return code;
 };
@@ -398,21 +402,21 @@ pythonGenerator.forBlock['plot_radar'] = function (block, generator) {
     let code = '';
     code += sub + '\n';
     code += `self.block_id = ${block_id}\n`;
-    code += `self.plot_style.plot_type = ${plotType}\n`;
+    code += `self.style_data.plot_type = ${plotType}\n`;
     code += `if hasattr(self.app_data, 'set_ndim_list_from_key'):\n`;
     code += `    self.app_data.set_ndim_list_from_key(${ndimKey})\n`;
     code += `else:\n`;
     code += `    self.app_data.ndim_list_key = ${ndimKey}\n`;
-    code += `self.plot_style.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n`;
+    code += `self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n`;
 
     // Reference check (plot_ndim uses ref_data/ref_index for labels & normalization)
     code += `if not getattr(self.app_data, 'ref_data', None) or self.app_data.ref_index is None:\n`;
     code += `    print("Reference value is required above for Radar plot.")\n`;
     code += `else:\n`;
-    code += `    self.canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)\n`;
-    code += `    if self.canvas is not None:\n`;
+    code += `    canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `    if canvas is not None:\n`;
     code += `        self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `        self.show()\n`;
+    code += `        self.canvas_widget.show()\n`;
 
     return code;
 };
@@ -449,12 +453,12 @@ pythonGenerator.forBlock['export_figure'] = function(block, generator) {
     const filename = block.getFieldValue('FILE_NAME');
     let code = '';
     if (filename === "path/filename"){
-        code = `self.canvas.save_plot('figure')\n`;
+        code = `canvas.save_plot('figure')\n`;
     }
     else{
         const full_filename = `${filename}.${filetype}`;
-        // Assuming `self.figure` or `self.canvas.figure` holds the figure object
-        code = `self.canvas.save_plot('figure', '${full_filename}')\n`;
+        // Assuming `self.figure` or `canvas.figure` holds the figure object
+        code = `canvas.save_plot('figure', '${full_filename}')\n`;
     }
     
     return code;
@@ -465,12 +469,12 @@ pythonGenerator.forBlock['export_data'] = function(block, generator) {
     const filename = block.getFieldValue('FILE_NAME');
     let code = '';
     if (filename === "path/filename"){
-        code = `self.canvas.save_plot('data')\n`;
+        code = `canvas.save_plot('data')\n`;
     }
     else{
         const full_filename = `${filename}.${filetype}`;
-        // Assuming `self.figure` or `self.canvas.figure` holds the figure object
-        code = `self.canvas.save_plot('data', '${full_filename}')\n`;
+        // Assuming `self.figure` or `canvas.figure` holds the figure object
+        code = `canvas.save_plot('data', '${full_filename}')\n`;
     }
     
     return code;

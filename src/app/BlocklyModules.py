@@ -49,6 +49,7 @@ from src.app.AppData import AppData
 from src.common.Status import StatusMessageManager
 import os
 import json
+from src.app.CanvasWidget import CanvasWidget
 
 class LameBlockly(PlotViewer):
     def __init__(self,parent, *args, **kwargs):
@@ -83,7 +84,7 @@ class LameBlockly(PlotViewer):
         self.plot_type = 'field map'
         self.field_type_list = ['Analyte', 'Analyte (normalized)']
 
-        self.app_data = AppData(self.data)
+        self.app_data = AppData(self)
 
         self.blockly  = parent.web_view.page() # This is the QWebEngineView that displays the Blockly interface
         
@@ -104,10 +105,9 @@ class LameBlockly(PlotViewer):
         self.io = LameIO(self, connect_actions=False)
         
         self.style_data = StyleData(self)
-        #set style using 'default' style them
-        self.style_themes = StyleTheme(self)
-        self.style_data.style_dict = self.style_themes.default_style_dict()
         
+        self.canvas_widget = CanvasWidget(ui=self)
+
         # # Initialise plotviewer form
         # self.plot_viewer = PlotViewer(self)
         self.update_bins = False

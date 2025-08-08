@@ -21,7 +21,6 @@ from scipy.stats import percentileofscore
 
 from src.app.UITheme import default_font
 from src.app.config import BASEDIR
-from src.common.PolygonNew import PolygonManager
 from src.common.colorfunc import get_hex_color, get_rgb_color
 
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -590,8 +589,6 @@ class FilterTab():
 class PolygonTab():
     def __init__(self, parent):
         self.parent = parent
-
-        self.logger_key = 'Mask'
         
         #init table_fcn
         self.table_fcn = TableFcn(self)
@@ -611,19 +608,19 @@ class PolygonTab():
         self.polygon_toggle.setChecked(Qt.CheckState.Unchecked)
         self.actionPolyToggle = QWidgetAction(toolbar)
         self.actionPolyToggle.setDefaultWidget(self.polygon_toggle)
-        self.polygon_toggle.stateChanged.connect(self.polygon_state_changed)
+        self.polygon_toggle.stateChanged.connect(lambda: self.polygon_state_changed())
 
         self.actionEdgeDetect = QAction("Toggle edge detection", toolbar)
         icon_edge_detection = QIcon(":/resources/icons/icon-spotlight-64.svg")
         self.actionEdgeDetect.setCheckable(True)
-        self.actionEdgeDetect.setChecked(Qt.CheckState.Unchecked)
+        self.actionEdgeDetect.setChecked(False)
         self.actionEdgeDetect.setIcon(icon_edge_detection)
         self.actionEdgeDetect.setToolTip("Add a filter using the properties set below")
         self.actionEdgeDetect.triggered.connect(self.toggle_edge_detection)
 
         self.comboBoxEdgeDetectMethod = QComboBox(toolbar)
         self.comboBoxEdgeDetectMethod.addItems(["Sobel","Canny","Zero cross"])
-        self.comboBoxEdgeDetectMethod.activated.connect(self.parent.main_window.noise_reduction._edge_detection_methods)
+        self.comboBoxEdgeDetectMethod.activated.connect(self.parent.main_window.control_dock.noise_reduction.add_edge_detection)
 
         self.actionPolyLoad = QAction("Load Polygon", toolbar)
         icon_load_file = QIcon(":/resources/icons/icon-open-file-64.svg")
@@ -711,7 +708,7 @@ class PolygonTab():
         # initialise polygon dictionary for a given sample id in self.parent.data
         self.polygon_manager = PolygonManager(parent = self, main_window=self.parent.main_window)
         #self.parent.main_window.data.polygon = self.polygon_manger.polygons
-        self.actionPolyCreate.triggered.connect(self.polygon_manager.increment_pid)
+        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.parent.main_window.mpl_canvas))
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
         self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)

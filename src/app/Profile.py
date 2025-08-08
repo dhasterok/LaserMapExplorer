@@ -413,7 +413,7 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
     def profile_state_changed(self, *args, **kwargs):
         self.main_window.profile_state = self.profile_toggle.isChecked()
         if self.profile_toggle.isChecked():
-            self.main_window.update_plot_type_combobox()
+            self.main_window.control_dock.update_plot_type_combobox_options()
             self.main_window.mask_dock.polygon_tab.polygon_toggle.setChecked(False)
             self.main_window.mask_dock.polygon_tab.toggle_polygon_actions()
 

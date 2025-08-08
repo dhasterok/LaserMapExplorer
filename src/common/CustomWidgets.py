@@ -910,6 +910,9 @@ class ToggleSwitch(QWidget):
         checked : bool
             New check state of the toggle switch.
         """
+        # Accept both bool and Qt.CheckState
+        if isinstance(checked, Qt.CheckState):
+            checked = (checked == Qt.CheckState.Checked)
         if self._checked != checked:
             self._checked = checked
             start = self._thumb_pos

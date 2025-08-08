@@ -32,7 +32,7 @@ class PreferencesManager(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.settings = QSettings("YourOrg", "YourApp")
+        self.settings = QSettings("Adelaide University", "LaME")
         self._load()
 
     def _load(self):

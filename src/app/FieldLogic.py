@@ -89,7 +89,7 @@ class ControlDock(CustomDockWidget):
         grid_layout.addWidget(self.labelPlotType, 0, 0, 1, 1)
 
         self.comboBoxPlotType = CustomComboBox(parent=self.groupBox)
-        self.comboBoxPlotType.setMaximumSize(QSize(16777215, 16777215))
+        self.comboBoxPlotType.setMaximumSize(QSize(175, 16777215))
         self.comboBoxPlotType.setObjectName("comboBoxPlotType")
         grid_layout.addWidget(self.comboBoxPlotType, 0, 1, 1, 2)
 
@@ -105,8 +105,8 @@ class ControlDock(CustomDockWidget):
         grid_layout.addWidget(self.comboBoxFieldTypeX, 1, 1, 1, 1)
 
         self.comboBoxFieldX = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldX.setCurrentText("")
         self.comboBoxFieldX.setObjectName("comboBoxFieldX")
+        self.comboBoxFieldX.setMaximumSize(QSize(125, 16777215))
         grid_layout.addWidget(self.comboBoxFieldX, 1, 2, 1, 1)
 
         self.spinBoxFieldX = QSpinBox(parent=self.groupBox)
@@ -124,8 +124,8 @@ class ControlDock(CustomDockWidget):
         grid_layout.addWidget(self.comboBoxFieldTypeY, 2, 1, 1, 1)
 
         self.comboBoxFieldY = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldY.setCurrentText("")
         self.comboBoxFieldY.setObjectName("comboBoxFieldY")
+        self.comboBoxFieldY.setMaximumSize(QSize(125, 16777215))
         grid_layout.addWidget(self.comboBoxFieldY, 2, 2, 1, 1)
 
         self.spinBoxFieldY = QSpinBox(parent=self.groupBox)
@@ -145,6 +145,7 @@ class ControlDock(CustomDockWidget):
 
         self.comboBoxFieldZ = CustomComboBox(parent=self.groupBox)
         self.comboBoxFieldZ.setObjectName("comboBoxFieldZ")
+        self.comboBoxFieldZ.setMaximumSize(QSize(125, 16777215))
         grid_layout.addWidget(self.comboBoxFieldZ, 3, 2, 1, 1)
 
         self.spinBoxFieldZ = QSpinBox(parent=self.groupBox)
@@ -157,13 +158,13 @@ class ControlDock(CustomDockWidget):
         grid_layout.addWidget(self.labelC, 4, 0, 1, 1)
 
         self.comboBoxFieldTypeC = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldTypeC.setMaximumSize(QSize(155, 16777215))
+        self.comboBoxFieldTypeC.setMaximumSize(QSize(125, 16777215))
         self.comboBoxFieldTypeC.setCurrentText("")
         self.comboBoxFieldTypeC.setObjectName("comboBoxFieldTypeC")
         grid_layout.addWidget(self.comboBoxFieldTypeC, 4, 1, 1, 1)
 
         self.comboBoxFieldC = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldC.setMaximumSize(QSize(155, 16777215))
+        self.comboBoxFieldC.setMaximumSize(QSize(125, 16777215))
         self.comboBoxFieldC.setCurrentText("")
         self.comboBoxFieldC.setObjectName("comboBoxFieldC")
         grid_layout.addWidget(self.comboBoxFieldC, 4, 2, 1, 1)

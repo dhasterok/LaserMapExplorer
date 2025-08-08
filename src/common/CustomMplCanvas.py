@@ -122,22 +122,22 @@ class MplCanvas(FigureCanvas):
         self.mpl_toolbar = NavigationToolbar(self)
 
         # enable distance mode by default
-        self.ui.toolButtonDistance.clicked.connect( self.enable_distance_mode)
-        self.ui.toolButtonHome.clicked.connect( self.enable_distance_mode)
-        self.ui.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.ui.toolButtonPan.isChecked()))
-        self.ui.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.ui.toolButtonZoom.isChecked()))   
-        self.ui.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
+        self.ui.canvas_widget.toolbar.sv.toolButtonDistance.clicked.connect( self.enable_distance_mode)
+        self.ui.canvas_widget.toolbar.sv.toolButtonHome.clicked.connect( self.enable_distance_mode)
+        self.ui.canvas_widget.toolbar.sv.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.ui.canvas_widget.toolbar.sv.toolButtonPan.isChecked()))
+        self.ui.canvas_widget.toolbar.sv.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.ui.canvas_widget.toolbar.sv.toolButtonZoom.isChecked()))   
+        self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
         
         SaveMenu_items = ['figure', 'data']
         SaveMenu = QMenu()
         SaveMenu.triggered.connect(lambda action: self.save_plot(action.text()))
-        self.ui.toolButtonSave.setMenu(SaveMenu)
+        self.ui.canvas_widget.toolbar.toolButtonSave.setMenu(SaveMenu)
         for item in SaveMenu_items:
             SaveMenu.addAction(item)
 
 
         if hasattr(self.ui, 'toolButtonPopFigure'):
-            self.ui.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
+            self.ui.canvas_widget.toolbar.sv.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
 
     @property
     def plot_name(self):
@@ -190,9 +190,9 @@ class MplCanvas(FigureCanvas):
                 pass
 
         if function == 'home':
-            self.ui.toolButtonPan.setChecked(False)
-            self.ui.toolButtonZoom.setChecked(False)
-            self.ui.toolButtonAnnotate.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 canvas.restore_view()
@@ -201,8 +201,8 @@ class MplCanvas(FigureCanvas):
             #     canvas.getItem(0, 0).getViewBox().autoRange()
 
         if function == 'pan':
-            self.ui.toolButtonZoom.setChecked(False)
-            self.ui.toolButtonAnnotate.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 # Toggle pan mode in Matplotlib
@@ -215,8 +215,8 @@ class MplCanvas(FigureCanvas):
             #     canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
         if function == 'zoom':
-            self.ui.toolButtonPan.setChecked(False)
-            self.ui.toolButtonAnnotate.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 # Toggle zoom mode in Matplotlib
@@ -230,12 +230,12 @@ class MplCanvas(FigureCanvas):
             #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
 
         if function == 'annotate':
-            self.ui.toolButtonPan.setChecked(False)
-            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
         
         if function == 'distance':
-            self.ui.toolButtonPan.setChecked(False)
-            self.ui.toolButtonZoom.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
 
 
         if function == 'preference':
@@ -265,9 +265,9 @@ class MplCanvas(FigureCanvas):
                     canvas.showAxis('bottom', False)
         
         if function == 'pop':
-            self.ui.toolButtonPan.setChecked(False)
-            self.ui.toolButtonZoom.setChecked(False)
-            self.ui.toolButtonAnnotate.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
+            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
 
             if isinstance(canvas,MplCanvas):
                 self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
@@ -303,7 +303,7 @@ class MplCanvas(FigureCanvas):
 
 
     def enable_distance_mode(self):
-        if self.ui.toolButtonDistance.isChecked():
+        if self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked():
             # Connect the button and canvas events for distance measurement
             self.distance_cid_press = self.mpl_connect('button_press_event', self.distanceOnClick)
             self.distance_cid_move = self.mpl_connect('motion_notify_event', self.distanceOnMove)
@@ -442,10 +442,10 @@ class MplCanvas(FigureCanvas):
         """ 
 
         if hasattr(self.ui,'canvas_tab') and hasattr(self.ui,'canvasWindow'):
-            if (self.ui.canvasWindow.currentIndex() != self.ui.canvas_tab['sv']) or (not self.ui.toolButtonAnnotate.isChecked()):
+            if (self.ui.canvasWindow.currentIndex() != self.ui.canvas_tab['sv']) or (not self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.isChecked()):
                 return
         else:
-            if (not self.ui.toolButtonAnnotate.isChecked()):
+            if (not self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.isChecked()):
                 return
 
         x,y = event.xdata, event.ydata
@@ -525,7 +525,7 @@ class MplCanvas(FigureCanvas):
         matplotlib.text
             Handle to text.
         """        
-        # plot_type = self.parent.app_data.plot_info['plot_type']
+        #plot_type = self.parent.app_data.plot_info['plot_type']
         style = self.parent.style_data
 
         # compute distance
@@ -572,7 +572,7 @@ class MplCanvas(FigureCanvas):
         if event.inaxes != self.axes:
             return
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if self.ui.toolButtonDistance.isChecked():
+        if self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked():
             self.distanceOnClick(event)
             return
         
@@ -624,7 +624,7 @@ class MplCanvas(FigureCanvas):
             return
 
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if (self.ui.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
+        if (self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
             self.distanceOnMove(event)
             return
         
@@ -681,8 +681,8 @@ class MplCanvas(FigureCanvas):
             self.dtext.remove()
             self.dtext = None
         self.draw()
-        if not self.ui.toolButtonDistance.isChecked():
-            self.ui.labelInfoDistance.setText("D: N/A")
+        if not self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked():
+            self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText("D: N/A")
 
 
 class MplDialog(QDialog):

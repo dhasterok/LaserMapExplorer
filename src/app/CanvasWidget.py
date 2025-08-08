@@ -161,7 +161,7 @@ class CanvasWidget(QWidget):
             self.toolbar.sv.hide()
             self.toolbar.mv.hide()
             self.toolbar.qv.hide()
-            self.toolbar.toolButtonSaveFigure.setVisible(False)
+            self.toolbar.toolButtonSave.setVisible(False)
 
             self.ui.actions.UpdatePlot.setEnabled(False)
             self.ui.actions.SavePlotToTree.setEnabled(False)
@@ -173,7 +173,7 @@ class CanvasWidget(QWidget):
             self.toolbar.sv.show()
             self.toolbar.mv.hide()
             self.toolbar.qv.hide()
-            self.toolbar.toolButtonSaveFigure.setVisible(True)
+            self.toolbar.toolButtonSave.setVisible(True)
 
             self.ui.control_dock.field_viewer.setEnabled(True)
             self.ui.control_dock.preprocess.setEnabled(True)
@@ -203,7 +203,7 @@ class CanvasWidget(QWidget):
             self.toolbar.sv.hide()
             self.toolbar.mv.show()
             self.toolbar.qv.hide()
-            self.toolbar.toolButtonSaveFigure.setVisible(True)
+            self.toolbar.toolButtonSave.setVisible(True)
 
             self.ui.control_dock.field_viewer.setEnabled(False)
             self.ui.control_dock.preprocess.setEnabled(False)
@@ -228,7 +228,7 @@ class CanvasWidget(QWidget):
             self.toolbar.sv.hide()
             self.toolbar.mv.hide()
             self.toolbar.qv.show()
-            self.toolbar.toolButtonSaveFigure.setVisible(True)
+            self.toolbar.toolButtonSave.setVisible(True)
 
             self.ui.control_dock.field_viewer.setEnabled(False)
             self.ui.control_dock.preprocess.setEnabled(False)
@@ -879,15 +879,15 @@ class CanvasToolBar(QGroupBox):
         toolbar_layout.addWidget(self.qv)
 
         # widgets common to all
-        self.toolButtonSaveFigure = CustomToolButton(
+        self.toolButtonSave = CustomToolButton(
             text="Save Figure",
             light_icon_unchecked="icon-save-file-64.svg",
             parent=self,
         )
-        self.toolButtonSaveFigure.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        self.toolButtonSaveFigure.setObjectName("toolButtonSave")
+        self.toolButtonSave.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.toolButtonSave.setObjectName("toolButtonSave")
 
-        toolbar_layout.addWidget(self.toolButtonSaveFigure)
+        toolbar_layout.addWidget(self.toolButtonSave)
 
 # QuickViewDialog gui
 # -------------------------------

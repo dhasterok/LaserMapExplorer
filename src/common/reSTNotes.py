@@ -132,8 +132,8 @@ class NotesDock(CustomDockWidget):
     TypeError
         Parent must be an instance of QMainWindow.
     """
-    def __init__(self, parent:QMainWindow, filename: str|Path|None=None, title: str='reST Editor'):
-        super().__init__()
+    def __init__(self, parent: QMainWindow=None, filename: str|Path|None=None, title: str='reST Editor'):
+        super().__init__(parent=parent)
         self.setWindowTitle(title)
 
         self.notes = NotesWidget(ui=self, filename=filename)

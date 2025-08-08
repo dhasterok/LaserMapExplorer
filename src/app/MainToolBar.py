@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QToolBar, QMenuBar, QMenu, QWidget, QLabel, QVBoxLay
 from src.app.UITheme import default_font, PreferencesDialog
 from src.common.CustomWidgets import CustomAction, CustomActionMenu
 from src.app.config import ICONPATH
+from src.app.settings import prefs
 from src.common.Logger import log, no_log
 
 class MainActions(QObject):
@@ -534,7 +535,7 @@ class MainActions(QObject):
         self.ViewMode.triggered.connect(lambda: log("actions.ViewMode", prefix="UI"))
 
     def open_preferences(self):
-        dlg = PreferencesDialog(self.ui.prefs, parent=self.ui)
+        dlg = PreferencesDialog(prefs, parent=self.ui)
         if dlg.exec():
             # dialog already updated prefs via accept, listeners will fire
             pass
@@ -682,11 +683,13 @@ class MainToolbar(QToolBar):
 
         self.ui = ui
 
-        font = default_font()
-        font.setPointSize(10)
-        self.setFont(font)
-        self.setToolTip("")
-        self.setIconSize(QSize(24, 24))
+        prefs.uiPreferencesChanged.connect(lambda: self.ui.on_ui_pref_changed())
+
+        #font = default_font()
+        #font.setPointSize(10)
+        #self.setFont(font)
+        #self.setToolTip("")
+        #self.setIconSize(QSize(24, 24))
         self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         self.setObjectName("toolBar")
 

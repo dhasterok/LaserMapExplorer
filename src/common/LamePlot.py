@@ -14,7 +14,6 @@ from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.backends.backend_qt import new_figure_manager
 import src.common.CustomMplCanvas as mplc
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color

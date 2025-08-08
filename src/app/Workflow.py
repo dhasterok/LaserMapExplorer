@@ -88,14 +88,14 @@ class BlocklyBridge(QObject):
     @pyqtSlot(result=list)
     def getRefValueList(self):
         
-        return self.lame_blockly.ref_list.tolist()
+        return self.lame_blockly.app_data.ref_list.tolist()
 
     @pyqtSlot(str,result=list)
     def getSavedLists(self,type):
         """
         Exposed method to JavaScript to get the list of saved analyte lists.
         """
-        saved_lists = self.get_saved_lists(type)
+        saved_lists = self.lame_blockly.get_saved_lists(type)
         return saved_lists
     
 

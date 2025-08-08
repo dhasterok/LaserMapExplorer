@@ -26,8 +26,8 @@ from src.common.Logger import auto_log_methods, log, no_log
 
 @auto_log_methods(logger_key='Canvas')
 class CanvasWidget(QWidget):
-    def __init__(self, ui):
-        super().__init__(parent=ui)
+    def __init__(self, ui, parent=None):
+        super().__init__(parent=parent)
         self.ui = ui
         self.logger_key = "Canvas"
 
@@ -402,7 +402,7 @@ class CanvasWidget(QWidget):
                 #update toolbar and SV canvas
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
-
+            
             if hasattr(self.ui, 'control_dock') and (self.ui.style_data.plot_type == 'field map') and (self.ui.control_dock.toolbox.currentIndex() == self.ui.control_dock.tab_dict['sample']):
                 current_map_df = self.ui.app_data.current_data.get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.ui.style_data.cscale)
                 plot_small_histogram(self.ui, self.ui.app_data.current_data, self.ui.app_data, self.ui.style_data, current_map_df)

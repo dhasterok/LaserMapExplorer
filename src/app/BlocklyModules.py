@@ -51,9 +51,8 @@ import os
 import json
 from src.app.CanvasWidget import CanvasWidget
 
-class LameBlockly(PlotViewer):
+class LameBlockly():
     def __init__(self,parent, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
         # setup initial logging options
         # self.logger = LogCounter()
         self.logger_options = {
@@ -106,8 +105,8 @@ class LameBlockly(PlotViewer):
         
         self.style_data = StyleData(self)
         
-        self.canvas_widget = CanvasWidget(ui=self)
-
+        self.canvas_widget = CanvasWidget(ui=self, parent=None)
+        self.canvas_widget.show()
         # # Initialise plotviewer form
         # self.plot_viewer = PlotViewer(self)
         self.update_bins = False
@@ -487,8 +486,6 @@ class LameBlockly(PlotViewer):
 
         print(code)
         exec(code)
-
-
 
     ### Blockly functions ##
     def store_sample_ids(self):

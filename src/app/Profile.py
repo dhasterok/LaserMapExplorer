@@ -1343,7 +1343,7 @@ class Profiling:
             profile_points = self.profiles[self.main_window.sample_id][self.profile_name].points
 
         # Get style and colormap
-        style = self.main_window.plot_style
+        style = self.main_window.style_data
         cmap = style.get_colormap()
 
         # Clear existing plot
@@ -1694,7 +1694,7 @@ class Profiling:
         -------
         None
         """
-        style = self.main_window.plot_style
+        style = self.main_window.style_data
 
         if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
             # The picked scatter plot

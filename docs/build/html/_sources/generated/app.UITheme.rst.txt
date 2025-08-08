@@ -1,4 +1,4 @@
-app.UITheme
+﻿app.UITheme
 ===========
 
 .. automodule:: app.UITheme
@@ -14,5 +14,9 @@ app.UITheme
 
    .. autosummary::
    
+      PreferencesDialog
+      PreferencesManager
+      PreviewWidget
+      ThemeManager
       UIThemes
    

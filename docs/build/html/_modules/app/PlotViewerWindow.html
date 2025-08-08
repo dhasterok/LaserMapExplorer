@@ -478,7 +478,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetSingleView</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sv_widget</span> <span class="o">=</span> <span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;figure&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_widget</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sv_widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sv_widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raise_</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span></div>
 
 
 
@@ -635,7 +637,7 @@
 
             <span class="c1"># since the canvas is moved to the dialog, the figure needs to be recreated in the main window</span>
             <span class="c1"># trigger update to plot        </span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">schedule_update</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s1">&#39;save&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span><span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">):</span>
@@ -644,7 +646,7 @@
                 <span class="c1"># Save functionality for pyqtgraph</span>
                 <span class="n">export</span> <span class="o">=</span> <span class="n">exportDialog</span><span class="o">.</span><span class="n">ExportDialog</span><span class="p">(</span><span class="n">canvas</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
                 <span class="n">export</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">canvas</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">getViewBox</span><span class="p">())</span>
-                <span class="n">export</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+                <span class="n">export</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span></div>
 
                 
 <div class="viewcode-block" id="PlotViewer.save_plot">

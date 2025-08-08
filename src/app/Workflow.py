@@ -48,17 +48,17 @@ class BlocklyBridge(QObject):
                 # You can expand this to more robust attribute validation if needed
                 if hasattr(self.lame_blockly.app_data, key):
                     setattr(self.lame_blockly.app_data, key, value)
-                elif hasattr(self.lame_blockly.plot_style, key):
-                    setattr(self.lame_blockly.plot_style, key, value)
+                elif hasattr(self.lame_blockly.style_data, key):
+                    setattr(self.lame_blockly.style_data, key, value)
             plot_type = args.get('plot_type', 'field map').replace('_',' ')
-            if plot_type in self.lame_blockly.plot_style.style_dict.keys():
-                self.lame_blockly.plot_style.plot_type = plot_type
-                self.lame_blockly.plot_style.set_style_attributes(
+            if plot_type in self.lame_blockly.style_data.style_dict.keys():
+                self.lame_blockly.style_data.plot_type = plot_type
+                self.lame_blockly.style_data.set_style_attributes(
                     data=self.lame_blockly.data[self.lame_blockly.app_data.sample_id],
                     app_data=self.lame_blockly.app_data,
                     plot_type=plot_type
                 )
-                style = self.lame_blockly.plot_style.style_dict[plot_type]
+                style = self.lame_blockly.style_data.style_dict[plot_type]
                 style_serializable = self.convert_numpy_types(style)
             else:
                 style_serializable = {}
@@ -78,8 +78,8 @@ class BlocklyBridge(QObject):
     @pyqtSlot(str,str, result=list)
     def getFieldTypeList(self, ax, plot_type):
         print('get_field_list')
-        self.lame_blockly.plot_style.plot_type = plot_type
-        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.plot_style)
+        self.lame_blockly.style_data.plot_type = plot_type
+        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.style_data)
 
     @pyqtSlot(result=str)
     def getBaseDir(self):

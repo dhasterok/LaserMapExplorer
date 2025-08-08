@@ -1812,7 +1812,7 @@
             <span class="n">profile_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">profile_name</span><span class="p">]</span><span class="o">.</span><span class="n">points</span>
 
         <span class="c1"># Get style and colormap</span>
-        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">style_data</span>
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">get_colormap</span><span class="p">()</span>
 
         <span class="c1"># Clear existing plot</span>
@@ -2181,7 +2181,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">plot_style</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">style_data</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_mode_enabled</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">artist</span><span class="p">,</span> <span class="n">PathCollection</span><span class="p">):</span>
             <span class="c1"># The picked scatter plot</span>

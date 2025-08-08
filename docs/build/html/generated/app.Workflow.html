@@ -244,10 +244,8 @@
       
       
       
-        
-      
       <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -336,6 +334,15 @@
       </div>
     
   </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
@@ -556,19 +563,22 @@
 <tr class="row-even"><td><p><strong>getFieldList</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>getHistogramRange</strong></p></td>
+<tr class="row-odd"><td><p><strong>getFieldTypeList</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>getRefValueList</strong></p></td>
+<tr class="row-even"><td><p><strong>getHistogramRange</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>invokeSetStyleWidgets</strong></p></td>
+<tr class="row-odd"><td><p><strong>getRefValueList</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>objectNameChanged</strong></p></td>
+<tr class="row-even"><td><p><strong>invokeSetStyleWidgets</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>runCode</strong></p></td>
+<tr class="row-odd"><td><p><strong>objectNameChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>runCode</strong></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -602,8 +612,13 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="app.Workflow.BlocklyBridge.getFieldTypeList">
+<span class="sig-name descname"><span class="pre">getFieldTypeList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Workflow.html#BlocklyBridge.getFieldTypeList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Workflow.BlocklyBridge.getFieldTypeList" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="app.Workflow.BlocklyBridge.getHistogramRange">
-<span class="sig-name descname"><span class="pre">getHistogramRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fieldType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Workflow.html#BlocklyBridge.getHistogramRange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Workflow.BlocklyBridge.getHistogramRange" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">getHistogramRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fieldType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/Workflow.html#BlocklyBridge.getHistogramRange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.Workflow.BlocklyBridge.getHistogramRange" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1716,6 +1731,7 @@ scratch.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getBaseDir"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getBaseDir()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getCurrentDimensions"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getCurrentDimensions()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getFieldList"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getFieldList()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getFieldTypeList"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getFieldTypeList()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getHistogramRange"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getHistogramRange()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getRefValueList"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getRefValueList()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.Workflow.BlocklyBridge.getSavedLists"><code class="docutils literal notranslate"><span class="pre">BlocklyBridge.getSavedLists()</span></code></a></li>

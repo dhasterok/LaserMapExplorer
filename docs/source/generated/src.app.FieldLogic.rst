@@ -1,4 +1,4 @@
-src.app.FieldLogic
+﻿src.app.FieldLogic
 ==================
 
 .. automodule:: src.app.FieldLogic
@@ -9,6 +9,7 @@ src.app.FieldLogic
    .. autosummary::
    
       AnalyteDialog
+      ControlDock
       FieldDialog
       FieldLogicUI
    

@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
-from src.app.config import APPDATA_PATH
+from src.app.config import APPDATA_PATH, STYLE_PATH
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods
 
@@ -170,14 +170,14 @@ class AppData(Observable):
         Sets clustering parameters based on the current method.
     generate_random_seed()
         Generates a random seed for clustering.
-    cluster_group_changed(data, plot_style)
+    cluster_group_changed(data, style_data)
 
     Notes
     -----
     This class is designed to be used as a singleton or shared instance within the application,
     serving as the authoritative source of state for all data analysis and visualization operations.
     """
-    def __init__(self, data):
+    def __init__(self, parent):
         super().__init__()
 
         self.logger_key = 'Data'
@@ -210,7 +210,7 @@ class AppData(Observable):
         self.csv_files = []
 
         # a dictionary of sample_id containing SampleObj data class
-        self.data = data
+        self.data = parent.data
 
         # a dictionary of the field_types in self.data[sample_id].processed_data
         self._field_dict = {}
@@ -395,6 +395,18 @@ class AppData(Observable):
         self.update_pca_flag = False
 
         self.axis = ['x','y','z','c']
+        
+        # create ternary colors dictionary
+        df = pd.read_csv(STYLE_PATH / "ternary_colormaps.csv")
+        self.ternary_colormaps = df.to_dict(orient='records')
+
+
+        self.color_schemes = []
+        for cmap in self.ternary_colormaps:
+            self.color_schemes.append(cmap['scheme'])
+
+        self.axis = ['x','y','z','c']
+
 
     def get_field(self, ax):
         """
@@ -567,6 +579,13 @@ class AppData(Observable):
 
         self._sample_id = new_id
         self.notify_observers("sample_id", new_id)
+
+    @property
+    def current_data(self):
+        """SampleObj : The current sample object ``self.data[self.sample_id]``."""
+        if self.sample_id and self.data:
+            return self.data[self.sample_id]
+        return None
 
     ### Histogram Properties ###
     @property
@@ -1206,7 +1225,7 @@ class AppData(Observable):
         
         return field_list
     
-    def get_field_type_list(self,ax, plot_style):
+    def get_field_type_list(self,ax, style_data):
         """Updates the field type options in the UI
         
         This method updates the field type options in the UI based on the currently selected sample.
@@ -1215,18 +1234,18 @@ class AppData(Observable):
         if self.sample_id == '':
             return
         
-        plot_type = plot_style.plot_type
-        plot_dict = plot_style.plot_axis_dict[plot_type]
+        plot_type = style_data.plot_type
+        plot_dict = style_data.plot_axis_dict[plot_type]
         field_dict = self.field_dict
 
         new_list = []
 
         # check if the list should include all options, global_list == True
         if ax == 3 and 'cfield_type' in plot_dict:
-            # set the list based on plot_style.plot_type and available field types
+            # set the list based on style_data.plot_type and available field types
             new_list = [key for key in field_dict if key in plot_dict['cfield_type']]
         elif 'field_type' in plot_dict:
-            # set the list based on plot_style.plot_type and available field types
+            # set the list based on style_data.plot_type and available field types
             new_list = [key for key in field_dict if key in plot_dict['field_type']]
         else:
             new_list = list(field_dict.keys())
@@ -1334,13 +1353,13 @@ class AppData(Observable):
         self.cluster_seed = r
         
 
-    def cluster_group_changed(self, data, plot_style):
+    def cluster_group_changed(self, data, style_data):
         """
         Updates the cluster dictionary and selected cluster groups.
 
         This method checks if the current clustering method is available in
         ``data.processed_data[method]``. If found, it retrieves and sorts
-        the unique cluster labels, assigns colors using ``plot_style``,
+        the unique cluster labels, assigns colors using ``style_data``,
         and updates the internal dictionary (``self.cluster_dict``) with
         each cluster’s information. If a mask cluster (label 99) exists,
         it is separately handled and assigned the last color.
@@ -1349,9 +1368,9 @@ class AppData(Observable):
         ----------
         data : object 
             The data container with processed cluster information stored in
-            ``data.processed_data[method]``.
-        plot_style : object
-            An object or utility providing default cluster color assignments.
+            ``data.processed_data[method]``
+        style_data : object
+            Object providing default cluster color assignments
         """
         if self.sample_id == '':
             return
@@ -1376,9 +1395,9 @@ class AppData(Observable):
                         break
 
                 if 99 in clusters:
-                    hexcolor = plot_style.set_default_cluster_colors(mask=True,n = len(clusters)-1)
+                    hexcolor = style_data.set_default_cluster_colors(mask=True,n = len(clusters)-1)
                 else:
-                    hexcolor = plot_style.set_default_cluster_colors(mask=False, n = len(clusters))
+                    hexcolor = style_data.set_default_cluster_colors(mask=False, n = len(clusters))
 
                 for c in clusters:
                     c = int(c)

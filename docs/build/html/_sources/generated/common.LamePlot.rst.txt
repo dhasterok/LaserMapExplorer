@@ -1,4 +1,4 @@
-common.LamePlot
+﻿common.LamePlot
 ===============
 
 .. automodule:: common.LamePlot
@@ -32,4 +32,5 @@ common.LamePlot
       plot_small_histogram
       plot_ternary_map
       ternary_scatter
+      update_figure_font
    

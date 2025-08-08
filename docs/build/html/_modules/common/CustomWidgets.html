@@ -388,9 +388,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.CustomWidgets</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
         <span class="n">QWidget</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QTreeView</span><span class="p">,</span>
-        <span class="n">QMenu</span><span class="p">,</span> <span class="n">QDockWidget</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QSlider</span>
+        <span class="n">QMenu</span><span class="p">,</span> <span class="n">QDockWidget</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QSlider</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
+        <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QScrollArea</span><span class="p">,</span> <span class="n">QLayout</span><span class="p">,</span> <span class="n">QColorDialog</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">QStandardItem</span><span class="p">,</span> <span class="n">QStandardItemModel</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QDoubleValidator</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QCursor</span><span class="p">,</span> <span class="n">QPainter</span><span class="p">,</span>
@@ -401,6 +403,104 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.colorfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_valid_hex_color</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.UITheme</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_font</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ICONPATH</span>
+
+<div class="viewcode-block" id="CustomPage">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomPage">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomPage</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj_name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">layout_cls</span><span class="o">=</span><span class="n">QVBoxLayout</span><span class="p">,</span>
+        <span class="n">layout_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">scrollable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A QWidget that contains a QScrollArea with a single content widget</span>
+<span class="sd">        and layout. Simplifies putting scrollable pages into QToolBox, </span>
+<span class="sd">        QTabWidget, QDockWidget, etc.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        layout_cls : QVBoxLayout | QHBoxLayout | QGridLayout | QFormLayout</span>
+<span class="sd">            Layout class for the inner content, by default QVBoxLayout</span>
+<span class="sd">        layout_args : dict</span>
+<span class="sd">            Dictionary of kwargs to pass to the layout constructor</span>
+<span class="sd">        scrollable : bool</span>
+<span class="sd">            If False, skips the scroll area and uses the content directly,</span>
+<span class="sd">            by default True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">obj_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">layout_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">layout_args</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">outer_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">outer_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">outer_layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scrollable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scroll</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scroll</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">outer_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scroll</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span> <span class="o">=</span> <span class="n">layout_cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">,</span> <span class="o">**</span><span class="n">layout_args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scroll</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># non-scrollable fallback: place content directly</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scroll</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span> <span class="o">=</span> <span class="n">layout_cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">,</span> <span class="o">**</span><span class="n">layout_args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="p">)</span>
+            <span class="n">outer_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">content_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">content_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QLayout</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span>
+
+<div class="viewcode-block" id="CustomPage.addItem">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomPage.addItem">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience to add a child item to the inner layout.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomPage.addWidget">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomPage.addWidget">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience to add a child widget to the inner layout.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomPage.addLayout">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomPage.addLayout">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience to add a child layout to the inner layout.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomPage.setContentsMargins">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomPage.setContentsMargins">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setContentsMargins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomPage.setSpacing">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomPage.setSpacing">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setSpacing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spacing</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="n">spacing</span><span class="p">)</span></div>
+</div>
+
 
 <div class="viewcode-block" id="CustomLineEdit">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomLineEdit">[docs]</a>
@@ -427,15 +527,25 @@
 <span class="sd">        Provide a validator to automatically text inputs for appropriate type and</span>
 <span class="sd">        ranges, by default QDoubleValidator</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">QDoubleValidator</span><span class="p">()):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
+            <span class="n">toward</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">validator</span><span class="o">=</span><span class="n">QDoubleValidator</span><span class="p">()</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">precision</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span> <span class="o">=</span> <span class="n">threshold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_toward</span> <span class="o">=</span> <span class="n">toward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_value_from_text</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignRight</span><span class="o">|</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignTrailing</span><span class="o">|</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -455,6 +565,10 @@
 <span class="sd">            The new value to store and display.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># ensure value is a float rather than integer</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">new_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_text_from_value</span><span class="p">()</span>
 
@@ -522,6 +636,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_toward</span> <span class="o">=</span> <span class="n">val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_text_from_value</span>
 
+<div class="viewcode-block" id="CustomLineEdit.set_bounds">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomLineEdit.set_bounds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set optional lower and upper bounds for the value.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="o">=</span> <span class="n">lower</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="o">=</span> <span class="n">upper</span>
+        <span class="c1"># Apply clamping if value already exists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span></div>
+
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_text_from_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the displayed text based on internal value and formatting rules.</span>
@@ -539,8 +663,15 @@
 <span class="sd">        Update the internal value from the current text, if valid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">new_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="c1"># Clamp if bounds are defined</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span><span class="p">,</span> <span class="n">new_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span><span class="p">,</span> <span class="n">new_val</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">new_val</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># ignore error</span>
             <span class="k">pass</span></div>
 
 
@@ -707,13 +838,34 @@
 <div class="viewcode-block" id="RotatedHeaderView">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.RotatedHeaderView">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RotatedHeaderView</span><span class="p">(</span><span class="n">QHeaderView</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotates the column header of a table by 90 degrees</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom QHeaderView that displays horizontal headers rotated by 90 degrees.</span>
+
+<span class="sd">    This header view is useful for tables with many columns where horizontal space</span>
+<span class="sd">    is constrained. It transposes the size hint and rotates the header text during</span>
+<span class="sd">    painting to display the headers vertically.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    parent : obj, optional</span>
-<span class="sd">        Parent table object</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    parent : QWidget, optional</span>
+<span class="sd">        The parent widget (typically a QTableView).</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    orientation : Qt.Orientation</span>
+<span class="sd">        The orientation of the header view. Fixed to Qt.Horizontal.</span>
+<span class="sd">    minimumSectionSize : int</span>
+<span class="sd">        The minimum size of each header section, set to 20 pixels.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    paintSection(painter, rect, logicalIndex)</span>
+<span class="sd">        Paints a rotated header section by -90 degrees.</span>
+<span class="sd">    minimumSizeHint()</span>
+<span class="sd">        Returns the transposed minimum size hint for the rotated layout.</span>
+<span class="sd">    sectionSizeFromContents(logicalIndex)</span>
+<span class="sd">        Returns the transposed section size to accommodate vertical text.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">RotatedHeaderView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Orientation</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSectionSize</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
@@ -721,19 +873,40 @@
 <div class="viewcode-block" id="RotatedHeaderView.paintSection">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.RotatedHeaderView.paintSection">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">paintSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rect</span><span class="p">,</span> <span class="n">logicalIndex</span> <span class="p">):</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="c1"># translate the painter to the appropriate position</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">rect</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">)</span>  <span class="c1"># rotate by -90 degrees</span>
-        <span class="c1"># and have parent code paint at this location</span>
-        <span class="n">newrect</span> <span class="o">=</span> <span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">RotatedHeaderView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">paintSection</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">newrect</span><span class="p">,</span> <span class="n">logicalIndex</span><span class="p">)</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Paint a single section of the header, rotating the text by -90 degrees.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        painter : QPainter</span>
+<span class="sd">            The painter used to draw the section.</span>
+<span class="sd">        rect : QRect</span>
+<span class="sd">            The bounding rectangle of the section.</span>
+<span class="sd">        logicalIndex : int</span>
+<span class="sd">            The index of the section being painted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">painter</span><span class="p">:</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="c1"># translate the painter to the appropriate position</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">rect</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">)</span>  <span class="c1"># rotate by -90 degrees</span>
+            <span class="c1"># and have parent code paint at this location</span>
+            <span class="n">newrect</span> <span class="o">=</span> <span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">RotatedHeaderView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">paintSection</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">newrect</span><span class="p">,</span> <span class="n">logicalIndex</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="RotatedHeaderView.minimumSizeHint">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.RotatedHeaderView.minimumSizeHint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">minimumSizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the minimum size hint for the header.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QSize</span>
+<span class="sd">            The minimum size hint, transposed due to rotation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">RotatedHeaderView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">minimumSizeHint</span><span class="p">()</span>
         <span class="n">size</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">size</span></div>
@@ -742,6 +915,19 @@
 <div class="viewcode-block" id="RotatedHeaderView.sectionSizeFromContents">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.RotatedHeaderView.sectionSizeFromContents">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sectionSizeFromContents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logicalIndex</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the size of a section, adjusted for rotated text.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        logicalIndex : int</span>
+<span class="sd">            The index of the section.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        QSize</span>
+<span class="sd">            The size of the section, transposed for vertical layout.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">RotatedHeaderView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">sectionSizeFromContents</span><span class="p">(</span><span class="n">logicalIndex</span><span class="p">)</span>
         <span class="n">size</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">size</span></div>
@@ -904,7 +1090,7 @@
     
 <div class="viewcode-block" id="CustomTreeView.get_leaf_data">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomTreeView.get_leaf_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_leaf_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_item</span><span class="p">,</span> <span class="n">branch_name</span><span class="p">,</span> <span class="n">leaf_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_leaf_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf_item</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the full path of an item as a list from root to the given item.</span>
 
@@ -1006,65 +1192,6 @@
 </div>
 
 
-<div class="viewcode-block" id="CustomActionMenu">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CustomActionMenu</span><span class="p">(</span><span class="n">QAction</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A QAction with an attached menu that displays on click.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    icon : str</span>
-<span class="sd">        Path to icon</span>
-<span class="sd">    text : str</span>
-<span class="sd">        Action text</span>
-<span class="sd">    menu_items : list of tuple</span>
-<span class="sd">        List of tuples where each tuple is (displayed text, callback function) or (displayed text, submenu items).</span>
-<span class="sd">    parent : QObject, optional</span>
-<span class="sd">        Parent widget.</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">menu_items</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">),</span> <span class="n">text</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-        
-        <span class="c1"># Create the main menu</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">menu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-
-        <span class="c1"># Dictionary to hold references to dynamically updatable submenus</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Populate the menu</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">,</span> <span class="n">menu_items</span><span class="p">)</span>
-
-        <span class="c1"># Function to display the menu</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">show_menu</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-
-        <span class="c1"># Connect the action to the show_menu function</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">show_menu</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_add_menu_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively add items and submenus to a menu.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">item_text</span><span class="p">,</span> <span class="n">callback_or_submenu</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">callback_or_submenu</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="c1"># Create a submenu</span>
-                <span class="n">submenu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">(</span><span class="n">item_text</span><span class="p">,</span> <span class="n">menu</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span><span class="p">[</span><span class="n">item_text</span><span class="p">]</span> <span class="o">=</span> <span class="n">submenu</span>  <span class="c1"># Store a reference</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="n">submenu</span><span class="p">,</span> <span class="n">callback_or_submenu</span><span class="p">)</span>
-                <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="n">submenu</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Add a regular action</span>
-                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">item_text</span><span class="p">,</span> <span class="n">callback_or_submenu</span><span class="p">)</span>
-
-<div class="viewcode-block" id="CustomActionMenu.update_submenu">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.update_submenu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_submenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">submenu_name</span><span class="p">,</span> <span class="n">new_items</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update a submenu with new items.&quot;&quot;&quot;</span>
-        <span class="n">submenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">submenu_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">submenu</span><span class="p">:</span>
-            <span class="n">submenu</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Remove all current actions</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="n">submenu</span><span class="p">,</span> <span class="n">new_items</span><span class="p">)</span></div>
-</div>
-
-
 <div class="viewcode-block" id="CustomComboBox">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomComboBox">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomComboBox</span><span class="p">(</span><span class="n">QComboBox</span><span class="p">):</span>
@@ -1110,7 +1237,12 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">popup_callback</span> <span class="o">=</span> <span class="n">popup_callback</span>
 
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;allItems&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">())])</span>
+<div class="viewcode-block" id="CustomComboBox.allItems">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomComboBox.allItems">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">allItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of all item texts in the combobox.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span></div>
+
 
 <div class="viewcode-block" id="CustomComboBox.showPopup">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomComboBox.showPopup">[docs]</a>
@@ -1147,8 +1279,8 @@
 <span class="sd">    closeEvent(event: QEvent)</span>
 <span class="sd">        Hides the dock instead of closing it when the user clicks the close button.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
@@ -1169,7 +1301,8 @@
 <span class="sd">            The close event triggered by the user action.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-        <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>  <span class="c1"># Ignore the close event to prevent the widget from being removed.</span></div>
+        <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>  <span class="c1"># Ignore the close event to prevent the widget from being removed.</span></div>
 </div>
 
 
@@ -1253,9 +1386,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle switch state and emit signal&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">animation</span><span class="o">.</span><span class="n">setStartValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thumb_pos</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">animation</span><span class="o">.</span><span class="n">setEndValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="k">else</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">animation</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">setStartValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thumb_pos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">setEndValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="k">else</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checked</span><span class="p">)</span>  <span class="c1"># Emit signal</span></div>
 
@@ -1285,14 +1418,29 @@
 <div class="viewcode-block" id="ToggleSwitch.isChecked">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.isChecked">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">isChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the current state of the toggle switch&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the current state of the toggle switch.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Returns checked state of the toggle switch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span></div>
 
 
 <div class="viewcode-block" id="ToggleSwitch.mousePressEvent">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.mousePressEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle switch on click.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles mouse press events to toggle the switch state when clicked.</span>
+
+<span class="sd">        If the left mouse button is pressed, this method toggles the checked state of the switch.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QMouseEvent</span>
+<span class="sd">            The mouse event triggered by the user interaction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">MouseButton</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span><span class="p">)</span></div>
 
@@ -1300,14 +1448,27 @@
 <div class="viewcode-block" id="ToggleSwitch.sizeHint">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.sizeHint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the size of the toggle switch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the size of the toggle switch.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        size : QSize</span>
+<span class="sd">            Returns the size of the toggle switch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ToggleSwitch.paintEvent">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.paintEvent">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw the toggle switch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw the toggle switch.</span>
+
+<span class="sd">        Draws the toggle switch.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        event : QEvent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">painter</span> <span class="o">=</span> <span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
@@ -1338,58 +1499,400 @@
 <div class="viewcode-block" id="ToggleSwitch.set_thumb_pos">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ToggleSwitch.set_thumb_pos">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_thumb_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the thumb position.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the thumb position.</span>
+<span class="sd">        </span>
+<span class="sd">        Paramters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        pos : int</span>
+<span class="sd">            Thumb position&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thumb_pos</span> <span class="o">=</span> <span class="n">pos</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>  <span class="c1"># Redraw switch</span></div>
 
 
     <span class="n">thumb_pos</span> <span class="o">=</span> <span class="n">pyqtProperty</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">get_thumb_pos</span><span class="p">,</span> <span class="n">set_thumb_pos</span><span class="p">)</span></div>
 
-    <span class="c1">#thumb_pos = property(get_thumb_pos, set_thumb_pos)</span>
 
-<div class="viewcode-block" id="CustomCheckButton">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomCheckButton">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CustomCheckButton</span><span class="p">(</span><span class="n">QToolButton</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A button that changes icons when checked</span>
+
+<div class="viewcode-block" id="CustomAction">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomAction">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomAction</span><span class="p">(</span><span class="n">QAction</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An action that changes icons when checked or the theme changes from light to dark</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self._light_icon_unchecked : QIcon</span>
+<span class="sd">        Icon for light, unchecked state</span>
+<span class="sd">    self._light_icon_checked : QIcon</span>
+<span class="sd">        Icon for light, checked state</span>
+<span class="sd">    self._dark_icon_unchecked : QIcon</span>
+<span class="sd">        Icon for dark, unchecked state</span>
+<span class="sd">    self._dark_icon_checked : QIcon</span>
+<span class="sd">        Icon for dark, checked state</span>
+<span class="sd">    self._current_theme : str</span>
+<span class="sd">        &quot;light&quot; or &quot;dark&quot; color theme</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    icon_unchecked : QIcon</span>
-<span class="sd">        Unchecked icon.</span>
-<span class="sd">    icon_checked : QIcon</span>
-<span class="sd">        Checked icon.</span>
+<span class="sd">    text: str</span>
+<span class="sd">        Text to display by widget</span>
+<span class="sd">    light_icon_unchecked : str</span>
+<span class="sd">        Unchecked icon filename for light color theme.</span>
+<span class="sd">    light_icon_checked : str | None</span>
+<span class="sd">        Checked icon filename for light color theme.  If None, the icon is not checkable</span>
+<span class="sd">    dark_icon_unchecked : str</span>
+<span class="sd">        Unchecked icon filename for dark color theme.</span>
+<span class="sd">    dark_icon_checked : str | None</span>
+<span class="sd">        Checked icon filename for dark color theme. If None, the icon is not checkable</span>
+<span class="sd">    button_size : int</span>
+<span class="sd">        Size of button in pt.</span>
+<span class="sd">    icon_size : int</span>
+<span class="sd">        Size of icon on button in pt.</span>
 <span class="sd">    parent : QToolButton</span>
 <span class="sd">        Tool button to set icons.</span>
 
 <span class="sd">    Methods</span>
 <span class="sd">    -------</span>
+<span class="sd">    set_theme()</span>
+<span class="sd">        Updates light or dark theme icons</span>
 <span class="sd">    update_icon()</span>
 <span class="sd">        Update the icon based on the button&#39;s checked state.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon_unchecked</span><span class="p">:</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">icon_checked</span><span class="p">:</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">light_icon_unchecked</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">light_icon_checked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dark_icon_unchecked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dark_icon_checked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
-        <span class="c1"># icons for checked and unchecked states</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">icon_checked</span> <span class="o">=</span> <span class="n">icon_checked</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">icon_unchecked</span> <span class="o">=</span> <span class="n">icon_checked</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">load_icon</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="o">|</span><span class="kc">None</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="n">QIcon</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QIcon</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Sets up the QIcon for a given light/dark, checked/unchecked state.</span>
 
-        <span class="c1"># button properties</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">18</span><span class="p">))</span>
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            filename : str | None</span>
+<span class="sd">                Icon filename for a state</span>
+<span class="sd">            fallback : QIcon, optional</span>
+<span class="sd">                Fallback icon for a state, by default None</span>
 
-        <span class="c1"># initialize checked state and icon</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            QIcon</span>
+<span class="sd">                Icon to use for a given states</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">ICONPATH</span> <span class="o">/</span> <span class="n">filename</span>
+                <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[Warning] Icon not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fallback</span> <span class="k">if</span> <span class="n">fallback</span> <span class="k">else</span> <span class="n">QIcon</span><span class="p">()</span>
+
+        <span class="c1"># Load icons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">light_icon_unchecked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_unchecked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">dark_icon_unchecked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">light_icon_checked</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">light_icon_checked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_checked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">dark_icon_checked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_checked</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span> <span class="o">=</span> <span class="s2">&quot;light&quot;</span>
+
+        <span class="c1"># Button visual setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">default_font</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIconVisibleInMenu</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_icon</span><span class="p">()</span>
-    
-<div class="viewcode-block" id="CustomCheckButton.update_icon">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomCheckButton.update_icon">[docs]</a>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_icon</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CustomAction.set_theme">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomAction.set_theme">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the icon to light/dark theme.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">theme</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;light&quot;</span><span class="p">,</span> <span class="s2">&quot;dark&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span> <span class="o">=</span> <span class="n">theme</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_icon</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CustomAction.update_icon">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomAction.update_icon">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the icon based on the button&#39;s checked state.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">icon_checked</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the icon based on the button&#39;s checked state and theme.&quot;&quot;&quot;</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s2">&quot;light&quot;</span><span class="p">:</span>
+                <span class="n">icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCheckable</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span>
+            <span class="k">case</span> <span class="s2">&quot;dark&quot;</span><span class="p">:</span>
+                <span class="n">icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_checked</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCheckable</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_unchecked</span>
+
+        <span class="k">if</span> <span class="n">icon</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="ColorButton">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ColorButton">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ColorButton</span><span class="p">(</span><span class="n">QPushButton</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A QPushButton subclass that allows the user to select a background color</span>
+<span class="sd">    via a QColorDialog. The widget tracks a history of recently selected colors</span>
+<span class="sd">    and emits a signal whenever the color changes.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">    - Emits `colorChanged(QColor)` when the button&#39;s color is updated.</span>
+<span class="sd">    - Maintains a history of recently used colors for quick access.</span>
+<span class="sd">    - Displays the selected color as the button background.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    permanent_text : str or None</span>
+<span class="sd">        Fixed text displayed on the button. If None, the button text shows</span>
+<span class="sd">        the selected color&#39;s hex code.</span>
+<span class="sd">    ui : QWidget or None</span>
+<span class="sd">        Reference to the parent UI component, used as the parent for the color dialog.</span>
+<span class="sd">    _color_history : list of QColor</span>
+<span class="sd">        Internal list tracking recently selected colors.</span>
+<span class="sd">    _max_history : int</span>
+<span class="sd">        Maximum number of colors to keep in the history (default = 16).</span>
+<span class="sd">    </span>
+<span class="sd">    Signals</span>
+<span class="sd">    -------</span>
+<span class="sd">    colorChanged(QColor)</span>
+<span class="sd">        Emitted when the button&#39;s background color changes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    permanent_text : str or None</span>
+<span class="sd">        Fixed text to display on the button. If None, the button text</span>
+<span class="sd">        will display the color&#39;s hex code.</span>
+<span class="sd">    ui : QWidget or None</span>
+<span class="sd">        Parent UI component, used as the parent for the color dialog.</span>
+<span class="sd">    parent : QWidget or None</span>
+<span class="sd">        Parent widget in the Qt hierarchy.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    btn = ColorButton(&quot;Pick Color&quot;)</span>
+<span class="sd">    btn.colorChanged.connect(lambda c: print(&quot;New color:&quot;, c.name()))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Signal that emits the new QColor</span>
+    <span class="n">colorChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="n">QColor</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permanent_text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">permanent_text</span> <span class="o">=</span> <span class="n">permanent_text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permanent_text</span> <span class="k">if</span> <span class="n">permanent_text</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Track recently selected colors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_history</span> <span class="o">=</span> <span class="mi">16</span>    <span class="c1"># QColorDialog supports 16 custom slots (0-15)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_color</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;QColor : Return the current background color of the button.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backgroundRole</span><span class="p">())</span>
+
+<div class="viewcode-block" id="ColorButton.select_color">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.ColorButton.select_color">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open a QColorDialog to allow the user to select a color.</span>
+
+<span class="sd">        - Initializes the dialog with the current color.</span>
+<span class="sd">        - Populates the custom color slots with recent history.</span>
+<span class="sd">        - Updates the button background and text when a new color is selected.</span>
+<span class="sd">        - Emits `colorChanged(QColor)` if the color changes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">old_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span>
+        <span class="n">dlg</span> <span class="o">=</span> <span class="n">QColorDialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">)</span>
+        <span class="n">dlg</span><span class="o">.</span><span class="n">setCurrentColor</span><span class="p">(</span><span class="n">old_color</span><span class="p">)</span>
+
+        <span class="c1"># Populate custom colors from history</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_history</span><span class="p">]):</span>
+            <span class="n">QColorDialog</span><span class="o">.</span><span class="n">setCustomColor</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+
+        <span class="n">new_color</span> <span class="o">=</span> <span class="n">dlg</span><span class="o">.</span><span class="n">getColor</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="n">old_color</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">new_color</span><span class="o">.</span><span class="n">isValid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">new_color</span> <span class="o">!=</span> <span class="n">old_color</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_color</span><span class="p">(</span><span class="n">new_color</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_history</span><span class="p">(</span><span class="n">new_color</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">colorChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_color</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">QColor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply the given color to the button&#39;s background and update its text.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        color : QColor</span>
+<span class="sd">            The new color to apply.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;background-color: </span><span class="si">{</span><span class="n">color</span><span class="o">.</span><span class="n">name</span><span class="p">()</span><span class="si">}</span><span class="s2">;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">permanent_text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">QColor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the given color to the recent history, keeping it unique</span>
+<span class="sd">        and limited to the maximum history size.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        color : QColor</span>
+<span class="sd">            The color to add to the history.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Add new color at front, keep unique, maintain max length</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_history</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_history</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="CustomToolButton">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomToolButton">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomToolButton</span><span class="p">(</span><span class="n">QToolButton</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A button that changes icons when checked or the theme changes from light to dark</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self._light_icon_unchecked : QIcon</span>
+<span class="sd">        Icon for light, unchecked state</span>
+<span class="sd">    self._light_icon_checked : QIcon</span>
+<span class="sd">        Icon for light, checked state</span>
+<span class="sd">    self._dark_icon_unchecked : QIcon</span>
+<span class="sd">        Icon for dark, unchecked state</span>
+<span class="sd">    self._dark_icon_checked : QIcon</span>
+<span class="sd">        Icon for dark, checked state</span>
+<span class="sd">    self._current_theme : str</span>
+<span class="sd">        &quot;light&quot; or &quot;dark&quot; color theme</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    light_icon_unchecked : str</span>
+<span class="sd">        Unchecked icon filename for light color theme.</span>
+<span class="sd">    light_icon_checked : str | None</span>
+<span class="sd">        Checked icon filename for light color theme.  If None, the icon is not checkable</span>
+<span class="sd">    dark_icon_unchecked : str</span>
+<span class="sd">        Unchecked icon filename for dark color theme.</span>
+<span class="sd">    dark_icon_checked : str | None</span>
+<span class="sd">        Checked icon filename for dark color theme. If None, the icon is not checkable</span>
+<span class="sd">    button_size : int</span>
+<span class="sd">        Size of button in pt.</span>
+<span class="sd">    icon_size : int</span>
+<span class="sd">        Size of icon on button in pt.</span>
+<span class="sd">    parent : QToolButton</span>
+<span class="sd">        Tool button to set icons.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    set_theme()</span>
+<span class="sd">        Updates light or dark theme icons</span>
+<span class="sd">    update_icon()</span>
+<span class="sd">        Update the icon based on the button&#39;s checked state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">light_icon_unchecked</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">light_icon_checked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dark_icon_unchecked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dark_icon_checked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">button_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">load_icon</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="n">QIcon</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QIcon</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Sets up the QIcon for a given light/dark, checked/unchecked state.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            filename : str | None</span>
+<span class="sd">                Icon filename for a state</span>
+<span class="sd">            fallback : QIcon, optional</span>
+<span class="sd">                Fallback icon for a state, by default None</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            QIcon</span>
+<span class="sd">                Icon to use for a given states</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">ICONPATH</span> <span class="o">/</span> <span class="n">filename</span>
+                <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[Warning] Icon not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fallback</span> <span class="k">if</span> <span class="n">fallback</span> <span class="k">else</span> <span class="n">QIcon</span><span class="p">()</span>
+
+        <span class="c1"># Load icons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">light_icon_unchecked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_unchecked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">dark_icon_unchecked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">light_icon_checked</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">light_icon_checked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_checked</span> <span class="o">=</span> <span class="n">load_icon</span><span class="p">(</span><span class="n">dark_icon_checked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">icon_unchecked</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_checked</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span> <span class="o">=</span> <span class="s2">&quot;light&quot;</span>
+
+        <span class="c1"># Button visual setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="n">button_size</span><span class="p">,</span> <span class="n">button_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="n">icon_size</span><span class="p">,</span> <span class="n">icon_size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">default_font</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_icon</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_icon</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CustomToolButton.set_theme">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomToolButton.set_theme">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the icon to light/dark theme.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">theme</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;light&quot;</span><span class="p">,</span> <span class="s2">&quot;dark&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span> <span class="o">=</span> <span class="n">theme</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_icon</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CustomToolButton.update_icon">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomToolButton.update_icon">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the icon based on the button&#39;s checked state and theme.&quot;&quot;&quot;</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s2">&quot;light&quot;</span><span class="p">:</span>
+                <span class="n">icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_checked</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCheckable</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_icon_unchecked</span>
+            <span class="k">case</span> <span class="s2">&quot;dark&quot;</span><span class="p">:</span>
+                <span class="n">icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_checked</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCheckable</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dark_icon_unchecked</span>
+
+        <span class="k">if</span> <span class="n">icon</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span></div>
 </div>
 
 
@@ -1431,21 +1934,42 @@
     <span class="n">sliderReleased</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">sliderPressed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span> <span class="n">label_position</span><span class="o">=</span><span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span> <span class="o">=</span> <span class="n">min_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_value</span> <span class="o">=</span> <span class="n">max_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">precision</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>  
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Orientation must be &#39;horizontal&#39; or &#39;vertical&#39;.&quot;</span><span class="p">)</span>
         
         <span class="c1"># Create label to display slider value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value: </span><span class="si">{</span><span class="n">initial_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">CustomLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="n">initial_value</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
         
         <span class="c1"># Create slider</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span> <span class="o">=</span> <span class="n">QSlider</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Orientation</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">min_value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">max_value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">initial_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slider</span> <span class="o">=</span> <span class="n">QSlider</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Orientation</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slider</span> <span class="o">=</span> <span class="n">QSlider</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Orientation</span><span class="o">.</span><span class="n">Vertical</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">max_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">initial_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+
+        <span class="c1"># connect label to slider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_label_change</span><span class="p">)</span>
         
         <span class="c1"># Connect slider movement to label update</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_label</span><span class="p">)</span>
@@ -1457,70 +1981,125 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">sliderPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliderPressed</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
         
         <span class="c1"># Add widgets to layout</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">label_position</span> <span class="o">==</span> <span class="s2">&quot;low&quot;</span> <span class="ow">and</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">label_position</span> <span class="o">==</span> <span class="s2">&quot;high&quot;</span> <span class="ow">and</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">):</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">label_position</span> <span class="o">==</span> <span class="s2">&quot;high&quot;</span> <span class="ow">and</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">label_position</span> <span class="o">==</span> <span class="s2">&quot;low&quot;</span> <span class="ow">and</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">):</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="p">)</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Label position must be &#39;low&#39; or &#39;high&#39;.&quot;</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">min_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span>
+
+    <span class="nd">@min_value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">min_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_value</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;CustomSlider minimum value must be a float.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">new_value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CustomSlider minimum bound must be greater than the maximum bound.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span> <span class="o">=</span> <span class="n">new_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_slider_range</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_value</span>
+
+    <span class="nd">@max_value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_value</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;CustomSlider maximum bound must be a float.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_value</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">new_value</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CustomSlider maximum bound must be greater than the minimum bound.&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_value</span> <span class="o">=</span> <span class="n">new_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_slider_range</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span>
+    
+    <span class="nd">@step</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_value</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;CustomSlider step must be a float.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">new_value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="n">new_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_slider_range</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_slider_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update slider range and current value based on min, max, step.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># avoid emitting signals while adjusting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">max_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Optionally: clamp current value if needed</span>
+        <span class="n">current_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="n">clamped_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">current_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">clamped_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CustomSlider.handle_label_change">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.handle_label_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_label_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the slider value from the label after editing is finished.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Clamp to range</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span>
+        <span class="n">int_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">int_value</span><span class="p">)</span></div>
+
     
 <div class="viewcode-block" id="CustomSlider.update_label">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.update_label">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">int_value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Updates the label text to display the current slider value.</span>
+<span class="sd">        Updates the label value to display the slider&#39;s value.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        value : int</span>
 <span class="sd">            Current value of the slider.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="n">true_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">int_value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">true_value</span></div>
 
     
-<div class="viewcode-block" id="CustomSlider.setMinimum">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setMinimum">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the minimum value of the slider.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : int</span>
-<span class="sd">            Minimum value.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
-
-    
-<div class="viewcode-block" id="CustomSlider.setMaximum">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setMaximum">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the maximum value of the slider.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : int</span>
-<span class="sd">            Maximum value.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
-
-    
-<div class="viewcode-block" id="CustomSlider.setStep">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setStep">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the step size of the slider.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : int</span>
-<span class="sd">            Step size.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CustomSlider.setTickInterval">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setTickInterval">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setTickInterval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_interval</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">tick_interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_interval</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setTickInterval</span><span class="p">(</span><span class="n">tick_interval</span><span class="p">)</span> </div>
 
     
 <div class="viewcode-block" id="CustomSlider.setValue">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.setValue">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">float_value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the slider value.</span>
 
@@ -1529,7 +2108,8 @@
 <span class="sd">        value : int</span>
 <span class="sd">            Desired slider value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        <span class="n">int_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">float_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">int_value</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="CustomSlider.value">
@@ -1543,21 +2123,7 @@
 <span class="sd">        int</span>
 <span class="sd">            Current slider value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="CustomSlider.slider">
-<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomSlider.slider">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">slider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the QSlider instance.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        QSlider</span>
-<span class="sd">            The underlying slider widget.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span></div>
 </div>
 
 
@@ -1606,7 +2172,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_left</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">initial_right</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
         
         <span class="c1"># Create horizontal layout for sliders</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
@@ -1631,13 +2197,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_label</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_values</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliderMoved</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_label</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_values</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliderReleased</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
 
@@ -1666,10 +2232,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_layout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_input</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider_layout</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_layout</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider_layout</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_layout</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
     
 <div class="viewcode-block" id="DoubleSlider.update_values">
 <a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.DoubleSlider.update_values">[docs]</a>
@@ -1802,6 +2368,294 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_slider</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span></div>
 </div>
+
+
+<div class="viewcode-block" id="CustomActionMenu">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomActionMenu</span><span class="p">(</span><span class="n">CustomAction</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom QMenu that allows dynamic addition and removal of menu actions.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : dict[str, QAction]</span>
+<span class="sd">        A dictionary mapping action names (as strings) to their corresponding QAction objects.</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    add_menu_item(name: str, callback: Callable, shortcut: Optional[str] = None, tooltip: Optional[str] = None) -&gt; None</span>
+<span class="sd">        Add a single menu item with an optional shortcut and tooltip.</span>
+
+<span class="sd">    remove_menu_item(name: str) -&gt; None</span>
+<span class="sd">        Remove a menu item by name if it exists.</span>
+
+<span class="sd">    _add_menu_items(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -&gt; None</span>
+<span class="sd">        Add multiple menu items in one batch operation.</span>
+
+<span class="sd">    clear_menu() -&gt; None</span>
+<span class="sd">        Remove all existing menu actions from the menu and clear the internal items dictionary.</span>
+
+<span class="sd">    update_menu(items: list[tuple[str, Callable, Optional[str], Optional[str]]]) -&gt; None</span>
+<span class="sd">        Clear and rebuild the menu using the provided list of items.</span>
+
+<span class="sd">    get_menu_item(name: str) -&gt; Optional[QAction]</span>
+<span class="sd">        Return the QAction associated with the given name, or None if not found.</span>
+
+<span class="sd">    get_menu_structure() -&gt; nested list</span>
+<span class="sd">        Return current menu structure as a nested list.</span>
+
+<span class="sd">    has_submenu(name: str) -&gt; bool</span>
+<span class="sd">        Check if a submenu by a specific name exists.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    icon : str</span>
+<span class="sd">        Path to the icon displayed in the action.</span>
+<span class="sd">    text : str</span>
+<span class="sd">        Text label for the action.</span>
+<span class="sd">    menu_items : list</span>
+<span class="sd">        Initial list of menu items and submenus to add.</span>
+<span class="sd">    parent : QWidget, optional</span>
+<span class="sd">        Parent widget for the action and menu.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">menu_items</span><span class="p">,</span> <span class="n">light_icon_unchecked</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dark_icon_unchecked</span><span class="p">:</span> <span class="nb">str</span><span class="o">|</span><span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="n">light_icon_unchecked</span><span class="p">,</span> <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="n">dark_icon_unchecked</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        
+        <span class="c1"># Create the main menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="c1"># Dictionary to hold references to dynamically updatable submenus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Populate the menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">,</span> <span class="n">menu_items</span><span class="p">)</span>
+
+        <span class="c1"># Function to display the menu</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">show_menu</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+
+        <span class="c1"># Connect the action to the show_menu function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">show_menu</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CustomActionMenu._add_menu_items">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu._add_menu_items">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_menu_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively adds menu items to the given QMenu.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        menu : QMenu</span>
+<span class="sd">            The parent menu to which items will be added.</span>
+<span class="sd">        items : list of tuples</span>
+<span class="sd">            A list where each tuple represents a menu item.</span>
+
+<span class="sd">            Each tuple must be of the form:</span>
+<span class="sd">                (str, Callable | list | None)</span>
+
+<span class="sd">            - If the second element is a callable, it will be connected to the triggered signal of a QAction.</span>
+<span class="sd">            - If it&#39;s a list, a submenu will be created with that list as its content (recursively).</span>
+<span class="sd">            - If it&#39;s None, a disabled/non-interactive menu item will be added (useful as a label or placeholder).</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            items = [</span>
+<span class="sd">                (&quot;Export&quot;, export_callback),</span>
+<span class="sd">                (&quot;Import&quot;, [</span>
+<span class="sd">                    (&quot;From CSV&quot;, import_csv_callback),</span>
+<span class="sd">                    (&quot;From JSON&quot;, import_json_callback)</span>
+<span class="sd">                ]),</span>
+<span class="sd">                (&quot;Disabled Item&quot;, None)</span>
+<span class="sd">            ]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">item_text</span><span class="p">,</span> <span class="n">callback_or_submenu</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">callback_or_submenu</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># Create a submenu</span>
+                <span class="n">submenu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">(</span><span class="n">item_text</span><span class="p">,</span> <span class="n">menu</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span><span class="p">[</span><span class="n">item_text</span><span class="p">]</span> <span class="o">=</span> <span class="n">submenu</span>  <span class="c1"># Store a reference</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="n">submenu</span><span class="p">,</span> <span class="n">callback_or_submenu</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="n">submenu</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Add a regular action</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">item_text</span><span class="p">,</span> <span class="n">callback_or_submenu</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomActionMenu.update_menu">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.update_menu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_items</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace the entire menu with a new structure.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_items : list of tuples</span>
+<span class="sd">            A list where each tuple represents a menu item.</span>
+
+<span class="sd">            Each tuple must be of the form:</span>
+<span class="sd">                (str, Callable | list | None)</span>
+
+<span class="sd">        :see also: _add_menu_items</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">,</span> <span class="n">new_items</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomActionMenu.update_submenu">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.update_submenu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_submenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">submenu_name</span><span class="p">,</span> <span class="n">new_items</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update a submenu with new items.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        submenu_name : str</span>
+<span class="sd">            Name of submenu</span>
+<span class="sd">        new_items : items</span>
+<span class="sd">            A list where each tuple represents a menu item.</span>
+
+<span class="sd">            Each tuple must be of the form:</span>
+<span class="sd">                (str, Callable | list | None)</span>
+
+<span class="sd">        :see also: _add_menu_items</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">submenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">submenu_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">submenu</span><span class="p">:</span>
+            <span class="n">submenu</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Remove all current actions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="n">submenu</span><span class="p">,</span> <span class="n">new_items</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CustomActionMenu.clear_menu">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.clear_menu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all actions and submenus from the menu.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CustomActionMenu.add_menu_item">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.add_menu_item">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_menu_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">callback_or_submenu</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a single menu item to the specified QMenu.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            menu (QMenu): The menu to which the item will be added.</span>
+<span class="sd">            label (str): The text label for the menu item.</span>
+<span class="sd">            action (Callable | None): The function to be called when the menu item is triggered.</span>
+<span class="sd">                If None, the menu item will be added as a non-interactive (disabled) item.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QAction: The QAction object that was added to the menu.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            self.add_menu_item(file_menu, &quot;Open&quot;, self.open_file)</span>
+<span class="sd">            self.add_menu_item(help_menu, &quot;About&quot;, None)  # Adds a non-clickable item</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_menu_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">,</span> <span class="p">[(</span><span class="n">text</span><span class="p">,</span> <span class="n">callback_or_submenu</span><span class="p">)])</span></div>
+
+
+
+<div class="viewcode-block" id="CustomActionMenu.remove_menu_item">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.remove_menu_item">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_menu_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a menu item or submenu by its path.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        menu_path : list of str</span>
+<span class="sd">            A list representing the hierarchical path to the item.</span>
+<span class="sd">            For example, [&#39;Top Level&#39;, &#39;Submenu&#39;, &#39;Item Text&#39;] will remove</span>
+<span class="sd">            the action or submenu named &#39;Item Text&#39; inside &#39;Submenu&#39; which is</span>
+<span class="sd">            under &#39;Top Level&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the item was found and removed, False otherwise.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        </span>
+<span class="sd">        To remove &#39;Export&#39; from the &#39;File&#39; top level,</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            action.remove_menu_item([&#39;File&#39;, &#39;Export&#39;])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">menu_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menu</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">menu_path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">menu</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">menu</span><span class="p">()</span> <span class="ow">and</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">part</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">menu</span><span class="p">()</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">menu</span> <span class="o">=</span> <span class="n">found</span>
+
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">menu</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">menu_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="CustomActionMenu.get_menu_structure">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.get_menu_structure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_menu_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return current menu structure as a nested list.</span>
+<span class="sd">         </span>
+<span class="sd">        This method is useful for debugging or serialization.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        nested list</span>
+<span class="sd">            Current menu structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">recurse</span><span class="p">(</span><span class="n">menu</span><span class="p">):</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">menu</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">menu</span><span class="p">():</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">recurse</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">menu</span><span class="p">())))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">items</span>
+        <span class="k">return</span> <span class="n">recurse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="CustomActionMenu.has_submenu">
+<a class="viewcode-back" href="../../generated/common.CustomWidgets.html#common.CustomWidgets.CustomActionMenu.has_submenu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_submenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a submenu by a specific name exists.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Submenu text to test</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if `name` is a submenu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">submenu_references</span></div>
+</div>
+
 
 </pre></div>
 

@@ -1,4 +1,5 @@
-import os, re, copy, pickle
+import re, copy, pickle
+from pathlib import Path
 from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
 from pyqtgraph import colormap
@@ -10,17 +11,315 @@ import matplotlib.colors as colors
 from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
-from src.app.config import BASEDIR
+from src.app.config import STYLE_PATH
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods, log
 
 VALID_MARKERS = {k for k in Line2D.markers if isinstance(k, str) and k.strip()}
 
-class StyleObj():
-    pass
+@auto_log_methods(logger_key='Style')
+class StyleTheme():
+    def __init__(self, parent=None):
+        self.logger_key = 'Style'
+
+        self.ui = parent
+
+    # Themes
+    # -------------------------------------
+    def load_theme_names(self):
+        """Loads theme names and adds them to the theme comboBox
+        
+        Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to
+
+        Returns
+        -------
+        list :
+            List of style themes
+        """
+        # read filenames with *.sty
+        style_list = [file.stem for file in STYLE_PATH.iterdir() if file.suffix == ".sty"]
+
+        # add default to list
+        style_list.insert(0,'default')
+
+        return style_list
+
+    def read_theme(self, name):
+        """Reads a style theme
+        
+        Parameters
+        ----------
+        name : str
+            Name of a style theme.
+        
+        Returns
+        -------
+        dict :
+            Style dictionary for all plot types.
+        """
+        if name == 'default':
+            return self.default_style_dict()
+
+        try:
+            file_path = Path(f"{name}.sty")
+            with file_path.open('rb') as file:
+                style_dict = pickle.load(file)
+        except Exception as e:
+            QMessageBox.warning(self.ui,'Error',f"Could not load style theme.\n{e}")
+
+        return style_dict
+
+
+    def input_theme_name_dlg(self, style_dict):
+        """Opens a dialog to save style theme
+        
+        Style themes are saved as a dictionary into the theme name with a ``.sty`` extension
+        and the name is returned, so it can be added to a list of style themes.
+
+        Parameters
+        ----------
+        style_dict : dict
+            Style settings for each plot type
+        
+        Returns
+        -------
+        str :
+            Name of style theme.
+        """
+        name, ok = QInputDialog.getText(None, 'Save custom theme', 'Enter theme name:')
+        if ok:
+            # append theme to file of saved themes
+            file_path = STYLE_PATH / f"{name}.sty"
+            with file_path.open('wb') as file:
+                pickle.dump(style_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+            return name
+        else:
+            # throw a warning that name is not saved
+            QMessageBox.warning(self.ui,'Error','Could not save theme.')
+
+            return None
+
+    def default_style_dict(self):
+        """
+        Generates a dictionary of default plot styles for various plot types.
+
+        This method resets the internal `default_style_data` to a base set of defaults,
+        applies preferred font detection from system fonts, and then clones and customizes
+        this style for multiple predefined plot types (e.g., field map, scatter, histogram).
+
+        The resulting dictionary contains one style dictionary per plot type.
+
+        Returns
+        -------
+        dict
+            A dictionary mapping plot type names to their corresponding style dictionaries.
+
+        Notes
+        -----
+        The base style template (`default_style_data`) contains the following keys and default values:
+
+        +------------------+------------------+--------------------------------------------------+
+        | Key              | Default Value    | Description                                      |
+        +==================+==================+==================================================+
+        | XFieldType       | 'none'           | Type of field for x-axis (e.g., 'Analyte')       |
+        | XField           | 'none'           | Name of x-axis field                             |
+        | XLim             | [0, 1]           | Limits for x-axis                                |
+        | XScale           | 'linear'         | Scale for x-axis ('linear' or 'log')             |
+        | XLabel           | ''               | Label for x-axis                                 |
+        | YFieldType       | 'none'           | Type of field for y-axis                         |
+        | YField           | 'none'           | Name of y-axis field                             |
+        | YLim             | [0, 1]           | Limits for y-axis                                |
+        | YScale           | 'linear'         | Scale for y-axis                                 |
+        | YLabel           | ''               | Label for y-axis                                 |
+        | ZFieldType       | 'none'           | Type of field for z-axis                         |
+        | ZField           | 'none'           | Name of z-axis field                             |
+        | ZLim             | [0, 1]           | Limits for z-axis                                |
+        | ZScale           | 'linear'         | Scale for z-axis                                 |
+        | ZLabel           | ''               | Label for z-axis                                 |
+        | CFieldType       | 'none'           | Type of color-mapped data                        |
+        | CField           | 'none'           | Field name for color-mapping                     |
+        | CLim             | [0, 1]           | Colorbar limits                                  |
+        | CScale           | 'linear'         | Colorbar scale                                   |
+        | CLabel           | ''               | Label for colorbar                               |
+        | AspectRatio      | 1.0              | Aspect ratio of the plot                         |
+        | TickDir          | 'out'            | Tick direction                                   |
+        | Font             | ''               | Preferred font (auto-selected from system)       |
+        | FontSize         | 11.0             | Font size in points                              |
+        | ScaleDir         | 'none'           | Scale bar direction                              |
+        | ScaleLocation    | 'northeast'      | Position of scale bar                            |
+        | ScaleLength      | None             | Length of the scale bar                          |
+        | OverlayColor     | '#ffffff'        | Overlay color (e.g., for text/annotation)        |
+        | Marker           | 'circle'         | Marker shape                                     |
+        | MarkerSize       | 6                | Marker size in points                            |
+        | MarkerColor      | '#1c75bc'        | Marker color                                     |
+        | MarkerAlpha      | 30               | Marker transparency (0–100)                      |
+        | LineWidth        | 1.5              | Width of lines in the plot                       |
+        | LineMultiplier   | 1                | Multiplier for line width                        |
+        | LineColor        | '#1c75bc'        | Line color                                       |
+        | Colormap         | 'viridis'        | Name of the colormap                             |
+        | CbarReverse      | False            | Whether to reverse the colormap                  |
+        | CbarDir          | 'vertical'       | Direction of colorbar                            |
+        | Resolution       | 10               | Grid resolution                                  |
+        +------------------+------------------+--------------------------------------------------+
+
+        Specific plot types (e.g., 'field map', 'scatter', 'correlation') override some of
+        these values, such as setting `Colormap`, axis fields, aspect ratio, etc.
+        """
+        styles = {}
+
+        self.default_style_data = {
+            'XFieldType': 'none',
+            'XField': 'none',
+            'XLim': [0,1],
+            'XScale': 'linear',
+            'XLabel': '',
+            'YFieldType': 'none',
+            'YField': 'none',
+            'YLim': [0,1],
+            'YScale': 'linear',
+            'YLabel': '',
+            'ZFieldType': 'none',
+            'ZField': 'none',
+            'ZLim': [0,1],
+            'ZLabel': '',
+            'ZScale': 'linear',
+            'CFieldType': 'none',
+            'CField': 'none',
+            'CLim': [0,1],
+            'CScale': 'linear',
+            'CLabel': '',
+            'AspectRatio': 1.0,
+            'TickDir': 'out',
+            'Font': '',
+            'FontSize': 11.0,
+            'ScaleDir': 'none',
+            'ScaleLocation': 'northeast',
+            'ScaleLength': None,
+            'OverlayColor': '#ffffff',
+            'Marker': 'circle',
+            'MarkerSize': 6.0,
+            'MarkerColor': '#1c75bc',
+            'MarkerAlpha': int(30),
+            'LineWidth': 1.5,
+            'LineMultiplier': 1.0,
+            'LineColor': '#1c75bc',
+            'Colormap': 'viridis',
+            'CbarReverse': False,
+            'CbarDir': 'vertical',
+            'Resolution': int(10)
+        }
+
+        # try to load one of the preferred fonts
+        default_font = ['Avenir','Futura','Candara','Myriad Pro','Myriad','Aptos',
+                        'Calibri','Helvetica','Arial','Verdana', 'Segoe UI',
+                        'Arial', 'Helvetica', 'Ubuntu', 'Calibri', 'DejaVu Sans',
+                        'Verdana', 'Tahoma','Aptos']
+        names = QFontDatabase.families()
+
+        for font in default_font:
+            if font in names:
+                self.default_style_data['Font'] = QFont(font, 11).family()
+                break
+
+
+        styles = {'field map': copy.deepcopy(self.default_style_data),
+            'correlation': copy.deepcopy(self.default_style_data),
+            'histogram': copy.deepcopy(self.default_style_data),
+            'gradient map': copy.deepcopy(self.default_style_data),
+            'scatter': copy.deepcopy(self.default_style_data),
+            'heatmap': copy.deepcopy(self.default_style_data),
+            'ternary map': copy.deepcopy(self.default_style_data),
+            'TEC': copy.deepcopy(self.default_style_data),
+            'radar': copy.deepcopy(self.default_style_data),
+            'variance': copy.deepcopy(self.default_style_data),
+            'basis vectors': copy.deepcopy(self.default_style_data),
+            'dimension scatter': copy.deepcopy(self.default_style_data),
+            'dimension heatmap': copy.deepcopy(self.default_style_data),
+            'dimension score map': copy.deepcopy(self.default_style_data),
+            'cluster map': copy.deepcopy(self.default_style_data),
+            'cluster score map': copy.deepcopy(self.default_style_data),
+            'cluster performance': copy.deepcopy(self.default_style_data),
+            'profile': copy.deepcopy(self.default_style_data),
+            'polygon': copy.deepcopy(self.default_style_data)
+        }
+
+        styles['field map']['Colormap'] = 'plasma'
+        styles['field map']['XField'] = 'Xc'
+        styles['field map']['YField'] = 'Yc'
+
+        styles['correlation']['AspectRatio'] = 1.0
+        styles['correlation']['FontSize'] = 8
+        styles['correlation']['Colormap'] = 'RdBu'
+        styles['correlation']['CbarDir'] = 'vertical'
+        styles['correlation']['CLim'] = [-1,1]
+
+        styles['basis vectors']['AspectRatio'] = 1.0
+        styles['basis vectors']['Colormap'] = 'RdBu'
+
+        styles['gradient map']['Colormap'] = 'RdYlBu'
+        styles['gradient map']['XField'] = 'Xc'
+        styles['gradient map']['YField'] = 'Yc'
+
+        styles['cluster score map']['Colormap'] = 'plasma'
+        styles['cluster score map']['XField'] = 'Xc'
+        styles['cluster score map']['YField'] = 'Yc'
+
+        styles['dimension score map']['Colormap'] = 'viridis'
+        styles['dimension score map']['XField'] = 'Xc'
+        styles['dimension score map']['YField'] = 'Yc'
+
+        styles['cluster map']['CScale'] = 'discrete'
+        styles['cluster map']['MarkerAlpha'] = 100
+        styles['cluster map']['FieldType'] = 'Cluster'
+
+        styles['cluster performance']['AspectRatio'] = 0.62
+
+        styles['scatter']['AspectRatio'] = 1.0
+        styles['scatter']['XFieldType'] = 'Analyte'
+        styles['scatter']['YFieldType'] = 'Analyte'
+        styles['scatter']['ZFieldType'] = 'none'
+        styles['scatter']['CFieldType'] = 'none'
+
+        styles['heatmap']['AspectRatio'] = 1.0
+        styles['heatmap']['CLim'] = [1,1000]
+        styles['heatmap']['CScale'] = 'log'
+        styles['heatmap']['XFieldType'] = 'Analyte'
+        styles['heatmap']['YFieldType'] = 'Analyte'
+
+        styles['TEC']['AspectRatio'] = 0.62
+        styles['variance']['AspectRatio'] = 0.62
+        styles['basis vectors']['CLim'] = [-1,1]
+
+        styles['dimension scatter']['LineColor'] = '#4d4d4d'
+        styles['dimension scatter']['LineWidth'] = 0.5
+        styles['dimension scatter']['AspectRatio'] = 1.0
+        styles['dimension scatter']['XFieldType'] = 'PCA score'
+        styles['dimension scatter']['YFieldType'] = 'PCA score'
+
+        styles['dimension heatmap']['AspectRatio'] = 1.0
+        styles['dimension heatmap']['LineColor'] = '#ffffff'
+        styles['dimension scatter']['XFieldType'] = 'PCA score'
+        styles['dimension scatter']['YFieldType'] = 'PCA score'
+
+        styles['variance']['FontSize'] = 8
+
+        styles['histogram']['AspectRatio'] = 0.62
+        styles['histogram']['LineWidth'] = 0.0
+        styles['histogram']['XFieldType'] = 'Analyte'
+        styles['histogram']['CFieldType'] = 'none'
+
+        styles['profile']['AspectRatio'] = 0.62
+        styles['profile']['LineWidth'] = 1.0
+        styles['profile']['MarkerSize'] = 12.0
+        styles['profile']['MarkerColor'] = '#d3d3d3'
+        styles['profile']['LineColor'] = '#d3d3d3'
+
+        return styles
+
 
 @auto_log_methods(logger_key='Style')
-class StyleData(Observable):
+class StyleData(Observable, StyleTheme):
     """Manages plot styling for different plot types and syncs with main window UI.
 
     Attributes
@@ -161,18 +460,13 @@ class StyleData(Observable):
             Prints debugging messages to stdout, by default ``False``
 
     """    
-    def __init__(self,parent):
-        super().__init__()
-
+    def __init__(self, parent):
+        super().__init__(parent=parent)
         self.logger_key = 'Style'
 
-
-        if hasattr(parent,"ui"):
-            self.ui = parent.ui
-        else:
-            self.ui = parent
-
+        self.ui = parent
         self.app_data = parent.app_data
+
         # create the default style dictionary (self.style_dict for each plot type)
         self.style_dict = {}
         self.map_plot_types = [
@@ -207,22 +501,13 @@ class StyleData(Observable):
                 del self.mpl_colormaps[i]
 
         # custom colormaps
-        self.custom_color_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/custom_colormaps.csv'))
+        self.custom_color_dict = csvdict.import_csv_to_dict(STYLE_PATH / "custom_colormaps.csv")
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
 
-        # create ternary colors dictionary
-        df = pd.read_csv(os.path.join(BASEDIR,'resources/styles/ternary_colormaps.csv'))
-        self.ternary_colormaps = df.to_dict(orient='records')
-
-
-        self.color_schemes = []
-        for cmap in self.ternary_colormaps:
-            self.color_schemes.append(cmap['scheme'])
-
-        self.axis = ['x','y','z','c']
-
         self.default_plot_axis_dict()
+
+        self.style_dict = self.default_style_dict()
 
     # -------------------------------------
     # Styling properties
@@ -760,22 +1045,22 @@ class StyleData(Observable):
         self.notify_observers("ternary_color_m", new_color)
 
     def get_axis_label(self, ax):
-        return getattr(self, f"{self.axis[ax]}label")
+        return getattr(self, f"{self.ui.app_data.axis[ax]}label")
 
     def set_axis_label(self, ax, new_label):
-        setattr(self, f"{self.axis[ax]}label", new_label)
+        setattr(self, f"{self.ui.app_data.axis[ax]}label", new_label)
 
     def get_axis_lim(self, ax):
-        return getattr(self, f"{self.axis[ax]}lim")
+        return getattr(self, f"{self.ui.app_data.axis[ax]}lim")
 
     def set_axis_lim(self, ax, new_lim):
-        setattr(self, f"{self.axis[ax]}lim", new_lim)
+        setattr(self.ui.style_data, f"{self.ui.app_data.axis[ax]}lim", new_lim)
 
     def get_axis_scale(self, ax):
-        return getattr(self, f"{self.axis[ax]}scale")
+        return getattr(self, f"{self.ui.app_data.axis[ax]}scale")
 
     def set_axis_scale(self, ax, new_scale):
-        setattr(self, f"{self.axis[ax]}scale", new_scale)
+        setattr(self, f"{self.ui.app_data.axis[ax]}scale", new_scale)
 
     def toggle_mass(self, labels):
         """Removes mass from labels
@@ -796,26 +1081,6 @@ class StyleData(Observable):
             labels = [re.sub(r'\d', '', col) for col in labels]
 
         return labels
-
-    def update_figure_font(self, canvas, font_name):
-        """updates figure fonts without the need to recreate the figure.
-
-        Parameters
-        ----------
-        canvas : MplCanvas
-            Canvas object displayed in UI.
-        font_name : str
-            Font used on plot.
-        """        
-        if font_name == '':
-            return
-
-        # Update font of all text elements in the figure
-        try:
-            for text_obj in canvas.fig.findobj(match=plt.Text):
-                text_obj.set_fontname(font_name)
-        except:
-            print('Unable to update figure font.')
 
     def default_scale_length(self):
         """Sets default length of a scale bar for map-type plots
@@ -1024,7 +1289,7 @@ class StyleData(Observable):
                 }
         }
     
-    def set_style_attributes(self,data, app_data, plot_type=None, style=None):
+    def set_style_attributes(self, data, app_data, plot_type=None, style=None):
         """Sets values in style dictionary
 
         Parameters
@@ -1131,7 +1396,7 @@ class StyleData(Observable):
         field : str
             Field plotted on axis, used as column name to ``MainWindow.data.processed_data`` dataframe.
         """
-        data = self.ui.data[self.app_data.sample_id]
+        data = self.ui.app_data.current_data
 
         if field == '':
             return
@@ -1253,8 +1518,75 @@ class StyleData(Observable):
         cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
 
         return cmap
+
+    def set_default_cluster_colors(self,n, mask=False):
+        """Sets cluster group to default colormap
+
+        Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in
+        ``self.styles['cluster map']['Colormap'].  Change the default colormap
+        by changing ``self.comboBoxColormap``, when ``self.ui.control_dock.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
+
+        Returns
+        -------
+            N : number of cluster groups
+            str : hexcolor
+        """
+
+        #print('set_default_cluster_colors')
+        # cluster_tab = self.parent.mask_dock.cluster_tab
+
+        # cluster colormap
+        cmap = self.get_colormap(N=n)
+
+        # set color for each cluster and place color in table
+        colors = [cmap(i) for i in range(cmap.N)]
+
+        hexcolor = []
+        for i in range(n):
+            hexcolor.append(get_hex_color(colors[i]))
+            
+        if mask:
+            hexcolor.append(self.style_dict['cluster map']['OverlayColor'])
+
+        return hexcolor
     
-    
+    def get_cluster_colormap(self, cluster_dict, alpha=100):
+        """Converts hex colors to a colormap
+
+        Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the ``MainWindow.tableWidgetViewGroups``.
+
+        Parameters
+        ----------
+        cluster_dict : dict
+            Dictionary with cluster information    
+        alpha : int, optional
+            Transparency to be added to color, by default 100
+
+        Returns
+        -------
+        matplotlib.colormap
+            A discrete (colors.ListedColormap) colormap
+        """
+        n = cluster_dict['n_clusters']
+        cluster_color = [None]*n
+        cluster_label = [None]*n
+        
+        # convert colors from hex to rgb and add to cluster_color list
+        for i in range(n):
+            color = get_rgb_color(cluster_dict[i]['color'])
+            cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
+            cluster_label[i] = cluster_dict[i]['name']
+
+        # mask
+        if 99 in cluster_dict:
+            color = get_rgb_color(cluster_dict[99]['color'])
+            cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
+            cluster_label.append(cluster_dict[99]['name'])
+            cmap = colors.ListedColormap(cluster_color, N=n+1)
+        else:
+            cmap = colors.ListedColormap(cluster_color, N=n)
+
+        return cluster_color, cluster_label, cmap
 
     # -------------------------------------
     # Validation functions
@@ -1294,298 +1626,3 @@ class StyleData(Observable):
         for attr, value in vars(self).items():
             log(f"{attr}: {value}", prefix="DEBUG")
 
-
-class StyleTheme():
-    def __init__(self, parent=None):
-
-        self.logger_key = 'Style'
-        self.ui = parent
-
-    # Themes
-    # -------------------------------------
-    def load_theme_names(self):
-        """Loads theme names and adds them to the theme comboBox
-        
-        Looks for saved style themes (*.sty) in ``resources/styles/`` directory and adds them to
-
-        Returns
-        -------
-        list :
-            List of style themes
-        """
-        # read filenames with *.sty
-        file_list = os.listdir(os.path.join(BASEDIR,'resources/styles/'))
-        style_list = [file.replace('.sty','') for file in file_list if file.endswith('.sty')]
-
-        # add default to list
-        style_list.insert(0,'default')
-
-        return style_list
-
-    def read_theme(self, name):
-        """Reads a style theme
-        
-        Parameters
-        ----------
-        name : str
-            Name of a style theme.
-        
-        Returns
-        -------
-        dict :
-            Style dictionary for all plot types.
-        """
-        if name == 'default':
-            return self.default_style_dict()
-
-        try:
-            with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'rb') as file:
-                style_dict = pickle.load(file)
-        except:
-            QMessageBox.warning(self.ui,'Error','Could not load style theme.')
-
-        return style_dict
-
-
-    def input_theme_name_dlg(self, style_dict):
-        """Opens a dialog to save style theme
-        
-        Style themes are saved as a dictionary into the theme name with a ``.sty`` extension
-        and the name is returned, so it can be added to a list of style themes.
-
-        Parameters
-        ----------
-        style_dict : dict
-            Style settings for each plot type
-        
-        Returns
-        -------
-        str :
-            Name of style theme.
-        """
-        name, ok = QInputDialog.getText(None, 'Save custom theme', 'Enter theme name:')
-        if ok:
-            # append theme to file of saved themes
-            with open(os.path.join(BASEDIR,f'resources/styles/{name}.sty'), 'wb') as file:
-                pickle.dump(style_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
-
-            return name
-        else:
-            # throw a warning that name is not saved
-            QMessageBox.warning(self.ui,'Error','Could not save theme.')
-
-            return None
-
-    def default_style_dict(self):
-        """
-        Generates a dictionary of default plot styles for various plot types.
-
-        This method resets the internal `default_plot_style` to a base set of defaults,
-        applies preferred font detection from system fonts, and then clones and customizes
-        this style for multiple predefined plot types (e.g., field map, scatter, histogram).
-
-        The resulting dictionary contains one style dictionary per plot type.
-
-        Returns
-        -------
-        dict
-            A dictionary mapping plot type names to their corresponding style dictionaries.
-
-        Notes
-        -----
-        The base style template (`default_plot_style`) contains the following keys and default values:
-
-        +------------------+------------------+--------------------------------------------------+
-        | Key              | Default Value    | Description                                      |
-        +==================+==================+==================================================+
-        | XFieldType       | 'none'           | Type of field for x-axis (e.g., 'Analyte')       |
-        | XField           | 'none'           | Name of x-axis field                             |
-        | XLim             | [0, 1]           | Limits for x-axis                                |
-        | XScale           | 'linear'         | Scale for x-axis ('linear' or 'log')             |
-        | XLabel           | ''               | Label for x-axis                                 |
-        | YFieldType       | 'none'           | Type of field for y-axis                         |
-        | YField           | 'none'           | Name of y-axis field                             |
-        | YLim             | [0, 1]           | Limits for y-axis                                |
-        | YScale           | 'linear'         | Scale for y-axis                                 |
-        | YLabel           | ''               | Label for y-axis                                 |
-        | ZFieldType       | 'none'           | Type of field for z-axis                         |
-        | ZField           | 'none'           | Name of z-axis field                             |
-        | ZLim             | [0, 1]           | Limits for z-axis                                |
-        | ZScale           | 'linear'         | Scale for z-axis                                 |
-        | ZLabel           | ''               | Label for z-axis                                 |
-        | CFieldType       | 'none'           | Type of color-mapped data                        |
-        | CField           | 'none'           | Field name for color-mapping                     |
-        | CLim             | [0, 1]           | Colorbar limits                                  |
-        | CScale           | 'linear'         | Colorbar scale                                   |
-        | CLabel           | ''               | Label for colorbar                               |
-        | AspectRatio      | 1.0              | Aspect ratio of the plot                         |
-        | TickDir          | 'out'            | Tick direction                                   |
-        | Font             | ''               | Preferred font (auto-selected from system)       |
-        | FontSize         | 11.0             | Font size in points                              |
-        | ScaleDir         | 'none'           | Scale bar direction                              |
-        | ScaleLocation    | 'northeast'      | Position of scale bar                            |
-        | ScaleLength      | None             | Length of the scale bar                          |
-        | OverlayColor     | '#ffffff'        | Overlay color (e.g., for text/annotation)        |
-        | Marker           | 'circle'         | Marker shape                                     |
-        | MarkerSize       | 6                | Marker size in points                            |
-        | MarkerColor      | '#1c75bc'        | Marker color                                     |
-        | MarkerAlpha      | 30               | Marker transparency (0–100)                      |
-        | LineWidth        | 1.5              | Width of lines in the plot                       |
-        | LineMultiplier   | 1                | Multiplier for line width                        |
-        | LineColor        | '#1c75bc'        | Line color                                       |
-        | Colormap         | 'viridis'        | Name of the colormap                             |
-        | CbarReverse      | False            | Whether to reverse the colormap                  |
-        | CbarDir          | 'vertical'       | Direction of colorbar                            |
-        | Resolution       | 10               | Grid resolution                                  |
-        +------------------+------------------+--------------------------------------------------+
-
-        Specific plot types (e.g., 'field map', 'scatter', 'correlation') override some of
-        these values, such as setting `Colormap`, axis fields, aspect ratio, etc.
-        """
-        styles = {}
-
-        self.default_plot_style = {
-                'XFieldType': 'none',
-                'XField': 'none',
-                'XLim': [0,1],
-                'XScale': 'linear',
-                'XLabel': '',
-                'YFieldType': 'none',
-                'YField': 'none',
-                'YLim': [0,1],
-                'YScale': 'linear',
-                'YLabel': '',
-                'ZFieldType': 'none',
-                'ZField': 'none',
-                'ZLim': [0,1],
-                'ZLabel': '',
-                'ZScale': 'linear',
-                'CFieldType': 'none',
-                'CField': 'none',
-                'CLim': [0,1],
-                'CScale': 'linear',
-                'CLabel': '',
-                'AspectRatio': 1.0,
-                'TickDir': 'out',
-                'Font': '',
-                'FontSize': 11.0,
-                'ScaleDir': 'none',
-                'ScaleLocation': 'northeast',
-                'ScaleLength': None,
-                'OverlayColor': '#ffffff',
-                'Marker': 'circle',
-                'MarkerSize': 6.0,
-                'MarkerColor': '#1c75bc',
-                'MarkerAlpha': int(30),
-                'LineWidth': 1.5,
-                'LineMultiplier': 1.0,
-                'LineColor': '#1c75bc',
-                'Colormap': 'viridis',
-                'CbarReverse': False,
-                'CbarDir': 'vertical',
-                'Resolution': int(10)
-                }
-
-        # try to load one of the preferred fonts
-        default_font = ['Avenir','Candara','Myriad Pro','Myriad','Aptos','Calibri','Helvetica','Arial','Verdana']
-        names = QFontDatabase.families()
-
-        for font in default_font:
-            if font in names:
-                self.default_plot_style['Font'] = QFont(font, 11).family()
-                break
-
-
-        styles = {'field map': copy.deepcopy(self.default_plot_style),
-                'correlation': copy.deepcopy(self.default_plot_style),
-                'histogram': copy.deepcopy(self.default_plot_style),
-                'gradient map': copy.deepcopy(self.default_plot_style),
-                'scatter': copy.deepcopy(self.default_plot_style),
-                'heatmap': copy.deepcopy(self.default_plot_style),
-                'ternary map': copy.deepcopy(self.default_plot_style),
-                'TEC': copy.deepcopy(self.default_plot_style),
-                'radar': copy.deepcopy(self.default_plot_style),
-                'variance': copy.deepcopy(self.default_plot_style),
-                'basis vectors': copy.deepcopy(self.default_plot_style),
-                'dimension scatter': copy.deepcopy(self.default_plot_style),
-                'dimension heatmap': copy.deepcopy(self.default_plot_style),
-                'dimension score map': copy.deepcopy(self.default_plot_style),
-                'cluster map': copy.deepcopy(self.default_plot_style),
-                'cluster score map': copy.deepcopy(self.default_plot_style),
-                'cluster performance': copy.deepcopy(self.default_plot_style),
-                'profile': copy.deepcopy(self.default_plot_style),
-                'polygon': copy.deepcopy(self.default_plot_style)
-                }
-
-        styles['field map']['Colormap'] = 'plasma'
-        styles['field map']['XField'] = 'Xc'
-        styles['field map']['YField'] = 'Yc'
-
-        styles['correlation']['AspectRatio'] = 1.0
-        styles['correlation']['FontSize'] = 8
-        styles['correlation']['Colormap'] = 'RdBu'
-        styles['correlation']['CbarDir'] = 'vertical'
-        styles['correlation']['CLim'] = [-1,1]
-
-        styles['basis vectors']['AspectRatio'] = 1.0
-        styles['basis vectors']['Colormap'] = 'RdBu'
-
-        styles['gradient map']['Colormap'] = 'RdYlBu'
-        styles['gradient map']['XField'] = 'Xc'
-        styles['gradient map']['YField'] = 'Yc'
-
-        styles['cluster score map']['Colormap'] = 'plasma'
-        styles['cluster score map']['XField'] = 'Xc'
-        styles['cluster score map']['YField'] = 'Yc'
-
-        styles['dimension score map']['Colormap'] = 'viridis'
-        styles['dimension score map']['XField'] = 'Xc'
-        styles['dimension score map']['YField'] = 'Yc'
-
-        styles['cluster map']['CScale'] = 'discrete'
-        styles['cluster map']['MarkerAlpha'] = 100
-        styles['cluster map']['FieldType'] = 'Cluster'
-
-        styles['cluster performance']['AspectRatio'] = 0.62
-
-        styles['scatter']['AspectRatio'] = 1.0
-        styles['scatter']['XFieldType'] = 'Analyte'
-        styles['scatter']['YFieldType'] = 'Analyte'
-        styles['scatter']['ZFieldType'] = 'none'
-        styles['scatter']['CFieldType'] = 'none'
-
-        styles['heatmap']['AspectRatio'] = 1.0
-        styles['heatmap']['CLim'] = [1,1000]
-        styles['heatmap']['CScale'] = 'log'
-        styles['heatmap']['XFieldType'] = 'Analyte'
-        styles['heatmap']['YFieldType'] = 'Analyte'
-
-        styles['TEC']['AspectRatio'] = 0.62
-        styles['variance']['AspectRatio'] = 0.62
-        styles['basis vectors']['CLim'] = [-1,1]
-
-        styles['dimension scatter']['LineColor'] = '#4d4d4d'
-        styles['dimension scatter']['LineWidth'] = 0.5
-        styles['dimension scatter']['AspectRatio'] = 1.0
-        styles['dimension scatter']['XFieldType'] = 'PCA score'
-        styles['dimension scatter']['YFieldType'] = 'PCA score'
-
-        styles['dimension heatmap']['AspectRatio'] = 1.0
-        styles['dimension heatmap']['LineColor'] = '#ffffff'
-        styles['dimension scatter']['XFieldType'] = 'PCA score'
-        styles['dimension scatter']['YFieldType'] = 'PCA score'
-
-        styles['variance']['FontSize'] = 8
-
-        styles['histogram']['AspectRatio'] = 0.62
-        styles['histogram']['LineWidth'] = 0.0
-        styles['histogram']['XFieldType'] = 'Analyte'
-        styles['histogram']['CFieldType'] = 'none'
-
-        styles['profile']['AspectRatio'] = 0.62
-        styles['profile']['LineWidth'] = 1.0
-        styles['profile']['MarkerSize'] = 12.0
-        styles['profile']['MarkerColor'] = '#d3d3d3'
-        styles['profile']['LineColor'] = '#d3d3d3'
-
-        return styles

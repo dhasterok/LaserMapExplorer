@@ -344,7 +344,7 @@ class FilterTab():
         Updates the plot once filter values have been update
         """
         self.parent.data.apply_field_filters()
-        self.main_window.plot_style.schedule_update()
+        self.main_window.schedule_update()
 
     def update_filter_values(self, *args, **kwargs):
         """Updates widgets that display the filter bounds for a selected field.
@@ -735,7 +735,7 @@ class PolygonTab():
         self.toggle_polygon_actions()
 
 
-        self.parent.main_window.plot_style.schedule_update()
+        self.parent.main_window.schedule_update()
         self.toggle_polygon_actions()
 
     def toggle_polygon_actions(self):
@@ -970,7 +970,7 @@ class ClusterTab():
 
         self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
         self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
-        self.actionClusterColorReset.triggered.connect(self.main_window.plot_style.set_default_cluster_colors)
+        self.actionClusterColorReset.triggered.connect(self.main_window.style_data.set_default_cluster_colors)
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
         self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
         self.actionGroupMask.triggered.connect(lambda: self.main_window.apply_cluster_mask(inverse=False))
@@ -1022,7 +1022,7 @@ class ClusterTab():
 
         # update plot
         if self.parent.main_window.comboBoxColorByField.currentText() == 'cluster':
-            self.parent.main_window.plot_style.schedule_update()
+            self.parent.main_window.schedule_update()
 
     def select_cluster_group_callback(self):
         """Set cluster color button background after change of selected cluster group
@@ -1074,7 +1074,7 @@ class ClusterTab():
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
-                    # colors in table are set by plot_style.set_default_cluster_colors()
+                    # colors in table are set by style_data.set_default_cluster_colors()
                     self.tableWidgetViewGroups.selectRow(c)
                     
 
@@ -1123,7 +1123,7 @@ class ClusterTab():
 
             # update plot with new cluster name
             # trigger update to plot
-            self.parent.main_window.plot_style.schedule_update()
+            self.parent.main_window.schedule_update()
 
     def update_clusters(self):
         """Executed on update to cluster table.
@@ -1149,15 +1149,15 @@ class ClusterTab():
                 app_data.cluster_dict[method]['selected_clusters'] = []
 
             # update plot
-            if (self.parent.main_window.plot_style.plot_type not in ['cluster', 'cluster score']) and (app_data.c_field_type == 'cluster'):
+            if (self.parent.main_window.style_data.plot_type not in ['cluster', 'cluster score']) and (app_data.c_field_type == 'cluster'):
                 # trigger update to plot
-                self.parent.main_window.plot_style.schedule_update()
+                self.parent.main_window.schedule_update()
 
     
         # cluster styles
     # -------------------------------------
 
-    def set_default_cluster_colors(self,plot_style,cluster_tab, mask=False):
+    def set_default_cluster_colors(self,style_data,cluster_tab, mask=False):
         """Sets cluster group to default colormap
 
         Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in
@@ -1173,7 +1173,7 @@ class ClusterTab():
         # cluster_tab = self.parent.mask_dock.cluster_tab
 
         # cluster colormap
-        cmap = plot_style.get_colormap(N=self.tableWidgetViewGroups.rowCount())
+        cmap = style_data.get_colormap(N=self.tableWidgetViewGroups.rowCount())
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]
@@ -1186,7 +1186,7 @@ class ClusterTab():
             self.tableWidgetViewGroups.blockSignals(False)
 
         if mask:
-            hexcolor.append(plot_style.style_dict['cluster']['OverlayColor'])
+            hexcolor.append(style_data.style_dict['cluster']['OverlayColor'])
 
         self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(self.spinBoxClusterGroup.value()-1,2).text())
 

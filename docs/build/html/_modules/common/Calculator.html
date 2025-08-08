@@ -395,15 +395,14 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.varfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial_match</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QUrl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-        <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
-        <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
+        <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QPlainTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
+        <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
         <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QFrame</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QScrollArea</span>
     <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QAction</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">CustomAction</span><span class="p">,</span> <span class="n">CustomToolButton</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.app.FieldLogic</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldLogicUI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
@@ -453,27 +452,25 @@
 <span class="sd">    TypeError</span>
 <span class="sd">        Parent must be an instance of QMainWindow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># super().__init__(self, parent=None)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Calculator&#39;</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ui</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parent must be an instance of QMainWindow.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
         
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
-        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">ui</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span>
 
         <span class="n">FieldLogicUI</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># create an instance of CustomFieldCalculator for the heavy lifting</span>
-        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cfc</span> <span class="o">=</span> <span class="n">CustomFieldCalculator</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -481,6 +478,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">calc_filename</span> <span class="o">=</span> <span class="n">filename</span>
 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_widgets</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_logger</span><span class="p">()</span>
+
+        <span class="c1"># update UI with pre-saved formulas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_load_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_formula</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precalculate_custom_fields</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="CalculatorDock.setupUI">
+<a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.setupUI">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Create container</span>
         <span class="n">scroll_area</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">()</span>
         <span class="n">scroll_area</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -494,30 +504,37 @@
         <span class="n">toolbar</span><span class="o">.</span><span class="n">setMovable</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Optional: Prevent toolbar from being dragged out</span>
 
         <span class="c1"># calculate new field based on formula entered by user</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionCalculate</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionCalculate</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-run-64.svg&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionCalculate</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Calculate field&quot;</span><span class="p">)</span>
-        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionCalculate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Calculate&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-run-64.svg&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Calculate field&quot;</span><span class="p">)</span>
 
         <span class="c1"># save the current formula to a  dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-save-file-64.svg&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Calculate and save field&quot;</span><span class="p">)</span>
-        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Save Equation&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-save-file-64.svg&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Calculate and save field&quot;</span><span class="p">)</span>
 
         <span class="c1"># clear the calculator screen</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-reject-64.svg&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Clear current formula&quot;</span><span class="p">)</span>
-        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Clear&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-reject-64.svg&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Clear current formula&quot;</span><span class="p">)</span>
 
         <span class="c1"># link the calculator to help</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionHelp</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionHelp</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="s1">&#39;:resources/icons/icon-info-64.svg&#39;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionHelp</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_help</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionHelp</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Get help calculating fields&quot;</span><span class="p">)</span>
-        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionHelp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">help_action</span> <span class="o">=</span> <span class="n">CustomAction</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Help&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-info-64.svg&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">help_action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Get help calculating fields&quot;</span><span class="p">)</span>
 
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_action</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_action</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clear_action</span><span class="p">)</span>
+        <span class="n">toolbar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">help_action</span><span class="p">)</span>
         <span class="n">calculator_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">toolbar</span><span class="p">)</span>
 
         <span class="c1"># calculator screen</span>
@@ -526,7 +543,7 @@
         <span class="n">screen_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">screen_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span> <span class="o">=</span> <span class="n">QTextEdit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span> <span class="o">=</span> <span class="n">QPlainTextEdit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_set_add_formula</span><span class="p">)</span>
         <span class="n">screen_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="p">)</span>
 
@@ -545,21 +562,18 @@
         <span class="c1"># Equations</span>
         <span class="n">equation_select_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFormula</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFormula</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_load_formula</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonFormulaDelete</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="n">delete_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-delete-64.svg&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">delete_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonFormulaDelete</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">delete_icon</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonFormulaDelete</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonFormulaDelete</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Delete selected equation&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonFormulaDelete</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_delete_formula</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_formula_button</span> <span class="o">=</span> <span class="n">CustomToolButton</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Delete&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-delete-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-delete-dark-64.svg&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_formula_button</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Delete selected equation&quot;</span><span class="p">)</span>
+
 
         <span class="n">equation_select_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFormula</span><span class="p">)</span>
-        <span class="n">equation_select_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolButtonFormulaDelete</span><span class="p">)</span>
+        <span class="n">equation_select_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_formula_button</span><span class="p">)</span>
         <span class="n">calculator_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">equation_select_layout</span><span class="p">)</span>
-
 
         <span class="c1"># Field Control</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFieldType</span> <span class="o">=</span> <span class="n">CustomComboBox</span><span class="p">()</span>
@@ -571,16 +585,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span> <span class="o">=</span> <span class="n">CustomComboBox</span><span class="p">(</span><span class="n">popup_callback</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select field&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonAddFormula</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="n">add_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-accept-64.svg&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">add_icon</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonAddFormula</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">add_icon</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonAddFormula</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Select a field to add it to the formula&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonAddFormula</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_add_field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_formula_button</span> <span class="o">=</span> <span class="n">CustomToolButton</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Add Formula&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-accept-64.svg&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_formula_button</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select a field to add it to the formula&quot;</span><span class="p">)</span>
 
         <span class="n">field_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="p">)</span>
-        <span class="n">field_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolButtonAddFormula</span><span class="p">)</span>
+        <span class="n">field_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_formula_button</span><span class="p">)</span>
         <span class="n">calculator_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">field_layout</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFieldType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="p">)</span>
@@ -659,18 +671,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setFloating</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;LaME Calculator&quot;</span><span class="p">)</span>
 
-        <span class="n">parent</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">DockWidgetArea</span><span class="o">.</span><span class="n">RightDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">DockWidgetArea</span><span class="o">.</span><span class="n">RightDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="CalculatorDock.connect_widgets">
+<a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.connect_widgets">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># connect actions to methods</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionCalculate</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_new_field</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_new_field</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="o">.</span><span class="n">clear</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actionClear</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">message_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Ready...&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_new_field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_new_field</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="o">.</span><span class="n">clear</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">message_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Ready...&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">help_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_help</span><span class="p">)</span>
 
-        <span class="c1"># update UI with pre-saved formulas</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calc_load_dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_formula</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">precalculate_custom_fields</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFormula</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_load_formula</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_formula_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_delete_formula</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_formula_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_add_field</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CalculatorDock.connect_logger">
+<a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.connect_logger">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="CalculatorDock.calc_help">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_help">[docs]</a>
@@ -842,7 +865,7 @@
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFormula</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_dict</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_text_edit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_dict</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_formula</span> <span class="o">=</span> <span class="kc">False</span></div>
 

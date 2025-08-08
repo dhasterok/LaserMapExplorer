@@ -450,7 +450,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # self.mask_tab['polygon']: [0, 'field map'],
             self.left_tab['scatter']: [0, 'scatter', 'heatmap', 'ternary map'],
             self.left_tab['ndim']: [0, 'TEC', 'Radar'],
-            self.left_tab['multidim']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
+            self.left_tab['dim_red']: [0, 'variance','vectors','PCA scatter','PCA heatmap','PCA score'],
             self.left_tab['cluster']: [0, 'cluster', 'cluster score', 'cluster performance'],
             self.left_tab['special']: [0,'field map', 'gradient map', 'cluster score', 'PCA score', 'profile'],
             -1: [0, 'field map']}
@@ -965,7 +965,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.profile_dock.profiling.add_samples()
         # self.polygon.add_samples()
 
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_sample_id_combobox(self, new_sample_id):
         """Updates ``MainWindow.comboBoxSampleID.currentText()``
@@ -983,14 +983,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.setCurrentText(new_sample_id)
 
         self.change_sample()
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
 
     def update_equalize_color_scale_toolbutton(self, value):
         self.toolButtonScaleEqualize.setChecked(value)
 
         if self.plot_style.plot_type == 'field map':
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_dx_lineedit(self,value):
         """Updates ``MainWindow.lineEditDX.value``
@@ -1003,7 +1003,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.lineEditDX.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
             field = "X"
             # update x axis limits in style_dict 
             self.plot_style.initialize_axis_values(self.field_type, field)
@@ -1021,7 +1021,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.lineEditDY.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
             field = "Y"
             # update y axis limits in style_dict 
             self.plot_style.initialize_axis_values(self.field_type, field)
@@ -1039,7 +1039,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.lineEditResolutionNx.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ny_lineedit(self,value):
         """Updates ``MainWindow.lineEditResolutionNx.value``
@@ -1052,7 +1052,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.lineEditResolutionNy.value = value
         if self.toolBox.currentIndex() == self.left_tab['process']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_hist_field_type_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
@@ -1066,7 +1066,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.comboBoxHistFieldType.setCurrentText(value)
         if self.plot_style.plot_type == "histogram":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_hist_field_combobox(self, value):
         """Updates ``MainWindow.comboBoxHistFieldType.currentText()``
@@ -1089,186 +1089,186 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.color_field_type = self.comboBoxHistFieldType.currentText()
             self.plot_style.color_field = self.comboBoxHistField.currentText()
 
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_hist_bin_width_spinbox(self, value):
         self.doubleSpinBoxBinWidth.setValue(value)
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_hist_num_bins_spinbox(self, value):
         self.spinBoxNBins.setValue(value)
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_hist_plot_style_combobox(self, new_hist_plot_style):
         self.comboBoxHistType.setCurrentText(new_hist_plot_style)
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "histogram":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_corr_method_combobox(self, new_corr_method):
         self.comboBoxCorrelationMethod.setCurrentText(new_corr_method)
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_corr_squared_checkbox(self, new_corr_squared):
         self.checkBoxCorrelationSquared.setChecked(new_corr_squared)
         if self.toolBox.currentIndex() == self.left_tab['sample'] and self.plot_style.plot_type == "correlation":
-            self.plot_style.schedule_update()
+            self.schedule_update()
     
     def update_noise_red_method_combobox(self, new_noise_red_method):
         self.comboBoxNoiseReductionMethod.setCurrentText(new_noise_red_method)
         if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_noise_red_option1_spinbox(self, new_noise_red_option1):
         self.spinBoxNoiseOption1.setValue(new_noise_red_option1)
         if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_noise_red_option2_spinbox(self, new_noise_red_option2):
         self.doubleSpinBoxNoiseOption2.setValue(new_noise_red_option2)
         if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
     
     def update_gradient_flag_checkbox(self, new_gradient_flag):
         self.checkBoxGradient.setChecked(new_gradient_flag)
         if self.toolBox.currentIndex() == self.left_tab['sample']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_x_field_type_combobox(self, new_field_type):
         self.comboBoxFieldTypeX.setCurrentText(new_field_type)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_y_field_type_combobox(self, new_field_type):
         self.comboBoxFieldTypeY.setCurrentText(new_field_type)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_z_field_type_combobox(self, new_field_type):
         self.comboBoxFieldTypeZ.setCurrentText(new_field_type)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_x_field_combobox(self, new_field):
         self.comboBoxFieldX.setCurrentText(new_field)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_y_field_combobox(self, new_field):
         self.comboBoxFieldY.setCurrentText(new_field)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_z_field_combobox(self, new_field):
         self.comboBoxFieldZ.setCurrentText(new_field)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_scatter_preset_combobox(self, new_scatter_preset):
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_heatmap_style_combobox(self, new_heatmap_style):
         self.comboBoxHeatmaps.setCurrentText(new_heatmap_style)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ternary_colormap_combobox(self, new_ternary_colormap):
         self.comboBoxTernaryColormap.setCurrentText(new_ternary_colormap)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ternary_color_x_toolbutton(self, new_color):
         self.toolButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ternary_color_y_toolbutton(self, new_color):
         self.toolButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ternary_color_z_toolbutton(self, new_color):
         self.toolButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ternary_color_m_toolbutton(self, new_color):
         self.toolButtonTCmapMColor.setStyleSheet("background-color: %s;" % new_color)
         if self.toolBox.currentIndex() == self.left_tab['scatter']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_norm_reference_combobox(self, new_norm_reference):
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ndim_analyte_set_combobox(self, new_ndim_analyte_set):
         self.comboBoxNDimAnalyteSet.setCurrentText(new_ndim_analyte_set)
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_ndim_quantile_index_combobox(self, new_ndim_quantile_index):
         self.comboBoxNDimQuantiles.setCurrentIndex(new_ndim_quantile_index)
         if self.toolBox.currentIndex() == self.left_tab['ndim']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_dim_red_method_combobox(self, new_dim_red_method):
         self.comboBoxNoiseReductionMethod.setCurrentText(new_dim_red_method)
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
+        if self.toolBox.currentIndex() == self.left_tab['dim_red']:
+            self.schedule_update()
 
     def update_dim_red_x_spinbox(self, new_dim_red_x):
         self.spinBoxPCX.setValue(int(new_dim_red_x))
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
+        if self.toolBox.currentIndex() == self.left_tab['dim_red']:
+            self.schedule_update()
 
     def update_dim_red_y_spinbox(self, new_dim_red_y):
         self.spinBoxPCY.setValue(int(new_dim_red_y))
-        if self.toolBox.currentIndex() == self.left_tab['multidim']:
-            self.plot_style.schedule_update()
+        if self.toolBox.currentIndex() == self.left_tab['dim_red']:
+            self.schedule_update()
 
     def update_cluster_method_combobox(self, new_cluster_method):
         self.comboBoxClusterMethod.setCurrentText(new_cluster_method)
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_max_clusters_spinbox(self, new_max_clusters):
         self.spinBoxClusterMax.setValue(int(new_max_clusters))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_num_clusters_spinbox(self, new_num_clusters):
         self.spinBoxNClusters.setValue(int(new_num_clusters))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_cluster_seed_lineedit(self, new_cluster_seed):
         self.lineEditSeed.setText(str(new_cluster_seed))
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_cluster_exponent_slider(self, new_cluster_exponent):
         self.horizontalSliderClusterExponent.setValue(new_cluster_exponent)
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_cluster_distance_combobox(self, new_cluster_distance):
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_dim_red_precondition_checkbox(self, new_pca_precondition):
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_num_basis_for_precondition_spinbox(self, new_num_pca_basis_for_precondition):
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_selected_clusters_spinbox(self, new_selected_clusters):
         if self.toolBox.currentIndex() == self.left_tab['cluster']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
 
     def update_sample_id(self):
@@ -1309,7 +1309,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_equalize_color_scale(self):
         self.app_data.equalize_color_scale = self.toolButtonScaleEqualize.isChecked()
         if self.plot_style.plot_type == "field map":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_corr_method(self):
         self.app_data.corr_method = self.comboBoxCorrelationMethod.currentText()
@@ -1319,101 +1319,101 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_xlim_lineedits(self, new_xlim):
         self.lineEditXLB.value = new_xlim[0]
         self.lineEditXUB.value = new_xlim[1]
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_xlabel_lineedit(self, new_label):
         self.lineEditXLabel.setText(new_label)
-        self.plot_style.schedule_update()
+        self.schedule_update()
         
     def update_xscale_combobox(self, new_scale):
         self.comboBoxXScale.setCurrentText(new_scale)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_ylim_lineedits(self, new_ylim):
         self.lineEditYLB.value = new_ylim[0]
         self.lineEditYUB.value = new_ylim[1]
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_ylabel_lineedit(self, new_label):
         self.lineEditYLabel.setText(new_label)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_yscale_combobox(self, new_scale):
         self.comboBoxYScale.setCurrentText(new_scale)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_zlim_lineedits(self, new_zlim):
         self.lineEditZLB.value = new_zlim[0]
         self.lineEditZUB.value = new_zlim[1]
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_zlabel_lineedit(self, new_label):
         self.lineEditZLabel.setText(new_label)
-        self.plot_style.schedule_update()
+        self.schedule_update()
         
     def update_zscale_combobox(self, new_scale):
         self.comboBoxZScale.setCurrentText(new_scale)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_aspect_ratio_lineedit(self, new_aspect_ratio):
         self.lineEditAspectRatio.value = new_aspect_ratio
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_tick_dir_combobox(self, new_tick_dir):
         self.comboBoxTickDirection.setCurrentText(new_tick_dir)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_scale_location_combobox(self, new_scale_location):
         self.comboBoxScaleLocation.setCurrentText(new_scale_location)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_scale_length_lineedit(self, new_scale_length):
         self.lineEditScaleLength.value = new_scale_length
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_overlay_color_toolbutton(self, new_color):
         self.toolButtonOverlayColor.setStyleSheet("background-color: %s;" % new_color)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_show_mass_checkbox(self, new_value):
         self.checkBoxShowMass.setChecked(new_value)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_marker_symbol_combobox(self, new_marker_symbol):
         self.comboBoxMarker.setCurrentText(new_marker_symbol)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_marker_size_spinbox(self, new_marker_size):
         self.doubleSpinBoxMarkerSize.setValue(new_marker_size)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_marker_color_toolbutton(self, new_color):
         self.toolButtonMarkerColor.setStyleSheet("background-color: %s;" % new_color)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_marker_alpha_slider(self, new_alpha):
         self.horizontalSliderMarkerAlpha.setValue(new_alpha)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_line_width_combobox(self, new_line_width):
         self.doubleSpinBoxLineWidth.setValue(new_line_width)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_line_multiplier_lineedit(self, new_multiplier):
         self.lineEditLengthMultiplier.value = new_multiplier
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_line_color_toolbutton(self, new_color):
         self.toolButtonLineColor.setStyleSheet("background-color: %s;" % new_color)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_font_family_combobox(self, new_font_family):
         self.fontComboBox.setCurrentText(new_font_family)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_font_size_spinbox(self, new_font_size):
         self.doubleSpinBoxFontSize.setValue(new_font_size)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_color_field_type_combobox(self, new_field_type):
         self.comboBoxColorByField.setCurrentText(new_field_type)
@@ -1422,11 +1422,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.color_field = self.comboBoxColorField.currentText()
         self.plot_style.update_color_field_spinbox()
 
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_color_field_combobox(self, new_field):
         self.comboBoxColorField.setCurrentText(new_field)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_color_field_spinbox(self, value):
         self.spinBoxColorField.setMinimum(0)
@@ -1435,34 +1435,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_cmap_combobox(self, new_colormap):
         self.comboBoxFieldColormap.setCurrentText(new_colormap)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_cbar_reverse_checkbox(self, new_value):
         self.checkBoxReverseColormap.setChecked(new_value)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_cbar_direction_combobox(self, new_cbar_direction):
         self.comboBoxCbarDirection.setCurrentText(new_cbar_direction)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_clim_lineedits(self, new_xlim):
         self.lineEditColorLB.value = new_xlim[0]
         self.lineEditColorUB.value = new_xlim[1]
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_clabel_lineedit(self, new_label):
         self.lineEditCbarLabel.setText(new_label)
-        self.plot_style.schedule_update()
+        self.schedule_update()
         
     def update_cscale_combobox(self, new_scale):
         self.comboBoxColorScale.setCurrentText(new_scale)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_resolution_spinbox(self, new_resolution):
         self.spinBoxHeatmapResolution.setValue(new_resolution)
 
         if self.plot_style.plot_type == "heatmap":
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
 
     def update_autoscale_checkbox(self, value):
@@ -1472,31 +1472,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.checkBoxApplyAll.setChecked(False)
 
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     
     def update_dx(self):
         self.data[self.app_data.sample_id].update_resolution('x', self.lineEditDX.value)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_dy(self):
         self.data[self.app_data.sample_id].update_resolution('y', self.lineEditDY.value)
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def reset_crop(self):
         self.data[self.app_data.sample_id].reset_crop
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_swap_resolution(self):
         if not self.data or self.app_data.sample_id != '':
             return
             
         self.data[self.app_data.sample_id].swap_resolution 
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def reset_pixel_resolution(self):
         self.data[self.app_data.sample_id].reset_resolution
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
 
     def toggle_spot_tab(self):
@@ -1539,7 +1539,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 case 'n-dim':
                     self.left_tab.update({'ndim': tid})
                 case 'dimensional reduction':
-                    self.left_tab.update({'multidim': tid})
+                    self.left_tab.update({'dim_red': tid})
                 case 'clustering':
                     self.left_tab.update({'cluster': tid})
                 case 'p-t-t functions':
@@ -1570,7 +1570,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         state is an int, so we convert it to bool by checking if it equals QtCore.Qt.Checked.
         """
         self.plot_style.show_mass = self.checkBoxShowMass.isChecked()
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     # -------------------------------------
     # Reset to start
@@ -1628,7 +1628,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.clear_layout(self.widgetQuickView.layout())
 
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
             self.mask_dock.filter_tab.tableWidgetFilters.clearContents()
             self.mask_dock.filter_tab.tableWidgetFilters.setRowCount(0)
@@ -1837,7 +1837,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_flag = True
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def connect_data_observers(self, data):
         data.add_observer("nx", self.update_nx_lineedit)
@@ -2238,7 +2238,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.toolBox.setCurrentIndex(self.left_tab['ndim'])
                 self.toolBox.show()
             case 'multidimensional':
-                self.toolBox.setCurrentIndex(self.left_tab['multidim'])
+                self.toolBox.setCurrentIndex(self.left_tab['dim_red'])
                 self.toolBox.show()
             case 'filters':
                 self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
@@ -2456,7 +2456,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.check_analysis_type()
 
         if self.plot_style.plot_type != '':
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_plot_type(self):
         """Updates plot_style.plot_type in the StylingDock.
@@ -2510,7 +2510,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # If canvasWindow is set to SingleView, update the plot
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
         # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def open_ternary(self):
         """Executes on actionTernary
@@ -2597,7 +2597,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
         # self.update_all_plots()
 
     def update_aspect_ratio_controls(self):
@@ -2613,14 +2613,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditResolutionNy.value = array_size[0]
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_norm(self, norm, field=None):
 
         self.data[self.app_data.sample_id].update_norm(norm=norm, field=field)
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_fields(self, sample_id, plot_type, field_type, field,  plot=False):
         # updates comboBoxPlotType,comboBoxColorByField and comboBoxColorField comboboxes using tree, branch and leaf
@@ -2728,7 +2728,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         item.setEnabled(False)
 
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
         #self.update_all_plots()
 
     def update_invalid_data_labels(self):
@@ -2848,7 +2848,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.mask_dock.filter_tab.update_filter_values()
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
         #self.show()
         
     def remove_multi_plot(self, selected_plot_name):
@@ -2997,7 +2997,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # if single view is active
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     # Field filter functions
     # -------------------------------
@@ -3997,7 +3997,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
             # trigger update to plot        
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
         if function == 'save':
             if isinstance(canvas,mplc.MplCanvas):
@@ -4395,7 +4395,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_style.plot_type = 'correlation'
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def correlation_squared_callback(self):
         """Produces a plot of the squared correlation."""        
@@ -4411,7 +4411,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.correlation_method_callback()
 
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
 
 
@@ -4431,7 +4431,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.spinBoxFieldIndex.setMaximum(self.comboBoxHistField.count())
 
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def update_histogram_field(self):
         """Executes when the histogram field is changed"""
@@ -4446,7 +4446,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_histogram_bin_width()
 
         if self.plot_style.plot_type in ['field map', 'histogram']:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_histogram_num_bins(self):
         """Updates the bin width
@@ -4478,7 +4478,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update histogram
         if self.plot_style.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_histogram_bin_width(self):
         """Updates the number of bins
@@ -4504,7 +4504,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update histogram
         if self.plot_style.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
 
     def number_of_clusters_callback(self):
@@ -4516,7 +4516,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def cluster_distance_callback(self):
         """Updates cluster dictionary with the new distance metric
@@ -4527,7 +4527,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def cluster_exponent_callback(self):
         """Updates cluster dictionary with the new exponent
@@ -4538,7 +4538,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
     
     def cluster_seed_callback(self):
         """Updates cluster dictionary with the new exponent
@@ -4549,7 +4549,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def generate_random_seed(self):
         """Generates a random seed for clustering
@@ -4562,7 +4562,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.update_cluster_flag = True
         # trigger update to plot
-        self.plot_style.schedule_update()
+        self.schedule_update()
 
     def cluster_method_callback(self):
         """Updates clustering-related widgets
@@ -4623,7 +4623,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.lineEditSeed.value = self.app_data.cluster_dict[method]['seed']
 
         if self.update_cluster_flag:
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def update_clusters(self):
         """Executed on update to cluster table.
@@ -4650,7 +4650,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # update plot
             if (self.plot_style.plot_type not in ['cluster', 'cluster score']) and (self.field_type == 'cluster'):
                 # trigger update to plot
-                self.plot_style.schedule_update()
+                self.schedule_update()
 
     # 4. Davies-Bouldin Index
     # The Davies-Bouldin Index (DBI) measures the ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.
@@ -4857,7 +4857,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             # update plot with new cluster name
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
 
     def toggle_color_widgets(self, switch):
         """Toggles enabled state of color related widgets

@@ -388,11 +388,12 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.AppData</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">random</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="o">,</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">src.common.csvdict</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">csvdict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">APPDATA_PATH</span><span class="p">,</span> <span class="n">STYLE_PATH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Observable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Observable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_log_methods</span>
 
@@ -412,7 +413,8 @@
 <span class="sd">    AppData is responsible for:</span>
 <span class="sd">    - Storing and managing user preferences (units, font size, tick direction, etc.).</span>
 <span class="sd">    - Maintaining references to all loaded sample data and their processed attributes.</span>
-<span class="sd">    - Providing property-based access to current sample, field, and field type selections for plotting.</span>
+<span class="sd">    - Providing property-based access to current sample, field, and field type selections for</span>
+<span class="sd">      plotting.</span>
 <span class="sd">    - Managing histogram and color scale settings for data visualization.</span>
 <span class="sd">    - Storing and updating clustering and dimensionality reduction parameters.</span>
 <span class="sd">    - Handling reference chemistry data for normalization.</span>
@@ -445,6 +447,8 @@
 <span class="sd">        Options for noise reduction methods and their parameters.</span>
 <span class="sd">    cluster_dict : dict</span>
 <span class="sd">        Dictionary of clustering method parameters and results.</span>
+<span class="sd">    scatter_preset_dict : dict</span>
+<span class="sd">        Preset field lists for scatter diagrams.</span>
 <span class="sd">    ndim_list_dict : dict</span>
 <span class="sd">        Preset analyte lists for multi-dimensional analysis.</span>
 <span class="sd">    ndim_analyte_df : pd.DataFrame</span>
@@ -500,10 +504,6 @@
 <span class="sd">        Preset for scatter plot styles.</span>
 <span class="sd">    heatmap_style : str</span>
 <span class="sd">        Style of heatmap to use.</span>
-<span class="sd">    ternary_colormap : str</span>
-<span class="sd">        Colormap for ternary maps.</span>
-<span class="sd">    ternary_color_x, ternary_color_y, ternary_color_z, ternary_color_m : str</span>
-<span class="sd">        Colors for ternary diagram vertices and centroid.</span>
 <span class="sd">    norm_reference : str</span>
 <span class="sd">        Reference used for normalizing analyte and ratio data.</span>
 <span class="sd">    ndim_analyte_set : str</span>
@@ -550,8 +550,8 @@
 <span class="sd">        Validates if the new field type exists in the current sample&#39;s processed data.</span>
 <span class="sd">    validate_field(field_type, new_field)</span>
 <span class="sd">        Validates if the new field exists for the given field type.</span>
-<span class="sd">    get_field_list(set_name=&#39;Analyte&#39;, filter_type=&#39;all&#39;)</span>
-<span class="sd">        Gets the fields associated with a defined set.</span>
+<span class="sd">    get_field_list(field_type=&#39;Analyte&#39;, filter_type=&#39;all&#39;)</span>
+<span class="sd">        Gets the fields associated with a field_type.</span>
 <span class="sd">    update_hist_bin_width()</span>
 <span class="sd">        Updates the bin width for histograms.</span>
 <span class="sd">    update_hist_num_bins()</span>
@@ -562,14 +562,14 @@
 <span class="sd">        Sets clustering parameters based on the current method.</span>
 <span class="sd">    generate_random_seed()</span>
 <span class="sd">        Generates a random seed for clustering.</span>
-<span class="sd">    cluster_group_changed(data, plot_style)</span>
+<span class="sd">    cluster_group_changed(data, style_data)</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    This class is designed to be used as a singleton or shared instance within the application,</span>
 <span class="sd">    serving as the authoritative source of state for all data analysis and visualization operations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Data&#39;</span>
@@ -588,12 +588,12 @@
 
         <span class="c1"># in future will be set from preference ui</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_preferences</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selected_directory</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sort_method</span> <span class="o">=</span> <span class="s1">&#39;mass&#39;</span>
 
         <span class="c1"># reference chemistry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASEDIR</span><span class="p">,</span><span class="s1">&#39;resources/app_data/earthref.xlsx&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">APPDATA_PATH</span> <span class="o">/</span> <span class="s1">&#39;earthref.xlsx&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span><span class="o">!=</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39; [&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;] &#39;</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ref_index</span> <span class="o">=</span> <span class="mi">0</span>
@@ -602,7 +602,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">csv_files</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># a dictionary of sample_id containing SampleObj data class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span>
 
         <span class="c1"># a dictionary of the field_types in self.data[sample_id].processed_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_field_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -704,19 +704,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_edge_detection_method</span> <span class="o">=</span> <span class="s2">&quot;zero cross&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_scatter_preset</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># get scatter presets list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_list_path</span> <span class="o">=</span> <span class="n">APPDATA_PATH</span> <span class="o">/</span> <span class="s1">&#39;scatter_presets.csv&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scatter_preset_dict</span> <span class="o">=</span> <span class="n">csvdict</span><span class="o">.</span><span class="n">import_csv_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_list_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scatter_preset_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_style</span> <span class="o">=</span> <span class="s2">&quot;counts&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_colormap</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_x</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_y</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_z</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_m</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_norm_reference</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="c1"># get N-Dim lists</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_filename</span> <span class="o">=</span> <span class="s1">&#39;resources/app_data/TEC_presets.csv&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_path</span> <span class="o">=</span> <span class="n">APPDATA_PATH</span> <span class="o">/</span> <span class="s1">&#39;TEC_presets.csv&#39;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span> <span class="o">=</span> <span class="n">csvdict</span><span class="o">.</span><span class="n">import_csv_to_dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASEDIR</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_filename</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span> <span class="o">=</span> <span class="n">csvdict</span><span class="o">.</span><span class="n">import_csv_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_path</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ndim_list_dict</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s1">&#39;majors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Si&#39;</span><span class="p">,</span><span class="s1">&#39;Ti&#39;</span><span class="p">,</span><span class="s1">&#39;Al&#39;</span><span class="p">,</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span><span class="s1">&#39;Mn&#39;</span><span class="p">,</span><span class="s1">&#39;Mg&#39;</span><span class="p">,</span><span class="s1">&#39;Ca&#39;</span><span class="p">,</span><span class="s1">&#39;Na&#39;</span><span class="p">,</span><span class="s1">&#39;K&#39;</span><span class="p">,</span><span class="s1">&#39;P&#39;</span><span class="p">],</span>
@@ -783,8 +785,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_cluster_flag</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">updating_cluster_table_flag</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_pca_flag</span> <span class="o">=</span> <span class="kc">False</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># create ternary colors dictionary</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">STYLE_PATH</span> <span class="o">/</span> <span class="s2">&quot;ternary_colormaps.csv&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ternary_colormaps</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_schemes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cmap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ternary_colormaps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_schemes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmap</span><span class="p">[</span><span class="s1">&#39;scheme&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="AppData.get_field">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.get_field">[docs]</a>
@@ -940,8 +954,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ref_chem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.Series : The reference chemistry for the current reference index.&quot;&quot;&quot;</span>
-        <span class="n">chem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ref_index</span><span class="p">]</span>
-        <span class="n">chem</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_ppm&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">chem</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">chem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ref_index</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">chem</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_ppm&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">chem</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">chem</span>
 
@@ -975,6 +989,13 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span> <span class="o">=</span> <span class="n">new_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;sample_id&quot;</span><span class="p">,</span> <span class="n">new_id</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">current_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SampleObj : The current sample object ``self.data[self.sample_id]``.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1">### Histogram Properties ###</span>
     <span class="nd">@property</span>
@@ -1294,72 +1315,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_style</span> <span class="o">=</span> <span class="n">new_style</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;heatmap_style&quot;</span><span class="p">,</span> <span class="n">new_style</span><span class="p">)</span>
 
-    <span class="c1">### Ternary Map ###</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The colormap used for ternary maps.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_colormap</span>
-    
-    <span class="nd">@ternary_colormap</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_colormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_cmap</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new_cmap</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_colormap</span><span class="p">:</span>
-            <span class="k">return</span>
-    
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_colormap</span> <span class="o">=</span> <span class="n">new_cmap</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_colormap&quot;</span><span class="p">,</span> <span class="n">new_cmap</span><span class="p">)</span>
-
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the A-vertex on a ternary diagram.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_x</span>
-    
-    <span class="nd">@ternary_color_x</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_x</span><span class="p">:</span>
-            <span class="k">return</span>
-    
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_x</span> <span class="o">=</span> <span class="n">new_color</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_x&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the B-vertex on a ternary diagram.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_y</span>
-    
-    <span class="nd">@ternary_color_y</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_y</span><span class="p">:</span>
-            <span class="k">return</span>
-    
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_y</span> <span class="o">=</span> <span class="n">new_color</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_y&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the C-vertex on a ternary diagram.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_z</span>
-    
-    <span class="nd">@ternary_color_z</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_z</span><span class="p">:</span>
-            <span class="k">return</span>
-    
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_z</span> <span class="o">=</span> <span class="n">new_color</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_z&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : The color for the centroid on a ternary diagram.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_m</span>
-    
-    <span class="nd">@ternary_color_m</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ternary_color_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_color</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new_color</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_m</span><span class="p">:</span>
-            <span class="k">return</span>
-    
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ternary_color_m</span> <span class="o">=</span> <span class="n">new_color</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ternary_color_m&quot;</span><span class="p">,</span> <span class="n">new_color</span><span class="p">)</span>
 
     <span class="c1">### Multidimensional Properties ###</span>
     <span class="nd">@property</span>
@@ -1600,7 +1555,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">num_basis_for_precondition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The number of basis vectors to use for preconditioning in dimensionality reduction.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int : The number of basis vectors to use for preconditioning in dimensionality reduction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_basis_for_precondition</span>
     
     <span class="nd">@num_basis_for_precondition</span><span class="o">.</span><span class="n">setter</span>
@@ -1622,31 +1578,34 @@
         <span class="k">if</span> <span class="s1">&#39;coordinate&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_dict</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_field_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;coordinate&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_dict</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">selected_analytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.Series : The selected analytes for the current sample.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="AppData.selected_fields">
+<a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.selected_fields">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">selected_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list : The selected fields for the current sample.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attributes</span><span class="p">({</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attributes</span><span class="p">({</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span><span class="n">field_type</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
 
-        <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="AppData.get_field_list">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.get_field_list">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_name</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="o">=</span><span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the fields associated with a defined set</span>
 
 <span class="sd">        Set names are consistent with QComboBox.</span>
 <span class="sd">        The set names are: ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calculated Field``,</span>
 <span class="sd">        ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``</span>
 <span class="sd">        and ``None``.  The set names are used to filter the data to a specific set of fields.</span>
-<span class="sd">        The ``filter_type`` parameter is used to filter the data to only fields that are used in analysis.</span>
-<span class="sd">        The options for ``filter_type`` are ``&#39;all&#39;`` and ``&#39;used&#39;``.  If ``filter_type`` is set to ``&#39;all&#39;``, all fields</span>
-<span class="sd">        in the set will be returned.  If ``filter_type`` is set to ``&#39;used&#39;``, only fields that are used in analysis will be returned.</span>
+<span class="sd">        The ``filter_type`` parameter is used to filter the data to only fields that are used</span>
+<span class="sd">        in analysis.  The options for ``filter_type`` are ``&#39;all&#39;`` and ``&#39;used&#39;``.  If</span>
+<span class="sd">        ``filter_type`` is set to ``&#39;all&#39;``, all fields in the set will be returned.  If</span>
+<span class="sd">        ``filter_type`` is set to ``&#39;used&#39;``, only fields that are used in analysis will be returned.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        set_name : str, optional</span>
+<span class="sd">        field_type : str, optional</span>
 <span class="sd">            name of set list, by default &#39;Analyte&#39;</span>
 <span class="sd">        filter_type : str, optional</span>
 <span class="sd">            Filters data to columns selected for analysis, by default &#39;all&#39;</span>
@@ -1664,24 +1623,60 @@
         <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;used&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;filter must be &#39;all&#39; or &#39;used&#39;.&quot;</span><span class="p">)</span>
 
-        <span class="n">set_fields</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">match</span> <span class="n">set_name</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s1">&#39;Analyte&#39;</span> <span class="o">|</span> <span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;used&#39;</span><span class="p">:</span>
-                    <span class="n">set_fields</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attributes</span><span class="p">({</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">set_fields</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
-            <span class="k">case</span> <span class="s1">&#39;Ratio&#39;</span> <span class="o">|</span> <span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;used&#39;</span><span class="p">:</span>
-                    <span class="n">set_fields</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attributes</span><span class="p">({</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">set_fields</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
-            <span class="k">case</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">[]</span>
-            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="n">set_fields</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="n">set_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;normalized&#39;</span> <span class="ow">in</span> <span class="n">field_type</span><span class="p">:</span>
+            <span class="n">field_type</span> <span class="o">=</span> <span class="n">field_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; (normalized)&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">set_fields</span></div>
+        <span class="n">field_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_dict</span><span class="p">[</span><span class="n">field_type</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">field_type</span> <span class="o">==</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">sort_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sort_method</span><span class="p">)</span>
+
+        <span class="c1"># filter list by selected analytes</span>
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;used&#39;</span><span class="p">:</span>
+            <span class="n">field_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_list</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_fields</span><span class="p">(</span><span class="n">field_type</span><span class="p">)]</span>
+        
+        <span class="k">return</span> <span class="n">field_list</span></div>
+
+    
+<div class="viewcode-block" id="AppData.get_field_type_list">
+<a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.get_field_type_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_type_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ax</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the field type options in the UI</span>
+<span class="sd">        </span>
+<span class="sd">        This method updates the field type options in the UI based on the currently selected sample.</span>
+<span class="sd">        It retrieves the field types for the selected sample and updates the UI accordingly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="n">plot_type</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span>
+        <span class="n">plot_dict</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_axis_dict</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]</span>
+        <span class="n">field_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_dict</span>
+
+        <span class="n">new_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># check if the list should include all options, global_list == True</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="s1">&#39;cfield_type&#39;</span> <span class="ow">in</span> <span class="n">plot_dict</span><span class="p">:</span>
+            <span class="c1"># set the list based on style_data.plot_type and available field types</span>
+            <span class="n">new_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">field_dict</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">plot_dict</span><span class="p">[</span><span class="s1">&#39;cfield_type&#39;</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="s1">&#39;field_type&#39;</span> <span class="ow">in</span> <span class="n">plot_dict</span><span class="p">:</span>
+            <span class="c1"># set the list based on style_data.plot_type and available field types</span>
+            <span class="n">new_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">field_dict</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">plot_dict</span><span class="p">[</span><span class="s1">&#39;field_type&#39;</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">field_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="s1">&#39;normalized&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;Analyte&#39;</span> <span class="ow">in</span> <span class="n">new_list</span><span class="p">:</span>
+                <span class="n">new_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">new_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Analyte (normalized)&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s1">&#39;Ratio&#39;</span> <span class="ow">in</span> <span class="n">new_list</span><span class="p">:</span>
+                <span class="n">new_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">new_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Ratio&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Ratio (normalized)&#39;</span><span class="p">)</span>
+
+        <span class="c1"># add &#39;None&#39; as first option if required.</span>
+        <span class="k">if</span> <span class="n">plot_dict</span><span class="p">[</span><span class="s1">&#39;add_none&#39;</span><span class="p">][</span><span class="n">ax</span><span class="p">]:</span>
+            <span class="n">new_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">new_list</span></div>
 
 
 <div class="viewcode-block" id="AppData.update_hist_bin_width">
@@ -1709,9 +1704,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">update_hist_num_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the number of bins for histograms</span>
 
-<span class="sd">        This method calculates the number of histogram bins based on the currently selected data field and type.</span>
-<span class="sd">        It retrieves the data for the selected field and type, calculates the range of values,</span>
-<span class="sd">        and sets the number of bins based on the bin width.</span>
+<span class="sd">        This method calculates the number of histogram bins based on the currently selected data</span>
+<span class="sd">        field and type.  It retrieves the data for the selected field and type, calculates the</span>
+<span class="sd">        range of values, and sets the number of bins based on the bin width.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_field_type</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_field</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
             <span class="k">return</span>
@@ -1771,13 +1766,13 @@
 
 <div class="viewcode-block" id="AppData.cluster_group_changed">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData.cluster_group_changed">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_group_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">plot_style</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_group_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the cluster dictionary and selected cluster groups.</span>
 
 <span class="sd">        This method checks if the current clustering method is available in</span>
 <span class="sd">        ``data.processed_data[method]``. If found, it retrieves and sorts</span>
-<span class="sd">        the unique cluster labels, assigns colors using ``plot_style``,</span>
+<span class="sd">        the unique cluster labels, assigns colors using ``style_data``,</span>
 <span class="sd">        and updates the internal dictionary (``self.cluster_dict``) with</span>
 <span class="sd">        each cluster’s information. If a mask cluster (label 99) exists,</span>
 <span class="sd">        it is separately handled and assigned the last color.</span>
@@ -1786,9 +1781,9 @@
 <span class="sd">        ----------</span>
 <span class="sd">        data : object </span>
 <span class="sd">            The data container with processed cluster information stored in</span>
-<span class="sd">            ``data.processed_data[method]``.</span>
-<span class="sd">        plot_style : object</span>
-<span class="sd">            An object or utility providing default cluster color assignments.</span>
+<span class="sd">            ``data.processed_data[method]``</span>
+<span class="sd">        style_data : object</span>
+<span class="sd">            Object providing default cluster color assignments</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="k">return</span>
@@ -1813,9 +1808,9 @@
                         <span class="k">break</span>
 
                 <span class="k">if</span> <span class="mi">99</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">:</span>
-                    <span class="n">hexcolor</span> <span class="o">=</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">set_default_cluster_colors</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">hexcolor</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">set_default_cluster_colors</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">hexcolor</span> <span class="o">=</span> <span class="n">plot_style</span><span class="o">.</span><span class="n">set_default_cluster_colors</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">))</span>
+                    <span class="n">hexcolor</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">set_default_cluster_colors</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">))</span>
 
                 <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">:</span>
                     <span class="n">c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>

@@ -401,19 +401,19 @@
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.add_colorbar" title="common.LamePlot.add_colorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_colorbar</span></code></a>(plot_style, canvas, cax[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.add_colorbar" title="common.LamePlot.add_colorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_colorbar</span></code></a>(style_data, canvas, cax[, ...])</p></td>
 <td><p>Adds a colorbar to a MPL figure</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.add_scalebar" title="common.LamePlot.add_scalebar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_scalebar</span></code></a>(data, app_data, plot_style, ax)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.add_scalebar" title="common.LamePlot.add_scalebar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_scalebar</span></code></a>(data, app_data, style_data, ax)</p></td>
 <td><p>Add a scalebar to a map</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.biplot" title="common.LamePlot.biplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">biplot</span></code></a>(canvas, data, app_data, plot_style, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.biplot" title="common.LamePlot.biplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">biplot</span></code></a>(canvas, data, app_data, style_data, ...)</p></td>
 <td><p>Creates scatter bi-plots</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.cluster_performance_plot" title="common.LamePlot.cluster_performance_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_performance_plot</span></code></a>(parent, data, ...)</p></td>
 <td><p>Plots used to estimate the optimal number of clusters</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.get_scatter_data" title="common.LamePlot.get_scatter_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scatter_data</span></code></a>(data, app_data, plot_style)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.get_scatter_data" title="common.LamePlot.get_scatter_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scatter_data</span></code></a>(data, app_data, style_data)</p></td>
 <td><p>Get data for scatter plots.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.hist2dbiplot" title="common.LamePlot.hist2dbiplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist2dbiplot</span></code></a>(canvas, data, app_data, ...)</p></td>
@@ -428,7 +428,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_cluster_map" title="common.LamePlot.plot_cluster_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_cluster_map</span></code></a>(parent, data, app_data, ...)</p></td>
 <td><p>Produces a map of cluster categories</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_clusters" title="common.LamePlot.plot_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_clusters</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_clusters" title="common.LamePlot.plot_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_clusters</span></code></a>(parent, data, app_data, style_data)</p></td>
 <td><p>Plot maps associated with clustering</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_correlation" title="common.LamePlot.plot_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correlation</span></code></a>(parent, data, app_data, ...)</p></td>
@@ -443,10 +443,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_map_pg" title="common.LamePlot.plot_map_pg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_map_pg</span></code></a>(parent, sample_id, field_type, field)</p></td>
 <td><p>Create a graphic widget for plotting a map</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_ndim" title="common.LamePlot.plot_ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ndim</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_ndim" title="common.LamePlot.plot_ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ndim</span></code></a>(parent, data, app_data, style_data)</p></td>
 <td><p>Produces trace element compatibility (TEC) and Radar plots</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca" title="common.LamePlot.plot_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca" title="common.LamePlot.plot_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca</span></code></a>(parent, data, app_data, style_data)</p></td>
 <td><p>Plot principal component analysis (PCA)</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca_components" title="common.LamePlot.plot_pca_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca_components</span></code></a>(pca_results, data, ...)</p></td>
@@ -458,7 +458,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_pca_vectors" title="common.LamePlot.plot_pca_vectors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pca_vectors</span></code></a>(parent, pca_results, data, ...)</p></td>
 <td><p>Displays a heat map of PCA vector components</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_scatter" title="common.LamePlot.plot_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_scatter</span></code></a>(parent, data, app_data, plot_style)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.plot_scatter" title="common.LamePlot.plot_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_scatter</span></code></a>(parent, data, app_data, style_data)</p></td>
 <td><p>Creates a plots from self.toolBox Scatter page.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.plot_score_map" title="common.LamePlot.plot_score_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_score_map</span></code></a>(parent, data, app_data, ...)</p></td>
@@ -473,17 +473,20 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#common.LamePlot.ternary_scatter" title="common.LamePlot.ternary_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_scatter</span></code></a>(canvas, data, app_data, ...)</p></td>
 <td><p>Creates ternary scatter plots</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.update_figure_font" title="common.LamePlot.update_figure_font"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_figure_font</span></code></a>(canvas, font_name)</p></td>
+<td><p>updates figure fonts without the need to recreate the figure.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.add_colorbar">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">add_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbartype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'continuous'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouplabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupcolors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#add_colorbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.add_colorbar" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">add_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbartype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'continuous'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouplabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupcolors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#add_colorbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.add_colorbar" title="Link to this definition">#</a></dt>
 <dd><p>Adds a colorbar to a MPL figure</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>canvas</strong> (<em>mplc.MplCanvas</em>) – canvas object</p></li>
 <li><p><strong>cax</strong> (<em>axes</em>) – color axes object</p></li>
 <li><p><strong>cbartype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Type of colorbar, <code class="docutils literal notranslate"><span class="pre">dicrete</span></code> or <code class="docutils literal notranslate"><span class="pre">continuous</span></code>, Defaults to continuous</p></li>
@@ -497,14 +500,14 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.add_scalebar">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">add_scalebar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#add_scalebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.add_scalebar" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">add_scalebar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#add_scalebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.add_scalebar" title="Link to this definition">#</a></dt>
 <dd><p>Add a scalebar to a map</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>ax</strong> – Axes to place scalebar on.</p></li>
 </ul>
 </dd>
@@ -513,16 +516,16 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.biplot">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">biplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#biplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.biplot" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">biplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#biplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.biplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates scatter bi-plots</p>
 <p>A general function for creating scatter plots of 2-dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas to be added to main window</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas to be added to main window</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldX.currentText()</span></code> as x coordinate</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldX.currentText()</span></code> as y coordinate</p></li>
 <li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxColorField.currentText()</span></code> as marker colors</p></li>
@@ -540,7 +543,7 @@ and the plot type.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.cluster_performance_plot">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">cluster_performance_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#cluster_performance_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.cluster_performance_plot" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">cluster_performance_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#cluster_performance_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.cluster_performance_plot" title="Link to this definition">#</a></dt>
 <dd><p>Plots used to estimate the optimal number of clusters</p>
 <p>1. Elbow Method
 The elbow method looks at the variance (or inertia) within clusters as the number
@@ -571,7 +574,7 @@ to other clusters. The score ranges from -1 to 1, where:</p>
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -586,7 +589,7 @@ to other clusters. The score ranges from -1 to 1, where:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.get_scatter_data">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">get_scatter_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#get_scatter_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.get_scatter_data" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">get_scatter_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#get_scatter_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.get_scatter_data" title="Link to this definition">#</a></dt>
 <dd><p>Get data for scatter plots.</p>
 <p>This function retrieves the necessary data vectors for scatter plots based on the
 specified plot style and application settings. It constructs a dictionary containing
@@ -597,7 +600,7 @@ visualizations.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>processed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, use processed data; if False, use raw data. Defaults to True.</p></li>
 </ul>
 </dd>
@@ -612,16 +615,16 @@ visualizations.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.hist2dbiplot">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">hist2dbiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#hist2dbiplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.hist2dbiplot" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">hist2dbiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#hist2dbiplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.hist2dbiplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates 2D histogram figure</p>
 <p>A general function for creating 2D histograms (heatmaps).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – plotting canvas</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – plotting canvas</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – X-axis dictionary</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Y-axis dictionary</p></li>
 </ul>
@@ -638,16 +641,16 @@ and the plot type.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.hist2dternplot">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">hist2dternplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#hist2dternplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.hist2dternplot" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">hist2dternplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#hist2dternplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.hist2dternplot" title="Link to this definition">#</a></dt>
 <dd><p>Creates a ternary histogram figure</p>
 <p>A general function for creating scatter plots of 2-dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
 <li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
@@ -665,7 +668,7 @@ addition to histogram map. Default is None, which produces a histogram.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.3)"><em>matplotlib.axes.Axes</em></a>) – The axes object to modify.</p></li>
+<li><p><strong>ax</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.5)"><em>matplotlib.axes.Axes</em></a>) – The axes object to modify.</p></li>
 <li><p><strong>lim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – The limits for the logarithmic axis, e.g., [1, 3] for 10^1 to 10^3.</p></li>
 <li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The axis to apply the logarithmic scale to, either ‘x’ or ‘y’.
 Defaults to ‘y’.</p></li>
@@ -679,7 +682,7 @@ Defaults to an empty string.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_cluster_map">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_cluster_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_cluster_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_cluster_map" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_cluster_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_cluster_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_cluster_map" title="Link to this definition">#</a></dt>
 <dd><p>Produces a map of cluster categories</p>
 <p>Creates the map on an <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.  Each cluster category is assigned a unique color.
 The function updates <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_info</span></code> with the displayed plot metadata and figure
@@ -690,7 +693,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -705,7 +708,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_clusters">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_clusters" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_clusters" title="Link to this definition">#</a></dt>
 <dd><p>Plot maps associated with clustering</p>
 <p>Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
 The function updates <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_info</span></code> with the displayed plot metadata and figure
@@ -716,7 +719,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -731,7 +734,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_correlation">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_correlation" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_correlation" title="Link to this definition">#</a></dt>
 <dd><p>Creates an image of the correlation matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -739,7 +742,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -754,7 +757,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_histogram">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_histogram" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_histogram" title="Link to this definition">#</a></dt>
 <dd><p>Plots a histogramn in the canvas window.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -762,21 +765,21 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <li><p><strong>parent</strong> (<em>QWidget</em>) – The parent widget for the plot canvas.</p></li>
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Data object containing processed data, mask, and methods for retrieving map data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Application data object containing settings such as color scale equalization and sample ID.</p></li>
-<li><p><strong>plot_style</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>canvas</strong> – The Matplotlib canvas containing the plotted histogram.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_map_mpl">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_mpl" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_mpl" title="Link to this definition">#</a></dt>
 <dd><p>Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -784,7 +787,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <li><p><strong>parent</strong> (<em>QWidget</em><em> or </em><em>similar</em>) – The parent widget for the plot canvas.</p></li>
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Data object containing processed data, mask, and methods for retrieving map data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Application data object containing settings such as color scale equalization and sample ID.</p></li>
-<li><p><strong>plot_style</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
 <li><p><strong>field_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The type of field to plot (e.g., ‘element’, ‘phase’).</p></li>
 <li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The specific field or attribute to plot.</p></li>
 <li><p><strong>add_histogram</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, adds a small histogram of the field data to the plot (default is False).</p></li>
@@ -811,7 +814,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_map_pg">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_pg" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_map_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_map_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_map_pg" title="Link to this definition">#</a></dt>
 <dd><p>Create a graphic widget for plotting a map</p>
 <p>Create a map using pyqtgraph.</p>
 <dl class="field-list simple">
@@ -827,7 +830,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_ndim">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_ndim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_ndim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_ndim" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_ndim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_ndim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_ndim" title="Link to this definition">#</a></dt>
 <dd><p>Produces trace element compatibility (TEC) and Radar plots</p>
 <p>Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider
 diagrams, which display a set of elements arranged by compatibility.  Radar plots show
@@ -841,7 +844,7 @@ or spider web.</p>
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -856,7 +859,7 @@ or spider web.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_pca">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca" title="Link to this definition">#</a></dt>
 <dd><p>Plot principal component analysis (PCA)</p>
 <p>Wrapper for one of four types of PCA plots:
 * <code class="docutils literal notranslate"><span class="pre">plot_pca_variance()</span></code> a plot of explained variances
@@ -869,7 +872,7 @@ or spider web.</p>
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -885,7 +888,7 @@ or spider web.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_pca_components">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_components" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_components" title="Link to this definition">#</a></dt>
 <dd><p>Adds vector components to PCA scatter and heatmaps</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -893,8 +896,8 @@ or spider web.</p>
 <li><p><strong>pca_results</strong> (<em>PCA</em>) – PCA results object containing the components.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
-<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – The canvas containing the PCA scatter or heatmap plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – The canvas containing the PCA scatter or heatmap plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -909,14 +912,14 @@ or spider web.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_pca_variance">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_variance" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_variance" title="Link to this definition">#</a></dt>
 <dd><p>Creates a plot of explained variance, individual and cumulative, for PCA</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>pca_results</strong> (<em>PCA</em>) – PCA results object containing explained variance ratios.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -931,7 +934,7 @@ or spider web.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_pca_vectors">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_vectors" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_pca_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_pca_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_pca_vectors" title="Link to this definition">#</a></dt>
 <dd><p>Displays a heat map of PCA vector components</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -940,7 +943,7 @@ or spider web.</p>
 <li><p><strong>pca_results</strong> (<em>PCA</em>) – PCA results object containing the components.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -955,7 +958,7 @@ or spider web.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_scatter">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_scatter" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_scatter" title="Link to this definition">#</a></dt>
 <dd><p>Creates a plots from self.toolBox Scatter page.</p>
 <p>Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.
 This function retrieves the necessary data vectors for scatter plots based on the
@@ -968,8 +971,8 @@ visualizations.</p>
 <li><p><strong>parent</strong> (<em>QWidget</em>) – The parent widget for the plot canvas.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
-<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – canvas within gui for plotting, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – canvas within gui for plotting, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -985,18 +988,18 @@ and the plot type.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_score_map">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_score_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_score_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_score_map" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_score_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_score_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_score_map" title="Link to this definition">#</a></dt>
 <dd><p>Plots score maps for dimensionality reduction methods such as PCA or clustering.</p>
 <p>Creates a score map for PCA and clusters.  Maps are displayed on an <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.
 The function uses the processed data from the DataHandler and the selected field from AppData
-to generate the score map. The plot is styled according to the provided PlotStyle object.</p>
+to generate the score map. The plot is styled according to the provided StyleData object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1011,7 +1014,7 @@ to generate the score map. The plot is styled according to the provided PlotStyl
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_small_histogram">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_small_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_small_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_small_histogram" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_small_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_plot_df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_small_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_small_histogram" title="Link to this definition">#</a></dt>
 <dd><p>Creates a small histogram on the Samples and Fields tab associated with the selected map</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1019,7 +1022,7 @@ to generate the score map. The plot is styled according to the provided PlotStyl
 <li><p><strong>parent</strong> (<em>QWidget</em>) – The parent widget for the plot canvas.</p></li>
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Data object containing processed data, mask, and methods for retrieving map data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Application data object containing settings such as color scale equalization and sample ID.</p></li>
-<li><p><strong>plot_style</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Plot style object providing colormap, normalization, and style dictionary.</p></li>
 <li><p><strong>current_plot_df</strong> (<em>pd.DataFrame</em>) – DataFrame containing the current plot data, typically the map data for the selected field.</p></li>
 </ul>
 </dd>
@@ -1027,25 +1030,25 @@ to generate the score map. The plot is styled according to the provided PlotStyl
 <dd class="field-even"><p><strong>canvas</strong> – The Matplotlib canvas containing the plotted histogram.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.plot_ternary_map">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_ternary_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_ternary_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_ternary_map" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_ternary_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_ternary_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_ternary_map" title="Link to this definition">#</a></dt>
 <dd><p>Creates map colored by ternary coordinate positions.</p>
 <p>This function generates a ternary map plot using the specified x, y, and z fields from the
 processed data. It uses the ternary library to create a ternary plot and displays it
-on a Matplotlib canvas. The plot is styled according to the provided PlotStyle object.</p>
+on a Matplotlib canvas. The plot is styled according to the provided StyleData object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1060,16 +1063,16 @@ on a Matplotlib canvas. The plot is styled according to the provided PlotStyle o
 
 <dl class="py function">
 <dt class="sig sig-object py" id="common.LamePlot.ternary_scatter">
-<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">ternary_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_style</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#ternary_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.ternary_scatter" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">ternary_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#ternary_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.ternary_scatter" title="Link to this definition">#</a></dt>
 <dd><p>Creates ternary scatter plots</p>
 <p>A general function for creating ternary scatter plots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
 <li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>plot_style</strong> (<em>PlotStyle</em>) – PlotStyle object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with top vertex</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with left vertex</p></li>
 <li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with right vertex</p></li>
@@ -1082,6 +1085,20 @@ and the plot type.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="common.LamePlot.update_figure_font">
+<span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">update_figure_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#update_figure_font"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.update_figure_font" title="Link to this definition">#</a></dt>
+<dd><p>updates figure fonts without the need to recreate the figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas object displayed in UI.</p></li>
+<li><p><strong>font_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Font used on plot.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1141,6 +1158,7 @@ and the plot type.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_small_histogram"><code class="docutils literal notranslate"><span class="pre">plot_small_histogram()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.plot_ternary_map"><code class="docutils literal notranslate"><span class="pre">plot_ternary_map()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.ternary_scatter"><code class="docutils literal notranslate"><span class="pre">ternary_scatter()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.LamePlot.update_figure_font"><code class="docutils literal notranslate"><span class="pre">update_figure_font()</span></code></a></li>
 </ul>
   </nav></div>
 

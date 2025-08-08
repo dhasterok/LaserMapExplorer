@@ -1,4 +1,4 @@
-src.common.CustomWidgets
+﻿src.common.CustomWidgets
 ========================
 
 .. automodule:: src.common.CustomWidgets
@@ -8,13 +8,16 @@ src.common.CustomWidgets
 
    .. autosummary::
    
+      ColorButton
+      CustomAction
       CustomActionMenu
-      CustomCheckButton
       CustomComboBox
       CustomDockWidget
       CustomLineEdit
+      CustomPage
       CustomSlider
       CustomTableWidget
+      CustomToolButton
       CustomTreeView
       DoubleSlider
       RotatedHeaderView

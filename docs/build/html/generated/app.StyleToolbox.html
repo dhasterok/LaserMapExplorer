@@ -404,10 +404,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StyleData</span></code></a>(parent)</p></td>
 <td><p>Manages plot styling for different plot types and syncs with main window UI.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleObj" title="app.StyleToolbox.StyleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StyleObj</span></code></a>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleTheme" title="app.StyleToolbox.StyleTheme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StyleTheme</span></code></a>([parent])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleTheme" title="app.StyleToolbox.StyleTheme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StyleTheme</span></code></a>([parent])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -416,7 +413,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.StyleToolbox.</span></span><span class="sig-name descname"><span class="pre">StyleData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="src.common.Observable.html#src.common.Observable.Observable" title="src.common.Observable.Observable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observable</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="src.common.Observable.html#src.common.Observable.Observable" title="src.common.Observable.Observable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observable</span></code></a>, <a class="reference internal" href="#app.StyleToolbox.StyleTheme" title="app.StyleToolbox.StyleTheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">StyleTheme</span></code></a></p>
 <p>Manages plot styling for different plot types and syncs with main window UI.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.plot_type">
@@ -631,7 +628,7 @@
 <dd><p>Marker alpha blending.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -648,8 +645,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.line_multiplier">
-<span class="sig-name descname"><span class="pre">line_multiplier</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.line_multiplier" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.length_multiplier">
+<span class="sig-name descname"><span class="pre">length_multiplier</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.length_multiplier" title="Link to this definition">#</a></dt>
 <dd><p>Multiplier used to lengthen (&gt;1) or shorten (0,1) lines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -759,6 +756,28 @@
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternary_colormap">
+<span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternary_colormap" title="Link to this definition">#</a></dt>
+<dd><p>Colormap for ternary maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ternary_color_x,</span> <span class="pre">ternary_color_y,</span> <span class="pre">ternary_color_z,</span> <span class="pre">ternary_color_m</span></span></dt>
+<dd><p>Colors for ternary diagram vertices and centroid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.map_plot_types">
 <span class="sig-name descname"><span class="pre">map_plot_types</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.map_plot_types" title="Link to this definition">#</a></dt>
 <dd><p>A list of plots that result in a map, i.e., [‘field map’, ‘ternary map’, ‘PCA score’, ‘cluster map’, ‘cluster score’].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.</p>
@@ -826,9 +845,9 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <li><p>associated with widgets in the toolBoxTreeView &gt; Styling &gt; Markers tab</p></li>
 </ul>
 <p>‘Marker’ : (str) – marker symbol defined by matplotlib styles in the attribute <code class="docutils literal notranslate"><span class="pre">marker_dict</span></code>
-‘MarkerSize’ : (int) – marker size in points, set by <code class="docutils literal notranslate"><span class="pre">doubleSpinBoxMarkerSize</span></code>
+‘MarkerSize’ : (float) – marker size in points, set by <code class="docutils literal notranslate"><span class="pre">doubleSpinBoxMarkerSize</span></code>
 ‘MarkerColor’ : (hex str) – color of markers, set by <code class="docutils literal notranslate"><span class="pre">toolButtonMarkerColor</span></code>
-‘MarkerAlpha’ : (int) – marker transparency, set by <code class="docutils literal notranslate"><span class="pre">horizontalSliderMarkerAlpha</span></code></p>
+‘MarkerAlpha’ : (float) – marker transparency, set by <code class="docutils literal notranslate"><span class="pre">horizontalSliderMarkerAlpha</span></code></p>
 <ul class="simple">
 <li><p>associated with widgets in the toolBoxTreeView &gt; Styling &gt; Lines tab</p></li>
 </ul>
@@ -844,7 +863,7 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 ‘Colormap’ : (str) – colormap used in figure, set by <code class="docutils literal notranslate"><span class="pre">comboBoxFieldColormap</span></code>
 ‘CbarReverse’ : (bool) – inverts colormap, set by <code class="docutils literal notranslate"><span class="pre">checkBoxReverseColormap</span></code>
 ‘CbarDir’ : (str) – colorbar direction, options include <code class="docutils literal notranslate"><span class="pre">none</span></code>, <code class="docutils literal notranslate"><span class="pre">vertical</span></code>, and <code class="docutils literal notranslate"><span class="pre">horizontal</span></code>, set by <code class="docutils literal notranslate"><span class="pre">comboBoxCbarDirection</span></code>
-‘Resolution’ : (int) – used to set discritization in 2D and ternary heatmaps, set by <code class="docutils literal notranslate"><span class="pre">spinBoxHeatmapResolution</span></code></p>
+‘Resolution’ : (float) – used to set discritization in 2D and ternary heatmaps, set by <code class="docutils literal notranslate"><span class="pre">spinBoxHeatmapResolution</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -870,24 +889,45 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <dt><strong>cscale</strong></dt><dd></dd>
 <dt><strong>font</strong></dt><dd></dd>
 <dt><strong>font_size</strong></dt><dd></dd>
+<dt><strong>length_multiplier</strong></dt><dd></dd>
 <dt><strong>line_color</strong></dt><dd></dd>
-<dt><strong>line_multiplier</strong></dt><dd></dd>
-<dt><strong>line_width</strong></dt><dd></dd>
-<dt><strong>marker</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#id11" title="app.StyleToolbox.StyleData.line_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_width</span></code></a></dt><dd><p>float : Line width for plots with lines</p>
+</dd>
+<dt><a class="reference internal" href="#id14" title="app.StyleToolbox.StyleData.marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker</span></code></a></dt><dd><p>str : Marker key name associated with self.marker_dict</p>
+</dd>
 <dt><strong>marker_alpha</strong></dt><dd></dd>
 <dt><strong>marker_color</strong></dt><dd></dd>
-<dt><strong>marker_size</strong></dt><dd></dd>
+<dt><strong>marker_dict</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#id18" title="app.StyleToolbox.StyleData.marker_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker_size</span></code></a></dt><dd><p>double : Marker size for plots with markers</p>
+</dd>
 <dt><strong>overlay_color</strong></dt><dd></dd>
 <dt><strong>plot_type</strong></dt><dd></dd>
-<dt><strong>resolution</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#id21" title="app.StyleToolbox.StyleData.resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution</span></code></a></dt><dd><p>int : Resolution for heatmaps.</p>
+</dd>
 <dt><strong>scale_dir</strong></dt><dd></dd>
 <dt><strong>scale_length</strong></dt><dd></dd>
 <dt><strong>scale_location</strong></dt><dd></dd>
-<dt><strong>show_mass</strong></dt><dd></dd>
-<dt><strong>tick_dir</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#app.StyleToolbox.StyleData.show_mass" title="app.StyleToolbox.StyleData.show_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_mass</span></code></a></dt><dd><p>bool : Flag indicating whether to show mass or not on isotope labels</p>
+</dd>
+<dt><a class="reference internal" href="#app.StyleToolbox.StyleData.ternary_color_m" title="app.StyleToolbox.StyleData.ternary_color_m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_m</span></code></a></dt><dd><p>str : The color for the centroid on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.StyleToolbox.StyleData.ternary_color_x" title="app.StyleToolbox.StyleData.ternary_color_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_x</span></code></a></dt><dd><p>str : The color for the A-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.StyleToolbox.StyleData.ternary_color_y" title="app.StyleToolbox.StyleData.ternary_color_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_y</span></code></a></dt><dd><p>str : The color for the B-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#app.StyleToolbox.StyleData.ternary_color_z" title="app.StyleToolbox.StyleData.ternary_color_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_z</span></code></a></dt><dd><p>str : The color for the C-vertex on a ternary diagram.</p>
+</dd>
+<dt><a class="reference internal" href="#id25" title="app.StyleToolbox.StyleData.ternary_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_colormap</span></code></a></dt><dd><p>str : The colormap used for ternary maps.</p>
+</dd>
+<dt><a class="reference internal" href="#id26" title="app.StyleToolbox.StyleData.tick_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tick_dir</span></code></a></dt><dd><p>str : Tick direction for plot.</p>
+</dd>
+<dt><strong>xfield</strong></dt><dd></dd>
+<dt><strong>xfield_type</strong></dt><dd></dd>
 <dt><strong>xlabel</strong></dt><dd></dd>
 <dt><strong>xlim</strong></dt><dd></dd>
 <dt><strong>xscale</strong></dt><dd></dd>
+<dt><strong>yfield</strong></dt><dd></dd>
+<dt><strong>yfield_type</strong></dt><dd></dd>
 <dt><strong>ylabel</strong></dt><dd></dd>
 <dt><strong>ylim</strong></dt><dd></dd>
 <dt><strong>yscale</strong></dt><dd></dd>
@@ -912,20 +952,44 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.default_scale_length" title="app.StyleToolbox.StyleData.default_scale_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_scale_length</span></code></a>()</p></td>
 <td><p>Sets default length of a scale bar for map-type plots</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.get_axis_values" title="app.StyleToolbox.StyleData.get_axis_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axis_values</span></code></a>(data, field_type, field[, ax])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.default_style_dict" title="app.StyleToolbox.StyleData.default_style_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_style_dict</span></code></a>()</p></td>
+<td><p>Generates a dictionary of default plot styles for various plot types.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.get_axis_values" title="app.StyleToolbox.StyleData.get_axis_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axis_values</span></code></a>(data, field_type, field[, ax])</p></td>
 <td><p>Gets axis values</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.get_cluster_colormap" title="app.StyleToolbox.StyleData.get_cluster_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cluster_colormap</span></code></a>(cluster_dict[, alpha])</p></td>
+<td><p>Converts hex colors to a colormap</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.get_colormap" title="app.StyleToolbox.StyleData.get_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_colormap</span></code></a>([N])</p></td>
 <td><p>Gets the color map</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.input_theme_name_dlg" title="app.StyleToolbox.StyleData.input_theme_name_dlg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_theme_name_dlg</span></code></a>(style_dict)</p></td>
+<td><p>Opens a dialog to save style theme</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.load_theme_names" title="app.StyleToolbox.StyleData.load_theme_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_theme_names</span></code></a>()</p></td>
+<td><p>Loads theme names and adds them to the theme comboBox</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.notify_observers" title="app.StyleToolbox.StyleData.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
 <td><p>Notify all registered observers of an event or property change.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.remove_observer" title="app.StyleToolbox.StyleData.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.read_theme" title="app.StyleToolbox.StyleData.read_theme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_theme</span></code></a>(name)</p></td>
+<td><p>Reads a style theme</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.remove_observer" title="app.StyleToolbox.StyleData.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Deregister a callback function from an event.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.set_style_dictionary" title="app.StyleToolbox.StyleData.set_style_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style_dictionary</span></code></a>(data, app_data[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.set_axis_attributes" title="app.StyleToolbox.StyleData.set_axis_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axis_attributes</span></code></a>(ax, field)</p></td>
+<td><p>Sets axis attributes in the style toolbox</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.set_default_cluster_colors" title="app.StyleToolbox.StyleData.set_default_cluster_colors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_default_cluster_colors</span></code></a>(n[, mask])</p></td>
+<td><p>Sets cluster group to default colormap</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.set_style_attributes" title="app.StyleToolbox.StyleData.set_style_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style_attributes</span></code></a>(data, app_data[, ...])</p></td>
 <td><p>Sets values in style dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.toggle_mass" title="app.StyleToolbox.StyleData.toggle_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_mass</span></code></a>(labels)</p></td>
+<td><p>Removes mass from labels</p></td>
 </tr>
 </tbody>
 </table>
@@ -1057,6 +1121,157 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.default_style_dict">
+<span class="sig-name descname"><span class="pre">default_style_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.default_style_dict" title="Link to this definition">#</a></dt>
+<dd><p>Generates a dictionary of default plot styles for various plot types.</p>
+<p>This method resets the internal <cite>default_style_data</cite> to a base set of defaults,
+applies preferred font detection from system fonts, and then clones and customizes
+this style for multiple predefined plot types (e.g., field map, scatter, histogram).</p>
+<p>The resulting dictionary contains one style dictionary per plot type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary mapping plot type names to their corresponding style dictionaries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The base style template (<cite>default_style_data</cite>) contains the following keys and default values:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default Value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>XFieldType
+XField
+XLim
+XScale
+XLabel
+YFieldType
+YField
+YLim
+YScale
+YLabel
+ZFieldType
+ZField
+ZLim
+ZScale
+ZLabel
+CFieldType
+CField
+CLim
+CScale
+CLabel
+AspectRatio
+TickDir
+Font
+FontSize
+ScaleDir
+ScaleLocation
+ScaleLength
+OverlayColor
+Marker
+MarkerSize
+MarkerColor
+MarkerAlpha
+LineWidth
+LineMultiplier
+LineColor
+Colormap
+CbarReverse
+CbarDir
+Resolution</p></td>
+<td><p>‘none’
+‘none’
+[0, 1]
+‘linear’
+‘’
+‘none’
+‘none’
+[0, 1]
+‘linear’
+‘’
+‘none’
+‘none’
+[0, 1]
+‘linear’
+‘’
+‘none’
+‘none’
+[0, 1]
+‘linear’
+‘’
+1.0
+‘out’
+‘’
+11.0
+‘none’
+‘northeast’
+None
+‘#ffffff’
+‘circle’
+6
+‘#1c75bc’
+30
+1.5
+1
+‘#1c75bc’
+‘viridis’
+False
+‘vertical’
+10</p></td>
+<td><p>Type of field for x-axis (e.g., ‘Analyte’)
+Name of x-axis field
+Limits for x-axis
+Scale for x-axis (‘linear’ or ‘log’)
+Label for x-axis
+Type of field for y-axis
+Name of y-axis field
+Limits for y-axis
+Scale for y-axis
+Label for y-axis
+Type of field for z-axis
+Name of z-axis field
+Limits for z-axis
+Scale for z-axis
+Label for z-axis
+Type of color-mapped data
+Field name for color-mapping
+Colorbar limits
+Colorbar scale
+Label for colorbar
+Aspect ratio of the plot
+Tick direction
+Preferred font (auto-selected from system)
+Font size in points
+Scale bar direction
+Position of scale bar
+Length of the scale bar
+Overlay color (e.g., for text/annotation)
+Marker shape
+Marker size in points
+Marker color
+Marker transparency (0–100)
+Width of lines in the plot
+Multiplier for line width
+Line color
+Name of the colormap
+Whether to reverse the colormap
+Direction of colorbar
+Grid resolution</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Specific plot types (e.g., ‘field map’, ‘scatter’, ‘correlation’) override some of
+these values, such as setting <cite>Colormap</cite>, axis fields, aspect ratio, etc.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="id7">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">font</span></span><a class="headerlink" href="#id7" title="Link to this definition">#</a></dt>
@@ -1107,6 +1322,27 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.get_cluster_colormap">
+<span class="sig-name descname"><span class="pre">get_cluster_colormap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.get_cluster_colormap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.get_cluster_colormap" title="Link to this definition">#</a></dt>
+<dd><p>Converts hex colors to a colormap</p>
+<p>Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the <code class="docutils literal notranslate"><span class="pre">MainWindow.tableWidgetViewGroups</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cluster_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary with cluster information</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Transparency to be added to color, by default 100</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A discrete (colors.ListedColormap) colormap</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.colormap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.get_colormap">
 <span class="sig-name descname"><span class="pre">get_colormap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.get_colormap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.get_colormap" title="Link to this definition">#</a></dt>
 <dd><p>Gets the color map</p>
@@ -1124,40 +1360,97 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.input_theme_name_dlg">
+<span class="sig-name descname"><span class="pre">input_theme_name_dlg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.input_theme_name_dlg" title="Link to this definition">#</a></dt>
+<dd><p>Opens a dialog to save style theme</p>
+<p>Style themes are saved as a dictionary into the theme name with a <code class="docutils literal notranslate"><span class="pre">.sty</span></code> extension
+and the name is returned, so it can be added to a list of style themes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>style_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Style settings for each plot type</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Name of style theme.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="id9">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_color</span></span><a class="headerlink" href="#id9" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length_multiplier</span></span><a class="headerlink" href="#id9" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id10">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_multiplier</span></span><a class="headerlink" href="#id10" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_color</span></span><a class="headerlink" href="#id10" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id11">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_width</span></span><a class="headerlink" href="#id11" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Line width for plots with lines</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="id12">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker</span></span><a class="headerlink" href="#id12" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="id13">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_alpha</span></span><a class="headerlink" href="#id13" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.load_theme_names">
+<span class="sig-name descname"><span class="pre">load_theme_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.load_theme_names" title="Link to this definition">#</a></dt>
+<dd><p>Loads theme names and adds them to the theme comboBox</p>
+<p>Looks for saved style themes (<a href="#id12"><span class="problematic" id="id13">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of style themes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id14">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_color</span></span><a class="headerlink" href="#id14" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker</span></span><a class="headerlink" href="#id14" title="Link to this definition">#</a></dt>
+<dd><p>Marker key name associated with self.marker_dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id15">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_size</span></span><a class="headerlink" href="#id15" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_alpha</span></span><a class="headerlink" href="#id15" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id16">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_color</span></span><a class="headerlink" href="#id16" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id17">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_dict</span></span><a class="headerlink" href="#id17" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id18">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_size</span></span><a class="headerlink" href="#id18" title="Link to this definition">#</a></dt>
+<dd><p>Marker size for plots with markers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.notify_observers">
@@ -1166,13 +1459,13 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id16">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">overlay_color</span></span><a class="headerlink" href="#id16" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id19">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">overlay_color</span></span><a class="headerlink" href="#id19" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id17">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_type</span></span><a class="headerlink" href="#id17" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id20">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_type</span></span><a class="headerlink" href="#id20" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1181,30 +1474,71 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.read_theme">
+<span class="sig-name descname"><span class="pre">read_theme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.read_theme" title="Link to this definition">#</a></dt>
+<dd><p>Reads a style theme</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of a style theme.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Style dictionary for all plot types.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.remove_observer">
 <span class="sig-name descname"><span class="pre">remove_observer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.remove_observer" title="Link to this definition">#</a></dt>
 <dd><p>Deregister a callback function from an event.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id18">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#id18" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="id19">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_dir</span></span><a class="headerlink" href="#id19" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="id20">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_length</span></span><a class="headerlink" href="#id20" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="id21">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_location</span></span><a class="headerlink" href="#id21" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#id21" title="Link to this definition">#</a></dt>
+<dd><p>Resolution for heatmaps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.13)"><strong>TypeError</strong></a> – Value must be float or None.</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id22">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_dir</span></span><a class="headerlink" href="#id22" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id23">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_length</span></span><a class="headerlink" href="#id23" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id24">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_location</span></span><a class="headerlink" href="#id24" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.set_axis_attributes">
+<span class="sig-name descname"><span class="pre">set_axis_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.set_axis_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.set_axis_attributes" title="Link to this definition">#</a></dt>
+<dd><p>Sets axis attributes in the style toolbox</p>
+<p>Updates axes limits and labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Axis ‘x’, ‘y’, or ‘z’</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Field plotted on axis, used as column name to <code class="docutils literal notranslate"><span class="pre">MainWindow.data.processed_data</span></code> dataframe.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.set_axis_label">
@@ -1222,8 +1556,26 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.set_style_dictionary">
-<span class="sig-name descname"><span class="pre">set_style_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.set_style_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.set_style_dictionary" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.set_default_cluster_colors">
+<span class="sig-name descname"><span class="pre">set_default_cluster_colors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.set_default_cluster_colors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.set_default_cluster_colors" title="Link to this definition">#</a></dt>
+<dd><p>Sets cluster group to default colormap</p>
+<p>Sets the colors in <code class="docutils literal notranslate"><span class="pre">self.tableWidgetViewGroups</span></code> to the default colormap in
+<code class="docutils literal notranslate"><span class="pre">self.styles['cluster</span> <span class="pre">map']['Colormap'].</span>&#160; <span class="pre">Change</span> <span class="pre">the</span> <span class="pre">default</span> <span class="pre">colormap</span>
+<span class="pre">by</span> <span class="pre">changing</span> <span class="pre">``self.comboBoxColormap</span></code>, when <code class="docutils literal notranslate"><span class="pre">self.ui.control_dock.comboBoxFieldTypeC.currentText()</span></code> is <code class="docutils literal notranslate"><span class="pre">Cluster</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>N</strong> (<em>number of cluster groups</em>)</p></li>
+<li><p><strong>str</strong> (<em>hexcolor</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.set_style_attributes">
+<span class="sig-name descname"><span class="pre">set_style_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.set_style_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.set_style_attributes" title="Link to this definition">#</a></dt>
 <dd><p>Sets values in style dictionary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1238,46 +1590,151 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 <dl class="py property">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.show_mass">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">show_mass</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.show_mass" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Flag indicating whether to show mass or not on isotope labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id22">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tick_dir</span></span><a class="headerlink" href="#id22" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternary_color_m">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_m</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternary_color_m" title="Link to this definition">#</a></dt>
+<dd><p>The color for the centroid on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id23">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlabel</span></span><a class="headerlink" href="#id23" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternary_color_x">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_x</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternary_color_x" title="Link to this definition">#</a></dt>
+<dd><p>The color for the A-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id24">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlim</span></span><a class="headerlink" href="#id24" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternary_color_y">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_y</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternary_color_y" title="Link to this definition">#</a></dt>
+<dd><p>The color for the B-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternary_color_z">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_color_z</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternary_color_z" title="Link to this definition">#</a></dt>
+<dd><p>The color for the C-vertex on a ternary diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id25">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xscale</span></span><a class="headerlink" href="#id25" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#id25" title="Link to this definition">#</a></dt>
+<dd><p>The colormap used for ternary maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id26">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><a class="headerlink" href="#id26" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tick_dir</span></span><a class="headerlink" href="#id26" title="Link to this definition">#</a></dt>
+<dd><p>Tick direction for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.toggle_mass">
+<span class="sig-name descname"><span class="pre">toggle_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.toggle_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.toggle_mass" title="Link to this definition">#</a></dt>
+<dd><p>Removes mass from labels</p>
+<p>Removes mass if <code class="docutils literal notranslate"><span class="pre">MainWindow.checkBoxShowMass.isChecked()</span></code> is False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Input labels</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output labels with or without mass</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.xfield">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xfield</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.xfield" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.xfield_type">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xfield_type</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.xfield_type" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id27">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylim</span></span><a class="headerlink" href="#id27" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlabel</span></span><a class="headerlink" href="#id27" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id28">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yscale</span></span><a class="headerlink" href="#id28" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlim</span></span><a class="headerlink" href="#id28" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id29">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zlabel</span></span><a class="headerlink" href="#id29" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xscale</span></span><a class="headerlink" href="#id29" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.yfield">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yfield</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.yfield" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.yfield_type">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yfield_type</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.yfield_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id30">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><a class="headerlink" href="#id30" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id31">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylim</span></span><a class="headerlink" href="#id31" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id32">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yscale</span></span><a class="headerlink" href="#id32" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id33">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zlabel</span></span><a class="headerlink" href="#id33" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1290,12 +1747,6 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zscale</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.zscale" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="app.StyleToolbox.StyleObj">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.StyleToolbox.</span></span><span class="sig-name descname"><span class="pre">StyleObj</span></span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleObj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleObj" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -1324,7 +1775,7 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleTheme.default_style_dict">
 <span class="sig-name descname"><span class="pre">default_style_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleTheme.default_style_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleTheme.default_style_dict" title="Link to this definition">#</a></dt>
 <dd><p>Generates a dictionary of default plot styles for various plot types.</p>
-<p>This method resets the internal <cite>default_plot_style</cite> to a base set of defaults,
+<p>This method resets the internal <cite>default_style_data</cite> to a base set of defaults,
 applies preferred font detection from system fonts, and then clones and customizes
 this style for multiple predefined plot types (e.g., field map, scatter, histogram).</p>
 <p>The resulting dictionary contains one style dictionary per plot type.</p>
@@ -1337,7 +1788,7 @@ this style for multiple predefined plot types (e.g., field map, scatter, histogr
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The base style template (<cite>default_plot_style</cite>) contains the following keys and default values:</p>
+<p>The base style template (<cite>default_style_data</cite>) contains the following keys and default values:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Key</p></th>
@@ -1494,7 +1945,7 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleTheme.load_theme_names">
 <span class="sig-name descname"><span class="pre">load_theme_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleTheme.load_theme_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleTheme.load_theme_names" title="Link to this definition">#</a></dt>
 <dd><p>Loads theme names and adds them to the theme comboBox</p>
-<p>Looks for saved style themes (<a href="#id30"><span class="problematic" id="id31">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
+<p>Looks for saved style themes (<a href="#id34"><span class="problematic" id="id35">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of style themes</p>
@@ -1577,7 +2028,7 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.marker_color"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.marker_alpha"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_alpha</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.line_width"><code class="docutils literal notranslate"><span class="pre">StyleData.line_width</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.line_multiplier"><code class="docutils literal notranslate"><span class="pre">StyleData.line_multiplier</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.length_multiplier"><code class="docutils literal notranslate"><span class="pre">StyleData.length_multiplier</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.line_color"><code class="docutils literal notranslate"><span class="pre">StyleData.line_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.color_field"><code class="docutils literal notranslate"><span class="pre">StyleData.color_field</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.color_field_type"><code class="docutils literal notranslate"><span class="pre">StyleData.color_field_type</span></code></a></li>
@@ -1588,6 +2039,7 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.clabel"><code class="docutils literal notranslate"><span class="pre">StyleData.clabel</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.cscale"><code class="docutils literal notranslate"><span class="pre">StyleData.cscale</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.resolution"><code class="docutils literal notranslate"><span class="pre">StyleData.resolution</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_colormap"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_colormap</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.map_plot_types"><code class="docutils literal notranslate"><span class="pre">StyleData.map_plot_types</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.marker_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_dict</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.style_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.style_dict</span></code></a></li>
@@ -1603,47 +2055,64 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">StyleData.cscale</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.default_plot_axis_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.default_plot_axis_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.default_scale_length"><code class="docutils literal notranslate"><span class="pre">StyleData.default_scale_length()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.default_style_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.default_style_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">StyleData.font</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">StyleData.font_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_label"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_label()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_lim"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_lim()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_scale"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_scale()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_values"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_values()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_cluster_colormap"><code class="docutils literal notranslate"><span class="pre">StyleData.get_cluster_colormap()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_colormap"><code class="docutils literal notranslate"><span class="pre">StyleData.get_colormap()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">StyleData.line_color</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">StyleData.line_multiplier</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.input_theme_name_dlg"><code class="docutils literal notranslate"><span class="pre">StyleData.input_theme_name_dlg()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">StyleData.length_multiplier</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">StyleData.line_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11"><code class="docutils literal notranslate"><span class="pre">StyleData.line_width</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12"><code class="docutils literal notranslate"><span class="pre">StyleData.marker</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_alpha</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_color</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.load_theme_names"><code class="docutils literal notranslate"><span class="pre">StyleData.load_theme_names()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">StyleData.marker</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id18"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.notify_observers"><code class="docutils literal notranslate"><span class="pre">StyleData.notify_observers()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">StyleData.overlay_color</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">StyleData.plot_type</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id19"><code class="docutils literal notranslate"><span class="pre">StyleData.overlay_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">StyleData.plot_type</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.print_properties"><code class="docutils literal notranslate"><span class="pre">StyleData.print_properties()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.read_theme"><code class="docutils literal notranslate"><span class="pre">StyleData.read_theme()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.remove_observer"><code class="docutils literal notranslate"><span class="pre">StyleData.remove_observer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id18"><code class="docutils literal notranslate"><span class="pre">StyleData.resolution</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id19"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_dir</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_length</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_location</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21"><code class="docutils literal notranslate"><span class="pre">StyleData.resolution</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id22"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_dir</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id23"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id24"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_location</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_attributes"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_attributes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_label"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_label()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_lim"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_lim()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_scale"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_scale()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_style_dictionary"><code class="docutils literal notranslate"><span class="pre">StyleData.set_style_dictionary()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_default_cluster_colors"><code class="docutils literal notranslate"><span class="pre">StyleData.set_default_cluster_colors()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_style_attributes"><code class="docutils literal notranslate"><span class="pre">StyleData.set_style_attributes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.show_mass"><code class="docutils literal notranslate"><span class="pre">StyleData.show_mass</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id22"><code class="docutils literal notranslate"><span class="pre">StyleData.tick_dir</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id23"><code class="docutils literal notranslate"><span class="pre">StyleData.xlabel</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id24"><code class="docutils literal notranslate"><span class="pre">StyleData.xlim</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id25"><code class="docutils literal notranslate"><span class="pre">StyleData.xscale</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26"><code class="docutils literal notranslate"><span class="pre">StyleData.ylabel</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id27"><code class="docutils literal notranslate"><span class="pre">StyleData.ylim</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id28"><code class="docutils literal notranslate"><span class="pre">StyleData.yscale</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id29"><code class="docutils literal notranslate"><span class="pre">StyleData.zlabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_m"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_m</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_x"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_x</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_y"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_y</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_z"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_z</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id25"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_colormap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26"><code class="docutils literal notranslate"><span class="pre">StyleData.tick_dir</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.toggle_mass"><code class="docutils literal notranslate"><span class="pre">StyleData.toggle_mass()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.xfield"><code class="docutils literal notranslate"><span class="pre">StyleData.xfield</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.xfield_type"><code class="docutils literal notranslate"><span class="pre">StyleData.xfield_type</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id27"><code class="docutils literal notranslate"><span class="pre">StyleData.xlabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id28"><code class="docutils literal notranslate"><span class="pre">StyleData.xlim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id29"><code class="docutils literal notranslate"><span class="pre">StyleData.xscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.yfield"><code class="docutils literal notranslate"><span class="pre">StyleData.yfield</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.yfield_type"><code class="docutils literal notranslate"><span class="pre">StyleData.yfield_type</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id30"><code class="docutils literal notranslate"><span class="pre">StyleData.ylabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id31"><code class="docutils literal notranslate"><span class="pre">StyleData.ylim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id32"><code class="docutils literal notranslate"><span class="pre">StyleData.yscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id33"><code class="docutils literal notranslate"><span class="pre">StyleData.zlabel</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.zlim"><code class="docutils literal notranslate"><span class="pre">StyleData.zlim</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.zscale"><code class="docutils literal notranslate"><span class="pre">StyleData.zscale</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleObj"><code class="docutils literal notranslate"><span class="pre">StyleObj</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleTheme"><code class="docutils literal notranslate"><span class="pre">StyleTheme</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleTheme.default_style_dict"><code class="docutils literal notranslate"><span class="pre">StyleTheme.default_style_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleTheme.input_theme_name_dlg"><code class="docutils literal notranslate"><span class="pre">StyleTheme.input_theme_name_dlg()</span></code></a></li>

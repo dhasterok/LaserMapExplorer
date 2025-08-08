@@ -1,7 +1,7 @@
 from typing import Callable
 from collections import defaultdict
 
-class Observable:
+class Observable():
     """Class for observing changes to properties or other events and notifying the observers.
 
     Methods
@@ -14,7 +14,7 @@ class Observable:
         inform observers of an event or change in a property
 
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self._observers = defaultdict(list)
 
     def add_observer(self, event_name: str, callback: Callable):

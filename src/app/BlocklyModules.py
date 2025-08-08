@@ -23,7 +23,7 @@ from src.common.plot_spider import plot_spider_norm
 from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
-from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
+from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot, update_figure_font
 from src.app.FieldLogic import AnalyteDialog, FieldDialog
 from src.app.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -38,7 +38,7 @@ from src.common.Calculator import CustomFieldCalculator as cfc
 from src.app.SpecialTools import SpecialFunctions as specfun
 from src.common.reSTNotes import NotesDock
 from src.common.Browser import Browser
-from src.app.config import BASEDIR, ICONPATH, SSPATH, load_stylesheet
+from src.app.config import BASEDIR, ICONPATH, STYLE_PATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
@@ -103,10 +103,10 @@ class LameBlockly(PlotViewer):
         self.workflow_dock = parent
         self.io = LameIO(self, connect_actions=False)
         
-        self.plot_style = StyleData(self)
+        self.style_data = StyleData(self)
         #set style using 'default' style them
         self.style_themes = StyleTheme(self)
-        self.plot_style.style_dict = self.style_themes.default_style_dict()
+        self.style_data.style_dict = self.style_themes.default_style_dict()
         
         # # Initialise plotviewer form
         # self.plot_viewer = PlotViewer(self)
@@ -275,14 +275,14 @@ class LameBlockly(PlotViewer):
         if (field_type == '') or (field == ''):
             return
 
-        self.plot_style.plot_type = 'histogram'
+        self.style_data.plot_type = 'histogram'
         self.app_data.x_field =field
         self.app_data.x_field_type =field_type
         self.app_data.hist_plot_style = hist_type
         self.app_data.hist_num_bins = n_bins
-        plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, plot_style=self.plot_style)
+        plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)
         # update bin width
-        range = (self.plot_style.xlim[1] - self.plot_style.xlim[0]) 
+        range = (self.style_data.xlim[1] - self.style_data.xlim[0]) 
 
         return  range
 
@@ -308,7 +308,8 @@ class LameBlockly(PlotViewer):
         # update histogram
         if self.plot_type == 'histogram':
             # trigger update to plot
-            self.plot_style.schedule_update()
+            self.schedule_update()
+
 
     # -------------------------------
     # Blockly functions
@@ -435,26 +436,26 @@ class LameBlockly(PlotViewer):
         if "XLim" in style_dict:
             lowerVal = style_dict["XLim"][0]
             upperVal = style_dict["XLim"][1]
-            self.plot_style.axis_limit_edit_callback("x", 0, float(lowerVal), field = 'X', ui_update=False)
-            self.plot_style.axis_limit_edit_callback("x", 1, float(upperVal), field = 'X', ui_update=False)
+            self.style_data.axis_limit_edit_callback("x", 0, float(lowerVal), field = 'X', ui_update=False)
+            self.style_data.axis_limit_edit_callback("x", 1, float(upperVal), field = 'X', ui_update=False)
 
         if "YLim" in style_dict:
             lowerVal = style_dict["YLim"][0]
             upperVal = style_dict["YLim"][1]
-            self.plot_style.axis_limit_edit_callback("y", 0, float(lowerVal), field = 'Y', ui_update=False)
-            self.plot_style.axis_limit_edit_callback("y", 1, float(upperVal), field = 'Y', ui_update=False)
+            self.style_data.axis_limit_edit_callback("y", 0, float(lowerVal), field = 'Y', ui_update=False)
+            self.style_data.axis_limit_edit_callback("y", 1, float(upperVal), field = 'Y', ui_update=False)
 
         if "ZLim" in style_dict:
             lowerVal = style_dict["ZLim"][0]
             upperVal = style_dict["ZLim"][1]
-            self.plot_style.axis_limit_edit_callback("z", 0, float(lowerVal), ui_update=False)
-            self.plot_style.axis_limit_edit_callback("z", 1, float(upperVal), ui_update=False)
+            self.style_data.axis_limit_edit_callback("z", 0, float(lowerVal), ui_update=False)
+            self.style_data.axis_limit_edit_callback("z", 1, float(upperVal), ui_update=False)
 
         if "CLim" in style_dict:
             lowerVal = style_dict["CLim"][0]
             upperVal = style_dict["CLim"][1]
-            self.plot_style.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
-            self.plot_style.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)
+            self.style_data.axis_limit_edit_callback("c", 0, float(lowerVal), field, ui_update=False)
+            self.style_data.axis_limit_edit_callback("c", 1, float(upperVal), field, ui_update=False)
 
     
     

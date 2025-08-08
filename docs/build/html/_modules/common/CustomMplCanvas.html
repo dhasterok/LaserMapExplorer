@@ -500,7 +500,7 @@
 
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">plot_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">map_plot_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">map_plot_types</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span> <span class="o">=</span> <span class="kc">False</span>
@@ -593,7 +593,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;V: N/A&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;V: N/A&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">x_i</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -605,12 +605,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">y_i</span><span class="p">][</span><span class="n">x_i</span><span class="p">]</span>
             <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;V: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}{</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
 
         <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;X: </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.4g</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoX</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoX</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
         <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Y: </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s1">.4g</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoY</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoY</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.set_initial_extent">
@@ -693,8 +693,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">overlay_color</span>
-        <span class="n">font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">font_size</span>
+        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
+        <span class="n">font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">font_size</span>
         <span class="n">annotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">txt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">overlay_color</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
 
@@ -744,8 +744,8 @@
 <span class="sd">            Handle to line</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">plot_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">]</span>
-        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">overlay_color</span>
-        <span class="n">line_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span><span class="o">.</span><span class="n">line_width</span>
+        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
+        <span class="n">line_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span>
 
         <span class="c1"># plot line (keep only first returned handle)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
@@ -760,7 +760,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds distance to plot and updates distance label</span>
 
-<span class="sd">        Updates distance in ``MainWindow.labelSVInfoDistance`` and adds distance</span>
+<span class="sd">        Updates distance in ``MainWindow.labelInfoDistance`` and adds distance</span>
 <span class="sd">        at the end of the measuring line.</span>
 
 <span class="sd">        Parameters</span>
@@ -774,14 +774,14 @@
 <span class="sd">            Handle to text.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">plot_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">]</span>
-        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_style</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span>
 
         <span class="c1"># compute distance</span>
         <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_distance</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
 
         <span class="c1"># Update distance label in widget </span>
         <span class="n">distance_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">distance</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">preferences</span><span class="p">[</span><span class="s1">&#39;Units&#39;</span><span class="p">][</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D: </span><span class="si">{</span><span class="n">distance_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D: </span><span class="si">{</span><span class="n">distance_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Update distance label on map</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span><span class="p">:</span>
@@ -860,7 +860,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># First click</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D: 0 </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">preferences</span><span class="p">[</span><span class="s1">&#39;Units&#39;</span><span class="p">][</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D: 0 </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">preferences</span><span class="p">[</span><span class="s1">&#39;Units&#39;</span><span class="p">][</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Second click</span>
                 <span class="n">second_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
@@ -932,7 +932,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets distance variables and clears plot</span>
 
 <span class="sd">        Sets ``MplCanvas.first_point`` to ``None``, ``MplCanvas.line`` and ``MplCanvas.dtext``.</span>
-<span class="sd">        If ``MainWindow.toolButtonDistance`` is not checked, then ``MainWindow.labelSVInfoDistance`` is </span>
+<span class="sd">        If ``MainWindow.toolButtonDistance`` is not checked, then ``MainWindow.labelInfoDistance`` is </span>
 <span class="sd">        also reset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="o">=</span> <span class="kc">None</span>
@@ -944,7 +944,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelSVInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;D: N/A&quot;</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;D: N/A&quot;</span><span class="p">)</span></div>
 </div>
 
 

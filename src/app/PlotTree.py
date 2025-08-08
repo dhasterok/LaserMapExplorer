@@ -328,8 +328,8 @@ class PlotTree(CustomDockWidget):
         leaf = tree_index.data()
 
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
-            self.ui.plot_style.initialize_axis_values(tree, leaf)
-            self.ui.plot_style.set_style_widgets()
+            self.ui.style_data.initialize_axis_values(tree, leaf)
+            self.ui.style_data.set_style_widgets()
             if self.plot_info:
                 log("plot_info exists, adding to canvas", "NOTE")
 
@@ -342,8 +342,8 @@ class PlotTree(CustomDockWidget):
                 log("plot_info does not exist, creating map", "NOTE")
 
                 # print('tree_double_click: plot_map_pg')
-                if self.ui.toolBox.currentIndex() not in [self.ui.left_tab['sample'], self.ui.left_tab['process']]:
-                    self.ui.toolBox.setCurrentIndex(self.ui.left_tab['sample'])
+                if self.ui.toolBox.currentIndex() not in [self.ui.control_dock.tab_dict['sample'], self.ui.control_dock.tab_dict['process']]:
+                    self.ui.toolBox.setCurrentIndex(self.ui.control_dock.tab_dict['sample'])
 
                 # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
                 self.ui.update_fields(branch,'field map',tree, leaf, plot=True)
@@ -355,8 +355,8 @@ class PlotTree(CustomDockWidget):
 
             if self.plot_info:
                 self.ui.add_plotwidget_to_canvas(self.plot_info)
-                self.ui.plot_style.style_dict[self.plot_info.plot_type] = self.plot_info.style
-                self.ui.plot_style.plot_type = self.plot_info.plot_type
+                self.ui.style_data.style_dict[self.plot_info.plot_type] = self.plot_info.style
+                self.ui.style_data.plot_type = self.plot_info.plot_type
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
                 #self.ui.update_fields(self.ui.plot_info['sample_id'], self.ui.plot_info['plot_type'],self.ui.plot_info['field_type'], self.ui.plot_info['field'])
 

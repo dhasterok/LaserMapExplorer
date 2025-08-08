@@ -69,9 +69,9 @@ class CanvasWidget(QWidget):
 
         self.canvasWindow = QTabWidget(parent=self)
 
-        self.single_view = SingleViewTab(self.canvasWindow, self.ui)
-        self.multi_view = MultiViewTab(self.canvasWindow, self.ui)
-        self.quick_view = QuickViewTab(self.canvasWindow, self.ui)
+        self.single_view = SingleViewTab(self.canvasWindow)
+        self.multi_view = MultiViewTab(self.canvasWindow)
+        self.quick_view = QuickViewTab(self.canvasWindow)
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -163,8 +163,6 @@ class CanvasWidget(QWidget):
             self.toolbar.qv.hide()
             self.toolbar.toolButtonSave.setVisible(False)
 
-            self.ui.actions.UpdatePlot.setEnabled(False)
-            self.ui.actions.SavePlotToTree.setEnabled(False)
             return
 
         if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
@@ -175,27 +173,6 @@ class CanvasWidget(QWidget):
             self.toolbar.qv.hide()
             self.toolbar.toolButtonSave.setVisible(True)
 
-            self.ui.control_dock.field_viewer.setEnabled(True)
-            self.ui.control_dock.preprocess.setEnabled(True)
-            self.ui.control_dock.scatter.setEnabled(True)
-            self.ui.control_dock.ndimensional.setEnabled(True)
-            self.ui.control_dock.dimreduction.setEnabled(True)
-            self.ui.control_dock.clustering.setEnabled(True)
-            if hasattr(self.ui.control_dock, "spot_tools"):
-                self.ui.control_dock.spot_tools.setEnabled(True)
-            if hasattr(self.ui.control_dock, "special_tools"):
-                self.ui.control_dock.special_tools.setEnabled(True)
-            if hasattr(self.ui, "mask_dock"):
-                self.ui.mask_dock.setEnabled(True)
-
-            #self.ui.style_dock.control_dock.toolbox.setEnabled(True)
-            self.ui.control_dock.comboBoxPlotType.setEnabled(True)
-            #self.ui.style_dock.comboBoxStyleTheme.setEnabled(True)
-            #self.ui.style_dock.toolButtonSaveTheme.setEnabled(True)
-            self.ui.actions.UpdatePlot.setEnabled(True)
-            self.ui.actions.SavePlotToTree.setEnabled(True)
-            self.ui.style_dock.setEnabled(True)
-
             if self.duplicate_plot_info:
                 self.ui.add_plotwidget_to_canvas(self.duplicate_plot_info)
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
@@ -205,22 +182,6 @@ class CanvasWidget(QWidget):
             self.toolbar.qv.hide()
             self.toolbar.toolButtonSave.setVisible(True)
 
-            self.ui.control_dock.field_viewer.setEnabled(False)
-            self.ui.control_dock.preprocess.setEnabled(False)
-            self.ui.control_dock.scatter.setEnabled(False)
-            self.ui.control_dock.ndimensional.setEnabled(False)
-            self.ui.control_dock.dimreduction.setEnabled(False)
-            self.ui.control_dock.clustering.setEnabled(False)
-            if hasattr(self.ui.control_dock, "spot_tools"):
-                self.ui.control_dock.spot_tools.setEnabled(False)
-            if hasattr(self.ui.control_dock, "special_tools"):
-                self.ui.control_dock.special_tools.setEnabled(False)
-            if hasattr(self.ui, "mask_dock"):
-                self.ui.mask_dock.setEnabled(False)
-
-            self.ui.actions.UpdatePlot.setEnabled(False)
-            self.ui.actions.SavePlotToTree.setEnabled(False)
-            self.ui.style_dock.setEnabled(False)
             if self.duplicate_plot_info:
                 self.ui.add_plotwidget_to_canvas(self.duplicate_plot_info)
         else:
@@ -229,23 +190,6 @@ class CanvasWidget(QWidget):
             self.toolbar.mv.hide()
             self.toolbar.qv.show()
             self.toolbar.toolButtonSave.setVisible(True)
-
-            self.ui.control_dock.field_viewer.setEnabled(False)
-            self.ui.control_dock.preprocess.setEnabled(False)
-            self.ui.control_dock.scatter.setEnabled(False)
-            self.ui.control_dock.ndimensional.setEnabled(False)
-            self.ui.control_dock.dimreduction.setEnabled(False)
-            self.ui.control_dock.clustering.setEnabled(False)
-            if hasattr(self.ui.control_dock, "spot_tools"):
-                self.ui.control_dock.spot_tools.setEnabled(False)
-            if hasattr(self.ui.control_dock, "special_tools"):
-                self.ui.control_dock.special_tools.setEnabled(False)
-            if hasattr(self.ui, "mask_dock"):
-                self.ui.mask_dock.setEnabled(False)
-
-            self.ui.style_dock.setEnabled(False)
-            self.ui.actions.UpdatePlot.setEnabled(False)
-            self.ui.actions.SavePlotToTree.setEnabled(False)
 
             self.display_QV()
 
@@ -459,9 +403,9 @@ class CanvasWidget(QWidget):
                 self.update_canvas(self.sv_widget)
             self.sv_widget.show()
 
-            if (self.ui.style_data.plot_type == 'field map') and (self.ui.control_dock.toolbox.currentIndex() == self.ui.control_dock.tab_dict['sample']):
-                current_map_df = self.ui.data[self.ui.app_data.sample_id].get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.ui.style_data.cscale)
-                plot_small_histogram(self.ui, self.ui.data[self.ui.app_data.sample_id], self.ui.app_data, self.ui.style_data, current_map_df)
+            if hasattr(self.ui, 'control_dock') and (self.ui.style_data.plot_type == 'field map') and (self.ui.control_dock.toolbox.currentIndex() == self.ui.control_dock.tab_dict['sample']):
+                current_map_df = self.ui.app_data.current_data.get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.ui.style_data.cscale)
+                plot_small_histogram(self.ui, self.ui.app_data.current_data, self.ui.app_data, self.ui.style_data, current_map_df)
         # add figure to MultiView canvas
         elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
             #print('add_plotwidget_to_canvas: MV')
@@ -483,7 +427,7 @@ class CanvasWidget(QWidget):
                 
             if plot_exists and name != self.SV_plot_name:
                 #plot exists in MV and is doesnt exist in SV
-                self.ui.statusBar().showMessage('Plot already displayed on canvas.')
+                self.ui.statusbar().showMessage('Plot already displayed on canvas.')
                 return
             
             # if position is given, use it
@@ -501,8 +445,8 @@ class CanvasWidget(QWidget):
             # if no position, find first empty space
             else:
                 keepgoing = True
-                for row in range(self.ui.spinBoxMaxRows.value()):
-                    for col in range(self.ui.spinBoxMaxCols.value()):
+                for row in range(self.toolbar.mv.spinBoxMaxRows.value()):
+                    for col in range(self.toolbar.mv.spinBoxMaxCols.value()):
                         if layout.itemAtPosition(row,col):
                             #print(f'row: {row}   col : {col}')
                             continue
@@ -515,7 +459,7 @@ class CanvasWidget(QWidget):
                         break
 
             # check if canvas is full
-            if row == self.ui.spinBoxMaxRows.value()-1 and col == self.ui.spinBoxMaxCols.value()-1 and layout.itemAtPosition(row,col):
+            if row == self.toolbar.mv.spinBoxMaxRows.value()-1 and col == self.toolbar.mv.spinBoxMaxCols.value()-1 and layout.itemAtPosition(row,col):
                 QMessageBox.warning(self.ui, "Add plot to canvas warning", "Canvas is full, to add more plots, increase row or column max.")
                 return
 
@@ -543,7 +487,8 @@ class CanvasWidget(QWidget):
 
         # put plot_info back into table
         #print(plot_info)
-        self.ui.plot_tree.add_tree_item(plot_info)
+        if hasattr(self.ui, "plot_tree"):
+            self.ui.plot_tree.add_tree_item(plot_info)
 
     def move_widget_between_layouts(self,source_layout, target_layout, widget, row=None, col=None):
         """
@@ -578,8 +523,30 @@ class CanvasWidget(QWidget):
             target_layout.addWidget(widget)
         widget.show()  # Ensure the widget is visible in the new layout
 
+    def get_SV_widget(self, index):
+        layout = self.single_view.widgetSingleView.layout()
+        if layout is not None:
+            item = layout.itemAt(index)
+            if item is not None:
+                return item.widget()
+        return None
+
+    def toggle_distance_tool(self):
+        canvas = self.get_SV_widget(1)
+        if not isinstance(canvas, mplc.MplCanvas):
+            return
+
+        if not self.toolbar.sv.toolButtonDistance.isChecked():
+            canvas.distance_reset()
+            for line, dtext in zip(reversed(canvas.saved_line), reversed(canvas.saved_dtext)):
+                line.remove()
+                dtext.remove()
+            canvas.saved_line = []
+            canvas.saved_dtext = []
+            canvas.draw()
+
 class SingleViewTab(QWidget):
-    def __init__(self, parent, ui):
+    def __init__(self, parent):
         super().__init__(parent=parent)
         self.setObjectName("singleViewTab")
         tab_layout = QVBoxLayout(self)
@@ -592,7 +559,7 @@ class SingleViewTab(QWidget):
         parent.addTab(self, "Single View")
 
 class MultiViewTab(QWidget):
-    def __init__(self, parent, ui):
+    def __init__(self, parent):
         super().__init__(parent=parent)
         self.setObjectName("multiViewTab")
         tab_layout = QVBoxLayout(self)
@@ -606,7 +573,7 @@ class MultiViewTab(QWidget):
         parent.addTab(self, "Multi View")
 
 class QuickViewTab(QWidget):
-    def __init__(self, parent, ui):
+    def __init__(self, parent):
         super().__init__(parent=parent)
         self.setObjectName("quickViewTab")
         stab_layout = QVBoxLayout(self)

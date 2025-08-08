@@ -1910,6 +1910,193 @@ class SampleObj(Observable):
         return True  # User chose to proceed
 
 
+    # # -------------------------------
+    # # Filter functions
+    # # -------------------------------
+    # def apply_filters(self, fullmap=False):
+    #     """Applies filter to map data
+
+    #     Applies user specified data filters to mask data for analysis and calls ``MainWindow.update_SV`` to update the current figure.
+    #     Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
+    #     Updates figure if the *Single View* canvas is active.
+
+    #     Parameters
+    #     ----------
+    #     fullmap : bool, optional
+    #         If ``True``, filters are ignored, otherwise the map is filtered, by default ``False``
+    #     """
+    #     #reset all masks in current sample id
+    #     sample_id = self.app_data.sample_id
+
+    #     # remove all masks
+    #     if fullmap:
+    #         #user clicked on Map viewable
+    #         self.actionFilterToggle.setChecked(False)
+    #         self.actionPolygonMask.setChecked(False)
+    #         self.actionClusterMask.setChecked(False)
+
+    #         self.actionClearFilters.setEnabled(False)
+    #         self.actionFilterToggle.setEnabled(False)
+    #         self.actionPolygonMask.setEnabled(False)
+    #         self.actionClusterMask.setEnabled(False)
+
+    #         self.data[sample_id].mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+    #         return
+
+    #     # apply interval filters
+    #     if self.actionFilterToggle.isChecked():
+    #         filter_mask = self.data[sample_id].filter_mask
+    #     else:
+    #         filter_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
+
+    #     # apply polygon filters
+    #     if self.actionPolygonMask.isChecked():
+    #         polygon_mask = self.data[sample_id].polygon_mask
+    #     else:
+    #         polygon_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
+
+    #     # apply cluster mask
+    #     if self.actionClusterMask.isChecked():
+    #         # apply map mask
+    #         cluster_mask = self.data[sample_id].cluster_mask
+    #     else:
+    #         cluster_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
+
+    #     self.data[sample_id].mask = filter_mask & polygon_mask & cluster_mask
+
+    #     # if single view is active
+    #     if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+    #         # trigger update to plot
+    #         self.schedule_update()
+
+    # # Field filter functions
+    # # -------------------------------
+    # def apply_field_filters(self, update_plot=True):
+    #     """Creates the field filter for masking data
+
+    #     Updates ``MainWindow.data[sample_id].filter_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+    #     Parameters
+    #     ----------
+    #     update_plot : bool, optional
+    #         If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+    #     """        
+    #     sample_id = self.app_data.sample_id
+
+    #     # create array of all true
+    #     self.data[sample_id].filter_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+
+    #     # remove all masks
+    #     self.actionClearFilters.setEnabled(True)
+    #     self.actionFilterToggle.setEnabled(True)
+    #     self.actionFilterToggle.setChecked(True)
+
+    #     # apply interval filters
+    #     #print(self.data[sample_id].filter_df)
+    #     self.data[self.app_data.sample_id].apply_field_filters()
+
+    #     if update_plot:
+    #         self.apply_filters(fullmap=False)
+
+    # # Polygon mask functions
+    # # -------------------------------
+    # def apply_polygon_mask(self, update_plot=True):
+    #     """Creates the polygon mask for masking data
+
+    #     Updates ``MainWindow.data[sample_id].polygon_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+    #     Parameters
+    #     ----------
+    #     update_plot : bool, optional
+    #         If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+    #     """        
+    #     sample_id = self.app_data.sample_id
+
+    #     # create array of all true
+    #     self.data[sample_id].polygon_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+
+    #     # remove all masks
+    #     self.actionClearFilters.setEnabled(True)
+    #     self.actionPolygonMask.setEnabled(True)
+    #     self.actionPolygonMask.setChecked(True)
+
+    #     # apply polygon mask
+    #     # Iterate through each polygon in self.polygons[self.main_window.sample_id]
+    #     for row in range(self.tableWidgetPolyPoints.rowCount()):
+    #         #check if checkbox is checked
+    #         checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
+
+    #         if checkBox.isChecked():
+    #             pid = int(self.tableWidgetPolyPoints.item(row,0).text())
+
+    #             polygon_points = self.polygon.polygons[sample_id][pid].points
+    #             polygon_points = [(x,y) for x,y,_ in polygon_points]
+
+    #             # Convert the list of (x, y) tuples to a list of points acceptable by Path
+    #             path = Path(polygon_points)
+
+    #             # Create a grid of points covering the entire array
+    #             # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
+
+    #             points = pd.concat([self.data[sample_id].processed_data['X'], self.data[sample_id].processed_data['Y']] , axis=1).values
+    #             # Use the path to determine which points are inside the polygon
+    #             inside_polygon = path.contains_points(points)
+
+    #             # Reshape the result back to the shape of self.array
+    #             inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.app_data.sample_id].array_size, order =  'C')
+    #             inside_polygon = inside_polygon_mask.flatten('F')
+    #             # Update the polygon mask - include points that are inside this polygon
+    #             self.data[sample_id].polygon_mask &= inside_polygon
+
+    #             #clear existing polygon lines
+    #             #self.polygon.clear_lines()
+
+    #     if update_plot:
+    #         self.apply_filters(fullmap=False)
+
+    # # Cluster mask functions
+    # # -------------------------------
+    # def apply_cluster_mask(self, inverse=False, update_plot=True):
+    #     """Creates a mask from selected clusters
+
+    #     Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
+    #     clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
+    #     on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \\ Filter Page*.
+
+    #     Updates ``MainWindow.data[sample_id].cluster_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+    #     Parameters
+    #     ----------
+    #     inverse : bool, optional
+    #         Inverts selected clusters to define the mask when ``MainWindow.toolButtonGroupMaskInverse`` is clicked, otherwise
+    #         the selected clusers are used to define the mask when ``MainWindow.toolButtonGroupMask`` is clicked, by default False
+    #     update_plot : bool, optional
+    #         If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+    #     """
+    #     sample_id = self.app_data.sample_id
+
+    #     method = self.app_data.cluster_dict['active method']
+    #     selected_clusters = self.app_data.cluster_dict[method]['selected_clusters']
+
+    #     # Invert list of selected clusters
+    #     if not inverse:
+    #         selected_clusters = [cluster_idx for cluster_idx in range(self.app_data.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
+
+    #     # create boolean array with selected_clusters == True
+    #     cluster_group = self.data[sample_id].processed_data.loc[:,method]
+    #     ind = np.isin(cluster_group, selected_clusters)
+    #     self.data[sample_id].cluster_mask = ind
+
+    #     self.actionClearFilters.setEnabled(True)
+    #     self.actionClusterMask.setEnabled(True)
+    #     self.actionClusterMask.setChecked(True)
+
+    #     self.update_cluster_flag = True
+
+    #     if update_plot:
+    #         self.apply_filters(fullmap=False)
+
+
 
 @auto_log_methods(logger_key='Data')
 class LaserSampleObj(SampleObj):

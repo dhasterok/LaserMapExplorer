@@ -17,18 +17,32 @@ def default_font():
 
     return font
 
+def apply_font_to_children(widget, font: QFont):
+    widget.setFont(font)
+    for child in widget.findChildren(QWidget):
+        child.setFont(font)
+
 class PreferencesManager(QObject):
     scaleChanged = pyqtSignal(float)
     fontFamilyChanged = pyqtSignal(str)
+    uiPreferencesChanged = pyqtSignal()
 
     SETTINGS_GROUP = "ui"
     KEY_SCALE = "scale"
     KEY_FONT_FAMILY = "font_family"
 
-    BASE_FONT_SIZE = 11
+    DEFAULT_FONT_SIZE = 11
     TOOLBAR_FONT_SIZE = 10
     MIN_FONT = 6
     MAX_FONT = 24
+
+    TOOLBAR_ICON_SIZE = 28
+
+    TOOLBUTTON_ICON_SIZE = 21
+    TOOLBUTTON_SIZE = 28
+
+    RESET_BUTTON_ICON_SIZE = 12
+    RESET_BUTTON_SIZE = 16
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -53,12 +67,13 @@ class PreferencesManager(QObject):
 
     @scale.setter
     def scale(self, v: float):
-        v = max(self.MIN_FONT / self.BASE_FONT_SIZE, min(self.MAX_FONT / self.BASE_FONT_SIZE, v))
+        v = max(self.MIN_FONT / self.DEFAULT_FONT_SIZE, min(self.MAX_FONT / self.DEFAULT_FONT_SIZE, v))
         if abs(self._scale - v) < 1e-6:
             return
         self._scale = v
         self.scaleChanged.emit(v)
         self.save()
+        self.uiPreferencesChanged.emit()
 
     @property
     def font_family(self):
@@ -71,15 +86,30 @@ class PreferencesManager(QObject):
         self._font_family = fam
         self.fontFamilyChanged.emit(fam)
         self.save()
+        self.uiPreferencesChanged.emit()
 
-    def effective_font_size(self):
+    def default_font_size(self):
         # base 11 scaled, clamped
-        size = round(self.BASE_FONT_SIZE * self._scale)
+        size = round(self.DEFAULT_FONT_SIZE * self._scale)
         return max(self.MIN_FONT, min(self.MAX_FONT, size))
 
-    def effective_toolbar_font_size(self):
+    def toolbar_font_size(self):
         size = round(self.TOOLBAR_FONT_SIZE * self._scale)
         return max(self.MIN_FONT, min(self.MAX_FONT, size))
+
+    def scale_size(self, base: int) -> int:
+        return int(round(base * self._scale))
+
+    def property(self):
+        return {
+            "font": QFont(self._font_family, self.default_font_size()),
+            "toolbar_font": QFont(self._font_family, self.toolbar_font_size()),
+            "toolbar_icon_size": QSize(self.scale_size(self.TOOLBAR_ICON_SIZE), self.scale_size(self.TOOLBAR_ICON_SIZE)),
+            "toolbutton_icon_size": QSize(self.scale_size(self.TOOLBUTTON_ICON_SIZE),self.scale_size(self.TOOLBUTTON_ICON_SIZE)),
+            "toolbutton_size": QSize(self.scale_size(self.TOOLBUTTON_SIZE),self.scale_size(self.TOOLBUTTON_SIZE)),
+            "reset_button_icon_size": QSize(self.scale_size(self.RESET_BUTTON_ICON_SIZE),self.scale_size(self.RESET_BUTTON_ICON_SIZE)),
+            "reset_button_size": QSize(self.scale_size(self.RESET_BUTTON_SIZE),self.scale_size(self.RESET_BUTTON_SIZE)),
+        }
 
     @staticmethod
     def available_font_families():
@@ -126,8 +156,8 @@ class PreferencesDialog(QDialog):
         # Scale slider
         self.scale_slider = QSlider(Qt.Orientation.Horizontal)
         self.scale_slider.setRange(0, 100)
-        min_s = self.prefs.MIN_FONT / self.prefs.BASE_FONT_SIZE
-        max_s = self.prefs.MAX_FONT / self.prefs.BASE_FONT_SIZE
+        min_s = self.prefs.MIN_FONT / self.prefs.DEFAULT_FONT_SIZE
+        max_s = self.prefs.MAX_FONT / self.prefs.DEFAULT_FONT_SIZE
         slider_pos = int(round((self.prefs.scale - min_s) / (max_s - min_s) * 100))
         self.scale_slider.setValue(slider_pos)
         form.addRow("UI Scale:", self.scale_slider)
@@ -169,12 +199,12 @@ class PreferencesDialog(QDialog):
         self._update_preview()
 
     def _update_preview(self):
-        min_s = self.prefs.MIN_FONT / self.prefs.BASE_FONT_SIZE
-        max_s = self.prefs.MAX_FONT / self.prefs.BASE_FONT_SIZE
+        min_s = self.prefs.MIN_FONT / self.prefs.DEFAULT_FONT_SIZE
+        max_s = self.prefs.MAX_FONT / self.prefs.DEFAULT_FONT_SIZE
         slider_pos = self.scale_slider.value()
         scale = (max_s - min_s) * (slider_pos / 100.0) + min_s
         font_family = self.font_combo.currentText()
-        font_size = round(self.prefs.BASE_FONT_SIZE * scale)
+        font_size = round(self.prefs.DEFAULT_FONT_SIZE * scale)
         font_size = max(self.prefs.MIN_FONT, min(self.prefs.MAX_FONT, font_size))
 
         # Update preview label for clarity
@@ -184,8 +214,8 @@ class PreferencesDialog(QDialog):
 
     def _reset_defaults(self):
         # reset slider to scale = 1.0 and font to default
-        min_s = self.prefs.MIN_FONT / self.prefs.BASE_FONT_SIZE
-        max_s = self.prefs.MAX_FONT / self.prefs.BASE_FONT_SIZE
+        min_s = self.prefs.MIN_FONT / self.prefs.DEFAULT_FONT_SIZE
+        max_s = self.prefs.MAX_FONT / self.prefs.DEFAULT_FONT_SIZE
         default_slider = int(round((1.0 - min_s) / (max_s - min_s) * 100))
         self.scale_slider.setValue(default_slider)
         self.font_combo.setCurrentText(self.prefs.font_family)
@@ -193,8 +223,8 @@ class PreferencesDialog(QDialog):
 
     def accept(self):
         slider_pos = self.scale_slider.value()
-        min_s = self.prefs.MIN_FONT / self.prefs.BASE_FONT_SIZE
-        max_s = self.prefs.MAX_FONT / self.prefs.BASE_FONT_SIZE
+        min_s = self.prefs.MIN_FONT / self.prefs.DEFAULT_FONT_SIZE
+        max_s = self.prefs.MAX_FONT / self.prefs.DEFAULT_FONT_SIZE
         new_scale = (max_s - min_s) * (slider_pos / 100.0) + min_s
         self.prefs.scale = new_scale
         self.prefs.font_family = self.font_combo.currentText()
@@ -280,11 +310,11 @@ class PreviewWidget(QFrame):
         font_family = self.prefs.font_family
 
         # Base font sizes
-        base_font_size = self.prefs.effective_font_size()
-        toolbar_font_size = self.prefs.effective_toolbar_font_size()
+        default_font_size = self.prefs.default_font_size()
+        toolbar_font_size = self.prefs.toolbar_font_size()
 
         # Apply fonts
-        normal_font = QFont(font_family, base_font_size)
+        normal_font = QFont(font_family, default_font_size)
         self.label_example.setFont(normal_font)
 
         toolbar_font = QFont(font_family, toolbar_font_size)
@@ -298,19 +328,19 @@ class PreviewWidget(QFrame):
 
         # Icon/button sizing
         # Toolbar-style: icon 24x24 scaled
-        tb_icon_dim = int(round(24 * scale))
+        tb_icon_dim = int(round(self.prefs.TOOLBAR_ICON_SIZE * scale))
         self.toolbar_example.setIconSize(QSize(tb_icon_dim, tb_icon_dim))
         # Toolbar-style button overall size auto-adjusts (text + icon)
 
         # Normal toolbutton: base 28x28, icon 20x20 scaled
-        tb_size = int(round(28 * scale))
-        tb_icon = int(round(20 * scale))
+        tb_size = int(round(self.prefs.TOOLBUTTON_SIZE * scale))
+        tb_icon = int(round(self.prefs.TOOLBUTTON_ICON_SIZE * scale))
         self.normal_example.setFixedSize(tb_size, tb_size)
         self.normal_example.setIconSize(QSize(tb_icon, tb_icon))
 
         # Reset button: base 20x20, icon 14x14
-        reset_size = int(round(16 * scale))
-        reset_icon = int(round(12 * scale))
+        reset_size = int(round(self.prefs.RESET_BUTTON_SIZE * scale))
+        reset_icon = int(round(self.prefs.RESET_BUTTON_ICON_SIZE * scale))
         self.reset_example.setFixedSize(reset_size, reset_size)
         self.reset_example.setIconSize(QSize(reset_icon, reset_icon))
 

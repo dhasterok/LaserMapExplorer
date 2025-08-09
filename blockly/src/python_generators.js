@@ -209,8 +209,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     // 5) Plot
     code += `canvas, self.plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
-    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())\n`
-    code += `self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)\n`
+    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`
     const showMap = block.getFieldValue('SHOW_MAP') === 'TRUE';
     if (showMap) {
     code += `self.canvas_widget.show()\n`;
@@ -280,8 +279,8 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     // Plot command
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas,  self.plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
-    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())\n`
-    code += `self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)\n`;
+    code += `self.canvas_widget.clear_layout(self.canvas_widget.single_view.layout())\n`
+    code += `self.canvas_widget.single_view.layout().addWidget(canvas)\n`;
     code += `self.canvas_widget.show()\n`;
 
     return code;

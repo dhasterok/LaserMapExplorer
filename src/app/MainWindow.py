@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusbar)
 
         # Central widget (canvas and toolbar)
-        self.canvas_widget = CanvasWidget(ui=self)
+        self.canvas_widget = CanvasWidget(ui=self, parent=self)
         self.setCentralWidget(self.canvas_widget)
 
         self.control_dock = ControlDock(ui=self)
@@ -917,8 +917,8 @@ class MainWindow(QMainWindow):
 
         # add canvas to layout
         if canvas:
-            self.canvas_widget.clear_layout(self.canvas_widget.single_view.widgetSingleView.layout())
-            self.canvas_widget.single_view.widgetSingleView.layout().addWidget(canvas)
+            self.canvas_widget.clear_layout(self.canvas_widget.single_view.layout())
+            self.canvas_widget.single_view.layout().addWidget(canvas)
 
         # add plot info to info_dock
         if hasattr(self,"info_dock"):

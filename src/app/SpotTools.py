@@ -5,35 +5,28 @@ from PyQt6.QtWidgets import (
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView
     )
 from src.app.UITheme import default_font
+from src.common.CustomWidgets import CustomPage
+from src.app.config import ICONPATH
 import resources_rc
 
-class SpotPage(QWidget):
-    def __init__(self, page_index, parent=None):
-        super().__init__(parent)
-
-        if parent is None:
+class SpotPage(CustomPage):
+    def __init__(self, page_index, dock=None):
+        if dock is None:
             return
+        super().__init__(dock)
 
-        self.parent = parent
+        self.dock = dock
+        self.page_index = page_index
 
+        self.setupUI()
+
+    def setupUI(self):
         self.setGeometry(QRect(0, 0, 300, 321))
         self.setObjectName("SpotDataPage")
 
-        page_layout = QVBoxLayout(self)
-        page_layout.setContentsMargins(3, 3, 3, 3)
+        self.setContentsMargins(0, 0, 0, 0)
 
-        self.scrollAreaSpots = QScrollArea(self)
-        self.scrollAreaSpots.setFrameShape(QFrame.Shape.NoFrame)
-        self.scrollAreaSpots.setFrameShadow(QFrame.Shadow.Plain)
-        self.scrollAreaSpots.setWidgetResizable(True)
-
-        self.scrollAreaWidgetContentsSpots = QWidget()
-        self.scrollAreaWidgetContentsSpots.setGeometry(QRect(0, 0, 294, 315))
-
-        self.verticalLayout_45 = QVBoxLayout(self.scrollAreaWidgetContentsSpots)
-        self.verticalLayout_45.setContentsMargins(0, 0, 0, 0)
-
-        self.groupBox = QGroupBox(self.scrollAreaWidgetContentsSpots)
+        self.groupBox = QGroupBox(self)
         self.groupBox.setTitle("")
 
         self.verticalLayout_44 = QVBoxLayout(self.groupBox)
@@ -129,11 +122,15 @@ class SpotPage(QWidget):
         self.toolButtonSpotRemove.setObjectName("toolButtonSpotRemove")
         self.toolbar.addWidget(self.toolButtonSpotRemove)
 
-        self.verticalLayout_44.addLayout(self.toolbar)
-        self.verticalLayout_45.addWidget(self.groupBox)
-        self.scrollAreaSpots.setWidget(self.scrollAreaWidgetContentsSpots)
+        self.addLayout(self.toolbar)
+        self.addWidget(self.groupBox)
 
-        page_layout.addWidget(self.scrollAreaSpots)
-        page_icon = QIcon(":/resources/icons/icon-spot-64.svg")
+        page_icon = QIcon(str(ICONPATH / "icon-spot-64.svg"))
+        page_name = "Spot Data"
+        self.dock.toolbox.insertItem(self.page_index+1, self, page_icon, page_name)
 
-        self.parent.toolBox.insertItem(page_index+1, self, page_icon, "Spot Data")
+        self.dock.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-spot-64.svg",
+            dark_icon = ICONPATH / "icon-spot-dark-64.svg"
+        )

@@ -1,13 +1,13 @@
 import darkdetect
 from pathlib import Path
-from PyQt6.QtGui import QIcon, QFont, QFontDatabase, QIcon
-from PyQt6.QtCore import Qt, QObject, pyqtSignal, QSettings, QSize
+from PyQt6.QtGui import QIcon, QFont, QFontDatabase, QIcon, QAction
+from PyQt6.QtCore import Qt, QObject, pyqtSignal, QSettings, QSize, QTimer
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QComboBox, QSlider,
     QHBoxLayout, QPushButton, QFormLayout, QSizePolicy,
     QFrame, QToolButton, QWidget, QApplication, QStyle, QGridLayout
 )
-from src.app.config import ICONPATH, RESOURCE_PATH, load_stylesheet
+from src.app.config import ICONPATH, STYLE_PATH, load_stylesheet
 
 def default_font():
     # set default font for application
@@ -25,7 +25,7 @@ def apply_font_to_children(widget, font: QFont):
 class PreferencesManager(QObject):
     scaleChanged = pyqtSignal(float)
     fontFamilyChanged = pyqtSignal(str)
-    uiPreferencesChanged = pyqtSignal()
+    settingsChanged = pyqtSignal()
 
     SETTINGS_GROUP = "ui"
     KEY_SCALE = "scale"
@@ -36,7 +36,7 @@ class PreferencesManager(QObject):
     MIN_FONT = 6
     MAX_FONT = 24
 
-    TOOLBAR_ICON_SIZE = 28
+    TOOLBAR_ICON_SIZE = 24
 
     TOOLBUTTON_ICON_SIZE = 21
     TOOLBUTTON_SIZE = 28
@@ -71,9 +71,7 @@ class PreferencesManager(QObject):
         if abs(self._scale - v) < 1e-6:
             return
         self._scale = v
-        self.scaleChanged.emit(v)
         self.save()
-        self.uiPreferencesChanged.emit()
 
     @property
     def font_family(self):
@@ -84,9 +82,7 @@ class PreferencesManager(QObject):
         if self._font_family == fam:
             return
         self._font_family = fam
-        self.fontFamilyChanged.emit(fam)
         self.save()
-        self.uiPreferencesChanged.emit()
 
     def default_font_size(self):
         # base 11 scaled, clamped
@@ -156,6 +152,8 @@ class PreferencesDialog(QDialog):
         # Scale slider
         self.scale_slider = QSlider(Qt.Orientation.Horizontal)
         self.scale_slider.setRange(0, 100)
+        self.scale_slider.setSingleStep(5)
+        self.scale_slider.setTickInterval(10)
         min_s = self.prefs.MIN_FONT / self.prefs.DEFAULT_FONT_SIZE
         max_s = self.prefs.MAX_FONT / self.prefs.DEFAULT_FONT_SIZE
         slider_pos = int(round((self.prefs.scale - min_s) / (max_s - min_s) * 100))
@@ -228,6 +226,7 @@ class PreferencesDialog(QDialog):
         new_scale = (max_s - min_s) * (slider_pos / 100.0) + min_s
         self.prefs.scale = new_scale
         self.prefs.font_family = self.font_combo.currentText()
+        self.prefs.settingsChanged.emit()
         super().accept()
 
 
@@ -345,220 +344,114 @@ class PreviewWidget(QFrame):
         self.reset_example.setIconSize(QSize(reset_icon, reset_icon))
 
 class ThemeManager(QObject):
-    themeChanged = pyqtSignal(str)  # 'dark' or 'light'
+    """Manages application theme (light/dark/auto) and notifies listeners."""
 
-    def __init__(self, app):
-        super().__init__()
-        self.current_theme = 'light'
+    theme_changed = pyqtSignal(str)  # "light" or "dark"
 
-        self.app = app
-
-    def set_theme(self, theme):
-        if theme == self.current_theme:
-            return
-        self.current_theme = theme
-        self.apply_theme()
-        self.themeChanged.emit(theme)
-
-    def apply_theme(self):
-        if self.current_theme == 'dark':
-            self.app.setStyleSheet(open(RESOURCE_PATH / 'styles' / 'dark.qss').read())
-        else:
-            self.app.setStyleSheet(open(RESOURCE_PATH / 'styles' / 'light.qss').read())
-
-class UIThemes():
-    def __init__(self, app, parent):
-
-        self.app = app
+    def __init__(self, initial="auto", parent=None):
+        super().__init__(parent)
+        self._mode = initial  # "auto", "dark", "light"
+        self.view_mode = 0  # 0=auto, 1=dark, 2=light
+        self._current_theme = None
+        self._poll_timer = None
         self.parent = parent
-
-        # set theme
-        self.view_mode = 0
-        self.switch_view_mode(self.view_mode)
-        parent.actions.ViewMode.triggered.connect(lambda: self.switch_view_mode(self.view_mode+1))
 
         self.highlight_color_dark = '#696880'
         self.highlight_color_light = '#FFFFC8'
 
-    def switch_view_mode(self, view_mode):
-        if view_mode > 2:
-            view_mode = 0
-        self.view_mode = view_mode
+        if self._mode == "auto":
+            self._start_auto_detection()
+        else:
+            self.set_theme(self._mode)
 
-        match self.view_mode:
-            case 0: # auto
-                if darkdetect.isDark():
-                    #self.set_dark_theme()
-                    pass
-                else:
-                    #self.set_light_theme()
-                    pass
+    @property
+    def theme(self) -> str:
+        return self._current_theme
 
-                self.parent.actions.ViewMode.setIcon(QIcon(str(ICONPATH / 'icon-sun-and-moon-64.svg')))
-                self.parent.actions.ViewMode.setIconText('Theme:\nAuto')
-            case 1: # dark
-                #self.set_dark_theme()
-                pass
-            case 2: # light
-                #self.set_light_theme()
-                pass
+    def set_mode(self, mode: str):
+        """Set mode to 'light', 'dark', or 'auto'."""
+        self._mode = mode
+        if mode == "auto":
+            self.view_mode = 0
+            self._start_auto_detection()
+        elif mode == "dark":
+            self.view_mode = 1
+            self._stop_auto_detection()
+            self.set_theme("dark")
+        elif mode == "light":
+            self.view_mode = 2
+            self._stop_auto_detection()
+            self.set_theme("light")
 
-    def set_dark_theme(self):
-        ss = load_stylesheet('dark.qss')
-        self.app.setStyleSheet(ss)
+        self._update_view_mode_action()
 
-        parent = self.parent
+    def cycle_mode(self):
+        """Cycle through Auto → Dark → Light → Auto."""
+        self.view_mode = (self.view_mode + 1) % 3
+        if self.view_mode == 0:
+            self.set_mode("auto")
+        elif self.view_mode == 1:
+            self.set_mode("dark")
+        elif self.view_mode == 2:
+            self.set_mode("light")
 
-        parent.actions.ViewMode.setIcon(QIcon(str(ICONPATH / 'icon-moon-64.svg')))
-        parent.actions.ViewMode.setIconText('Theme:\nDark')
+    def _start_auto_detection(self):
+        """Starts polling system theme."""
+        if not self._poll_timer:
+            self._poll_timer = QTimer(self)
+            self._poll_timer.timeout.connect(self._check_system_theme)
+            self._poll_timer.start(60000)  # every 60 seconds
+        self._check_system_theme()
 
-        parent.actions.SelectAnalytes.setIcon(QIcon(str(ICONPATH / 'icon-atom-dark-64.svg')))
-        parent.actions.OpenProject.setIcon(QIcon(str(ICONPATH / 'icon-open-session-dark-64.svg')))
-        parent.actions.SaveProject.setIcon(QIcon(str(ICONPATH / 'icon-save-session-dark-64.svg')))
-        parent.actions.FullMap.setIcon(QIcon(str(ICONPATH / 'icon-fit-to-width-dark-64.svg')))
-        parent.actions.Crop.setIcon(QIcon(str(ICONPATH / 'icon-crop-dark-64.svg')))
-        parent.actions.SwapAxes.setIcon(QIcon(str(ICONPATH / 'icon-swap-dark-64.svg')))
-        # Reset Buttons
-        parent.toolButtonXAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        parent.toolButtonYAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        parent.toolButtonZAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        parent.toolButtonCAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        #parent.toolButtonClusterColorReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        parent.histogram.toolButtonHistogramReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-dark-64.svg')))
-        # Samples
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['sample'],QIcon(str(ICONPATH / 'icon-atom-dark-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['process'],QIcon(str(ICONPATH / 'icon-histogram-dark-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['dim_red'],QIcon(str(ICONPATH / 'icon-dimensional-analysis-dark-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['cluster'],QIcon(str(ICONPATH / 'icon-cluster-dark-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['scatter'],QIcon(str(ICONPATH / 'icon-ternary-dark-64.svg')))
-        # Spot Data
-        if hasattr(parent,"spot_tools"):
-            parent.toolButtonSpotMove.setIcon(QIcon(str(ICONPATH / 'icon-move-point-dark-64.svg')))
-            parent.toolButtonSpotToggle.setIcon(QIcon(str(ICONPATH / 'icon-show-hide-dark-64.svg')))
-            parent.toolButtonSpotSelectAll.setIcon(QIcon(str(ICONPATH / 'icon-select-all-dark-64.svg')))
-            parent.toolButtonSpotAnalysis.setIcon(QIcon(str(ICONPATH / 'icon-analysis-dark-64.svg')))
-            parent.toolButtonSpotRemove.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-        #parent.toolButtonFilterSelectAll.setIcon(QIcon(str(ICONPATH / 'icon-select-all-dark-64.svg')))
-        #parent.toolButtonFilterUp.setIcon(QIcon(str(ICONPATH / 'icon-up-arrow-dark-64.svg')))
-        #parent.toolButtonFilterDown.setIcon(QIcon(str(ICONPATH / 'icon-down-arrow-dark-64.svg')))
-        #parent.toolButtonFilterRemove.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-        # Polygons
-        #parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['polygons'],QIcon(str(ICONPATH / 'icon-polygon-new-dark-64.svg')))
-        #parent.toolButtonPolyCreate.setIcon(QIcon(str(ICONPATH / 'icon-polygon-new-dark-64.svg')))
-        #parent.toolButtonPolyAddPoint.setIcon(QIcon(str(ICONPATH / 'icon-add-point-dark-64.svg')))
-        #parent.toolButtonPolyRemovePoint.setIcon(QIcon(str(ICONPATH / 'icon-remove-point-dark-64.svg')))
-        #parent.toolButtonPolyMovePoint.setIcon(QIcon(str(ICONPATH / 'icon-move-point-dark-64.svg')))
-        #parent.toolButtonPolyLink.setIcon(QIcon(str(ICONPATH / 'icon-link-dark-64.svg')))
-        #parent.toolButtonPolyDelink.setIcon(QIcon(str(ICONPATH / 'icon-unlink-dark-64.svg')))
-        #parent.toolButtonPolyDelete.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-        # Profile
-        #parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['profile'],QIcon(str(ICONPATH / 'icon-profile-dark-64.svg')))
-        #parent.toolButtonClearProfile.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-        #parent.toolButtonPointDelete.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-        #parent.toolButtonPointSelectAll.setIcon(QIcon(str(ICONPATH / 'icon-select-all-dark-64.svg')))
-        #parent.toolButtonPointMove.setIcon(QIcon(str(ICONPATH / 'icon-move-point-dark-64.svg')))
-        #parent.toolButtonProfileInterpolate.setIcon(QIcon(str(ICONPATH / 'icon-interpolate-dark-64.svg')))
-        #parent.toolButtonPlotProfile.setIcon(QIcon(str(ICONPATH / 'icon-profile-dark-64.svg')))
-        #parent.toolButtonPointDown.setIcon(QIcon(str(ICONPATH / 'icon-down-arrow-dark-64.svg')))
-        #parent.toolButtonPointUp.setIcon(QIcon(str(ICONPATH / 'icon-up-arrow-dark-64.svg')))
-        # Group Box Plot Tools
-        parent.toolButtonHome.setIcon(QIcon(str(ICONPATH / 'icon-home-dark-64.svg')))
-        parent.toolButtonRemoveAllMVPlots.setIcon(QIcon(str(ICONPATH / 'icon-delete-dark-64.svg')))
-        parent.toolButtonPopFigure.setIcon(QIcon(str(ICONPATH / 'icon-popout-dark-64.svg')))
-        parent.toolButtonAnnotate.setIcon(QIcon(str(ICONPATH / 'icon-annotate-dark-64.svg')))
-        parent.toolButtonPan.setIcon(QIcon(str(ICONPATH / 'icon-move-dark-64.svg')))
-        parent.toolButtonZoom.setIcon(QIcon(str(ICONPATH / 'icon-zoom-dark-64.svg')))
-        parent.toolButtonDistance.setIcon(QIcon(str(ICONPATH / 'icon-distance-dark-64.svg')))
-        # Calculator
-        # Style Toolbox
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(str(ICONPATH / 'icon-axes-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(str(ICONPATH / 'icon-text-and-scales-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['markers'],QIcon(str(ICONPATH / 'icon-marker-and-lines-dark-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(str(ICONPATH / 'icon-rgb-dark-64.svg')))
-        # Cluster tab
-        #parent.tabWidgetMask.setItemIcon(parent.mask_tab['cluster'],QIcon(str(ICONPATH / 'icon-cluster-dark-64.svg')))
-        #parent.toolButtonClusterLink.setIcon(QIcon(str(ICONPATH / 'icon-link-dark-64.svg')))
-        #parent.toolButtonClusterDelink.setIcon(QIcon(str(ICONPATH / 'icon-unlink-dark-64.svg')))
+    def _stop_auto_detection(self):
+        if self._poll_timer:
+            self._poll_timer.stop()
+            self._poll_timer = None
 
-    def set_light_theme(self):
-        ss = load_stylesheet('light.qss')
-        self.app.setStyleSheet(ss)
+    def _check_system_theme(self):
+        system_theme = "dark" if darkdetect.isDark() else "light"
+        if system_theme != self._current_theme:
+            self.set_theme(system_theme)
 
-        parent = self.parent
+    def set_theme(self, theme: str):
+        """Force set theme to 'light' or 'dark' and notify listeners."""
+        if theme in ("light", "dark") and theme != self._current_theme:
+            self._current_theme = theme
+            self._apply_stylesheet(theme)
+            self.theme_changed.emit(theme)
 
-        parent.actions.ViewMode.setIcon(QIcon(str(ICONPATH / 'icon-sun-64.svg')))
-        parent.actions.ViewMode.setIconText('Theme:\nLight')
+    def _apply_stylesheet(self, theme: str):
+        """Apply the appropriate QSS stylesheet."""
+        qss_file = STYLE_PATH / f'{theme}.qss'
+        if qss_file.exists():
+            with open(qss_file, 'r') as f:
+                self.parent.app.setStyleSheet(f.read())
+        else:
+            print(f"Stylesheet not found: {qss_file}")
 
-        parent.actions.SelectAnalytes.setIcon(QIcon(str(ICONPATH / 'icon-atom-64.svg')))
-        parent.actions.OpenProject.setIcon(QIcon(str(ICONPATH / 'icon-open-session-64.svg')))
-        parent.actions.SaveProject.setIcon(QIcon(str(ICONPATH / 'icon-save-session-64.svg')))
-        parent.actions.FullMap.setIcon(QIcon(str(ICONPATH / 'icon-fit-to-width-64.svg')))
-        parent.actions.Crop.setIcon(QIcon(str(ICONPATH / 'icon-crop-64.svg')))
-        parent.actions.SwapAxes.setIcon(QIcon(str(ICONPATH / 'icon-swap-64.svg')))
-        # Reset Buttons
-        parent.toolButtonXAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
-        parent.toolButtonYAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
-        parent.toolButtonZAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
-        parent.toolButtonCAxisReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
-        if hasattr(parent,"mask_dock"):
-            parent.mask_dock.actionClusterColorReset.setIcon(QIcon(str(ICONPATH / 'icon-reset-64.svg')))
-        # Samples
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['sample'],QIcon(str(ICONPATH / 'icon-atom-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['process'],QIcon(str(ICONPATH / 'icon-histogram-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['dim_red'],QIcon(str(ICONPATH / 'icon-dimensional-analysis-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['cluster'],QIcon(str(ICONPATH / 'icon-cluster-64.svg')))
-        parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['scatter'],QIcon(str(ICONPATH / 'icon-ternary-64.svg')))
-        # Spot Data
-        if hasattr(parent,"spot_tools"):
-            parent.toolButtonSpotMove.setIcon(QIcon(str(ICONPATH / 'icon-move-point-64.svg')))
-            parent.toolButtonSpotToggle.setIcon(QIcon(str(ICONPATH / 'icon-show-hide-64.svg')))
-            parent.toolButtonSpotSelectAll.setIcon(QIcon(str(ICONPATH / 'icon-select-all-64.svg')))
-            parent.toolButtonSpotAnalysis.setIcon(QIcon(str(ICONPATH / 'icon-analysis-64.svg')))
-            parent.toolButtonSpotRemove.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-        # Filter
-        if hasattr(parent,"mask_dock"):
-            parent.actionFilterSelectAll.setIcon(QIcon(str(ICONPATH / 'icon-select-all-64.svg')))
-            parent.actionFilterUp.setIcon(QIcon(str(ICONPATH / 'icon-up-arrow-64.svg')))
-            parent.actionFilterDown.setIcon(QIcon(str(ICONPATH / 'icon-down-arrow-64.svg')))
-            parent.actionFilterRemove.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-            # Polygons
-            parent.toolBox.setItemIcon(parent.mask_tab['polygon'],QIcon(str(ICONPATH / 'icon-polygon-new-64.svg')))
-            parent.actionPolyCreate.setIcon(QIcon(str(ICONPATH / 'icon-polygon-new-64.svg')))
-            parent.actionPolyAddPoint.setIcon(QIcon(str(ICONPATH / 'icon-add-point-64.svg')))
-            parent.actionPolyRemovePoint.setIcon(QIcon(str(ICONPATH / 'icon-remove-point-64.svg')))
-            parent.actionPolyMovePoint.setIcon(QIcon(str(ICONPATH / 'icon-move-point-64.svg')))
-            parent.actionPolyLink.setIcon(QIcon(str(ICONPATH / 'icon-link-64.svg')))
-            parent.actionPolyDelink.setIcon(QIcon(str(ICONPATH / 'icon-unlink-64.svg')))
-            parent.actionPolyDelete.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-        # Profile
-        #parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict['profile'],QIcon(str(ICONPATH / 'icon-profile-64.svg')))
-        #parent.toolButtonClearProfile.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-        #parent.toolButtonPointDelete.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-        #parent.toolButtonPointSelectAll.setIcon(QIcon(str(ICONPATH / 'icon-select-all-64.svg')))
-        #parent.toolButtonPointMove.setIcon(QIcon(str(ICONPATH / 'icon-move-point-64.svg')))
-        #parent.toolButtonProfileInterpolate.setIcon(QIcon(str(ICONPATH / 'icon-interpolate-64.svg')))
-        #parent.toolButtonPlotProfile.setIcon(QIcon(str(ICONPATH / 'icon-profile-64.svg')))
-        #parent.toolButtonPointDown.setIcon(QIcon(str(ICONPATH / 'icon-down-arrow-64.svg')))
-        #parent.toolButtonPointUp.setIcon(QIcon(str(ICONPATH / 'icon-up-arrow-64.svg')))
-        # Group Box Plot Tools
-        parent.toolButtonHome.setIcon(QIcon(str(ICONPATH / 'icon-home-64.svg')))
-        parent.toolButtonRemoveAllMVPlots.setIcon(QIcon(str(ICONPATH / 'icon-delete-64.svg')))
-        parent.toolButtonPopFigure.setIcon(QIcon(str(ICONPATH / 'icon-popout-64.svg')))
-        parent.toolButtonAnnotate.setIcon(QIcon(str(ICONPATH / 'icon-annotate-64.svg')))
-        parent.toolButtonPan.setIcon(QIcon(str(ICONPATH / 'icon-move-64.svg')))
-        parent.toolButtonZoom.setIcon(QIcon(str(ICONPATH / 'icon-zoom-64.svg')))
-        parent.toolButtonDistance.setIcon(QIcon(str(ICONPATH / 'icon-distance-64.svg')))
-        # Calculator
-        parent.actions.Calculator.setIcon(QIcon(str(ICONPATH / 'icon-calculator-64.svg')))
-        # Style Toolbox
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['axes'],QIcon(str(ICONPATH / 'icon-axes-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['text'],QIcon(str(ICONPATH / 'icon-text-and-scales-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['markers'],QIcon(str(ICONPATH / 'icon-marker-and-lines-64.svg')))
-        parent.toolBoxStyle.setItemIcon(parent.style_tab['colors'],QIcon(str(ICONPATH / 'icon-rgb-64.svg')))
-        # Cluster tab
-        if hasattr(parent, "mask_dock"):
-            parent.mask_dock.cluster_tab.setTabIcon(parent.mask_tab['cluster'],QIcon(str(ICONPATH / 'icon-cluster-64.svg')))
-            parent.actionClusterLink.setIcon(QIcon(str(ICONPATH / 'icon-link-64.svg')))
-            parent.actionClusterDelink.setIcon(QIcon(str(ICONPATH / 'icon-unlink-64.svg')))
+    def _update_view_mode_action(self):
+        """Update icon and tooltip based on current view_mode."""
+        if not self.parent.actions.ViewMode:
+            return
+
+        icons = {
+            0: ('icon-sun-and-moon-64.svg', 'Theme:\nAuto'),
+            1: ('icon-moon-64.svg', 'Theme:\nDark'),
+            2: ('icon-sun-64.svg', 'Theme:\nLight')
+        }
+
+        icon_file, text = icons[self.view_mode]
+        icon_path = ICONPATH / icon_file
+
+        if isinstance(self.parent.actions.ViewMode, QAction):
+            self.parent.actions.ViewMode.setIcon(QIcon(str(icon_path)))
+            self.parent.actions.ViewMode.setText(text)
+        else:  # QToolButton or similar
+            self.parent.actions.ViewMode.setIcon(QIcon(str(icon_path)))
+            self.parent.actions.ViewMode.setText(text)
+
+
+
+
 
 

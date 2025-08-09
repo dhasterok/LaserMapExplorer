@@ -542,7 +542,15 @@ class ScatterUI(CustomPage):
 
         # add the page to the toolbox
         scatter_icon = QIcon(str(ICONPATH / "icon-ternary-64.svg"))
-        self.dock.toolbox.addItem(self, scatter_icon, "Scatter and Heatmaps")
+        page_name = "Scatter and Heatmaps" 
+
+        self.dock.toolbox.addItem(self, scatter_icon, page_name)
+
+        self.dock.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-ternary-64.svg",
+            dark_icon = ICONPATH / "icon-ternary-dark-64.svg"
+        )
 
     def connect_widgets(self):
         """Connects scatter and heatmap widgets to methods."""
@@ -881,7 +889,15 @@ class NDimUI(CustomPage):
 
         # add the page to the toolbox
         ndim_icon = QIcon(str(ICONPATH / "icon-TEC-64.svg"))
-        self.dock.toolbox.addItem(self, ndim_icon, "n-Dimensional")
+        page_name = "n-Dimensional" 
+
+        self.dock.toolbox.addItem(self, ndim_icon, page_name)
+
+        self.dock.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-TEC-64.svg",
+            dark_icon = ICONPATH / "icon-TEC-dark-64.svg"
+        )
 
     def connect_widgets(self):
         """Connects n-dimensional widgets to methods."""

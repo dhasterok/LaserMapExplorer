@@ -70,7 +70,7 @@ class PlotTree(CustomDockWidget):
             ("radius", lambda: self.sort_tree("radius")),
         ]
         self.action_sort = CustomActionMenu(
-            text="Sort fields for Quick View",
+            text="Sort\nAnalytes",
             menu_items=sortmenu_items,
             light_icon_unchecked="icon-sort-64.svg",
             dark_icon_unchecked="icon-sort-dark-64.svg",
@@ -79,7 +79,7 @@ class PlotTree(CustomDockWidget):
         self.action_sort.setToolTip("Choose a method for sorting the analyte fields")
 
         self.action_remove_plot = CustomAction(
-            text="Remove Plot",
+            text="Remove\nPlot",
             light_icon_unchecked="icon-delete-64.svg",
             dark_icon_unchecked="icon-delete-dark-64.svg",
             parent=self,
@@ -88,7 +88,7 @@ class PlotTree(CustomDockWidget):
         self.action_remove_plot.setToolTip("Remove selected plot from plot tree")
 
         self.action_remove_all = CustomAction(
-            text="Remove All",
+            text="Remove\nAll Plots",
             light_icon_unchecked="icon-delete-all-64.svg",
             dark_icon_unchecked="icon-delete-all-dark-64.svg",
             parent=self,

@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase, QIcon )
 from PyQt6.QtCore import Qt, QSize, QRect
 from src.common.CustomWidgets import (
-    CustomDockWidget, CustomToolButton, CustomSlider, CustomLineEdit, CustomPage, CustomComboBox, ColorButton 
+    CustomDockWidget, CustomToolButton, CustomSlider, CustomLineEdit, CustomPage, CustomComboBox, ColorButton, CustomToolBox 
 )
 from pyqtgraph import colormap
 import src.common.format as fmt
@@ -191,8 +191,15 @@ class AxesPage(CustomPage):
         self.addItem(scatter_spacer)
 
         # add the page to the toolbox
-        axes_icon = QIcon(str(ICONPATH / "icon-axes-64.svg"))
-        parent.toolbox.addItem(self, axes_icon,  "Axes")
+        light_icon = ICONPATH / "icon-axes-64.svg"
+        page_name = "Axes"
+        parent.toolbox.addItem(self, QIcon(str(light_icon)),  page_name)
+
+        parent.toolbox.set_page_icons(
+            page_name,
+            light_icon = light_icon,
+            dark_icon = ICONPATH / "icon-axes-dark-64.svg"
+        ) 
 
 class AnnotationsPage(CustomPage):
     def __init__(self, parent=None):
@@ -263,8 +270,15 @@ class AnnotationsPage(CustomPage):
         self.addItem(scatter_spacer)
 
         # add the page to the toolbox
-        annotations_icon = QIcon(str(ICONPATH / "icon-text-and-scales-64.svg"))
-        parent.toolbox.addItem(self, annotations_icon,  "Text and Scales")
+        light_icon = ICONPATH / "icon-text-and-scales-64.svg"
+        page_name = "Text and Scales"
+        parent.toolbox.addItem(self, QIcon(str(light_icon)),  page_name)
+
+        parent.toolbox.set_page_icons(
+            page_name,
+            light_icon = light_icon,
+            dark_icon = ICONPATH / "icon-text-and-scales-dark-64.svg"
+        ) 
 
 class MarkersPage(CustomPage):
     def __init__(self, parent=None):
@@ -341,8 +355,15 @@ class MarkersPage(CustomPage):
         self.addItem(scatter_spacer)
 
         # add the page to the toolbox
-        markers_icon = QIcon(str(ICONPATH / "icon-marker-and-lines-64.svg"))
-        parent.toolbox.addItem(self, markers_icon,  "Markers and Lines")
+        light_icon = ICONPATH / "icon-marker-and-lines-64.svg"
+        page_name = "Markers and Lines"
+        parent.toolbox.addItem(self, QIcon(str(light_icon)),  page_name)
+
+        parent.toolbox.set_page_icons(
+            page_name,
+            light_icon = light_icon,
+            dark_icon = ICONPATH / "icon-marker-and-lines-dark-64.svg"
+        )
 
 class ColorsPage(CustomPage):
     def __init__(self, parent=None):
@@ -437,8 +458,15 @@ class ColorsPage(CustomPage):
         self.addItem(scatter_spacer)
 
         # add the page to the toolbox
-        colors_icon = QIcon(str(ICONPATH / "icon-rgb-64.svg"))
-        parent.toolbox.addItem(self, colors_icon,  "Colors")
+        light_icon = ICONPATH / "icon-rgb-64.svg"
+        page_name = "Colors"
+        parent.toolbox.addItem(self, QIcon(str(light_icon)),  page_name)
+
+        parent.toolbox.set_page_icons(
+            page_name,
+            light_icon = light_icon,
+            dark_icon = ICONPATH / "icon-rgb-dark-64.svg"
+        )
 
 @auto_log_methods(logger_key='Style')
 class StylingDock(CustomDockWidget):
@@ -507,12 +535,13 @@ class StylingDock(CustomDockWidget):
         dock_layout.setContentsMargins(3, 3, 3, 3)
 
         # Style theme selection
-        theme_layout = QGridLayout()
+        theme_layout = QHBoxLayout()
 
         theme_label = QLabel(parent=dock_contents)
-        theme_label.setObjectName("labelStyleTheme")
         theme_label.setText("Theme")
-        theme_layout.addWidget(theme_label, 0, 0, 1, 1)
+
+        self.comboBoxStyleTheme = QComboBox(parent=dock_contents)
+        self.comboBoxStyleTheme.setObjectName("comboBoxStyleTheme")
 
         self.toolButtonSaveTheme = CustomToolButton(
             text="Save\nTheme",
@@ -521,17 +550,16 @@ class StylingDock(CustomDockWidget):
         )
         self.toolButtonSaveTheme.setObjectName("toolButtonSaveTheme")
         self.toolButtonSaveTheme.setToolTip("Save plot theme")
-        theme_layout.addWidget(self.toolButtonSaveTheme, 0, 2, 1, 1)
+
+        theme_layout.addWidget(theme_label)
+        theme_layout.addWidget(self.comboBoxStyleTheme)
+        theme_layout.addWidget(self.toolButtonSaveTheme)
         
-        self.comboBoxStyleTheme = QComboBox(parent=dock_contents)
-        self.comboBoxStyleTheme.setObjectName("comboBoxStyleTheme")
-        self.comboBoxStyleTheme.addItem("")
-        theme_layout.addWidget(self.comboBoxStyleTheme, 0, 1, 1, 1)
 
         dock_layout.addLayout(theme_layout)
 
         # Style toolbox
-        self.toolbox = QToolBox(parent=dock_contents)
+        self.toolbox = CustomToolBox(parent=dock_contents)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

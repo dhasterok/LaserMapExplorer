@@ -520,7 +520,7 @@ class LoggerDock(CustomDockWidget):
         self.action_clear.setToolTip("Clear log")
 
         # Create QTextEdit for logging
-        self.text_edit = QPlainTextEdit()
+        self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
         self.text_edit.setFont(QFont("Monaco",10))
 

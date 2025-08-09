@@ -5,11 +5,11 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
     QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
     QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QComboBox,
-    QSplashScreen, QApplication, QMainWindow, QSizePolicy, QSpacerItem, QToolBar
+    QSplashScreen, QApplication, QMainWindow, QSizePolicy, QSpacerItem, QToolBar, QTreeView
 ) # type: ignore
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon ) 
-from src.common.CustomWidgets import CustomPage, CustomToolButton, CustomComboBox
-from src.app.UITheme import UIThemes, ThemeManager, PreferencesManager, apply_font_to_children
+from src.common.CustomWidgets import CustomPage, CustomToolButton, CustomComboBox, CustomAction
+from src.app.UITheme import ThemeManager, PreferencesManager, apply_font_to_children
 from src.app.AppData import AppData
 from src.app.StyleToolbox import StyleData
 from src.app.MainToolBar import MainActions, MainMenubar, MainToolbar
@@ -130,22 +130,23 @@ class MainWindow(QMainWindow):
         # used to schedule plot updates
         self.scheduler = Scheduler(callback=self.update_SV)
 
-        self.theme = ThemeManager(app)
-
         # initialize the styling data and dock
         self.setupUI()
 
         self.help_mapping = create_help_mapping(self)
 
         # connect listeners for dynamic propagation
-        prefs.uiPreferencesChanged.connect(lambda: self.on_ui_pref_changed())
-        prefs.scaleChanged.connect(self.on_ui_pref_changed)
-        prefs.fontFamilyChanged.connect(self.on_ui_pref_changed)
+        prefs.settingsChanged.connect(self.on_ui_pref_changed)
 
         # initial apply
         self.on_ui_pref_changed()
 
         self.connect_app_data_observers(self.app_data)
+
+        self.theme_manager = ThemeManager(initial="auto", parent=self)
+
+        # Apply theme changes to all CustomToolButton instances
+        self.theme_manager.theme_changed.connect(self._apply_theme_to_buttons)
 
         self.connect_actions()
         self.connect_widgets()
@@ -160,7 +161,10 @@ class MainWindow(QMainWindow):
         #self.init_canvas_widget()
         self.mpl_canvas = None # will hold the current canvas
 
-        self.theme_manager = ThemeManager(self.app)
+
+        # Force initial update
+        self._apply_theme_to_buttons(self.theme_manager.theme)
+
 
     def setupUI(self):
         """Initialize the UI"""
@@ -226,14 +230,10 @@ class MainWindow(QMainWindow):
         self.table_fcn = TableFcn(self)
         #self.clustertool = Clustering(self)
 
-        # For light and dark themes, connects actionViewMode
-        self.theme = UIThemes(self.app, self)
-
     def connect_actions(self):
         self.actions.connect_actions()
 
         self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_changed())
-
 
     def connect_widgets(self):
         """ Connects widgets to their respective methods and actions.
@@ -260,28 +260,29 @@ class MainWindow(QMainWindow):
         for child in self.findChildren(QToolButton):
             if 'reset' in child.objectName().lower():
                 child.setFont(p['toolbar_font'])
-                child.setFixedSize(p['reset_button_size'])
                 child.setIconSize(p['reset_button_icon_size'])
+            elif 'action' in child.objectName().lower():
+                child.setFont(p['toolbar_font'])
+                child.setIconSize(p['toolbar_icon_size'])
             else:
                 child.setFont(p['toolbar_font'])
-                child.setFixedSize(p['toolbutton_size'])
                 child.setIconSize(p['toolbutton_icon_size'])
 
         for child in self.findChildren(CustomToolButton):
             if 'reset' in child.objectName().lower():
                 child.setFont(p['toolbar_font'])
-                child.setFixedSize(p['reset_button_size'])
                 child.setIconSize(p['reset_button_icon_size'])
+            elif 'action' in child.objectName().lower():
+                child.setFont(p['toolbar_font'])
+                child.setIconSize(p['toolbar_icon_size'])
             else:
                 child.setFont(p['toolbar_font'])
-                child.setFixedSize(p['toolbutton_size'])
                 child.setIconSize(p['toolbutton_icon_size'])
 
-        for tb in self.findChildren(QToolBar):
-            child.setFont(p['toolbar_font'])
-            child.setIconSize(p['toolbar_icon_size'])
-
         for child in self.findChildren(QLabel):
+            child.setFont(p['font'])
+
+        for child in self.findChildren(QTreeView):
             child.setFont(p['font'])
 
         for child in self.findChildren(QComboBox):
@@ -293,10 +294,15 @@ class MainWindow(QMainWindow):
         # propagate to other custom buttons: they should listen to prefs.scaleChanged or
         # you can emit a custom signal here for modules to pick up
 
+    def _apply_theme_to_buttons(self, theme):
+        for btn in self.findChildren(CustomToolButton):
+            btn.set_theme(theme)
 
+        for btn in self.findChildren(CustomAction):
+            btn.set_theme(theme)
 
-
-
+        self.control_dock.toolbox.set_theme(theme)
+        self.style_dock.toolbox.set_theme(theme)
 
     def init_tabs(self, enable=False):
         """Enables/disables UI for user.
@@ -805,7 +811,7 @@ class MainWindow(QMainWindow):
         return True
 
     def schedule_update(self):
-        """Schedules an update to a plot only when ``self.plot_flag == True``."""
+        """Schedules an update to a plot only when ``self.ui.plot_flag == True``."""
         if self.plot_flag:
             self.scheduler.schedule_update()
 
@@ -1300,68 +1306,3 @@ class MainWindow(QMainWindow):
                 self.workflow.refresh_custom_fields_lists_dropdown() #refresh saved analyte dropdown in blockly 
         if result == QDialog.DialogCode.Rejected:
             pass
-
-    def canvas_changed(self):
-        """Sets visibility of canvas tools and updates canvas plots"""        
-
-        if self.app_data.sample_id == '':
-            self.actions.UpdatePlot.setEnabled(False)
-            self.actions.SavePlotToTree.setEnabled(False)
-            return
-
-        if self.canvas_widget.canvasWindow.currentIndex() == self.canvas_widget.canvas_tab['sv']:
-            self.control_dock.field_viewer.setEnabled(True)
-            self.control_dock.preprocess.setEnabled(True)
-            self.control_dock.scatter.setEnabled(True)
-            self.control_dock.ndimensional.setEnabled(True)
-            self.control_dock.dimreduction.setEnabled(True)
-            self.control_dock.clustering.setEnabled(True)
-            if hasattr(self.control_dock, "spot_tools"):
-                self.control_dock.spot_tools.setEnabled(True)
-            if hasattr(self.control_dock, "special_tools"):
-                self.control_dock.special_tools.setEnabled(True)
-            if hasattr(self, "mask_dock"):
-                self.mask_dock.setEnabled(True)
-
-            #self.style_dock.control_dock.toolbox.setEnabled(True)
-            self.control_dock.comboBoxPlotType.setEnabled(True)
-            #self.style_dock.comboBoxStyleTheme.setEnabled(True)
-            #self.style_dock.toolButtonSaveTheme.setEnabled(True)
-            self.actions.UpdatePlot.setEnabled(True)
-            self.actions.SavePlotToTree.setEnabled(True)
-            self.style_dock.setEnabled(True)
-
-        elif self.canvas_widget.canvasWindow.currentIndex() == self.canvas_widget.canvas_tab['mv']:
-            self.control_dock.field_viewer.setEnabled(False)
-            self.control_dock.preprocess.setEnabled(False)
-            self.control_dock.scatter.setEnabled(False)
-            self.control_dock.ndimensional.setEnabled(False)
-            self.control_dock.dimreduction.setEnabled(False)
-            self.control_dock.clustering.setEnabled(False)
-            if hasattr(self.control_dock, "spot_tools"):
-                self.control_dock.spot_tools.setEnabled(False)
-            if hasattr(self.control_dock, "special_tools"):
-                self.control_dock.special_tools.setEnabled(False)
-            if hasattr(self, "mask_dock"):
-                self.mask_dock.setEnabled(False)
-
-            self.actions.UpdatePlot.setEnabled(False)
-            self.actions.SavePlotToTree.setEnabled(False)
-            self.style_dock.setEnabled(False)
-        else:
-            self.control_dock.field_viewer.setEnabled(False)
-            self.control_dock.preprocess.setEnabled(False)
-            self.control_dock.scatter.setEnabled(False)
-            self.control_dock.ndimensional.setEnabled(False)
-            self.control_dock.dimreduction.setEnabled(False)
-            self.control_dock.clustering.setEnabled(False)
-            if hasattr(self.control_dock, "spot_tools"):
-                self.control_dock.spot_tools.setEnabled(False)
-            if hasattr(self.control_dock, "special_tools"):
-                self.control_dock.special_tools.setEnabled(False)
-            if hasattr(self, "mask_dock"):
-                self.mask_dock.setEnabled(False)
-
-            self.style_dock.setEnabled(False)
-            self.actions.UpdatePlot.setEnabled(False)
-            self.actions.SavePlotToTree.setEnabled(False)

@@ -13,11 +13,15 @@ class MainActions(QObject):
 
         self.ui = ui
 
+        self.setupActions()
+    
+    def setupActions(self):
+
         # File Actions
         self.OpenDirectory = CustomAction(
             text="Open\nDirectory",
             light_icon_unchecked="icon-add-directory-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.OpenDirectory.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.OpenDirectory.setObjectName("actionOpenDirectory")
@@ -27,30 +31,30 @@ class MainActions(QObject):
         self.SaveFigure = CustomAction(
             text = "Save\nFigure",
             light_icon_unchecked="icon-save-file-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SaveFigure.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SaveFigure.setObjectName("actionSaveFile")
         self.SaveFigure.setToolTip("Save the current file")
         self.SaveFigure.setShortcut("Ctrl+P")
 
-        self.Undo = QAction(parent=ui)
+        self.Undo = QAction(parent=self.ui)
         self.Undo.setObjectName("actionUndo")
 
-        self.Cut = QAction(parent=ui)
+        self.Cut = QAction(parent=self.ui)
         self.Cut.setObjectName("actionCut")
 
-        self.Copy = QAction(parent=ui)
+        self.Copy = QAction(parent=self.ui)
         self.Copy.setObjectName("actionCopy")
 
-        #self.Shortcuts = QAction(parent=ui)
+        #self.Shortcuts = QAction(parent=self.ui)
         #self.Shortcuts.setObjectName("actionShortcuts")
 
         self.Calculator = CustomAction(
             text="Calculator",
             light_icon_unchecked="icon-calculator-64.svg",
             dark_icon_unchecked="icon-calculator-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Calculator.setObjectName("actionCalculator")
         self.Calculator.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -59,7 +63,7 @@ class MainActions(QObject):
             text = "Analytes",
             light_icon_unchecked="icon-atom-64.svg",
             dark_icon_unchecked="icon-atom-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SelectAnalytes.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SelectAnalytes.setObjectName("actionSelectAnalytes")
@@ -67,7 +71,7 @@ class MainActions(QObject):
         self.BiPlot = CustomAction(
             text="Scatter Plot",
             light_icon_unchecked="icon-scatter-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.BiPlot.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.BiPlot.setObjectName("actionBiPlot")
@@ -75,7 +79,7 @@ class MainActions(QObject):
         self.Ternary = CustomAction(
             text="Ternary Plot",
             light_icon_unchecked="icon-ternary-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Ternary.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Ternary.setObjectName("actionTernary")
@@ -84,7 +88,7 @@ class MainActions(QObject):
             text="Cluster",
             light_icon_unchecked="icon-cluster-64.svg",
             dark_icon_unchecked="icon-cluster-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Cluster.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Cluster.setObjectName("actionCluster")
@@ -93,31 +97,31 @@ class MainActions(QObject):
             text="TEC plot",
             light_icon_unchecked="icon-TEC-64.svg",
             dark_icon_unchecked="icon-cluster-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.TEC.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.TEC.setObjectName("actionTEC")
 
-        self.Radar = QAction(parent=ui)
+        self.Radar = QAction(parent=self.ui)
         self.Radar.setObjectName("actionRadar")
 
         self.Compare_Spot_Map = CustomAction(
             text="Compare Spot",
             light_icon_unchecked="icon-analysis-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Compare_Spot_Map.setEnabled(False)
         self.Compare_Spot_Map.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Compare_Spot_Map.setObjectName("actionCompare_Spot_Map")
 
-        # build menubar entry
-        self.Preferences = QAction(parent=ui)
+        # bself.uild menubar entry
+        self.Preferences = QAction(parent=self.ui)
         self.Preferences.setObjectName("actionPreferences")
         self.Preferences.setMenuRole(QAction.MenuRole.PreferencesRole)
         self.Preferences.setText("Preferences")
         self.Preferences.triggered.connect(self.open_preferences)
 
-        self.About = QAction(parent=ui)
+        self.About = QAction(parent=self.ui)
         self.About.setObjectName("actionAbout")
         self.About.setMenuRole(QAction.MenuRole.AboutRole)
         self.About.setText("About")
@@ -126,7 +130,7 @@ class MainActions(QObject):
             text="Quit",
             light_icon_unchecked="",
             dark_icon_unchecked="",
-            parent=ui,
+            parent=self.ui,
         )
         self.Quit_LaME.setMenuRole(QAction.MenuRole.QuitRole)
         self.Quit_LaME.setObjectName("actionQuit_LaME")
@@ -136,7 +140,7 @@ class MainActions(QObject):
         self.Batch_Process = CustomAction(
             text="Batch\nProcess",
             light_icon_unchecked="icon-batch-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Batch_Process.setEnabled(False)
         self.Batch_Process.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -145,7 +149,7 @@ class MainActions(QObject):
         self.SpotData = CustomAction(
             text="Spot Data",
             light_icon_unchecked="icon-spot-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SpotData.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SpotData.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -155,7 +159,7 @@ class MainActions(QObject):
             text="Filter",
             light_icon_unchecked="icon-filter-64.svg",
             light_icon_checked="icon-filter2-64.png",
-            parent=ui,
+            parent=self.ui,
         )
         self.FilterToggle.setCheckable(True)
         self.FilterToggle.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -166,7 +170,7 @@ class MainActions(QObject):
             text="Profiles",
             light_icon_unchecked="icon-profile-64.svg",
             dark_icon_unchecked="icon-profile-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Profiles.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Profiles.setObjectName("actionProfiles")
@@ -176,7 +180,7 @@ class MainActions(QObject):
             text="Polygons",
             light_icon_unchecked="icon-polygon-new-64.svg",
             dark_icon_unchecked="icon-polygon-new-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.PolygonMask.setCheckable(True)
         self.PolygonMask.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -187,7 +191,7 @@ class MainActions(QObject):
             text="Clusers",
             light_icon_unchecked="icon-mask-light-64.svg",
             light_icon_checked="icon-mask-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.ClusterMask.setCheckable(True)
         self.ClusterMask.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -197,7 +201,7 @@ class MainActions(QObject):
         self.Correlation = CustomAction(
             text="Correlation",
             light_icon_unchecked="icon-correlation-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Correlation.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Correlation.setObjectName("actionCorrelation")
@@ -206,7 +210,7 @@ class MainActions(QObject):
             text="Histogram",
             light_icon_unchecked="icon-histogram-64.svg",
             dark_icon_unchecked="icon-histogram-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Histograms.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Histograms.setObjectName("actionHistograms")
@@ -214,7 +218,7 @@ class MainActions(QObject):
         self.Reset = CustomAction(
             text="Reset",
             light_icon_unchecked="icon-nuke-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Reset.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Reset.setObjectName("actionReset")
@@ -224,7 +228,7 @@ class MainActions(QObject):
             text="Open\nSample",
             light_icon_unchecked="icon-open-file-64.svg",
             dark_icon_unchecked="icon-open-file-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.OpenSample.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.OpenSample.setObjectName("actionOpenSample")
@@ -233,7 +237,7 @@ class MainActions(QObject):
             text="Noise\nReduction",
             light_icon_unchecked="icon-noise-reduction-off-64.svg",
             dark_icon_unchecked="icon-noise-reduction-on-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.NoiseReduction.setCheckable(True)
         self.NoiseReduction.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -243,7 +247,7 @@ class MainActions(QObject):
         self.SavePlotToTree = CustomAction(
             text="Add Plot\nto Tree",
             light_icon_unchecked="icon-tree-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SavePlotToTree.setEnabled(True)
         self.SavePlotToTree.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -254,7 +258,7 @@ class MainActions(QObject):
         self.ImportFiles = CustomAction(
             text="Import\nFiles",
             light_icon_unchecked="icon-import-directory-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.ImportFiles.setObjectName("actionImportFiles")
         self.ImportFiles.setToolTip("Import a directory with raw or processed data")
@@ -263,7 +267,7 @@ class MainActions(QObject):
             text="Swap Axes",
             light_icon_unchecked="icon-swap-64.svg",
             dark_icon_unchecked="icon-swap-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SwapAxes.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SwapAxes.setObjectName("actionSwapAxes")
@@ -273,7 +277,7 @@ class MainActions(QObject):
             text="Crop",
             light_icon_unchecked="icon-crop-64.svg",
             dark_icon_unchecked="icon-crop-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Crop.setCheckable(True)
         self.Crop.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -284,7 +288,7 @@ class MainActions(QObject):
             text="Full Map",
             light_icon_unchecked="icon-fit-to-width-64.svg",
             dark_icon_unchecked="icon-fit-to-width-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.FullMap.setMenuRole(QAction.MenuRole.ApplicationSpecificRole)
         self.FullMap.setObjectName("actionFullMap")
@@ -294,7 +298,7 @@ class MainActions(QObject):
             text="Filters",
             light_icon_unchecked="icon-map-64.svg",
             dark_icon_unchecked="icon-map-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.ClearFilters.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ClearFilters.setObjectName("actionClearFilters")
@@ -303,7 +307,7 @@ class MainActions(QObject):
         self.ReportBug = CustomAction(
             text="Report\nBug",
             light_icon_unchecked="icon-bugs-64.png",
-            parent=ui,
+            parent=self.ui,
         )
         self.ReportBug.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ReportBug.setObjectName("actionReportBug")
@@ -313,7 +317,7 @@ class MainActions(QObject):
             text="Save\nProject",
             light_icon_unchecked="icon-save-session-64.svg",
             dark_icon_unchecked="icon-save-session-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SaveProject.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SaveProject.setObjectName("actionSaveProject")
@@ -322,7 +326,7 @@ class MainActions(QObject):
             text="Open\nProject",
             light_icon_unchecked="icon-open-session-64.svg",
             dark_icon_unchecked="icon-open-session-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.OpenProject.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.OpenProject.setObjectName("actionOpenProject")
@@ -330,7 +334,7 @@ class MainActions(QObject):
         self.Help = CustomAction(
             text="Help",
             light_icon_unchecked="icon-question-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Help.setCheckable(True)
         self.Help.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -342,7 +346,7 @@ class MainActions(QObject):
             text="",
             light_icon_unchecked="icon-sun-and-moon-64.svg",
             dark_icon_unchecked="",
-            parent=ui,
+            parent=self.ui,
         )
         self.ViewMode.setMenuRole(QAction.MenuRole.ApplicationSpecificRole)
         self.ViewMode.setObjectName("actionViewMode")
@@ -352,7 +356,7 @@ class MainActions(QObject):
             text="Import Spots",
             light_icon_unchecked="icon-import-spots-64.svg",
             dark_icon_unchecked="",
-            parent=ui,
+            parent=self.ui,
         )
         self.ImportSpots.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ImportSpots.setObjectName("actionImportSpots")
@@ -360,7 +364,7 @@ class MainActions(QObject):
         self.WorkflowTool = CustomAction(
             text="Workflow",
             light_icon_unchecked="icon-workflow-design-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.WorkflowTool.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.WorkflowTool.setObjectName("actionWorkflowTool")
@@ -369,7 +373,7 @@ class MainActions(QObject):
         self.Logger = CustomAction(
             text="Logger",
             light_icon_unchecked="icon-log-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Logger.setObjectName("actionLogger")
         self.Logger.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -377,7 +381,7 @@ class MainActions(QObject):
         self.Notes = CustomAction(
             text="Notes",
             light_icon_unchecked="icon-notes-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Notes.setObjectName("actionNotes")
         self.Notes.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -386,16 +390,16 @@ class MainActions(QObject):
             text="Filtering",
             light_icon_unchecked="icon-filter-64.svg",
             dark_icon_unchecked="icon-filter-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Filters.setObjectName("actionFilters")
         self.Filters.setMenuRole(QAction.MenuRole.TextHeuristicRole)
 
-        self.UserGuide = QAction( text="User Guide", parent=ui )
+        self.UserGuide = QAction( text="User Guide", parent=self.ui )
         self.UserGuide.setObjectName("actionUserGuide")
         self.UserGuide.setMenuRole(QAction.MenuRole.TextHeuristicRole)
 
-        self.Tutorials = QAction( text="Tutorials", parent=ui )
+        self.Tutorials = QAction( text="Tutorials", parent=self.ui )
         self.Tutorials.setObjectName("actionTutorials")
         self.Tutorials.setMenuRole(QAction.MenuRole.TextHeuristicRole)
 
@@ -403,7 +407,7 @@ class MainActions(QObject):
             text="Polygons",
             light_icon_unchecked="icon-polygon-new-64.svg",
             dark_icon_unchecked="icon-polygon-new-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Polygons.setObjectName("actionPolygons")
         self.Polygons.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -412,7 +416,7 @@ class MainActions(QObject):
             text="Clusters",
             light_icon_unchecked="icon-cluster-64.svg",
             dark_icon_unchecked="icon-cluster-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Clusters.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Clusters.setObjectName("actionClusters")
@@ -420,7 +424,7 @@ class MainActions(QObject):
         self.Info = CustomAction(
             text="Info",
             light_icon_unchecked="icon-info-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Info.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Info.setObjectName("actionInfo")
@@ -428,7 +432,7 @@ class MainActions(QObject):
         self.SpotTools = CustomAction(
             text="Spot Tools",
             light_icon_unchecked="icon-spot-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SpotTools.setCheckable(True)
         self.SpotTools.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -438,7 +442,7 @@ class MainActions(QObject):
         self.SpecialTools = CustomAction(
             text="Special Tools",
             light_icon_unchecked="icon-zoning-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.SpecialTools.setCheckable(True)
         self.SpecialTools.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -449,7 +453,7 @@ class MainActions(QObject):
             text="Update\nPlot",
             light_icon_unchecked="icon-launch-64.svg",
             dark_icon_unchecked="",
-            parent=ui,
+            parent=self.ui,
         )
         self.UpdatePlot.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.UpdatePlot.setObjectName("actionUpdatePlot")
@@ -459,7 +463,7 @@ class MainActions(QObject):
             text="Regression",
             light_icon_unchecked="icon-regression-64.svg",
             dark_icon_unchecked="icon-regression-dark-64.svg",
-            parent=ui,
+            parent=self.ui,
         )
         self.Regression.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Regression.setObjectName("actionRegression")
@@ -505,6 +509,8 @@ class MainActions(QObject):
         self.ReportBug.triggered.connect(lambda _: self.ui.open_browser('report_bug'))
         self.UserGuide.triggered.connect(lambda _: self.ui.open_browser('user_guide'))
         self.Tutorials.triggered.connect(lambda _: self.ui.open_browser('tutorials'))
+
+        self.ViewMode.triggered.connect(self.ui.theme_manager.cycle_mode)
 
 
     @no_log
@@ -683,13 +689,11 @@ class MainToolbar(QToolBar):
 
         self.ui = ui
 
-        prefs.uiPreferencesChanged.connect(lambda: self.ui.on_ui_pref_changed())
-
-        #font = default_font()
-        #font.setPointSize(10)
-        #self.setFont(font)
-        #self.setToolTip("")
-        #self.setIconSize(QSize(24, 24))
+        font = default_font()
+        font.setPointSize(10)
+        self.setFont(font)
+        self.setToolTip("")
+        self.setIconSize(QSize(24, 24))
         self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         self.setObjectName("toolBar")
 

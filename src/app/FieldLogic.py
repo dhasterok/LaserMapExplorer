@@ -13,7 +13,7 @@ from src.ui.FieldSelectionDialog import Ui_FieldDialog
 from src.app.config import BASEDIR, ICONPATH, RESOURCE_PATH
 
 from src.common.ExtendedDF import AttributeDataFrame
-from src.common.CustomWidgets import CustomDockWidget, CustomPage, RotatedHeaderView, CustomComboBox
+from src.common.CustomWidgets import CustomDockWidget, CustomPage, RotatedHeaderView, CustomComboBox, CustomToolBox
 from src.app.Preprocessing import PreprocessingUI
 from src.app.LamePlotUI import HistogramUI, CorrelationUI, ScatterUI, NDimUI
 from src.app.ImageProcessing import ImageProcessingUI
@@ -86,98 +86,101 @@ class ControlDock(CustomDockWidget):
         self.labelPlotType = QLabel(parent=self.groupBox)
         self.labelPlotType.setObjectName("labelPlotType")
         self.labelPlotType.setText("Plot type")
-        grid_layout.addWidget(self.labelPlotType, 0, 0, 1, 1)
 
         self.comboBoxPlotType = CustomComboBox(parent=self.groupBox)
         self.comboBoxPlotType.setMaximumSize(QSize(175, 16777215))
         self.comboBoxPlotType.setObjectName("comboBoxPlotType")
-        grid_layout.addWidget(self.comboBoxPlotType, 0, 1, 1, 2)
 
         # X-Axis
         self.labelX = QLabel(parent=self.groupBox)
         self.labelX.setObjectName("labelX")
         self.labelX.setText("X")
-        grid_layout.addWidget(self.labelX, 1, 0, 1, 1)
 
         self.comboBoxFieldTypeX = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldTypeX.setMaximumSize(QSize(125, 16777215))
         self.comboBoxFieldTypeX.setObjectName("comboBoxFieldTypeX")
-        grid_layout.addWidget(self.comboBoxFieldTypeX, 1, 1, 1, 1)
 
         self.comboBoxFieldX = CustomComboBox(parent=self.groupBox)
         self.comboBoxFieldX.setObjectName("comboBoxFieldX")
-        self.comboBoxFieldX.setMaximumSize(QSize(125, 16777215))
-        grid_layout.addWidget(self.comboBoxFieldX, 1, 2, 1, 1)
 
         self.spinBoxFieldX = QSpinBox(parent=self.groupBox)
         self.spinBoxFieldX.setObjectName("spinBoxFieldX")
-        grid_layout.addWidget(self.spinBoxFieldX, 1, 3, 1, 1)
 
         # Y-Axis
         self.labelY = QLabel(parent=self.groupBox)
         self.labelY.setObjectName("labelY")
-        grid_layout.addWidget(self.labelY, 2, 0, 1, 1)
 
         self.comboBoxFieldTypeY = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldTypeY.setMaximumSize(QSize(125, 16777215))
         self.comboBoxFieldTypeY.setObjectName("comboBoxFieldTypeY")
-        grid_layout.addWidget(self.comboBoxFieldTypeY, 2, 1, 1, 1)
 
         self.comboBoxFieldY = CustomComboBox(parent=self.groupBox)
         self.comboBoxFieldY.setObjectName("comboBoxFieldY")
-        self.comboBoxFieldY.setMaximumSize(QSize(125, 16777215))
-        grid_layout.addWidget(self.comboBoxFieldY, 2, 2, 1, 1)
 
         self.spinBoxFieldY = QSpinBox(parent=self.groupBox)
         self.spinBoxFieldY.setObjectName("spinBoxFieldY")
-        grid_layout.addWidget(self.spinBoxFieldY, 2, 3, 1, 1)
 
         # Z-Axis
         self.labelZ = QLabel(parent=self.groupBox)
         self.labelZ.setObjectName("labelZ")
         self.labelZ.setText("Z")
-        grid_layout.addWidget(self.labelZ, 3, 0, 1, 1)
 
         self.comboBoxFieldTypeZ = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldTypeZ.setMaximumSize(QSize(125, 16777215))
         self.comboBoxFieldTypeZ.setObjectName("comboBoxFieldTypeZ")
-        grid_layout.addWidget(self.comboBoxFieldTypeZ, 3, 1, 1, 1)
 
         self.comboBoxFieldZ = CustomComboBox(parent=self.groupBox)
         self.comboBoxFieldZ.setObjectName("comboBoxFieldZ")
-        self.comboBoxFieldZ.setMaximumSize(QSize(125, 16777215))
-        grid_layout.addWidget(self.comboBoxFieldZ, 3, 2, 1, 1)
 
         self.spinBoxFieldZ = QSpinBox(parent=self.groupBox)
         self.spinBoxFieldZ.setObjectName("spinBoxFieldZ")
-        grid_layout.addWidget(self.spinBoxFieldZ, 3, 3, 1, 1)
 
         # C-Axis
         self.labelC = QLabel(parent=self.groupBox)
         self.labelC.setObjectName("labelC")
-        grid_layout.addWidget(self.labelC, 4, 0, 1, 1)
 
         self.comboBoxFieldTypeC = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldTypeC.setMaximumSize(QSize(125, 16777215))
-        self.comboBoxFieldTypeC.setCurrentText("")
         self.comboBoxFieldTypeC.setObjectName("comboBoxFieldTypeC")
-        grid_layout.addWidget(self.comboBoxFieldTypeC, 4, 1, 1, 1)
 
         self.comboBoxFieldC = CustomComboBox(parent=self.groupBox)
-        self.comboBoxFieldC.setMaximumSize(QSize(125, 16777215))
-        self.comboBoxFieldC.setCurrentText("")
         self.comboBoxFieldC.setObjectName("comboBoxFieldC")
-        grid_layout.addWidget(self.comboBoxFieldC, 4, 2, 1, 1)
 
         self.spinBoxFieldC = QSpinBox(parent=self.groupBox)
         self.spinBoxFieldC.setReadOnly(False)
         self.spinBoxFieldC.setObjectName("spinBoxFieldC")
+
+        max_type_width = 155
+        max_field_width = 125
+
+        for cb in [self.comboBoxFieldTypeX, self.comboBoxFieldTypeY, self.comboBoxFieldTypeZ, self.comboBoxFieldTypeC]:
+            cb.setMaximumWidth(max_type_width)
+
+        for cb in [self.comboBoxFieldX, self.comboBoxFieldY, self.comboBoxFieldZ, self.comboBoxFieldC]:
+            cb.setMaximumWidth(max_field_width)
+
+        grid_layout.addWidget(self.labelPlotType, 0, 0, 1, 1)
+        grid_layout.addWidget(self.comboBoxPlotType, 0, 1, 1, 3)
+
+        grid_layout.addWidget(self.labelX, 1, 0, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldTypeX, 1, 1, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldX, 1, 2, 1, 1)
+        grid_layout.addWidget(self.spinBoxFieldX, 1, 3, 1, 1)
+
+        grid_layout.addWidget(self.labelY, 2, 0, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldTypeY, 2, 1, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldY, 2, 2, 1, 1)
+        grid_layout.addWidget(self.spinBoxFieldY, 2, 3, 1, 1)
+
+        grid_layout.addWidget(self.labelZ, 3, 0, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldTypeZ, 3, 1, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldZ, 3, 2, 1, 1)
+        grid_layout.addWidget(self.spinBoxFieldZ, 3, 3, 1, 1)
+
+        grid_layout.addWidget(self.labelC, 4, 0, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldTypeC, 4, 1, 1, 1)
+        grid_layout.addWidget(self.comboBoxFieldC, 4, 2, 1, 1)
         grid_layout.addWidget(self.spinBoxFieldC, 4, 3, 1, 1)
 
         # Normalization reference
-        norm_layout = QHBoxLayout()
-
         norm_label = QLabel(parent=self.groupBox)
+        norm_label.setText("Norm ref.")
         norm_label.setObjectName("labelReferenceValue")
 
         self.comboBoxRefMaterial = QComboBox(parent=self.groupBox)
@@ -186,15 +189,14 @@ class ControlDock(CustomDockWidget):
         self.comboBoxRefMaterial.setPlaceholderText("Select reference...")
         self.comboBoxRefMaterial.setToolTip("Choose a reference material for normalization")
 
-        norm_layout.addWidget(norm_label)
-        norm_layout.addWidget(self.comboBoxRefMaterial)
+        grid_layout.addWidget(norm_label, 5, 0, 1, 1)
+        grid_layout.addWidget(self.comboBoxRefMaterial, 5, 1, 1, 3)
 
         group_box_layout.addLayout(grid_layout)
-        group_box_layout.addLayout(norm_layout)
 
         dock_layout.addWidget(self.groupBox)
 
-        self.toolbox = QToolBox(parent=dock_container)
+        self.toolbox = CustomToolBox(parent=dock_container)
         self.toolbox.setEnabled(True)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -216,7 +218,14 @@ class ControlDock(CustomDockWidget):
         field_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.field_viewer.addItem(field_spacer)
         atom_icon = QIcon(str(ICONPATH / "icon-atom-64.svg"))
-        self.toolbox.addItem(self.field_viewer, atom_icon, "Field Viewer")
+        page_name = "Field Viewer" 
+        self.toolbox.addItem(self.field_viewer, atom_icon, page_name)
+
+        self.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-atom-64.svg",
+            dark_icon = ICONPATH / "icon-atom-dark-64.svg"
+        )
         
         # Initialize scatter page
         self.scatter = ScatterUI(self)

@@ -309,7 +309,14 @@ class PreprocessingUI(CustomPage):
         self.addItem(preprocess_spacer)
         
         icon_preprocess = QIcon(str(ICONPATH / "icon-histogram-64.svg"))
-        self.dock.toolbox.addItem(self, icon_preprocess, "Preprocess")
+        page_name = "Preprocess"
+        self.dock.toolbox.addItem(self, icon_preprocess, page_name)
+
+        self.dock.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-histogram-64.svg",
+            dark_icon = ICONPATH / "icon-histogram-dark-64.svg"
+        )
 
     def connect_widgets(self):
         self.lineEditDX.editingFinished.connect(self.update_dx)

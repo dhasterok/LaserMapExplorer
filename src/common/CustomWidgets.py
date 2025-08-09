@@ -2,7 +2,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
         QMenu, QDockWidget, QHeaderView, QToolButton, QSlider, QVBoxLayout, QHBoxLayout, QLabel,
-        QSizePolicy, QScrollArea, QLayout, QColorDialog,
+        QSizePolicy, QScrollArea, QLayout, QColorDialog, QToolBox
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
@@ -13,7 +13,7 @@ import src.common.format as fmt
 import pandas as pd
 
 from src.common.colorfunc import is_valid_hex_color
-from src.app.UITheme import default_font
+from src.app.UITheme import default_font, ThemeManager
 from src.app.config import ICONPATH
 
 class CustomPage(QWidget):
@@ -93,6 +93,42 @@ class CustomPage(QWidget):
 
     def setSpacing(self, spacing):
         self._content_layout.setSpacing(spacing)
+
+class CustomToolBox(QToolBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.icon_dict = {}  # { page_text: {"light": QIcon(...), "dark": QIcon(...)} }
+        self._current_theme = "light"  # default until set
+
+    def set_theme(self, theme: str):
+        """Set current theme and update all icons."""
+        if theme not in ("light", "dark"):
+            raise ValueError("Theme must be 'light' or 'dark'")
+        self._current_theme = theme
+        self.update_icons()
+
+    def set_page_icons(self, page_text: str, light_icon: Path, dark_icon: Path):
+        """Assign icons for a given page."""
+        self.icon_dict[page_text] = {
+            "light": QIcon(str(light_icon)),
+            "dark": QIcon(str(dark_icon))
+        }
+        self.update_icon(page_text)
+
+    def update_icon(self, page_text: str):
+        """Update a single page icon based on current theme."""
+        if page_text in self.icon_dict:
+            icon = self.icon_dict[page_text][self._current_theme]
+            # find the page index by matching text
+            for i in range(self.count()):
+                if self.itemText(i) == page_text:
+                    self.setItemIcon(i, icon)
+                    break
+
+    def update_icons(self):
+        """Update all page icons to match the current theme."""
+        for page_text in self.icon_dict.keys():
+            self.update_icon(page_text)
 
 class CustomLineEdit(QLineEdit):
     """Custom line edit widget, when the only input should be of type float

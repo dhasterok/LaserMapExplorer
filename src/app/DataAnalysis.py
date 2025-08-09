@@ -252,10 +252,19 @@ class ClusterPage(CustomPage, Clustering):
         self.addItem(cluster_spacer)
 
         cluster_icon = QIcon(str(ICONPATH / "icon-cluster-64.svg"))
+        page_name = "Clustering"
         if not page_index:
-            self.dock.toolbox.addItem(self, cluster_icon, "Clustering")
+            self.dock.toolbox.addItem(self, cluster_icon, page_name)
         else:
-            self.dock.toolbox.insertItem(page_index, self, cluster_icon, "Clustering")
+            self.dock.toolbox.insertItem(page_index, self, cluster_icon, page_name)
+
+        self.dock.toolbox.addItem(self, cluster_icon, page_name)
+
+        self.dock.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-cluster-64.svg",
+            dark_icon = ICONPATH / "icon-cluster-dark-64.svg"
+        )
 
     def connect_widgets(self):
         """Connect clustering widgets to UI."""
@@ -653,10 +662,17 @@ class DimensionalReductionPage(CustomPage, DimensionalReduction):
         self.addItem(field_spacer)
 
         multidim_icon = QIcon(str(ICONPATH / "icon-dimensional-analysis-64.svg"))
+        page_name = "Dimensional Reduction" 
         if not page_index:
-            self.dock.toolbox.addItem(self, multidim_icon, "Dimensional Reduction")
+            self.dock.toolbox.addItem(self, multidim_icon, page_name)
         else:
-            self.dock.toolbox.insertItem(page_index, self, multidim_icon, "Dimensional Reduction")
+            self.dock.toolbox.insertItem(page_index, self, multidim_icon, page_name)
+
+        self.dock.toolbox.set_page_icons(
+            page_name,
+            light_icon = ICONPATH / "icon-dimensional-analysis-64.svg",
+            dark_icon = ICONPATH / "icon-dimensional-analysis-dark-64.svg"
+        )
 
     def connect_widgets(self):
         # Dimensional reduction ui widgets

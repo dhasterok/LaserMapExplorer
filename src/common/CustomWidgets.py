@@ -1210,6 +1210,8 @@ class ColorButton(QPushButton):
     def __init__(self, permanent_text=None, ui=None, parent=None):
         super().__init__(parent=parent)
 
+        self.setContentsMargins(3, 3, 3, 3)
+
         self.ui = ui
         self.permanent_text = permanent_text
         self.setText(self.permanent_text if permanent_text else "")

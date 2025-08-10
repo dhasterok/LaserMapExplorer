@@ -65,7 +65,7 @@ class HistogramUI(QGroupBox):
         self.setObjectName("groupBoxHistogram")
 
         form_layout = QFormLayout(self)
-        form_layout.setContentsMargins(3, 3, 3, 3)
+        form_layout.setContentsMargins(6, 6, 6, 6)
         self.setLayout(form_layout)
 
         self.doubleSpinBoxBinWidth = QDoubleSpinBox(parent=self)
@@ -76,6 +76,7 @@ class HistogramUI(QGroupBox):
 
 
         no_bin_layout = QHBoxLayout()
+        no_bin_layout.setContentsMargins(0, 0, 0, 0)
 
         self.toolButtonHistogramReset = CustomToolButton(
             text="Reset",
@@ -264,11 +265,12 @@ class CorrelationUI(QGroupBox):
         self.setObjectName("groupBoxCorrelation")
 
         box_layout = QHBoxLayout(self)
-        box_layout.setContentsMargins(3, 3, 3, 3)
+        box_layout.setContentsMargins(6, 6, 6, 6)
         self.setLayout(box_layout)
 
         label_method = QLabel(parent=self)
         label_method.setText("Method")
+        label_method.setAlignment(Qt.AlignmentFlag.AlignRight)
         box_layout.addWidget(label_method)
 
         self.comboBoxCorrelationMethod = QComboBox(parent=self)
@@ -276,7 +278,7 @@ class CorrelationUI(QGroupBox):
         box_layout.addWidget(self.comboBoxCorrelationMethod)
 
         self.checkBoxCorrelationSquared = QCheckBox(parent=self)
-        self.checkBoxCorrelationSquared.setText("")
+        self.checkBoxCorrelationSquared.setText("C²")
         self.checkBoxCorrelationSquared.setObjectName("checkBoxCorrelationSquared")
         box_layout.addWidget(self.checkBoxCorrelationSquared)
 
@@ -438,7 +440,7 @@ class ScatterUI(CustomPage):
         scatter_group_box.setTitle("Biplot and Ternary")
 
         scatter_form_layout = QFormLayout(scatter_group_box)
-        scatter_form_layout.setContentsMargins(3, 3, 3, 3)
+        scatter_form_layout.setContentsMargins(6, 6, 6, 6)
 
         preset_layout = QHBoxLayout(scatter_group_box)
 
@@ -450,7 +452,7 @@ class ScatterUI(CustomPage):
             light_icon_unchecked="icon-save-file-64.svg",
             parent=scatter_group_box
         )
-        self.toolButtonScatterSavePreset.setObjectName("toolButtonScatterSavePreset")
+        self.toolButtonScatterSavePreset.setObjectName("toolButtonScatterSaveFields")
 
         preset_layout.addWidget(self.comboBoxScatterPreset)
         preset_layout.addWidget(self.toolButtonScatterSavePreset)
@@ -468,13 +470,15 @@ class ScatterUI(CustomPage):
         ternary_map_group_box.setTitle("Ternary Map")
 
         ternary_map_form_layout = QFormLayout(ternary_map_group_box)
-        ternary_map_form_layout.setContentsMargins(3, 3, 3, 3)
+        ternary_map_form_layout.setContentsMargins(6, 6, 6, 6)
 
         self.comboBoxTernaryColormap = QComboBox(parent=ternary_map_group_box)
         self.comboBoxTernaryColormap.setObjectName("comboBoxTernaryColormap")
         ternary_map_form_layout.addRow("Colormap", self.comboBoxTernaryColormap)
 
         ternary_swatches_layout = QHBoxLayout(ternary_map_group_box)
+        ternary_swatches_layout.setContentsMargins(0, 0, 0, 0)
+        ternary_swatches_layout.setSpacing(2)
 
         self.colorButtonTCmapXColor = ColorButton(
             permanent_text="X",
@@ -532,9 +536,10 @@ class ScatterUI(CustomPage):
         ternary_swatches_layout.addWidget(self.colorButtonTCmapMColor)
         ternary_swatches_layout.addItem(spacer)
         ternary_swatches_layout.addWidget(self.toolButtonSaveTernaryColormap)
-        ternary_swatches_layout.addWidget(self.toolButtonTernaryMap)
+
 
         ternary_map_form_layout.addRow("Colors", ternary_swatches_layout)
+        ternary_map_form_layout.addRow("Ternary map", self.toolButtonTernaryMap)
 
         self.addWidget(ternary_map_group_box)
         scatter_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
@@ -760,11 +765,14 @@ class NDimUI(CustomPage):
         group_box.setObjectName("groupBoxNDim")
 
         group_box_layout = QVBoxLayout(group_box)
-        group_box_layout.setContentsMargins(3, 3, 3, 3)
+        group_box_layout.setContentsMargins(6, 6, 6, 6)
 
         form_layout = QFormLayout()
+        form_layout.setContentsMargins(0, 0, 0, 0)
+        form_layout.setSpacing(2)
 
         horizontal_analyte_layout = QHBoxLayout()
+        horizontal_analyte_layout.setContentsMargins(0, 0, 0, 0)
 
         self.comboBoxNDimAnalyte = CustomComboBox(parent=group_box)
         self.comboBoxNDimAnalyte.setObjectName("comboBoxNDimAnalyte")
@@ -777,7 +785,7 @@ class NDimUI(CustomPage):
         self.toolButtonNDimAnalyteAdd.setObjectName("toolButtonNDimAnalyteAdd")
         self.toolButtonNDimAnalyteAdd.setToolTip("Add analyte to plot")
 
-        analyte_spacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        analyte_spacer = QSpacerItem(60, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         horizontal_analyte_layout.addWidget(self.comboBoxNDimAnalyte)
         horizontal_analyte_layout.addItem(analyte_spacer)
@@ -886,6 +894,10 @@ class NDimUI(CustomPage):
 
         group_box_layout.addLayout(table_layout)
         self.addWidget(group_box)
+
+        spacer_end = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.addItem(spacer_end)
+        
 
         # add the page to the toolbox
         ndim_icon = QIcon(str(ICONPATH / "icon-TEC-64.svg"))

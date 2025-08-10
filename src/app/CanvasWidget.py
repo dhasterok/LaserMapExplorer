@@ -591,6 +591,7 @@ class NavigationWidgetsSV(QWidget):
         super().__init__(parent=parent)
 
         navigation_layout = QHBoxLayout()
+        navigation_layout.setContentsMargins(3, 3, 3, 3)
         self.setLayout(navigation_layout)
 
         self.toolButtonHome = CustomToolButton(
@@ -708,6 +709,7 @@ class NavigationWidgetsMV(QWidget):
         super().__init__(parent=parent)
 
         navigation_layout = QHBoxLayout()
+        navigation_layout.setContentsMargins(3, 3, 3, 3)
         self.setLayout(navigation_layout)
 
 
@@ -730,6 +732,13 @@ class NavigationWidgetsMV(QWidget):
         self.spinBoxMaxCols.setMaximum(8)
         self.spinBoxMaxCols.setProperty("value", 3)
         self.spinBoxMaxCols.setObjectName("spinBoxMaxCols")
+
+        spinbox_width = 40
+
+        for sb in [self.spinBoxMaxRows, self.spinBoxMaxCols]:
+            sb.setMinimumWidth(spinbox_width)
+            sb.setMaximumWidth(spinbox_width)
+            sb.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.comboBoxMVPlots = CustomComboBox(parent=self)
         self.comboBoxMVPlots.setObjectName("comboBoxMVPlots")
@@ -795,6 +804,7 @@ class NavigationWidgetsQV(QWidget):
         super().__init__(parent=parent)
 
         navigation_layout = QHBoxLayout()
+        navigation_layout.setContentsMargins(3, 3, 3, 3)
         self.setLayout(navigation_layout)
 
         list_label = QLabel()
@@ -829,6 +839,7 @@ class CanvasToolBar(QGroupBox):
         self.setObjectName("groupBoxPlotToolBar")
 
         toolbar_layout = QHBoxLayout()
+        toolbar_layout.setContentsMargins(3, 3, 3, 3)
         self.setLayout(toolbar_layout)
 
         # single view nav widgets

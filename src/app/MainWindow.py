@@ -233,7 +233,7 @@ class MainWindow(QMainWindow):
     def connect_actions(self):
         self.actions.connect_actions()
 
-        self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_changed())
+        self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_widget.canvasWindow.canvas_changed())
 
     def connect_widgets(self):
         """ Connects widgets to their respective methods and actions.

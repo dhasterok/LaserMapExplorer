@@ -381,9 +381,9 @@ class PlotTree(CustomDockWidget):
             return
 
         if darkdetect.isDark():
-            hexcolor = self.ui.theme.highlight_color_dark
+            hexcolor = self.ui.theme_manager.highlight_color_dark
         else:
-            hexcolor = self.ui.theme.highlight_color_light
+            hexcolor = self.ui.theme_manager.highlight_color_light
 
         data = self.ui.app_data.data[sample_id]
         ref_chem = self.ui.app_data.ref_chem

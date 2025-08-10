@@ -172,6 +172,7 @@ class ClusterPage(CustomPage, Clustering):
         self.groupBoxClustering.setObjectName("groupBoxClustering")
 
         self.cluster_form_layout = QFormLayout(self.groupBoxClustering)
+        self.cluster_form_layout.setContentsMargins(3, 3, 3, 3)
         self.cluster_form_layout.setObjectName("cluster_form_layout")
 
         self.comboBoxClusterMethod = QComboBox(parent=self.groupBoxClustering)
@@ -257,8 +258,6 @@ class ClusterPage(CustomPage, Clustering):
             self.dock.toolbox.addItem(self, cluster_icon, page_name)
         else:
             self.dock.toolbox.insertItem(page_index, self, cluster_icon, page_name)
-
-        self.dock.toolbox.addItem(self, cluster_icon, page_name)
 
         self.dock.toolbox.set_page_icons(
             page_name,

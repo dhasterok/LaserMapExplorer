@@ -1159,7 +1159,7 @@ class StyleData(Observable, StyleTheme):
                 'axis_widgets': [True, True, True, True],
                 'lim_precision': [3, 3, 3, 3],
                 'add_none': [False, False, True, True],
-                'spinbox': [False, False, False, True],
+                'spinbox': [True, True, True, True],
                 'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
                 },
             'heatmap': {

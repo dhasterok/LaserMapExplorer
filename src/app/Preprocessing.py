@@ -81,6 +81,7 @@ class PreprocessingUI(CustomPage):
 
         widget_resolution_label = QWidget(parent=self.groupBoxCoordinates)
         layout_resolution_label = QHBoxLayout()
+        layout_resolution_label.setContentsMargins(3, 3, 3, 3)
         widget_resolution_label.setLayout(layout_resolution_label)
 
         self.labelSampleResolution = QLabel(parent=self.groupBoxCoordinates)
@@ -102,6 +103,7 @@ class PreprocessingUI(CustomPage):
 
         widget_resolution = QWidget(self.groupBoxCoordinates)
         layout_resolution = QHBoxLayout(widget_resolution)
+        layout_resolution.setContentsMargins(3, 3, 3, 3)
         widget_resolution.setLayout(layout_resolution)
 
         self.labelResolutionNx = QLabel(parent=self.groupBoxCoordinates)
@@ -133,9 +135,11 @@ class PreprocessingUI(CustomPage):
 
         widget_dimension_label = QWidget(parent=self.groupBoxCoordinates)
         layout_dimension_label = QHBoxLayout()
+        layout_dimension_label.setContentsMargins(3, 3, 3, 3)
         widget_dimension_label.setLayout(layout_dimension_label)
 
         self.labelPixelResolution = QLabel(parent=self.groupBoxCoordinates)
+        self.labelPixelResolution.setText("Dimensions")
         self.labelPixelResolution.setObjectName("labelPixelResolution")
 
         self.toolButtonPixelResolutionReset = CustomToolButton(
@@ -152,6 +156,7 @@ class PreprocessingUI(CustomPage):
 
         widget_dimension = QWidget(self.groupBoxCoordinates)
         layout_dimension = QHBoxLayout()
+        layout_dimension.setContentsMargins(3, 3, 3, 3)
         widget_dimension.setLayout(layout_dimension)
 
         self.labelDX = QLabel(parent=self.groupBoxCoordinates)
@@ -205,7 +210,7 @@ class PreprocessingUI(CustomPage):
         self.groupBoxAutoscale.setTitle("Outliers and negatives")
 
         layout_autoscale = QVBoxLayout(self.groupBoxAutoscale)
-        layout_autoscale.setContentsMargins(3, 3, 3, 3)
+        layout_autoscale.setContentsMargins(6, 6, 6, 6)
 
         layout_buttons = QHBoxLayout()
         layout_buttons.setObjectName("horizontalLayout_61")
@@ -258,21 +263,24 @@ class PreprocessingUI(CustomPage):
         self.comboBoxOutlierMethod = QComboBox(parent=self.groupBoxAutoscale)
         self.comboBoxOutlierMethod.setObjectName("comboBoxOutlierMethod")
         self.comboBoxOutlierMethod.setToolTip("Select method for removing outliers from analyte and ratio data")
+        self.comboBoxOutlierMethod.setMaximumWidth(150)
         form_layout_autoscale.addRow("Outlier Method", self.comboBoxOutlierMethod)
 
         self.comboBoxNegativeMethod = QComboBox(parent=self.groupBoxAutoscale)
         self.comboBoxNegativeMethod.setObjectName("comboBoxNegativeMethod")
+        self.comboBoxNegativeMethod.setToolTip("Select method to handle negative values")
+        self.comboBoxNegativeMethod.setMaximumWidth(150)
         form_layout_autoscale.addRow("Negative handling", self.comboBoxNegativeMethod)
 
         layout_quantiles = QHBoxLayout()
 
         self.lineEditLowerQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
-        self.lineEditLowerQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditLowerQuantile.setMaximumSize(QSize(75, 16777215))
         self.lineEditLowerQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditLowerQuantile.setObjectName("lineEditLowerQuantile")
 
         self.lineEditUpperQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
-        self.lineEditUpperQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditUpperQuantile.setMaximumSize(QSize(75, 16777215))
         self.lineEditUpperQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditUpperQuantile.setObjectName("lineEditUpperQuantile")
 
@@ -284,12 +292,12 @@ class PreprocessingUI(CustomPage):
         layout_quantiles_diff = QHBoxLayout()
 
         self.lineEditDifferenceLowerQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
-        self.lineEditDifferenceLowerQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditDifferenceLowerQuantile.setMaximumSize(QSize(75, 16777215))
         self.lineEditDifferenceLowerQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditDifferenceLowerQuantile.setObjectName("lineEditDifferenceLowerQuantile")
 
         self.lineEditDifferenceUpperQuantile = CustomLineEdit(parent=self.groupBoxAutoscale)
-        self.lineEditDifferenceUpperQuantile.setMaximumSize(QSize(103, 16777215))
+        self.lineEditDifferenceUpperQuantile.setMaximumSize(QSize(75, 16777215))
         self.lineEditDifferenceUpperQuantile.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditDifferenceUpperQuantile.setObjectName("lineEditDifferenceUpperQuantile")
 
@@ -328,6 +336,7 @@ class PreprocessingUI(CustomPage):
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
 
         self.comboBoxOutlierMethod.addItems(self.dock.ui.app_data.outlier_methods)
+        self.comboBoxOutlierMethod.setMaximumWidth(150)
         if 'Chauvenet criterion' in self.dock.ui.app_data.outlier_methods:
             self.comboBoxOutlierMethod.setCurrentText('Chauvenet criterion')
         self.comboBoxOutlierMethod.activated.connect(

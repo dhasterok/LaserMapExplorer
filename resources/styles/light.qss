@@ -166,9 +166,13 @@ QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover, QTimeEdit::down-
 }
 QSpinBox::up-arrow, QDoubleSpinBox::up-arrow, QTimeEdit::up-arrow, QDateEdit::up-arrow, QDateTimeEdit::up-arrow {
     image: url({icon_path}/up_spinarrow.png);
+    width: 8px;
+    height: 8px;
 }
 QSpinBox::down-arrow, QDoubleSpinBox::down-arrow, QTimeEdit::down-arrow, QDateEdit::down-arrow, QDateTimeEdit::down-arrow {
     image: url({icon_path}/down_spinarrow.png);
+    width: 8px;
+    height: 8px;
 }
 QProgressBar {
     max-height: 8px;
@@ -271,6 +275,8 @@ QComboBox::drop-down {
 }
 QComboBox::down-arrow {
     image: url({icon_path}/down_arrow.png);
+    width: 12px;
+    height: 12px;
 }
 
 QComboBox::down-arrow:on {

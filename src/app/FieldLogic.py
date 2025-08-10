@@ -45,7 +45,7 @@ class ControlDock(CustomDockWidget):
         self.connect_logger()
 
         self.axis_widget_dict = {
-            'label': [self.labelX, self.labelY, self.labelZ, self.labelZ],
+            'label': [self.labelX, self.labelY, self.labelZ, self.labelC],
             'parentbox': [self.comboBoxFieldTypeX, self.comboBoxFieldTypeY, self.comboBoxFieldTypeZ, self.comboBoxFieldTypeC],
             'childbox': [self.comboBoxFieldX, self.comboBoxFieldY, self.comboBoxFieldZ, self.comboBoxFieldC],
             'spinbox': [self.spinBoxFieldX, self.spinBoxFieldY, self.spinBoxFieldZ, self.spinBoxFieldC],
@@ -69,10 +69,6 @@ class ControlDock(CustomDockWidget):
         dock_layout.setContentsMargins(3, 3, 3, 3)
 
         self.groupBox = QGroupBox(parent=dock_container)
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
         self.groupBox.setSizePolicy(sizePolicy)
         self.groupBox.setMaximumSize(QSize(300, 16777215))
         self.groupBox.setObjectName("groupBox")
@@ -85,10 +81,10 @@ class ControlDock(CustomDockWidget):
         # Plot type
         self.labelPlotType = QLabel(parent=self.groupBox)
         self.labelPlotType.setObjectName("labelPlotType")
-        self.labelPlotType.setText("Plot type")
+        self.labelPlotType.setText("Plot")
 
         self.comboBoxPlotType = CustomComboBox(parent=self.groupBox)
-        self.comboBoxPlotType.setMaximumSize(QSize(175, 16777215))
+        self.comboBoxPlotType.setMaximumSize(QSize(190, 16777215))
         self.comboBoxPlotType.setObjectName("comboBoxPlotType")
 
         # X-Axis
@@ -145,15 +141,34 @@ class ControlDock(CustomDockWidget):
         self.spinBoxFieldC = QSpinBox(parent=self.groupBox)
         self.spinBoxFieldC.setReadOnly(False)
         self.spinBoxFieldC.setObjectName("spinBoxFieldC")
+        # Normalization reference
+        norm_label = QLabel(parent=self.groupBox)
+        norm_label.setText("Ref.")
+        norm_label.setObjectName("labelReferenceValue")
 
-        max_type_width = 155
-        max_field_width = 125
+        self.comboBoxRefMaterial = QComboBox(parent=self.groupBox)
+        self.comboBoxRefMaterial.setMaximumSize(QSize(190, 16777215))
+        self.comboBoxRefMaterial.setObjectName("comboBoxRefMaterial")
+        self.comboBoxRefMaterial.setPlaceholderText("Select reference...")
+        self.comboBoxRefMaterial.setToolTip("Choose a reference for normalization")
+
+        max_type_width = 125
+        max_field_width = 100
+        spinbox_width = 40
+
+        for lbl in [self.labelPlotType, self.labelX, self.labelY, self.labelZ, self.labelC, norm_label]:
+            lbl.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         for cb in [self.comboBoxFieldTypeX, self.comboBoxFieldTypeY, self.comboBoxFieldTypeZ, self.comboBoxFieldTypeC]:
             cb.setMaximumWidth(max_type_width)
 
         for cb in [self.comboBoxFieldX, self.comboBoxFieldY, self.comboBoxFieldZ, self.comboBoxFieldC]:
             cb.setMaximumWidth(max_field_width)
+
+        for sb in [self.spinBoxFieldX, self.spinBoxFieldY, self.spinBoxFieldZ, self.spinBoxFieldC]:
+            sb.setMinimumWidth(spinbox_width)
+            sb.setMaximumWidth(spinbox_width)
+            sb.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         grid_layout.addWidget(self.labelPlotType, 0, 0, 1, 1)
         grid_layout.addWidget(self.comboBoxPlotType, 0, 1, 1, 3)
@@ -177,17 +192,6 @@ class ControlDock(CustomDockWidget):
         grid_layout.addWidget(self.comboBoxFieldTypeC, 4, 1, 1, 1)
         grid_layout.addWidget(self.comboBoxFieldC, 4, 2, 1, 1)
         grid_layout.addWidget(self.spinBoxFieldC, 4, 3, 1, 1)
-
-        # Normalization reference
-        norm_label = QLabel(parent=self.groupBox)
-        norm_label.setText("Norm ref.")
-        norm_label.setObjectName("labelReferenceValue")
-
-        self.comboBoxRefMaterial = QComboBox(parent=self.groupBox)
-        self.comboBoxRefMaterial.setMaximumSize(QSize(190, 16777215))
-        self.comboBoxRefMaterial.setObjectName("comboBoxRefMaterial")
-        self.comboBoxRefMaterial.setPlaceholderText("Select reference...")
-        self.comboBoxRefMaterial.setToolTip("Choose a reference material for normalization")
 
         grid_layout.addWidget(norm_label, 5, 0, 1, 1)
         grid_layout.addWidget(self.comboBoxRefMaterial, 5, 1, 1, 3)
@@ -618,11 +622,15 @@ class ControlDock(CustomDockWidget):
         # enable and set visibility of widgets
         widget_dict = self.axis_widget_dict
         for ax in range(4):
+            label = widget_dict['label'][ax]
             parentbox = widget_dict['parentbox'][ax]
             childbox = widget_dict['childbox'][ax]
             spinbox = widget_dict['spinbox'][ax]
 
             # set field label text
+            label.setEnabled(setting['axis'][ax])
+            label.setVisible(setting['axis'][ax])
+
             # set parent and child comboboxes
             parentbox.setEnabled(setting['axis'][ax])
             parentbox.setVisible(setting['axis'][ax])

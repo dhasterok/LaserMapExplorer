@@ -17,10 +17,12 @@
       CustomPage
       CustomSlider
       CustomTableWidget
+      CustomToolBox
       CustomToolButton
       CustomTreeView
       DoubleSlider
       RotatedHeaderView
       StandardItem
       ToggleSwitch
+      VisibilityWidget
    

@@ -16,6 +16,17 @@ from src.common.colorfunc import is_valid_hex_color
 from src.app.UITheme import default_font, ThemeManager
 from src.app.config import ICONPATH
 
+class VisibilityWidget(QWidget):
+    visibilityChanged = pyqtSignal(bool)  # True = shown, False = hidden
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.visibilityChanged.emit(True)
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.visibilityChanged.emit(False)
+
 class CustomPage(QWidget):
     def __init__(
         self,

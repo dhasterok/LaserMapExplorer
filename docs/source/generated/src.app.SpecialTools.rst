@@ -8,6 +8,9 @@ src.app.SpecialTools
 
    .. autosummary::
    
-      SpecialFunctions
+      BarmometryTab
+      DatingTab
+      DiffusionTab
       SpecialPage
+      ThermometryTab
    

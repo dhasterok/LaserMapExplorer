@@ -1,4 +1,4 @@
-app.SpecialTools
+﻿app.SpecialTools
 ================
 
 .. automodule:: app.SpecialTools
@@ -8,6 +8,9 @@ app.SpecialTools
 
    .. autosummary::
    
-      SpecialFunctions
+      BarmometryTab
+      DatingTab
+      DiffusionTab
       SpecialPage
+      ThermometryTab
    

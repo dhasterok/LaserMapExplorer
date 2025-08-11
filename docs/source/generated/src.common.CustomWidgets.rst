@@ -1,4 +1,4 @@
-﻿src.common.CustomWidgets
+src.common.CustomWidgets
 ========================
 
 .. automodule:: src.common.CustomWidgets
@@ -17,10 +17,12 @@
       CustomPage
       CustomSlider
       CustomTableWidget
+      CustomToolBox
       CustomToolButton
       CustomTreeView
       DoubleSlider
       RotatedHeaderView
       StandardItem
       ToggleSwitch
+      VisibilityWidget
    

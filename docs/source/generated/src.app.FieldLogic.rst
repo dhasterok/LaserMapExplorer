@@ -1,4 +1,4 @@
-﻿src.app.FieldLogic
+src.app.FieldLogic
 ==================
 
 .. automodule:: src.app.FieldLogic

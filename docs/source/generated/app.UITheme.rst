@@ -8,6 +8,7 @@
 
    .. autosummary::
    
+      apply_font_to_children
       default_font
    
    .. rubric:: Classes
@@ -18,5 +19,4 @@
       PreferencesManager
       PreviewWidget
       ThemeManager
-      UIThemes
    

@@ -2,10 +2,11 @@ from PyQt6.QtCore import ( Qt, QSize )
 from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
     QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy, QToolButton,
-    QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox
+    QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox,
+    QButtonGroup
 )
 from PyQt6.QtGui import QFont, QCursor
-from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox
+from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
 from src.app.config import APPDATA_PATH
 
 import numpy as np
@@ -65,7 +66,6 @@ class CanvasWidget(QWidget):
         self.setObjectName("centralwidget")
 
         canvas_widget_layout = QVBoxLayout(self)
-        canvas_widget_layout.setObjectName("verticalLayout_21")
 
         self.canvasWindow = QTabWidget(parent=self)
 
@@ -586,10 +586,14 @@ class QuickViewTab(QWidget):
 
         parent.addTab(self, "Quick View")
 
-class NavigationWidgetsSV(QWidget):
+class NavigationWidgetsSV(VisibilityWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
+        self.setupUI()
+        self.connect_widgets()
+
+    def setupUI(self):
         navigation_layout = QHBoxLayout()
         navigation_layout.setContentsMargins(3, 3, 3, 3)
         self.setLayout(navigation_layout)
@@ -704,7 +708,43 @@ class NavigationWidgetsSV(QWidget):
         navigation_layout.addItem(navigation_spacer)
         navigation_layout.addWidget(self.widgetPlotInfo)
 
-class NavigationWidgetsMV(QWidget):
+        # button_group = QButtonGroup(self)
+        # button_group.addButton(self.toolButtonPan)
+        # button_group.addButton(self.toolButtonZoom)
+        # button_group.addButton(self.toolButtonAnnotate)
+        # button_group.addButton(self.toolButtonDistance)
+        # button_group.setExclusive(True)
+
+    def connect_widgets(self):
+        self.visibilityChanged.connect(lambda _: self.reset_buttons)
+        self.toolButtonPopFigure.clicked.connect(lambda _: self.all_sv_buttons_off)
+        self.toolButtonPan.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonPan))
+        self.toolButtonZoom.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonZoom))
+        self.toolButtonAnnotate.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonAnnotate))
+        self.toolButtonDistance.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonDistance))
+
+    def reset_buttons(self):
+        if not self.isVisible():
+            return
+        self.all_sv_buttons_off()
+
+    def all_sv_buttons_off(self):
+        self.toolButtonZoom.setChecked(False)
+        self.toolButtonPan.setChecked(False)
+        self.toolButtonAnnotate.setChecked(False)
+        self.toolButtonDistance.setChecked(False)
+
+    def update_button_state(self, button):
+        if not button.isChecked():
+            return
+
+        for btn in [self.toolButtonPan, self.toolButtonZoom, self.toolButtonAnnotate, self.toolButtonDistance]:
+            if btn == button:
+                continue
+            else:
+                btn.setChecked(False)
+
+class NavigationWidgetsMV(VisibilityWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
@@ -799,7 +839,7 @@ class NavigationWidgetsMV(QWidget):
         navigation_layout.addItem(navigation_spacer)
         navigation_layout.addWidget(self.widgetPlotInfo)
 
-class NavigationWidgetsQV(QWidget):
+class NavigationWidgetsQV(VisibilityWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
@@ -833,6 +873,9 @@ class CanvasToolBar(QGroupBox):
     def __init__(self, parent):
         super().__init__(parent=parent)
 
+        self.setupUI()
+
+    def setupUI(self):
         self.setMinimumSize(QSize(200, 40))
         self.setMaximumSize(QSize(16777215, 40))
         self.setTitle("")
@@ -866,6 +909,8 @@ class CanvasToolBar(QGroupBox):
         self.toolButtonSave.setObjectName("toolButtonSave")
 
         toolbar_layout.addWidget(self.toolButtonSave)
+
+
 
 # QuickViewDialog gui
 # -------------------------------

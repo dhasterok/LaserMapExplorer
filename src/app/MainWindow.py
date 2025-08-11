@@ -20,24 +20,17 @@ pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
-import cmcrameri as cmc
 from src.common.LamePlot import (
     plot_map_mpl, plot_histogram, plot_correlation, get_scatter_data, plot_scatter,
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
-import src.common.csvdict as csvdict
-from src.common.radar import Radar
-from src.ui.MainWindow import Ui_MainWindow
 from src.app.FieldLogic import ControlDock, AnalyteDialog, FieldDialog
-from src.app.LamePlotUI import HistogramUI, CorrelationUI, ScatterUI, NDimUI
-from src.app.Preprocessing import PreprocessingUI
 from src.app.StylingUI import StylingDock
 from src.app.LameStatusBar import MainStatusBar
 from src.common.TableFunctions import TableFcn as TableFcn
 from src.app.PlotTree import PlotTree
 from src.app.CanvasWidget import CanvasWidget
-from src.app.DataAnalysis import ClusterPage, DimensionalReductionPage
 from src.common.Masking import MaskDock
 from src.app.CropImage import CropTool
 from src.app.Profile import Profiling, ProfileDock
@@ -53,9 +46,6 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
-#import src.radar_factory
-#from src.ui.PreferencesWindow import Ui_PreferencesWindow
-#from datetime import datetimec
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -161,8 +151,7 @@ class MainWindow(QMainWindow):
         #self.init_canvas_widget()
         self.mpl_canvas = None # will hold the current canvas
 
-
-        # Force initial update
+        # Force initial update of theme
         self._apply_theme_to_buttons(self.theme_manager.theme)
 
 

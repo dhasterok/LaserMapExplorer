@@ -92,8 +92,19 @@ class MplCanvas(FigureCanvas):
         self.setCursorPosition()
 
         # restoring initial axes
-        # --------------------
+        # ----------------------
         self.initial_extent = None
+
+        # states for tools
+        # ----------------
+        self.tool_state = {
+            'pan': False,
+            'zoom': False,
+            'annotate': False,
+            'distance': False,
+            'polygon': False,
+            'profile': False,
+        }
 
         # distance measurement
         # --------------------
@@ -164,46 +175,29 @@ class MplCanvas(FigureCanvas):
             self._data = value
         else:
             raise TypeError("data must be a pandas DataFrame or None")
-    
-    
-    def toolbar_plotting(self,function,view,enable=None):
-        """Controls functionality of the toolbar
 
-        Controls the viewing behavior, home view, pan, zoom, pop out, and saving.
+    def all_tools_off(self):
+        for k in self.tool_state.keys():
+            self.tool_state[k] = False
 
-        Parameters
-        ----------
-        function : str
-            Button fuction
-        view : _type_
-            _description_
-        enable : _type_
-            _description_
-        """
-        
-        match view:
-            case 'SV':
-                canvas = self.sv_widget
-            case 'MV':
-                pass
-            case 'QV':
-                pass
+    def toggle_tool(self, tool, enable):
+        for k in self.tool_state.keys():
+            if enable and k != tool:
+                self.tool_enable[k] = False
+            elif k == tool:
+                self.tool_state[tool] = enable
+                if enable:
+                    self.init_canvas_tool(tool)
 
-        if function == 'home':
-            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
-
+    def init_canvas_tool(self, tool):
+        if tool == 'home':
             if isinstance(canvas,MplCanvas):
                 canvas.restore_view()
 
             # elif isinstance(canvas,GraphicsLayoutWidget):
             #     canvas.getItem(0, 0).getViewBox().autoRange()
 
-        if function == 'pan':
-            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
-
+        if tool == 'pan':
             if isinstance(canvas,MplCanvas):
                 # Toggle pan mode in Matplotlib
                 self.mpl_toolbar.pan()
@@ -214,10 +208,7 @@ class MplCanvas(FigureCanvas):
             #     # Enable or disable panning
             #     canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
 
-        if function == 'zoom':
-            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
-
+        if tool == 'zoom':
             if isinstance(canvas,MplCanvas):
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
@@ -229,16 +220,11 @@ class MplCanvas(FigureCanvas):
             #     else:
             #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
 
-        if function == 'annotate':
-            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
-        
-        if function == 'distance':
-            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
-
-
-        if function == 'preference':
+        if tool == 'annotate':
+            pass
+        if tool == 'distance':
+            pass
+        if tool == 'preference':
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.edit_parameters()
 
@@ -251,7 +237,7 @@ class MplCanvas(FigureCanvas):
             #         canvas.showAxis('left', False)
             #         canvas.showAxis('bottom', False)
 
-        if function == 'axes':
+        if tool == 'axes':
             if isinstance(canvas,MplCanvas):
                 self.mpl_toolbar.configure_subplots()
 
@@ -264,11 +250,7 @@ class MplCanvas(FigureCanvas):
                     canvas.showAxis('left', False)
                     canvas.showAxis('bottom', False)
         
-        if function == 'pop':
-            self.ui.canvas_widget.toolbar.sv.toolButtonPan.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonZoom.setChecked(False)
-            self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.setChecked(False)
-
+        if tool == 'pop':
             if isinstance(canvas,MplCanvas):
                 self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
                 self.pop_figure.show()

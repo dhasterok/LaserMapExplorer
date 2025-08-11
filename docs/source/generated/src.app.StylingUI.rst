@@ -1,4 +1,4 @@
-﻿src.app.StylingUI
+src.app.StylingUI
 =================
 
 .. automodule:: src.app.StylingUI

@@ -1,4 +1,4 @@
-﻿src.common.LamePlot
+src.common.LamePlot
 ===================
 
 .. automodule:: src.common.LamePlot

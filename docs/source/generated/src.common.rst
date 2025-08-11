@@ -24,7 +24,6 @@
    Observable
    Polygon
    PolygonMatplotlib
-   PolygonNew
    Regression
    ScheduleTimer
    SearchTool
@@ -35,6 +34,7 @@
    csvdict
    format
    gausscensor
+   geochronology
    outliers
    plot_spider
    radar

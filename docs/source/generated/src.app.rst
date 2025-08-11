@@ -29,7 +29,7 @@
    PlotViewerWindow
    Preprocessing
    Profile
-   ProfileNew
+   ProfileMatplotlib
    SpecialTools
    SpotImporter
    SpotTools
@@ -40,3 +40,4 @@
    base_dialog
    config
    help_mapping
+   settings

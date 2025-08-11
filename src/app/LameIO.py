@@ -33,12 +33,12 @@ class LameIO():
 
         self.connect_actions = connect_actions
         if self.connect_actions:
-            ui.actions.OpenSample.triggered.connect(lambda: self.open_sample())
-            ui.actions.OpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
-            ui.actions.ImportSpots.triggered.connect(self.import_spots)
-            ui.actions.OpenProject.triggered.connect(lambda: self.open_project())
-            ui.actions.SaveProject.triggered.connect(lambda: self.save_project())
-            ui.actions.ImportFiles.triggered.connect(lambda: self.import_files())
+            ui.lame_action.OpenSample.triggered.connect(lambda: self.open_sample())
+            ui.lame_action.OpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
+            ui.lame_action.ImportSpots.triggered.connect(self.import_spots)
+            ui.lame_action.OpenProject.triggered.connect(lambda: self.open_project())
+            ui.lame_action.SaveProject.triggered.connect(lambda: self.save_project())
+            ui.lame_action.ImportFiles.triggered.connect(lambda: self.import_files())
 
         self.ui = ui
 

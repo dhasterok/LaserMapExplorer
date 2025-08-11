@@ -16,7 +16,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 
-import src.common.CustomMplCanvas as mplc
+from src.common.CustomMplCanvas import MplCanvas
 from src.common.LamePlot import plot_small_histogram
 import src.common.csvdict as csvdict
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -32,10 +32,6 @@ class CanvasWidget(QWidget):
         self.ui = ui
         self.logger_key = "Canvas"
 
-        self.setupUI()
-
-        self.reindex_canvas_tab()
-
         self.duplicate_plot_info = None
         self.lasermaps = {}
 
@@ -47,13 +43,14 @@ class CanvasWidget(QWidget):
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
                 'Gd157','Tb159','Dy163','Ho165','Y89','Er166','Tm169','Yb172','Lu175']}
 
-        self.toolbar.qv.toolButtonNewList.clicked.connect(lambda: QuickView(self))
-        self.toolbar.qv.comboBoxQVList.activated.connect(lambda _: self.display_QV())
+        self.setupUI()
+        self.connect_widgets()
+        self.reindex_tab_dict()
 
-        self.canvasWindow.currentChanged.connect(lambda _: self.canvas_changed())
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.canvasWindow.currentChanged.connect(lambda _: self.tab_changed())
+        self.canvasWindow.setCurrentIndex(self.tab_dict['sv'])
 
-        self.canvas_changed()
+        self.tab_changed()
 
     def setupUI(self):
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
@@ -91,6 +88,12 @@ class CanvasWidget(QWidget):
         canvas_widget_layout.addWidget(self.canvasWindow)
         canvas_widget_layout.addWidget(self.toolbar)
 
+    def connect_widgets(self):
+        """Connects widgets to their respective functions"""
+        self.toolbar.qv.toolButtonNewList.clicked.connect(lambda: QuickView(self))
+        self.toolbar.qv.comboBoxQVList.activated.connect(lambda _: self.display_QV())
+
+
     def init_canvas_widget(self):
         """Initializes the central canvas tabs"""
         # Plot Layouts
@@ -103,7 +106,7 @@ class CanvasWidget(QWidget):
         self.single_view.widgetSingleView.setLayout(layout_single_view)
         self.single_view.widgetSingleView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.mpl_toolbar = None
-        #self.mpl_toolbar = NavigationToolbar(mplc.MplCanvas())
+        #self.mpl_toolbar = NavigationToolbar(MplCanvas())
         # for button show hide
         #self.toolButtonPopFigure.setVisible(False)
         #self.toolButtonPopFigure.raise_()
@@ -142,20 +145,50 @@ class CanvasWidget(QWidget):
 
         self.toolbar.qv.toolButtonNewList.clicked.connect(lambda: QuickView(self))
         self.toolbar.qv.comboBoxQVList.activated.connect(lambda: self.display_QV())
+    
+    @property
+    def current_canvas(self):
+        """MplCanvas : Returns the current canvas based on the selected tab."""
+        if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
+            return self.single_view.widgetSingleView.layout().itemAt(0).widget()
+        elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
+            return self.multi_view.widgetMultiView.layout()
+        elif self.canvasWindow.currentIndex() == self.tab_dict['qv']:
+            return self.quick_view.widgetQuickView.layout()
+        else:
+            return None
 
-    def reindex_canvas_tab(self):
-        self.canvas_tab = {}
+    @current_canvas.setter
+    def current_canvas(self, canvas: MplCanvas):
+        if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
+            self.update_canvas(canvas)
+        elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
+            self.multi_view.widgetMultiView.layout().addWidget(canvas)
+        elif self.canvasWindow.currentIndex() == self.tab_dict['qv']:
+            self.quick_view.widgetQuickView.layout().addWidget(canvas)
+        else:
+            raise ValueError("Invalid tab index.")
+
+    def reindex_tab_dict(self):
+        """Reindexes the tab_dict to match the current tabs in canvasWindow.
+
+        This function updates the tab_dict to ensure it reflects the current state of the canvasWindow tabs.
+        """
+        self.tab_dict = {}
         for tid in range(self.canvasWindow.count()):
             match self.canvasWindow.tabText(tid).lower():
                 case 'single view':
-                    self.canvas_tab.update({'sv': tid})
+                    self.tab_dict.update({'sv': tid})
                 case 'multi view':
-                    self.canvas_tab.update({'mv': tid})
+                    self.tab_dict.update({'mv': tid})
                 case 'quick view':
-                    self.canvas_tab.update({'qv': tid})
+                    self.tab_dict.update({'qv': tid})
 
-    def canvas_changed(self):
-        """Sets visibility of canvas tools and updates canvas plots"""        
+    def tab_changed(self):
+        """Sets visibility of canvas tools and updates canvas plots.
+
+        If the current tab is SingleView, MultiView, or QuickView, it shows the corresponding toolbar.
+        """        
 
         if self.ui.app_data.sample_id == '':
             self.toolbar.sv.hide()
@@ -165,7 +198,7 @@ class CanvasWidget(QWidget):
 
             return
 
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+        if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
             # plot toolbar items
             
             self.toolbar.sv.show()
@@ -175,7 +208,7 @@ class CanvasWidget(QWidget):
 
             if self.duplicate_plot_info:
                 self.ui.add_plotwidget_to_canvas(self.duplicate_plot_info)
-        elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+        elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
             # plot toolbar items
             self.toolbar.sv.hide()
             self.toolbar.mv.show()
@@ -223,6 +256,14 @@ class CanvasWidget(QWidget):
         self.toolbar.mv.comboBoxMVPlots.addItems(self.multi_view_index)
 
     def update_canvas(self, new_canvas):
+        """Updates the current canvas with a new canvas.
+        Clears the existing layout and adds the new canvas to the SingleView tab.
+
+        Parameters
+        ----------
+        new_canvas : MplCanvas
+            The new canvas to be added to the SingleView tab.
+        """
         # Clear the existing layout
         self.clear_layout(self.single_view.widgetSingleView.layout())
         
@@ -239,14 +280,14 @@ class CanvasWidget(QWidget):
             self.mpl_toolbar.hide()
             self.single_view.widgetSingleView.layout().addWidget(self.mpl_toolbar)
         except:
-            # canvas is not a mplc.MplCanvas  
+            # canvas is not a MplCanvas  
             pass
 
     def display_QV(self):
         """Plots selected maps to the Quick View tab
 
         Adds plots of predefined analytes to the Quick View tab in a grid layout."""
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['qv'])
+        self.canvasWindow.setCurrentIndex(self.tab_dict['qv'])
         if self.ui.app_data.sample_id == '':
             return
 
@@ -268,7 +309,7 @@ class CanvasWidget(QWidget):
                 continue
 
             # create plot canvas
-            canvas = mplc.MplCanvas(parent=self.ui)
+            canvas = MplCanvas(parent=self.ui)
 
             # determine location of plot
             col = i % ncol
@@ -325,7 +366,7 @@ class CanvasWidget(QWidget):
                     # layout.removeWidget(widget)  # Remove the widget from the layout
                     # widget.setParent(None)      # Set the widget's parent to None
 
-        if self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+        if self.canvasWindow.currentIndex() == self.tab_dict['mv']:
             list = self.toolbar.mv.comboBoxMVPlots.allItems()
             if not list:
                 return
@@ -365,11 +406,11 @@ class CanvasWidget(QWidget):
         # widget_dict = self.axis_widget_dict[tree][sample_id][plot_name]
 
         # if on QuickView canvas, then set to SingleView canvas
-        if self.canvasWindow.currentIndex() == self.canvas_tab['qv']:
-            self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        if self.canvasWindow.currentIndex() == self.tab_dict['qv']:
+            self.canvasWindow.setCurrentIndex(self.tab_dict['sv'])
 
         # add figure to SingleView canvas
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+        if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
             #print('add_plotwidget_to_canvas: SV')
             self.clear_layout(self.single_view.widgetSingleView.layout())
             self.sv_widget = plot_info['figure']
@@ -400,14 +441,14 @@ class CanvasWidget(QWidget):
                 self.duplicate_plot_info = None #reset to avoid plotting previous duplicates
             else:
                 #update toolbar and SV canvas
-                self.update_canvas(self.sv_widget)
+                self.current_canvas = self.sv_widget
             self.sv_widget.show()
             
             if hasattr(self.ui, 'control_dock') and (self.ui.style_data.plot_type == 'field map') and (self.ui.control_dock.toolbox.currentIndex() == self.ui.control_dock.tab_dict['sample']):
                 current_map_df = self.ui.app_data.current_data.get_map_data(plot_info['plot_name'], plot_info['field_type'], norm=self.ui.style_data.cscale)
                 plot_small_histogram(self.ui, self.ui.app_data.current_data, self.ui.app_data, self.ui.style_data, current_map_df)
         # add figure to MultiView canvas
-        elif self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+        elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
             #print('add_plotwidget_to_canvas: MV')
             name = f"{plot_info['sample_id']}:{plot_info['plot_type']}:{plot_info['plot_name']}"
             layout = self.multi_view.widgetMultiView.layout()
@@ -533,7 +574,7 @@ class CanvasWidget(QWidget):
 
     def toggle_distance_tool(self):
         canvas = self.get_SV_widget(1)
-        if not isinstance(canvas, mplc.MplCanvas):
+        if not isinstance(canvas, MplCanvas):
             return
 
         if not self.toolbar.sv.toolButtonDistance.isChecked():
@@ -613,6 +654,8 @@ class NavigationWidgetsSV(VisibilityWidget):
             parent=self
         )
         self.toolButtonPan.setObjectName("toolButtonPan")
+        self.toolButtonPan.setCheckable(True)
+        self.toolButtonPan.setChecked(False)
 
         self.toolButtonZoom = CustomToolButton(
             text="",
@@ -622,6 +665,8 @@ class NavigationWidgetsSV(VisibilityWidget):
         )
         self.toolButtonZoom.setCheckable(True)
         self.toolButtonZoom.setObjectName("toolButtonZoom")
+        self.toolButtonZoom.setCheckable(True)
+        self.toolButtonZoom.setChecked(False)
 
         self.toolButtonAnnotate = CustomToolButton(
             text="Annotate",
@@ -631,6 +676,8 @@ class NavigationWidgetsSV(VisibilityWidget):
         )
         self.toolButtonAnnotate.setCheckable(True)
         self.toolButtonAnnotate.setObjectName("toolButtonAnnotate")
+        self.toolButtonAnnotate.setCheckable(True)
+        self.toolButtonAnnotate.setChecked(False)
 
         self.toolButtonDistance = CustomToolButton(
             text="Calculate\nDistance",
@@ -640,6 +687,8 @@ class NavigationWidgetsSV(VisibilityWidget):
         )
         self.toolButtonDistance.setCheckable(True)
         self.toolButtonDistance.setObjectName("toolButtonDistance")
+        self.toolButtonDistance.setCheckable(True)
+        self.toolButtonDistance.setChecked(False)
 
         self.toolButtonPopFigure = CustomToolButton(
             text="Pop Figure",
@@ -873,7 +922,10 @@ class CanvasToolBar(QGroupBox):
     def __init__(self, parent):
         super().__init__(parent=parent)
 
+        self.parent = parent
+
         self.setupUI()
+        self.connect_widgets()
 
     def setupUI(self):
         self.setMinimumSize(QSize(200, 40))
@@ -910,7 +962,12 @@ class CanvasToolBar(QGroupBox):
 
         toolbar_layout.addWidget(self.toolButtonSave)
 
-
+    def connect_widgets(self):
+        self.sv.toolButtonHome.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('home'))
+        self.sv.toolButtonPan.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('pan', self.sv.toolButtonPan.isChecked()))
+        self.sv.toolButtonZoom.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('zoom', self.sv.toolButtonZoom.isChecked()))
+        self.sv.toolButtonAnnotate.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('annotate', self.sv.toolButtonAnnotate.isChecked()))
+        self.sv.toolButtonDistance.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('distance', self.sv.toolButtonDistance.isChecked()))
 
 # QuickViewDialog gui
 # -------------------------------

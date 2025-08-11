@@ -42,7 +42,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setContentsMargins(2, 2, 2, 2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.toolButtonActions = QtWidgets.QToolButton(self.frameNavigation)
-        self.toolButtonActions.setObjectName("toolButtonActions")
+        self.toolButtonlame_action.setObjectName("toolButtonActions")
         self.verticalLayout_2.addWidget(self.toolButtonActions)
         self.toolButtonFilters = QtWidgets.QToolButton(self.frameNavigation)
         self.toolButtonFilters.setObjectName("toolButtonFilters")
@@ -181,7 +181,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.toolButtonActions.setText(_translate("MainWindow", "Actions"))
+        self.toolButtonlame_action.setText(_translate("MainWindow", "Actions"))
         self.toolButtonFilters.setText(_translate("MainWindow", "Filters"))
         self.toolButtonControls.setText(_translate("MainWindow", "Controls"))
         self.toolButtonStyles.setText(_translate("MainWindow", "Styles"))

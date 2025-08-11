@@ -14,7 +14,7 @@ from matplotlib.path import Path
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
-import src.common.CustomMplCanvas as mplc
+from src.common.CustomMplCanvas import MplCanvas, SimpleMplCanvas
 import src.common.format as fmt
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.common.plot_spider import plot_spider_norm
@@ -63,7 +63,7 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     - Stores the plotted data in the parent for potential export.
     """
     # create plot canvas
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     # get data for current map
     #scale = data.processed_data.get_attribute(field, 'norm')
@@ -201,12 +201,12 @@ def plot_map_pg(parent, sample_id, field_type, field, add_histogram=False):
         title = ''
 
         view = parent.canvasWindow.currentIndex()
-        if view == parent.canvas_tab['sv']:
+        if view == parent.tab_dict['sv']:
             title = field
-        elif view == parent.canvas_tab['mv']:
+        elif view == parent.tab_dict['mv']:
             title = sample_id + '_' + field
         else:
-            view = parent.canvas_tab['sv']
+            view = parent.tab_dict['sv']
             parent.canvasWindow.setCurrentIndex(view)
             title = field
 
@@ -342,7 +342,7 @@ def plot_map_pg(parent, sample_id, field_type, field, add_histogram=False):
         parent.plot_tree.add_tree_item(parent.plot_info)
 
         # add small histogram
-        if add_histogram and (parent.toolBox.currentIndex() == parent.ui.control_dock.tab_dict['sample']) and (view == parent.ui.canvas_widget.canvas_tab['sv']):
+        if add_histogram and (parent.toolBox.currentIndex() == parent.ui.control_dock.tab_dict['sample']) and (view == parent.ui.canvas_widget.tab_dict['sv']):
             plot_small_histogram(parent, parent.data[parent.app_data.sample_id], parent.app_data, parent.style_data, map_df)
 
 @log_call(logger_key='Plot')
@@ -369,7 +369,7 @@ def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
     """
     #print('plot_small_histogram')
     # create Mpl canvas
-    canvas = mplc.SimpleMplCanvas()
+    canvas = SimpleMplCanvas()
 
     # Histogram
     #remove by mask and drop rows with na
@@ -462,7 +462,7 @@ def plot_histogram(parent, data, app_data, style_data):
     plot_data = None
     #print('plot histogram')
     # create Mpl canvas
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     nbins = int(app_data.hist_num_bins)
 
@@ -750,7 +750,7 @@ def add_colorbar(style_data, canvas, cax, cbartype='continuous', grouplabels=Non
     ----------
     style_data : StyleData
         StyleData object containing style settings for the plot.
-    canvas : mplc.MplCanvas
+    canvas : MplCanvas
         canvas object
     cax : axes
         color axes object
@@ -895,14 +895,14 @@ def plot_correlation(parent, data, app_data, style_data):
 
     Returns
     -------
-    canvas : mplc.MplCanvas
+    canvas : MplCanvas
         The canvas containing the correlation plot.
     plot_info : dict
         Dictionary containing information about the plot, including the correlation matrix.
     """
     #print('plot_correlation')
 
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
     canvas.axes.clear()
 
     # get the data for computing correlations
@@ -1120,7 +1120,7 @@ def plot_scatter(parent, data, app_data, style_data, canvas=None):
     plot_flag = False
     if canvas is None:
         plot_flag = True
-        canvas = mplc.MplCanvas(parent=parent)
+        canvas = MplCanvas(parent=parent)
 
     match plot_type.split()[-1]:
         # scatter
@@ -1614,7 +1614,7 @@ def plot_ternary_map(parent, data, app_data, style_data):
         app_data.plot_type = 'ternary map'
         style_data.set_style_widgets('ternary map')
 
-    canvas = mplc.MplCanvas(sub=121, parent=parent)
+    canvas = MplCanvas(sub=121, parent=parent)
 
     afield = app_data.x_field
     bfield = app_data.y_field
@@ -1703,7 +1703,7 @@ def plot_ndim(parent, data, app_data, style_data):
     or spider web.
     
     The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure
-    ``mplc.MplCanvas`` for display in the centralWidget views.
+    ``MplCanvas`` for display in the centralWidget views.
 
     Parameters
     ----------
@@ -1782,7 +1782,7 @@ def plot_ndim(parent, data, app_data, style_data):
         cluster_flag = False
 
     
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     match plot_type:
         case 'Radar':
@@ -1884,7 +1884,7 @@ def plot_ndim(parent, data, app_data, style_data):
 def plot_score_map(parent,data, app_data, style_data):
     """Plots score maps for dimensionality reduction methods such as PCA or clustering.
 
-    Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.
+    Creates a score map for PCA and clusters.  Maps are displayed on an ``MplCanvas``.
     The function uses the processed data from the DataHandler and the selected field from AppData
     to generate the score map. The plot is styled according to the provided StyleData object.
 
@@ -1906,7 +1906,7 @@ def plot_score_map(parent,data, app_data, style_data):
     field_data : pd.Series
         The data series corresponding to the selected field for the score map.
     """
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     plot_type = style_data.plot_type
 
@@ -1977,7 +1977,7 @@ def plot_pca(parent, data, app_data, style_data):
     #'plot_pca')
     if app_data == '':
         return
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
     pca_results = data.dim_red_results[app_data.dim_red_method]
     # Determine which PCA plot to create based on the combobox selection
     plot_type = style_data.plot_type
@@ -2064,7 +2064,7 @@ def plot_pca_variance(parent,pca_results, style_data):
     plot_data : pd.DataFrame
         DataFrame containing the principal components, variance ratios, and cumulative variance ratios.
     """        
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     # pca_dict contains variance ratios for the principal components
     variances = pca_results.explained_variance_ratio_
@@ -2134,7 +2134,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, style_data):
     plot_data : pd.DataFrame
         DataFrame containing the PCA components, with columns for each variable.
     """        
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
@@ -2264,7 +2264,7 @@ def plot_clusters(parent, data, app_data, style_data):
 
     Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
     The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure
-    ``mplc.MplCanvas`` for display in the centralWidget views.
+    ``MplCanvas`` for display in the centralWidget views.
 
     Parameters
     ----------
@@ -2389,7 +2389,7 @@ def cluster_performance_plot(parent, data, app_data, style_data):
     #optimal_k = np.argmax(second_derivative) + 2  # Example heuristic
 
     # Plot inertia
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     canvas.axes.plot(range(1, max_clusters+1), inertia, linestyle='-', linewidth=style_data.line_width,
         marker=style_data.marker_dict[style_data.marker], markeredgecolor=style_data.marker_color, markerfacecolor='none', markersize=style_data.marker_size,
@@ -2464,9 +2464,9 @@ def cluster_performance_plot(parent, data, app_data, style_data):
 def plot_cluster_map(parent, data, app_data, style_data):
     """Produces a map of cluster categories
     
-    Creates the map on an ``mplc.MplCanvas``.  Each cluster category is assigned a unique color.
+    Creates the map on an ``MplCanvas``.  Each cluster category is assigned a unique color.
     The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure
-    ``mplc.MplCanvas`` for display in the centralWidget views.
+    ``MplCanvas`` for display in the centralWidget views.
 
     Parameters
     ----------
@@ -2486,7 +2486,7 @@ def plot_cluster_map(parent, data, app_data, style_data):
     plot_data : pd.Series
         Series containing the cluster labels for each data point.
     """
-    canvas = mplc.MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent)
 
     plot_type = style_data.plot_type
     method = app_data.cluster_method

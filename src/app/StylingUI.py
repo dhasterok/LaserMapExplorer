@@ -1905,9 +1905,9 @@ class StylingDock(CustomDockWidget):
         # toggle actionSwapAxes
         match self.ui.style_data.plot_type:
             case 'field map' | 'gradient map'| 'scatter' | 'heatmap':
-                self.ui.actions.SwapAxes.setEnabled(True)
+                self.ui.lame_action.SwapAxes.setEnabled(True)
             case _:
-                self.ui.actions.SwapAxes.setEnabled(False)
+                self.ui.lame_action.SwapAxes.setEnabled(False)
 
         if (self.ui.style_data.scale_length is None) and (self.ui.style_data.plot_type.lower() in self.ui.style_data.map_plot_types):
             self.ui.style_data.scale_length = self.ui.style_data.default_scale_length()

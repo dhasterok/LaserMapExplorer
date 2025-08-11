@@ -1839,7 +1839,7 @@ class DoubleSlider(QWidget):
 
 class CustomActionMenu(CustomAction):
     """
-    A custom QMenu that allows dynamic addition and removal of menu actions.
+    A custom QMenu that allows dynamic addition and removal of menu lame_action.
 
     Attributes
     ----------

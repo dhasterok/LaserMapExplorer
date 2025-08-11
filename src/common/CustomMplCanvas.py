@@ -1,4 +1,4 @@
-from PyQt6 import QtGui
+from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import (
     Qt, QSize
 )
@@ -14,7 +14,7 @@ from matplotlib.figure import Figure
 import pandas as pd
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import matplotlib as mpl
-from src.app.config import BASEDIR
+from src.app.config import ICONPATH
 
 
 # Matplotlib Canvas object
@@ -95,16 +95,7 @@ class MplCanvas(FigureCanvas):
         # ----------------------
         self.initial_extent = None
 
-        # states for tools
-        # ----------------
-        self.tool_state = {
-            'pan': False,
-            'zoom': False,
-            'annotate': False,
-            'distance': False,
-            'polygon': False,
-            'profile': False,
-        }
+        self.active_tool = None
 
         # distance measurement
         # --------------------
@@ -132,13 +123,6 @@ class MplCanvas(FigureCanvas):
         
         self.mpl_toolbar = NavigationToolbar(self)
 
-        # enable distance mode by default
-        self.ui.canvas_widget.toolbar.sv.toolButtonDistance.clicked.connect( self.enable_distance_mode)
-        self.ui.canvas_widget.toolbar.sv.toolButtonHome.clicked.connect( self.enable_distance_mode)
-        self.ui.canvas_widget.toolbar.sv.toolButtonPan.clicked.connect(lambda: self.toolbar_plotting('pan', 'SV', self.ui.canvas_widget.toolbar.sv.toolButtonPan.isChecked()))
-        self.ui.canvas_widget.toolbar.sv.toolButtonZoom.clicked.connect(lambda: self.toolbar_plotting('zoom', 'SV', self.ui.canvas_widget.toolbar.sv.toolButtonZoom.isChecked()))   
-        self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.clicked.connect(lambda: self.toolbar_plotting('annotate', 'SV'))
-        
         SaveMenu_items = ['figure', 'data']
         SaveMenu = QMenu()
         SaveMenu.triggered.connect(lambda action: self.save_plot(action.text()))
@@ -176,92 +160,73 @@ class MplCanvas(FigureCanvas):
         else:
             raise TypeError("data must be a pandas DataFrame or None")
 
-    def all_tools_off(self):
-        for k in self.tool_state.keys():
-            self.tool_state[k] = False
+    
+    def toggle_tool(self, tool, enable=None):
+        if tool == 'home':
+            self.restore_view()
+            return
 
-    def toggle_tool(self, tool, enable):
-        for k in self.tool_state.keys():
-            if enable and k != tool:
-                self.tool_enable[k] = False
-            elif k == tool:
-                self.tool_state[tool] = enable
-                if enable:
-                    self.init_canvas_tool(tool)
+        # If the tool is already active and being disabled
+        if self.active_tool == tool and not enable:
+            self.disable_tool(tool)
+            self.active_tool = None
+            return
+
+        # If switching to a new tool
+        if self.active_tool and self.active_tool != tool:
+            self.disable_tool(self.active_tool)
+
+        # Enable the new tool
+        if enable:
+            self.active_tool = tool
+            self.init_canvas_tool(tool)
+        else:
+            self.active_tool = None
+
+
 
     def init_canvas_tool(self, tool):
-        if tool == 'home':
-            if isinstance(canvas,MplCanvas):
-                canvas.restore_view()
-
-            # elif isinstance(canvas,GraphicsLayoutWidget):
-            #     canvas.getItem(0, 0).getViewBox().autoRange()
-
-        if tool == 'pan':
-            if isinstance(canvas,MplCanvas):
+        match tool:
+            case 'pan':
                 # Toggle pan mode in Matplotlib
                 self.mpl_toolbar.pan()
-                print(self.mpl_toolbar)
-                #canvas.figure.canvas.toolbar.pan()
-
-            # elif isinstance(canvas,GraphicsLayoutWidget):
-            #     # Enable or disable panning
-            #     canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode if enable else ViewBox.RectMode)
-
-        if tool == 'zoom':
-            if isinstance(canvas,MplCanvas):
+            case 'zoom':
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
-            # elif isinstance(canvas,GraphicsLayoutWidget):
-            #     # Assuming pyqtgraph_widget is a GraphicsLayoutWidget or similar
-            #     if enable:
-
-            #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.RectMode)
-            #     else:
-            #         canvas.getItem(0, 0).getViewBox().setMouseMode(ViewBox.PanMode)
-
-        if tool == 'annotate':
-            pass
-        if tool == 'distance':
-            pass
-        if tool == 'preference':
-            if isinstance(canvas,MplCanvas):
+            case 'annotate':
+                pass
+            case 'distance':
+                self.enable_distance_mode()
+            case 'preference':
                 self.mpl_toolbar.edit_parameters()
-
-            # elif isinstance(canvas,GraphicsLayoutWidget):
-            #     # Assuming it's about showing/hiding axes
-            #     if enable:
-            #         canvas.showAxis('left', True)
-            #         canvas.showAxis('bottom', True)
-            #     else:
-            #         canvas.showAxis('left', False)
-            #         canvas.showAxis('bottom', False)
-
-        if tool == 'axes':
-            if isinstance(canvas,MplCanvas):
+            case 'axes':
                 self.mpl_toolbar.configure_subplots()
-
-            elif isinstance(canvas,GraphicsLayoutWidget):
-                # Assuming it's about showing/hiding axes
-                if enable:
-                    canvas.showAxis('left', True)
-                    canvas.showAxis('bottom', True)
-                else:
-                    canvas.showAxis('left', False)
-                    canvas.showAxis('bottom', False)
-        
-        if tool == 'pop':
-            if isinstance(canvas,MplCanvas):
-                self.pop_figure = MplDialog(self,canvas,self.plot_info['plot_name'])
+            case 'pop':
+                self.pop_figure = MplDialog(self.parent, self, self.plot_info['plot_name'])
                 self.pop_figure.show()
 
-            # since the canvas is moved to the dialog, the figure needs to be recreated in the main window
-            # trigger update to plot        
-            self.plot_style.schedule_update()
+                # since the canvas is moved to the dialog, the figure needs to be recreated in the
+                # main window trigger update to plot        
+                self.plot_style.schedule_update()
 
+    
+    def disable_tool(self, tool):
+        match tool:
+            case 'pan':
+                self.mpl_toolbar.pan()  # toggles off
+            case 'zoom':
+                self.mpl_toolbar.zoom()  # toggles off
+            case 'annotate':
+                # Add logic to disable annotate mode if needed
+                pass
+            case 'distance':
+                # Disconnect mouse events or clear state
+                self.disable_distance_mode()
+            case 'polygon' | 'profile':
+                pass
 
                 
-    def save_plot(self, method, filename= None):
+    def save_plot(self, method, filename=None):
         """Sorts analyte table in dialog"""        
         # get save method (Figure/Data)
         
@@ -285,7 +250,7 @@ class MplCanvas(FigureCanvas):
 
 
     def enable_distance_mode(self):
-        if self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked():
+        if self.active_tool == 'distance':
             # Connect the button and canvas events for distance measurement
             self.distance_cid_press = self.mpl_connect('button_press_event', self.distanceOnClick)
             self.distance_cid_move = self.mpl_connect('motion_notify_event', self.distanceOnMove)
@@ -423,11 +388,11 @@ class MplCanvas(FigureCanvas):
             Mouse click event.
         """ 
 
-        if hasattr(self.ui,'canvas_tab') and hasattr(self.ui,'canvasWindow'):
-            if (self.ui.canvasWindow.currentIndex() != self.ui.canvas_tab['sv']) or (not self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.isChecked()):
+        if hasattr(self.ui,'tab_dict') and hasattr(self.ui,'canvasWindow'):
+            if (self.ui.canvasWindow.currentIndex() != self.ui.tab_dict['sv']) or (self.active_tool != 'annotate'):
                 return
         else:
-            if (not self.ui.canvas_widget.toolbar.sv.toolButtonAnnotate.isChecked()):
+            if self.active_tool != 'annotate':
                 return
 
         x,y = event.xdata, event.ydata
@@ -554,7 +519,7 @@ class MplCanvas(FigureCanvas):
         if event.inaxes != self.axes:
             return
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked():
+        if self.active_tool == 'distance':
             self.distanceOnClick(event)
             return
         
@@ -606,7 +571,7 @@ class MplCanvas(FigureCanvas):
             return
 
         self.setCursor(Qt.CursorShape.CrossCursor)
-        if (self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked()) and (self.first_point is not None) and event.inaxes:
+        if (self.active_tool == 'distance') and (self.first_point is not None) and event.inaxes:
             self.distanceOnMove(event)
             return
         
@@ -663,7 +628,7 @@ class MplCanvas(FigureCanvas):
             self.dtext.remove()
             self.dtext = None
         self.draw()
-        if not self.ui.canvas_widget.toolbar.sv.toolButtonDistance.isChecked():
+        if self.active_tool != 'distance':
             self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText("D: N/A")
 
 
@@ -698,16 +663,16 @@ class MplDialog(QDialog):
         unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
 
         icons_buttons = {
-            "Home": QtGui.QIcon("resources/icons/icon-home-64.svg"),
-            "Pan": QtGui.QIcon("resources/icons/icon-move-64.svg"),
-            "Zoom": QtGui.QIcon("resources/icons/icon-zoom-64.svg"),
-            "Save": QtGui.QIcon("resources/icons/icon-save-file-64.svg")
+            "Home": QIcon(ICONPATH / "icon-home-64.svg"),
+            "Pan": QIcon(ICONPATH / "icon-move-64.svg"),
+            "Zoom": QIcon(ICONPATH / "icon-zoom-64.svg"),
+            "Save": QIcon(ICONPATH / "icon-save-file-64.svg")
         }
         for action in self.toolbar.actions():
             if action.text() in unwanted_buttons:
                 self.toolbar.removeAction(action)
             if action.text() in icons_buttons:
-                action.setIcon(icons_buttons.get(action.text(), QtGui.QIcon()))
+                action.setIcon(icons_buttons.get(action.text(), QIcon()))
 
         self.toolbar.setMaximumHeight(int(32))
         self.toolbar.setIconSize(QSize(24,24))

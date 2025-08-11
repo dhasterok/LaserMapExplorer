@@ -225,7 +225,7 @@ class Browser(QDockWidget):
         bool
             ``True`` if the event was handled, otherwise ``False``.
         """        
-        if self.parent.actions.Help.isChecked():
+        if self.parent.lame_action.Help.isChecked():
             # Handle hover events
             if event.type() == QEvent.Type.Enter:
                 if obj in self.help_mapping:
@@ -240,7 +240,7 @@ class Browser(QDockWidget):
 
             # Handle mouse press events
             if event.type() == QEvent.Type.MouseButtonPress:
-                self.parent.actions.Help.setChecked(False)
+                self.parent.lame_action.Help.setChecked(False)
                 self.parent.setCursor(Qt.CursorShape.ArrowCursor)
 
                 if obj in self.help_mapping:

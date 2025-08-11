@@ -169,9 +169,9 @@ class MainWindow(QMainWindow):
         self.setCorner(Qt.Corner.BottomRightCorner, Qt.DockWidgetArea.RightDockWidgetArea)
 
         # Actions and Toolbar
-        self.actions = MainActions(self)
-        self.toolbar = MainToolbar(self, self.actions)
-        self.menu_bar = MainMenubar(self, self.actions)
+        self.lame_action = MainActions(self)
+        self.toolbar = MainToolbar(self, self.lame_action)
+        self.menu_bar = MainMenubar(self, self.lame_action)
         self.setMenuBar(self.menu_bar)
 
         # Status bar
@@ -220,19 +220,19 @@ class MainWindow(QMainWindow):
         #self.clustertool = Clustering(self)
 
     def connect_actions(self):
-        self.actions.connect_actions()
+        self.lame_action.connect_actions()
 
-        self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_widget.canvasWindow.canvas_changed())
+        self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_widget.canvasWindow.tab_changed())
 
     def connect_widgets(self):
-        """ Connects widgets to their respective methods and actions.
+        """ Connects widgets to their respective methods and lame_action.
         
         This method sets up the connections for various widgets in the MainWindow,
         including the toolBox, comboBoxes, and buttons. It ensures that user interactions
         with these widgets trigger the appropriate methods for updating the UI and data.
         """
-        self.control_dock.toolbox.currentChanged.connect(lambda: self.canvas_widget.canvasWindow.setCurrentIndex(self.canvas_widget.canvas_tab['sv']))
-        self.actions.FullMap.triggered.connect(self.control_dock.preprocess.reset_crop)
+        self.control_dock.toolbox.currentChanged.connect(lambda: self.canvas_widget.canvasWindow.setCurrentIndex(self.canvas_widget.tab_dict['sv']))
+        self.lame_action.FullMap.triggered.connect(self.control_dock.preprocess.reset_crop)
 
     
     def on_ui_pref_changed(self, *args):
@@ -459,9 +459,9 @@ class MainWindow(QMainWindow):
             self.control_dock.preprocess.connect_data_observers(self.app_data.current_data)
             # enable widgets that require self.data not be empty
             if self.data:
-                self.actions.toggle_actions(True)
+                self.lame_action.toggle_actions(True)
             else:
-                self.actions.toggle_actions(False)
+                self.lame_action.toggle_actions(False)
             
             # add sample to the plot tree
             self.plot_tree.add_sample(self.app_data.sample_id)
@@ -536,8 +536,8 @@ class MainWindow(QMainWindow):
             self.info_dock.update_tab_widget()
 
         # set canvas to single view
-        self.canvas_widget.canvasWindow.setCurrentIndex(self.canvas_widget.canvas_tab['sv'])
-        self.canvas_widget.canvas_changed()
+        self.canvas_widget.canvasWindow.setCurrentIndex(self.canvas_widget.tab_dict['sv'])
+        self.canvas_widget.tab_changed()
         
         # set toolbox tab indexes
         self.style_dock.toolbox.setCurrentIndex(0)
@@ -586,24 +586,24 @@ class MainWindow(QMainWindow):
 
     def update_mask_and_profile_widgets(self):
         #update filters, polygon, profiles with existing data
-        self.actions.ClearFilters.setEnabled(False)
+        self.lame_action.ClearFilters.setEnabled(False)
         if np.all(self.app_data.current_data.filter_mask):
-            self.actions.FilterToggle.setEnabled(False)
+            self.lame_action.FilterToggle.setEnabled(False)
         else:
-            self.actions.FilterToggle.setEnabled(True)
-            self.actions.ClearFilters.setEnabled(True)
+            self.lame_action.FilterToggle.setEnabled(True)
+            self.lame_action.ClearFilters.setEnabled(True)
 
         if np.all(self.app_data.current_data.polygon_mask):
-            self.actions.PolygonMask.setEnabled(False)
+            self.lame_action.PolygonMask.setEnabled(False)
         else:
-            self.actions.PolygonMask.setEnabled(True)
-            self.actions.ClearFilters.setEnabled(True)
+            self.lame_action.PolygonMask.setEnabled(True)
+            self.lame_action.ClearFilters.setEnabled(True)
 
         if np.all(self.app_data.current_data.cluster_mask):
-            self.actions.ClusterMask.setEnabled(False)
+            self.lame_action.ClusterMask.setEnabled(False)
         else:
-            self.actions.ClusterMask.setEnabled(True)
-            self.actions.ClearFilters.setEnabled(True)
+            self.lame_action.ClusterMask.setEnabled(True)
+            self.lame_action.ClearFilters.setEnabled(True)
 
         if hasattr(self, "mask_dock"):
             #reset filter table, keeping any persistent filters
@@ -653,7 +653,7 @@ class MainWindow(QMainWindow):
                         self.actionPolyAddPoint.setChecked(False)
                         self.actionPolyRemovePoint.setChecked(False)
             case 'profiling':
-                self.actions.Crop.setChecked(False)
+                self.lame_action.Crop.setChecked(False)
                 if hasattr(self, "mask_dock"):
                     if hasattr(self.mask_dock, "polygon_tab"):
                         self.actionPolyCreate.setChecked(False)
@@ -661,7 +661,7 @@ class MainWindow(QMainWindow):
                         self.actionPolyAddPoint.setChecked(False)
                         self.actionPolyRemovePoint.setChecked(False)
             case 'polygon':
-                self.actions.Crop.setChecked(False)
+                self.lame_action.Crop.setChecked(False)
                 if hasattr(self, "profile_dock"):
                     self.profile_dock.actionControlPoints.setChecked(False)
                     self.profile_dock.actionMovePoint.setChecked(False)

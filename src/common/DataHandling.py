@@ -1965,7 +1965,7 @@ class SampleObj(Observable):
     #     self.data[sample_id].mask = filter_mask & polygon_mask & cluster_mask
 
     #     # if single view is active
-    #     if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+    #     if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
     #         # trigger update to plot
     #         self.schedule_update()
 

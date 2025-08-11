@@ -108,7 +108,7 @@ class SearchWidget(QWidget):
     def _connect_signals(self):
         """
         Connects internal UI signals to their corresponding slots.
-        Handles text change, toggle buttons, navigation, and replace actions.
+        Handles text change, toggle buttons, navigation, and replace lame_action.
         """
         if self.realtime:
             self.search_input.textChanged.connect(self.highlight_matches)

@@ -431,7 +431,7 @@ class ThemeManager(QObject):
 
     def _update_view_mode_action(self):
         """Update icon and tooltip based on current view_mode."""
-        if not self.parent.actions.ViewMode:
+        if not self.parent.lame_action.ViewMode:
             return
 
         icons = {
@@ -443,12 +443,12 @@ class ThemeManager(QObject):
         icon_file, text = icons[self.view_mode]
         icon_path = ICONPATH / icon_file
 
-        if isinstance(self.parent.actions.ViewMode, QAction):
-            self.parent.actions.ViewMode.setIcon(QIcon(str(icon_path)))
-            self.parent.actions.ViewMode.setText(text)
+        if isinstance(self.parent.lame_action.ViewMode, QAction):
+            self.parent.lame_action.ViewMode.setIcon(QIcon(str(icon_path)))
+            self.parent.lame_action.ViewMode.setText(text)
         else:  # QToolButton or similar
-            self.parent.actions.ViewMode.setIcon(QIcon(str(icon_path)))
-            self.parent.actions.ViewMode.setText(text)
+            self.parent.lame_action.ViewMode.setIcon(QIcon(str(icon_path)))
+            self.parent.lame_action.ViewMode.setText(text)
 
 
 

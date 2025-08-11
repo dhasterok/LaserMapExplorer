@@ -368,17 +368,17 @@ class ControlDock(CustomDockWidget):
 
     def toggle_spot_tab(self):
         #self.actionSpotTools.toggle()
-        if self.ui.actions.SpotTools.isChecked():
+        if self.ui.lame_action.SpotTools.isChecked():
             # add spot page to MainWindow.toolBox
             self.spot_tools = SpotPage(self.tab_dict['sample'], self)
-            self.ui.actions.ImportSpots.setVisible(True)
+            self.ui.lame_action.ImportSpots.setVisible(True)
         else:
             self.toolbox.removeItem(self.tab_dict['spot'])
-            self.ui.actions.ImportSpots.setVisible(False)
+            self.ui.lame_action.ImportSpots.setVisible(False)
         self.reindex_tab_dict()
 
     def toggle_special_tab(self):
-        if self.ui.actions.SpecialTools.isChecked():
+        if self.ui.lame_action.SpecialTools.isChecked():
             self.special_tools = SpecialPage(self.tab_dict['cluster'], self)
         else:
             self.toolbox.removeItem(self.tab_dict['special'])
@@ -526,7 +526,7 @@ class ControlDock(CustomDockWidget):
 
         self.plot_flag = True
         # If canvasWindow is set to SingleView, update the plot
-        if self.ui.canvas_widget.canvasWindow.currentIndex() == self.ui.canvas_widget.canvas_tab['sv']:
+        if self.ui.canvas_widget.canvasWindow.currentIndex() == self.ui.canvas_widget.tab_dict['sv']:
         # trigger update to plot
             self.ui.schedule_update()
 
@@ -572,17 +572,17 @@ class ControlDock(CustomDockWidget):
         # update ui
         match self.ui.style_data.plot_type.lower():
             case 'field map' | 'gradient map':
-                self.ui.actions.SwapAxes.setEnabled(True)
+                self.ui.lame_action.SwapAxes.setEnabled(True)
             case 'scatter' | 'heatmap':
-                self.ui.actions.SwapAxes.setEnabled(True)
+                self.ui.lame_action.SwapAxes.setEnabled(True)
             case 'correlation':
-                self.ui.actions.SwapAxes.setEnabled(False)
+                self.ui.lame_action.SwapAxes.setEnabled(False)
                 if self.correlation.comboBoxCorrelationMethod.currentText() == 'none':
                     self.correlation.comboBoxCorrelationMethod.setCurrentText('Pearson')
             case 'cluster performance' | 'cluster map' | 'cluster score ':
                 self.clustering.toggle_cluster_widgets()
             case _:
-                self.ui.actions.SwapAxes.setEnabled(False)
+                self.ui.lame_action.SwapAxes.setEnabled(False)
 
         self.init_field_widgets(self.ui.style_data.plot_axis_dict, self.axis_widget_dict, plot_type=self.ui.style_data.plot_type)
 

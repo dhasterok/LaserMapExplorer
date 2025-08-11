@@ -1476,8 +1476,8 @@ class StyleData(Observable, StyleTheme):
         -------
         matplotlib.colormap.ListedColormap : colormap
         """
-        if hasattr(self.ui,'canvasWindow') and hasattr(self.ui,'canvas_tab'):
-            if self.ui.canvasWindow.currentIndex() == self.ui.canvas_tab['qv']:
+        if hasattr(self.ui,'canvasWindow') and hasattr(self.ui,'tab_dict'):
+            if self.ui.canvasWindow.currentIndex() == self.ui.tab_dict['qv']:
                 plot_type = 'field map'
 
 

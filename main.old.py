@@ -196,7 +196,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if hasattr(self, "mask_dock"):
             self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
         self.toolBoxStyle.setCurrentIndex(0)
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.canvasWindow.setCurrentIndex(self.tab_dict['sv'])
 
  
         # Menu and Toolbar
@@ -295,7 +295,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.toolButtonHistogramReset.clicked.connect(lambda: plot_histogram(self, self.data, self.app_data, self.plot_style))
 
         #uncheck crop is checked
-        self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.canvas_tab['sv']))
+        self.toolBox.currentChanged.connect(lambda: self.canvasWindow.setCurrentIndex(self.tab_dict['sv']))
 
         # Noise reduction
         self.noise_reduction = ip(self)
@@ -486,7 +486,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBoxSampleId.addItems(new_sample_list)
         self.comboBoxSampleId.setCurrentIndex(0)
 
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.canvasWindow.setCurrentIndex(self.tab_dict['sv'])
         self.init_tabs()
         self.change_sample()
         # self.profile_dock.profiling.add_samples()
@@ -798,7 +798,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_style.set_style_widgets(self.plot_style.plot_type)
 
         # set canvas to single view
-        self.canvasWindow.setCurrentIndex(self.canvas_tab['sv'])
+        self.canvasWindow.setCurrentIndex(self.tab_dict['sv'])
         self.canvas_changed()
         
         # set toolbox
@@ -1030,7 +1030,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.plot_style.set_style_widgets(plot_type=plot_type, style=self.plot_style.plot_type[plot_type])
 
         # If canvasWindow is set to SingleView, update the plot
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+        if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
         # trigger update to plot
             self.schedule_update()
 
@@ -1406,7 +1406,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     any_plot_hovered = True
                     value = array[y_i, x_i]  # assuming self.array is numpy self.array
 
-                    if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+                    if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
                         if self.toolButtonPolyCreate.isChecked() or (self.toolButtonPolyMovePoint.isChecked() and self.point_selected):
                             # Update the position of the zoom view
                             self.update_zoom_view_position(x, y)
@@ -1474,7 +1474,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def plot_laser_map_cont(self,layout,array,img,p1,cm, view):
         # Single views (add histogram)
-        if (self.canvasWindow.currentIndex() == self.canvas_tab['sv']) and (view == self.canvasWindow.currentIndex()):
+        if (self.canvasWindow.currentIndex() == self.tab_dict['sv']) and (view == self.canvasWindow.currentIndex()):
             # Try to remove the colorbar just in case it was added somehow
             # for i in reversed(range(p1.layout.count())):  # Reverse to avoid skipping due to layout change
             #     item = p1.layout.itemAt(i)
@@ -1642,7 +1642,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     # layout.removeWidget(widget)  # Remove the widget from the layout
                     # widget.setParent(None)      # Set the widget's parent to None
 
-        if self.canvasWindow.currentIndex() == self.canvas_tab['mv']:
+        if self.canvasWindow.currentIndex() == self.tab_dict['mv']:
             list = self.ui.comboBoxMVPlots.allItems()
             if not list:
                 return
@@ -2002,12 +2002,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         title = ''
 
         view = self.canvasWindow.currentIndex()
-        if view == self.canvas_tab['sv']:
+        if view == self.tab_dict['sv']:
             title = field
-        elif view == self.canvas_tab['mv']:
+        elif view == self.tab_dict['mv']:
             title = sample_id + '_' + field
         else:
-            view = self.canvas_tab['sv']
+            view = self.tab_dict['sv']
             self.canvasWindow.setCurrentIndex(view)
             title = field
 
@@ -2143,7 +2143,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plot_tree.add_tree_item(self.plot_info)
 
         # add small histogram
-        if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.canvas_tab['sv']):
+        if (self.toolBox.currentIndex() == self.left_tab['sample']) and (view == self.tab_dict['sv']):
             plot_small_histogram(self, self.data[self.app_data.sample_id], self.app_data, self.plot_style, map_df)
 
 
@@ -2393,7 +2393,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data = self.data[self.app_data.sample_id].processed_data
         parameters = data.column_attributes[field]
 
-        if self.canvasWindow.currentIndex() == self.canvas_tab['sv']:
+        if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
             auto_scale = parameters['auto_scale']
             #self.spinBoxX.setValue(int(parameters['x_max']))
 

@@ -63,7 +63,7 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     - Stores the plotted data in the parent for potential export.
     """
     # create plot canvas
-    canvas = MplCanvas(parent=parent)
+    canvas = MplCanvas(parent=parent, map_flag=True)
 
     # get data for current map
     #scale = data.processed_data.get_attribute(field, 'norm')

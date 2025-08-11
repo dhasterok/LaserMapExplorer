@@ -62,7 +62,7 @@ class MplCanvas(FigureCanvas):
     proj : str, optional
         Projection, by default None
     """    
-    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui= None):
+    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False):
         #create MPLCanvas with existing figure (required when loading saved projects)
         if fig:
             self.fig = fig
@@ -83,6 +83,9 @@ class MplCanvas(FigureCanvas):
             self.ui = ui
         else:
             self.ui = parent
+
+        self.title = '' # this should be plot_info['name']
+        self.map_flag = map_flag
         
         # Hold the data of the canvas as a pandas DataFrame
         self._data = None
@@ -112,14 +115,7 @@ class MplCanvas(FigureCanvas):
         self.distance_cid_press = None
         self.distance_cid_move = None
 
-
-        if self.parent is not None and self.parent.app_data.sample_id in self.parent.app_data.data:
-            if self.parent.style_data.plot_type in self.parent.style_data.map_plot_types:
-                self.map_flag = True
-            else:
-                self.map_flag = False
-            
-            self.mpl_connect('motion_notify_event', self.mouseLocation)
+        self.mpl_connect('motion_notify_event', self.mouseLocation)
         
         self.mpl_toolbar = NavigationToolbar(self)
 
@@ -129,10 +125,6 @@ class MplCanvas(FigureCanvas):
         self.ui.canvas_widget.toolbar.toolButtonSave.setMenu(SaveMenu)
         for item in SaveMenu_items:
             SaveMenu.addAction(item)
-
-
-        if hasattr(self.ui, 'toolButtonPopFigure'):
-            self.ui.canvas_widget.toolbar.sv.toolButtonPopFigure.clicked.connect(lambda: self.toolbar_plotting('pop', 'SV'))
 
     @property
     def plot_name(self):
@@ -160,7 +152,6 @@ class MplCanvas(FigureCanvas):
         else:
             raise TypeError("data must be a pandas DataFrame or None")
 
-    
     def toggle_tool(self, tool, enable=None):
         if tool == 'home':
             self.restore_view()
@@ -201,13 +192,6 @@ class MplCanvas(FigureCanvas):
                 self.mpl_toolbar.edit_parameters()
             case 'axes':
                 self.mpl_toolbar.configure_subplots()
-            case 'pop':
-                self.pop_figure = MplDialog(self.parent, self, self.plot_info['plot_name'])
-                self.pop_figure.show()
-
-                # since the canvas is moved to the dialog, the figure needs to be recreated in the
-                # main window trigger update to plot        
-                self.plot_style.schedule_update()
 
     
     def disable_tool(self, tool):
@@ -630,64 +614,5 @@ class MplCanvas(FigureCanvas):
         self.draw()
         if self.active_tool != 'distance':
             self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText("D: N/A")
-
-
-class MplDialog(QDialog):
-    def __init__(self, parent, canvas, title=''):
-        """A plot dialog
-
-        This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.
-
-        Parameters
-        ----------
-        parent : MainWindow
-            Calling class.
-        canvas : MplCanvas
-            Matplotlib plot canvas.
-        title : str, optional
-            Dialog title, by default ''
-        """        
-        super(MplDialog, self).__init__(parent)
-
-        self.parent = parent
-
-        self.setWindowTitle(title)
-
-        # Create a QVBoxLayout to hold the canvas and toolbar
-        layout = QVBoxLayout(self)
-
-        # Create a NavigationToolbar and add it to the layout
-        self.toolbar = NavigationToolbar(canvas, self)
-
-        # use custom buttons
-        unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
-
-        icons_buttons = {
-            "Home": QIcon(ICONPATH / "icon-home-64.svg"),
-            "Pan": QIcon(ICONPATH / "icon-move-64.svg"),
-            "Zoom": QIcon(ICONPATH / "icon-zoom-64.svg"),
-            "Save": QIcon(ICONPATH / "icon-save-file-64.svg")
-        }
-        for action in self.toolbar.actions():
-            if action.text() in unwanted_buttons:
-                self.toolbar.removeAction(action)
-            if action.text() in icons_buttons:
-                action.setIcon(icons_buttons.get(action.text(), QIcon()))
-
-        self.toolbar.setMaximumHeight(int(32))
-        self.toolbar.setIconSize(QSize(24,24))
-
-        # Add toolbar to self.layout
-        layout.addWidget(self.toolbar,0)
-
-        # Add a matplotlib canvas to self.layout
-        layout.addWidget(canvas,1)
-
-        # Create a button box for OK and Cancel buttons
-        button_box = QDialogButtonBox(QDialogButtonBox.Close)
-        button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box,2)
-
-        self.parent.clear_layout(self.parent.widgetSingleView.layout())
 
 

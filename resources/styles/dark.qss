@@ -553,7 +553,7 @@ QGroupBox#groupBoxCalcFunctions > QPushButton {
     margin-left: 0px;
     margin-right: 0px;
     font: bold 10px;
-    padding: 0;
+    padding: 4px 4px;
 }
 QGroupBox#groupBoxCalcFunctions > QPushButton:hover {
     color: #ffffff;

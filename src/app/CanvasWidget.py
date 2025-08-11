@@ -3,11 +3,11 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
     QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy, QToolButton,
     QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox,
-    QButtonGroup
+    QButtonGroup, QDialogButtonBox
 )
-from PyQt6.QtGui import QFont, QCursor
+from PyQt6.QtGui import QFont, QIcon, QCursor
 from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
-from src.app.config import APPDATA_PATH
+from src.app.config import APPDATA_PATH, ICONPATH
 
 import numpy as np
 import pandas as pd
@@ -964,10 +964,20 @@ class CanvasToolBar(QGroupBox):
 
     def connect_widgets(self):
         self.sv.toolButtonHome.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('home'))
-        self.sv.toolButtonPan.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('pan', self.sv.toolButtonPan.isChecked()))
-        self.sv.toolButtonZoom.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('zoom', self.sv.toolButtonZoom.isChecked()))
-        self.sv.toolButtonAnnotate.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('annotate', self.sv.toolButtonAnnotate.isChecked()))
-        self.sv.toolButtonDistance.clicked.connect(lambda _: self.parent.current_canvas.toggle_tool('distance', self.sv.toolButtonDistance.isChecked()))
+        self.sv.toolButtonPan.clicked.connect(lambda state: self.parent.current_canvas.toggle_tool('pan', state))
+        self.sv.toolButtonZoom.clicked.connect(lambda state: self.parent.current_canvas.toggle_tool('zoom', state))
+        self.sv.toolButtonAnnotate.clicked.connect(lambda state: self.parent.current_canvas.toggle_tool('annotate', state))
+        self.sv.toolButtonDistance.clicked.connect(lambda state: self.parent.current_canvas.toggle_tool('distance', state))
+        self.sv.toolButtonPopFigure.clicked.connect(lambda _: self.move_canvas_to_window())
+
+    def move_canvas_to_window(self):
+        self.parent.current_canvas.toggle_tool('pop_figure',True)
+        self.pop_figure = PlotWindow(self.parent.ui, self.parent.current_canvas, title=self.parent.ui.plot_info['plot_name'])
+        self.pop_figure.show()
+
+        # since the canvas is moved to the dialog, the figure needs to be recreated in the
+        # main window trigger update to plot        
+        self.parent.ui.schedule_update()
 
 # QuickViewDialog gui
 # -------------------------------
@@ -1223,3 +1233,63 @@ class QuickView(QDialog):
             QMessageBox.information(self, "Save Successful", f"Analytes view saved under '{self.view_name}' successfully.")
         else:
             QMessageBox.warning(self, "Error", "Could not save analyte list.")
+
+
+class PlotWindow(QDialog):
+    def __init__(self, parent, canvas, title=''):
+        """A plot dialog
+
+        This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out
+        from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.
+
+        Parameters
+        ----------
+        parent : MainWindow
+            Calling class.
+        canvas : MplCanvas
+            Matplotlib plot canvas.
+        title : str, optional
+            Dialog title, by default ''
+        """        
+        super().__init__(parent)
+
+        self.parent = parent
+
+        self.setWindowTitle(title)
+
+        # Create a QVBoxLayout to hold the canvas and toolbar
+        layout = QVBoxLayout(self)
+
+        # Create a NavigationToolbar and add it to the layout
+        self.toolbar = NavigationToolbar(canvas, self)
+
+        # use custom buttons
+        unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
+
+        icons_buttons = {
+            "Home": QIcon(str(ICONPATH / "icon-home-64.svg")),
+            "Pan": QIcon(str(ICONPATH / "icon-move-64.svg")),
+            "Zoom": QIcon(str(ICONPATH / "icon-zoom-64.svg")),
+            "Save": QIcon(str(ICONPATH / "icon-save-file-64.svg"))
+        }
+        for action in self.toolbar.actions():
+            if action.text() in unwanted_buttons:
+                self.toolbar.removeAction(action)
+            if action.text() in icons_buttons:
+                action.setIcon(icons_buttons.get(action.text(), QIcon()))
+
+        self.toolbar.setMaximumHeight(int(32))
+        self.toolbar.setIconSize(QSize(24,24))
+
+        # Add toolbar to self.layout
+        layout.addWidget(self.toolbar,0)
+
+        # Add a matplotlib canvas to self.layout
+        layout.addWidget(canvas,1)
+
+        # Create a button box for OK and Cancel buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box,2)
+
+        #self.parent.clear_layout(self.parent.widgetSingleView.layout())

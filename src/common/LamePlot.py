@@ -91,6 +91,11 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
                             cmap=style_data.get_colormap(),
                             aspect=aspect_ratio, interpolation='none',
                             norm=norm)
+    canvas.array = reshaped_array
+    canvas.dx = app_data.current_data.dx
+    canvas.dy = app_data.current_data.dy
+    canvas.color_units = data.processed_data.column_attributes[field]['units']
+    canvas.distance_units = data.processed_data.column_attributes['Xc']['units']
 
     add_colorbar(style_data, canvas, cax)
     match style_data.cscale:

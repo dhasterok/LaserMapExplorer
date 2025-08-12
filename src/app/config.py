@@ -1,4 +1,5 @@
 from pathlib import Path
+from PyQt6.QtWidgets import QMainWindow, QWidget
 
 # __file__ holds the full path to the current Python file
 BASEDIR = Path(__file__).resolve().parent.parent.parent
@@ -24,3 +25,20 @@ def load_stylesheet(filename):
     for key, value in replacements.items():
         stylesheet = stylesheet.replace(key, value)
     return stylesheet
+
+def get_top_parent(widget: QWidget):
+    """Walks up the parent chain until a QMainWindow or Workspace is found.
+    
+    Parameters
+    ----------
+    widget : QWidget
+        Widget that the base parent is needed, either MainWindow or Workflow
+    """
+    from src.app.Workflow import Workflow
+
+    w = widget
+    while w is not None:
+        if isinstance(w, (QMainWindow, Workflow)):
+            return w
+        w = w.parentWidget()
+    return None  # fallback if nothing found

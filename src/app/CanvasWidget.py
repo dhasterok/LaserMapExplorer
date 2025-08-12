@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
     QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy, QToolButton,
     QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox,
-    QButtonGroup, QDialogButtonBox
+    QButtonGroup, QDialogButtonBox, QMenu
 )
 from PyQt6.QtGui import QFont, QIcon, QCursor
 from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
@@ -92,7 +92,6 @@ class CanvasWidget(QWidget):
         """Connects widgets to their respective functions"""
         self.toolbar.qv.toolButtonNewList.clicked.connect(lambda: QuickView(self))
         self.toolbar.qv.comboBoxQVList.activated.connect(lambda _: self.display_QV())
-
 
     def init_canvas_widget(self):
         """Initializes the central canvas tabs"""
@@ -272,6 +271,10 @@ class CanvasWidget(QWidget):
             self.single_view.widgetSingleView.setLayout(QVBoxLayout())
 
         self.single_view.widgetSingleView.layout().addWidget(new_canvas)
+        new_canvas.add_observer("xpos", self.toolbar.update_sv_info)
+        new_canvas.add_observer("ypos", self.toolbar.update_sv_info)
+        new_canvas.add_observer("value", self.toolbar.update_sv_info)
+        new_canvas.add_observer("distance", self.toolbar.update_sv_info)
         
         try:
             # Recreate the NavigationToolbar with the new canvas
@@ -637,6 +640,7 @@ class NavigationWidgetsSV(VisibilityWidget):
     def setupUI(self):
         navigation_layout = QHBoxLayout()
         navigation_layout.setContentsMargins(3, 3, 3, 3)
+        navigation_layout.setSpacing(2)
         self.setLayout(navigation_layout)
 
         self.toolButtonHome = CustomToolButton(
@@ -723,15 +727,15 @@ class NavigationWidgetsSV(VisibilityWidget):
         self.labelInfoX.setText("X: 0")
 
         self.labelInfoValue = QLabel(parent=self.widgetPlotInfo)
-        self.labelInfoValue.setMinimumSize(QSize(70, 0))
-        self.labelInfoValue.setMaximumSize(QSize(70, 16777215))
+        self.labelInfoValue.setMinimumSize(QSize(80, 0))
+        self.labelInfoValue.setMaximumSize(QSize(80, 16777215))
         self.labelInfoValue.setObjectName("labelInfoValue")
         self.labelInfoValue.setText("V: 0")
         self.labelInfoValue.setToolTip("Value at mouse pointer")
 
         self.labelInfoDistance = QLabel(parent=self.widgetPlotInfo)
-        self.labelInfoDistance.setMinimumSize(QSize(70, 0))
-        self.labelInfoDistance.setMaximumSize(QSize(70, 16777215))
+        self.labelInfoDistance.setMinimumSize(QSize(80, 0))
+        self.labelInfoDistance.setMaximumSize(QSize(80, 16777215))
         self.labelInfoDistance.setObjectName("labelInfoDistance")
         self.labelInfoDistance.setText("D: 0")
         self.labelInfoDistance.setToolTip("Distance from anchor point to mouse pointer")
@@ -766,7 +770,7 @@ class NavigationWidgetsSV(VisibilityWidget):
 
     def connect_widgets(self):
         self.visibilityChanged.connect(lambda _: self.reset_buttons)
-        self.toolButtonPopFigure.clicked.connect(lambda _: self.all_sv_buttons_off)
+        self.toolButtonPopFigure.clicked.connect(lambda _: self.all_buttons_off)
         self.toolButtonPan.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonPan))
         self.toolButtonZoom.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonZoom))
         self.toolButtonAnnotate.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonAnnotate))
@@ -775,9 +779,9 @@ class NavigationWidgetsSV(VisibilityWidget):
     def reset_buttons(self):
         if not self.isVisible():
             return
-        self.all_sv_buttons_off()
+        self.all_buttons_off()
 
-    def all_sv_buttons_off(self):
+    def all_buttons_off(self):
         self.toolButtonZoom.setChecked(False)
         self.toolButtonPan.setChecked(False)
         self.toolButtonAnnotate.setChecked(False)
@@ -792,6 +796,7 @@ class NavigationWidgetsSV(VisibilityWidget):
                 continue
             else:
                 btn.setChecked(False)
+
 
 class NavigationWidgetsMV(VisibilityWidget):
     def __init__(self, parent=None):
@@ -928,8 +933,8 @@ class CanvasToolBar(QGroupBox):
         self.connect_widgets()
 
     def setupUI(self):
-        self.setMinimumSize(QSize(200, 40))
-        self.setMaximumSize(QSize(16777215, 40))
+        self.setMinimumSize(QSize(200, 50))
+        self.setMaximumSize(QSize(16777215, 50))
         self.setTitle("")
         self.setObjectName("groupBoxPlotToolBar")
 
@@ -959,6 +964,15 @@ class CanvasToolBar(QGroupBox):
         )
         self.toolButtonSave.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.toolButtonSave.setObjectName("toolButtonSave")
+        self.toolButtonSave.setShortcut("Ctrl+P")
+        
+        #SaveMenu_items = ['Figure', 'Data', 'Both']
+        #SaveMenu = QMenu(self)
+        #SaveMenu.triggered.connect(lambda action: self.parent.ui.io.save_plot(canvas=self.parent.current_canvas, method=action.text()))
+
+        #self.toolButtonSave.setMenu(SaveMenu)
+        #for item in SaveMenu_items:
+        #    SaveMenu.addAction(item)
 
         toolbar_layout.addWidget(self.toolButtonSave)
 
@@ -969,15 +983,47 @@ class CanvasToolBar(QGroupBox):
         self.sv.toolButtonAnnotate.clicked.connect(lambda state: self.parent.current_canvas.toggle_tool('annotate', state))
         self.sv.toolButtonDistance.clicked.connect(lambda state: self.parent.current_canvas.toggle_tool('distance', state))
         self.sv.toolButtonPopFigure.clicked.connect(lambda _: self.move_canvas_to_window())
+        self.toolButtonSave.clicked.connect(lambda _: self.parent.ui.io.save_plot(canvas=self.parent.current_canvas, parent=self.parent))
 
     def move_canvas_to_window(self):
         self.parent.current_canvas.toggle_tool('pop_figure',True)
-        self.pop_figure = PlotWindow(self.parent.ui, self.parent.current_canvas, title=self.parent.ui.plot_info['plot_name'])
+        self.pop_figure = PlotWindow(self.parent.ui, self.parent.current_canvas)
         self.pop_figure.show()
 
         # since the canvas is moved to the dialog, the figure needs to be recreated in the
         # main window trigger update to plot        
         self.parent.ui.schedule_update()
+
+    def update_sv_info(self, *args, **kwargs):
+        """Updates the information labels in the SingleView tab."""
+        if not self.isVisible():
+            return
+
+        canvas = self.parent.current_canvas
+        if not isinstance(canvas, MplCanvas):
+            return
+
+        xpos = canvas.xpos
+        ypos = canvas.ypos
+
+        if xpos is None or ypos is None:
+            self.sv.labelInfoX.setText("X: N/A")
+            self.sv.labelInfoY.setText(f"Y: N/A")
+        else:
+            self.sv.labelInfoX.setText(f"X: {xpos:.4g}")
+            self.sv.labelInfoY.setText(f"Y: {ypos:.4g}")
+        if canvas.array is not None:
+            val = canvas.value
+            units = canvas.color_units or ''
+            if val:
+                self.sv.labelInfoValue.setText(f"V: {val:.2f} {units}")
+        else:
+            self.sv.labelInfoValue.setText("V: N/A")
+        if self.sv.toolButtonDistance.isChecked():
+            distance = canvas.distance
+            units = canvas.distance_units or ''
+            if distance:
+                self.sv.labelInfoDistance.setText(f"D: {distance:.2f} {units}")
 
 # QuickViewDialog gui
 # -------------------------------
@@ -1236,11 +1282,11 @@ class QuickView(QDialog):
 
 
 class PlotWindow(QDialog):
-    def __init__(self, parent, canvas, title=''):
+    def __init__(self, parent, canvas):
         """A plot dialog
 
         This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out
-        from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.
+        from ``MainWindow.canvasWindow`` using ``CanvasWindow.toolbar.sv.toolButtonPopFigure``.
 
         Parameters
         ----------
@@ -1255,7 +1301,7 @@ class PlotWindow(QDialog):
 
         self.parent = parent
 
-        self.setWindowTitle(title)
+        self.setWindowTitle(canvas.plot_name)
 
         # Create a QVBoxLayout to hold the canvas and toolbar
         layout = QVBoxLayout(self)

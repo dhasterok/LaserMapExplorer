@@ -15,6 +15,7 @@ import pandas as pd
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import matplotlib as mpl
 from src.app.config import ICONPATH
+from src.common.Observable import Observable
 
 
 # Matplotlib Canvas object
@@ -46,7 +47,7 @@ class SimpleMplCanvas(FigureCanvas):
         self.parent = parent
 
 
-class MplCanvas(FigureCanvas):
+class MplCanvas(FigureCanvas, Observable):
     """Matplotlib canvas object for interactive plots
 
     Parameters
@@ -84,7 +85,7 @@ class MplCanvas(FigureCanvas):
         else:
             self.ui = parent
 
-        self.title = '' # this should be plot_info['name']
+        # indicates whether the data are map form (x, y, value) or simply (x, y)
         self.map_flag = map_flag
         
         # Hold the data of the canvas as a pandas DataFrame
@@ -100,15 +101,28 @@ class MplCanvas(FigureCanvas):
 
         self.active_tool = None
 
+        # data for estimating self.distance and self.value
+        # these come from the data and should be provided when the plot is added
+        # to the canvas.
+        self.array = None
+        self.dx = None
+        self.dy = None
+        self.color_units = ''
+        self.distance_units = ''
+
         # distance measurement
         # --------------------
         # Variables to store points and line
+        self._xpos = None
+        self._ypos = None
+        self._value = None
+        self._distance = None
+
         self.first_point = None
         self.line = None
         self.dtext = None
         self.saved_line = []
         self.saved_dtext = []
-        self.array = None
         self.annotations = {}
         
         self.interaction_mode = None
@@ -118,13 +132,6 @@ class MplCanvas(FigureCanvas):
         self.mpl_connect('motion_notify_event', self.mouseLocation)
         
         self.mpl_toolbar = NavigationToolbar(self)
-
-        SaveMenu_items = ['figure', 'data']
-        SaveMenu = QMenu()
-        SaveMenu.triggered.connect(lambda action: self.save_plot(action.text()))
-        self.ui.canvas_widget.toolbar.toolButtonSave.setMenu(SaveMenu)
-        for item in SaveMenu_items:
-            SaveMenu.addAction(item)
 
     @property
     def plot_name(self):
@@ -152,6 +159,54 @@ class MplCanvas(FigureCanvas):
         else:
             raise TypeError("data must be a pandas DataFrame or None")
 
+    @property
+    def xpos(self):
+        """str : x position of mouse pointer on canvas"""
+        return self._xpos
+
+    @xpos.setter
+    def xpos(self, value):
+        if self._xpos == value:
+            return
+        self._xpos = value
+        self.notify_observers("xpos", value)
+
+    @property
+    def ypos(self):
+        """str : y position of mouse pointer on canvas"""
+        return self._ypos
+
+    @ypos.setter
+    def ypos(self, value):
+        if self._ypos == value:
+            return
+        self._ypos = value
+        self.notify_observers("ypos", value)
+
+    @property
+    def value(self):
+        """str : volue at mouse pointer location"""
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if self._value == value:
+            return
+        self._value = value
+        self.notify_observers("value", value)
+
+    @property
+    def distance(self):
+        """str : when distance tool is active, the distance of the line"""
+        return self._distance
+
+    @distance.setter
+    def distance(self, value):
+        if self._distance == value:
+            return
+        self._distance = value
+        self.notify_observers("distance",value)
+
     def toggle_tool(self, tool, enable=None):
         if tool == 'home':
             self.restore_view()
@@ -170,13 +225,11 @@ class MplCanvas(FigureCanvas):
         # Enable the new tool
         if enable:
             self.active_tool = tool
-            self.init_canvas_tool(tool)
+            self.enable_tool(tool)
         else:
             self.active_tool = None
 
-
-
-    def init_canvas_tool(self, tool):
+    def enable_tool(self, tool):
         match tool:
             case 'pan':
                 # Toggle pan mode in Matplotlib
@@ -192,7 +245,6 @@ class MplCanvas(FigureCanvas):
                 self.mpl_toolbar.edit_parameters()
             case 'axes':
                 self.mpl_toolbar.configure_subplots()
-
     
     def disable_tool(self, tool):
         match tool:
@@ -208,31 +260,7 @@ class MplCanvas(FigureCanvas):
                 self.disable_distance_mode()
             case 'polygon' | 'profile':
                 pass
-
                 
-    def save_plot(self, method, filename=None):
-        """Sorts analyte table in dialog"""        
-        # get save method (Figure/Data)
-        
-        if method == 'figure':
-            if filename:
-                self.parent.io.save_figure(self.figure, filename)
-            else:
-                self.parent.io.save_figure(self.figure, self.plot_name)
-
-            # elif isinstance(canvas,GraphicsLayoutWidget):
-            #     # Save functionality for pyqtgraph
-            #     export = exportDialog.ExportDialog(canvas.getItem(0, 0).scene())
-            #     export.show(canvas.getItem(0, 0).getViewBox())
-
-        if method == 'data':
-            if filename:
-                self.parent.io.save_data(self.data, filename)
-            else:
-                self.parent.io.save_data(self.data, self.plot_name)
-                    
-
-
     def enable_distance_mode(self):
         if self.active_tool == 'distance':
             # Connect the button and canvas events for distance measurement
@@ -244,7 +272,6 @@ class MplCanvas(FigureCanvas):
         self.mpl_disconnect(self.distance_cid_move)
         self.distance_cid_press = None
         self.distance_cid_move = None
-
 
     def enterEvent(self, event):
         # Set cursor to cross when the mouse enters the window
@@ -267,6 +294,9 @@ class MplCanvas(FigureCanvas):
         x = 0
         y = 0     
         if (not event.inaxes) or (event.xdata is None) or (event.ydata is None):
+            self.xpos = None
+            self.ypos = None
+            self.value = None
             return
 
         if event.inaxes.get_label() == '<colorbar>':
@@ -290,34 +320,33 @@ class MplCanvas(FigureCanvas):
             
             #x = x_i*self.parent.dx
             #y = y_i*self.parent.dy
-            if self.parent.app_data.sample_id in self.parent.app_data.data:
-                x = x_i*self.parent.app_data.data[self.parent.app_data.sample_id].dx
-                y = y_i*self.parent.app_data.data[self.parent.app_data.sample_id].dy
-            else:
-                return
-
-            label =  f" {self.parent.app_data.preferences['Units']['Concentration']}"
+            # if self.parent.app_data.sample_id in self.parent.app_data.data:
+            #     x = x_i*self.parent.app_data.data[self.parent.app_data.sample_id].dx
+            #     y = y_i*self.parent.app_data.data[self.parent.app_data.sample_id].dy
+            # else:
+            #     return
+            x = x_i*self.dx
+            y = y_i*self.dy
+    
+            #label =  f" {self.parent.app_data.preferences['Units']['Concentration']}"
         else:
             x = event.xdata
             y = event.ydata
-            self.ui.canvas_widget.toolbar.sv.labelInfoValue.setText(f"V: N/A")
+            #self.ui.canvas_widget.toolbar.sv.labelInfoValue.setText(f"V: N/A")
 
             if self.array is not None:
                 x_i = round(x)
                 y_i = round(y)
 
-                label = ''
-        
+                #label = ''
 
         if self.array is not None:
-            value = self.array[y_i][x_i]
-            txt = f"V: {value:.4g}{label}"
-            self.ui.canvas_widget.toolbar.sv.labelInfoValue.setText(txt)
+            self._value = self.array[y_i][x_i]
+            #txt = f"V: {value:.4g}{label}"
+            #self.ui.canvas_widget.toolbar.sv.labelInfoValue.setText(txt)
 
-        txt = f'X: {x:.4g}'
-        self.ui.canvas_widget.toolbar.sv.labelInfoX.setText(txt)
-        txt = f'Y: {y:.4g}'
-        self.ui.canvas_widget.toolbar.sv.labelInfoY.setText(txt)
+        self.xpos = x
+        self.ypos = y
 
     def set_initial_extent(self):
         """Initial extent of the plot
@@ -332,7 +361,9 @@ class MplCanvas(FigureCanvas):
     def restore_view(self):
         """Restores the initial extent
 
-        Restores the initial extent when ``MainWindow.toolButtonHome`` is clicked.
+        Restores the initial extent when ``home`` signal is received.
+
+        :seealso: toggle_tool
         """
         if self.initial_extent:
             self.axes.set_xlim(self.initial_extent[:2])
@@ -408,8 +439,10 @@ class MplCanvas(FigureCanvas):
             Distance between two given points.
         """
         if self.map_flag:
-            dx = self.parent.app_data.data[self.parent.app_data.sample_id].dx
-            dy = self.parent.app_data.data[self.parent.app_data.sample_id].dy
+            #dx = self.parent.app_data.data[self.parent.app_data.sample_id].dx
+            #dy = self.parent.app_data.data[self.parent.app_data.sample_id].dy
+            dx = self.dx
+            dy = self.dy
         else:
             dx = 1
             dy = 1
@@ -460,10 +493,12 @@ class MplCanvas(FigureCanvas):
         style = self.parent.style_data
 
         # compute distance
-        distance = self.calculate_distance(p1, p2)
+        self.distance = self.calculate_distance(p1, p2)
+
+        units = self.distance_units or ''
 
         # Update distance label in widget 
-        distance_text = f"{distance:.4g} {self.parent.app_data.preferences['Units']['Distance']}"
+        distance_text = f"{self.distance:.4g} {units}"
         self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText(f"D: {distance_text}")
 
         # Update distance label on map
@@ -537,7 +572,8 @@ class MplCanvas(FigureCanvas):
             if self.first_point is None:
                 # First click
                 self.first_point = (event.xdata, event.ydata)
-                self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText(f"D: 0 {self.parent.app_data.preferences['Units']['Distance']}")
+                self.distance = 0
+                #self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText(f"D: 0 {self.parent.app_data.preferences['Units']['Distance']}")
             else:
                 # Second click
                 second_point = (event.xdata, event.ydata)
@@ -613,6 +649,7 @@ class MplCanvas(FigureCanvas):
             self.dtext = None
         self.draw()
         if self.active_tool != 'distance':
-            self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText("D: N/A")
+            #self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText("D: N/A")
+            self.distance = None
 
 

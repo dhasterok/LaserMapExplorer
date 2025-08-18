@@ -683,10 +683,10 @@ class ScatterUI(CustomPage):
         """
         for cmap in self.dock.ui.app_data.ternary_colormaps:
             if cmap['scheme'] == self.comboBoxTernaryColormap.currentText():
-                self.colorButtonTCmapXColor.setStyleSheet("background-color: %s;" % cmap['top'])
-                self.colorButtonTCmapYColor.setStyleSheet("background-color: %s;" % cmap['left'])
-                self.colorButtonTCmapZColor.setStyleSheet("background-color: %s;" % cmap['right'])
-                self.colorButtonTCmapMColor.setStyleSheet("background-color: %s;" % cmap['center'])
+                self.colorButtonTCmapXColor.color = cmap['top']
+                self.colorButtonTCmapYColor.color = cmap['left']
+                self.colorButtonTCmapZColor.color = cmap['right']
+                self.colorButtonTCmapMColor.color = cmap['center']
 
     def update_ternary_colormap(self, new_colormap=None):
         """Updates ternary colormap used to make ternary maps.
@@ -717,22 +717,22 @@ class ScatterUI(CustomPage):
             self.dock.ui.schedule_update()
 
     def update_ternary_color_x(self, new_color):
-        self.colorButtonTCmapXColor.setStyleSheet("background-color: %s;" % new_color)
+        self.colorButtonTCmapXColor.color = new_color
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
 
     def update_ternary_color_y(self, new_color):
-        self.colorButtonTCmapYColor.setStyleSheet("background-color: %s;" % new_color)
+        self.colorButtonTCmapYColor.color = new_color
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
 
     def update_ternary_color_z(self, new_color):
-        self.colorButtonTCmapZColor.setStyleSheet("background-color: %s;" % new_color)
+        self.colorButtonTCmapZColor.color = new_color
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
 
     def update_ternary_color_m(self, new_color):
-        self.colorButtonTCmapMColor.setStyleSheet("background-color: %s;" % new_color)
+        self.colorButtonTCmapMColor.color = new_color
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
 

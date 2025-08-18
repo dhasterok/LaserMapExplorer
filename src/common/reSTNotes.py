@@ -205,6 +205,7 @@ class NotesWidget(QWidget):
         self.toolbar = QToolBar("Notes Toolbar", self)
         self.toolbar.setIconSize(QSize(24, 24))
         self.toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+        self.toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         self.action_wrap = CustomAction(
             text="Wrap", 

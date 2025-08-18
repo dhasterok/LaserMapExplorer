@@ -1,4 +1,4 @@
-﻿src.app.CanvasWidget
+src.app.CanvasWidget
 ====================
 
 .. automodule:: src.app.CanvasWidget
@@ -14,6 +14,7 @@
       NavigationWidgetsMV
       NavigationWidgetsQV
       NavigationWidgetsSV
+      PlotWindow
       QuickView
       QuickViewTab
       SingleViewTab

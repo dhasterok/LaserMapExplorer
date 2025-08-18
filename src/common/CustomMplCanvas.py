@@ -1,3 +1,4 @@
+import copy
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import (
     Qt, QSize
@@ -123,7 +124,7 @@ class MplCanvas(FigureCanvas, Observable):
         self.dtext = None
         self.saved_line = []
         self.saved_dtext = []
-        self.annotations = {}
+        self.annotations = [] 
         
         self.interaction_mode = None
         self.distance_cid_press = None
@@ -328,11 +329,9 @@ class MplCanvas(FigureCanvas, Observable):
             x = x_i*self.dx
             y = y_i*self.dy
     
-            #label =  f" {self.parent.app_data.preferences['Units']['Concentration']}"
         else:
             x = event.xdata
             y = event.ydata
-            #self.ui.canvas_widget.toolbar.sv.labelInfoValue.setText(f"V: N/A")
 
             if self.array is not None:
                 x_i = round(x)
@@ -343,7 +342,6 @@ class MplCanvas(FigureCanvas, Observable):
         if self.array is not None:
             self._value = self.array[y_i][x_i]
             #txt = f"V: {value:.4g}{label}"
-            #self.ui.canvas_widget.toolbar.sv.labelInfoValue.setText(txt)
 
         self.xpos = x
         self.ypos = y
@@ -401,16 +399,11 @@ class MplCanvas(FigureCanvas, Observable):
         ----------
         event : MouseEvent
             Mouse click event.
-        """ 
+        """
+        if self.active_tool != 'annotate':
+            return
 
-        if hasattr(self.ui,'tab_dict') and hasattr(self.ui,'canvasWindow'):
-            if (self.ui.canvasWindow.currentIndex() != self.ui.tab_dict['sv']) or (self.active_tool != 'annotate'):
-                return
-        else:
-            if self.active_tool != 'annotate':
-                return
-
-        x,y = event.xdata, event.ydata
+        x, y = event.xdata, event.ydata
         # get text
         txt, ok = QInputDialog.getText(self, 'Figure', 'Enter text:')
         if not ok:
@@ -418,20 +411,47 @@ class MplCanvas(FigureCanvas, Observable):
 
         overlay_color = self.parent.style_data.overlay_color
         font_size = self.parent.style_data.font_size
-        annotation = self.axes.text(x,y,txt, color=overlay_color, fontsize=font_size)
+        annotation_obj = self.axes.text(x, y, txt, color=overlay_color, fontsize=font_size, visible=True)
         self.draw()
 
-        self.annotations[annotation] = {"Type":"Text", "Value":txt, "Visible":True}
+        new = {
+            'Type': 'Text',
+            'X1': x,
+            'Y1': y,
+            'Text': txt,
+            'Color': overlay_color,
+            'Size': font_size,
+            'Visible': True,
+            'object': annotation_obj
+        }
+        self.annotations.append(new)
+        self.notify_observers("annotations", copy.deepcopy(self.annotations))
+
+    def redraw_annotations(self):
+        for ann in self.annotations:
+            if not ann['Visibile']:
+                continue
+
+            if ann['Type'] == "text":
+                self.axes.text(ann['X1'], ann['Y1'], ann['Text'],
+                            color=ann['Color'], fontsize=ann['Size'])
+            elif ann['Type'] == 'line':
+                self.axes.plot([ann['X1'], ann['X2']], [ann['Y1'], ann['Y2']],
+                            color=ann['Color'], linewidth=ann['Line Width'])
+                txt = ann['Text']
+                self.axes.text(txt['X1'], txt['Y1'], txt['Text'], ha=txt['HAlign'], va=txt['VAlign'], fontdict=txt['FontDict'], c=ann['Color'])
+
+        self.draw_idle()
 
     def calculate_distance(self,p1,p2):
         """Calculuates distance on a figure
 
         Parameters
         ----------
-        p1 : _type_
-            _description_
-        p2 : _type_
-            _description_
+        p1 : [float]
+            First endpoint
+        p2 : [float]
+            Second endpoint
 
         Returns
         -------
@@ -467,13 +487,17 @@ class MplCanvas(FigureCanvas, Observable):
         line_width = self.parent.style_data.line_width
 
         # plot line (keep only first returned handle)
-        p = self.axes.plot([p1[0], p2[0]], [p1[1], p2[1]],
-                ':', c=overlay_color, lw=line_width
-            )[0]
+        p = self.axes.plot(
+            [p1[0], p2[0]],
+            [p1[1], p2[1]],
+            ':',
+            c=overlay_color,
+            lw=line_width
+        )[0]
 
         return p
  
-    def plot_text(self, p1,p2):
+    def plot_text(self, p1, p2):
         """Adds distance to plot and updates distance label
 
         Updates distance in ``MainWindow.labelInfoDistance`` and adds distance
@@ -488,8 +512,10 @@ class MplCanvas(FigureCanvas, Observable):
         -------
         matplotlib.text
             Handle to text.
+
+        text_dict : dict
+            Dictionary needed to reconstruct distance label
         """        
-        #plot_type = self.parent.app_data.plot_info['plot_type']
         style = self.parent.style_data
 
         # compute distance
@@ -499,7 +525,6 @@ class MplCanvas(FigureCanvas, Observable):
 
         # Update distance label in widget 
         distance_text = f"{self.distance:.4g} {units}"
-        self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText(f"D: {distance_text}")
 
         # Update distance label on map
         if self.map_flag:
@@ -531,7 +556,15 @@ class MplCanvas(FigureCanvas, Observable):
         font = {'family':style.font, 'size':style.font_size-2}
         t = self.axes.text(p2[0]+dx, p2[1]+dy, distance_text, ha=halign, va=valign, fontdict=font, c=style.overlay_color)
 
-        return t
+        text_dict = {'Text': distance_text,
+            'X1': p2[0]+dx,
+            'Y1': p2[1]+dy,
+            'HAlign': halign,
+            'VAlign': valign,
+            'FontDict': font,
+        } 
+
+        return t, text_dict
 
     def on_click(self, event):
         """Handle left/right clicks for distance calculation, polygons and profiles."""
@@ -555,6 +588,7 @@ class MplCanvas(FigureCanvas, Observable):
             return
 
 
+
     def distanceOnClick(self, event):
         """Updates static endpoints of distance measuring line.
 
@@ -566,22 +600,51 @@ class MplCanvas(FigureCanvas, Observable):
         ----------
         event : MouseEvent
             Mouse click event.
-        """        
-        
+        """
         if event.inaxes:
             if self.first_point is None:
                 # First click
                 self.first_point = (event.xdata, event.ydata)
                 self.distance = 0
-                #self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText(f"D: 0 {self.parent.app_data.preferences['Units']['Distance']}")
             else:
                 # Second click
                 second_point = (event.xdata, event.ydata)
 
-                self.saved_line.append(self.plot_line(self.first_point, second_point))
-                self.saved_dtext.append(self.plot_text(self.first_point, second_point))
-                
-                self.distance_reset()
+                # Plot permanent line and text
+                line_obj = self.plot_line(self.first_point, second_point)
+                text_obj, text_dict = self.plot_text(self.first_point, second_point)
+
+                # Save to your existing lists if needed
+                self.saved_line.append(line_obj)
+                self.saved_dtext.append(text_obj)
+
+                new = {
+                    "Type": "line",
+                    'X1': self.first_point[0],
+                    'Y1': self.first_point[1],
+                    'X2': second_point[0],
+                    'Y2': second_point[1],
+                    'Text': text_dict,
+                    'Label': text_obj.get_text(),
+                    'Color': self.parent.style_data.line_color,
+                    'Size': self.parent.style.font_size,
+                    'Width': self.parent.style_data.line_width,
+                    'Visible': True,
+                    'object': line_obj,
+                    'text_object': text_obj
+                }
+                self.annotations.append(new)
+                self.notify_observers("annotations", copy.deepcopy(self.annotations))
+
+                # Reset first_point so next click starts a new line
+                self.first_point = None
+                if self.line:
+                    self.line.remove()
+                    self.line = None
+                if self.dtext:
+                    self.dtext.remove()
+                    self.dtext = None
+                self.distance = None
 
         self.draw()
 
@@ -629,7 +692,7 @@ class MplCanvas(FigureCanvas, Observable):
         second_point = (event.xdata,event.ydata)
         if self.first_point:
             self.line = self.plot_line(self.first_point, second_point)
-            self.dtext = self.plot_text(self.first_point, second_point)
+            self.dtext, _ = self.plot_text(self.first_point, second_point)
 
             self.draw()
 
@@ -649,7 +712,6 @@ class MplCanvas(FigureCanvas, Observable):
             self.dtext = None
         self.draw()
         if self.active_tool != 'distance':
-            #self.ui.canvas_widget.toolbar.sv.labelInfoDistance.setText("D: N/A")
             self.distance = None
 
 

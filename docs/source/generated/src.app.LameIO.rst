@@ -9,4 +9,5 @@ src.app.LameIO
    .. autosummary::
    
       LameIO
+      SavePlotDialog
    

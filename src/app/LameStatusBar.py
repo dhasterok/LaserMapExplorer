@@ -6,6 +6,7 @@ class MainStatusBar(QStatusBar):
         super().__init__(ui)
 
         self.setupUI()
+        self.connect_widgets()
 
     def setupUI(self):
         self.setObjectName("statusbar")
@@ -37,12 +38,13 @@ class MainStatusBar(QStatusBar):
         )
         self.toolButtonBottomDock.setChecked(True)
 
-        self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
-        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetStyling, button=self.toolButtonRightDock))
-
         self.addPermanentWidget(self.toolButtonLeftDock)
         self.addPermanentWidget(self.toolButtonBottomDock)
         self.addPermanentWidget(self.toolButtonRightDock)
+
+    def connect_widgets(self):
+        self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetLeftToolbox, button=self.toolButtonLeftDock))
+        self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.dockWidgetStyling, button=self.toolButtonRightDock))
 
     def toggle_dock_visibility(self, dock, button=None):
         """Toggles the visibility and checked state of a dock and its controlling button

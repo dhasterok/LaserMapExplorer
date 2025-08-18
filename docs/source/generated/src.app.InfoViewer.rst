@@ -9,6 +9,7 @@ src.app.InfoViewer
    .. autosummary::
    
       create_checkbox
+      create_color_button
       decrease_precision
       increase_precision
       update_dataframe

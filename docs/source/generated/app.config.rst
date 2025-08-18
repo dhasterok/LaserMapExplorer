@@ -1,4 +1,4 @@
-app.config
+﻿app.config
 ==========
 
 .. automodule:: app.config
@@ -8,5 +8,6 @@ app.config
 
    .. autosummary::
    
+      get_top_parent
       load_stylesheet
    

@@ -185,7 +185,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         calculator_layout.addWidget(self.comboBoxFieldType)
 
         field_layout = QHBoxLayout()
-        self.comboBoxField = CustomComboBox(popup_callback=lambda: self.update_field_combobox(self.comboBoxField))
+        self.comboBoxField = CustomComboBox(popup_callback=lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
         self.comboBoxField.setToolTip("Select field")
 
         self.add_formula_button = CustomToolButton(
@@ -202,6 +202,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
 
         # keypad_checkbox
         keypad_checkbox = QCheckBox()
+        keypad_checkbox.setText("show/hide keypad")
 
         calculator_layout.addWidget(keypad_checkbox)
 

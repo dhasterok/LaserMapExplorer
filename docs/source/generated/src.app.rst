@@ -33,6 +33,7 @@
    SpecialTools
    SpotImporter
    SpotTools
+   StyleDict
    StyleToolbox
    StylingUI
    UITheme

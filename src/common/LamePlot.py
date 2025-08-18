@@ -171,184 +171,184 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
 
 @log_call(logger_key='Plot')
 def plot_map_pg(parent, sample_id, field_type, field, add_histogram=False):
-        """Create a graphic widget for plotting a map
+    """Create a graphic widget for plotting a map
 
-        Create a map using pyqtgraph.
+    Create a map using pyqtgraph.
 
-        Parameters
-        ----------
-        sample_id : str
-            Sample identifier
-        field_type : str
-            Type of field for plotting
-        field : str
-            Field for plotting
-        """        
-        # ----start debugging----
-        # print('[plot_map_pg] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
-        # ----end debugging----
+    Parameters
+    ----------
+    sample_id : str
+        Sample identifier
+    field_type : str
+        Type of field for plotting
+    field : str
+        Field for plotting
+    """        
+    # ----start debugging----
+    # print('[plot_map_pg] sample_id: '+sample_id+'   field_type: '+'   field: '+field)
+    # ----end debugging----
 
-        # get data for current map
-        scale = parent.style_data.cscale
-        map_df = parent.data[parent.app_data.sample_id].get_map_data(field, field_type, norm=scale)
+    # get data for current map
+    scale = parent.style_data.cscale
+    map_df = parent.data[parent.app_data.sample_id].get_map_data(field, field_type, norm=scale)
 
-        # store map_df to save_data if data needs to be exported
-        parent.save_data = map_df
-        
-        #Change transparency of values outside mask
-        parent.array, rgba_array = parent.array_to_image(map_df)
+    # store map_df to save_data if data needs to be exported
+    parent.save_data = map_df
+    
+    #Change transparency of values outside mask
+    parent.array, rgba_array = parent.array_to_image(map_df)
 
-        # plotWidget = QWidget()
-        # layout = QVBoxLayout()
-        # layout.setSpacing(0)
-        # plotWidget.setLayout(layout)
+    # plotWidget = QWidget()
+    # layout = QVBoxLayout()
+    # layout.setSpacing(0)
+    # plotWidget.setLayout(layout)
 
-        title = ''
+    title = ''
 
-        view = parent.canvasWindow.currentIndex()
-        if view == parent.tab_dict['sv']:
-            title = field
-        elif view == parent.tab_dict['mv']:
-            title = sample_id + '_' + field
-        else:
-            view = parent.tab_dict['sv']
-            parent.canvasWindow.setCurrentIndex(view)
-            title = field
+    view = parent.canvasWindow.currentIndex()
+    if view == parent.tab_dict['sv']:
+        title = field
+    elif view == parent.tab_dict['mv']:
+        title = sample_id + '_' + field
+    else:
+        view = parent.tab_dict['sv']
+        parent.canvasWindow.setCurrentIndex(view)
+        title = field
 
-        graphicWidget = GraphicsLayoutWidget(show=True)
-        graphicWidget.setObjectName('LaserMap')
-        graphicWidget.setBackground('w')
+    graphicWidget = GraphicsLayoutWidget(show=True)
+    graphicWidget.setObjectName('LaserMap')
+    graphicWidget.setBackground('w')
 
-        # layout.addWidget(graphicWidget)
+    # layout.addWidget(graphicWidget)
 
-        # Create the ImageItem
-        img_item = ImageItem(image=parent.array, antialias=False)
+    # Create the ImageItem
+    img_item = ImageItem(image=parent.array, antialias=False)
 
-        #set aspect ratio of rectangle
-        img_item.setRect(parent.data[parent.app_data.sample_id].x.min(),
-                parent.data[parent.app_data.sample_id].y.min(),
-                parent.data[parent.app_data.sample_id].x_range,
-                parent.data[parent.app_data.sample_id].y_range)
+    #set aspect ratio of rectangle
+    img_item.setRect(parent.data[parent.app_data.sample_id].x.min(),
+            parent.data[parent.app_data.sample_id].y.min(),
+            parent.data[parent.app_data.sample_id].x_range,
+            parent.data[parent.app_data.sample_id].y_range)
 
-        #--- add non-interactive image with integrated color ------------------
-        plotWindow = graphicWidget.addPlot(0,0,title=title.replace('_',' '))
+    #--- add non-interactive image with integrated color ------------------
+    plotWindow = graphicWidget.addPlot(0,0,title=title.replace('_',' '))
 
-        plotWindow.addItem(img_item)
+    plotWindow.addItem(img_item)
 
-        # turn off axes and
-        plotWindow.showAxes(False, showValues=(True,False,False,True) )
-        plotWindow.invertY(True)
-        plotWindow.setAspectLocked()
+    # turn off axes and
+    plotWindow.showAxes(False, showValues=(True,False,False,True) )
+    plotWindow.invertY(True)
+    plotWindow.setAspectLocked()
 
-        # Prevent zooming/panning outside the default view
-        ## These cut off parts of the map when plotting.
-        #plotWindow.setRange(yRange=[parent.y.min(), parent.y.max()])
-        #plotWindow.setLimits(xMin=parent.x.min(), xMax=parent.x.max(), yMin=parent.y.min(), yMax = parent.y.max())
-        #plotWindow.setLimits(maxXRange=parent.data[parent.app_data.sample_id].x_range, maxYRange=parent.data[parent.app_data.sample_id].y_range)
+    # Prevent zooming/panning outside the default view
+    ## These cut off parts of the map when plotting.
+    #plotWindow.setRange(yRange=[parent.y.min(), parent.y.max()])
+    #plotWindow.setLimits(xMin=parent.x.min(), xMax=parent.x.max(), yMin=parent.y.min(), yMax = parent.y.max())
+    #plotWindow.setLimits(maxXRange=parent.data[parent.app_data.sample_id].x_range, maxYRange=parent.data[parent.app_data.sample_id].y_range)
 
-        #supress right click menu
-        plotWindow.setMenuEnabled(False)
+    #supress right click menu
+    plotWindow.setMenuEnabled(False)
 
-        # colorbar
-        cmap = colormap.get(parent.style_data.cmap, source = 'matplotlib')
-        #clb,cub,cscale,clabel = parent.style_data.get_axis_values(field_type,field)
-        # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=parent.style_data.cbar_dir, pen='black')
-        img_item.setLookupTable(cmap.getLookupTable())
-        # graphicWidget.addItem(cbar)
-        pg.setConfigOption('leftButtonPan', False)
+    # colorbar
+    cmap = colormap.get(parent.style_data.cmap, source = 'matplotlib')
+    #clb,cub,cscale,clabel = parent.style_data.get_axis_values(field_type,field)
+    # cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=parent.style_data.cbar_dir, pen='black')
+    img_item.setLookupTable(cmap.getLookupTable())
+    # graphicWidget.addItem(cbar)
+    pg.setConfigOption('leftButtonPan', False)
 
-        # ... Inside your plotting function
-        target = TargetItem(symbol = '+', )
-        target.setZValue(1e9)
-        plotWindow.addItem(target)
+    # ... Inside your plotting function
+    target = TargetItem(symbol = '+', )
+    target.setZValue(1e9)
+    plotWindow.addItem(target)
 
-        # store plots in parent.lasermap to be used in profiling. parent.lasermaps is a multi index dictionary with index: (field, view)
-        parent.lasermaps[field,view] = (target, plotWindow, parent.array)
+    # store plots in parent.lasermap to be used in profiling. parent.lasermaps is a multi index dictionary with index: (field, view)
+    parent.lasermaps[field,view] = (target, plotWindow, parent.array)
 
-        #hide pointer
-        target.hide()
+    #hide pointer
+    target.hide()
 
-        plotWindow.scene().sigMouseClicked.connect(lambda event,array=parent.array, k=field, plot=plotWindow: parent.plot_clicked(event,array, k, plotWindow))
+    plotWindow.scene().sigMouseClicked.connect(lambda event,array=parent.array, k=field, plot=plotWindow: parent.plot_clicked(event,array, k, plotWindow))
 
-        #remove previous plot in single view
-        if view == 1:
-            #create label with analyte name
-            #create another label for value of the corresponding plot
-            labelMVInfoField = QLabel()
-            # labelMVInfoValueLabel.setMaximumSize(QSize(20, 16777215))
-            labelMVInfoField.setObjectName("labelMVInfoField"+field)
-            labelMVInfoField.setText(field)
-            font = QFont()
-            font.setPointSize(9)
-            labelMVInfoField.setFont(font)
-            verticalLayout = QVBoxLayout()
-            # Naming the verticalLayout
-            verticalLayout.setObjectName(field + str(view))
-            verticalLayout.addWidget(labelMVInfoField)
+    #remove previous plot in single view
+    if view == 1:
+        #create label with analyte name
+        #create another label for value of the corresponding plot
+        labelMVInfoField = QLabel()
+        # labelMVInfoValueLabel.setMaximumSize(QSize(20, 16777215))
+        labelMVInfoField.setObjectName("labelMVInfoField"+field)
+        labelMVInfoField.setText(field)
+        font = QFont()
+        font.setPointSize(9)
+        labelMVInfoField.setFont(font)
+        verticalLayout = QVBoxLayout()
+        # Naming the verticalLayout
+        verticalLayout.setObjectName(field + str(view))
+        verticalLayout.addWidget(labelMVInfoField)
 
-            labelMVInfoValue = QLabel()
-            labelMVInfoValue.setObjectName("labelMVInfoValue"+field)
-            labelMVInfoValue.setFont(font)
-            verticalLayout.addWidget(labelMVInfoValue)
-            parent.gridLayoutMVInfo.addLayout(verticalLayout, 0, parent.gridLayoutMVInfo.count()+1, 1, 1)
-            # Store the reference to verticalLayout in a dictionary
-            parent.multiview_info_label[field] = (labelMVInfoField, labelMVInfoValue)
-        else:
-            #print(parent.lasermaps)
-            #print(parent.prev_plot)
-            if parent.prev_plot and (parent.prev_plot,0) in parent.lasermaps:
-                parent.plot_info['view'][0] = False
-                del parent.lasermaps[(parent.prev_plot,0)]
-            # update variables which stores current plot in SV
-            parent.plot = plotWindow
-            parent.prev_plot = field
-            parent.init_zoom_view()
-            # uncheck edge detection
-            parent.mask_dock.polygon_tab.action_edge_detect.setChecked(False)
-
-
-        # Create a SignalProxy to handle mouse movement events
-        # Create a SignalProxy for this plot and connect it to mouseMoved
-
-        plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: parent.mouse_moved_pg(event,plot))
-
-        #add zoom window
-        plotWindow.getViewBox().autoRange()
-
-        # add edge detection
-        if parent.mask_dock.polygon_tab.action_edge_detect.isChecked():
-            parent.noise_reduction.add_edge_detection()
-
-        if view == 0 and parent.plot_info:
+        labelMVInfoValue = QLabel()
+        labelMVInfoValue.setObjectName("labelMVInfoValue"+field)
+        labelMVInfoValue.setFont(font)
+        verticalLayout.addWidget(labelMVInfoValue)
+        parent.gridLayoutMVInfo.addLayout(verticalLayout, 0, parent.gridLayoutMVInfo.count()+1, 1, 1)
+        # Store the reference to verticalLayout in a dictionary
+        parent.multiview_info_label[field] = (labelMVInfoField, labelMVInfoValue)
+    else:
+        #print(parent.lasermaps)
+        #print(parent.prev_plot)
+        if parent.prev_plot and (parent.prev_plot,0) in parent.lasermaps:
             parent.plot_info['view'][0] = False
-            tmp = [True,False]
-        else:
-            tmp = [False,True]
+            del parent.lasermaps[(parent.prev_plot,0)]
+        # update variables which stores current plot in SV
+        parent.plot = plotWindow
+        parent.prev_plot = field
+        parent.init_zoom_view()
+        # uncheck edge detection
+        parent.mask_dock.polygon_tab.action_edge_detect.setChecked(False)
 
 
-        parent.plot_info = {
-            'tree': 'Analyte',
-            'sample_id': sample_id,
-            'plot_name': field,
-            'plot_type': 'field map',
-            'field_type': field_type,
-            'field': field,
-            'figure': graphicWidget,
-            'style': parent.style_data.style_dict[parent.style_data.plot_type],
-            'cluster_groups': None,
-            'view': tmp,
-            'position': None
-            }
+    # Create a SignalProxy to handle mouse movement events
+    # Create a SignalProxy for this plot and connect it to mouseMoved
 
-        #parent.plot_widget_dict[parent.plot_info['tree']][parent.plot_info['sample_id']][parent.plot_info['plot_name']] = {'info':parent.plot_info, 'view':view, 'position':None}
-        parent.parent.canvas_widget.add_plotwidget_to_canvas(parent.plot_info)
+    plotWindow.scene().sigMouseMoved.connect(lambda event,plot=plotWindow: parent.mouse_moved_pg(event,plot))
 
-        #parent.update_tree(plot_info=parent.plot_info)
-        parent.plot_tree.add_tree_item(parent.plot_info)
+    #add zoom window
+    plotWindow.getViewBox().autoRange()
 
-        # add small histogram
-        if add_histogram and (parent.toolBox.currentIndex() == parent.ui.control_dock.tab_dict['sample']) and (view == parent.ui.canvas_widget.tab_dict['sv']):
-            plot_small_histogram(parent, parent.data[parent.app_data.sample_id], parent.app_data, parent.style_data, map_df)
+    # add edge detection
+    if parent.mask_dock.polygon_tab.action_edge_detect.isChecked():
+        parent.noise_reduction.add_edge_detection()
+
+    if view == 0 and parent.plot_info:
+        parent.plot_info['view'][0] = False
+        tmp = [True,False]
+    else:
+        tmp = [False,True]
+
+
+    parent.plot_info = {
+        'tree': 'Analyte',
+        'sample_id': sample_id,
+        'plot_name': field,
+        'plot_type': 'field map',
+        'field_type': field_type,
+        'field': field,
+        'figure': graphicWidget,
+        'style': parent.style_data.style_dict[parent.style_data.plot_type],
+        'cluster_groups': None,
+        'view': tmp,
+        'position': None
+        }
+
+    #parent.plot_widget_dict[parent.plot_info['tree']][parent.plot_info['sample_id']][parent.plot_info['plot_name']] = {'info':parent.plot_info, 'view':view, 'position':None}
+    parent.parent.canvas_widget.add_plotwidget_to_canvas(parent.plot_info)
+
+    #parent.update_tree(plot_info=parent.plot_info)
+    parent.plot_tree.add_tree_item(parent.plot_info)
+
+    # add small histogram
+    if add_histogram and (parent.toolBox.currentIndex() == parent.ui.control_dock.tab_dict['sample']) and (view == parent.ui.canvas_widget.tab_dict['sv']):
+        plot_small_histogram(parent, parent.data[parent.app_data.sample_id], parent.app_data, parent.style_data, map_df)
 
 @log_call(logger_key='Plot')
 def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
@@ -2325,8 +2325,6 @@ def plot_clusters(parent, data, app_data, style_data):
         }
 
     return canvas, plot_info
-    # self.clear_layout(self.widgetSingleView.layout())
-    # self.widgetSingleView.layout().addWidget(canvas)
 
 @log_call(logger_key='Plot')
 def cluster_performance_plot(parent, data, app_data, style_data):

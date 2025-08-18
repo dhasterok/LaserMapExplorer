@@ -198,6 +198,11 @@ class PreprocessingUI(CustomPage):
         self.widgetHistView.setAutoFillBackground(False)
         self.widgetHistView.setObjectName("widgetHistView")
 
+        layout_histogram_view = QVBoxLayout()
+        layout_histogram_view.setSpacing(0)
+        layout_histogram_view.setContentsMargins(0, 0, 0, 0)
+        self.widgetHistView.setLayout(layout_histogram_view)
+
         self.checkBoxShowHistCmap = QCheckBox(parent=self)
         self.checkBoxShowHistCmap.setText("Show with colormap")
         self.checkBoxShowHistCmap.setChecked(True)

@@ -348,8 +348,8 @@ class ImageProcessing():
             'position': None
             }
 
-        self.parent.canvas_widget.clear_layout(self.parent.widgetSingleView.layout())
-        self.parent.widgetSingleView.layout().addWidget(canvas)
+        self.parent.canvas_widget.clear_layout(self.parent.canvas_widget.single_view.layout())
+        self.parent.canvas_widget.single_view.layout().addWidget(canvas)
 
         self.parent.plot_tree.add_tree_item(self.plot_info)
 
@@ -426,8 +426,8 @@ class ImageProcessing():
             'position': None
             }
 
-        self.parent.canvas_widget.clear_layout(self.parent.widgetSingleView.layout())
-        self.parent.widgetSingleView.layout().addWidget(canvas)
+        self.parent.canvas_widget.clear_layout(self.parent.canvas_widget.single_view.layout())
+        self.parent.canvas_widget.single_view.layout().addWidget(canvas)
 
     def histogram_equalization(array):
         """Apply histogram equalization to an array.

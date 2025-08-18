@@ -487,9 +487,7 @@ class StyleData(Observable, StyleTheme):
             'pentagon':'p'
         }
 
-        # keep track of the plot type.
         self._plot_type = ''
-
         self._show_mass = False
 
         # colormaps
@@ -504,6 +502,9 @@ class StyleData(Observable, StyleTheme):
         self.custom_color_dict = csvdict.import_csv_to_dict(STYLE_PATH / "custom_colormaps.csv")
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
+
+        self.tick_dir_options = ['none', 'in', 'out', 'both']
+        self.cbar_dir_options = ['none', 'vertical', 'horizontal']
 
         self.default_plot_axis_dict()
 
@@ -544,14 +545,118 @@ class StyleData(Observable, StyleTheme):
         self._plot_type = value
         self.notify_observers("plot_type", value)
 
-    @property
-    def xfield(self):
-        return self.style_dict[self.plot_type]['XField']
 
-    @xfield.setter
-    def xfield(self, value):
-        self.style_dict[self.plot_type]['XField'] = value
-        self.notify_observers("xfield", value)
+    @property
+    def x_field_type(self):
+        """str : Field type for x field."""
+        return self._x_field_type
+
+    @x_field_type.setter
+    def x_field_type(self, new_field_type):
+        if new_field_type != self._x_field_type:
+            #self.validate_field_type(new_field_type)
+            self._x_field_type = new_field_type
+            self.notify_observers("field_type", 0, new_field_type)
+
+
+
+    @property
+    def y_field_type(self):
+        """str : Field type for y field."""
+        return self.style_dict[self.plot_type]['YFieldType']
+
+    @y_field_type.setter
+    def y_field_type(self, new_field_type):
+        if new_field_type != self.style_dict[self.plot_type]:
+            self.style_dict[self.plot_type]['YFieldType'] = new_field_type
+            self.notify_observers("field_type", 1, new_field_type)
+
+    @property
+    def z_field_type(self):
+        """str : Field type for z field."""
+        return self.style_dict[self.plot_type]['ZFieldType']
+
+    @z_field_type.setter
+    def z_field_type(self, new_field_type):
+        if new_field_type != self.style_dict[self.plot_type]['ZFieldType']:
+            #self.validate_field_type(new_field_type)
+            self.style_dict[self.plot_type]['ZFieldType'] = new_field_type
+            self.notify_observers("field_type", 2, new_field_type)
+
+    @property
+    def c_field_type(self):
+        """str : Field type for color field or map data."""
+        return self._c_field_type
+    
+    @c_field_type.setter
+    def c_field_type(self, new_field_type):
+        if new_field_type == self.style_dict[self.plot_type]['CFieldType']:
+            return
+
+        # update c_field_type
+        #self.validate_field_type(new_field_type)
+        self._c_field_type = new_field_type
+        self.notify_observers("field_type", 3, new_field_type)
+
+        # update c_field
+        if new_field_type in ['', 'none', 'None']:
+            self.c_field = ''
+        else:
+            self.c_field = self.ui.app_data.field_dict[new_field_type][0]
+
+
+    @property
+    def x_field(self):
+        """str : Field associated with x-axis or A-vertex on a ternary diagram."""
+        return self.style_dict[self.plot_type]['XField']
+    
+    @x_field.setter
+    def x_field(self, new_field):
+        if new_field == self.style_dict[self.plot_type]['XField']:
+            return
+    
+        self.style_dict[self.plot_type]['XField'] = new_field
+        self.notify_observers("field", 0, new_field)
+    
+    @property
+    def y_field(self):
+        """str : Field associated with y-axis or B-vertex on a ternary diagram."""
+        return self.style_dict[self.plot_type]['YField']
+    
+    @y_field.setter
+    def y_field(self, new_field):
+        if new_field == self.style_dict[self.plot_type]['YField']:
+            return
+    
+        self.style_dict[self.plot_type]['YField'] = new_field
+        self.notify_observers("field", 1, new_field)
+    
+    @property
+    def z_field(self):
+        """str : Field associated with z-axis or C-vertex on a ternary diagram."""
+        return self.style_dict[self.plot_type]['ZField']
+    
+    @z_field.setter
+    def z_field(self, new_field):
+        if new_field == self.style_dict[self.plot_type]['ZField']:
+            return
+    
+        self.style_dict[self.plot_type]['ZField'] = new_field
+        self.notify_observers("field", 2, new_field)
+
+    @property
+    def c_field(self):
+        """str : Field associated with color on many plots."""
+        return self.style_dict[self.plot_type]['CField']
+
+    @c_field.setter
+    def c_field(self, new_field):
+        if new_field == self.style_dict[self.plot_type]['CField']:
+            return
+
+        #self.validate_field(self._c_field_type, new_field)
+        self._c_field = new_field
+        self.notify_observers("field", 3, new_field)
 
     @property
     def xfield_type(self):
@@ -593,29 +698,14 @@ class StyleData(Observable, StyleTheme):
 
     @xscale.setter
     def xscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self.plot_type]['XScale'] = scale
-            self.notify_observers("xscale", 'x', scale)
-        else:
-            raise TypeError("scale must be linear, log, logit, or symlog.")
+        # if self._is_valid_scale(scale):
+        #     self.style_dict[self.plot_type]['XScale'] = scale
+        #     self.notify_observers("xscale", 'x', scale)
+        # else:
+        #     raise TypeError("scale must be linear, log, logit, or symlog.")
+        self.style_dict[self.plot_type]['XScale'] = scale
+        self.notify_observers("xscale", 'x', scale)
         
-    @property
-    def yfield(self):
-        return self.style_dict[self.plot_type]['YField']
-
-    @yfield.setter
-    def yfield(self, value):
-        self.style_dict[self.plot_type]['YField'] = value      
-        self.notify_observers("yfield", value)
-
-    @property
-    def yfield_type(self):
-        return self.style_dict[self.plot_type]['YFieldType']
-
-    @yfield_type.setter
-    def yfield_type(self, value):
-        self.style_dict[self.plot_type]['YFieldType'] = value
-        self.notify_observers("yfield_type", value)
 
     @property
     def ylim(self):
@@ -647,11 +737,13 @@ class StyleData(Observable, StyleTheme):
 
     @yscale.setter
     def yscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self.plot_type]['YScale'] = scale
-            self.notify_observers("yscale", 'y', scale)
-        else:
-            raise TypeError("scale must be linear, log, logit, or symlog.")
+        # if self._is_valid_scale(scale):
+        #     self.style_dict[self.plot_type]['YScale'] = scale
+        #     self.notify_observers("yscale", 'y', scale)
+        # else:
+        #     raise TypeError("scale must be linear, log, logit, or symlog.")
+        self.style_dict[self.plot_type]['YScale'] = scale
+        self.notify_observers("yscale", 'y', scale)
 
     @property
     def zlim(self):
@@ -683,11 +775,13 @@ class StyleData(Observable, StyleTheme):
 
     @zscale.setter
     def zscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self.plot_type]['ZScale'] = scale
-            self.notify_observers("zscale", 'z', scale)
-        else:
-            raise TypeError("scale must be linear, log, logit,  or symlog.")
+        # if self._is_valid_scale(scale):
+        #     self.style_dict[self.plot_type]['ZScale'] = scale
+        #     self.notify_observers("zscale", 'z', scale)
+        # else:
+        #     raise TypeError("scale must be linear, log, logit,  or symlog.")
+        self.style_dict[self.plot_type]['ZScale'] = scale
+        self.notify_observers("zscale", 'z', scale)
 
     @property
     def aspect_ratio(self):
@@ -915,6 +1009,7 @@ class StyleData(Observable, StyleTheme):
         else:
             raise TypeError("new_dir must be of type str.")
 
+
     @property
     def clim(self):
         return self.style_dict[self.plot_type]['CLim']
@@ -945,11 +1040,13 @@ class StyleData(Observable, StyleTheme):
 
     @cscale.setter
     def cscale(self, scale):
-        if self._is_valid_scale(scale):
-            self.style_dict[self.plot_type]['CScale'] = scale
-            self.notify_observers("cscale", 'c', scale)
-        else:
-            raise TypeError("scale must be linear, log, logit, or symlog.")
+        # if self._is_valid_scale(scale):
+        #     self.style_dict[self.plot_type]['CScale'] = scale
+        #     self.notify_observers("cscale", 'c', scale)
+        # else:
+        #     raise TypeError("scale must be linear, log, logit, or symlog.")
+        self.style_dict[self.plot_type]['CScale'] = scale
+        self.notify_observers("cscale", 'c', scale)
 
     @property
     def resolution(self):

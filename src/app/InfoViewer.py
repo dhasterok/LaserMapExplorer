@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     )
 from PyQt6.QtGui import QDoubleValidator
 
-from src.common.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction
+from src.common.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction, ColorButton
 from src.app.FieldLogic import FieldLogicUI
 
 from src.app.UITheme import default_font
@@ -68,6 +68,11 @@ def create_checkbox(is_checked, callback, key):
     checkbox.setChecked(is_checked)
     checkbox.stateChanged.connect(lambda state: callback(state, key))
     return checkbox
+
+def create_color_button(color, callback, key):
+    button = ColorButton(initial_color=color)
+    button.colorChanged.connect(lambda color: callback(color, key))
+    return button
 
 def update_dataframe(dataframe, table_widget):
     global PRECISION
@@ -337,9 +342,18 @@ class PlotInfoTab():
         self.annotations_label = QLabel(self.plot_info_tab)
         self.annotations_label.setText("Annotations")
 
-        self.annotations_table = QTableWidget(0, 4, self.plot_info_tab)
-        self.annotations_table.setHorizontalHeaderLabels(["Type", "Value", "Color", "Visible"])
+        self.annotations_table = QTableWidget(0, 6, self.plot_info_tab)
+        self.annotations_table.setHorizontalHeaderLabels(["Type", "Text", "Size", "Width", "Color", "Visible"])
         self.annotations_table.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
+
+        header = self.annotations_table.horizontalHeader()
+        if header is not None:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
 
         self.annotations_layout.addWidget(self.annotations_label)
         self.annotations_layout.addWidget(self.annotations_table)
@@ -426,26 +440,52 @@ class PlotInfoTab():
 
         annotations = self.parent.plot_info['figure'].annotations
 
-        # Update the table with the current annotations
+        self.annotations_table.blockSignals(True)
         self.annotations_table.setRowCount(len(annotations))
-        for row, (annotation, data) in enumerate(annotations.items()):
+        for row, ann in enumerate(annotations):
             # Type
-            type_item = QTableWidgetItem(data["type"])
+            type_item = QTableWidgetItem(ann['Type'])
             type_item.setFlags(type_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.annotations_table.setItem(row, 0, type_item)
 
-            # Value
-            value_item = QTableWidgetItem(data["value"])
-            self.annotations_table.setItem(row, 1, value_item)
+            # Text
+            read_only = True
+            if isinstance(ann["Text"],dict):
+                text = ann["Text"]["Text"]
+                font_size = ann["Text"]["FontDict"]["size"]
+                line_width = ann["Width"]
+            else:
+                text = ann["Text"]
+                read_only = False
+                font_size = ann["Size"]
+                line_width = None
+            text_item = QTableWidgetItem(text)
+            if read_only:
+                text_item.setFlags(text_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            self.annotations_table.setItem(row, 1, text_item)
+
+            # Font Size
+            font_size_item = QTableWidgetItem(str(font_size))
+            font_size_item.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
+            self.annotations_table.setItem(row, 2, font_size_item)
+
+            # Line Width
+            line_width_item = QTableWidgetItem(str(line_width))
+            line_width_item.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
+            self.annotations_table.setItem(row, 3, line_width_item)
+
+            # Color
+            button = create_color_button(color=ann["Color"], callback=self.change_annotation_color, key=row)
+            self.annotations_table.setCellWidget(row, 4, button)
 
             # Visibility checkbox
-            checkbox = create_checkbox(is_checked=data["visible"], callback=self.toggle_annotation, key=annotation)
-            self.annotations_table.setCellWidget(row, 2, checkbox)
+            checkbox = create_checkbox(is_checked=ann["Visible"], callback=self.toggle_annotation, key=row)
+            self.annotations_table.setCellWidget(row, 5, checkbox)
 
-        # Connect cell changes to the update function
+        self.annotations_table.blockSignals(False)
         self.annotations_table.itemChanged.connect(self.update_annotation_from_table)
 
-    def toggle_annotation(self, state, annotation):
+    def toggle_annotation(self, state, index):
         """
         Callback function to toggle annotation visibility.
 
@@ -459,9 +499,12 @@ class PlotInfoTab():
             The annotation object to be toggled.
         """
         # Show or hide the annotation
-        self.parent.plot_info['figure'].annotations[annotation]["visible"] = bool(state)
-        annotation.set_visible(bool(state))
-        self.parent.canvas.draw()
+        self.parent.plot_info['figure'].annotations[index]["visible"] = bool(state)
+        #annotation.set_visible(bool(state))
+        #self.parent.canvas.draw()
+
+    def change_annotation_color(self, color, index):
+        self.parent.plot_info['figure'].annotations[index]["Color"] = color
 
     def update_annotation_from_table(self, item):
         """
@@ -481,11 +524,21 @@ class PlotInfoTab():
         annotation = list(canvas.annotations.keys())[row]
 
         # Update value
-        if item.column() == 1:  # Value column
-            new_text = item.text()
-            canvas.annotations[annotation]["value"] = new_text
-            annotation.set_text(new_text)
-            self.parent.canvas.draw()
+        match item.column():
+            case 1: # text
+                new_text = item.text()
+                canvas.annotations[row]['Text'] = new_text
+                annotation.set_text(new_text)
+            case 2: # font size
+                new_size = float(item.text())
+                if canvas.annotations[row]['Type'] == 'Text':
+                    canvas.annotations[row]['Size'] = new_size
+                else:
+                    canvas.annotations[row]['Text']['FontDict']['size'] = new_size
+            case 3: # line width
+                new_width = float(item.text())
+                canvas.annotations[row]['Width'] = new_width
+        self.parent.canvas.draw()
 
     def export_plot_info(self):
         if not hasattr(self.parent.ui,"notes_dock") or not self.parent.ui.plot_info:

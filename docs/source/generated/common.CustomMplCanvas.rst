@@ -1,4 +1,4 @@
-common.CustomMplCanvas
+﻿common.CustomMplCanvas
 ======================
 
 .. automodule:: common.CustomMplCanvas
@@ -9,6 +9,5 @@ common.CustomMplCanvas
    .. autosummary::
    
       MplCanvas
-      MplDialog
       SimpleMplCanvas
    

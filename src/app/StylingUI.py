@@ -2,7 +2,7 @@ import os, re, copy, pickle
 from PyQt6.QtWidgets import (
     QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog, QSizePolicy, QComboBox, QLabel,
     QToolButton, QCheckBox, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGridLayout,
-    QFrame, QSpacerItem, QLayout, QLineEdit, QDoubleSpinBox, QFontComboBox, QSpinBox, QToolBox, QMainWindow
+    QFrame, QSpacerItem, QLayout, QLineEdit, QDoubleSpinBox, QFontComboBox, QSpinBox, QMainWindow
 )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase, QIcon )
 from PyQt6.QtCore import Qt, QSize, QRect
@@ -13,12 +13,9 @@ from pyqtgraph import colormap
 import src.common.format as fmt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR, ICONPATH
-from src.app.StyleToolbox import StyleData, StyleTheme
 from src.common.Logger import auto_log_methods, log
 
 class AxesPage(CustomPage):
@@ -336,17 +333,18 @@ class MarkersPage(CustomPage):
         self.doubleSpinBoxLineWidth.setSingleStep(0.5)
         self.doubleSpinBoxLineWidth.setObjectName("doubleSpinBoxLineWidth")
 
-        self.toolButtonLineColor = QToolButton(parent=self)
-        self.toolButtonLineColor.setMaximumSize(QSize(18, 18))
-        self.toolButtonLineColor.setText("")
-        self.toolButtonLineColor.setObjectName("toolButtonLineColor")
+        self.colorButtonLineColor = ColorButton(
+            ui=self.parent,
+            parent=self
+        )
+        self.colorButtonLineColor.setObjectName("colorButtonLineColor")
         self.lineEditLengthMultiplier = CustomLineEdit(parent=self)
         self.lineEditLengthMultiplier.setMinimumSize(QSize(30, 0))
         self.lineEditLengthMultiplier.setMaximumSize(QSize(75, 16777215))
         self.lineEditLengthMultiplier.setObjectName("lineEditLengthMultiplier")
 
         form_layout.addRow("Line width", self.doubleSpinBoxLineWidth)
-        form_layout.addRow("Line color", self.toolButtonLineColor)
+        form_layout.addRow("Line color", self.colorButtonLineColor)
         form_layout.addRow("Line multiplier", self.lineEditLengthMultiplier)
 
         self.addLayout(form_layout)
@@ -508,7 +506,6 @@ class StylingDock(CustomDockWidget):
         self.ui.control_dock.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(self.ui.control_dock.comboBoxFieldTypeZ.currentText(), self.ui.control_dock.comboBoxFieldZ.currentText(), 'z'))
 
         # callback functions
-        self.ui.control_dock.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self, 'plot_type', self.ui.control_dock.comboBoxPlotType.currentText()))
 
 
         self.connect_widgets()
@@ -654,6 +651,8 @@ class StylingDock(CustomDockWidget):
 
         self.axes.lineEditAspectRatio.editingFinished.connect(lambda _:self.update_aspect_ratio)
         self.axes.comboBoxTickDirection.activated.connect(lambda _: self.update_tick_dir())
+        self.axes.comboBoxTickDirection.clear()
+        self.axes.comboBoxTickDirection.addItems(self.ui.style_data.tick_dir_options)
 
         # annotations and scales
         # ---
@@ -702,12 +701,14 @@ class StylingDock(CustomDockWidget):
 
         self.elements.doubleSpinBoxLineWidth.valueChanged.connect(lambda _: self.update_line_width())
         self.elements.lineEditLengthMultiplier.editingFinished.connect(lambda _: self.update_length_multiplier())
-        self.elements.toolButtonLineColor.setStyleSheet("background-color: white;")
-        self.elements.toolButtonLineColor.clicked.connect(lambda _: self.update_line_color())
+        self.elements.colorButtonLineColor.setStyleSheet("background-color: white;")
+        self.elements.colorButtonLineColor.clicked.connect(lambda _: self.update_line_color())
         # marker color
 
         # colors
         self.caxes.comboBoxFieldColormap.activated.connect(lambda _: self.update_field_colormap())
+        self.caxes.comboBoxCbarDirection.clear()
+        self.caxes.comboBoxCbarDirection.addItems(self.ui.style_data.cbar_dir_options)
         self.caxes.comboBoxCbarDirection.activated.connect(lambda _: self.update_cbar_direction())
         # resolution
         self.caxes.spinBoxHeatmapResolution.valueChanged.connect(lambda _: self.update_resolution())
@@ -807,7 +808,7 @@ class StylingDock(CustomDockWidget):
         self.elements.colorButtonMarkerColor.clicked.connect(lambda: log("colorButtonMarkerColor", prefix="UI"))
         self.elements.sliderTransparency.valueChanged.connect(lambda: log(f"sliderTransparency value=[{self.elements.sliderTransparency.value()}]", prefix="UI"))
         self.elements.doubleSpinBoxLineWidth.valueChanged.connect(lambda: log(f"doubleSpinBoxLineWidth value=[{self.elements.doubleSpinBoxLineWidth.value()}]", prefix="UI"))
-        self.elements.toolButtonLineColor.clicked.connect(lambda: log("toolButtonLineColor", prefix="UI"))
+        self.elements.colorButtonLineColor.clicked.connect(lambda: log("colorButtonLineColor", prefix="UI"))
         self.elements.lineEditLengthMultiplier.editingFinished.connect(lambda: log(f"lineEditLengthMultiplier value=[{self.elements.lineEditLengthMultiplier.value}]", prefix="UI"))
 
         # coloring
@@ -890,7 +891,7 @@ class StylingDock(CustomDockWidget):
         self.elements.colorButtonMarkerColor.blockSignals(self._signal_state)
         self.elements.sliderTransparency.blockSignals(self._signal_state)
         self.elements.doubleSpinBoxLineWidth.blockSignals(self._signal_state)
-        self.elements.toolButtonLineColor.blockSignals(self._signal_state)
+        self.elements.colorButtonLineColor.blockSignals(self._signal_state)
         self.elements.lineEditLengthMultiplier.blockSignals(self._signal_state)
 
         # coloring
@@ -1129,10 +1130,8 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_overlay_color(self, new_color=None):
-        self.overlay_color = f"background-color: {new_color};"
-        if new_color == self.annotations.colorButtonOverlayColor.styleSheet():
-            return
-        self.annotations.colorButtonOverlayColor.setStyleSheet(new_color)
+        self.ui.overlay_color = new_color
+        self.annotations.colorButtonOverlayColor.color = new_color
         self.ui.schedule_update()
 
     def update_show_mass(self, new_state=None):
@@ -1210,10 +1209,8 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_marker_color(self, new_color=None):
-        desired = f"background-color: {new_color};"
-        if desired == self.elements.colorButtonMarkerColor.styleSheet():
-            return
-        self.elements.colorButtonMarkerColor.setStyleSheet(desired)
+        self.ui.style_data.marker_color = new_color
+        self.elements.colorButtonMarkerColor.color = new_color
 
         self.ui.schedule_update()
 
@@ -1293,10 +1290,8 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_line_color(self, new_color=None):
-        desired = f"background-color: {new_color};"
-        if desired == self.elements.toolButtonLineColor.styleSheet():
-            return
-        self.elements.toolButtonLineColor.setStyleSheet(desired)
+        self.ui.style_data.line_color = new_color
+        self.elements.colorButtonLineColor.color = new_color
         self.ui.schedule_update()
 
     # ------------------------------------------------------------------
@@ -1480,7 +1475,7 @@ class StylingDock(CustomDockWidget):
         self.elements.colorButtonMarkerColor.setEnabled(False)
         self.elements.sliderTransparency.setEnabled(False)
         self.elements.doubleSpinBoxLineWidth.setEnabled(False)
-        self.elements.toolButtonLineColor.setEnabled(False)
+        self.elements.colorButtonLineColor.setEnabled(False)
         self.elements.lineEditLengthMultiplier.setEnabled(False)
 
         # coloring
@@ -1535,7 +1530,7 @@ class StylingDock(CustomDockWidget):
 
                 # line properties
                 self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.toolButtonLineColor.setEnabled(True)
+                self.elements.colorButtonLineColor.setEnabled(True)
 
                 # color properties
                 self.caxes.comboBoxFieldColormap.setEnabled(True)
@@ -1576,7 +1571,7 @@ class StylingDock(CustomDockWidget):
 
                 # line properties
                 self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.toolButtonLineColor.setEnabled(True)
+                self.elements.colorButtonLineColor.setEnabled(True)
 
                 # color properties
                 # if color by field is set to clusters, then colormap fields are on,
@@ -1616,7 +1611,7 @@ class StylingDock(CustomDockWidget):
                 # line properties
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
                     self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                    self.elements.toolButtonLineColor.setEnabled(True)
+                    self.elements.colorButtonLineColor.setEnabled(True)
 
                 if plot_type == 'PCA scatter':
                     self.elements.lineEditLengthMultiplier.setEnabled(True)
@@ -1655,7 +1650,7 @@ class StylingDock(CustomDockWidget):
                     self.axes.lineEditZUB.setEnabled(True)
                     self.axes.comboBoxZScale.setEnabled(True)
                     self.axes.lineEditZLabel.setEnabled(True)
-                self.axes.lineEditAspectRation.setEnabled(True)
+                self.axes.lineEditAspectRatio.setEnabled(True)
                 self.axes.comboBoxTickDirection.setEnabled(True)
 
                 self.annotations.checkBoxShowMass.setEnabled(True)
@@ -1663,7 +1658,7 @@ class StylingDock(CustomDockWidget):
                 # line properties
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
                     self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                    self.elements.toolButtonLineColor.setEnabled(True)
+                    self.elements.colorButtonLineColor.setEnabled(True)
 
                 if plot_type == 'PCA heatmap':
                     self.elements.lineEditLengthMultiplier.setEnabled(True)
@@ -1727,7 +1722,7 @@ class StylingDock(CustomDockWidget):
 
                 # line properties
                 self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.toolButtonLineColor.setEnabled(True)
+                self.elements.colorButtonLineColor.setEnabled(True)
 
                 # color properties
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
@@ -1752,7 +1747,7 @@ class StylingDock(CustomDockWidget):
 
                 # line properties
                 self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.toolButtonLineColor.setEnabled(True)
+                self.elements.colorButtonLineColor.setEnabled(True)
 
                 # color properties
                 self.elements.colorButtonMarkerColor.setEnabled(True)
@@ -1782,7 +1777,7 @@ class StylingDock(CustomDockWidget):
 
                 # line properties
                 self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.toolButtonLineColor.setEnabled(True)
+                self.elements.colorButtonLineColor.setEnabled(True)
 
                 # color properties
                 if plot_type != 'clusters':
@@ -1810,7 +1805,7 @@ class StylingDock(CustomDockWidget):
 
                 # line properties
                 self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.toolButtonLineColor.setEnabled(True)
+                self.elements.colorButtonLineColor.setEnabled(True)
 
                 # color properties
                 self.elements.colorButtonMarkerColor.setEnabled(True)
@@ -1858,11 +1853,11 @@ class StylingDock(CustomDockWidget):
 
         # line properties
         ui.labelLineWidth.setEnabled(ui.doubleSpinBoxLineWidth.isEnabled())
-        if ui.toolButtonLineColor.isEnabled():
-            ui.toolButtonLineColor.setStyleSheet("background-color: %s;" % self.ui.style_data.style_dict[self.ui.style_data.plot_type]['LineColor'])
+        if ui.colorButtonLineColor.isEnabled():
+            ui.colorButtonLineColor.setStyleSheet("background-color: %s;" % self.ui.style_data.style_dict[self.ui.style_data.plot_type]['LineColor'])
             ui.labelLineColor.setEnabled(True)
         else:
-            ui.toolButtonLineColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
+            ui.colorButtonLineColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
             ui.labelLineColor.setEnabled(False)
         ui.labelLengthMultiplier.setEnabled(ui.lineEditLengthMultiplier.isEnabled())
 
@@ -1900,111 +1895,118 @@ class StylingDock(CustomDockWidget):
 
         self.signal_state = True
 
-        style = self.ui.style_data.style_dict[self.ui.style_data.plot_type]
+        style = self.ui.style_data
 
         # toggle actionSwapAxes
-        match self.ui.style_data.plot_type:
+        match style.plot_type:
             case 'field map' | 'gradient map'| 'scatter' | 'heatmap':
                 self.ui.lame_action.SwapAxes.setEnabled(True)
             case _:
                 self.ui.lame_action.SwapAxes.setEnabled(False)
 
-        if (self.ui.style_data.scale_length is None) and (self.ui.style_data.plot_type.lower() in self.ui.style_data.map_plot_types):
-            self.ui.style_data.scale_length = self.ui.style_data.default_scale_length()
+        if (style.scale_length is None) and (style.plot_type.lower() in style.map_plot_types):
+            style.scale_length = style.default_scale_length()
 
         # axes properties
-        # for map plots, check to see that 'X' and 'Y' are initialized
-        if self.ui.style_data.plot_type.lower() in self.ui.style_data.map_plot_types:
-            xmin,xmax,xscale,_ = self.ui.style_data.get_axis_values(data,'Analyte','Xc')
-            ymin,ymax,yscale,_ = self.ui.style_data.get_axis_values(data,'Analyte','Yc')
+        # set style dictionary values for Axes
+        for i, ax in enumerate(['x', 'y', 'z', 'c']):
+            axes_obj = self.caxes if ax == 'c' else self.axes
 
-            # set style dictionary values for X and Y
-            self.xlim = [xmin, xmax]
-            self.xlabel = 'X'
-            style['XFieldType'] = 'Coordinate'
-            style['XField'] = 'Xc'
+            # Get axis-specific widgets
+            lb = getattr(axes_obj, f"lineEdit{ax.upper()}LB")
+            ub = getattr(axes_obj, f"lineEdit{ax.upper()}UB")
+            if style.plot_type in style.map_plot_types and ax in ['x', 'y']:
+                # do not round axes limits for coordinates
+                lb.precision = None
+                ub.precision = None
+            else:
+                # limit precision for non coordinates
+                lb.precision = 3
+                ub.precision = 3
+            label = getattr(axes_obj, f"lineEdit{ax.upper()}Label")
+            scale = getattr(axes_obj, f"comboBox{ax.upper()}Scale")
 
-            self.ylim = [ymin, ymax]
-            self.ylabel = 'Y'
-            style['YFieldType'] = 'Coordinate'
-            style['YField'] = 'Yc'
+            # Set axis limits, label, and scale
+            lb.value = getattr(style, f"{ax}lim")[0]
+            ub.value = getattr(style, f"{ax}lim")[1]
+            label.setText(getattr(style, f"{ax}label"))
+            # scale probably needs to get fixed to clear and add correct list
+            # of options each time.
+            scale.setCurrentText(getattr(style, f"{ax}scale"))
 
-            self.aspect_ratio = data.aspect_ratio
+            # Get and set field type and field in control dock
+            field_type = getattr(self.ui.control_dock, f"comboBoxFieldType{ax.upper()}")
+            field = getattr(self.ui.control_dock, f"comboBoxField{ax.upper()}")
+
+            field_type.setCurrentText(getattr(style, f"{ax}field_type"))
+            field.setCurrentText(getattr(style, f"{ax}field"))
+
+            # color properties
+            self.ui.control_dock.update_field_type_combobox_options(
+                field_type,
+                field,
+                ax=i
+            )
+            if getattr(self.ui.style_data, f"{ax}_field_type") is None or getattr(self.ui.style_data, f"{ax}_field_type") == '':
+                field_type.setCurrentIndex(0)
+                setattr(self.ui.style_data, f"{ax}_field_type", field_type.currentText())
+            else:
+                #field.setCurrentText(getattr(self.ui.style_data, f"{c}_field_type")
+                pass
+
+            if getattr(self.ui.style_data, f"{ax}_field_type") == '':
+                field.clear()
+            else:
+                self.ui.control_dock.update_field_combobox_options(field, field_type)
+                self.ui.control_dock.spinBoxFieldC.setMinimum(0)
+                self.ui.control_dock.spinBoxFieldC.setMaximum(field.count() - 1)
+
+            if getattr(self.ui.style_data, f"{ax}_field") in field.allItems():
+                field.setCurrentText(self.ui.style_data.c_field)
+                #self.ui.c_field_spinbox_changed()
+            else:
+                #self.ui.style_data.c_field = self.ui.control_dock.comboBoxFieldC.currentText()
+                pass
+
+        # for map plots
+        if style.plot_type.lower() in style.map_plot_types:
+            style.aspect_ratio = data.aspect_ratio
             
-            # do not round axes limits for maps
-            self.axes.lineEditXLB.precision = None
-            self.axes.lineEditXUB.precision = None
-
-            if self.ui.style_data.scale_length is None:
-                self.ui.style_data.scale_length = self.ui.style_data.default_scale_length()
+            if style.scale_length is None:
+                style.scale_length = style.default_scale_length()
         else:
-            self.axes.lineEditXLB.precision = 3
-            self.axes.lineEditXUB.precision = 3
-            # round axes limits for everything that isn't a map
-            # Non-map plots might still need axes
-            self.xlim = style.get('XLim')
-            self.yscale = style.get('ZScale')
-
-            self.ylim = style.get('YLim')
-            self.yscale = style.get('ZScale')
-
             self.scale_length = None
 
-        # Set Z axis details if available
-        self.zlabel = style.get('ZLabel')
-        self.zscale = style.get('ZScale')
-        self.zlim = style.get('ZLim')
-
-        self.aspect_ratio = data.aspect_ratio
+        self.axes.lineEditAspectRatio.value = style.aspect_ratio
+        self.axes.comboBoxTickDirection.setCurrentText(style.tick_dir)
 
         # annotation properties
         # Font
-        self.font_size = style.get('FontSize')
+        if isinstance(style.font, str):
+            self.annotations.fontComboBox.setCurrentFont(QFont(style.font))
+        else:
+            self.annotations.fontComboBox.setCurrentFont(style.font)
+        self.annotations.doubleSpinBoxFontSize.setValue(style.font_size)
 
         # scalebar properties
-        self.scale_dir = style.get('ScaleDir')
-        self.scale_location = style.get('ScaleLocation')
-            
-        self.overlay_color = style.get('OverlayColor')
+        self.annotations.comboBoxScaleDirection.setCurrentText(style.scale_dir)
+        self.annotations.comboBoxScaleLocation.setCurrentText(style.scale_location)
+        self.annotations.colorButtonOverlayColor.color = style.overlay_color
 
         # Marker
-        self.marker = style.get('Marker')
-        self.marker_size = style.get('MarkerSize')
-        self.marker_alpha = style.get('MarkerAlpha')
-        self.marker_color = style.get('MarkerColor')
+        self.elements.comboBoxMarker.setCurrentText(style.marker)
+        self.elements.doubleSpinBoxMarkerSize.setValue(style.marker_size)
+        self.elements.colorButtonMarkerColor.color = style.marker_color
+        self.elements.sliderTransparency.setValue(style.marker_alpha)
 
         # Line
-        self.line_width = style.get('LineWidth')
-        self.line_color = style.get('LineColor')
-        self.length_multiplier = style.get('LineMultiplier')
+        self.elements.doubleSpinBoxLineWidth.setValue(style.line_width)
+        self.elements.colorButtonLineColor.color = style.line_color
+        self.elements.lineEditLengthMultiplier.value = style.length_multiplier
 
-        # color properties
-        self.ui.control_dock.update_field_type_combobox_options(
-            self.ui.control_dock.comboBoxFieldTypeC,
-            self.ui.control_dock.comboBoxFieldC,
-            ax=3
-        )
-        if self.ui.app_data.c_field_type is None or self.ui.app_data.c_field_type == '':
-            self.ui.control_dock.comboBoxFieldTypeC.setCurrentIndex(1)
-            self.ui.app_data.c_field_type = self.ui.control_dock.comboBoxFieldTypeC.currentText()
-        else:
-            self.ui.control_dock.comboBoxFieldTypeC.setCurrentText(self.ui.app_data.c_field_type)
 
-        if self.ui.app_data.c_field_type == '':
-            self.ui.control_dock.comboBoxFieldC.clear()
-        else:
-            self.ui.control_dock.update_field_combobox_options(self.ui.control_dock.comboBoxFieldC, self.ui.control_dock.comboBoxFieldTypeC)
-            self.ui.control_dock.spinBoxFieldC.setMinimum(0)
-            self.ui.control_dock.spinBoxFieldC.setMaximum(self.ui.control_dock.comboBoxFieldC.count() - 1)
-
-        if self.ui.app_data.c_field in self.ui.control_dock.comboBoxFieldC.allItems():
-            self.ui.control_dock.comboBoxFieldC.setCurrentText(self.ui.app_data.c_field)
-            #self.ui.c_field_spinbox_changed()
-        else:
-            self.ui.app_data.c_field = self.ui.control_dock.comboBoxFieldC.currentText()
-
-        self.ui.style_data.cmap = style.get('Colormap')
-        self.ui.style_data.cbar_reverse = style.get('CbarReverse')
+        self.caxes.comboBoxFieldColormap.setCurrentText(style.cmap)
+        self.caxes.checkBoxReverseColormap.setChecked(style.cbar_reverse)
         
         field = self.ui.app_data.c_field
         if field in list(data.processed_data.column_attributes.keys()):
@@ -2027,14 +2029,12 @@ class StylingDock(CustomDockWidget):
         else:
             # set color scale options to linear/log
             self.caxes.comboBoxCScale.clear()
-            self.caxes.comboBoxCScale.addItems(data.scale_options)
+            self.caxes.comboBoxCScale.addItems(data.scale_options(plot_type=self.ui.style_data.plot_type, ax='c', field_type=self.ui.style_data.cfield_type, field=self.ui.style_data.cfield))
             self.ui.style_data.cscale = 'linear'
             self.caxes.comboBoxCScale.setCurrentText(self.ui.style_data.cscale)
             
-        self.ui.style_data.cbar_dir = style.get('CbarDir')
-        self.ui.style_data.clabel = style['CLabel']
-
-        self.ui.style_data.resolution = style.get('Resolution')
+        self.caxes.comboBoxCbarDirection.setCurrentText(style.cbar_dir)
+        self.caxes.spinBoxHeatmapResolution.setValue(style.resolution)
 
         # turn properties on/off based on plot type and style settings
         self.toggle_style_widgets()
@@ -2424,11 +2424,11 @@ class StylingDock(CustomDockWidget):
     def line_color_callback(self):
         """Updates color of plot markers
 
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.toolButtonLineColor`` color.
+        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.colorButtonLineColor`` color.
         """
         # change color
-        self.elements.toolButtonLineColor.select_color()
-        color = get_hex_color(self.elements.toolButtonLineColor.palette().button().color())
+        self.elements.colorButtonLineColor.select_color()
+        color = get_hex_color(self.elements.colorButtonLineColor.palette().button().color())
         if self.line_color == color:
             return
 

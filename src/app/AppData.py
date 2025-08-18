@@ -211,6 +211,7 @@ class AppData(Observable):
 
         # a dictionary of sample_id containing SampleObj data class
         self.data = parent.data
+        self.style = parent.style_data.
 
         # a dictionary of the field_types in self.data[sample_id].processed_data
         self._field_dict = {}
@@ -218,16 +219,6 @@ class AppData(Observable):
         self._ndim_list = []
 
         self._sample_id = ""
-
-        self._x_field_type = ""
-        self._y_field_type = ""
-        self._z_field_type = ""
-        self._c_field_type = ""
-
-        self._x_field = ""
-        self._y_field = ""
-        self._z_field = ""
-        self._c_field = ""
 
         self.plot_info = {}
 
@@ -502,7 +493,7 @@ class AppData(Observable):
         if self.sample_id == "":
             return False
         data_types = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
-        if new_field_type in data_types:
+        if new_field_type in data_types or new_field_type.lower() == 'none':
             return True
         else:
             raise ValueError("Field type not found.")
@@ -770,7 +761,7 @@ class AppData(Observable):
     @property
     def x_field_type(self):
         """str : Field type for x field."""
-        return self._x_field_type
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['XFieldType']
 
     @x_field_type.setter
     def x_field_type(self, new_field_type):

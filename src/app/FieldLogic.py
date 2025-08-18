@@ -254,6 +254,7 @@ class ControlDock(CustomDockWidget):
 
     def connect_widgets(self):
         self.toolbox.currentChanged.connect(self.toolbox_changed)
+        self.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self.ui.style_data, 'plot_type', self.comboBoxPlotType.currentText()))
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(
             self.comboBoxFieldTypeC,
             self.comboBoxFieldC,
@@ -823,6 +824,19 @@ class ControlDock(CustomDockWidget):
             return
 
         parentbox = self.axis_widget_dict['parentbox'][ax]
+        childbox = self.axis_widget_dict['childbox'][ax]
+        spinbox = self.axis_widget_dict['spinbox'][ax]
+
+        current_type = parentbox.currentText() if field_type is None else field_type
+        if current_type in ['None', 'none', None]:
+            childbox.blockSignals(True)
+            childbox.setCurrentText('None')
+            childbox.blockSignals(False)
+            if spinbox is not None:
+                spinbox.setValue(-1)
+            self.ui.app_data.set_field_type(ax, 'None')
+            self.ui.app_data.set_field(ax, 'None')
+            return
 
         if field_type is None:   # user interaction, or direct setting of combobox
             # set field type property to combobox
@@ -860,6 +874,16 @@ class ControlDock(CustomDockWidget):
         parentbox = self.axis_widget_dict['parentbox'][ax]
         childbox = self.axis_widget_dict['childbox'][ax]
         spinbox = self.axis_widget_dict['spinbox'][ax]
+
+        if parentbox.currentText() in ['None', 'none', None]:
+            childbox.blockSignals(True)
+            childbox.setCurrentText('None')
+            childbox.blockSignals(False)
+            if spinbox is not None:
+                spinbox.setValue(-1)
+            self.ui.app_data.set_field(ax, 'None')
+            self.ui.style_data.clabel = ''
+            return
 
         if field is None:   # user interaction, or direct setting of combobox
             # set field property to combobox

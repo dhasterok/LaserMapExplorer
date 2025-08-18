@@ -1218,12 +1218,10 @@ class ColorButton(QPushButton):
     # Signal that emits the new QColor
     colorChanged = pyqtSignal(QColor)
 
-    def __init__(self, permanent_text=None, ui=None, parent=None):
+    def __init__(self, permanent_text=None, ui=None, parent=None, initial_color=None):
         super().__init__(parent=parent)
 
         self.setContentsMargins(3, 3, 3, 3)
-
-        self.ui = ui
         self.permanent_text = permanent_text
         self.setText(self.permanent_text if permanent_text else "")
 
@@ -1232,10 +1230,38 @@ class ColorButton(QPushButton):
 
         self.clicked.connect(self.select_color)
 
+        # Apply initial color if given
+        self.styles = { "border": "1px solid black",
+            "border-radius": "4px",
+            "background-color": "none;"
+        }
+        self.ui = ui
+        if initial_color is None:
+            initial_color = None
+        if initial_color and not isinstance(initial_color, QColor):
+            initial_color = QColor(initial_color)
+        self._apply_color(initial_color)
+        self._update_history(initial_color)
+
     @property
     def color(self):
         """QColor : Return the current background color of the button."""
         return self.palette().color(self.backgroundRole())
+
+    @color.setter
+    def color(self, value):
+        """Allow setting via ColorButton.color = QColor(...) or a string."""
+        if not value:
+            value = None
+            self._apply_color(value)
+            self.colorChanged.emit(value)
+        elif not isinstance(value, QColor):
+            value = QColor(value)
+
+        if value.isValid():
+            self._apply_color(value)
+            self._update_history(value)
+            self.colorChanged.emit(value)
 
     def select_color(self):
         """
@@ -1257,11 +1283,10 @@ class ColorButton(QPushButton):
         new_color = dlg.getColor(initial=old_color, parent=self.ui)
 
         if new_color.isValid() and new_color != old_color:
-            self._apply_color(new_color)
-            self._update_history(new_color)
-            self.colorChanged.emit(new_color)
+            self.color = new_color
 
-    def _apply_color(self, color: QColor):
+
+    def _apply_color(self, color: QColor|None):
         """
         Apply the given color to the button's background and update its text.
 
@@ -1270,9 +1295,17 @@ class ColorButton(QPushButton):
         color : QColor
             The new color to apply.
         """
-        self.setStyleSheet(f"background-color: {color.name()};")
+        if color is None:
+            self.styles["background-color"] = "none;"
+        else:
+            self.styles["background-color"] = color.name()
+
+        self.setStyleSheet("QPushButton {" + "; ".join(f"{k}: {v}" for k, v in self.styles.items()) + "; }")
         if self.permanent_text is None:
-            self.setText(color.name())
+            if color is None:
+                self.setText("None")
+            else:
+                self.setText(color.name())
 
     def _update_history(self, color: QColor):
         """

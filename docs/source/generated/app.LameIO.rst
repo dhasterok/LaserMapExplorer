@@ -1,4 +1,4 @@
-app.LameIO
+﻿app.LameIO
 ==========
 
 .. automodule:: app.LameIO
@@ -9,4 +9,5 @@ app.LameIO
    .. autosummary::
    
       LameIO
+      SavePlotDialog
    

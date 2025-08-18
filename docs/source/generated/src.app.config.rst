@@ -8,5 +8,6 @@ src.app.config
 
    .. autosummary::
    
+      get_top_parent
       load_stylesheet
    

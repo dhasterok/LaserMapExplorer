@@ -228,18 +228,15 @@ class SampleObj(Observable):
         ]
         self._valid_data_types = self._default_data_types
 
-        self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
 
         
-        # self._default_scale_options = {'standard':['linear', 'log', 'inv_logit', 'symlog'],
-        #                                'linear':['linear'],
-        #                                'discrete':['discrete']}
 
         self.order = 'F'
-    
 
-
-        self._scale_options = self._default_scale_options
+        #self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
+        self._default_scale_options = {'standard':['linear', 'log', 'inv_logit', 'symlog'],
+                                       'linear':['linear'],
+                                       'discrete':['discrete']}
 
         self.order = 'F'
 
@@ -515,17 +512,23 @@ class SampleObj(Observable):
 
         self.prep_data()
 
-    @property
-    def scale_options(self):
+    def scale_options(self, plot_type=None, ax=None, field_type=None, field=None):
         """list : options for scaling the data."""
-        return self._scale_options
+        scale_options = {
+            'standard':['linear', 'log', 'inv_logit', 'symlog'],
+            'linear':['linear'],
+            'discrete':['discrete'],
+        }
+        if plot_type is not None:
+            if plot_type == 'correlation':
+                return scale_options['linear']
+            if plot_type == 'histogram' and ax == 'y':
+                return scale_options['linear']
 
-    @scale_options.setter
-    def scale_options(self, new_list):
-        if set(new_list).issubset(self._default_scale_options):
-            self._scale_options = new_list
+        if field_type.lower() in ['cluster'] and field.lower() in ['k-means', 'fuzzy-c means']:
+            return scale_options['discrete']
         else:
-            raise ValueError("List (new_list) is not a subset of self._default_scale_options.")
+            return scale_options['standard']
 
     @property
     def valid_data_types(self):
@@ -1649,7 +1652,7 @@ class SampleObj(Observable):
         df = self.processed_data[use_analytes]
 
         #perform scaling for groups of analytes with same norm parameter
-        for norm in self.scale_options:
+        for norm in ['log', 'symlog', 'inv_logit']:
             analyte_set = self.processed_data.match_attributes({'data_type': 'Analyte', 'use': True, 'norm': norm})
             if not analyte_set:
                 continue

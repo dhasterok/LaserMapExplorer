@@ -222,7 +222,7 @@ class MainWindow(QMainWindow):
     def connect_actions(self):
         self.lame_action.connect_actions()
 
-        self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_widget.canvasWindow.tab_changed())
+        self.canvas_widget.canvasWindow.currentChanged.connect(lambda _: self.canvas_widget.tab_changed())
 
     def connect_widgets(self):
         """ Connects widgets to their respective methods and lame_action.
@@ -547,8 +547,6 @@ class MainWindow(QMainWindow):
         # update combobox to reflect list of available field types and fields
         #self.update_field_type_combobox_options(self.comboBoxFieldTypeC, self.comboBoxFieldC)
 
-
-
     def update_widget_data_on_sample_change(self):
         self.control_dock.update_field_combobox_options(self.control_dock.ndimensional.comboBoxNDimAnalyte)
 
@@ -843,11 +841,11 @@ class MainWindow(QMainWindow):
                     if self.control_dock.toolbox.currentIndex() == self.control_dock.tab_dict['process']:
                         canvas, self.plot_info, hist_canvas = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=True)
 
-                        if not self.control_dock.preprocess.widgetHistView.layout():
-                            self.control_dock.preprocess.widgetHistView.setLayout(QVBoxLayout())
-
                         self.canvas_widget.clear_layout(self.control_dock.preprocess.widgetHistView.layout())
-                        self.control_dock.preprocess.widgetHistView.layout().addWidget(hist_canvas)
+
+                        layout = self.control_dock.preprocess.widgetHistView.layout()
+                        if layout is not None:
+                            layout.addWidget(hist_canvas)
                     else:
                         canvas, self.plot_info, _ = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
                 self.mpl_canvas = canvas
@@ -906,8 +904,12 @@ class MainWindow(QMainWindow):
 
         # add canvas to layout
         if canvas:
-            self.canvas_widget.clear_layout(self.canvas_widget.single_view.layout())
-            self.canvas_widget.single_view.layout().addWidget(canvas)
+            layout = self.canvas_widget.single_view.layout()
+            if layout is not None:
+                self.canvas_widget.clear_layout(layout)
+                layout.addWidget(canvas)
+            else:
+                print("Warning: single_view.layout() is None")
 
         # add plot info to info_dock
         if hasattr(self,"info_dock"):
@@ -979,7 +981,7 @@ class MainWindow(QMainWindow):
             self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.mask_dock)
             self.mask_dock.setFloating(False)
 
-            self.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.toolButtonBottomDock))
+            self.statusbar.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.toolButtonBottomDock))
 
             if self.mask_dock not in self.help_mapping:
                 self.help_mapping[self.mask_dock] = 'filtering'

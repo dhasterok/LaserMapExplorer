@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
     QComboBox, QLabel, QPushButton, QWidget, QFrame, QScrollArea,
     QColorDialog, QFileDialog, QMessageBox, QCheckBox, QSpinBox, QLineEdit,
-    QSlider, QGroupBox, QSizePolicy, QToolBar, QWidgetAction, QInputDialog
+    QSpacerItem, QGroupBox, QSizePolicy, QToolBar, QWidgetAction, QInputDialog
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF, QTimer, QSize, QRegularExpression
 from PyQt6.QtGui import (
@@ -165,7 +165,7 @@ class DraggableColorButton(QPushButton):
 class DiscreteColorWidget(QWidget):
     """Widget for editing discrete colormaps with draggable color squares."""
     colorChanged = pyqtSignal()  # General change signal
-    selectionChanged = pyqtSignal()  # Selection changed signal
+    selectionChanged = pyqtSignal(int)  # Selection changed signal
     
     def __init__(self, colors: List[QColor], parent=None):
         super().__init__(parent)
@@ -209,7 +209,7 @@ class DiscreteColorWidget(QWidget):
             self.selected_indices.add(index)
         
         self.update_selection_display()
-        self.selectionChanged.emit()
+        self.selectionChanged.emit(index)
     
     def change_color(self, index: int):
         """Open color dialog to change a color."""
@@ -352,6 +352,11 @@ class DiscreteColorWidget(QWidget):
     def get_colors(self) -> List[QColor]:
         """Get current colors."""
         return self.colors.copy()
+
+    def reverse_colormap(self):
+        self.colors.reverse()
+        self.update_buttons()
+        self.colorChanged.emit()
 
 
 class ContinuousColorWidget(QWidget):
@@ -587,11 +592,6 @@ class ContinuousColorWidget(QWidget):
         
         return QColor(int(r), int(g), int(b))
 
-    def update_hex_display(self, qcolor):
-        """Update the hexEdit box to show the currently selected color."""
-        hex_str = qcolor.name().upper()  # e.g. #FF00AA
-        self.parent().hex_display.setText(hex_str)
-    
     def change_point_color(self, index: int):
         """Open color dialog to change a control point color."""
         if 0 <= index < len(self.color_points):
@@ -656,6 +656,33 @@ class ContinuousColorWidget(QWidget):
     def get_selected_point(self) -> int:
         """Get the index of the selected point (-1 if none)."""
         return self.selected_point
+
+    def reverse_colormap(self):
+        reversed_points = [
+            ColorPoint(1.0 - cp.position, cp.color) 
+            for cp in reversed(self.color_points)
+        ]
+        self.color_points = reversed_points
+        self.update()
+        self.colorChanged.emit()
+
+    def space_evenly_color_points(self):
+        """Evenly spaces continuous color points along [0, 1]."""
+        points = self.color_points
+        n = len(points)
+        if n < 2:
+            return  # Need at least 2 to space
+
+        # Evenly distribute positions between 0 and 1
+        for i, point in enumerate(points):
+            point.position = i / (n - 1)
+
+        # Sort to ensure correct ordering
+        points.sort(key=lambda p: p.position)
+
+        # Update widget display
+        self.update()
+        self.colorChanged.emit()
 
 
 class ColormapPreviewWidget(FigureCanvas):
@@ -819,7 +846,7 @@ class ColormapEditorDialog(QDialog):
         super().__init__(parent)
         self.existing_colormaps = existing_colormaps or {}
         self.current_colormap_data = None
-        self.is_discrete = True
+        self.is_discrete = False
         
         self.setWindowTitle("Colormap Editor")
         self.setMinimumSize(600, 250)
@@ -878,6 +905,15 @@ class ColormapEditorDialog(QDialog):
         colormap_layout.addWidget(self.colormap_combo)
         colormap_layout.setSpacing(3)
 
+        self.reverse_action = CustomAction(
+            text="Reverse",
+            light_icon_unchecked="icon-reverse-64.svg",
+            dark_icon_unchecked="icon-reverse-dark-64.svg",
+            parent=toolbar,
+        )
+        self.reverse_action.setToolTip("Reverse colormap direction")
+        self.reverse_action.triggered.connect(self.reverse_colormap)
+
         self.add_point_action = CustomAction(
             text="Add\nPoint",
             light_icon_unchecked="icon-accept-64.svg",
@@ -894,6 +930,16 @@ class ColormapEditorDialog(QDialog):
         self.remove_point_action.triggered.connect(self.delete_control_point)
         self.remove_point_action.setEnabled(False)
         self.remove_point_action.setToolTip("Remove control point")
+
+        self.space_evenly_action = CustomAction(
+            text="Equal\nSpacing",
+            light_icon_unchecked="icon-even-spacing-64.svg",
+            dark_icon_unchecked="icon-even-spacing-dark-64.svg",
+            parent=toolbar,
+        )
+        self.space_evenly_action.setEnabled(True)
+        self.space_evenly_action.setToolTip("Evenly space control points")
+
 
         self.preview_action = CustomAction(
             text="Preview",
@@ -916,7 +962,7 @@ class ColormapEditorDialog(QDialog):
         self.simulator_combo.currentTextChanged.connect(self.on_preview_mode_changed)
         
         simulator_label = QLabel()
-        simulator_label.setText("Colormap:")
+        simulator_label.setText("Simulate:")
         simulator_label.setFont(font)
 
         simulator_layout.addWidget(simulator_label)
@@ -928,13 +974,13 @@ class ColormapEditorDialog(QDialog):
         toggle_layout.setContentsMargins(0,0,0,0)
         self.toggle_widget.setLayout(toggle_layout)
 
-        self.cmap_style_toggle = ToggleSwitch(toolbar, height=24, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
-        self.cmap_style_toggle.setChecked(True)
+        self.cmap_style_toggle = ToggleSwitch(toolbar, height=24, bg_left_color="#5798d1", bg_right_color="#d9ad86")
+        self.cmap_style_toggle.setChecked(False)
         self.cmap_style_toggle.setToolTip("Toggle colormap style")
         self.cmap_style_toggle.stateChanged.connect(self.on_discrete_toggled)
 
         self.cmap_style_label = QLabel(toolbar)
-        self.cmap_style_label.setText("Discrete")
+        self.cmap_style_label.setText("Continuous")
         self.cmap_style_label.setFont(font)
         self.cmap_style_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -946,7 +992,7 @@ class ColormapEditorDialog(QDialog):
         self.cmap_style_action.setDefaultWidget(self.toggle_widget)
 
         self.color_select_action = CustomAction(
-            text="Preview",
+            text="Color\nPicker",
             light_icon_unchecked="icon-dropper-64.svg",
             dark_icon_unchecked="icon-dropper-dark-64.svg",
             parent=toolbar,
@@ -956,21 +1002,35 @@ class ColormapEditorDialog(QDialog):
         self.color_select_action.triggered.connect(self.select_color)
 
         self.hex_display = QLineEdit()
-        self.hex_display.setFixedWidth(100)  # compact
+        self.hex_display.setFixedWidth(80)  # compact
         self.hex_display.setPlaceholderText("#RRGGBB")
         # Optional: restrict input to valid hex codes
         hex_validator = QRegularExpressionValidator(QRegularExpression("#[0-9A-Fa-f]{6}"))
         self.hex_display.setValidator(hex_validator)
         self.hex_display.editingFinished.connect(self.on_hex_changed)
+        self.hex_display.setStyleSheet("""
+            QLineEdit {
+                border: 2px solid #000000;
+                border-radius: 4px;
+                padding: 2px;
+            }
+        """)
+        self.hex_display.textChanged.connect(self.set_hex_display_color)
 
         toolbar.addAction(self.load_action)
         toolbar.addAction(self.save_action)
+        toolbar.addSeparator()
         toolbar.addWidget(self.colormap_widget)
+        toolbar.addAction(self.reverse_action)
         toolbar.addAction(self.cmap_style_action)
+        toolbar.addSeparator()
         toolbar.addAction(self.add_point_action)
         toolbar.addAction(self.remove_point_action)
+        toolbar.addAction(self.space_evenly_action)
+        toolbar.addSeparator()
         toolbar.addAction(self.preview_action)
         toolbar.addWidget(self.simulator_widget)
+        toolbar.addSeparator()
         toolbar.addAction(self.color_select_action)
         toolbar.addWidget(self.hex_display)
         
@@ -1000,7 +1060,6 @@ class ColormapEditorDialog(QDialog):
         ])
         self.continuous_widget.colorChanged.connect(self.on_colormap_modified)
         self.continuous_widget.selectionChanged.connect(self.on_selection_changed)
-        self.continuous_widget.hide()
         display_layout.addWidget(self.continuous_widget)
         
         self.main_layout.addWidget(display_group)
@@ -1024,8 +1083,10 @@ class ColormapEditorDialog(QDialog):
         self.preview_widget.setMinimumHeight(300)  # Set minimum height for preview
         preview_layout.addWidget(self.preview_widget)
         
-        cancel_button = QPushButton("Cancel")
-        cancel_button.clicked.connect(self.reject)
+        self.discrete_widget.hide()
+        self.continuous_widget.show()
+
+        self.space_evenly_action.triggered.connect(self.continuous_widget.space_evenly_color_points)
 
     def select_color(self):
         # need to create a functioning DropperWidget
@@ -1062,6 +1123,13 @@ class ColormapEditorDialog(QDialog):
         self.discrete_widget.set_colors(default_colors)
         self.current_colormap_data = default_colors
         self.update_preview()
+
+    def reverse_colormap(self):
+        if self.cmap_style_toggle.isChecked():
+            self.discrete_widget.reverse_colormap()
+        else:
+            self.continuous_widget.reverse_colormap()
+
     
     def on_colormap_changed(self, colormap_name: str):
         """Handle colormap selection change."""
@@ -1134,6 +1202,7 @@ class ColormapEditorDialog(QDialog):
             self.add_point_action.setText("Add\nColor")
             self.remove_point_action.setText("Delete\nColor")
             self.cmap_style_label.setText("Discrete")
+            self.space_evenly_action.setEnabled(False)
         else:
             self.discrete_widget.hide()
             self.continuous_widget.show()
@@ -1141,6 +1210,7 @@ class ColormapEditorDialog(QDialog):
             self.add_point_action.setText("Add\nPoint")
             self.remove_point_action.setText("Delete\nPoint")
             self.cmap_style_label.setText("Continuous")
+            self.space_evenly_action.setEnabled(True)
         
         # Reload current colormap in the new mode
         current_colormap = self.colormap_combo.currentText()
@@ -1153,13 +1223,40 @@ class ColormapEditorDialog(QDialog):
     def on_hex_changed(self):
         text = self.hex_display.text().strip()
         if len(text) == 7 and text.startswith("#"):
-            try:
-                qcolor = QColor(text)
-                if qcolor.isValid():
-                    # Update the selected control point / button color
-                    self.parent().set_selected_color(qcolor)
-            except Exception:
-                pass
+            qcolor = QColor(text)
+            if qcolor.isValid():
+                if self.cmap_style_toggle.isChecked():
+                    idx = self.discrete_widget.selected_indices
+                    if len(idx) >= 0:
+                        for i in idx:
+                            self.discrete_widget.colors[i] = qcolor
+                        self.discrete_widget.update_buttons()
+                        self.discrete_widget.update()
+                        self.discrete_widget.colorChanged.emit()
+                else:
+                    idx = self.continuous_widget.get_selected_point()
+                    if idx >= 0:
+                        self.continuous_widget.color_points[idx].color = qcolor
+                        self.continuous_widget.update()
+                        self.continuous_widget.colorChanged.emit()
+    
+    def set_hex_display_color(self):
+        """Update QLineEdit text and border color."""
+        text = self.hex_display.text().strip()
+        if len(text) == 7 and text.startswith("#"):
+            qcolor = QColor(text)
+            if qcolor.isValid():
+                hex_code = qcolor.name().upper()
+                self.hex_display.setText(hex_code)
+
+                # set border color to match
+                self.hex_display.setStyleSheet(f"""
+                    QLineEdit {{
+                        border: 2px solid {hex_code};
+                        border-radius: 4px;
+                        padding: 2px;
+                    }}
+                """)
     
     def on_colormap_modified(self):
         """Handle colormap modifications."""
@@ -1169,13 +1266,32 @@ class ColormapEditorDialog(QDialog):
             self.current_colormap_data = self.continuous_widget.get_color_points()
         
         self.update_preview()
-    
+
+    def update_hex_display(self, qcolor):
+        """Update the hexEdit box to show the currently selected color."""
+        hex_str = qcolor.name().upper()  # e.g. #FF00AA
+        self.hex_display.setText(hex_str)
+
     def on_selection_changed(self, selected_index: int):
         """Handle control point selection changes in continuous mode."""
+        if selected_index >= 0:
+            # Get the selected color
+            qcolor = self.continuous_widget.color_points[selected_index].color
+            self.update_hex_display(qcolor)
+        else:
+            # Clear hex display when nothing selected
+            self.hex_display.setText("")
         self.update_button_states()
-    
-    def on_discrete_selection_changed(self):
+
+    def on_discrete_selection_changed(self, selected_index: int):
         """Handle color selection changes in discrete mode."""
+        if selected_index >= 0:
+            # Get the selected color
+            qcolor = self.discrete_widget.colors[selected_index]
+            self.update_hex_display(qcolor)
+        else:
+            # Clear hex display when nothing selected
+            self.hex_display.setText("")
         self.update_button_states()
     
     def update_button_states(self):

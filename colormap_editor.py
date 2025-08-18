@@ -11,16 +11,16 @@ import numpy as np
 from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass
 from PyQt6.QtWidgets import (
-    QApplication, QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
-    QComboBox, QLabel, QPushButton, QWidget, QFrame, QScrollArea,
-    QColorDialog, QFileDialog, QMessageBox, QCheckBox, QSpinBox, QLineEdit,
-    QSpacerItem, QGroupBox, QSizePolicy, QToolBar, QWidgetAction, QInputDialog
+    QApplication, QDialog, QVBoxLayout, QHBoxLayout, QComboBox, QLabel,
+    QPushButton, QWidget, QFrame, QScrollArea, QColorDialog, QFileDialog,
+    QMessageBox, QLineEdit, QGroupBox, QSizePolicy, QToolBar,
+    QWidgetAction, QInputDialog,
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF, QTimer, QSize, QRegularExpression
 from PyQt6.QtGui import (
     QColor, QPainter, QPen, QBrush, QLinearGradient, QPolygonF, QPixmap,
     QPalette, QMouseEvent, QCursor, QPainterPath, QDrag,
-    QRegularExpressionValidator
+    QRegularExpressionValidator, QAction, QUndoCommand, QUndoStack
 )
 from PyQt6.QtCore import QMimeData
 import matplotlib.pyplot as plt
@@ -43,6 +43,75 @@ class ColorPoint:
     def to_rgb_tuple(self) -> Tuple[float, float, float]:
         """Convert to matplotlib RGB tuple (0-1 range)."""
         return (self.color.redF(), self.color.greenF(), self.color.blueF())
+
+class AddColorPointCommand(QUndoCommand):
+    def __init__(self, widget, point, index=None):
+        super().__init__("Add Color Point")
+        self.widget = widget
+        self.point = point
+        self.index = index
+
+    def redo(self):
+        if self.index is None:
+            self.widget.color_points.append(self.point)
+        else:
+            self.widget.color_points.insert(self.index, self.point)
+        self.widget.update()
+
+    def undo(self):
+        if self.point in self.widget.color_points:
+            self.widget.color_points.remove(self.point)
+        self.widget.update()
+
+
+class RemoveColorPointCommand(QUndoCommand):
+    def __init__(self, widget, point):
+        super().__init__("Remove Color Point")
+        self.widget = widget
+        self.point = point
+        self.index = widget.color_points.index(point)
+
+    def redo(self):
+        self.widget.color_points.remove(self.point)
+        self.widget.update()
+
+    def undo(self):
+        self.widget.color_points.insert(self.index, self.point)
+        self.widget.update()
+
+
+class MoveColorPointCommand(QUndoCommand):
+    def __init__(self, widget, point, old_pos, new_pos):
+        super().__init__("Move Color Point")
+        self.widget = widget
+        self.point = point
+        self.old_pos = old_pos
+        self.new_pos = new_pos
+
+    def redo(self):
+        self.point.position = self.new_pos
+        self.widget.update()
+
+    def undo(self):
+        self.point.position = self.old_pos
+        self.widget.update()
+
+
+class ChangeColorCommand(QUndoCommand):
+    def __init__(self, widget, point, old_color, new_color):
+        super().__init__("Change Color")
+        self.widget = widget
+        self.point = point
+        self.old_color = old_color
+        self.new_color = new_color
+
+    def redo(self):
+        self.point.color = self.new_color
+        self.widget.update()
+
+    def undo(self):
+        self.point.color = self.old_color
+        self.widget.update()
 
 
 class DraggableColorButton(QPushButton):
@@ -878,6 +947,7 @@ class ColormapEditorDialog(QDialog):
         )
         self.load_action.setToolTip("Load file with custom colormaps")
         self.load_action.triggered.connect(self.load_csv)
+        self.load_action.setShortcut("Ctrl+O")
         
         self.save_action = CustomAction(
             text="Save",
@@ -886,6 +956,7 @@ class ColormapEditorDialog(QDialog):
         )
         self.save_action.setToolTip("Save colormap")
         self.save_action.triggered.connect(self.save_colormap)
+        self.save_action.setShortcut("Ctrl+S")
         
         # Colormap selection
         self.colormap_widget = QWidget(toolbar)
@@ -906,13 +977,14 @@ class ColormapEditorDialog(QDialog):
         colormap_layout.setSpacing(3)
 
         self.reverse_action = CustomAction(
-            text="Reverse",
+            text="Invert",
             light_icon_unchecked="icon-reverse-64.svg",
             dark_icon_unchecked="icon-reverse-dark-64.svg",
             parent=toolbar,
         )
         self.reverse_action.setToolTip("Reverse colormap direction")
         self.reverse_action.triggered.connect(self.reverse_colormap)
+        self.reverse_action.setShortcut("Ctrl+I")
 
         self.add_point_action = CustomAction(
             text="Add\nPoint",
@@ -921,6 +993,7 @@ class ColormapEditorDialog(QDialog):
         )
         self.add_point_action.triggered.connect(self.add_control_point)
         self.add_point_action.setToolTip("Add control point")
+        self.add_point_action.setShortcut("Ctrl+Shift+=")
 
         self.remove_point_action = CustomAction(
             text="Remove\nPoint",
@@ -930,6 +1003,7 @@ class ColormapEditorDialog(QDialog):
         self.remove_point_action.triggered.connect(self.delete_control_point)
         self.remove_point_action.setEnabled(False)
         self.remove_point_action.setToolTip("Remove control point")
+        self.remove_point_action.setShortcut("Ctrl+Shift+-")
 
         self.space_evenly_action = CustomAction(
             text="Equal\nSpacing",
@@ -950,6 +1024,7 @@ class ColormapEditorDialog(QDialog):
         self.preview_action.setChecked(False)
         self.preview_action.setToolTip("Show/hide preview")
         self.preview_action.triggered.connect(self.toggle_preview)
+        self.preview_action.setShortcut("Ctrl+P")
         
         # Preview mode selection
         self.simulator_widget = QWidget(toolbar)
@@ -990,6 +1065,7 @@ class ColormapEditorDialog(QDialog):
 
         self.cmap_style_action = QWidgetAction(toolbar)
         self.cmap_style_action.setDefaultWidget(self.toggle_widget)
+        self.cmap_style_action.setShortcut("Ctrl+T")
 
         self.color_select_action = CustomAction(
             text="Color\nPicker",
@@ -1091,6 +1167,9 @@ class ColormapEditorDialog(QDialog):
     def select_color(self):
         # need to create a functioning DropperWidget
         pass
+
+    def on_switch_mode(self):
+        self.cmap_style_toggle.setChecked(not self.cmap_style_toggle.isChecked())
 
     def closeEvent(self, event):
         """

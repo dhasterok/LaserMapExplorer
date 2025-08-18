@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                             QHBoxLayout, QPushButton, QLabel, QToolBar, QFrame)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QRect, QPoint
 from PyQt6.QtGui import (QPixmap, QPainter, QPen, QColor, QCursor, QAction, 
-                        QIcon, QScreen, QPalette)
+                        QIcon, QScreen, QPalette, QImage)
 
 
 class ColorDropperWidget(QWidget):
@@ -47,8 +47,8 @@ class ColorDropperWidget(QWidget):
         self.preview_frame.setGeometry(10, 10, self.preview_size + 20, self.preview_size + 20)
         self.preview_frame.setStyleSheet("""
             QFrame {
-                background-color: rgba(40, 40, 40, 200);
-                border: 2px solid white;
+                background-color: none;
+                border: 2px solid #888;
                 border-radius: 5px;
             }
         """)
@@ -128,81 +128,74 @@ class ColorDropperWidget(QWidget):
         """Pick color at current mouse position and emit signal"""
         if not self.screen_pixmap:
             return
-            
-        # Get color at mouse position
-        color = self.screen_pixmap.toImage().pixelColor(self.mouse_pos.x(), self.mouse_pos.y())
-        hex_color = color.name()
-        
-        # Emit the color and stop picking
-        self.colorSelected.emit(hex_color)
-        self.stop_color_picking()
-        
-    def paintEvent(self, event):
-        """Paint the magnified preview"""
-        if not self.screen_pixmap:
-            return
-            
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)  # Disable for crisp pixels
-        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
-        
-        # Get the screen image for accurate color sampling
+
+        desktop_geometry = QApplication.primaryScreen().virtualGeometry()
+        mouse_x = self.mouse_pos.x() - desktop_geometry.x()
+        mouse_y = self.mouse_pos.y() - desktop_geometry.y()
+
         screen_image = self.screen_pixmap.toImage()
-        # Convert to RGB32 format to ensure consistent color handling
         if screen_image.format() != screen_image.Format.Format_RGB32:
             screen_image = screen_image.convertToFormat(screen_image.Format.Format_RGB32)
+
+        if 0 <= mouse_x < screen_image.width() and 0 <= mouse_y < screen_image.height():
+            color = screen_image.pixelColor(mouse_x, mouse_y)
+            hex_color = color.name()
+
+            self.colorSelected.emit(hex_color)
+            self.stop_color_picking()
         
-        # Calculate source rectangle around mouse position (centered on mouse)
+    def paintEvent(self, event):
+        """Paint a true 8x magnified preview centered on the mouse. 1 desktop pixel = 8 preview pixels. Center is color under mouse."""
+        if not self.screen_pixmap:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+
+        screen_image = self.screen_pixmap.toImage()
+        if screen_image.format() != screen_image.Format.Format_RGB32:
+            screen_image = screen_image.convertToFormat(screen_image.Format.Format_RGB32)
+
+        # Map mouse position to pixmap coordinates (handle multi-monitor)
+        desktop_geometry = QApplication.primaryScreen().virtualGeometry()
+        mouse_x = self.mouse_pos.x() - desktop_geometry.x()
+        mouse_y = self.mouse_pos.y() - desktop_geometry.y()
+
         half_grid = self.grid_size // 2
-        
-        # Draw each pixel individually with exact colors
+        src_x = mouse_x - half_grid
+        src_y = mouse_y - half_grid
+
+        # Fill a region_img with gray, then copy valid screen pixels
+        region_img = QImage(self.grid_size, self.grid_size, screen_image.format())
+        region_img.fill(QColor(64, 64, 64))
         for row in range(self.grid_size):
             for col in range(self.grid_size):
-                source_x = self.mouse_pos.x() - half_grid + col
-                source_y = self.mouse_pos.y() - half_grid + row
-                
-                # Get the actual pixel color from screen
-                if (source_x >= 0 and source_x < screen_image.width() and 
-                    source_y >= 0 and source_y < screen_image.height()):
-                    # Get raw RGB values to avoid color space conversion
-                    rgb = screen_image.pixel(source_x, source_y)
-                    pixel_color = QColor.fromRgb(rgb)
-                    # Ensure the color is fully opaque
-                    pixel_color.setAlpha(255)
-                else:
-                    # Use a neutral color for out-of-bounds
-                    pixel_color = QColor(64, 64, 64)
-                
-                # Draw the magnified pixel with exact color
-                pixel_rect = QRect(
-                    20 + col * self.pixel_size,
-                    20 + row * self.pixel_size,
-                    self.pixel_size,
-                    self.pixel_size
-                )
-                
-                # Use solid brush to ensure no transparency effects
-                painter.fillRect(pixel_rect, pixel_color)
-        
-        # Draw subtle grid lines
+                sx = src_x + col
+                sy = src_y + row
+                if 0 <= sx < screen_image.width() and 0 <= sy < screen_image.height():
+                    region_img.setPixel(col, row, screen_image.pixel(sx, sy))
+
+        # Scale up by zoom_factor (should be integer)
+        zoomed = region_img.scaled(self.grid_size * self.zoom_factor, self.grid_size * self.zoom_factor, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.FastTransformation)
+        # Draw the zoomed region at (20,20)
+        painter.drawImage(20, 20, zoomed)
+
+        # Draw grid lines (every zoom_factor pixels)
         painter.setPen(QPen(QColor(128, 128, 128, 80), 1))
         for i in range(self.grid_size + 1):
-            x = 20 + (i * self.pixel_size)
-            y = 20 + (i * self.pixel_size)
-            painter.drawLine(x, 20, x, 20 + self.preview_size)
-            painter.drawLine(20, y, 20 + self.preview_size, y)
-        
+            x = 20 + (i * self.zoom_factor)
+            y = 20 + (i * self.zoom_factor)
+            painter.drawLine(x, 20, x, 20 + self.grid_size * self.zoom_factor)
+            painter.drawLine(20, y, 20 + self.grid_size * self.zoom_factor, y)
+
         # Highlight center pixel (the one under the mouse) with high contrast
-        center_x = 20 + (half_grid * self.pixel_size)
-        center_y = 20 + (half_grid * self.pixel_size)
-        
-        # White outer border
+        center_x = 20 + (half_grid * self.zoom_factor)
+        center_y = 20 + (half_grid * self.zoom_factor)
         painter.setPen(QPen(QColor(255, 255, 255), 3))
-        painter.drawRect(center_x - 1, center_y - 1, self.pixel_size + 2, self.pixel_size + 2)
-        
-        # Black inner border for contrast
+        painter.drawRect(center_x - 1, center_y - 1, self.zoom_factor + 2, self.zoom_factor + 2)
         painter.setPen(QPen(QColor(0, 0, 0), 1))
-        painter.drawRect(center_x, center_y, self.pixel_size, self.pixel_size)
+        painter.drawRect(center_x, center_y, self.zoom_factor, self.zoom_factor)
 
 
 class ColorDropperAction(QAction):

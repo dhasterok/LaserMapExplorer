@@ -492,11 +492,7 @@ class StyleData(Observable, StyleTheme):
 
         # colormaps
         # matplotlib colormaps
-        self.mpl_colormaps = colormap.listMaps('matplotlib')
-        for i in range(len(self.mpl_colormaps) - 1, -1, -1):
-            if self.mpl_colormaps[i].endswith('_r'):
-                # If the item ends with '_r', remove it from the list
-                del self.mpl_colormaps[i]
+        self.mpl_colormaps = [name for name in plt.colormaps() if not name.endswith('_r')]
 
         # custom colormaps
         self.custom_color_dict = csvdict.import_csv_to_dict(STYLE_PATH / "custom_colormaps.csv")

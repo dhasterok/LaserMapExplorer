@@ -13,22 +13,25 @@ from dataclasses import dataclass
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
     QComboBox, QLabel, QPushButton, QWidget, QFrame, QScrollArea,
-    QColorDialog, QFileDialog, QMessageBox, QCheckBox, QSpinBox,
-    QSlider, QGroupBox, QSizePolicy, QToolBar
+    QColorDialog, QFileDialog, QMessageBox, QCheckBox, QSpinBox, QLineEdit,
+    QSlider, QGroupBox, QSizePolicy, QToolBar, QWidgetAction, QInputDialog
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF, QTimer
+from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF, QTimer, QSize, QRegularExpression
 from PyQt6.QtGui import (
-    QColor, QPainter, QPen, QBrush, QLinearGradient, QPolygonF,
-    QPixmap, QPalette, QMouseEvent, QCursor, QPainterPath, QDrag
+    QColor, QPainter, QPen, QBrush, QLinearGradient, QPolygonF, QPixmap,
+    QPalette, QMouseEvent, QCursor, QPainterPath, QDrag,
+    QRegularExpressionValidator
 )
 from PyQt6.QtCore import QMimeData
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from matplotlib.cm import ScalarMappable
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
+from pyqtgraph import colormap
 
-from src.common.CustomWidgets import CustomAction
+from src.common.CustomWidgets import CustomAction, ToggleSwitch
 from src.app.config import RESOURCE_PATH, ICONPATH
 
 @dataclass
@@ -583,6 +586,11 @@ class ContinuousColorWidget(QWidget):
         b = left_point.color.blue() * (1-t) + right_point.color.blue() * t
         
         return QColor(int(r), int(g), int(b))
+
+    def update_hex_display(self, qcolor):
+        """Update the hexEdit box to show the currently selected color."""
+        hex_str = qcolor.name().upper()  # e.g. #FF00AA
+        self.parent().hex_display.setText(hex_str)
     
     def change_point_color(self, index: int):
         """Open color dialog to change a control point color."""
@@ -653,10 +661,18 @@ class ContinuousColorWidget(QWidget):
 class ColormapPreviewWidget(FigureCanvas):
     """Widget for previewing colormaps with colorblindness simulation."""
     
-    def __init__(self, parent=None):
-        self.figure = Figure(figsize=(8, 4))
+    def __init__(self, plot_type="colorbar", parent=None):
+        self.plot_type = plot_type
+
+        if self.plot_type == "colorbar":
+            self.figure = Figure(figsize=(8, 0.25))
+        elif self.plot_type == "image":
+            self.figure = Figure(figsize=(8, 4))
+        else:
+            raise ValueError("Plot type must be 'image' or 'colorbar' ")
         super().__init__(self.figure)
         self.setParent(parent)
+
         
         # Create test data - using a simple pattern if image not available
         try:
@@ -692,38 +708,46 @@ class ColormapPreviewWidget(FigureCanvas):
             return
             
         self.figure.clear()
-        
-        # Create axis for the visualization
-        ax1 = self.figure.add_subplot(1, 1, 1)
-        
-        # Create colormap from current data
+
+        # --- Build colormap ---
         if hasattr(self.current_colormap, '__iter__') and len(self.current_colormap) > 0:
             if isinstance(self.current_colormap[0], ColorPoint):
                 # Continuous colormap
-                colors = []
-                positions = []
+                colors, positions = [], []
                 for cp in sorted(self.current_colormap, key=lambda x: x.position):
                     positions.append(cp.position)
                     colors.append(cp.to_rgb_tuple())
-                
-                if len(colors) >= 2:
-                    cmap = mcolors.LinearSegmentedColormap.from_list('custom', list(zip(positions, colors)))
-                else:
-                    cmap = 'viridis'  # fallback
+                cmap = mcolors.LinearSegmentedColormap.from_list('custom', list(zip(positions, colors))) \
+                    if len(colors) >= 2 else 'viridis'
             else:
                 # Discrete colormap
                 rgb_colors = [(c.redF(), c.greenF(), c.blueF()) for c in self.current_colormap]
                 cmap = mcolors.ListedColormap(rgb_colors)
         else:
-            cmap = 'viridis'  # fallback
-        
+            cmap = 'viridis'
+
         # Apply colorblindness simulation if needed
         if self.preview_mode != 'normal':
             cmap = self.simulate_colorblind_view(cmap)
+
+        # --- Set up ScalarMappable for colorbar ---
+        norm = mcolors.Normalize(vmin=0, vmax=1)  # Adjust vmin/vmax as needed
+        sm = ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])  # Required for ScalarMappable
+
+        if self.plot_type == "colorbar":
+            ax = self.figure.add_subplot(1, 1, 1)
+            ax.axis('off')
+            cbar = self.figure.colorbar(sm, cax=ax, orientation='horizontal')
+            cbar.set_ticks([])
         
-        # Create main visualization
-        im = ax1.imshow(self.test_data, cmap=cmap, aspect='equal')
-        ax1.axis('off')
+        elif self.plot_type == "image":
+            # Create axis for the visualization
+            ax = self.figure.add_subplot(1, 1, 1)
+            
+            # Create main visualization
+            im = ax.imshow(self.test_data, cmap=cmap, aspect='equal')
+            ax.axis('off')
         
         self.figure.tight_layout()
         self.draw()
@@ -750,9 +774,24 @@ class ColormapPreviewWidget(FigureCanvas):
             ]),
         }
 
+        # --- Grayscale mode ---
         if self.preview_mode == "grayscale":
-            return plt.cm.gray
-        
+            if isinstance(cmap, mcolors.ListedColormap):
+                # Discrete: convert each color to grayscale
+                colors = cmap.colors
+                gray_colors = np.array([np.dot(c[:3], [0.299, 0.587, 0.114]) for c in colors])
+                gray_colors = np.stack([gray_colors]*3, axis=1)
+                return mcolors.ListedColormap(gray_colors, name=f"{cmap.name}_gray")
+            else:
+                # Continuous: convert all sampled colors to grayscale
+                n_samples = 256
+                colors = cmap(np.linspace(0, 1, n_samples))[:, :3]
+                gray_values = np.dot(colors, [0.299, 0.587, 0.114])
+                gray_colors = np.stack([gray_values]*3, axis=1)
+                return mcolors.LinearSegmentedColormap.from_list(
+                    f"{cmap.name}_gray", gray_colors
+                )
+            
         if self.preview_mode not in cb_matrices:
             return cmap  # fallback
 
@@ -773,7 +812,6 @@ class ColormapPreviewWidget(FigureCanvas):
             f"{cmap.name}_{self.preview_mode}", transformed
         )
 
-
 class ColormapEditorDialog(QDialog):
     """Main colormap editor dialog."""
     
@@ -790,7 +828,7 @@ class ColormapEditorDialog(QDialog):
         self.setup_ui()
         self.load_default_colormap()
         # Initial resize without preview
-        self.resize(800, 250)
+        #self.resize(800, 250)
     
     def setup_ui(self):
         self.main_layout = QVBoxLayout(self)
@@ -799,11 +837,46 @@ class ColormapEditorDialog(QDialog):
         # Top controls
         toolbar = QToolBar(self)
         toolbar.setContentsMargins(3,3,3,3)
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        toolbar.setIconSize(QSize(24,24))
+        font = toolbar.font()
+        font.setPixelSize(11)
+
+        # File operations
+        self.load_action = CustomAction(
+            text="Load\nFile",
+            light_icon_unchecked="icon-add-list-64.svg",
+            dark_icon_unchecked="icon-add-list-dark-64.svg",
+            parent=toolbar,
+        )
+        self.load_action.setToolTip("Load file with custom colormaps")
+        self.load_action.triggered.connect(self.load_csv)
+        
+        self.save_action = CustomAction(
+            text="Save",
+            light_icon_unchecked="icon-save-file-64.svg",
+            parent=toolbar,
+        )
+        self.save_action.setToolTip("Save colormap")
+        self.save_action.triggered.connect(self.save_colormap)
         
         # Colormap selection
+        self.colormap_widget = QWidget(toolbar)
+        colormap_layout = QVBoxLayout(self.colormap_widget)
+        colormap_layout.setContentsMargins(0, 0, 0, 0)
+        self.colormap_widget.setLayout(colormap_layout)
+
         self.colormap_combo = QComboBox(toolbar)
         self.populate_colormap_combo()
         self.colormap_combo.currentTextChanged.connect(self.on_colormap_changed)
+
+        colormap_label = QLabel()
+        colormap_label.setText("Colormap:")
+        colormap_label.setFont(font)
+
+        colormap_layout.addWidget(colormap_label)
+        colormap_layout.addWidget(self.colormap_combo)
+        colormap_layout.setSpacing(3)
 
         self.add_point_action = CustomAction(
             text="Add\nPoint",
@@ -824,8 +897,8 @@ class ColormapEditorDialog(QDialog):
 
         self.preview_action = CustomAction(
             text="Preview",
-            light_icon_checked="icon-show-64.svg",
             light_icon_unchecked="icon-show-hide-64.svg",
+            light_icon_checked="icon-show-64.svg",
             parent=toolbar,
         )
         self.preview_action.setChecked(False)
@@ -833,23 +906,73 @@ class ColormapEditorDialog(QDialog):
         self.preview_action.triggered.connect(self.toggle_preview)
         
         # Preview mode selection
-        self.preview_combo = QComboBox()
-        self.preview_combo.addItems(['normal', 'grayscale', 'deuteranopia', 'protanopia', 'tritanopia'])
-        self.preview_combo.currentTextChanged.connect(self.on_preview_mode_changed)
-        
-        # Discrete/Continuous toggle
-        self.discrete_checkbox = QCheckBox("Discrete")
-        self.discrete_checkbox.setChecked(True)
-        self.discrete_checkbox.toggled.connect(self.on_discrete_toggled)
+        self.simulator_widget = QWidget(toolbar)
+        simulator_layout = QVBoxLayout(self.simulator_widget)
+        simulator_layout.setContentsMargins(0, 0, 0, 0)
+        self.simulator_widget.setLayout(simulator_layout)
 
-        toolbar.addWidget(QLabel("Colormap:"))
-        toolbar.addWidget(self.colormap_combo)
-        toolbar.addWidget(self.discrete_checkbox)
+        self.simulator_combo = QComboBox()
+        self.simulator_combo.addItems(['normal', 'grayscale', 'deuteranopia', 'protanopia', 'tritanopia'])
+        self.simulator_combo.currentTextChanged.connect(self.on_preview_mode_changed)
+        
+        simulator_label = QLabel()
+        simulator_label.setText("Colormap:")
+        simulator_label.setFont(font)
+
+        simulator_layout.addWidget(simulator_label)
+        simulator_layout.addWidget(self.simulator_combo)
+
+        # Discrete/Continuous toggle
+        self.toggle_widget = QWidget(toolbar)
+        toggle_layout = QVBoxLayout(self.toggle_widget)
+        toggle_layout.setContentsMargins(0,0,0,0)
+        self.toggle_widget.setLayout(toggle_layout)
+
+        self.cmap_style_toggle = ToggleSwitch(toolbar, height=24, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
+        self.cmap_style_toggle.setChecked(True)
+        self.cmap_style_toggle.setToolTip("Toggle colormap style")
+        self.cmap_style_toggle.stateChanged.connect(self.on_discrete_toggled)
+
+        self.cmap_style_label = QLabel(toolbar)
+        self.cmap_style_label.setText("Discrete")
+        self.cmap_style_label.setFont(font)
+        self.cmap_style_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        toggle_layout.addWidget(self.cmap_style_toggle)
+        toggle_layout.addWidget(self.cmap_style_label)
+        toggle_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.cmap_style_action = QWidgetAction(toolbar)
+        self.cmap_style_action.setDefaultWidget(self.toggle_widget)
+
+        self.color_select_action = CustomAction(
+            text="Preview",
+            light_icon_unchecked="icon-dropper-64.svg",
+            dark_icon_unchecked="icon-dropper-dark-64.svg",
+            parent=toolbar,
+        )
+        self.color_select_action.setChecked(False)
+        self.color_select_action.setToolTip("Activate the color select tool")
+        self.color_select_action.triggered.connect(self.select_color)
+
+        self.hex_display = QLineEdit()
+        self.hex_display.setFixedWidth(100)  # compact
+        self.hex_display.setPlaceholderText("#RRGGBB")
+        # Optional: restrict input to valid hex codes
+        hex_validator = QRegularExpressionValidator(QRegularExpression("#[0-9A-Fa-f]{6}"))
+        self.hex_display.setValidator(hex_validator)
+        self.hex_display.editingFinished.connect(self.on_hex_changed)
+
+        toolbar.addAction(self.load_action)
+        toolbar.addAction(self.save_action)
+        toolbar.addWidget(self.colormap_widget)
+        toolbar.addAction(self.cmap_style_action)
         toolbar.addAction(self.add_point_action)
         toolbar.addAction(self.remove_point_action)
         toolbar.addAction(self.preview_action)
-        toolbar.addWidget(QLabel("Colorblind Simulation:"))
-        toolbar.addWidget(self.preview_combo)
+        toolbar.addWidget(self.simulator_widget)
+        toolbar.addAction(self.color_select_action)
+        toolbar.addWidget(self.hex_display)
         
         self.main_layout.addWidget(toolbar)
         
@@ -886,7 +1009,10 @@ class ColormapEditorDialog(QDialog):
         colorblind_group.setMinimumSize(600, 150)
         colorblind_layout = QVBoxLayout(colorblind_group)
 
-        #colorblind_layout.addWidget()
+        self.colorbar_widget = ColormapPreviewWidget(plot_type="colorbar")
+        self.colorbar_widget.setMinimumHeight(100)  # Set minimum height for preview
+
+        colorblind_layout.addWidget(self.colorbar_widget)
 
         self.main_layout.addWidget(colorblind_group)
         
@@ -894,35 +1020,30 @@ class ColormapEditorDialog(QDialog):
         self.preview_group = QGroupBox("Preview")
         preview_layout = QVBoxLayout(self.preview_group)
         
-        self.preview_widget = ColormapPreviewWidget()
+        self.preview_widget = ColormapPreviewWidget(plot_type="image")
         self.preview_widget.setMinimumHeight(300)  # Set minimum height for preview
         preview_layout.addWidget(self.preview_widget)
         
-        # Control buttons
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        
-        # File operations
-        load_button = QPushButton("Load CSV")
-        load_button.clicked.connect(self.load_csv)
-        button_layout.addWidget(load_button)
-        
-        save_button = QPushButton("Save")
-        save_button.clicked.connect(self.save_colormap)
-        button_layout.addWidget(save_button)
-        
         cancel_button = QPushButton("Cancel")
         cancel_button.clicked.connect(self.reject)
-        button_layout.addWidget(cancel_button)
-        
-        self.main_layout.addLayout(button_layout)
+
+    def select_color(self):
+        # need to create a functioning DropperWidget
+        pass
+
+    def closeEvent(self, event):
+        """
+        Reject the dialog when closed, so changes are discarded.
+        """
+        self.reject()
+        event.accept()  # proceed with closing
     
     def populate_colormap_combo(self):
         """Populate the colormap selection combo."""
         self.colormap_combo.clear()  # Clear existing items
         
         # Add built-in matplotlib colormaps
-        builtin_maps = ['viridis', 'plasma', 'inferno', 'magma', 'Blues', 'Greens', 'Reds']
+        builtin_maps = [name for name in plt.colormaps() if not name.endswith('_r')]
         self.colormap_combo.addItems(builtin_maps)
         
         # Add separator if there are custom colormaps
@@ -999,6 +1120,7 @@ class ColormapEditorDialog(QDialog):
 
     def on_preview_mode_changed(self, mode: str):
         """Handle preview mode change."""
+        self.colorbar_widget.set_preview_mode(mode)
         self.preview_widget.set_preview_mode(mode)
     
     def on_discrete_toggled(self, is_discrete: bool):
@@ -1011,12 +1133,14 @@ class ColormapEditorDialog(QDialog):
             # Update button text for discrete mode
             self.add_point_action.setText("Add\nColor")
             self.remove_point_action.setText("Delete\nColor")
+            self.cmap_style_label.setText("Discrete")
         else:
             self.discrete_widget.hide()
             self.continuous_widget.show()
             # Update button text for continuous mode
             self.add_point_action.setText("Add\nPoint")
             self.remove_point_action.setText("Delete\nPoint")
+            self.cmap_style_label.setText("Continuous")
         
         # Reload current colormap in the new mode
         current_colormap = self.colormap_combo.currentText()
@@ -1025,6 +1149,17 @@ class ColormapEditorDialog(QDialog):
         
         # Update button states
         self.update_button_states()
+
+    def on_hex_changed(self):
+        text = self.hex_display.text().strip()
+        if len(text) == 7 and text.startswith("#"):
+            try:
+                qcolor = QColor(text)
+                if qcolor.isValid():
+                    # Update the selected control point / button color
+                    self.parent().set_selected_color(qcolor)
+            except Exception:
+                pass
     
     def on_colormap_modified(self):
         """Handle colormap modifications."""
@@ -1084,7 +1219,7 @@ class ColormapEditorDialog(QDialog):
         """Toggle preview visibility."""
         if self.preview_action.isChecked():
             # Add preview to layout
-            preview_insert_index = self.main_layout.count() - 1  # Before button layout
+            preview_insert_index = self.main_layout.count() # Before button layout
             self.main_layout.insertWidget(preview_insert_index, self.preview_group)
             self.preview_group.show()
             self.preview_action.setText("Hide\nPreview")
@@ -1100,6 +1235,7 @@ class ColormapEditorDialog(QDialog):
     
     def update_preview(self):
         """Update the preview if visible."""
+        self.colorbar_widget.set_colormap(self.current_colormap_data, self.is_discrete)
         if self.preview_action.isChecked() and self.current_colormap_data:
             self.preview_widget.set_colormap(self.current_colormap_data, self.is_discrete)
     
@@ -1116,9 +1252,10 @@ class ColormapEditorDialog(QDialog):
                     reader = csv.reader(file)
                     for row in reader:
                         if len(row) >= 2:  # At least name and one color
-                            colormap_name = row[0].strip()
+                            # Strip BOM from the first cell if present
+                            colormap_name = row[0].lstrip('\ufeff').strip()
                             colors = []
-                            
+
                             # Parse hex colors from remaining columns
                             for hex_color in row[1:]:
                                 hex_color = hex_color.strip()
@@ -1126,7 +1263,7 @@ class ColormapEditorDialog(QDialog):
                                     # Ensure hex color starts with #
                                     if not hex_color.startswith('#'):
                                         hex_color = '#' + hex_color
-                                    
+
                                     # Validate hex color format
                                     if len(hex_color) == 7:  # #rrggbb
                                         try:
@@ -1135,7 +1272,7 @@ class ColormapEditorDialog(QDialog):
                                                 colors.append(color)
                                         except:
                                             continue  # Skip invalid colors
-                            
+
                             if colors:  # Only add if we have valid colors
                                 loaded_colormaps[colormap_name] = colors
                 
@@ -1180,23 +1317,24 @@ class ColormapEditorDialog(QDialog):
         if not self.current_colormap_data:
             QMessageBox.warning(self, "Warning", "No colormap data to save")
             return
-        
+
         # Get colormap name from user
-        from PyQt6.QtWidgets import QInputDialog
         colormap_name, ok = QInputDialog.getText(
             self, "Save Colormap", "Enter colormap name:"
         )
-        
+
         if not ok or not colormap_name.strip():
             return
-        
+
         colormap_name = colormap_name.strip()
-        
-        file_path, _ = QFileDialog.getSaveFileName(
+
+        file_path_str, _ = QFileDialog.getSaveFileName(
             self, "Save Colormap CSV", "", "CSV Files (*.csv)"
         )
-        
-        if file_path:
+
+        if file_path_str:
+            file_path = Path(file_path_str)  # Convert to pathlib.Path
+
             try:
                 # Get colors based on current mode
                 if self.is_discrete:
@@ -1204,21 +1342,17 @@ class ColormapEditorDialog(QDialog):
                 else:
                     # Extract colors from continuous color points
                     colors = [point.color for point in sorted(self.current_colormap_data, key=lambda x: x.position)]
-                
+
                 # Convert colors to hex strings
                 hex_colors = [color.name() for color in colors]  # QColor.name() returns hex format
-                
-                # Check if file exists to determine if we should append or create new
-                import os
-                file_exists = os.path.exists(file_path)
+
                 existing_data = []
-                
-                if file_exists:
+                if file_path.exists():
                     # Read existing data
-                    with open(file_path, 'r') as file:
+                    with file_path.open('r', newline='', encoding='utf-8-sig') as file:
                         reader = csv.reader(file)
                         existing_data = list(reader)
-                
+
                 # Check if colormap name already exists
                 colormap_found = False
                 for i, row in enumerate(existing_data):
@@ -1227,23 +1361,26 @@ class ColormapEditorDialog(QDialog):
                         existing_data[i] = [colormap_name] + hex_colors
                         colormap_found = True
                         break
-                
+
                 if not colormap_found:
                     # Add new colormap
                     existing_data.append([colormap_name] + hex_colors)
-                
+
                 # Write all data back to file
-                with open(file_path, 'w', newline='') as file:
+                with file_path.open('w', newline='', encoding='utf-8-sig') as file:
                     writer = csv.writer(file)
                     writer.writerows(existing_data)
-                
+
                 action = "updated" if colormap_found else "added"
-                QMessageBox.information(self, "Success", 
-                                      f"Colormap '{colormap_name}' {action} successfully with {len(hex_colors)} colors")
+                QMessageBox.information(
+                    self, "Success",
+                    f"Colormap '{colormap_name}' {action} successfully with {len(hex_colors)} colors"
+                )
                 self.accept()
-                
+
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Failed to save CSV: {str(e)}")
+
     
     def get_colormap_data(self):
         """Get the current colormap data."""
@@ -1255,10 +1392,7 @@ def main():
     app = QApplication(sys.argv)
     
     # Sample existing colormaps
-    existing_maps = {
-        "Custom1": [QColor("#ff0000"), QColor("#00ff00"), QColor("#0000ff")],
-        "Custom2": [QColor("#000000"), QColor("#ffffff")]
-    }
+    existing_maps = { }
     
     dialog = ColormapEditorDialog(existing_maps)
     

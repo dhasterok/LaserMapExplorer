@@ -8,20 +8,18 @@ import sys
 import csv
 from pathlib import Path
 import numpy as np
-from typing import List, Tuple, Dict, Optional, Any
+from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QHBoxLayout, QComboBox, QLabel,
     QPushButton, QWidget, QFrame, QScrollArea, QColorDialog, QFileDialog,
     QMessageBox, QLineEdit, QGroupBox, QSizePolicy, QToolBar,
-    QWidgetAction, QInputDialog, QMenu, QMenuBar
+    QWidgetAction, QInputDialog,
 )
-from PyQt6.QtCore import (
-    Qt, pyqtSignal, QPointF, QRectF, QTimer, QSize, QRegularExpression, QObject
-)
+from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF, QTimer, QSize, QRegularExpression
 from PyQt6.QtGui import (
     QColor, QPainter, QPen, QBrush, QLinearGradient, QPolygonF, QPixmap,
-    QPalette, QMouseEvent, QCursor, QPainterPath, QDrag, QIcon,
+    QPalette, QMouseEvent, QCursor, QPainterPath, QDrag,
     QRegularExpressionValidator, QAction, QUndoCommand, QUndoStack
 )
 from PyQt6.QtCore import QMimeData
@@ -46,217 +44,74 @@ class ColorPoint:
         """Convert to matplotlib RGB tuple (0-1 range)."""
         return (self.color.redF(), self.color.greenF(), self.color.blueF())
 
-class ColorMapModel(QObject):
-    """Shared model that holds color points + undo/redo stack."""
-    modelChanged = pyqtSignal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.color_points: list[ColorPoint] = []
-        self.undo_stack = QUndoStack(self)
-
-        self.is_discrete = False
-
-    # --- API for both discrete and continuous widgets ---
-
-    def add_point(self, position: float, color: QColor, index: int = None):
-        """Add a ColorPoint at a given position (continuous) or index (discrete)."""
-        self.undo_stack.push(AddColorPoint(self, position, color, index))
-
-    def remove_point(self, index: int):
-        if 0 <= index < len(self.color_points):
-            self.undo_stack.push(RemoveColorPoint(self, index))
-
-    def move_point(self, source_index: int, target_index: int):
-        if source_index == target_index or not (0 <= source_index < len(self.color_points)) or not (0 <= target_index < len(self.color_points)):
-            return
-        self.undo_stack.push(MoveColorPoint(self, source_index, target_index))
-    
-
-
-    def space_evenly_points(self):
-        self.undo_stack.push(SpaceEvenlyPointsCommand(self))
-
-    def change_color(self, index: int, new_color: QColor):
-        if 0 <= index < len(self.color_points):
-            self.undo_stack.push(ChangeColor(self, index, new_color))
-
-    def reverse_points(self):
-        self.undo_stack.push(ReverseColorPoints(self))
-
-    def set_points(self, points: list[ColorPoint]):
-        """Directly set all color points (used for loading colormaps)."""
-        self.color_points = list(points)
-        self.modelChanged.emit()
-
-# --- Undo Commands ---
-
-class AddColorPoint(QUndoCommand):
-    def __init__(self, model, position, color, index=None):
-        super().__init__("Add Point")
-        self.model = model
-        self.position = position
-        self.color = color
-        self.index = index  # If None, append at end
+class AddColorPointCommand(QUndoCommand):
+    def __init__(self, widget, point, index=None):
+        super().__init__("Add Color Point")
+        self.widget = widget
+        self.point = point
+        self.index = index
 
     def redo(self):
-        cp = ColorPoint(self.position, self.color)
-        if self.index is not None and 0 <= self.index <= len(self.model.color_points):
-            self.model.color_points.insert(self.index, cp)
+        if self.index is None:
+            self.widget.color_points.append(self.point)
         else:
-            # Insert in sorted order by position
-            points = self.model.color_points
-            insert_at = next((i for i, p in enumerate(points) if p.position > self.position), len(points))
-            self.model.color_points.insert(insert_at, cp)
-            self.index = insert_at
-        if getattr(self.model, "is_discrete", False):
-            self._fix_positions()
-        self.model.modelChanged.emit()
+            self.widget.color_points.insert(self.index, self.point)
+        self.widget.update()
 
     def undo(self):
-        if 0 <= self.index < len(self.model.color_points):
-            self.model.color_points.pop(self.index)
-            self._fix_positions()
-            self.model.modelChanged.emit()
+        if self.point in self.widget.color_points:
+            self.widget.color_points.remove(self.point)
+        self.widget.update()
 
-    def _fix_positions(self):
-        if getattr(self.model, "is_discrete", False):
-            n = len(self.model.color_points)
-            if n > 1:
-                for i, cp in enumerate(self.model.color_points):
-                    cp.position = i / (n - 1)
-            elif n == 1:
-                self.model.color_points[0].position = 0.0
 
-class RemoveColorPoint(QUndoCommand):
-    def __init__(self, model, index):
-        super().__init__("Remove Point")
-        self.model = model
-        self.index = index
-        self.point = None
+class RemoveColorPointCommand(QUndoCommand):
+    def __init__(self, widget, point):
+        super().__init__("Remove Color Point")
+        self.widget = widget
+        self.point = point
+        self.index = widget.color_points.index(point)
 
     def redo(self):
-        if 0 <= self.index < len(self.model.color_points):
-            self.point = self.model.color_points.pop(self.index)
-            self._fix_positions()
-            self.model.modelChanged.emit()
+        self.widget.color_points.remove(self.point)
+        self.widget.update()
 
     def undo(self):
-        if self.point is not None:
-            self.model.color_points.insert(self.index, self.point)
-            self._fix_positions()
-            self.model.modelChanged.emit()
+        self.widget.color_points.insert(self.index, self.point)
+        self.widget.update()
 
-    def _fix_positions(self):
-        n = len(self.model.color_points)
-        if n > 1:
-            for i, cp in enumerate(self.model.color_points):
-                cp.position = i / (n - 1)
-        elif n == 1:
-            self.model.color_points[0].position = 0.0
 
-class MoveColorPoint(QUndoCommand):
-    def __init__(self, model, source_index, target_index):
-        super().__init__("Move Point")
-        self.model = model
-        self.source_index = source_index
-        self.target_index = target_index
-
-    def redo(self):
-        points = self.model.color_points
-        point = points.pop(self.source_index)
-        points.insert(self.target_index, point)
-        self._fix_positions()
-        self.model.modelChanged.emit()
-
-    def undo(self):
-        points = self.model.color_points
-        point = points.pop(self.target_index)
-        points.insert(self.source_index, point)
-        self._fix_positions()
-        self.model.modelChanged.emit()
-
-    def _fix_positions(self):
-        n = len(self.model.color_points)
-        if n > 1:
-            for i, cp in enumerate(self.model.color_points):
-                cp.position = i / (n - 1)
-        elif n == 1:
-            self.model.color_points[0].position = 0.0
-
-class MoveContinuousPointCommand(QUndoCommand):
-    def __init__(self, model, index, old_pos, new_pos):
-        super().__init__("Move Point")
-        self.model = model
-        self.index = index
+class MoveColorPointCommand(QUndoCommand):
+    def __init__(self, widget, point, old_pos, new_pos):
+        super().__init__("Move Color Point")
+        self.widget = widget
+        self.point = point
         self.old_pos = old_pos
         self.new_pos = new_pos
 
     def redo(self):
-        self.model.color_points[self.index].position = self.new_pos
-        self.model.color_points.sort(key=lambda cp: cp.position)
-        self.model.modelChanged.emit()
+        self.point.position = self.new_pos
+        self.widget.update()
 
     def undo(self):
-        self.model.color_points[self.index].position = self.old_pos
-        self.model.color_points.sort(key=lambda cp: cp.position)
-        self.model.modelChanged.emit()
+        self.point.position = self.old_pos
+        self.widget.update()
 
-class SpaceEvenlyPointsCommand(QUndoCommand):
-    def __init__(self, model):
-        super().__init__("Space Evenly")
-        self.model = model
-        self.old_positions = [cp.position for cp in model.color_points]
 
-    def redo(self):
-        n = len(self.model.color_points)
-        if n < 2:
-            return
-        for i, cp in enumerate(self.model.color_points):
-            cp.position = i / (n - 1)
-        self.model.color_points.sort(key=lambda cp: cp.position)
-        self.model.modelChanged.emit()
-
-    def undo(self):
-        for cp, pos in zip(self.model.color_points, self.old_positions):
-            cp.position = pos
-        self.model.color_points.sort(key=lambda cp: cp.position)
-        self.model.modelChanged.emit()
-
-class ChangeColor(QUndoCommand):
-    def __init__(self, model, index, new_color):
+class ChangeColorCommand(QUndoCommand):
+    def __init__(self, widget, point, old_color, new_color):
         super().__init__("Change Color")
-        self.model = model
-        self.index = index
-        self.old_color = model.color_points[index].color
+        self.widget = widget
+        self.point = point
+        self.old_color = old_color
         self.new_color = new_color
 
     def redo(self):
-        self.model.color_points[self.index].color = self.new_color
-        self.model.modelChanged.emit()
+        self.point.color = self.new_color
+        self.widget.update()
 
     def undo(self):
-        self.model.color_points[self.index].color = self.old_color
-        self.model.modelChanged.emit()
-
-class ReverseColorPoints(QUndoCommand):
-    def __init__(self, model):
-        super().__init__("Reverse Map")
-        self.model = model
-
-    def redo(self):
-        self._reverse_points()
-
-    def undo(self):
-        self._reverse_points()
-
-    def _reverse_points(self):
-        reversed_points = [
-            ColorPoint(1.0 - cp.position, cp.color)
-            for cp in reversed(self.model.color_points)
-        ]
-        self.model.color_points = reversed_points
-        self.model.modelChanged.emit()
+        self.point.color = self.old_color
+        self.widget.update()
 
 
 class DraggableColorButton(QPushButton):
@@ -377,242 +232,250 @@ class DraggableColorButton(QPushButton):
 
 
 class DiscreteColorWidget(QWidget):
-    """Widget for editing discrete colormaps with draggable color squares, using ColorMapModel."""
+    """Widget for editing discrete colormaps with draggable color squares."""
     colorChanged = pyqtSignal()  # General change signal
     selectionChanged = pyqtSignal(int)  # Selection changed signal
-
-    def __init__(self, model: ColorMapModel, parent=None):
+    
+    def __init__(self, colors: List[QColor], parent=None):
         super().__init__(parent)
-        self.model = model
-        self.model.modelChanged.connect(self.update_buttons)
+        self.colors = colors.copy()
         self.selected_indices = set()
         self.setup_ui()
-
+    
     def setup_ui(self):
         self.layout = QHBoxLayout(self)
         self.layout.setSpacing(2)
         self.buttons = []
         self.update_buttons()
-
+    
     def update_buttons(self):
         # Clear existing buttons
         for button in self.buttons:
             button.deleteLater()
         self.buttons.clear()
-
-        # Create new buttons from model color_points (ignore position for display)
-        for i, cp in enumerate(self.model.color_points):
-            button = DraggableColorButton(cp.color, i, self)
+        
+        # Create new buttons
+        for i, color in enumerate(self.colors):
+            button = DraggableColorButton(color, i, self)
             button.clicked.connect(lambda checked, idx=i: self.handle_color_click(idx))
             self.buttons.append(button)
             self.layout.addWidget(button)
-
+        
+        # Update selection states
         self.update_selection_display()
+        
+        # Force layout update
         self.layout.update()
         self.update()
-
+    
     def handle_color_click(self, index: int):
         """Handle color button clicks for selection."""
         if index in self.selected_indices:
+            # Already selected - deselect
             self.selected_indices.remove(index)
         else:
+            # Not selected - add to selection
             self.selected_indices.add(index)
+        
         self.update_selection_display()
         self.selectionChanged.emit(index)
-
+    
     def change_color(self, index: int):
         """Open color dialog to change a color."""
-        if 0 <= index < len(self.model.color_points):
-            color = QColorDialog.getColor(self.model.color_points[index].color, self)
+        if 0 <= index < len(self.colors):
+            color = QColorDialog.getColor(self.colors[index], self)
             if color.isValid():
-                self.model.change_color(index, color)
+                self.colors[index] = color
+                self.buttons[index].set_color(color)
                 self.colorChanged.emit()
-
+    
     def update_selection_display(self):
         """Update the visual selection state of all buttons."""
         for i, button in enumerate(self.buttons):
             button.set_selected(i in self.selected_indices)
-
+    
     def handle_color_move(self, source_index: int, target_index: int):
         """Handle drag-and-drop reordering."""
         if source_index == target_index:
             return
-
-        # Move the ColorPoint in the model
-        points = self.model.color_points
-        point = points.pop(source_index)
-        points.insert(target_index, point)
-
-        # Reassign positions to be evenly spaced
-        n = len(points)
-        for i, p in enumerate(points):
-            p.position = i / (n - 1) if n > 1 else 0.0
-
-        self.model.modelChanged.emit()
-        # Update selection indices
+        
+        print(f"Moving color from index {source_index} to {target_index}")  # Debug print
+        
+        # Move the color in the list
+        color = self.colors.pop(source_index)
+        self.colors.insert(target_index, color)
+        
+        print(f"Colors after move: {[c.name() for c in self.colors]}")  # Debug print
+        
+        # Update selected indices based on the move
         new_selected = set()
         for idx in self.selected_indices:
             if idx == source_index:
+                # The moved item goes to target_index
                 new_selected.add(target_index)
             elif source_index < target_index:
+                # Moving right: items between source and target shift left
                 if source_index < idx <= target_index:
                     new_selected.add(idx - 1)
                 else:
                     new_selected.add(idx)
-            else:
+            else:  # source_index > target_index
+                # Moving left: items between target and source shift right
                 if target_index <= idx < source_index:
                     new_selected.add(idx + 1)
                 else:
                     new_selected.add(idx)
+        
         self.selected_indices = new_selected
+        
+        # Rebuild all buttons to reflect new order
         self.update_buttons()
         self.colorChanged.emit()
-
+    
     def add_color(self):
         """Add a new color based on selection."""
-        points = self.model.color_points
-        n = len(points)
-        if n == 0:
-            # Add first color
-            self.model.add_point(0.0, QColor(Qt.GlobalColor.white))
-            self.selected_indices = {0}
-            return True
-
         if len(self.selected_indices) == 0:
-            # No selection - add at end, position 1.0
-            color = points[-1].color
-            self.model.add_point(1.0, color)
-            self.selected_indices = {n}
-            return True
-
-        sorted_indices = sorted(self.selected_indices)
-        if len(sorted_indices) == 1:
-            idx = sorted_indices[0]
-            # Insert after selected, position halfway to next (or at end)
-            if idx == n - 1:
-                pos = 1.0
-            else:
-                pos = (points[idx].position + points[idx + 1].position) / 2
-            color = points[idx].color
-            self.model.add_point(pos, color)
-            # After add, find the new point's index (may not be at end)
-            self.model.color_points.sort(key=lambda cp: cp.position)
-            new_idx = self.model.color_points.index(
-                min((cp for cp in self.model.color_points if cp.position == pos), key=lambda cp: cp.position)
-            )
-            self.selected_indices = {new_idx}
-            return True
-
-        # Multiple selections: insert between first two
-        idx1, idx2 = sorted_indices[:2]
-        if idx2 == idx1 + 1:
-            pos = (points[idx1].position + points[idx2].position) / 2
-            color1 = points[idx1].color
-            color2 = points[idx2].color
-            # Interpolate color
+            # No selection - add at end with same color as rightmost
+            new_color = self.colors[-1] if self.colors else QColor(Qt.GlobalColor.white)
+            self.colors.append(new_color)
+            new_index = len(self.colors) - 1
+        elif len(self.selected_indices) == 1:
+            # Single selection - add after it with same color
+            selected_idx = next(iter(self.selected_indices))
+            new_color = self.colors[selected_idx]
+            self.colors.insert(selected_idx + 1, new_color)
+            new_index = selected_idx + 1
+            
+            # Update selected indices for items that shifted
+            new_selected = set()
+            for idx in self.selected_indices:
+                if idx > selected_idx:
+                    new_selected.add(idx + 1)
+                else:
+                    new_selected.add(idx)
+            self.selected_indices = new_selected
+        else:
+            # Multiple selections - add between them
+            sorted_indices = sorted(self.selected_indices)
+            
+            # Find the best position (between first two selections)
+            insert_pos = sorted_indices[0] + 1
+            
+            # Calculate interpolated color between the two selected colors
+            color1 = self.colors[sorted_indices[0]]
+            color2 = self.colors[sorted_indices[1]]
+            
+            # Simple interpolation
             r = (color1.red() + color2.red()) // 2
             g = (color1.green() + color2.green()) // 2
             b = (color1.blue() + color2.blue()) // 2
-            color = QColor(r, g, b)
-            self.model.add_point(pos, color)
-            self.model.color_points.sort(key=lambda cp: cp.position)
-            new_idx = self.model.color_points.index(
-                min((cp for cp in self.model.color_points if cp.position == pos), key=lambda cp: cp.position)
-            )
-            self.selected_indices = {new_idx}
-            return True
-        return False
-
+            new_color = QColor(r, g, b)
+            
+            self.colors.insert(insert_pos, new_color)
+            new_index = insert_pos
+            
+            # Update selected indices for items that shifted
+            new_selected = set()
+            for idx in self.selected_indices:
+                if idx >= insert_pos:
+                    new_selected.add(idx + 1)
+                else:
+                    new_selected.add(idx)
+            self.selected_indices = new_selected
+        
+        # Select the new color
+        self.selected_indices.add(new_index)
+        
+        self.update_buttons()
+        self.colorChanged.emit()
+        self.selectionChanged.emit()
+        return True
+    
     def delete_selected(self):
         """Delete selected colors."""
-        points = self.model.color_points
-        if not self.selected_indices or len(points) <= len(self.selected_indices):
+        if not self.selected_indices or len(self.colors) <= len(self.selected_indices):
             return False  # Can't delete all colors
-
-        for idx in sorted(self.selected_indices, reverse=True):
-            self.model.remove_point(idx)
+        
+        # Sort indices in reverse order to delete from end to beginning
+        sorted_indices = sorted(self.selected_indices, reverse=True)
+        
+        for idx in sorted_indices:
+            del self.colors[idx]
+        
         self.selected_indices.clear()
+        self.update_buttons()
+        self.colorChanged.emit()
+        self.selectionChanged.emit()
         return True
-
+    
     def get_selected_count(self) -> int:
         """Get the number of selected colors."""
         return len(self.selected_indices)
-
+    
     def set_colors(self, colors: List[QColor]):
         """Set new colors and update display."""
-        n = len(colors)
-        self.model.color_points = [
-            ColorPoint(i / (n - 1) if n > 1 else 0.0, color)
-            for i, color in enumerate(colors)
-        ]
+        self.colors = colors.copy()
         self.selected_indices.clear()
-        self.model.modelChanged.emit()
-
+        self.update_buttons()
+    
     def get_colors(self) -> List[QColor]:
         """Get current colors."""
-        return [cp.color for cp in self.model.color_points]
+        return self.colors.copy()
 
     def reverse_colormap(self):
-        self.model.reverse_points()
+        self.colors.reverse()
+        self.update_buttons()
+        self.colorChanged.emit()
+
 
 class ContinuousColorWidget(QWidget):
     """Widget for editing continuous colormaps with draggable triangular control points."""
     colorChanged = pyqtSignal()
     selectionChanged = pyqtSignal(int)  # Selected point index (-1 for none)
     
-    def __init__(self, model: ColorMapModel, parent=None):
+    def __init__(self, color_points: List[ColorPoint], parent=None):
         super().__init__(parent)
-        self.model = model
-        self.model.modelChanged.connect(self.update)
+        self.color_points = sorted(color_points, key=lambda cp: cp.position)
+        #self.setMinimumHeight(120)
         self.dragging_point = None
         self.selected_point = -1
-        self._drag_start_pos = None
-        self._drag_start_value = None
-        self._drag_current_value = None
-        self._drag_visual_pos = None
         self.setMouseTracking(True)
-        self.margin_left = 15
+        
+        # Add margins to accommodate triangular handles
+        self.margin_left = 15  # Half triangle width + some padding
         self.margin_right = 15
-
+        
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         rect = self.rect()
+        
+        # Calculate the colormap area (excluding margins)
         colormap_left = self.margin_left
         colormap_width = rect.width() - self.margin_left - self.margin_right
         colormap_rect = QRectF(colormap_left, 0, colormap_width, 60)
-
-        # Build a list of (position, color) for the current state, including drag
-        points = []
-        for i, point in enumerate(self.model.color_points):
-            pos = point.position
-            if self.dragging_point == i and self._drag_current_value is not None:
-                pos = self._drag_current_value
-            points.append((pos, point.color))
-        # Sort by position for correct gradient
-        points.sort(key=lambda pc: pc[0])
-
+        
         # Draw colormap gradient
         gradient = QLinearGradient(colormap_left, 0, colormap_left + colormap_width, 0)
-        for pos, color in points:
-            gradient.setColorAt(pos, color)
+        for point in self.color_points:
+            gradient.setColorAt(point.position, point.color)
+        
         painter.fillRect(colormap_rect, QBrush(gradient))
-
+        
         # Draw black border around colormap (1 pixel)
         painter.setPen(QPen(Qt.GlobalColor.black, 1))
         painter.drawRect(colormap_rect)
-
-        # Draw control points and lines
-        for i, (pos, color) in enumerate(points):
-            # Find the original index for selection
-            orig_idx = next((j for j, p in enumerate(self.model.color_points)
-                            if abs(p.position - pos) < 1e-6 and p.color == color), i)
-            x = self.get_colormap_x(pos)
-            # Draw the thin black line
-            painter.setPen(QPen(Qt.GlobalColor.black, 1))
+        
+        # Draw control points as triangles
+        for i, point in enumerate(self.color_points):
+            x = colormap_left + point.position * colormap_width
+            
+            # Draw control point line
+            painter.setPen(QPen(Qt.GlobalColor.black, 2))
             painter.drawLine(int(x), 0, int(x), 60)
-            # Draw the handle
-            self.draw_triangular_handle(painter, x, color, orig_idx == self.selected_point)
+            
+            # Create triangular handle with rounded corners
+            self.draw_triangular_handle(painter, x, point.color, i == self.selected_point)
     
     def draw_triangular_handle(self, painter: QPainter, x: float, color: QColor, is_selected: bool):
         """Draw an equilateral triangular handle with convex rounded corners."""
@@ -679,83 +542,81 @@ class ContinuousColorWidget(QWidget):
         pos = (x - self.margin_left) / colormap_width
         return max(0.0, min(1.0, pos))
     
-
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
+            # Check if clicking on a control point
             clicked_point = -1
-            for i, point in enumerate(self.model.color_points):
+            for i, point in enumerate(self.color_points):
                 x = self.get_colormap_x(point.position)
                 handle_rect = self.get_handle_bounds(x)
                 if handle_rect.contains(event.position()):
                     clicked_point = i
                     break
+            
             if clicked_point >= 0:
-                self.selected_point = clicked_point
-                self.dragging_point = clicked_point
-                self._drag_start_pos = event.position().x()
-                self._drag_start_value = self.model.color_points[clicked_point].position
-                self._drag_current_value = self._drag_start_value
-                self.selectionChanged.emit(clicked_point)
-                self.update()
+                # Clicked on a control point
+                if self.selected_point == clicked_point:
+                    # Same point clicked again - deselect it
+                    self.selected_point = -1
+                    self.selectionChanged.emit(-1)
+                    self.update()
+                else:
+                    # Select this point and prepare for potential drag
+                    self.selected_point = clicked_point
+                    self.dragging_point = clicked_point  # Allow immediate dragging
+                    self.selectionChanged.emit(clicked_point)
+                    self.update()
             else:
+                # Clicked on colormap background - deselect
                 self.selected_point = -1
                 self.selectionChanged.emit(-1)
                 self.update()
         super().mousePressEvent(event)
-
+    
     def mouseDoubleClickEvent(self, event: QMouseEvent):
-        # Try to add a new point at the clicked position
-        if event.position().y() <= 60:
-            new_pos = self.get_position_from_x(event.position().x())
-            color = None
-
-            # 1. Try color at clicked position
-            if self.model.color_points:
-                color = self.get_color_at_position(new_pos)
-
-            # 2. If nothing selected, try selected point's color
-            if (color is None or not color.isValid()) and self.selected_point >= 0:
-                color = self.model.color_points[self.selected_point].color
-
-            # 3. Fallback: last color in map
-            if (color is None or not color.isValid()) and self.model.color_points:
-                color = self.model.color_points[-1].color
-
-            if color is None:
-                color = QColor(Qt.GlobalColor.black)
-
-            self.model.add_point(new_pos, color)
-            # Select the new point
-            idx = min(
-                (i for i, cp in enumerate(self.model.color_points) if abs(cp.position - new_pos) < 1e-6),
-                default=-1
-            )
-            self.selected_point = idx
-            self.selectionChanged.emit(self.selected_point)
-            self.update()
-            self.colorChanged.emit()
-            return
-
-        # Otherwise, check if double-clicked on a handle to change color
-        for i, point in enumerate(self.model.color_points):
+        # Check if double-clicking on a control point first
+        for i, point in enumerate(self.color_points):
             x = self.get_colormap_x(point.position)
             handle_rect = self.get_handle_bounds(x)
             if handle_rect.contains(event.position()):
                 self.change_point_color(i)
                 return
-
+        
+        # Double-clicked on colormap background - add new control point
+        if event.position().y() <= 60:  # Only if clicking on the gradient area
+            new_pos = self.get_position_from_x(event.position().x())
+            new_color = self.get_color_at_position(new_pos)
+            new_point = ColorPoint(new_pos, new_color)
+            
+            self.color_points.append(new_point)
+            self.color_points.sort(key=lambda cp: cp.position)
+            
+            # Select the new point
+            self.selected_point = self.color_points.index(new_point)
+            self.selectionChanged.emit(self.selected_point)
+            
+            self.update()
+            self.colorChanged.emit()
+        
         super().mouseDoubleClickEvent(event)
-
+    
     def mouseMoveEvent(self, event: QMouseEvent):
         if self.dragging_point is not None:
-            # Only update the visual position, not the model
+            # Update position of dragged point
             new_pos = self.get_position_from_x(event.position().x())
-            self._drag_current_value = min(max(new_pos, 0.0), 1.0)
-            # Visual feedback: temporarily update the point's position for painting
+            old_point = self.color_points[self.dragging_point]
+            old_point.position = new_pos
+            
+            # Keep points sorted by position and update selection
+            self.color_points.sort(key=lambda cp: cp.position)
+            self.selected_point = self.color_points.index(old_point)
+            
             self.update()
+            self.colorChanged.emit()
         else:
+            # Update cursor when hovering over control points
             cursor = Qt.CursorShape.ArrowCursor
-            for point in self.model.color_points:
+            for point in self.color_points:
                 x = self.get_colormap_x(point.position)
                 handle_rect = self.get_handle_bounds(x)
                 if handle_rect.contains(event.position()):
@@ -763,118 +624,132 @@ class ContinuousColorWidget(QWidget):
                     break
             self.setCursor(cursor)
         super().mouseMoveEvent(event)
-
+    
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if self.dragging_point is not None:
-            idx = self.dragging_point
-
-            old_pos = self._drag_start_value
-            new_pos = self._drag_current_value
-            if old_pos is None or new_pos is None:
-                return
-
-            if abs(old_pos - new_pos) > 1e-6:
-                # Only push undo command if position changed
-                self.model.undo_stack.push(MoveContinuousPointCommand(self.model, idx, old_pos, new_pos))
-
-            self.dragging_point = None
-            self._drag_start_pos = None
-            self._drag_start_value = None
-            self._drag_current_value = None
-
-            self.update()
+        self.dragging_point = None
         super().mouseReleaseEvent(event)
-
+    
     def get_color_at_position(self, position: float) -> QColor:
-        if not self.model.color_points:
+        """Calculate the interpolated color at a given position."""
+        if not self.color_points:
             return QColor(Qt.GlobalColor.black)
+        
+        # Find surrounding points
         left_point = None
         right_point = None
-        for point in self.model.color_points:
+        
+        for point in self.color_points:
             if point.position <= position:
                 left_point = point
             if point.position >= position and right_point is None:
                 right_point = point
                 break
+        
         if left_point is None:
-            return self.model.color_points[0].color
+            return self.color_points[0].color
         if right_point is None:
-            return self.model.color_points[-1].color
+            return self.color_points[-1].color
         if left_point == right_point:
             return left_point.color
+        
+        # Interpolate between left and right points
         t = (position - left_point.position) / (right_point.position - left_point.position)
+        
         r = left_point.color.red() * (1-t) + right_point.color.red() * t
         g = left_point.color.green() * (1-t) + right_point.color.green() * t
         b = left_point.color.blue() * (1-t) + right_point.color.blue() * t
+        
         return QColor(int(r), int(g), int(b))
 
     def change_point_color(self, index: int):
-        if 0 <= index < len(self.model.color_points):
-            color = QColorDialog.getColor(self.model.color_points[index].color, self)
+        """Open color dialog to change a control point color."""
+        if 0 <= index < len(self.color_points):
+            color = QColorDialog.getColor(self.color_points[index].color, self)
             if color.isValid():
-                self.model.change_color(index, color)
+                self.color_points[index].color = color
+                self.update()
                 self.colorChanged.emit()
-
+    
     def delete_selected_point(self):
-        if self.selected_point >= 0 and len(self.model.color_points) > 2:
-            self.model.remove_point(self.selected_point)
+        """Delete the currently selected control point."""
+        if self.selected_point >= 0 and len(self.color_points) > 2:  # Keep at least 2 points
+            del self.color_points[self.selected_point]
             self.selected_point = -1
             self.selectionChanged.emit(-1)
             self.update()
             self.colorChanged.emit()
             return True
         return False
-
+    
     def add_control_point(self):
-        if len(self.model.color_points) < 10:
-            # Find the largest gap between consecutive points
+        """Add a new control point, redistributing existing points to maintain colormap."""
+        if len(self.color_points) < 10:  # Reasonable maximum
+            # Find the best position to insert a new point
             best_pos = 0.5
             max_distance = 0
-            points = sorted(self.model.color_points, key=lambda cp: cp.position)
-            for i in range(len(points) - 1):
-                distance = points[i + 1].position - points[i].position
+            
+            # Find the largest gap between consecutive points
+            for i in range(len(self.color_points) - 1):
+                distance = self.color_points[i + 1].position - self.color_points[i].position
                 if distance > max_distance:
                     max_distance = distance
-                    best_pos = (points[i].position + points[i + 1].position) / 2
+                    best_pos = (self.color_points[i].position + self.color_points[i + 1].position) / 2
+            
+            # Add new point at the best position
             new_color = self.get_color_at_position(best_pos)
-            self.model.add_point(best_pos, new_color)
+            new_point = ColorPoint(best_pos, new_color)
+            
+            self.color_points.append(new_point)
+            self.color_points.sort(key=lambda cp: cp.position)
+            
             # Select the new point
-            idx = min(
-                (i for i, cp in enumerate(self.model.color_points) if abs(cp.position - best_pos) < 1e-6),
-                default=-1
-            )
-            self.selected_point = idx
+            self.selected_point = self.color_points.index(new_point)
             self.selectionChanged.emit(self.selected_point)
+            
             self.update()
             self.colorChanged.emit()
             return True
         return False
-
+    
     def set_color_points(self, color_points: List[ColorPoint]):
-        self.model.set_points(sorted(color_points, key=lambda cp: cp.position))
+        """Set new color points."""
+        self.color_points = sorted(color_points, key=lambda cp: cp.position)
         self.selected_point = -1
         self.selectionChanged.emit(-1)
-        self.model.modelChanged.emit()
         self.update()
-
+    
     def get_color_points(self) -> List[ColorPoint]:
-        return self.model.color_points.copy()
-
+        """Get current color points."""
+        return self.color_points.copy()
+    
     def get_selected_point(self) -> int:
+        """Get the index of the selected point (-1 if none)."""
         return self.selected_point
 
     def reverse_colormap(self):
-        self.model.reverse_points()
+        reversed_points = [
+            ColorPoint(1.0 - cp.position, cp.color) 
+            for cp in reversed(self.color_points)
+        ]
+        self.color_points = reversed_points
+        self.update()
+        self.colorChanged.emit()
 
     def space_evenly_color_points(self):
-        points = self.model.color_points
+        """Evenly spaces continuous color points along [0, 1]."""
+        points = self.color_points
         n = len(points)
         if n < 2:
-            return
+            return  # Need at least 2 to space
+
+        # Evenly distribute positions between 0 and 1
         for i, point in enumerate(points):
             point.position = i / (n - 1)
+
+        # Sort to ensure correct ordering
         points.sort(key=lambda p: p.position)
-        self.model.modelChanged.emit()
+
+        # Update widget display
         self.update()
         self.colorChanged.emit()
 
@@ -1041,26 +916,12 @@ class ColormapEditorDialog(QDialog):
         self.existing_colormaps = existing_colormaps or {}
         self.current_colormap_data = None
         self.is_discrete = False
-
-        # create colormap model, it contains the color points (positions, colors) and undo stack
-        self.model = ColorMapModel(self)
-        # default colormap model
-        self.model.color_points = [
-            ColorPoint(0.0, QColor("#440154")),
-            ColorPoint(0.25, QColor("#31688e")),
-            ColorPoint(0.5, QColor("#35b779")),
-            ColorPoint(0.75, QColor("#fde725")),
-            ColorPoint(1.0, QColor("#ffffff"))
-        ]
         
         self.setWindowTitle("Colormap Editor")
         self.setMinimumSize(600, 250)
         # Allow dynamic resizing
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setup_ui()
-
-        self.model.modelChanged.connect(self.on_colormap_modified)
-
         self.load_default_colormap()
         # Initial resize without preview
         #self.resize(800, 250)
@@ -1096,7 +957,6 @@ class ColormapEditorDialog(QDialog):
         self.save_action.setToolTip("Save colormap")
         self.save_action.triggered.connect(self.save_colormap)
         self.save_action.setShortcut("Ctrl+S")
-
         
         # Colormap selection
         self.colormap_widget = QWidget(toolbar)
@@ -1123,7 +983,7 @@ class ColormapEditorDialog(QDialog):
             parent=toolbar,
         )
         self.reverse_action.setToolTip("Reverse colormap direction")
-        self.reverse_action.triggered.connect(self.model.reverse_points)
+        self.reverse_action.triggered.connect(self.reverse_colormap)
         self.reverse_action.setShortcut("Ctrl+I")
 
         self.add_point_action = CustomAction(
@@ -1205,7 +1065,6 @@ class ColormapEditorDialog(QDialog):
 
         self.cmap_style_action = QWidgetAction(toolbar)
         self.cmap_style_action.setDefaultWidget(self.toggle_widget)
-        self.cmap_style_action.setText("Colormap: continuous")
         self.cmap_style_action.setShortcut("Ctrl+T")
 
         self.color_select_action = CustomAction(
@@ -1252,33 +1111,6 @@ class ColormapEditorDialog(QDialog):
         toolbar.addWidget(self.hex_display)
         
         self.main_layout.addWidget(toolbar)
-
-        menubar = QMenuBar(self)
-        file_menu = QMenu("&File", self)
-        edit_menu = QMenu("&Edit", self)
-        view_menu = QMenu("&View", self)
-
-        menubar.addMenu(file_menu)
-        menubar.addMenu(edit_menu)
-        menubar.addMenu(view_menu)
-
-        file_menu.addAction(self.load_action)
-        file_menu.addAction(self.save_action)
-        
-        self.undo_action = self.model.undo_stack.createUndoAction(self, "&Undo")
-        self.redo_action = self.model.undo_stack.createRedoAction(self, "&Redo")
-
-        edit_menu.addAction(self.undo_action)
-        edit_menu.addAction(self.redo_action)
-        edit_menu.addSeparator()
-        edit_menu.addAction(self.add_point_action)
-        edit_menu.addAction(self.remove_point_action)
-        edit_menu.addAction(self.space_evenly_action)
-        edit_menu.addAction(self.reverse_action)
-
-        view_menu.addAction(self.cmap_style_action)
-        view_menu.addAction(self.preview_action)
-        view_menu.addAction(self.color_select_action)
         
         # Colormap display area
         display_group = QGroupBox("Colormap Editor")
@@ -1286,13 +1118,22 @@ class ColormapEditorDialog(QDialog):
         display_layout = QVBoxLayout(display_group)
         
         # Discrete color editor (default)
-        self.discrete_widget = DiscreteColorWidget(self.model, self)
+        self.discrete_widget = DiscreteColorWidget([
+            QColor("#440154"), QColor("#31688e"), QColor("#35b779"), 
+            QColor("#fde725"), QColor("#ffffff")
+        ])
         self.discrete_widget.colorChanged.connect(self.on_colormap_modified)
         self.discrete_widget.selectionChanged.connect(self.on_discrete_selection_changed)
         display_layout.addWidget(self.discrete_widget)
         
         # Continuous color editor (hidden initially)
-        self.continuous_widget = ContinuousColorWidget(self.model, self)
+        self.continuous_widget = ContinuousColorWidget([
+            ColorPoint(0.0, QColor("#440154")),
+            ColorPoint(0.25, QColor("#31688e")),
+            ColorPoint(0.5, QColor("#35b779")),
+            ColorPoint(0.75, QColor("#fde725")),
+            ColorPoint(1.0, QColor("#ffffff"))
+        ])
         self.continuous_widget.colorChanged.connect(self.on_colormap_modified)
         self.continuous_widget.selectionChanged.connect(self.on_selection_changed)
         display_layout.addWidget(self.continuous_widget)
@@ -1362,6 +1203,13 @@ class ColormapEditorDialog(QDialog):
         self.current_colormap_data = default_colors
         self.update_preview()
 
+    def reverse_colormap(self):
+        if self.cmap_style_toggle.isChecked():
+            self.discrete_widget.reverse_colormap()
+        else:
+            self.continuous_widget.reverse_colormap()
+
+    
     def on_colormap_changed(self, colormap_name: str):
         """Handle colormap selection change."""
         if not colormap_name or not colormap_name.strip():  # Handle empty or whitespace selection
@@ -1370,7 +1218,6 @@ class ColormapEditorDialog(QDialog):
         print(f"Loading colormap: {colormap_name}")  # Debug print
         print(f"Available custom colormaps: {list(self.existing_colormaps.keys())}")  # Debug print
             
-        self.model.undo_stack.clear()
         if colormap_name in self.existing_colormaps:
             # Load custom colormap from loaded CSV data
             colors = self.existing_colormaps[colormap_name]
@@ -1389,7 +1236,7 @@ class ColormapEditorDialog(QDialog):
                 self.continuous_widget.set_color_points(points)
                 self.current_colormap_data = points
             
-            self.model.modelChanged.emit()
+            self.update_preview()
         else:
             # Load matplotlib colormap
             print(f"Loading matplotlib colormap: {colormap_name}")  # Debug print
@@ -1412,8 +1259,8 @@ class ColormapEditorDialog(QDialog):
                         points.append(ColorPoint(pos, color))
                     self.continuous_widget.set_color_points(points)
                     self.current_colormap_data = points
-
-                self.model.modelChanged.emit()
+                
+                self.update_preview()
             except Exception as e:
                 print(f"Error loading matplotlib colormap {colormap_name}: {e}")  # Debug print
                 pass  # Handle error gracefully
@@ -1468,7 +1315,7 @@ class ColormapEditorDialog(QDialog):
                 else:
                     idx = self.continuous_widget.get_selected_point()
                     if idx >= 0:
-                        self.model.color_points[idx].color = qcolor
+                        self.continuous_widget.color_points[idx].color = qcolor
                         self.continuous_widget.update()
                         self.continuous_widget.colorChanged.emit()
     
@@ -1508,7 +1355,7 @@ class ColormapEditorDialog(QDialog):
         """Handle control point selection changes in continuous mode."""
         if selected_index >= 0:
             # Get the selected color
-            qcolor = self.model.color_points[selected_index].color
+            qcolor = self.continuous_widget.color_points[selected_index].color
             self.update_hex_display(qcolor)
         else:
             # Clear hex display when nothing selected
@@ -1519,7 +1366,7 @@ class ColormapEditorDialog(QDialog):
         """Handle color selection changes in discrete mode."""
         if selected_index >= 0:
             # Get the selected color
-            qcolor = self.model.color_points[selected_index].color
+            qcolor = self.discrete_widget.colors[selected_index]
             self.update_hex_display(qcolor)
         else:
             # Clear hex display when nothing selected
@@ -1548,25 +1395,20 @@ class ColormapEditorDialog(QDialog):
     def add_control_point(self):
         """Add a new control point or color."""
         if self.is_discrete:
-            self.discrete_widget.add_color()
-            #if self.discrete_widget.add_color():
-            #    self.model.modelChanged.emit()
+            if self.discrete_widget.add_color():
+                self.on_colormap_modified()
         else:
-            self.continuous_widget.add_control_point()
-            #if self.continuous_widget.add_control_point():
-            #    self.model.modelChanged.emit()
-
+            if self.continuous_widget.add_control_point():
+                self.on_colormap_modified()
     
     def delete_control_point(self):
         """Delete the selected control point or colors."""
         if self.is_discrete:
-            self.discrete_widget.delete_selected()
-            # if self.discrete_widget.delete_selected():
-            #     self.model.modelChanged.emit()
+            if self.discrete_widget.delete_selected():
+                self.on_colormap_modified()
         else:
-            self.continuous_widget.delete_selected_point()
-            # if self.continuous_widget.delete_selected_point():
-            #     self.model.modelChanged.emit()
+            if self.continuous_widget.delete_selected_point():
+                self.on_colormap_modified()
     
     def toggle_preview(self):
         """Toggle preview visibility."""
@@ -1734,6 +1576,7 @@ class ColormapEditorDialog(QDialog):
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Failed to save CSV: {str(e)}")
 
+    
     def get_colormap_data(self):
         """Get the current colormap data."""
         return self.current_colormap_data, self.is_discrete

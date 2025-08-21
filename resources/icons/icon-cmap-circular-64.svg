@@ -8,38 +8,73 @@
       }
 
       .st1 {
-        fill: #4d4d4f;
+        fill: url(#linear-gradient2);
       }
 
       .st2 {
-        fill: #efefef;
+        fill: url(#linear-gradient1);
       }
 
       .st3 {
-        clip-path: url(#clippath-1);
+        fill: url(#linear-gradient3);
       }
 
       .st4 {
-        clip-path: url(#clippath);
+        fill: #4d4d4f;
+      }
+
+      .st5 {
+        fill: #efefef;
+      }
+
+      .st6 {
+        fill: url(#linear-gradient);
       }
     </style>
+    <linearGradient id="linear-gradient" x1="32" y1="32" x2="32" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#280f48" stop-opacity="0"/>
+      <stop offset=".1" stop-color="#280f48" stop-opacity=".3"/>
+      <stop offset=".3" stop-color="#280f48" stop-opacity=".6"/>
+      <stop offset=".5" stop-color="#280f48" stop-opacity=".8"/>
+      <stop offset=".7" stop-color="#280f48" stop-opacity="1"/>
+      <stop offset="1" stop-color="#280f48"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient1" x1="32" y1="60" x2="32" y2="88" gradientTransform="translate(64 92) rotate(-180)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f79020" stop-opacity="0"/>
+      <stop offset=".2" stop-color="#f79020" stop-opacity=".3"/>
+      <stop offset=".3" stop-color="#f79020" stop-opacity=".5"/>
+      <stop offset=".5" stop-color="#f79020" stop-opacity=".7"/>
+      <stop offset=".6" stop-color="#f79020" stop-opacity=".8"/>
+      <stop offset=".8" stop-color="#f79020" stop-opacity=".9"/>
+      <stop offset=".9" stop-color="#f79020" stop-opacity="1"/>
+      <stop offset="1" stop-color="#f79020"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient2" x1="32" y1="32" x2="32" y2="60" gradientTransform="translate(64) rotate(90)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f9ed23" stop-opacity="0"/>
+      <stop offset="0" stop-color="#f9ed23" stop-opacity="0"/>
+      <stop offset=".2" stop-color="#f9ed23" stop-opacity=".1"/>
+      <stop offset=".4" stop-color="#f9ed23" stop-opacity=".3"/>
+      <stop offset=".6" stop-color="#f9ed23" stop-opacity=".6"/>
+      <stop offset=".9" stop-color="#f9ed23" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#f9ed23"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient3" x1="32" y1="60" x2="32" y2="88" gradientTransform="translate(-28 64) rotate(-90)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#457fc2" stop-opacity="0"/>
+      <stop offset=".2" stop-color="#3c7fb0" stop-opacity=".1"/>
+      <stop offset=".6" stop-color="#277f81" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#098040"/>
+    </linearGradient>
     <clipPath id="clippath">
       <circle class="st0" cx="32" cy="32" r="30"/>
     </clipPath>
-    <clipPath id="clippath-1">
-      <rect class="st0" x="-3" y="-3" width="70" height="70"/>
-    </clipPath>
   </defs>
+  <path class="st6" d="M60,32c0,15.4-12.6,28-28,28S4,47.4,4,32h56Z"/>
+  <path class="st2" d="M4,32c0-15.4,12.6-28,28-28s28,12.6,28,28H4Z"/>
+  <path class="st1" d="M32,60c-15.4,0-28-12.6-28-28S16.6,4,32,4v56Z"/>
+  <path class="st3" d="M32,4c15.4,0,28,12.6,28,28s-12.6,28-28,28V4Z"/>
+  <path class="st4" d="M32,4c15.4,0,28,12.6,28,28s-12.6,28-28,28S4,47.4,4,32,16.6,4,32,4M32,2C15.4,2,2,15.4,2,32s13.4,30,30,30,30-13.4,30-30S48.6,2,32,2h0Z"/>
   <g>
-    <g class="st4">
-      <g class="st3">
-        <image width="147" height="147" transform="translate(-3.4 -3.2) scale(.5)" xlink:href="icon-cmap-circular-64-1.png"/>
-      </g>
-    </g>
-    <path class="st1" d="M32,4c15.4,0,28,12.6,28,28s-12.6,28-28,28S4,47.4,4,32,16.6,4,32,4M32,2C15.4,2,2,15.4,2,32s13.4,30,30,30,30-13.4,30-30S48.6,2,32,2h0Z"/>
-  </g>
-  <g>
-    <path class="st2" d="M32,43c-6.1,0-11-4.9-11-11s4.9-11,11-11,11,4.9,11,11-4.9,11-11,11Z"/>
-    <path class="st1" d="M32,22c5.5,0,10,4.5,10,10s-4.5,10-10,10-10-4.5-10-10,4.5-10,10-10M32,20c-6.6,0-12,5.4-12,12s5.4,12,12,12,12-5.4,12-12-5.4-12-12-12h0Z"/>
+    <path class="st5" d="M32,43c-6.1,0-11-4.9-11-11s4.9-11,11-11,11,4.9,11,11-4.9,11-11,11Z"/>
+    <path class="st4" d="M32,22c5.5,0,10,4.5,10,10s-4.5,10-10,10-10-4.5-10-10,4.5-10,10-10M32,20c-6.6,0-12,5.4-12,12s5.4,12,12,12,12-5.4,12-12-5.4-12-12-12h0Z"/>
   </g>
 </svg>

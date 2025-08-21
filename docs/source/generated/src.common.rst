@@ -13,6 +13,7 @@
    Browser
    Calculator
    CodingWidgets
+   ColorDropper
    CustomMplCanvas
    CustomWidgets
    DataHandling
@@ -35,6 +36,7 @@
    format
    gausscensor
    geochronology
+   image_color_picker
    outliers
    plot_spider
    radar

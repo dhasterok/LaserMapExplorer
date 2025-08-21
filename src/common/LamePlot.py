@@ -2547,3 +2547,37 @@ def update_figure_font(canvas, font_name):
             text_obj.set_fontname(font_name)
     except:
         print('Unable to update figure font.')
+
+# def plot_colormap_annulus(cmap_name, r_inner=0.5, r_outer=1.0, n_points=512):
+#     """
+#     Preview a colormap as an annulus (good for circular colormaps).
+    
+#     Parameters
+#     ----------
+#     cmap_name : str
+#         The name of the matplotlib colormap.
+#     r_inner : float
+#         Inner radius of the annulus.
+#     r_outer : float
+#         Outer radius of the annulus.
+#     n_points : int
+#         Angular resolution (higher = smoother).
+#     """
+#     theta = np.linspace(0, 2*np.pi, n_points)
+#     r = np.linspace(r_inner, r_outer, 2)
+#     T, R = np.meshgrid(theta, r)
+    
+#     # Normalize theta to [0,1] for colormap lookup
+#     norm = mcolors.Normalize(vmin=0, vmax=2*np.pi)
+#     cmap = get_cmap(cmap_name)
+#     Z = T  # angle determines color
+    
+#     fig, ax = plt.subplots(subplot_kw={'projection':'polar'})
+#     c = ax.pcolormesh(T, R, Z, cmap=cmap, norm=norm, shading='auto')
+    
+#     ax.set_yticklabels([])   # hide radius labels
+#     ax.set_xticklabels([])   # hide angle labels
+#     ax.set_ylim(r_inner, r_outer)
+#     ax.set_aspect(1)
+    
+#     plt.show()

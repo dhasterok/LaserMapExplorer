@@ -1,63 +1,88 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QLineEdit
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout,
+    QComboBox, QLineEdit, QLabel
+)
 import matplotlib.pyplot as plt
 import cmcrameri.cm as cmr
 import sys
 
+# --- Collect colormap names ---
+def get_cmr_colormap_names():
+    """Return a flat list of all Crameri colormap names."""
+    names = []
+    for attr in dir(cmr):
+        if attr.startswith("_cmap_names"):
+            val = getattr(cmr, attr)
+            if isinstance(val, (list, tuple)):
+                names.extend(val)
+    return sorted(set(names))
+
+
 class ColormapSelector(QWidget):
-    def __init__(self, custom_maps=None):
-        super().__init__()
-        self.setWindowTitle("Colormap Selector")
-        layout = QVBoxLayout(self)
+    def __init__(self, custom_maps=None, parent=None):
+        super().__init__(parent)
 
-        # --- Colormap sets ---
-        self.set_combo = QComboBox()
-        self.set_combo.addItems(["All", "Matplotlib", "Crameri", "Custom"])
-        layout.addWidget(QLabel("Set:"))
-        layout.addWidget(self.set_combo)
-
-        # --- Search box ---
-        self.search_box = QLineEdit()
-        layout.addWidget(QLabel("Search:"))
-        layout.addWidget(self.search_box)
-
-        # --- Colormap combobox ---
-        self.cmap_combo = QComboBox()
-        layout.addWidget(self.cmap_combo)
-
-        # --- Store maps ---
+        # --- Data sources ---
         self.maps = {
-            "Matplotlib": [name for name in plt.colormaps() if not name.endswith('_r')],
-            "Crameri": list(cmr.keys()),
+            "Matplotlib": sorted(
+                name for name in plt.colormaps()
+                if not name.endswith("_r") and not name.startswith("cmc.")
+            ),
+            "Crameri": get_cmr_colormap_names(),
             "Custom": custom_maps or []
         }
 
-        # --- Connect signals ---
-        self.set_combo.currentTextChanged.connect(self.update_maps)
-        self.search_box.textChanged.connect(self.update_maps)
+        # --- Widgets ---
+        layout = QVBoxLayout(self)
 
-        # Initial population
-        self.update_maps()
+        self.source_combo = QComboBox()
+        self.source_combo.addItems(self.maps.keys())
 
-    def update_maps(self):
-        set_name = self.set_combo.currentText()
-        search = self.search_box.text().lower()
+        self.search_box = QLineEdit()
+        self.search_box.setPlaceholderText("Search colormaps...")
 
-        # Aggregate maps based on set
-        if set_name == "All":
-            names = sum(self.maps.values(), [])
-        else:
-            names = self.maps.get(set_name, [])
+        self.cmap_combo = QComboBox()
 
-        # Apply search filter
-        filtered = [n for n in names if search in n.lower()]
+        layout.addWidget(QLabel("Colormap Source:"))
+        layout.addWidget(self.source_combo)
+        layout.addWidget(QLabel("Search:"))
+        layout.addWidget(self.search_box)
+        layout.addWidget(QLabel("Colormap:"))
+        layout.addWidget(self.cmap_combo)
 
-        # Update combobox
+        # --- Signals ---
+        self.source_combo.currentTextChanged.connect(self.update_cmap_combo)
+        self.search_box.textChanged.connect(self.update_cmap_combo)
+
+        # --- Initialize ---
+        self.update_cmap_combo()
+
+    def update_cmap_combo(self):
+        """Update colormap combobox based on current source and search."""
+        source = self.source_combo.currentText()
+        all_items = self.maps[source]
+
+        filter_text = self.search_box.text().lower()
+        filtered = [name for name in all_items if filter_text in name.lower()]
+
         self.cmap_combo.clear()
         self.cmap_combo.addItems(filtered)
+
+    def get_selected_cmap(self):
+        """Return the currently selected colormap name."""
+        return self.cmap_combo.currentText()
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Colormap Selector Example")
+        self.setCentralWidget(ColormapSelector(custom_maps=["my_custom_1", "my_custom_2"]))
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = ColormapSelector(custom_maps=["mymap1", "mymap2"])
+    window = MainWindow()
+    window.resize(400, 200)
     window.show()
     sys.exit(app.exec())

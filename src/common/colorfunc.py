@@ -1,5 +1,6 @@
 import re
 import numpy as np
+from PyQt6.QtGui import QColor
 
 def is_valid_hex_color(hex_str):
     """
@@ -66,3 +67,33 @@ def get_rgb_color(color):
             rgb = get_rgb_color(hexcolor)
             color_list[i] = tuple(float(c)/255 for c in rgb) + (1.0,)
         return color_list
+
+def qcolor_to_nrgb(colors):
+    """
+    Convert a list of QColor objects into a list of normalized (R, G, B) tuples.
+    
+    Parameters
+    ----------
+    colors : list of QColor
+    
+    Returns
+    -------
+    list of tuple
+        Each tuple is (r, g, b) with values in [0, 1].
+    """
+    return [(c.redF(), c.greenF(), c.blueF()) for c in colors]
+
+def qcolor_to_rgb(colors):
+    """
+    Convert a list of QColor objects into a list of normalized (R, G, B) tuples.
+    
+    Parameters
+    ----------
+    colors : list of QColor
+    
+    Returns
+    -------
+    list of tuple
+        Each tuple is (r, g, b) with values in [0, 1].
+    """
+    return [(c.red(), c.green(), c.blue()) for c in colors]

@@ -1,4 +1,4 @@
-﻿src.common.CustomMplCanvas
+src.common.CustomMplCanvas
 ==========================
 
 .. automodule:: src.common.CustomMplCanvas

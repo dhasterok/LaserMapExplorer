@@ -1,18 +1,3 @@
-#!/usr/bin/env python3
-"""image_color_picker.py
-
-A self-contained PyQt6 application that reproduces the behavior of imagecolorpicker.com:
-- Load image from file, drag-drop, or clipboard paste
-- Hover to see a magnified pixel-perfect preview (grid + center highlight)
-- Click to pick the exact pixel color under the cursor
-- Displays HEX, RGB, HSV values and a small palette of picked colors
-- Editable HEX field (press Enter to copy / apply to clipboard)
-- DPI-aware and multi-monitor safe mapping between display coordinates and image pixels
-
-Save this file and run it with Python where PyQt6 is installed:
-    python image_color_picker.py
-"""
-
 from __future__ import annotations
 import sys
 from typing import Tuple, List
@@ -32,8 +17,7 @@ DEFAULT_ZOOM = 8         # magnification factor
 GRID_SIZE = 15           # sample grid (odd preferred)
 MAG_PREVIEW_SIZE = 180   # preview widget size in pixels (square)
 MIN_ZOOM = 0.1
-MAX_ZOOM = 20.0
-
+MAX_ZOOM = 10.0
 
 class Magnifier(QWidget):
     """Floating magnifier widget showing zoomed region around a point in an image.
@@ -146,7 +130,7 @@ class ImageColorPicker(QWidget):
     """
     colorPicked = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         self.setWindowTitle('Image Color Picker')
         self.resize(900, 600)
@@ -160,20 +144,11 @@ class ImageColorPicker(QWidget):
         self.open_btn.clicked.connect(self.open_image)
         self.paste_btn = QPushButton('Paste Image')
         self.paste_btn.clicked.connect(self.paste_image)
-        self.clear_btn = QPushButton('Clear Palette')
-        self.clear_btn.clicked.connect(self.clear_palette)
-
-        self.hex_edit = QLineEdit()
-        self.hex_edit.setPlaceholderText('#RRGGBB')
-        self.hex_edit.returnPressed.connect(self.on_hex_entered)
 
         top_bar = QHBoxLayout()
         top_bar.addWidget(self.open_btn)
         top_bar.addWidget(self.paste_btn)
         top_bar.addStretch(1)
-        top_bar.addWidget(QLabel('Selected HEX:'))
-        top_bar.addWidget(self.hex_edit)
-        top_bar.addWidget(self.clear_btn)
 
         # Image display
         self.image_label = QLabel()
@@ -187,17 +162,9 @@ class ImageColorPicker(QWidget):
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.image_label)
 
-        # Palette
-        self.palette_list = QListWidget()
-        self.palette_list.setMaximumWidth(160)
-        self.palette_list.itemClicked.connect(self.on_palette_item_clicked)
-
-        main_layout = QHBoxLayout()
-        left_layout = QVBoxLayout()
-        left_layout.addLayout(top_bar)
-        left_layout.addWidget(self.scroll)
-        main_layout.addLayout(left_layout)
-        main_layout.addWidget(self.palette_list)
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(top_bar)
+        main_layout.addWidget(self.scroll)
 
         self.setLayout(main_layout)
 
@@ -346,8 +313,7 @@ class ImageColorPicker(QWidget):
 
         color = self._image.pixelColor(img_x, img_y)
         hex_code = color_to_hex(color)
-        self.add_color_to_palette(hex_code)
-        self.hex_edit.setText(hex_code)
+        print(f"Picked color: {hex_code}")
         self.colorPicked.emit(hex_code)
 
     def wheelEvent(self, event: QWheelEvent):
@@ -381,40 +347,3 @@ class ImageColorPicker(QWidget):
         self.image_label.setPixmap(scaled)
         self.image_label.adjustSize()
         self._display_scale = scaled.width() / self._image.width()
-
-    # ----------------- palette -----------------
-    def add_color_to_palette(self, hex_code: str):
-        item = QListWidgetItem(hex_code)
-        item.setBackground(QColor(hex_code))
-        self.palette_list.addItem(item)
-
-    def on_palette_item_clicked(self, item: QListWidgetItem):
-        hex_code = item.text()
-        self.hex_edit.setText(hex_code)
-        copy = QApplication.clipboard()
-        copy.setText(hex_code)
-
-    def clear_palette(self):
-        self.palette_list.clear()
-
-    def on_hex_entered(self):
-        text = self.hex_edit.text().strip()
-        if QColor.isValidColor(text):
-            # copy to clipboard
-            QApplication.clipboard().setText(text)
-            QMessageBox.information(self, 'Copied', f'Copied {text} to clipboard')
-        else:
-            QMessageBox.warning(self, 'Invalid', 'Not a valid hex color')
-
-
-def main():
-    app = QApplication(sys.argv)
-    #QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
-    #QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
-    w = ImageColorPicker()
-    w.show()
-    sys.exit(app.exec())
-
-
-if __name__ == '__main__':
-    main()

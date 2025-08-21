@@ -17,6 +17,7 @@ import pandas as pd
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 from matplotlib.colors import BoundaryNorm, ListedColormap
+
 # import ternary
 class ternary:
     """Ternary plotting class, produces ternary axes and creates various plot types.

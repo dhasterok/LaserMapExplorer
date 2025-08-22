@@ -1,8 +1,9 @@
 from __future__ import annotations
 import sys
+import numpy as np
 from typing import Tuple, List
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton,
+    QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QSpinBox,
     QFileDialog, QScrollArea, QLineEdit, QListWidget, QListWidgetItem, QMessageBox
 )
 from PyQt6.QtGui import (
@@ -10,7 +11,14 @@ from PyQt6.QtGui import (
     QPen, QGuiApplication, QWheelEvent
 )
 from PyQt6.QtCore import Qt, QPoint, QRect, QSize, pyqtSignal
-from src.common.ColorManager import color_to_hex, color_to_rgb, color_to_hsv
+from src.common.ColorManager import color_to_hex, color_to_rgb, color_to_hex, convert_color_list
+
+from PIL import Image
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
+import colorsys
 
 # Configuration defaults
 DEFAULT_ZOOM = 8         # magnification factor
@@ -18,6 +26,9 @@ GRID_SIZE = 15           # sample grid (odd preferred)
 MAG_PREVIEW_SIZE = 180   # preview widget size in pixels (square)
 MIN_ZOOM = 0.1
 MAX_ZOOM = 10.0
+
+def sort_by_hue(colors):
+    return sorted(colors, key=lambda c: colorsys.rgb_to_hsv(*c)[0])
 
 class Magnifier(QWidget):
     """Floating magnifier widget showing zoomed region around a point in an image.
@@ -129,6 +140,7 @@ class ImageColorPicker(QWidget):
     - Click picks color and adds to palette
     """
     colorPicked = pyqtSignal(str)
+    paletteCreated = pyqtSignal(list)
 
     def __init__(self, parent=None):
         super().__init__()
@@ -138,6 +150,7 @@ class ImageColorPicker(QWidget):
         self.zoom = DEFAULT_ZOOM
         self.grid_size = GRID_SIZE
         self._zoom_factor = 1.0
+        self._n_colors = 6
 
         # UI
         self.open_btn = QPushButton('Open Image')
@@ -145,10 +158,22 @@ class ImageColorPicker(QWidget):
         self.paste_btn = QPushButton('Paste Image')
         self.paste_btn.clicked.connect(self.paste_image)
 
+        self.region_btn = QPushButton('Auto: Palette')
+        self.region_btn.clicked.connect(self.region_based_palette_qpixmap)
+
+        self.n_colors_spinbox = QSpinBox()
+        self.n_colors_spinbox.setRange(2, 20)
+        self.n_colors_spinbox.setSingleStep(1)
+        self.n_colors_spinbox.setValue(self._n_colors)
+        self.n_colors_spinbox.valueChanged.connect(lambda value: setattr(self, "_n_colors", value))
+
         top_bar = QHBoxLayout()
         top_bar.addWidget(self.open_btn)
         top_bar.addWidget(self.paste_btn)
         top_bar.addStretch(1)
+        top_bar.addWidget(self.region_btn)
+        top_bar.addWidget(QLabel("No. colors:"))
+        top_bar.addWidget(self.n_colors_spinbox)
 
         # Image display
         self.image_label = QLabel()
@@ -347,3 +372,43 @@ class ImageColorPicker(QWidget):
         self.image_label.setPixmap(scaled)
         self.image_label.adjustSize()
         self._display_scale = scaled.width() / self._image.width()
+
+    def qpixmap_to_pil(self) -> Image.Image:
+        """Convert QPixmap to a PIL Image (RGB)."""
+        qimg = self._pixmap.toImage().convertToFormat(QImage.Format.Format_RGB32)
+        width, height = qimg.width(), qimg.height()
+
+        ptr = qimg.bits()
+        ptr.setsize(height * width * 4)
+
+        arr = np.array(ptr, dtype=np.uint8).reshape((height, width, 4))
+
+        # Qt RGB32 is stored as BGRA on little-endian
+        b, g, r, a = arr[...,0], arr[...,1], arr[...,2], arr[...,3]
+        rgb = np.dstack([r, g, b])
+
+        return Image.fromarray(rgb, "RGB")    
+
+    def region_based_palette_qpixmap(self):
+        grid_size = int(50)
+        # Convert to PIL, downsample to emphasize regions
+        pil_img = self.qpixmap_to_pil().convert("RGB")
+        print("Image mode after conversion:", pil_img.mode)
+
+        # plt.imshow(pil_img)
+        # plt.axis("off")
+        # plt.show()
+        print("Image mode before resize:", pil_img.mode)
+        small = pil_img.convert("RGB").resize((grid_size, grid_size), Image.Resampling.LANCZOS)
+        pixels = np.array(small).reshape(-1, 3).astype(float) / 255.0
+
+        print("Sample pixels:", pixels[:10])
+
+        # K-means clustering on reduced set
+        kmeans = KMeans(n_clusters=self._n_colors, random_state=42, n_init=10)
+        kmeans.fit(pixels)
+        colors = kmeans.cluster_centers_
+        colors = sort_by_hue(colors=colors)
+
+        # Example visualization
+        self.paletteCreated.emit(convert_color_list(colors, 'hex'))

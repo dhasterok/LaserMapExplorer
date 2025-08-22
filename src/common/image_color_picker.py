@@ -16,8 +16,9 @@ Save this file and run it with Python where PyQt6 is installed:
 from __future__ import annotations
 import sys
 from typing import Tuple, List
+import numpy as np
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton,
+    QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QSpinBox,
     QFileDialog, QScrollArea, QLineEdit, QListWidget, QListWidgetItem, QMessageBox
 )
 from PyQt6.QtGui import (
@@ -25,7 +26,15 @@ from PyQt6.QtGui import (
     QPen, QGuiApplication, QWheelEvent
 )
 from PyQt6.QtCore import Qt, QPoint, QRect, QSize, pyqtSignal
-from src.common.ColorManager import color_to_hex, color_to_rgb, color_to_hsv
+from ColorManager import color_to_hex, color_to_rgb, color_to_hsv, color_to_hex, convert_color_list
+
+from PIL import Image
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from skimage import color
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
+import colorsys
 
 # Configuration defaults
 DEFAULT_ZOOM = 8         # magnification factor
@@ -34,6 +43,25 @@ MAG_PREVIEW_SIZE = 180   # preview widget size in pixels (square)
 MIN_ZOOM = 0.1
 MAX_ZOOM = 20.0
 
+def debug_qpixmap(pixmap: QPixmap):
+    qimg = pixmap.toImage()
+    print("QImage format:", qimg.format())
+    width, height = qimg.width(), qimg.height()
+    ptr = qimg.bits()
+    ptr.setsize(qimg.sizeInBytes())
+    arr = np.array(ptr, dtype=np.uint8).reshape((height, width, qimg.depth() // 8))
+    print("Array shape:", arr.shape)
+    print("First pixel:", arr[0,0])
+    return arr
+
+def sort_by_lab(colors):
+    lab = color.rgb2lab([colors])  # shape (1, n, 3)
+    lab = lab[0]
+    order = np.lexsort((lab[:,2], lab[:,1], lab[:,0]))  # sort by L, then a, then b
+    return [colors[i] for i in order]
+
+def sort_by_hue(colors):
+    return sorted(colors, key=lambda c: colorsys.rgb_to_hsv(*c)[0])
 
 class Magnifier(QWidget):
     """Floating magnifier widget showing zoomed region around a point in an image.
@@ -145,6 +173,7 @@ class ImageColorPicker(QWidget):
     - Click picks color and adds to palette
     """
     colorPicked = pyqtSignal(str)
+    paletteCreated = pyqtSignal(list)
 
     def __init__(self):
         super().__init__()
@@ -154,6 +183,8 @@ class ImageColorPicker(QWidget):
         self.zoom = DEFAULT_ZOOM
         self.grid_size = GRID_SIZE
         self._zoom_factor = 1.0
+        self._n_colors = 6
+        self.plot_flag = True
 
         # UI
         self.open_btn = QPushButton('Open Image')
@@ -166,10 +197,34 @@ class ImageColorPicker(QWidget):
         self.hex_edit = QLineEdit()
         self.hex_edit.setPlaceholderText('#RRGGBB')
         self.hex_edit.returnPressed.connect(self.on_hex_entered)
+        
+        self.pca_btn = QPushButton('Auto: PCA')
+        self.pca_btn.clicked.connect(self.pca_palette)
+
+        self.kmeans_btn = QPushButton('Auto: K-Means')
+        self.kmeans_btn.clicked.connect(self.kmeans_palette)
+
+        self.quantize_btn = QPushButton('Auto: Quantize')
+        self.quantize_btn.clicked.connect(self.quantize_palette)
+
+        self.region_btn = QPushButton('Auto: Region')
+        self.region_btn.clicked.connect(self.region_based_palette_qpixmap)
+
+        self.n_colors_spinbox = QSpinBox()
+        self.n_colors_spinbox.setRange(2, 20)
+        self.n_colors_spinbox.setSingleStep(1)
+        self.n_colors_spinbox.setValue(self._n_colors)
+        self.n_colors_spinbox.valueChanged.connect(lambda value: setattr(self, "_n_colors", value))
 
         top_bar = QHBoxLayout()
         top_bar.addWidget(self.open_btn)
         top_bar.addWidget(self.paste_btn)
+        top_bar.addWidget(self.pca_btn)
+        top_bar.addWidget(self.kmeans_btn)
+        top_bar.addWidget(self.quantize_btn)
+        top_bar.addWidget(self.region_btn)
+        top_bar.addWidget(QLabel("No. colors:"))
+        top_bar.addWidget(self.n_colors_spinbox)
         top_bar.addStretch(1)
         top_bar.addWidget(QLabel('Selected HEX:'))
         top_bar.addWidget(self.hex_edit)
@@ -213,6 +268,8 @@ class ImageColorPicker(QWidget):
         # Drag & drop
         self.setAcceptDrops(True)
 
+        self.paletteCreated.connect(lambda colors: self.update_palette(colors))
+
     # ----------------- image loading -----------------
     def open_image(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Images (*.png *.jpg *.bmp *.gif)')
@@ -254,6 +311,8 @@ class ImageColorPicker(QWidget):
 
         self.image_label.adjustSize()
         self.magnifier.hide()
+
+        debug_qpixmap(self._pixmap)
 
     # ----------------- drag & drop -----------------
     def dragEnterEvent(self, event):
@@ -383,6 +442,11 @@ class ImageColorPicker(QWidget):
         self._display_scale = scaled.width() / self._image.width()
 
     # ----------------- palette -----------------
+    def update_palette(self, colors: List):
+        self.clear_palette()
+        for c in colors:
+            self.add_color_to_palette(c)
+
     def add_color_to_palette(self, hex_code: str):
         item = QListWidgetItem(hex_code)
         item.setBackground(QColor(hex_code))
@@ -405,6 +469,137 @@ class ImageColorPicker(QWidget):
             QMessageBox.information(self, 'Copied', f'Copied {text} to clipboard')
         else:
             QMessageBox.warning(self, 'Invalid', 'Not a valid hex color')
+
+    def qpixmap_to_numpy(self) -> np.ndarray:
+        """Convert QPixmap to a normalized (0-1) RGB NumPy array."""
+        qimg = self._pixmap.toImage().convertToFormat(QImage.Format.Format_RGB32)
+        width = qimg.width()
+        height = qimg.height()
+        
+        ptr = qimg.bits()
+        ptr.setsize(height * width * 4)
+        
+        arr = np.array(ptr, dtype=np.uint8).reshape((height, width, 4))
+
+        # Qt RGB32 is stored as BGRA on little-endian
+        b, g, r, a = arr[...,0], arr[...,1], arr[...,2], arr[...,3]
+        rgb = np.dstack([r, g, b])
+
+        # Reshape to (num_pixels, 3)
+        pixels = rgb.reshape(-1, 3)
+
+        return pixels / 255.0  # normalize to 0-1
+
+    def qpixmap_to_pil(self) -> Image.Image:
+        """Convert QPixmap to a PIL Image (RGB)."""
+        qimg = self._pixmap.toImage().convertToFormat(QImage.Format.Format_RGB32)
+        width, height = qimg.width(), qimg.height()
+
+        ptr = qimg.bits()
+        ptr.setsize(height * width * 4)
+
+        arr = np.array(ptr, dtype=np.uint8).reshape((height, width, 4))
+
+        # Qt RGB32 is stored as BGRA on little-endian
+        b, g, r, a = arr[...,0], arr[...,1], arr[...,2], arr[...,3]
+        rgb = np.dstack([r, g, b])
+
+        return Image.fromarray(rgb, "RGB")
+
+    def plot_palette(self, colors):
+        """ Visualize the palette """
+        if not self.plot_flag:
+            return
+
+        plt.figure(figsize=(8, 1))
+        plt.imshow([colors], aspect='auto')
+        plt.axis('off')
+        plt.show()
+
+    def pca_palette(self):
+        pixels = self.qpixmap_to_numpy()
+        pixels = color.rgb2lab(pixels.reshape(-1,1,3)).reshape(-1,3)
+
+        # PCA in LAB space
+        pca = PCA(n_components=1)
+        pca.fit(pixels)
+        proj = pca.transform(pixels)
+
+        # Find min/max along principal axis
+        min_idx = np.argmin(proj)
+        max_idx = np.argmax(proj)
+        color_min_lab = pixels[min_idx]
+        color_max_lab = pixels[max_idx]
+
+        # Convert back to RGB for matplotlib
+        color_min_rgb = color.lab2rgb(color_min_lab.reshape(1,1,3)).reshape(3)
+        color_max_rgb = color.lab2rgb(color_max_lab.reshape(1,1,3)).reshape(3)
+
+        # Create colormap
+        from matplotlib.colors import LinearSegmentedColormap
+        cmap = LinearSegmentedColormap.from_list("pca_lab_colormap", [color_min_rgb, color_max_rgb])
+
+        # Visualize colormap
+        plt.figure(figsize=(8, 1))
+        plt.imshow([np.linspace(0, 1, 256)], aspect='auto', cmap=cmap)
+        plt.axis('off')
+        plt.show()
+
+    def kmeans_palette(self):
+        pixels = self.qpixmap_to_numpy()
+
+        # Apply K-means clustering
+        kmeans = KMeans(n_clusters=self._n_colors, random_state=42)
+        kmeans.fit(pixels)
+        colors = kmeans.cluster_centers_
+        #colors = sort_by_lab(colors=colors)
+        colors = sort_by_hue(colors=colors)
+
+        self.plot_palette(colors)
+
+        self.paletteCreated.emit(convert_color_list(colors, 'hex'))
+
+    def quantize_palette(self):
+        pil_img = self.qpixmap_to_pil()
+
+        # Pillow’s median-cut quantization
+        quantized = pil_img.quantize(colors=self._n_colors, method=Image.MEDIANCUT)
+
+        # Extract palette
+        palette = quantized.getpalette()[:self._n_colors*3]  # first N colors * 3 channels
+        colors = np.array(palette).reshape(-1, 3) / 255.0
+        colors = sort_by_hue(colors=colors)
+
+        # Example visualization
+        self.plot_palette(colors)
+
+        self.paletteCreated.emit(convert_color_list(colors, 'hex'))
+
+    def region_based_palette_qpixmap(self):
+        grid_size = int(50)
+        # Convert to PIL, downsample to emphasize regions
+        pil_img = self.qpixmap_to_pil().convert("RGB")
+        print("Image mode after conversion:", pil_img.mode)
+
+        # plt.imshow(pil_img)
+        # plt.axis("off")
+        # plt.show()
+        print("Image mode before resize:", pil_img.mode)
+        small = pil_img.convert("RGB").resize((grid_size, grid_size), Image.Resampling.LANCZOS)
+        pixels = np.array(small).reshape(-1, 3).astype(float) / 255.0
+
+        print("Sample pixels:", pixels[:10])
+
+        # K-means clustering on reduced set
+        kmeans = KMeans(n_clusters=self._n_colors, random_state=42, n_init=10)
+        kmeans.fit(pixels)
+        colors = kmeans.cluster_centers_
+        colors = sort_by_hue(colors=colors)
+
+        # Example visualization
+        self.plot_palette(colors)
+
+        self.paletteCreated.emit(convert_color_list(colors, 'hex'))
 
 
 def main():

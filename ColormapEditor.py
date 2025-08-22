@@ -1352,6 +1352,7 @@ class ColormapEditorDialog(QDialog):
     def __init__(self, existing_colormaps: Dict[str, any] = None, parent=None):
         super().__init__(parent)
         self.existing_colormaps = existing_colormaps or {}
+        self.counter = 0
 
         # create colormap model, it contains the color points (positions, colors) and undo stack
         self.model = ColorMapModel(self)
@@ -1660,6 +1661,7 @@ class ColormapEditorDialog(QDialog):
         self.picker.setMinimumHeight(350)  # Set minimum height for preview
         picker_layout.addWidget(self.picker)
         self.picker.colorPicked.connect(self.on_color_picked)
+        self.picker.paletteCreated.connect(lambda colors: self.palette_from_image(colors))
 
         self.main_layout.addWidget(self.picker_group)
         self.picker_group.hide()
@@ -1984,23 +1986,29 @@ class ColormapEditorDialog(QDialog):
         self.model.color_points = points
         self.model.modelChanged.emit()
 
-        # Switch comboboxes to indicate new custom map
-        idx_source = self.colormap_widget.source_combobox.findText("Custom")
-        if idx_source >= 0:
-            self.colormap_widget.source_combobox.setCurrentIndex(idx_source)
-
-        # Ensure "untitled" exists in cmap_combobox
-        if self.colormap_widget.cmap_combobox.findText("untitled") == -1:
-            self.colormap_widget.cmap_combobox.addItem("untitled")
-
-        idx_cmap = self.colormap_widget.cmap_combobox.findText("untitled")
-        self.colormap_widget.cmap_combobox.setCurrentIndex(idx_cmap)
+        self.create_new_colormap_entry() 
 
         # Track current colormap
         self.current_colormap_data = points
 
         # Refresh preview
         self.update_preview()
+
+    def create_new_colormap_entry(self):
+        # Switch comboboxes to indicate new custom map
+        idx_source = self.colormap_widget.source_combobox.findText("Custom")
+        if idx_source >= 0:
+            self.colormap_widget.source_combobox.setCurrentIndex(idx_source)
+
+        # Ensure "untitled" exists in cmap_combobox
+        if self.colormap_widget.cmap_combobox.findText(f"untitled-{self.counter}") == -1:
+            self.colormap_widget.cmap_combobox.addItem(f"untitled-{self.counter}")
+        else:
+            self.counter += 1
+            self.colormap_widget.cmap_combobox.addItem(f"untitled-{self.counter}")
+
+        idx_cmap = self.colormap_widget.cmap_combobox.findText(f"untitled-{self.counter}")
+        self.colormap_widget.cmap_combobox.setCurrentIndex(idx_cmap)
 
     
     def load_csv(self):
@@ -2149,6 +2157,20 @@ class ColormapEditorDialog(QDialog):
 
         self.model.undo_stack.setClean()
         self.model.unsaved = False
+
+    def palette_from_image(self, colors):
+        n = len(colors)
+        points = []
+        for i, c in enumerate(colors):
+            points.append(ColorPoint(position=i/(n-1), color=QColor(c)))
+        self.model.color_points = points
+        self.create_new_colormap_entry()
+
+        self.model.undo_stack.clear()
+        self.model.unsaved = True
+
+        # Refresh preview
+        self.model.modelChanged.emit()
     
     def get_colormodel(self):
         """Get the current colormap data."""

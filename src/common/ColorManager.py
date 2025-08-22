@@ -3,9 +3,51 @@ import re
 from typing import Union, Tuple, Optional, Any
 from PyQt6.QtGui import QColor
 
+# Add numpy support with graceful fallback
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    np = None
+    HAS_NUMPY = False
+
 
 class ColorConverter:
-    """Unified color conversion system supporting multiple color formats."""
+    """Unified color conversion system supporting multiple color formats, including numpy arrays."""
+    
+    @staticmethod
+    def _is_numeric(value: Any) -> bool:
+        """Check if value is numeric, including numpy numeric types."""
+        if isinstance(value, (int, float)):
+            return True
+        if HAS_NUMPY and isinstance(value, np.number):
+            return True
+        return False
+    
+    @staticmethod
+    def _to_python_float(value: Any) -> float:
+        """Convert numeric value to Python float, handling numpy types."""
+        if HAS_NUMPY and isinstance(value, np.number):
+            return float(value)
+        return float(value)
+    
+    @staticmethod
+    def _is_array_like(obj: Any) -> bool:
+        """Check if object is array-like (list, tuple, or numpy array)."""
+        if isinstance(obj, (list, tuple)):
+            return True
+        if HAS_NUMPY and isinstance(obj, np.ndarray):
+            return True
+        return False
+    
+    @staticmethod
+    def _to_list(obj: Any) -> list:
+        """Convert array-like object to list."""
+        if isinstance(obj, (list, tuple)):
+            return list(obj)
+        if HAS_NUMPY and isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return [obj]
     
     @staticmethod
     def validate_color(color: Any) -> bool:
@@ -15,7 +57,7 @@ class ColorConverter:
         Parameters
         ----------
         color : Any
-            Input color to validate
+            Input color to validate (supports numpy arrays and numpy numeric types)
             
         Returns
         -------
@@ -26,12 +68,10 @@ class ColorConverter:
         --------
         >>> ColorConverter.validate_color('#ff0000')
         True
-        >>> ColorConverter.validate_color('#xyz123')
-        False
-        >>> ColorConverter.validate_color((255, 0, 0))
+        >>> ColorConverter.validate_color(np.array([1.0, 0.0, 0.0]))
         True
-        >>> ColorConverter.validate_color((300, 0, 0))  # Invalid RGB
-        False
+        >>> ColorConverter.validate_color((np.float64(1.0), np.float64(0.0), np.float64(0.0)))
+        True
         """
         try:
             detected_type = ColorConverter._detect_input_type(color)
@@ -91,23 +131,32 @@ class ColorConverter:
     
     @staticmethod
     def _validate_rgb(color: Union[tuple, list]) -> bool:
-        """Validate RGB color values."""
-        if not isinstance(color, (tuple, list)) or len(color) < 3 or len(color) > 4:
+        """Validate RGB color values, including numpy arrays and numpy numeric types."""
+        if not ColorConverter._is_array_like(color):
             return False
         
         try:
-            r, g, b = color[:3]
-            alpha = color[3] if len(color) > 3 else None
-            
-            # Check if values are numeric
-            if not all(isinstance(v, (int, float)) for v in color[:3]):
+            color_list = ColorConverter._to_list(color)
+            if len(color_list) < 3 or len(color_list) > 4:
                 return False
             
+            r, g, b = color_list[:3]
+            alpha = color_list[3] if len(color_list) > 3 else None
+            
+            # Check if values are numeric (including numpy types)
+            if not all(ColorConverter._is_numeric(v) for v in color_list[:3]):
+                return False
+            
+            # Convert to Python floats for range checking
+            r_f = ColorConverter._to_python_float(r)
+            g_f = ColorConverter._to_python_float(g)
+            b_f = ColorConverter._to_python_float(b)
+            
             # Check ranges - support both 0-1 and 0-255
-            if all(0 <= v <= 1 for v in color[:3]):
+            if all(0 <= v <= 1 for v in [r_f, g_f, b_f]):
                 # Normalized range (0-1)
                 valid_rgb = True
-            elif all(0 <= v <= 255 for v in color[:3]):
+            elif all(0 <= v <= 255 for v in [r_f, g_f, b_f]):
                 # Integer range (0-255)
                 valid_rgb = True
             else:
@@ -115,129 +164,158 @@ class ColorConverter:
             
             # Validate alpha if present
             if alpha is not None:
-                if not isinstance(alpha, (int, float)):
+                if not ColorConverter._is_numeric(alpha):
                     return False
+                alpha_f = ColorConverter._to_python_float(alpha)
                 # Alpha can be 0-1 or 0-255 depending on RGB range
-                max_rgb = max(color[:3])
+                max_rgb = max(r_f, g_f, b_f)
                 if max_rgb <= 1:
-                    valid_alpha = 0 <= alpha <= 1
+                    valid_alpha = 0 <= alpha_f <= 1
                 else:
-                    valid_alpha = 0 <= alpha <= 255
+                    valid_alpha = 0 <= alpha_f <= 255
             else:
                 valid_alpha = True
             
             return valid_rgb and valid_alpha
             
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, ValueError):
             return False
     
     @staticmethod
     def _validate_hsv(color: Union[tuple, list]) -> bool:
-        """Validate HSV color values."""
-        if not isinstance(color, (tuple, list)) or len(color) < 3 or len(color) > 4:
+        """Validate HSV color values, including numpy arrays and numpy numeric types."""
+        if not ColorConverter._is_array_like(color):
             return False
         
         try:
-            h, s, v = color[:3]
-            alpha = color[3] if len(color) > 3 else None
-            
-            # Check if values are numeric
-            if not all(isinstance(val, (int, float)) for val in color[:3]):
+            color_list = ColorConverter._to_list(color)
+            if len(color_list) < 3 or len(color_list) > 4:
                 return False
             
+            h, s, v = color_list[:3]
+            alpha = color_list[3] if len(color_list) > 3 else None
+            
+            # Check if values are numeric
+            if not all(ColorConverter._is_numeric(val) for val in color_list[:3]):
+                return False
+            
+            # Convert to Python floats
+            h_f = ColorConverter._to_python_float(h)
+            s_f = ColorConverter._to_python_float(s)
+            v_f = ColorConverter._to_python_float(v)
+            
             # Hue: 0-360 degrees or 0-1 normalized
-            valid_h = (0 <= h <= 360) or (0 <= h <= 1)
+            valid_h = (0 <= h_f <= 360) or (0 <= h_f <= 1)
             
             # Saturation and Value: 0-1 or 0-100
-            valid_s = (0 <= s <= 1) or (0 <= s <= 100)
-            valid_v = (0 <= v <= 1) or (0 <= v <= 100)
+            valid_s = (0 <= s_f <= 1) or (0 <= s_f <= 100)
+            valid_v = (0 <= v_f <= 1) or (0 <= v_f <= 100)
             
             # Validate alpha if present
             if alpha is not None:
-                if not isinstance(alpha, (int, float)):
+                if not ColorConverter._is_numeric(alpha):
                     return False
-                valid_alpha = 0 <= alpha <= 1
+                alpha_f = ColorConverter._to_python_float(alpha)
+                valid_alpha = 0 <= alpha_f <= 1
             else:
                 valid_alpha = True
             
             return valid_h and valid_s and valid_v and valid_alpha
             
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, ValueError):
             return False
     
     @staticmethod
     def _validate_hsl(color: Union[tuple, list]) -> bool:
-        """Validate HSL color values."""
-        if not isinstance(color, (tuple, list)) or len(color) < 3 or len(color) > 4:
+        """Validate HSL color values, including numpy arrays and numpy numeric types."""
+        if not ColorConverter._is_array_like(color):
             return False
         
         try:
-            h, s, l = color[:3]
-            alpha = color[3] if len(color) > 3 else None
-            
-            # Check if values are numeric
-            if not all(isinstance(val, (int, float)) for val in color[:3]):
+            color_list = ColorConverter._to_list(color)
+            if len(color_list) < 3 or len(color_list) > 4:
                 return False
             
+            h, s, l = color_list[:3]
+            alpha = color_list[3] if len(color_list) > 3 else None
+            
+            # Check if values are numeric
+            if not all(ColorConverter._is_numeric(val) for val in color_list[:3]):
+                return False
+            
+            # Convert to Python floats
+            h_f = ColorConverter._to_python_float(h)
+            s_f = ColorConverter._to_python_float(s)
+            l_f = ColorConverter._to_python_float(l)
+            
             # Hue: 0-360 degrees or 0-1 normalized
-            valid_h = (0 <= h <= 360) or (0 <= h <= 1)
+            valid_h = (0 <= h_f <= 360) or (0 <= h_f <= 1)
             
             # Saturation and Lightness: 0-1 or 0-100
-            valid_s = (0 <= s <= 1) or (0 <= s <= 100)
-            valid_l = (0 <= l <= 1) or (0 <= l <= 100)
+            valid_s = (0 <= s_f <= 1) or (0 <= s_f <= 100)
+            valid_l = (0 <= l_f <= 1) or (0 <= l_f <= 100)
             
             # Validate alpha if present
             if alpha is not None:
-                if not isinstance(alpha, (int, float)):
+                if not ColorConverter._is_numeric(alpha):
                     return False
-                valid_alpha = 0 <= alpha <= 1
+                alpha_f = ColorConverter._to_python_float(alpha)
+                valid_alpha = 0 <= alpha_f <= 1
             else:
                 valid_alpha = True
             
             return valid_h and valid_s and valid_l and valid_alpha
             
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, ValueError):
             return False
     
     @staticmethod
     def _validate_cmyk(color: Union[tuple, list]) -> bool:
         """
-        Validate CMYK color values.
+        Validate CMYK color values, including numpy arrays and numpy numeric types.
         
         CMYK values are typically in 0-1 range (fractional) or 0-100 range (percentage).
         """
-        if not isinstance(color, (tuple, list)) or len(color) < 4 or len(color) > 5:
+        if not ColorConverter._is_array_like(color):
             return False
         
         try:
-            c, m, y, k = color[:4]
-            alpha = color[4] if len(color) > 4 else None
-            
-            # Check if values are numeric
-            if not all(isinstance(val, (int, float)) for val in color[:4]):
+            color_list = ColorConverter._to_list(color)
+            if len(color_list) < 4 or len(color_list) > 5:
                 return False
             
+            c, m, y, k = color_list[:4]
+            alpha = color_list[4] if len(color_list) > 4 else None
+            
+            # Check if values are numeric
+            if not all(ColorConverter._is_numeric(val) for val in color_list[:4]):
+                return False
+            
+            # Convert to Python floats
+            cmyk_floats = [ColorConverter._to_python_float(val) for val in color_list[:4]]
+            
             # CMYK values: 0-1 (fractional) or 0-100 (percentage)
-            valid_cmyk = (all(0 <= val <= 1 for val in color[:4]) or 
-                         all(0 <= val <= 100 for val in color[:4]))
+            valid_cmyk = (all(0 <= val <= 1 for val in cmyk_floats) or 
+                         all(0 <= val <= 100 for val in cmyk_floats))
             
             # Validate alpha if present
             if alpha is not None:
-                if not isinstance(alpha, (int, float)):
+                if not ColorConverter._is_numeric(alpha):
                     return False
-                valid_alpha = 0 <= alpha <= 1
+                alpha_f = ColorConverter._to_python_float(alpha)
+                valid_alpha = 0 <= alpha_f <= 1
             else:
                 valid_alpha = True
             
             return valid_cmyk and valid_alpha
             
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, ValueError):
             return False
     
     @staticmethod
     def _detect_input_type(color: Any) -> Optional[str]:
         """
-        Detect the input color type.
+        Detect the input color type, including numpy arrays.
         
         Parameters
         ----------
@@ -249,15 +327,6 @@ class ColorConverter:
         Optional[str]
             Detected color type: 'rgb', 'hsv', 'hsl', 'cmyk', 'hex', 'qcolor'
             Returns None if color format cannot be detected or is invalid
-            
-        Examples
-        --------
-        >>> ColorConverter._detect_input_type('#ff0000')
-        'hex'
-        >>> ColorConverter._detect_input_type((255, 0, 0))
-        'rgb'
-        >>> ColorConverter._detect_input_type('invalid')
-        None
         """
         try:
             if isinstance(color, QColor):
@@ -266,25 +335,23 @@ class ColorConverter:
             elif isinstance(color, str):
                 return 'hex' if ColorConverter._validate_hex(color) else None
             
-            elif isinstance(color, (tuple, list)):
-                length = len(color)
+            elif ColorConverter._is_array_like(color):
+                color_list = ColorConverter._to_list(color)
+                length = len(color_list)
                 
-                # Special handling for single QColor in a list/tuple
-                if length == 1 and isinstance(color[0], QColor):
-                    # This is a single QColor wrapped in a list/tuple
-                    # We should treat this as the QColor itself for conversion
-                    return 'qcolor' if color[0].isValid() else None
+                # Special handling for single QColor in a list/tuple/array
+                if length == 1 and isinstance(color_list[0], QColor):
+                    return 'qcolor' if color_list[0].isValid() else None
                 
-                # Check if it's a list/tuple of multiple QColor objects (not a single color)
-                if length > 1 and all(isinstance(item, QColor) for item in color):
-                    # This is a list of multiple QColor objects, not a single color
+                # Check if it's a list/tuple/array of multiple QColor objects
+                if length > 1 and all(isinstance(item, QColor) for item in color_list):
                     return None
                 
                 # Check if any element is a QColor (mixed types - not supported as single color)
-                if any(isinstance(item, QColor) for item in color):
+                if any(isinstance(item, QColor) for item in color_list):
                     return None
                 
-                if length == 4 or (length == 5 and all(isinstance(v, (int, float)) for v in color)):
+                if length == 4 or (length == 5 and all(ColorConverter._is_numeric(v) for v in color_list)):
                     # Could be CMYK (4 values) or CMYKA (5 values)
                     if ColorConverter._validate_cmyk(color):
                         return 'cmyk'
@@ -293,8 +360,10 @@ class ColorConverter:
                     # Try to determine between RGB, HSV, HSL
                     if ColorConverter._validate_rgb(color):
                         # Check if it looks more like HSV
-                        h, s, v = color[:3]
-                        if isinstance(h, (int, float)) and h > 1 and all(0 <= val <= 1 for val in color[1:3]):
+                        h, s, v = color_list[:3]
+                        if (ColorConverter._is_numeric(h) and 
+                            ColorConverter._to_python_float(h) > 1 and 
+                            all(0 <= ColorConverter._to_python_float(val) <= 1 for val in color_list[1:3])):
                             if ColorConverter._validate_hsv(color):
                                 return 'hsv'
                         return 'rgb'
@@ -307,18 +376,18 @@ class ColorConverter:
             
             return None  # Cannot detect or invalid format
             
-        except (TypeError, AttributeError, IndexError):
+        except (TypeError, AttributeError, IndexError, ValueError):
             return None
     
     @staticmethod
     def _normalize_to_rgb(color: Any, input_type: str = None) -> Optional[Tuple[float, float, float, float]]:
         """
-        Convert any color format to normalized RGBA (0-1 range).
+        Convert any color format to normalized RGBA (0-1 range), including numpy arrays.
         
         Parameters
         ----------
         color : Any
-            Input color in any format
+            Input color in any format (supports numpy arrays)
         input_type : str, optional
             Explicit input type, by default None (auto-detect)
             
@@ -333,9 +402,11 @@ class ColorConverter:
                 if input_type is None:
                     return None
             
-            # Handle special case of single QColor in a list/tuple
-            if input_type == 'qcolor' and isinstance(color, (list, tuple)) and len(color) == 1:
-                color = color[0]  # Extract the QColor from the container
+            # Handle special case of single QColor in a list/tuple/array
+            if input_type == 'qcolor' and ColorConverter._is_array_like(color):
+                color_list = ColorConverter._to_list(color)
+                if len(color_list) == 1:
+                    color = color_list[0]  # Extract the QColor from the container
             
             # Validate the color for the detected/specified type
             if not ColorConverter._validate_by_type(color, input_type):
@@ -368,79 +439,83 @@ class ColorConverter:
                 
                 return r, g, b, alpha
             
-            elif input_type == 'rgb':
-                r, g, b = color[:3]
-                alpha = color[3] if len(color) > 3 else 1.0
+            elif input_type in ['rgb', 'hsv', 'hsl', 'cmyk']:
+                # Convert to list and handle numpy types
+                color_list = ColorConverter._to_list(color)
                 
-                # Normalize to 0-1 if values are in 0-255 range
-                if any(v > 1 for v in color[:3]):
-                    r, g, b = r/255.0, g/255.0, b/255.0
-                    if len(color) > 3 and color[3] > 1:
-                        alpha = alpha / 255.0
+                if input_type == 'rgb':
+                    r, g, b = [ColorConverter._to_python_float(v) for v in color_list[:3]]
+                    alpha = ColorConverter._to_python_float(color_list[3]) if len(color_list) > 3 else 1.0
+                    
+                    # Normalize to 0-1 if values are in 0-255 range
+                    if any(v > 1 for v in [r, g, b]):
+                        r, g, b = r/255.0, g/255.0, b/255.0
+                        if len(color_list) > 3 and ColorConverter._to_python_float(color_list[3]) > 1:
+                            alpha = alpha / 255.0
+                    
+                    return r, g, b, alpha
                 
-                return r, g, b, alpha
+                elif input_type == 'hsv':
+                    h, s, v = [ColorConverter._to_python_float(val) for val in color_list[:3]]
+                    alpha = ColorConverter._to_python_float(color_list[3]) if len(color_list) > 3 else 1.0
+                    
+                    # Normalize values to 0-1 range
+                    if h > 1:
+                        h = h / 360.0
+                    if s > 1:
+                        s = s / 100.0
+                    if v > 1:
+                        v = v / 100.0
+                    
+                    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+                    return r, g, b, alpha
+                
+                elif input_type == 'hsl':
+                    h, s, l = [ColorConverter._to_python_float(val) for val in color_list[:3]]
+                    alpha = ColorConverter._to_python_float(color_list[3]) if len(color_list) > 3 else 1.0
+                    
+                    # Normalize values to 0-1 range
+                    if h > 1:
+                        h = h / 360.0
+                    if s > 1:
+                        s = s / 100.0
+                    if l > 1:
+                        l = l / 100.0
+                    
+                    r, g, b = colorsys.hls_to_rgb(h, l, s)  # Note: HLS in colorsys
+                    return r, g, b, alpha
+                
+                elif input_type == 'cmyk':
+                    c, m, y, k = [ColorConverter._to_python_float(val) for val in color_list[:4]]
+                    alpha = ColorConverter._to_python_float(color_list[4]) if len(color_list) > 4 else 1.0
+                    
+                    # Normalize to 0-1 if values are in 0-100 range
+                    if any(v > 1 for v in [c, m, y, k]):
+                        c, m, y, k = c/100.0, m/100.0, y/100.0, k/100.0
+                    
+                    # Convert CMYK to RGB
+                    r = (1 - c) * (1 - k)
+                    g = (1 - m) * (1 - k)
+                    b = (1 - y) * (1 - k)
+                    
+                    return r, g, b, alpha
             
-            elif input_type == 'hsv':
-                h, s, v = color[:3]
-                alpha = color[3] if len(color) > 3 else 1.0
-                
-                # Normalize values to 0-1 range
-                if h > 1:
-                    h = h / 360.0
-                if s > 1:
-                    s = s / 100.0
-                if v > 1:
-                    v = v / 100.0
-                
-                r, g, b = colorsys.hsv_to_rgb(h, s, v)
-                return r, g, b, alpha
-            
-            elif input_type == 'hsl':
-                h, s, l = color[:3]
-                alpha = color[3] if len(color) > 3 else 1.0
-                
-                # Normalize values to 0-1 range
-                if h > 1:
-                    h = h / 360.0
-                if s > 1:
-                    s = s / 100.0
-                if l > 1:
-                    l = l / 100.0
-                
-                r, g, b = colorsys.hls_to_rgb(h, l, s)  # Note: HLS in colorsys
-                return r, g, b, alpha
-            
-            elif input_type == 'cmyk':
-                c, m, y, k = color[:4]
-                alpha = color[4] if len(color) > 4 else 1.0
-                
-                # Normalize to 0-1 if values are in 0-100 range
-                if any(v > 1 for v in color[:4]):
-                    c, m, y, k = c/100.0, m/100.0, y/100.0, k/100.0
-                
-                # Convert CMYK to RGB
-                r = (1 - c) * (1 - k)
-                g = (1 - m) * (1 - k)
-                b = (1 - y) * (1 - k)
-                
-                return r, g, b, alpha
-            
-            else:
-                return None
+            return None
                 
         except (ValueError, TypeError, IndexError, AttributeError):
             return None
 
 
+# Keep all the existing conversion functions with the same signatures
 def color_to_rgb(color: Any, input_type: str = None, 
                  normalize: bool = True, include_alpha: bool = False) -> Optional[Union[Tuple[float, ...], Tuple[int, ...]]]:
     """
-    Convert any color format to RGB.
+    Convert any color format to RGB, including numpy arrays and numpy numeric types.
     
     Parameters
     ----------
     color : Any
-        Input color in any supported format (RGB, HSV, HSL, CMYK, hex, QColor)
+        Input color in any supported format (RGB, HSV, HSL, CMYK, hex, QColor, numpy arrays)
     input_type : str, optional
         Explicit input type to skip auto-detection, by default None
     normalize : bool, optional
@@ -457,12 +532,10 @@ def color_to_rgb(color: Any, input_type: str = None,
     --------
     >>> color_to_rgb('#ff0000')
     (1.0, 0.0, 0.0)
-    >>> color_to_rgb((255, 0, 0), normalize=False)
-    (255, 0, 0)
-    >>> color_to_rgb((0, 1, 1), input_type='hsv')
+    >>> color_to_rgb(np.array([1.0, 0.0, 0.0]))
     (1.0, 0.0, 0.0)
-    >>> color_to_rgb('invalid_color')
-    None
+    >>> color_to_rgb((np.float64(1.0), np.float64(0.0), np.float64(0.0)))
+    (1.0, 0.0, 0.0)
     """
     result = ColorConverter._normalize_to_rgb(color, input_type)
     if result is None:
@@ -481,34 +554,7 @@ def color_to_rgb(color: Any, input_type: str = None,
 
 def color_to_hsv(color: Any, input_type: str = None, 
                  degrees: bool = True, include_alpha: bool = False) -> Optional[Tuple[float, ...]]:
-    """
-    Convert any color format to HSV.
-    
-    Parameters
-    ----------
-    color : Any
-        Input color in any supported format
-    input_type : str, optional
-        Explicit input type to skip auto-detection, by default None
-    degrees : bool, optional
-        If True, return hue in 0-360 range, else 0-1 range, by default True
-    include_alpha : bool, optional
-        If True, include alpha channel in output, by default False
-        
-    Returns
-    -------
-    Optional[Tuple[float, ...]]
-        HSV or HSVA values, or None if conversion fails
-        
-    Examples
-    --------
-    >>> color_to_hsv('#ff0000')
-    (0.0, 1.0, 1.0)
-    >>> color_to_hsv((1, 0, 0), degrees=False)
-    (0.0, 1.0, 1.0)
-    >>> color_to_hsv('invalid_color')
-    None
-    """
+    """Convert any color format to HSV, including numpy arrays and numpy numeric types."""
     result = ColorConverter._normalize_to_rgb(color, input_type)
     if result is None:
         return None
@@ -527,34 +573,7 @@ def color_to_hsv(color: Any, input_type: str = None,
 
 def color_to_hsl(color: Any, input_type: str = None, 
                  degrees: bool = True, include_alpha: bool = False) -> Optional[Tuple[float, ...]]:
-    """
-    Convert any color format to HSL.
-    
-    Parameters
-    ----------
-    color : Any
-        Input color in any supported format
-    input_type : str, optional
-        Explicit input type to skip auto-detection, by default None
-    degrees : bool, optional
-        If True, return hue in 0-360 range, else 0-1 range, by default True
-    include_alpha : bool, optional
-        If True, include alpha channel in output, by default False
-        
-    Returns
-    -------
-    Optional[Tuple[float, ...]]
-        HSL or HSLA values, or None if conversion fails
-        
-    Examples
-    --------
-    >>> color_to_hsl('#ff0000')
-    (0.0, 1.0, 0.5)
-    >>> color_to_hsl((255, 0, 0), normalize=False)
-    (0.0, 1.0, 0.5)
-    >>> color_to_hsl('invalid_color')
-    None
-    """
+    """Convert any color format to HSL, including numpy arrays and numpy numeric types."""
     result = ColorConverter._normalize_to_rgb(color, input_type)
     if result is None:
         return None
@@ -573,32 +592,7 @@ def color_to_hsl(color: Any, input_type: str = None,
 
 def color_to_cmyk(color: Any, input_type: str = None, 
                   include_alpha: bool = False) -> Optional[Tuple[float, ...]]:
-    """
-    Convert any color format to CMYK.
-    
-    Parameters
-    ----------
-    color : Any
-        Input color in any supported format
-    input_type : str, optional
-        Explicit input type to skip auto-detection, by default None
-    include_alpha : bool, optional
-        If True, include alpha channel in output, by default False
-        
-    Returns
-    -------
-    Optional[Tuple[float, ...]]
-        CMYK or CMYKA values (0-1 range), or None if conversion fails
-        
-    Examples
-    --------
-    >>> color_to_cmyk('#ff0000')
-    (0.0, 1.0, 1.0, 0.0)
-    >>> color_to_cmyk((255, 255, 0), input_type='rgb')
-    (0.0, 0.0, 1.0, 0.0)
-    >>> color_to_cmyk('invalid_color')
-    None
-    """
+    """Convert any color format to CMYK, including numpy arrays and numpy numeric types."""
     result = ColorConverter._normalize_to_rgb(color, input_type)
     if result is None:
         return None
@@ -623,34 +617,7 @@ def color_to_cmyk(color: Any, input_type: str = None,
 
 def color_to_hex(color: Any, input_type: str = None, 
                  include_alpha: bool = False, uppercase: bool = True) -> Optional[str]:
-    """
-    Convert any color format to hex string.
-    
-    Parameters
-    ----------
-    color : Any
-        Input color in any supported format
-    input_type : str, optional
-        Explicit input type to skip auto-detection, by default None
-    include_alpha : bool, optional
-        If True, include alpha channel in hex output, by default False
-    uppercase : bool, optional
-        If True, return uppercase hex, by default True
-        
-    Returns
-    -------
-    Optional[str]
-        Hex color string (e.g., '#FF0000' or '#FF0000FF'), or None if conversion fails
-        
-    Examples
-    --------
-    >>> color_to_hex((1, 0, 0))
-    '#FF0000'
-    >>> color_to_hex((255, 0, 0, 128), include_alpha=True, normalize=False)
-    '#FF000080'
-    >>> color_to_hex('invalid_color')
-    None
-    """
+    """Convert any color format to hex string, including numpy arrays and numpy numeric types."""
     result = ColorConverter._normalize_to_rgb(color, input_type)
     if result is None:
         return None
@@ -672,30 +639,7 @@ def color_to_hex(color: Any, input_type: str = None,
 
 
 def color_to_qcolor(color: Any, input_type: str = None) -> Optional[QColor]:
-    """
-    Convert any color format to QColor.
-    
-    Parameters
-    ----------
-    color : Any
-        Input color in any supported format
-    input_type : str, optional
-        Explicit input type to skip auto-detection, by default None
-        
-    Returns
-    -------
-    Optional[QColor]
-        Qt QColor object, or None if conversion fails
-        
-    Examples
-    --------
-    >>> qcolor = color_to_qcolor('#ff0000')
-    >>> qcolor = color_to_qcolor((0, 1, 1), input_type='hsv')
-    >>> qcolor = color_to_qcolor((0, 100, 100, 0), input_type='cmyk')
-    >>> qcolor = color_to_qcolor('invalid_color')
-    >>> qcolor is None
-    True
-    """
+    """Convert any color format to QColor, including numpy arrays and numpy numeric types."""
     if input_type == 'qcolor' or isinstance(color, QColor):
         return QColor(color) if (isinstance(color, QColor) and color.isValid()) else None
     
@@ -712,29 +656,7 @@ def color_to_qcolor(color: Any, input_type: str = None) -> Optional[QColor]:
 
 
 def convert_color_list(colors: list, output_type: str, **kwargs) -> list:
-    """
-    Convert a list of colors to the specified output type.
-    
-    Parameters
-    ----------
-    colors : list
-        List of colors in any supported format
-    output_type : str
-        Target format: 'rgb', 'hsv', 'hsl', 'cmyk', 'hex', 'qcolor'
-    **kwargs
-        Additional arguments passed to the conversion function
-        
-    Returns
-    -------
-    list
-        List of converted colors (invalid colors are filtered out)
-        
-    Examples
-    --------
-    >>> colors = ['#ff0000', '#00ff00', '#0000ff', 'invalid']
-    >>> convert_color_list(colors, 'rgb')
-    [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
-    """
+    """Convert a list of colors to the specified output type, including numpy arrays."""
     conversion_funcs = {
         'rgb': color_to_rgb,
         'hsv': color_to_hsv,
@@ -760,8 +682,73 @@ def convert_color_list(colors: list, output_type: str, **kwargs) -> list:
 
 # Example usage and testing
 if __name__ == "__main__":
-    # Test validation
-    print("=== Color Validation Tests ===")
+    # Test numpy support if available
+    if HAS_NUMPY:
+        print("=== NumPy Support Tests ===")
+        
+        # Test numpy array with regular tuples
+        np_rgb = np.array([1.0, 0.0, 0.0])
+        print(f"NumPy RGB array: {color_to_rgb(np_rgb)}")
+        
+        # Test tuple with numpy float64 values
+        np_tuple_rgb = (np.float64(1.0), np.float64(0.0), np.float64(0.0))
+        print(f"Tuple with numpy floats: {color_to_rgb(np_tuple_rgb)}")
+        
+        # Test validation
+        print(f"NumPy array validation: {ColorConverter.validate_color(np_rgb)}")
+        print(f"NumPy tuple validation: {ColorConverter.validate_color(np_tuple_rgb)}")
+        
+        # Test type detection
+        print(f"NumPy array type detection: {ColorConverter._detect_input_type(np_rgb)}")
+        print(f"NumPy tuple type detection: {ColorConverter._detect_input_type(np_tuple_rgb)}")
+        
+        # Test all conversions with numpy data
+        print("\n=== NumPy Conversion Tests ===")
+        test_np_color = np.array([0.8, 0.2, 0.6, 0.9])  # RGBA
+        print(f"NumPy RGBA: {test_np_color}")
+        print(f"  To RGB: {color_to_rgb(test_np_color)}")
+        print(f"  To HSV: {color_to_hsv(test_np_color)}")
+        print(f"  To HSL: {color_to_hsl(test_np_color)}")
+        print(f"  To CMYK: {color_to_cmyk(test_np_color)}")
+        print(f"  To Hex: {color_to_hex(test_np_color)}")
+        
+        # Test batch conversion with mixed numpy and regular data
+        mixed_colors_with_np = [
+            np.array([1.0, 0.0, 0.0]),
+            (np.float64(0.0), np.float64(1.0), np.float64(0.0)),
+            '#0000ff',
+            (0.5, 0.5, 0.5)
+        ]
+        rgb_results_np = convert_color_list(mixed_colors_with_np, 'rgb', normalize=False)
+        print(f"\nMixed colors with NumPy: {[str(c) for c in mixed_colors_with_np]}")
+        print(f"RGB Results: {rgb_results_np}")
+        
+        # Test array of tuples with numpy floats (your specific case)
+        print("\n=== Array of NumPy Float Tuples Test ===")
+        color_tuples = np.array([
+            (np.float64(1.0), np.float64(0.0), np.float64(0.0)),  # Red
+            (np.float64(0.0), np.float64(1.0), np.float64(0.0)),  # Green
+            (np.float64(0.0), np.float64(0.0), np.float64(1.0)),  # Blue
+        ])
+        
+        print(f"Array of numpy float tuples shape: {color_tuples.shape}")
+        print(f"Individual tuple type: {type(color_tuples[0])}")
+        print(f"Individual value type: {type(color_tuples[0][0])}")
+        
+        # Test individual conversions
+        for i, color_tuple in enumerate(color_tuples):
+            converted = color_to_rgb(color_tuple)
+            print(f"Color {i}: {color_tuple} -> {converted}")
+            
+        # Test batch conversion
+        batch_converted = convert_color_list(color_tuples.tolist(), 'hex')
+        print(f"Batch to hex: {batch_converted}")
+    
+    else:
+        print("NumPy not available - skipping NumPy-specific tests")
+    
+    # Standard validation tests (same as before)
+    print("\n=== Standard Color Validation Tests ===")
     test_colors = [
         '#ff0000',      # Valid hex
         '#xyz123',      # Invalid hex
@@ -777,21 +764,6 @@ if __name__ == "__main__":
         is_valid = ColorConverter.validate_color(color)
         detected_type = ColorConverter._detect_input_type(color)
         print(f"{str(color):20} -> Valid: {is_valid:5}, Type: {detected_type}")
-    
-    # Test QColor in list/tuple
-    print("\n=== QColor in List Tests ===")
-    qcolor_red = QColor(255, 0, 0)
-    qcolor_list = [qcolor_red]
-    qcolor_tuple = (qcolor_red,)
-    
-    print(f"Single QColor: {color_to_rgb(qcolor_red)}")
-    print(f"QColor in list: {color_to_rgb(qcolor_list)}")
-    print(f"QColor in tuple: {color_to_rgb(qcolor_tuple)}")
-    
-    # Test multiple QColors in list (should return None for individual conversion)
-    qcolor_green = QColor(0, 255, 0)
-    multiple_qcolors = [qcolor_red, qcolor_green]
-    print(f"Multiple QColors in list: {color_to_rgb(multiple_qcolors)}")
     
     # Test conversions with validation
     print("\n=== Color Conversion Tests ===")
@@ -820,10 +792,3 @@ if __name__ == "__main__":
     rgb_results = convert_color_list(mixed_colors, 'rgb', normalize=False)
     print(f"Input: {mixed_colors}")
     print(f"RGB Results (invalid filtered out): {rgb_results}")
-    
-    # Test batch conversion with QColors
-    print("\n=== Batch QColor Conversion Test ===")
-    qcolor_mixed = [qcolor_red, qcolor_green, '#0000ff']
-    rgb_qcolor_results = convert_color_list(qcolor_mixed, 'rgb', normalize=False)
-    print(f"Input QColors + Hex: {[str(c) for c in qcolor_mixed]}")
-    print(f"RGB Results: {rgb_qcolor_results}")

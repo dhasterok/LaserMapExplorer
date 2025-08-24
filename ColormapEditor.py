@@ -35,9 +35,10 @@ import matplotlib.image as mpimg
 import cmcrameri.cm as cmr
 
 from src.common.CustomWidgets import CustomAction, ToggleSwitch
+from src.common.ColorSelector import select_color, ColorSelectorDialog
 from src.app.config import RESOURCE_PATH, ICONPATH
 from src.common.ternary_plot import ternary
-from src.common.ColorManager import color_to_rgb
+from src.common.ColorManager2 import convert_color, convert_color_list
 from src.common.ColorPicker import ImageColorPicker
 
 # Define transformation matrices
@@ -656,7 +657,10 @@ class DiscreteColorWidget(QWidget):
     def change_color(self, index: int):
         """Open color dialog to change a color."""
         if 0 <= index < len(self.model.color_points):
-            color = QColorDialog.getColor(self.model.color_points[index].color, self)
+            #color = QColorDialog.getColor(self.model.color_points[index].color, self)
+            initial_color = convert_color(self.model.color_points[index].color, "qcolor", "hex")
+            print(initial_color)
+            color = QColor(select_color(initial_color, self))
             if color.isValid():
                 self.model.change_color(index, color)
 
@@ -1076,7 +1080,10 @@ class ContinuousColorWidget(QWidget):
 
     def change_point_color(self, index: int):
         if 0 <= index < len(self.model.color_points):
-            color = QColorDialog.getColor(self.model.color_points[index].color, self)
+            #color = QColorDialog.getColor(self.model.color_points[index].color, self)
+            initial_color = convert_color(self.model.color_points[index].color, "qcolor", "hex")
+            print(initial_color)
+            color = QColor(select_color(initial_color, self))
             if color.isValid():
                 self.model.change_color(index, color)
 
@@ -1226,7 +1233,8 @@ class ColormapPreviewWidget(FigureCanvas):
                 ax = self.figure.add_subplot(1, 1, 1)
 
                 tern = ternary(ax, labels=None)
-                rgb_colors = [color_to_rgb(c, normalize=True) for c in self.model.get_colors()]
+                #rgb_colors = [color_to_rgb(c, normalize=True) for c in self.model.get_colors()]
+                rgb_colors = convert_color_list(self.model.get_colors(), "QColor", "rgb", norm_out=True)
 
                 if rgb_colors:
                     rgb_colors = self.simulate_colorblind_view(rgb_colors)
@@ -1276,14 +1284,16 @@ class ColormapPreviewWidget(FigureCanvas):
 
         # --- Case 2: List of QColor/tuples ---
         if isinstance(cmap, (list, tuple)):
-            rgb_colors = np.array([color_to_rgb(c, normalize=True) for c in cmap])
+            #rgb_colors = np.array([color_to_rgb(c, normalize=True) for c in cmap])
+            rgb_colors = np.array(convert_color_list(cmap, "QColor", "rgb", norm_out=True))
             transformed = np.dot(rgb_colors, matrix.T)
             transformed = np.clip(transformed, 0, 1)
             return [tuple(c) for c in transformed]
 
         # --- Case 3: Single QColor or tuple ---
         if isinstance(cmap, (QColor, tuple, list)):
-            rgb = np.array(color_to_rgb(cmap, normalize=True))
+            #rgb = np.array(color_to_rgb(cmap, normalize=True))
+            rgb_colors = np.array(convert_color_list(cmap, "QColor", "rgb", norm_out=True))
             transformed = np.dot(rgb, matrix.T)
             transformed = np.clip(transformed, 0, 1)
             return tuple(transformed)

@@ -1,8 +1,17 @@
-src.app.AppData
+﻿src.app.AppData
 ===============
 
 .. automodule:: src.app.AppData
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ src.app.AppData
    
       AppData
    
+   
+
+   
+   
+   
+
+
+

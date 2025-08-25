@@ -1,8 +1,17 @@
-src.app.Workflow
+﻿src.app.Workflow
 ================
 
 .. automodule:: src.app.Workflow
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -11,3 +20,11 @@ src.app.Workflow
       BlocklyBridge
       Workflow
    
+   
+
+   
+   
+   
+
+
+

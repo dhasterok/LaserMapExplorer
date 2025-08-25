@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=e5166e32" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/app.InfoViewer';</script>
@@ -50,7 +47,6 @@
     <link rel="search" title="Search" href="../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -66,8 +62,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -75,6 +82,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -82,8 +90,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -117,7 +125,7 @@
     
     
     <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -179,11 +187,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -210,7 +222,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
       
@@ -221,11 +233,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -244,8 +260,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -327,7 +342,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
         
@@ -346,14 +361,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -371,6 +381,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -379,7 +391,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.InfoViewer</span></li>
+    <li class="breadcrumb-item active" aria-current="page">app.InfoViewer</li>
   </ul>
 </nav>
 </div>
@@ -399,28 +411,31 @@
   <section id="module-app.InfoViewer">
 <span id="app-infoviewer"></span><h1>app.InfoViewer<a class="headerlink" href="#module-app.InfoViewer" title="Link to this heading">#</a></h1>
 <p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.create_checkbox" title="app.InfoViewer.create_checkbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_checkbox</span></code></a>(is_checked, callback, key)</p></td>
 <td><p>Create a QCheckBox widget with an initial state and a bound callback.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.decrease_precision" title="app.InfoViewer.decrease_precision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decrease_precision</span></code></a>()</p></td>
-<td><p>Decrease the global display precision for numeric formatting.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.increase_precision" title="app.InfoViewer.increase_precision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">increase_precision</span></code></a>()</p></td>
-<td><p>Increase the global display precision for numeric formatting.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.update_dataframe" title="app.InfoViewer.update_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_dataframe</span></code></a>(dataframe, table_widget)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.create_color_button" title="app.InfoViewer.create_color_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_color_button</span></code></a>(color, callback, key)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.update_numpy_array" title="app.InfoViewer.update_numpy_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_numpy_array</span></code></a>(array, table_widget)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.decrease_precision" title="app.InfoViewer.decrease_precision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decrease_precision</span></code></a>()</p></td>
+<td><p>Decrease the global display precision for numeric formatting.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.increase_precision" title="app.InfoViewer.increase_precision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">increase_precision</span></code></a>()</p></td>
+<td><p>Increase the global display precision for numeric formatting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.update_dataframe" title="app.InfoViewer.update_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_dataframe</span></code></a>(dataframe, table_widget)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.update_numpy_array" title="app.InfoViewer.update_numpy_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_numpy_array</span></code></a>(array, table_widget)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p class="rubric">Classes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.DataFrameTab" title="app.InfoViewer.DataFrameTab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrameTab</span></code></a>(parent)</p></td>
 <td><p>Creates the data info tab for plots and annotations.</p></td>
@@ -445,7 +460,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.DataFrameTab">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">DataFrameTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#DataFrameTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.DataFrameTab" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">DataFrameTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#DataFrameTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.DataFrameTab" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Creates the data info tab for plots and annotations.</p>
 <dl class="field-list simple">
@@ -457,7 +472,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.FieldTab">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">FieldTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FieldTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FieldTab" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">FieldTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FieldTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FieldTab" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="src.app.FieldLogic.html#src.app.FieldLogic.FieldLogicUI" title="src.app.FieldLogic.FieldLogicUI"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldLogicUI</span></code></a></p>
 <p>Creates the field info tab for plots and annotations.</p>
 <dl class="field-list simple">
@@ -466,7 +481,7 @@
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data</span></code>(data)</p></td>
 <td><p>Updates the data</p></td>
@@ -497,7 +512,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.FloatItemDelegate">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">FloatItemDelegate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FloatItemDelegate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FloatItemDelegate" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">FloatItemDelegate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#FloatItemDelegate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.FloatItemDelegate" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QStyledItemDelegate</span></code></p>
 <p>Custom item delegate for handling float input in QTableWidget.
 This delegate allows for editing of float values in the table, with validation
@@ -524,7 +539,7 @@ need to be constrained to the actual data range.
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">blockSignals</span></code>(self, b)</p></td>
 <td><p></p></td>
@@ -720,7 +735,7 @@ need to be constrained to the actual data range.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.InfoDock">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">InfoDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Info</span> <span class="pre">Tools'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#InfoDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.InfoDock" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">InfoDock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Info</span> <span class="pre">Tools'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#InfoDock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.InfoDock" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="src.common.CustomWidgets.html#src.common.CustomWidgets.CustomDockWidget" title="src.common.CustomWidgets.CustomDockWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomDockWidget</span></code></a>, <a class="reference internal" href="src.app.FieldLogic.html#src.app.FieldLogic.FieldLogicUI" title="src.app.FieldLogic.FieldLogicUI"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldLogicUI</span></code></a></p>
 <p>Dockable widget providing data insight tools through multiple interactive tabs.</p>
 <p>This widget embeds a tabbed interface within a dockable container, giving users access
@@ -754,7 +769,7 @@ It includes:</p>
 </dl>
 </div>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">acceptDrops</span></code>(self)</p></td>
 <td><p></p></td>
@@ -762,133 +777,127 @@ It includes:</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accessibleDescription</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accessibleIdentifier</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accessibleName</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">accessibleName</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actionEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actionEvent</span></code>(self, a0)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actions</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actions</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">activateWindow</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">activateWindow</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addAction</span></code>(...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addAction</span></code>(...)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addActions</span></code>(self, actions)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addActions</span></code>(self, actions)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjustSize</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjustSize</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">allowedAreas</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">allowedAreas</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">autoFillBackground</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">autoFillBackground</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backgroundRole</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backgroundRole</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">baseSize</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">baseSize</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">blockSignals</span></code>(self, b)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">blockSignals</span></code>(self, b)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">changeEvent</span></code>(self, event)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">changeEvent</span></code>(self, event)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childAt</span></code>(...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childAt</span></code>(...)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childrenRect</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childrenRect</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childrenRegion</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childrenRegion</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clearFocus</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clearFocus</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clearMask</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clearMask</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>(self)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">closeEvent</span></code>(event)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">closeEvent</span></code>(event)</p></td>
 <td><p>Override the default close event to hide the dock widget instead of closing it.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorCount</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorCount</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">connectNotify</span></code>(self, signal)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">connectNotify</span></code>(self, signal)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contentsMargins</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contentsMargins</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contentsRect</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contentsRect</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextMenuEvent</span></code>(self, a0)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextMenuEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextMenuPolicy</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextMenuPolicy</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code>(self[, window, initializeWindow, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code>(self[, window, initializeWindow, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">createWindowContainer</span></code>(window[, parent, flags])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">createWindowContainer</span></code>(window[, parent, flags])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cursor</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cursor</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">customEvent</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">customEvent</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deleteLater</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deleteLater</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">depth</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">depth</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">destroy</span></code>(self[, destroyWindow, destroySubWindows])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">destroy</span></code>(self[, destroyWindow, destroySubWindows])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devType</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devType</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatio</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatio</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatioF</span></code>(self)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatioF</span></code>(self)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatioFScale</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devicePixelRatioFScale</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnect</span></code>(-&gt; bool disconnect)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnect</span></code>(-&gt; bool disconnect)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnectNotify</span></code>(self, signal)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dockLocation</span></code>(self)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnectNotify</span></code>(self, signal)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dragEnterEvent</span></code>(self, a0)</p></td>
@@ -1344,40 +1353,34 @@ It includes:</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAccessibleDescription</span></code>(self, description)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAccessibleIdentifier</span></code>(self, identifier)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAccessibleName</span></code>(self, name)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAccessibleName</span></code>(self, name)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAllowedAreas</span></code>(self, areas)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAllowedAreas</span></code>(self, areas)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAttribute</span></code>(self, attribute[, on])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAttribute</span></code>(self, attribute[, on])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAutoFillBackground</span></code>(self, enabled)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setAutoFillBackground</span></code>(self, enabled)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setBackgroundRole</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setBackgroundRole</span></code>(self, a0)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setBaseSize</span></code>(setBaseSize)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setBaseSize</span></code>(setBaseSize)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setContentsMargins</span></code>(setContentsMargins)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setContentsMargins</span></code>(setContentsMargins)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setContextMenuPolicy</span></code>(self, policy)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setContextMenuPolicy</span></code>(self, policy)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setCursor</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setCursor</span></code>(self, a0)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDisabled</span></code>(self, a0)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDockLocation</span></code>(self, area)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setDisabled</span></code>(self, a0)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setEnabled</span></code>(self, a0)</p></td>
@@ -1808,7 +1811,7 @@ Fields are not updated if none are selected.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.MetadataTab">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">MetadataTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#MetadataTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.MetadataTab" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">MetadataTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#MetadataTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.MetadataTab" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Creates the metadata tab for plots and annotations.</p>
 <dl class="field-list simple">
@@ -1817,7 +1820,7 @@ Fields are not updated if none are selected.</p>
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.MetadataTab.toggle_all_columns" title="app.InfoViewer.MetadataTab.toggle_all_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_all_columns</span></code></a>()</p></td>
 <td><p>Toggle all columns based on toolbar action.</p></td>
@@ -1932,7 +1935,7 @@ Fields are not updated if none are selected.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="app.InfoViewer.PlotInfoTab">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">PlotInfoTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#PlotInfoTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.PlotInfoTab" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">PlotInfoTab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#PlotInfoTab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.PlotInfoTab" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Plot Info Tab UI for displaying plot metadata and managing annotations.</p>
 <p>This tab provides a read-only display of the current plot’s metadata and a table for managing
@@ -1947,9 +1950,9 @@ user-added annotations, including their type, value, and visibility.</p>
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.PlotInfoTab.toggle_annotation" title="app.InfoViewer.PlotInfoTab.toggle_annotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_annotation</span></code></a>(state, annotation)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.InfoViewer.PlotInfoTab.toggle_annotation" title="app.InfoViewer.PlotInfoTab.toggle_annotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_annotation</span></code></a>(state, index)</p></td>
 <td><p>Callback function to toggle annotation visibility.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.InfoViewer.PlotInfoTab.update_annotation_from_table" title="app.InfoViewer.PlotInfoTab.update_annotation_from_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_annotation_from_table</span></code></a>(item)</p></td>
@@ -1966,12 +1969,20 @@ user-added annotations, including their type, value, and visibility.</p>
 </div>
 <div class="pst-scrollable-table-container"><table class="table">
 <tbody>
-<tr class="row-odd"><td><p><strong>export_plot_info</strong></p></td>
+<tr class="row-odd"><td><p><strong>change_annotation_color</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>export_plot_info</strong></p></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.InfoViewer.PlotInfoTab.change_annotation_color">
+<span class="sig-name descname"><span class="pre">change_annotation_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#PlotInfoTab.change_annotation_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.PlotInfoTab.change_annotation_color" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="app.InfoViewer.PlotInfoTab.export_plot_info">
 <span class="sig-name descname"><span class="pre">export_plot_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#PlotInfoTab.export_plot_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.PlotInfoTab.export_plot_info" title="Link to this definition">#</a></dt>
@@ -1979,7 +1990,7 @@ user-added annotations, including their type, value, and visibility.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.InfoViewer.PlotInfoTab.toggle_annotation">
-<span class="sig-name descname"><span class="pre">toggle_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#PlotInfoTab.toggle_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.PlotInfoTab.toggle_annotation" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">toggle_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#PlotInfoTab.toggle_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.PlotInfoTab.toggle_annotation" title="Link to this definition">#</a></dt>
 <dd><p>Callback function to toggle annotation visibility.</p>
 <p>Updates both the internal state and visual visibility of the selected annotation.</p>
 <dl class="field-list simple">
@@ -2069,6 +2080,11 @@ the new state and the key as arguments.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="app.InfoViewer.create_color_button">
+<span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">create_color_button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#create_color_button"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.create_color_button" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="app.InfoViewer.decrease_precision">
 <span class="sig-prename descclassname"><span class="pre">app.InfoViewer.</span></span><span class="sig-name descname"><span class="pre">decrease_precision</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/InfoViewer.html#decrease_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.InfoViewer.decrease_precision" title="Link to this definition">#</a></dt>
 <dd><p>Decrease the global display precision for numeric formatting.</p>
@@ -2113,8 +2129,7 @@ up to a maximum of 16 significant figures.</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -2154,6 +2169,7 @@ up to a maximum of 16 significant figures.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.PlotInfoTab"><code class="docutils literal notranslate"><span class="pre">PlotInfoTab</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.PlotInfoTab.change_annotation_color"><code class="docutils literal notranslate"><span class="pre">PlotInfoTab.change_annotation_color()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.PlotInfoTab.export_plot_info"><code class="docutils literal notranslate"><span class="pre">PlotInfoTab.export_plot_info()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.PlotInfoTab.toggle_annotation"><code class="docutils literal notranslate"><span class="pre">PlotInfoTab.toggle_annotation()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.PlotInfoTab.update_annotation_from_table"><code class="docutils literal notranslate"><span class="pre">PlotInfoTab.update_annotation_from_table()</span></code></a></li>
@@ -2162,6 +2178,7 @@ up to a maximum of 16 significant figures.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.create_checkbox"><code class="docutils literal notranslate"><span class="pre">create_checkbox()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.create_color_button"><code class="docutils literal notranslate"><span class="pre">create_color_button()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.decrease_precision"><code class="docutils literal notranslate"><span class="pre">decrease_precision()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.increase_precision"><code class="docutils literal notranslate"><span class="pre">increase_precision()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#app.InfoViewer.update_dataframe"><code class="docutils literal notranslate"><span class="pre">update_dataframe()</span></code></a></li>
@@ -2170,13 +2187,13 @@ up to a maximum of 16 significant figures.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/generated/app.InfoViewer.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/app.InfoViewer.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -2191,8 +2208,8 @@ up to a maximum of 16 significant figures.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2212,7 +2229,7 @@ up to a maximum of 16 significant figures.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -2225,8 +2242,7 @@ up to a maximum of 16 significant figures.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

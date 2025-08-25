@@ -1,8 +1,17 @@
-ui.PreferencesWindow
+﻿ui.PreferencesWindow
 ====================
 
 .. automodule:: ui.PreferencesWindow
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.PreferencesWindow
    
       Ui_PreferencesWindow
    
+   
+
+   
+   
+   
+
+
+

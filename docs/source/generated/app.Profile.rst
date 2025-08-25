@@ -1,8 +1,17 @@
-app.Profile
+﻿app.Profile
 ===========
 
 .. automodule:: app.Profile
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -12,3 +21,11 @@ app.Profile
       ProfileDock
       Profiling
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,17 @@
-ui.MapImportDialog
+﻿ui.MapImportDialog
 ==================
 
 .. automodule:: ui.MapImportDialog
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.MapImportDialog
    
       Ui_MapImportDialog
    
+   
+
+   
+   
+   
+
+
+

@@ -4,6 +4,62 @@ common package
 Submodules
 ----------
 
+common.Browser module
+-----------------------------
+
+.. automodule:: common.Browser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.Calculator module
+-----------------------------
+
+.. automodule:: common.Calculator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.CodingWidgets module
+-----------------------------
+
+.. automodule:: common.CodingWidgets
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.ColorManager module
+-----------------------------
+
+.. automodule:: common.ColorManager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.ColormapEditor module
+-----------------------------
+
+.. automodule:: common.ColormapEditor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.ColorPicker module
+-----------------------------
+
+.. automodule:: common.ColorPicker
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.ColorSelector module
+-----------------------------
+
+.. automodule:: common.ColorSelector
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 common.CustomMplCanvas module
 -----------------------------
 
@@ -77,10 +133,42 @@ common.Polygon module
    :undoc-members:
    :show-inheritance:
 
+common.PolygonMatplotlib module
+---------------------
+
+.. automodule:: common.PolygonMatplotlib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 common.Regression module
 ------------------------
 
 .. automodule:: common.Regression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.reSTEdit module
+------------------------
+
+.. automodule:: common.reSTEdit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.reSTNotes module
+------------------------
+
+.. automodule:: common.reSTNotes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+common.reSTRules module
+------------------------
+
+.. automodule:: common.reSTRules
    :members:
    :undoc-members:
    :show-inheritance:

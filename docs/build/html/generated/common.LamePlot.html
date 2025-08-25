@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=e5166e32" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/common.LamePlot';</script>
@@ -50,7 +47,6 @@
     <link rel="search" title="Search" href="../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -66,8 +62,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -75,6 +82,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -82,8 +90,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -117,7 +125,7 @@
     
     
     <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -179,11 +187,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -210,7 +222,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
       
@@ -221,11 +233,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -244,8 +260,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -327,7 +342,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
         
@@ -346,14 +361,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -371,6 +381,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -379,7 +391,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.LamePlot</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.LamePlot</li>
   </ul>
 </nav>
 </div>
@@ -399,7 +411,7 @@
   <section id="module-common.LamePlot">
 <span id="common-lameplot"></span><h1>common.LamePlot<a class="headerlink" href="#module-common.LamePlot" title="Link to this heading">#</a></h1>
 <p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#common.LamePlot.add_colorbar" title="common.LamePlot.add_colorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_colorbar</span></code></a>(style_data, canvas, cax[, ...])</p></td>
 <td><p>Adds a colorbar to a MPL figure</p></td>
@@ -486,8 +498,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
-<li><p><strong>canvas</strong> (<em>mplc.MplCanvas</em>) – canvas object</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – canvas object</p></li>
 <li><p><strong>cax</strong> (<em>axes</em>) – color axes object</p></li>
 <li><p><strong>cbartype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Type of colorbar, <code class="docutils literal notranslate"><span class="pre">dicrete</span></code> or <code class="docutils literal notranslate"><span class="pre">continuous</span></code>, Defaults to continuous</p></li>
 <li><p><strong>grouplabels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – category/group labels for tick marks</p></li>
@@ -506,8 +518,8 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>ax</strong> – Axes to place scalebar on.</p></li>
 </ul>
 </dd>
@@ -522,10 +534,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas to be added to main window</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas to be added to main window</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldX.currentText()</span></code> as x coordinate</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxFieldX.currentText()</span></code> as y coordinate</p></li>
 <li><p><strong>c</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data associated with field <code class="docutils literal notranslate"><span class="pre">MainWindow.comboBoxColorField.currentText()</span></code> as marker colors</p></li>
@@ -573,8 +585,8 @@ to other clusters. The score ranges from -1 to 1, where:</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -599,8 +611,8 @@ visualizations.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>processed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, use processed data; if False, use raw data. Defaults to True.</p></li>
 </ul>
 </dd>
@@ -621,10 +633,10 @@ visualizations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – plotting canvas</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – plotting canvas</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – X-axis dictionary</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Y-axis dictionary</p></li>
 </ul>
@@ -647,10 +659,10 @@ and the plot type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
 <li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Coordinates associated with top, left and right vertices, respectively</p></li>
@@ -684,16 +696,16 @@ Defaults to an empty string.</p></li>
 <dt class="sig sig-object py" id="common.LamePlot.plot_cluster_map">
 <span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_cluster_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_cluster_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_cluster_map" title="Link to this definition">#</a></dt>
 <dd><p>Produces a map of cluster categories</p>
-<p>Creates the map on an <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.  Each cluster category is assigned a unique color.
+<p>Creates the map on an <code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code>.  Each cluster category is assigned a unique color.
 The function updates <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_info</span></code> with the displayed plot metadata and figure
-<code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code> for display in the centralWidget views.</p>
+<code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code> for display in the centralWidget views.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -712,14 +724,14 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <dd><p>Plot maps associated with clustering</p>
 <p>Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.
 The function updates <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_info</span></code> with the displayed plot metadata and figure
-<code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code> for display in the centralWidget views.</p>
+<code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code> for display in the centralWidget views.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -741,13 +753,13 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>canvas</strong> (<em>mplc.MplCanvas</em>) – The canvas containing the correlation plot.</p></li>
+<li><p><strong>canvas</strong> (<em>MplCanvas</em>) – The canvas containing the correlation plot.</p></li>
 <li><p><strong>plot_info</strong> (<em>dict</em>) – Dictionary containing information about the plot, including the correlation matrix.</p></li>
 </ul>
 </p>
@@ -772,7 +784,7 @@ The function updates <code class="docutils literal notranslate"><span class="pre
 <dd class="field-even"><p><strong>canvas</strong> – The Matplotlib canvas containing the plotted histogram.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -837,14 +849,14 @@ diagrams, which display a set of elements arranged by compatibility.  Radar plot
 data displayed on a set of radial spokes (axes), giving the appearance of a radar screen
 or spider web.</p>
 <p>The function updates <code class="docutils literal notranslate"><span class="pre">MainWindow.plot_info</span></code> with the displayed plot metadata and figure
-<code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code> for display in the centralWidget views.</p>
+<code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code> for display in the centralWidget views.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -871,8 +883,8 @@ or spider web.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -895,9 +907,9 @@ or spider web.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pca_results</strong> (<em>PCA</em>) – PCA results object containing the components.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – The canvas containing the PCA scatter or heatmap plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – The canvas containing the PCA scatter or heatmap plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -919,7 +931,7 @@ or spider web.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>pca_results</strong> (<em>PCA</em>) – PCA results object containing explained variance ratios.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -942,8 +954,8 @@ or spider web.</p>
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>pca_results</strong> (<em>PCA</em>) – PCA results object containing the components.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -970,9 +982,9 @@ visualizations.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – The parent widget for the plot canvas.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – canvas within gui for plotting, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – canvas within gui for plotting, by default <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -990,7 +1002,7 @@ and the plot type.</p></li>
 <dt class="sig sig-object py" id="common.LamePlot.plot_score_map">
 <span class="sig-prename descclassname"><span class="pre">common.LamePlot.</span></span><span class="sig-name descname"><span class="pre">plot_score_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/LamePlot.html#plot_score_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.LamePlot.plot_score_map" title="Link to this definition">#</a></dt>
 <dd><p>Plots score maps for dimensionality reduction methods such as PCA or clustering.</p>
-<p>Creates a score map for PCA and clusters.  Maps are displayed on an <code class="docutils literal notranslate"><span class="pre">mplc.MplCanvas</span></code>.
+<p>Creates a score map for PCA and clusters.  Maps are displayed on an <code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code>.
 The function uses the processed data from the DataHandler and the selected field from AppData
 to generate the score map. The plot is styled according to the provided StyleData object.</p>
 <dl class="field-list simple">
@@ -998,8 +1010,8 @@ to generate the score map. The plot is styled according to the provided StyleDat
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1030,7 +1042,7 @@ to generate the score map. The plot is styled according to the provided StyleDat
 <dd class="field-even"><p><strong>canvas</strong> – The Matplotlib canvas containing the plotted histogram.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas">MplCanvas</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1047,8 +1059,8 @@ on a Matplotlib canvas. The plot is styled according to the provided StyleData o
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parent</strong> (<em>QWidget</em>) – Parent widget for the plot.</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1069,10 +1081,10 @@ on a Matplotlib canvas. The plot is styled according to the provided StyleData o
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas that contains axes and figure</p></li>
 <li><p><strong>data</strong> (<em>DataHandler</em>) – DataHandler object containing the processed data.</p></li>
-<li><p><strong>app_data</strong> (<a class="reference internal" href="app.AppData.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
-<li><p><strong>style_data</strong> (<a class="reference internal" href="app.StyleToolbox.html#app.StyleToolbox.StyleData" title="app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
+<li><p><strong>app_data</strong> (<a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><em>AppData</em></a>) – AppData object containing application settings and user preferences.</p></li>
+<li><p><strong>style_data</strong> (<a class="reference internal" href="src.app.StyleToolbox.html#src.app.StyleToolbox.StyleData" title="src.app.StyleToolbox.StyleData"><em>StyleData</em></a>) – StyleData object containing style settings for the plot.</p></li>
 <li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with top vertex</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with left vertex</p></li>
 <li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – coordinate associated with right vertex</p></li>
@@ -1096,7 +1108,7 @@ and the plot type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (<a class="reference internal" href="common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas" title="common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas object displayed in UI.</p></li>
+<li><p><strong>canvas</strong> (<a class="reference internal" href="src.common.CustomMplCanvas.html#src.common.CustomMplCanvas.MplCanvas" title="src.common.CustomMplCanvas.MplCanvas"><em>MplCanvas</em></a>) – Canvas object displayed in UI.</p></li>
 <li><p><strong>font_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Font used on plot.</p></li>
 </ul>
 </dd>
@@ -1122,8 +1134,7 @@ and the plot type.</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1163,13 +1174,13 @@ and the plot type.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/generated/common.LamePlot.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/common.LamePlot.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1184,8 +1195,8 @@ and the plot type.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1205,7 +1216,7 @@ and the plot type.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1218,8 +1229,7 @@ and the plot type.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

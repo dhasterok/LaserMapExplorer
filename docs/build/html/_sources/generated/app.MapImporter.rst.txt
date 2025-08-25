@@ -1,8 +1,17 @@
-app.MapImporter
+﻿app.MapImporter
 ===============
 
 .. automodule:: app.MapImporter
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -11,3 +20,11 @@ app.MapImporter
       FileSelectData
       MapImporter
    
+   
+
+   
+   
+   
+
+
+

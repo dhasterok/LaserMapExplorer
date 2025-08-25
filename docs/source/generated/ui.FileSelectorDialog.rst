@@ -1,8 +1,17 @@
-ui.FileSelectorDialog
+﻿ui.FileSelectorDialog
 =====================
 
 .. automodule:: ui.FileSelectorDialog
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.FileSelectorDialog
    
       Ui_FileSelectorDialog
    
+   
+
+   
+   
+   
+
+
+

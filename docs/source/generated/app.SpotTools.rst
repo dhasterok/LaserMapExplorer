@@ -1,8 +1,17 @@
-app.SpotTools
+﻿app.SpotTools
 =============
 
 .. automodule:: app.SpotTools
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ app.SpotTools
    
       SpotPage
    
+   
+
+   
+   
+   
+
+
+

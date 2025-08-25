@@ -1,8 +1,17 @@
-common.ternary\_plot
+﻿common.ternary\_plot
 ====================
 
 .. automodule:: common.ternary_plot
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ common.ternary\_plot
    
       ternary
    
+   
+
+   
+   
+   
+
+
+

@@ -107,7 +107,7 @@ html_theme_options = {
         {
             "name": "MinEx CRC",
             "url": "https://minexcrc.com.au/",
-            "icon": "_static/minex_crc_logo.svg",
+            "icon": "_static/minex_crc_logo_black.svg",
             "type": "local",
         }
    ]

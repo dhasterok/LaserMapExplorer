@@ -1,8 +1,17 @@
-common.Polygon
+﻿common.Polygon
 ==============
 
 .. automodule:: common.Polygon
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -11,3 +20,11 @@ common.Polygon
       Polygon
       PolygonManager
    
+   
+
+   
+   
+   
+
+
+

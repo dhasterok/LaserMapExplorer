@@ -4,6 +4,15 @@
 .. automodule:: common.CustomWidgets
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -26,3 +35,11 @@
       ToggleSwitch
       VisibilityWidget
    
+   
+
+   
+   
+   
+
+
+

@@ -4,6 +4,15 @@
 .. automodule:: app.SpecialTools
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -14,3 +23,11 @@
       SpecialPage
       ThermometryTab
    
+   
+
+   
+   
+   
+
+
+

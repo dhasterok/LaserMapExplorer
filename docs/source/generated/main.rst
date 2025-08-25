@@ -4,6 +4,11 @@
 .. automodule:: main
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -12,3 +17,15 @@
       main
       show_splash
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

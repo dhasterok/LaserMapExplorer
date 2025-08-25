@@ -1,8 +1,17 @@
-ui.SpotImportDialog
+﻿ui.SpotImportDialog
 ===================
 
 .. automodule:: ui.SpotImportDialog
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.SpotImportDialog
    
       Ui_SpotImportDialog
    
+   
+
+   
+   
+   
+
+
+

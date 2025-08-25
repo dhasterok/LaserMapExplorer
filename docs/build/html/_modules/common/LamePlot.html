@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/LamePlot';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.LamePlot</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.LamePlot</li>
   </ul>
 </nav>
 </div>
@@ -388,36 +400,35 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.LamePlot</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QFont</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QVBoxLayout</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QVBoxLayout</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pg</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphicsLayoutWidget</span><span class="p">,</span> <span class="n">ImageItem</span><span class="p">,</span> <span class="n">colormap</span><span class="p">,</span> <span class="n">TargetItem</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="kn">import</span> <span class="n">GraphicsLayoutWidget</span><span class="p">,</span> <span class="n">ImageItem</span><span class="p">,</span> <span class="n">colormap</span><span class="p">,</span> <span class="n">TargetItem</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.gridspec</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gs</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gs</span>
 <span class="c1">#import matplotlib.pyplot as plt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Patch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">colors</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.CustomMplCanvas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplc</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">src.common.format</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fmt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.colorfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.plot_spider</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_spider_norm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.radar</span><span class="w"> </span><span class="kn">import</span> <span class="n">Radar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.scalebar</span><span class="w"> </span><span class="kn">import</span> <span class="n">scalebar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.ternary_plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">ternary</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">log_call</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Patch</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">colors</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomMplCanvas</span> <span class="kn">import</span> <span class="n">MplCanvas</span><span class="p">,</span> <span class="n">SimpleMplCanvas</span>
+<span class="kn">import</span> <span class="nn">src.common.format</span> <span class="k">as</span> <span class="nn">fmt</span>
+<span class="kn">from</span> <span class="nn">src.common.colorfunc</span> <span class="kn">import</span> <span class="n">get_hex_color</span><span class="p">,</span> <span class="n">get_rgb_color</span>
+<span class="kn">from</span> <span class="nn">src.common.plot_spider</span> <span class="kn">import</span> <span class="n">plot_spider_norm</span>
+<span class="kn">from</span> <span class="nn">src.common.radar</span> <span class="kn">import</span> <span class="n">Radar</span>
+<span class="kn">from</span> <span class="nn">src.common.scalebar</span> <span class="kn">import</span> <span class="n">scalebar</span>
+<span class="kn">from</span> <span class="nn">src.common.ternary_plot</span> <span class="kn">import</span> <span class="n">ternary</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">log_call</span><span class="p">,</span> <span class="n">log</span>
 
 <div class="viewcode-block" id="plot_map_mpl">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_map_mpl">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_map_mpl</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">add_histogram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_map_mpl</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">add_histogram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.</span>
 
@@ -456,7 +467,7 @@
 <span class="sd">    - Stores the plotted data in the parent for potential export.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># create plot canvas</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">map_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># get data for current map</span>
     <span class="c1">#scale = data.processed_data.get_attribute(field, &#39;norm&#39;)</span>
@@ -466,7 +477,7 @@
     <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">aspect_ratio</span>
 
     <span class="c1"># store map_df to save_data if data needs to be exported</span>
-    <span class="n">parent</span><span class="o">.</span><span class="n">save_data</span> <span class="o">=</span> <span class="n">map_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">map_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="c1"># equalized color bins to CDF function</span>
     <span class="k">if</span> <span class="n">app_data</span><span class="o">.</span><span class="n">equalize_color_scale</span><span class="p">:</span>
@@ -484,6 +495,11 @@
                             <span class="n">cmap</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">get_colormap</span><span class="p">(),</span>
                             <span class="n">aspect</span><span class="o">=</span><span class="n">aspect_ratio</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
                             <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">reshaped_array</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">current_data</span><span class="o">.</span><span class="n">dx</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">current_data</span><span class="o">.</span><span class="n">dy</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">color_units</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">[</span><span class="n">field</span><span class="p">][</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">distance_units</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">column_attributes</span><span class="p">[</span><span class="s1">&#39;Xc&#39;</span><span class="p">][</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
 
     <span class="n">add_colorbar</span><span class="p">(</span><span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">)</span>
     <span class="k">match</span> <span class="n">style_data</span><span class="o">.</span><span class="n">cscale</span><span class="p">:</span>
@@ -509,7 +525,6 @@
     <span class="n">alpha_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">reshaped_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  
     <span class="c1"># white plot screen when uncommented.</span>
     <span class="c1"># canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation=&#39;none&#39;, cmap=&#39;Greys&#39;, alpha=alpha_mask)</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">reshaped_array</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labeltop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelright</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -534,11 +549,14 @@
     <span class="c1"># add small histogram</span>
     <span class="k">if</span> <span class="n">add_histogram</span><span class="p">:</span>
         <span class="n">hist_canvas</span> <span class="o">=</span> <span class="n">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">map_df</span><span class="p">)</span>
-
+    <span class="n">plot_name</span> <span class="o">=</span> <span class="n">field</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    <span class="c1"># set title to set default name when saving figure</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="n">field_type</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
-        <span class="s1">&#39;plot_name&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+        <span class="s1">&#39;plot_name&#39;</span><span class="p">:</span> <span class="n">plot_name</span><span class="p">,</span>
         <span class="s1">&#39;plot_type&#39;</span><span class="p">:</span> <span class="s1">&#39;field map&#39;</span><span class="p">,</span>
         <span class="s1">&#39;field_type&#39;</span><span class="p">:</span> <span class="n">field_type</span><span class="p">,</span>
         <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
@@ -546,7 +564,8 @@
         <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">style_data</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span><span class="p">],</span>
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
-        <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
         <span class="p">}</span>
     
     <span class="k">if</span> <span class="n">add_histogram</span><span class="p">:</span>
@@ -558,191 +577,191 @@
 <div class="viewcode-block" id="plot_map_pg">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_map_pg">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_map_pg</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">add_histogram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a graphic widget for plotting a map</span>
+<span class="k">def</span> <span class="nf">plot_map_pg</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">sample_id</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">add_histogram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a graphic widget for plotting a map</span>
 
-<span class="sd">        Create a map using pyqtgraph.</span>
+<span class="sd">    Create a map using pyqtgraph.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        sample_id : str</span>
-<span class="sd">            Sample identifier</span>
-<span class="sd">        field_type : str</span>
-<span class="sd">            Type of field for plotting</span>
-<span class="sd">        field : str</span>
-<span class="sd">            Field for plotting</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="c1"># ----start debugging----</span>
-        <span class="c1"># print(&#39;[plot_map_pg] sample_id: &#39;+sample_id+&#39;   field_type: &#39;+&#39;   field: &#39;+field)</span>
-        <span class="c1"># ----end debugging----</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sample_id : str</span>
+<span class="sd">        Sample identifier</span>
+<span class="sd">    field_type : str</span>
+<span class="sd">        Type of field for plotting</span>
+<span class="sd">    field : str</span>
+<span class="sd">        Field for plotting</span>
+<span class="sd">    &quot;&quot;&quot;</span>        
+    <span class="c1"># ----start debugging----</span>
+    <span class="c1"># print(&#39;[plot_map_pg] sample_id: &#39;+sample_id+&#39;   field_type: &#39;+&#39;   field: &#39;+field)</span>
+    <span class="c1"># ----end debugging----</span>
 
-        <span class="c1"># get data for current map</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">cscale</span>
-        <span class="n">map_df</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+    <span class="c1"># get data for current map</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">cscale</span>
+    <span class="n">map_df</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
 
-        <span class="c1"># store map_df to save_data if data needs to be exported</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">save_data</span> <span class="o">=</span> <span class="n">map_df</span>
-        
-        <span class="c1">#Change transparency of values outside mask</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">rgba_array</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">array_to_image</span><span class="p">(</span><span class="n">map_df</span><span class="p">)</span>
+    <span class="c1"># store map_df to save_data if data needs to be exported</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">save_data</span> <span class="o">=</span> <span class="n">map_df</span>
+    
+    <span class="c1">#Change transparency of values outside mask</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">rgba_array</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">array_to_image</span><span class="p">(</span><span class="n">map_df</span><span class="p">)</span>
 
-        <span class="c1"># plotWidget = QWidget()</span>
-        <span class="c1"># layout = QVBoxLayout()</span>
-        <span class="c1"># layout.setSpacing(0)</span>
-        <span class="c1"># plotWidget.setLayout(layout)</span>
+    <span class="c1"># plotWidget = QWidget()</span>
+    <span class="c1"># layout = QVBoxLayout()</span>
+    <span class="c1"># layout.setSpacing(0)</span>
+    <span class="c1"># plotWidget.setLayout(layout)</span>
 
-        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
-        <span class="n">view</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">canvasWindow</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">canvas_tab</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="n">field</span>
-        <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">canvas_tab</span><span class="p">[</span><span class="s1">&#39;mv&#39;</span><span class="p">]:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="n">sample_id</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">field</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">view</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">canvas_tab</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">canvasWindow</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="n">field</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">canvasWindow</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">field</span>
+    <span class="k">elif</span> <span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;mv&#39;</span><span class="p">]:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">sample_id</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">field</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">canvasWindow</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">field</span>
 
-        <span class="n">graphicWidget</span> <span class="o">=</span> <span class="n">GraphicsLayoutWidget</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">graphicWidget</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s1">&#39;LaserMap&#39;</span><span class="p">)</span>
-        <span class="n">graphicWidget</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">graphicWidget</span> <span class="o">=</span> <span class="n">GraphicsLayoutWidget</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">graphicWidget</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s1">&#39;LaserMap&#39;</span><span class="p">)</span>
+    <span class="n">graphicWidget</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
 
-        <span class="c1"># layout.addWidget(graphicWidget)</span>
+    <span class="c1"># layout.addWidget(graphicWidget)</span>
 
-        <span class="c1"># Create the ImageItem</span>
-        <span class="n">img_item</span> <span class="o">=</span> <span class="n">ImageItem</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># Create the ImageItem</span>
+    <span class="n">img_item</span> <span class="o">=</span> <span class="n">ImageItem</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1">#set aspect ratio of rectangle</span>
-        <span class="n">img_item</span><span class="o">.</span><span class="n">setRect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
-                <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
-                <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x_range</span><span class="p">,</span>
-                <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y_range</span><span class="p">)</span>
+    <span class="c1">#set aspect ratio of rectangle</span>
+    <span class="n">img_item</span><span class="o">.</span><span class="n">setRect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x_range</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y_range</span><span class="p">)</span>
 
-        <span class="c1">#--- add non-interactive image with integrated color ------------------</span>
-        <span class="n">plotWindow</span> <span class="o">=</span> <span class="n">graphicWidget</span><span class="o">.</span><span class="n">addPlot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
+    <span class="c1">#--- add non-interactive image with integrated color ------------------</span>
+    <span class="n">plotWindow</span> <span class="o">=</span> <span class="n">graphicWidget</span><span class="o">.</span><span class="n">addPlot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
 
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">img_item</span><span class="p">)</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">img_item</span><span class="p">)</span>
 
-        <span class="c1"># turn off axes and</span>
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">showAxes</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">showValues</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span> <span class="p">)</span>
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">invertY</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">setAspectLocked</span><span class="p">()</span>
+    <span class="c1"># turn off axes and</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">showAxes</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">showValues</span><span class="o">=</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">invertY</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">setAspectLocked</span><span class="p">()</span>
 
-        <span class="c1"># Prevent zooming/panning outside the default view</span>
-        <span class="c1">## These cut off parts of the map when plotting.</span>
-        <span class="c1">#plotWindow.setRange(yRange=[parent.y.min(), parent.y.max()])</span>
-        <span class="c1">#plotWindow.setLimits(xMin=parent.x.min(), xMax=parent.x.max(), yMin=parent.y.min(), yMax = parent.y.max())</span>
-        <span class="c1">#plotWindow.setLimits(maxXRange=parent.data[parent.app_data.sample_id].x_range, maxYRange=parent.data[parent.app_data.sample_id].y_range)</span>
+    <span class="c1"># Prevent zooming/panning outside the default view</span>
+    <span class="c1">## These cut off parts of the map when plotting.</span>
+    <span class="c1">#plotWindow.setRange(yRange=[parent.y.min(), parent.y.max()])</span>
+    <span class="c1">#plotWindow.setLimits(xMin=parent.x.min(), xMax=parent.x.max(), yMin=parent.y.min(), yMax = parent.y.max())</span>
+    <span class="c1">#plotWindow.setLimits(maxXRange=parent.data[parent.app_data.sample_id].x_range, maxYRange=parent.data[parent.app_data.sample_id].y_range)</span>
 
-        <span class="c1">#supress right click menu</span>
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1">#supress right click menu</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># colorbar</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">)</span>
-        <span class="c1">#clb,cub,cscale,clabel = parent.style_data.get_axis_values(field_type,field)</span>
-        <span class="c1"># cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=parent.style_data.cbar_dir, pen=&#39;black&#39;)</span>
-        <span class="n">img_item</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">())</span>
-        <span class="c1"># graphicWidget.addItem(cbar)</span>
-        <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;leftButtonPan&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># colorbar</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">)</span>
+    <span class="c1">#clb,cub,cscale,clabel = parent.style_data.get_axis_values(field_type,field)</span>
+    <span class="c1"># cbar = ColorBarItem(values=(clb,cub), width=25, colorMap=cmap, label=clabel, interactive=False, limits=(clb,cub), orientation=parent.style_data.cbar_dir, pen=&#39;black&#39;)</span>
+    <span class="n">img_item</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">())</span>
+    <span class="c1"># graphicWidget.addItem(cbar)</span>
+    <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;leftButtonPan&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># ... Inside your plotting function</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">TargetItem</span><span class="p">(</span><span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="p">)</span>
-        <span class="n">target</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span>
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="c1"># ... Inside your plotting function</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">TargetItem</span><span class="p">(</span><span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
-        <span class="c1"># store plots in parent.lasermap to be used in profiling. parent.lasermaps is a multi index dictionary with index: (field, view)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">lasermaps</span><span class="p">[</span><span class="n">field</span><span class="p">,</span><span class="n">view</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">plotWindow</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>
+    <span class="c1"># store plots in parent.lasermap to be used in profiling. parent.lasermaps is a multi index dictionary with index: (field, view)</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">lasermaps</span><span class="p">[</span><span class="n">field</span><span class="p">,</span><span class="n">view</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">plotWindow</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>
 
-        <span class="c1">#hide pointer</span>
-        <span class="n">target</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="c1">#hide pointer</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span> <span class="n">event</span><span class="p">,</span><span class="n">array</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">field</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">plotWindow</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">plot_clicked</span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="n">array</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">plotWindow</span><span class="p">))</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span> <span class="n">event</span><span class="p">,</span><span class="n">array</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">field</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">plotWindow</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">plot_clicked</span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="n">array</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">plotWindow</span><span class="p">))</span>
 
-        <span class="c1">#remove previous plot in single view</span>
-        <span class="k">if</span> <span class="n">view</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1">#create label with analyte name</span>
-            <span class="c1">#create another label for value of the corresponding plot</span>
-            <span class="n">labelMVInfoField</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
-            <span class="c1"># labelMVInfoValueLabel.setMaximumSize(QSize(20, 16777215))</span>
-            <span class="n">labelMVInfoField</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelMVInfoField&quot;</span><span class="o">+</span><span class="n">field</span><span class="p">)</span>
-            <span class="n">labelMVInfoField</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
-            <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
-            <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
-            <span class="n">labelMVInfoField</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-            <span class="n">verticalLayout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
-            <span class="c1"># Naming the verticalLayout</span>
-            <span class="n">verticalLayout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">field</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">view</span><span class="p">))</span>
-            <span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">labelMVInfoField</span><span class="p">)</span>
+    <span class="c1">#remove previous plot in single view</span>
+    <span class="k">if</span> <span class="n">view</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1">#create label with analyte name</span>
+        <span class="c1">#create another label for value of the corresponding plot</span>
+        <span class="n">labelMVInfoField</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
+        <span class="c1"># labelMVInfoValueLabel.setMaximumSize(QSize(20, 16777215))</span>
+        <span class="n">labelMVInfoField</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelMVInfoField&quot;</span><span class="o">+</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">labelMVInfoField</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+        <span class="n">labelMVInfoField</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="n">verticalLayout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="c1"># Naming the verticalLayout</span>
+        <span class="n">verticalLayout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">field</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">view</span><span class="p">))</span>
+        <span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">labelMVInfoField</span><span class="p">)</span>
 
-            <span class="n">labelMVInfoValue</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
-            <span class="n">labelMVInfoValue</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelMVInfoValue&quot;</span><span class="o">+</span><span class="n">field</span><span class="p">)</span>
-            <span class="n">labelMVInfoValue</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-            <span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">labelMVInfoValue</span><span class="p">)</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">gridLayoutMVInfo</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">verticalLayout</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">gridLayoutMVInfo</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="c1"># Store the reference to verticalLayout in a dictionary</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">multiview_info_label</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">labelMVInfoField</span><span class="p">,</span> <span class="n">labelMVInfoValue</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1">#print(parent.lasermaps)</span>
-            <span class="c1">#print(parent.prev_plot)</span>
-            <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span> <span class="ow">and</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">lasermaps</span><span class="p">:</span>
-                <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">del</span> <span class="n">parent</span><span class="o">.</span><span class="n">lasermaps</span><span class="p">[(</span><span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span><span class="p">,</span><span class="mi">0</span><span class="p">)]</span>
-            <span class="c1"># update variables which stores current plot in SV</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">plotWindow</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span> <span class="o">=</span> <span class="n">field</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">init_zoom_view</span><span class="p">()</span>
-            <span class="c1"># uncheck edge detection</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">polygon_tab</span><span class="o">.</span><span class="n">action_edge_detect</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-
-
-        <span class="c1"># Create a SignalProxy to handle mouse movement events</span>
-        <span class="c1"># Create a SignalProxy for this plot and connect it to mouseMoved</span>
-
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span> <span class="n">event</span><span class="p">,</span><span class="n">plot</span><span class="o">=</span><span class="n">plotWindow</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">mouse_moved_pg</span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="n">plot</span><span class="p">))</span>
-
-        <span class="c1">#add zoom window</span>
-        <span class="n">plotWindow</span><span class="o">.</span><span class="n">getViewBox</span><span class="p">()</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
-
-        <span class="c1"># add edge detection</span>
-        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">polygon_tab</span><span class="o">.</span><span class="n">action_edge_detect</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">noise_reduction</span><span class="o">.</span><span class="n">add_edge_detection</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">view</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
+        <span class="n">labelMVInfoValue</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
+        <span class="n">labelMVInfoValue</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelMVInfoValue&quot;</span><span class="o">+</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">labelMVInfoValue</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">labelMVInfoValue</span><span class="p">)</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">gridLayoutMVInfo</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">verticalLayout</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">gridLayoutMVInfo</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Store the reference to verticalLayout in a dictionary</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">multiview_info_label</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">labelMVInfoField</span><span class="p">,</span> <span class="n">labelMVInfoValue</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">#print(parent.lasermaps)</span>
+        <span class="c1">#print(parent.prev_plot)</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span> <span class="ow">and</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">lasermaps</span><span class="p">:</span>
             <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">parent</span><span class="o">.</span><span class="n">lasermaps</span><span class="p">[(</span><span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span><span class="p">,</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="c1"># update variables which stores current plot in SV</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">plotWindow</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">prev_plot</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">init_zoom_view</span><span class="p">()</span>
+        <span class="c1"># uncheck edge detection</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">polygon_tab</span><span class="o">.</span><span class="n">action_edge_detect</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
 
-        <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">sample_id</span><span class="p">,</span>
-            <span class="s1">&#39;plot_name&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
-            <span class="s1">&#39;plot_type&#39;</span><span class="p">:</span> <span class="s1">&#39;field map&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;field_type&#39;</span><span class="p">:</span> <span class="n">field_type</span><span class="p">,</span>
-            <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
-            <span class="s1">&#39;figure&#39;</span><span class="p">:</span> <span class="n">graphicWidget</span><span class="p">,</span>
-            <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span><span class="p">],</span>
-            <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="n">tmp</span><span class="p">,</span>
-            <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="kc">None</span>
-            <span class="p">}</span>
+    <span class="c1"># Create a SignalProxy to handle mouse movement events</span>
+    <span class="c1"># Create a SignalProxy for this plot and connect it to mouseMoved</span>
 
-        <span class="c1">#parent.plot_widget_dict[parent.plot_info[&#39;tree&#39;]][parent.plot_info[&#39;sample_id&#39;]][parent.plot_info[&#39;plot_name&#39;]] = {&#39;info&#39;:parent.plot_info, &#39;view&#39;:view, &#39;position&#39;:None}</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">add_plotwidget_to_canvas</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span> <span class="n">event</span><span class="p">,</span><span class="n">plot</span><span class="o">=</span><span class="n">plotWindow</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">mouse_moved_pg</span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="n">plot</span><span class="p">))</span>
 
-        <span class="c1">#parent.update_tree(plot_info=parent.plot_info)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">add_tree_item</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span>
+    <span class="c1">#add zoom window</span>
+    <span class="n">plotWindow</span><span class="o">.</span><span class="n">getViewBox</span><span class="p">()</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
 
-        <span class="c1"># add small histogram</span>
-        <span class="k">if</span> <span class="n">add_histogram</span> <span class="ow">and</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">canvas_tab</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]):</span>
-            <span class="n">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">],</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="p">,</span> <span class="n">map_df</span><span class="p">)</span></div>
+    <span class="c1"># add edge detection</span>
+    <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">polygon_tab</span><span class="o">.</span><span class="n">action_edge_detect</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">noise_reduction</span><span class="o">.</span><span class="n">add_edge_detection</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">view</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">:</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">]</span>
+
+
+    <span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">sample_id</span><span class="p">,</span>
+        <span class="s1">&#39;plot_name&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+        <span class="s1">&#39;plot_type&#39;</span><span class="p">:</span> <span class="s1">&#39;field map&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;field_type&#39;</span><span class="p">:</span> <span class="n">field_type</span><span class="p">,</span>
+        <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+        <span class="s1">&#39;figure&#39;</span><span class="p">:</span> <span class="n">graphicWidget</span><span class="p">,</span>
+        <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">style_dict</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span><span class="p">],</span>
+        <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="n">tmp</span><span class="p">,</span>
+        <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="p">}</span>
+
+    <span class="c1">#parent.plot_widget_dict[parent.plot_info[&#39;tree&#39;]][parent.plot_info[&#39;sample_id&#39;]][parent.plot_info[&#39;plot_name&#39;]] = {&#39;info&#39;:parent.plot_info, &#39;view&#39;:view, &#39;position&#39;:None}</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">add_plotwidget_to_canvas</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span>
+
+    <span class="c1">#parent.update_tree(plot_info=parent.plot_info)</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">plot_tree</span><span class="o">.</span><span class="n">add_tree_item</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">plot_info</span><span class="p">)</span>
+
+    <span class="c1"># add small histogram</span>
+    <span class="k">if</span> <span class="n">add_histogram</span> <span class="ow">and</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">view</span> <span class="o">==</span> <span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">]):</span>
+        <span class="n">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">],</span> <span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="p">,</span> <span class="n">map_df</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="plot_small_histogram">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_small_histogram">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">current_plot_df</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_small_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">current_plot_df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a small histogram on the Samples and Fields tab associated with the selected map</span>
 
 <span class="sd">    Parameters</span>
@@ -765,7 +784,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;plot_small_histogram&#39;)</span>
     <span class="c1"># create Mpl canvas</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">SimpleMplCanvas</span><span class="p">()</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">SimpleMplCanvas</span><span class="p">()</span>
 
     <span class="c1"># Histogram</span>
     <span class="c1">#remove by mask and drop rows with na</span>
@@ -838,7 +857,7 @@
 <div class="viewcode-block" id="plot_histogram">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_histogram">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_histogram</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots a histogramn in the canvas window.</span>
 
 <span class="sd">    Parameters</span>
@@ -861,7 +880,7 @@
     <span class="n">plot_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1">#print(&#39;plot histogram&#39;)</span>
     <span class="c1"># create Mpl canvas</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">nbins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">app_data</span><span class="o">.</span><span class="n">hist_num_bins</span><span class="p">)</span>
 
@@ -920,6 +939,7 @@
         <span class="n">cluster_group</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">method</span><span class="p">]</span>
         <span class="n">clusters</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">cluster_dict</span><span class="p">[</span><span class="n">method</span><span class="p">][</span><span class="s1">&#39;selected_clusters&#39;</span><span class="p">]</span>
 
+        <span class="n">hist_dfs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Plot histogram for all clusters</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">:</span>
             <span class="n">cluster_data</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="n">cluster_group</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
@@ -941,6 +961,17 @@
                         <span class="n">alpha</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_alpha</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span>
                         <span class="n">density</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
+                <span class="c1"># plot_data: (n, bins, patches)</span>
+                <span class="n">counts</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plot_data</span>
+                <span class="c1"># Store histogram data for each cluster</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                    <span class="s1">&#39;bin_left&#39;</span><span class="p">:</span> <span class="n">bin_edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="s1">&#39;bin_right&#39;</span><span class="p">:</span> <span class="n">bin_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                    <span class="s1">&#39;bin_center&#39;</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">bin_edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bin_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span>
+                    <span class="sa">f</span><span class="s1">&#39;prob_</span><span class="si">{</span><span class="n">cluster_label</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">counts</span>
+                <span class="p">})</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_label</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+                <span class="n">hist_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Filter out NaN and zero values</span>
                 <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">cluster_data</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cluster_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
@@ -954,7 +985,20 @@
 
                 <span class="c1"># Plot the data</span>
                 <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">log_values</span><span class="p">,</span> <span class="n">log_counts</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">cluster_label</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)],</span> <span class="n">color</span><span class="o">=</span><span class="n">bar_color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw</span><span class="p">)</span>
+                
+                <span class="c1"># Store data</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                    <span class="s1">&#39;log_value&#39;</span><span class="p">:</span> <span class="n">log_values</span><span class="p">,</span>
+                    <span class="s1">&#39;log_count&#39;</span><span class="p">:</span> <span class="n">log_counts</span><span class="p">,</span>
+                    <span class="s1">&#39;cluster&#39;</span><span class="p">:</span> <span class="n">cluster_label</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+                <span class="p">})</span>
+                <span class="n">hist_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
+        <span class="c1"># Combine all clusters to one DataFrame</span>
+        <span class="k">if</span> <span class="n">hist_dfs</span><span class="p">:</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">hist_dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># Add a legend</span>
         <span class="n">add_colorbar</span><span class="p">(</span><span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;discrete&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="n">cluster_label</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="n">cluster_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_alpha</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
         <span class="c1">#canvas.axes.legend()</span>
@@ -977,6 +1021,13 @@
                     <span class="n">alpha</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_alpha</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span>
                     <span class="n">density</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
+            <span class="n">counts</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plot_data</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                <span class="s1">&#39;bin_left&#39;</span><span class="p">:</span> <span class="n">bin_edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s1">&#39;bin_right&#39;</span><span class="p">:</span> <span class="n">bin_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="s1">&#39;bin_center&#39;</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">bin_edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bin_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span>
+                <span class="s1">&#39;probability&#39;</span><span class="p">:</span> <span class="n">counts</span>
+            <span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Filter out NaN and zero values</span>
             <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
@@ -991,7 +1042,10 @@
             <span class="c1"># Plot the data</span>
             <span class="c1">#canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)</span>
             <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sorted_data</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">bar_color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_alpha</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
-
+            <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">sorted_data</span><span class="p">,</span>
+            <span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="n">counts</span>
+            <span class="p">})</span>
     <span class="c1"># axes</span>
     <span class="c1"># label font</span>
     <span class="k">if</span> <span class="s1">&#39;font&#39;</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -1041,11 +1095,13 @@
     <span class="n">update_figure_font</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">style_data</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-
+    <span class="n">plot_name</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field_type</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">app_data</span><span class="o">.</span><span class="n">c_field</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Histogram&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
-        <span class="s1">&#39;plot_name&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field_type</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">app_data</span><span class="o">.</span><span class="n">c_field</span><span class="p">,</span>
+        <span class="s1">&#39;plot_name&#39;</span><span class="p">:</span> <span class="n">plot_name</span><span class="p">,</span>
         <span class="s1">&#39;field_type&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field_type</span><span class="p">,</span>
         <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">c_field</span><span class="p">,</span>
         <span class="s1">&#39;plot_type&#39;</span><span class="p">:</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span><span class="p">,</span>
@@ -1056,7 +1112,7 @@
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="n">clusters</span><span class="p">,</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">plot_data</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">plot_info</span></div>
@@ -1065,7 +1121,7 @@
 <div class="viewcode-block" id="logax">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.logax">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">logax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">lim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">tick_label_rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">logax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">lim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">tick_label_rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a logarithmic axis with tick marks and labels for a given axis.</span>
 
@@ -1111,14 +1167,14 @@
 
 <div class="viewcode-block" id="add_colorbar">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.add_colorbar">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_colorbar</span><span class="p">(</span><span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_colorbar</span><span class="p">(</span><span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds a colorbar to a MPL figure</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    style_data : StyleData</span>
 <span class="sd">        StyleData object containing style settings for the plot.</span>
-<span class="sd">    canvas : mplc.MplCanvas</span>
+<span class="sd">    canvas : MplCanvas</span>
 <span class="sd">        canvas object</span>
 <span class="sd">    cax : axes</span>
 <span class="sd">        color axes object</span>
@@ -1214,7 +1270,7 @@
 <div class="viewcode-block" id="add_scalebar">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.add_scalebar">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a scalebar to a map</span>
 
 <span class="sd">    Parameters</span>
@@ -1252,7 +1308,7 @@
 <div class="viewcode-block" id="plot_correlation">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_correlation">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_correlation</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_correlation</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates an image of the correlation matrix.</span>
 
@@ -1269,14 +1325,14 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    canvas : mplc.MplCanvas</span>
+<span class="sd">    canvas : MplCanvas</span>
 <span class="sd">        The canvas containing the correlation plot.</span>
 <span class="sd">    plot_info : dict</span>
 <span class="sd">        Dictionary containing information about the plot, including the correlation matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#print(&#39;plot_correlation&#39;)</span>
 
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
     <span class="c1"># get the data for computing correlations</span>
@@ -1310,13 +1366,13 @@
     <span class="n">square_flag</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">corr_squared</span>
     <span class="k">if</span> <span class="n">square_flag</span><span class="p">:</span>
         <span class="n">cax</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">correlation_matrix</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">get_colormap</span><span class="p">(),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
-        <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">correlation_matrix</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">canvas_array</span> <span class="o">=</span> <span class="n">correlation_matrix</span><span class="o">**</span><span class="mi">2</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cax</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">correlation_matrix</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">get_colormap</span><span class="p">(),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
-        <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">correlation_matrix</span>
+        <span class="n">canvas_array</span> <span class="o">=</span> <span class="n">correlation_matrix</span>
         
     <span class="c1"># store correlation_matrix to save_data if data needs to be exported</span>
-    <span class="n">parent</span><span class="o">.</span><span class="n">save_data</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">array</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">canvas_array</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="n">columns</span><span class="p">)</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -1352,6 +1408,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">plot_name</span> <span class="o">=</span> <span class="n">method</span>
 
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Correlation&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -1366,7 +1424,7 @@
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">correlation_matrix</span><span class="p">,</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">plot_info</span></div>
@@ -1376,7 +1434,7 @@
 <div class="viewcode-block" id="get_scatter_data">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.get_scatter_data">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_scatter_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_scatter_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">processed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get data for scatter plots.</span>
 
@@ -1456,7 +1514,7 @@
 <div class="viewcode-block" id="plot_scatter">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_scatter">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_scatter</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_scatter</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a plots from self.toolBox Scatter page.</span>
 
 <span class="sd">    Creates both scatter and heatmaps (spatial histograms) for bi- and ternary plots.</span>
@@ -1498,7 +1556,7 @@
     <span class="n">plot_flag</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">canvas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plot_flag</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="k">match</span> <span class="n">plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
         <span class="c1"># scatter</span>
@@ -1553,7 +1611,7 @@
 <div class="viewcode-block" id="biplot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.biplot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">biplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">biplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates scatter bi-plots</span>
 
 <span class="sd">    A general function for creating scatter plots of 2-dimensions.</span>
@@ -1668,7 +1726,9 @@
         <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">ticklabel_format</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;sci&#39;</span><span class="p">,</span> <span class="n">scilimits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 
     <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;scatter&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
-
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">plot_data</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -1690,7 +1750,7 @@
 <div class="viewcode-block" id="ternary_scatter">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.ternary_scatter">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ternary_scatter</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">ternary_scatter</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates ternary scatter plots</span>
 
 <span class="sd">    A general function for creating ternary scatter plots.</span>
@@ -1784,8 +1844,10 @@
     <span class="c1"># axes limits</span>
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">1.01</span><span class="p">,</span><span class="mf">1.01</span><span class="p">)</span>
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">plot_data</span>
     <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;ternscatter&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -1807,7 +1869,7 @@
 <div class="viewcode-block" id="hist2dbiplot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.hist2dbiplot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">hist2dbiplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">hist2dbiplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates 2D histogram figure</span>
 
 <span class="sd">    A general function for creating 2D histograms (heatmaps).</span>
@@ -1876,6 +1938,9 @@
         <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">ticklabel_format</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;sci&#39;</span><span class="p">,</span> <span class="n">scilimits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 
     <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;heatmap&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -1888,7 +1953,7 @@
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">plot_info</span></div>
@@ -1897,7 +1962,7 @@
 <div class="viewcode-block" id="hist2dternplot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.hist2dternplot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">hist2dternplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">hist2dternplot</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a ternary histogram figure</span>
 
 <span class="sd">    A general function for creating scatter plots of 2-dimensions.</span>
@@ -1944,9 +2009,11 @@
 
         <span class="c1"># cb.set_label(c[&#39;label&#39;])</span>
 
-        <span class="c1"># #tp.ternhex(hexbin_df=hexbin_df, plotfield=&#39;n&#39;, cmap=style_data.cmap, orientation=&#39;vertical&#39;)</span>
-
+        <span class="c1"># #tp.ternhex(hexbin_df=hexbin_df, plotfield=&#39;n&#39;, cmap=plot_style.cmap, orientation=&#39;vertical&#39;)</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">])</span>
     <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;heatmap&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -1959,7 +2026,7 @@
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;data&#39;</span> <span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">])</span>
+        <span class="s1">&#39;data&#39;</span> <span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">plot_info</span></div>
@@ -1968,7 +2035,7 @@
 <div class="viewcode-block" id="plot_ternary_map">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_ternary_map">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_ternary_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_ternary_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates map colored by ternary coordinate positions.</span>
 
@@ -1998,7 +2065,7 @@
         <span class="n">app_data</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;ternary map&#39;</span>
         <span class="n">style_data</span><span class="o">.</span><span class="n">set_style_widgets</span><span class="p">(</span><span class="s1">&#39;ternary map&#39;</span><span class="p">)</span>
 
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">sub</span><span class="o">=</span><span class="mi">121</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">sub</span><span class="o">=</span><span class="mi">121</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">afield</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">x_field</span>
     <span class="n">bfield</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">y_field</span>
@@ -2024,7 +2091,7 @@
     <span class="n">map_data</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">cval</span><span class="p">),</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">cval</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">map_data</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">aspect_ratio</span><span class="p">)</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">map_data</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">map_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">])</span>
 
     <span class="c1"># add scalebar</span>
     <span class="n">add_scalebar</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
@@ -2055,6 +2122,8 @@
         <span class="n">t2</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">hb</span><span class="p">[</span><span class="s1">&#39;xv&#39;</span><span class="p">],</span> <span class="n">hb</span><span class="p">[</span><span class="s1">&#39;yv&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">cv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
 
     <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">afield</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">bfield</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">cfield</span><span class="si">}</span><span class="s1">_ternarymap&#39;</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -2067,7 +2136,7 @@
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">map_data</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">plot_info</span></div>
@@ -2079,7 +2148,7 @@
 <div class="viewcode-block" id="plot_ndim">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_ndim">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_ndim</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_ndim</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Produces trace element compatibility (TEC) and Radar plots</span>
 <span class="sd">    </span>
 <span class="sd">    Geochemical TEC diagrams are a staple of geochemical analysis, often referred to as spider</span>
@@ -2088,7 +2157,7 @@
 <span class="sd">    or spider web.</span>
 <span class="sd">    </span>
 <span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure</span>
-<span class="sd">    ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+<span class="sd">    ``MplCanvas`` for display in the centralWidget views.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2167,7 +2236,7 @@
         <span class="n">cluster_flag</span> <span class="o">=</span> <span class="kc">False</span>
 
     
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="k">match</span> <span class="n">plot_type</span><span class="p">:</span>
         <span class="k">case</span> <span class="s1">&#39;Radar&#39;</span><span class="p">:</span>
@@ -2242,7 +2311,9 @@
         <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">_all&quot;</span>
 
     <span class="n">update_figure_font</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">style_data</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
-
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">plot_data</span><span class="p">)</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Geochemistry&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -2255,7 +2326,7 @@
         <span class="s1">&#39;cluster_groups&#39;</span><span class="p">:</span> <span class="n">cluster_dict</span><span class="p">,</span>
         <span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">plot_data</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">plot_info</span></div>
@@ -2267,10 +2338,10 @@
 <div class="viewcode-block" id="plot_score_map">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_score_map">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_score_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_score_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots score maps for dimensionality reduction methods such as PCA or clustering.</span>
 
-<span class="sd">    Creates a score map for PCA and clusters.  Maps are displayed on an ``mplc.MplCanvas``.</span>
+<span class="sd">    Creates a score map for PCA and clusters.  Maps are displayed on an ``MplCanvas``.</span>
 <span class="sd">    The function uses the processed data from the DataHandler and the selected field from AppData</span>
 <span class="sd">    to generate the score map. The plot is styled according to the provided StyleData object.</span>
 
@@ -2292,7 +2363,7 @@
 <span class="sd">    field_data : pd.Series</span>
 <span class="sd">        The data series corresponding to the selected field for the score map.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">plot_type</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span>
 
@@ -2333,7 +2404,7 @@
 <div class="viewcode-block" id="plot_pca">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot principal component analysis (PCA)</span>
 <span class="sd">    </span>
 <span class="sd">    Wrapper for one of four types of PCA plots:</span>
@@ -2366,7 +2437,7 @@
     <span class="c1">#&#39;plot_pca&#39;)</span>
     <span class="k">if</span> <span class="n">app_data</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">return</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
     <span class="n">pca_results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dim_red_results</span><span class="p">[</span><span class="n">app_data</span><span class="o">.</span><span class="n">dim_red_method</span><span class="p">]</span>
     <span class="c1"># Determine which PCA plot to create based on the combobox selection</span>
     <span class="n">plot_type</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span>
@@ -2412,7 +2483,9 @@
             <span class="k">return</span>
 
     <span class="n">update_figure_font</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">style_data</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
-
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">plot_data</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Multidimensional Analysis&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -2435,7 +2508,7 @@
 <div class="viewcode-block" id="plot_pca_variance">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca_variance">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_variance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca_variance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a plot of explained variance, individual and cumulative, for PCA</span>
 
 <span class="sd">    Parameters</span>
@@ -2454,7 +2527,7 @@
 <span class="sd">    plot_data : pd.DataFrame</span>
 <span class="sd">        DataFrame containing the principal components, variance ratios, and cumulative variance ratios.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="c1"># pca_dict contains variance ratios for the principal components</span>
     <span class="n">variances</span> <span class="o">=</span> <span class="n">pca_results</span><span class="o">.</span><span class="n">explained_variance_ratio_</span>
@@ -2504,7 +2577,7 @@
 <div class="viewcode-block" id="plot_pca_vectors">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca_vectors">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_vectors</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca_vectors</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="n">pca_results</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Displays a heat map of PCA vector components</span>
 
 <span class="sd">    Parameters</span>
@@ -2527,7 +2600,7 @@
 <span class="sd">    plot_data : pd.DataFrame</span>
 <span class="sd">        DataFrame containing the PCA components, with columns for each variable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="c1"># pca_dict contains &#39;components_&#39; from PCA analysis with columns for each variable</span>
     <span class="c1"># No need to transpose for heatmap representation</span>
@@ -2593,7 +2666,7 @@
 <div class="viewcode-block" id="plot_pca_components">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_pca_components">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_components</span><span class="p">(</span><span class="n">pca_results</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span><span class="n">canvas</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_pca_components</span><span class="p">(</span><span class="n">pca_results</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">,</span><span class="n">canvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds vector components to PCA scatter and heatmaps</span>
 
 <span class="sd">    Parameters</span>
@@ -2658,12 +2731,12 @@
 <div class="viewcode-block" id="plot_clusters">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_clusters">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_clusters</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_clusters</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot maps associated with clustering</span>
 
 <span class="sd">    Will produce plots of Clusters or Cluster Scores and computes clusters if necesseary.</span>
 <span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure</span>
-<span class="sd">    ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+<span class="sd">    ``MplCanvas`` for display in the centralWidget views.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2700,7 +2773,9 @@
             <span class="k">return</span>
 
     <span class="n">update_figure_font</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">style_data</span><span class="o">.</span><span class="n">font</span><span class="p">)</span>
-
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">plot_data</span><span class="p">)</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Multidimensional Analysis&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -2718,13 +2793,11 @@
 
     <span class="k">return</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">plot_info</span></div>
 
-    <span class="c1"># self.clear_layout(self.widgetSingleView.layout())</span>
-    <span class="c1"># self.widgetSingleView.layout().addWidget(canvas)</span>
 
 <div class="viewcode-block" id="cluster_performance_plot">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.cluster_performance_plot">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cluster_performance_plot</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">cluster_performance_plot</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots used to estimate the optimal number of clusters</span>
 
 <span class="sd">    1. Elbow Method</span>
@@ -2789,7 +2862,7 @@
     <span class="c1">#optimal_k = np.argmax(second_derivative) + 2  # Example heuristic</span>
 
     <span class="c1"># Plot inertia</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">inertia</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span>
         <span class="n">marker</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_dict</span><span class="p">[</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker</span><span class="p">],</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_color</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">style_data</span><span class="o">.</span><span class="n">marker_size</span><span class="p">,</span>
@@ -2836,7 +2909,9 @@
     <span class="n">plot_type</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span>
     <span class="n">plot_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">plot_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;inertia&#39;</span><span class="p">:</span> <span class="n">inertia</span><span class="p">,</span> <span class="s1">&#39;2nd derivative&#39;</span><span class="p">:</span> <span class="n">second_derivative</span><span class="p">}</span>
-
+    <span class="n">canvas</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">plot_data</span><span class="p">)</span>
+    <span class="n">canvas</span><span class="o">.</span><span class="n">plot_name</span> <span class="o">=</span> <span class="n">plot_name</span>
+    
     <span class="n">plot_info</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="s1">&#39;Multidimensional Analysis&#39;</span><span class="p">,</span>
         <span class="s1">&#39;sample_id&#39;</span><span class="p">:</span> <span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
@@ -2862,12 +2937,12 @@
 <div class="viewcode-block" id="plot_cluster_map">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.plot_cluster_map">[docs]</a>
 <span class="nd">@log_call</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Plot&#39;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">plot_cluster_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_cluster_map</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">app_data</span><span class="p">,</span> <span class="n">style_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Produces a map of cluster categories</span>
 <span class="sd">    </span>
-<span class="sd">    Creates the map on an ``mplc.MplCanvas``.  Each cluster category is assigned a unique color.</span>
+<span class="sd">    Creates the map on an ``MplCanvas``.  Each cluster category is assigned a unique color.</span>
 <span class="sd">    The function updates ``MainWindow.plot_info`` with the displayed plot metadata and figure</span>
-<span class="sd">    ``mplc.MplCanvas`` for display in the centralWidget views.</span>
+<span class="sd">    ``MplCanvas`` for display in the centralWidget views.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2887,7 +2962,7 @@
 <span class="sd">    plot_data : pd.Series</span>
 <span class="sd">        Series containing the cluster labels for each data point.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">canvas</span> <span class="o">=</span> <span class="n">mplc</span><span class="o">.</span><span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">MplCanvas</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="n">plot_type</span> <span class="o">=</span> <span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">app_data</span><span class="o">.</span><span class="n">cluster_method</span>
@@ -2908,7 +2983,6 @@
 
     <span class="c1">#cax = canvas.axes.imshow(self.array.astype(&#39;float&#39;), cmap=style_data.cmap, norm=norm, aspect = data.aspect_ratio)</span>
     <span class="n">cax</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">reshaped_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">aspect_ratio</span><span class="p">)</span>
-    <span class="n">canvas</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">reshaped_array</span>
     <span class="c1">#cax.cmap.set_under(style[&#39;Scale&#39;][&#39;OverlayColor&#39;])</span>
 
     <span class="n">add_colorbar</span><span class="p">(</span><span class="n">style_data</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">cbartype</span><span class="o">=</span><span class="s1">&#39;discrete&#39;</span><span class="p">,</span> <span class="n">grouplabels</span><span class="o">=</span><span class="n">cluster_label</span><span class="p">,</span> <span class="n">groupcolors</span><span class="o">=</span><span class="n">cluster_color</span><span class="p">)</span>
@@ -2930,7 +3004,7 @@
 
 <div class="viewcode-block" id="update_figure_font">
 <a class="viewcode-back" href="../../generated/common.LamePlot.html#common.LamePlot.update_figure_font">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">update_figure_font</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">font_name</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">update_figure_font</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">font_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;updates figure fonts without the need to recreate the figure.</span>
 
 <span class="sd">    Parameters</span>
@@ -2950,6 +3024,40 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unable to update figure font.&#39;</span><span class="p">)</span></div>
 
+
+<span class="c1"># def plot_colormap_annulus(cmap_name, r_inner=0.5, r_outer=1.0, n_points=512):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Preview a colormap as an annulus (good for circular colormaps).</span>
+    
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     cmap_name : str</span>
+<span class="c1">#         The name of the matplotlib colormap.</span>
+<span class="c1">#     r_inner : float</span>
+<span class="c1">#         Inner radius of the annulus.</span>
+<span class="c1">#     r_outer : float</span>
+<span class="c1">#         Outer radius of the annulus.</span>
+<span class="c1">#     n_points : int</span>
+<span class="c1">#         Angular resolution (higher = smoother).</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     theta = np.linspace(0, 2*np.pi, n_points)</span>
+<span class="c1">#     r = np.linspace(r_inner, r_outer, 2)</span>
+<span class="c1">#     T, R = np.meshgrid(theta, r)</span>
+    
+<span class="c1">#     # Normalize theta to [0,1] for colormap lookup</span>
+<span class="c1">#     norm = mcolors.Normalize(vmin=0, vmax=2*np.pi)</span>
+<span class="c1">#     cmap = get_cmap(cmap_name)</span>
+<span class="c1">#     Z = T  # angle determines color</span>
+    
+<span class="c1">#     fig, ax = plt.subplots(subplot_kw={&#39;projection&#39;:&#39;polar&#39;})</span>
+<span class="c1">#     c = ax.pcolormesh(T, R, Z, cmap=cmap, norm=norm, shading=&#39;auto&#39;)</span>
+    
+<span class="c1">#     ax.set_yticklabels([])   # hide radius labels</span>
+<span class="c1">#     ax.set_xticklabels([])   # hide angle labels</span>
+<span class="c1">#     ax.set_ylim(r_inner, r_outer)</span>
+<span class="c1">#     ax.set_aspect(1)</span>
+    
+<span class="c1">#     plt.show()</span>
 </pre></div>
 
                 </article>
@@ -2979,8 +3087,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -3000,7 +3108,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -3013,8 +3121,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QMainWindow, QLabel, QSlider, QHBoxLayout, QPushButton,
     QVBoxLayout, QGridLayout, QLineEdit, QFrame, QSizePolicy, QFormLayout, QToolButton, QDialog
 )
-from src.common.ColorManager2 import convert_color
+from src.common.ColorManager import convert_color
 
 def fix_bounds(x):
     return max(0.0, min(1.0, float(x)))

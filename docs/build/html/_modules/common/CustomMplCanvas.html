@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/CustomMplCanvas';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.CustomMplCanvas</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.Custo...</li>
   </ul>
 </nav>
 </div>
@@ -388,27 +400,32 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.CustomMplCanvas</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtGui</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QDialogButtonBox</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QMenu</span>
 <span class="p">)</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Qt5Agg&#39;</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qtagg</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.figure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Figure</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qtagg</span> <span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">FigureManagerQT</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">ICONPATH</span>
+<span class="kn">from</span> <span class="nn">src.common.Observable</span> <span class="kn">import</span> <span class="n">Observable</span>
 
 
 <span class="c1"># Matplotlib Canvas object</span>
 <span class="c1"># -------------------------------</span>
 <div class="viewcode-block" id="SimpleMplCanvas">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.SimpleMplCanvas">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SimpleMplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SimpleMplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib canvas object for non-interactive plots</span>
 
 <span class="sd">    Parameters</span>
@@ -424,7 +441,7 @@
 <span class="sd">    proj : str, optional</span>
 <span class="sd">        Projection, by default None</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">proj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;radar&#39;</span><span class="p">)</span>
@@ -438,7 +455,7 @@
 
 <div class="viewcode-block" id="MplCanvas">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib canvas object for interactive plots</span>
 
 <span class="sd">    Parameters</span>
@@ -454,7 +471,7 @@
 <span class="sd">    proj : str, optional</span>
 <span class="sd">        Projection, by default None</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1">#create MPLCanvas with existing figure (required when loading saved projects)</span>
         <span class="k">if</span> <span class="n">fig</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
@@ -475,47 +492,196 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">ui</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="c1"># indicates whether the data are map form (x, y, value) or simply (x, y)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span> <span class="o">=</span> <span class="n">map_flag</span>
+        
+        <span class="c1"># Hold the data of the canvas as a pandas DataFrame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># for placing text annotations</span>
         <span class="c1"># --------------------</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCursorPosition</span><span class="p">()</span>
 
         <span class="c1"># restoring initial axes</span>
-        <span class="c1"># --------------------</span>
+        <span class="c1"># ----------------------</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_extent</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># data for estimating self.distance and self.value</span>
+        <span class="c1"># these come from the data and should be provided when the plot is added</span>
+        <span class="c1"># to the canvas.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_units</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_units</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
         <span class="c1"># distance measurement</span>
         <span class="c1"># --------------------</span>
         <span class="c1"># Variables to store points and line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xpos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ypos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">saved_line</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">saved_dtext</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="p">[]</span> 
         
         <span class="bp">self</span><span class="o">.</span><span class="n">interaction_mode</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_move</span> <span class="o">=</span> <span class="kc">None</span>
 
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">plot_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">map_plot_types</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span> <span class="o">=</span> <span class="kc">False</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;motion_notify_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseLocation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;motion_notify_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseLocation</span><span class="p">)</span>
         
-        <span class="c1"># enable distance mode by default</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s1">&#39;toolButtonDistance&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_distance_mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span> <span class="o">=</span> <span class="n">NavigationToolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plot_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the stored pandas DataFrame.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_name</span>
+
+    <span class="nd">@plot_name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">plot_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the plot_name only if it is a str.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_name</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;plot_name must be a str or None&quot;</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the stored pandas DataFrame.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="nd">@data</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the data only if it is a pandas DataFrame.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;data must be a pandas DataFrame or None&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xpos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : x position of mouse pointer on canvas&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xpos</span>
+
+    <span class="nd">@xpos</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">xpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xpos</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xpos</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ypos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : y position of mouse pointer on canvas&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ypos</span>
+
+    <span class="nd">@ypos</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ypos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ypos</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ypos</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : volue at mouse pointer location&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;str : when distance tool is active, the distance of the line&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span>
+
+    <span class="nd">@distance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MplCanvas.toggle_tool">
+<a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.toggle_tool">[docs]</a>
+    <span class="k">def</span> <span class="nf">toggle_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tool</span> <span class="o">==</span> <span class="s1">&#39;home&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restore_view</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="c1"># If the tool is already active and being disabled</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">==</span> <span class="n">tool</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">enable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disable_tool</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="c1"># If switching to a new tool</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">!=</span> <span class="n">tool</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disable_tool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span><span class="p">)</span>
+
+        <span class="c1"># Enable the new tool</span>
+        <span class="k">if</span> <span class="n">enable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">=</span> <span class="n">tool</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enable_tool</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
+<div class="viewcode-block" id="MplCanvas.enable_tool">
+<a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.enable_tool">[docs]</a>
+    <span class="k">def</span> <span class="nf">enable_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">):</span>
+        <span class="k">match</span> <span class="n">tool</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s1">&#39;pan&#39;</span><span class="p">:</span>
+                <span class="c1"># Toggle pan mode in Matplotlib</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">pan</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s1">&#39;zoom&#39;</span><span class="p">:</span>
+                <span class="c1"># Toggle zoom mode in Matplotlib</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">zoom</span><span class="p">()</span>  <span class="c1"># Assuming your Matplotlib canvas has a toolbar with a zoom function</span>
+            <span class="k">case</span> <span class="s1">&#39;annotate&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">case</span> <span class="s1">&#39;distance&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enable_distance_mode</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s1">&#39;preference&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">edit_parameters</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s1">&#39;axes&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">configure_subplots</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="MplCanvas.disable_tool">
+<a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.disable_tool">[docs]</a>
+    <span class="k">def</span> <span class="nf">disable_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">):</span>
+        <span class="k">match</span> <span class="n">tool</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s1">&#39;pan&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">pan</span><span class="p">()</span>  <span class="c1"># toggles off</span>
+            <span class="k">case</span> <span class="s1">&#39;zoom&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpl_toolbar</span><span class="o">.</span><span class="n">zoom</span><span class="p">()</span>  <span class="c1"># toggles off</span>
+            <span class="k">case</span> <span class="s1">&#39;annotate&#39;</span><span class="p">:</span>
+                <span class="c1"># Add logic to disable annotate mode if needed</span>
+                <span class="k">pass</span>
+            <span class="k">case</span> <span class="s1">&#39;distance&#39;</span><span class="p">:</span>
+                <span class="c1"># Disconnect mouse events or clear state</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">disable_distance_mode</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s1">&#39;polygon&#39;</span> <span class="o">|</span> <span class="s1">&#39;profile&#39;</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+                
 <div class="viewcode-block" id="MplCanvas.enable_distance_mode">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.enable_distance_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">enable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">enable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">==</span> <span class="s1">&#39;distance&#39;</span><span class="p">:</span>
             <span class="c1"># Connect the button and canvas events for distance measurement</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distanceOnClick</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_move</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;motion_notify_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distanceOnMove</span><span class="p">)</span></div>
@@ -523,31 +689,30 @@
 
 <div class="viewcode-block" id="MplCanvas.disable_distance_mode">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.disable_distance_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">disable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">disable_distance_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_move</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_press</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance_cid_move</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
-
 <div class="viewcode-block" id="MplCanvas.enterEvent">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.enterEvent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c1"># Set cursor to cross when the mouse enters the window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CursorShape</span><span class="o">.</span><span class="n">CrossCursor</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.leaveEvent">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.leaveEvent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c1"># Reset cursor to default when the mouse leaves the window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unsetCursor</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.mouseLocation">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.mouseLocation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mouseLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mouseLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get mouse location on axes for display</span>
 
 <span class="sd">        Displays the location and value of a map in ``MainWindow.widgetPlotInfoSV``.</span>
@@ -560,6 +725,9 @@
         <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>     
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ydata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xpos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ypos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&lt;colorbar&gt;&#39;</span><span class="p">:</span>
@@ -583,39 +751,35 @@
             
             <span class="c1">#x = x_i*self.parent.dx</span>
             <span class="c1">#y = y_i*self.parent.dy</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                <span class="n">x</span> <span class="o">=</span> <span class="n">x_i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span>
-                <span class="n">y</span> <span class="o">=</span> <span class="n">y_i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">dy</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span>
-
-            <span class="n">label</span> <span class="o">=</span>  <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">preferences</span><span class="p">[</span><span class="s1">&#39;Units&#39;</span><span class="p">][</span><span class="s1">&#39;Concentration&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="c1"># if self.parent.app_data.sample_id in self.parent.app_data.data:</span>
+            <span class="c1">#     x = x_i*self.parent.app_data.data[self.parent.app_data.sample_id].dx</span>
+            <span class="c1">#     y = y_i*self.parent.app_data.data[self.parent.app_data.sample_id].dy</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     return</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y_i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
+    
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;V: N/A&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">x_i</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
                 <span class="n">y_i</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-                <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        
+                <span class="c1">#label = &#39;&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">y_i</span><span class="p">][</span><span class="n">x_i</span><span class="p">]</span>
-            <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;V: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}{</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">y_i</span><span class="p">][</span><span class="n">x_i</span><span class="p">]</span>
+            <span class="c1">#txt = f&quot;V: {value:.4g}{label}&quot;</span>
 
-        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;X: </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.4g</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoX</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
-        <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Y: </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s1">.4g</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoY</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xpos</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ypos</span> <span class="o">=</span> <span class="n">y</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.set_initial_extent">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.set_initial_extent">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_initial_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_initial_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initial extent of the plot</span>
 
 <span class="sd">        Sets the initital extent of the plot.</span>
@@ -628,10 +792,12 @@
 
 <div class="viewcode-block" id="MplCanvas.restore_view">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.restore_view">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">restore_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">restore_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restores the initial extent</span>
 
-<span class="sd">        Restores the initial extent when ``MainWindow.toolButtonHome`` is clicked.</span>
+<span class="sd">        Restores the initial extent when ``home`` signal is received.</span>
+
+<span class="sd">        :seealso: toggle_tool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_extent</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_extent</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
@@ -644,7 +810,7 @@
 
 <div class="viewcode-block" id="MplCanvas.load_figure">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.load_figure">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load existing figure</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -659,7 +825,7 @@
 
 <div class="viewcode-block" id="MplCanvas.setCursorPosition">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.setCursorPosition">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the cursor position on an MplCanvas</span>
 
 <span class="sd">        Mouse listener</span>
@@ -669,7 +835,7 @@
 
 <div class="viewcode-block" id="MplCanvas.textOnClick">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.textOnClick">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">textOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">textOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds text to plot at clicked position</span>
 
 <span class="sd">        Only adds a text to a plot when the Annotate button is checked.</span>
@@ -678,16 +844,11 @@
 <span class="sd">        ----------</span>
 <span class="sd">        event : MouseEvent</span>
 <span class="sd">            Mouse click event.</span>
-<span class="sd">        &quot;&quot;&quot;</span> 
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">!=</span> <span class="s1">&#39;annotate&#39;</span><span class="p">:</span>
+            <span class="k">return</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s1">&#39;canvas_tab&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s1">&#39;canvasWindow&#39;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvasWindow</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_tab</span><span class="p">[</span><span class="s1">&#39;sv&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonAnnotate</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()):</span>
-                <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonAnnotate</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()):</span>
-                <span class="k">return</span>
-
-        <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span>
         <span class="c1"># get text</span>
         <span class="n">txt</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Figure&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter text:&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
@@ -695,23 +856,53 @@
 
         <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
         <span class="n">font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">font_size</span>
-        <span class="n">annotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">txt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">overlay_color</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">)</span>
+        <span class="n">annotation_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">overlay_color</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="n">annotation</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Type&quot;</span><span class="p">:</span><span class="s2">&quot;Text&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">:</span><span class="n">txt</span><span class="p">,</span> <span class="s2">&quot;Visible&quot;</span><span class="p">:</span><span class="kc">True</span><span class="p">}</span></div>
+        <span class="n">new</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="s1">&#39;Text&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;X1&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="s1">&#39;Y1&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+            <span class="s1">&#39;Text&#39;</span><span class="p">:</span> <span class="n">txt</span><span class="p">,</span>
+            <span class="s1">&#39;Color&#39;</span><span class="p">:</span> <span class="n">overlay_color</span><span class="p">,</span>
+            <span class="s1">&#39;Size&#39;</span><span class="p">:</span> <span class="n">font_size</span><span class="p">,</span>
+            <span class="s1">&#39;Visible&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;object&#39;</span><span class="p">:</span> <span class="n">annotation_obj</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MplCanvas.redraw_annotations">
+<a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.redraw_annotations">[docs]</a>
+    <span class="k">def</span> <span class="nf">redraw_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Visibile&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Y1&#39;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Text&#39;</span><span class="p">],</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Color&#39;</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Size&#39;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;X2&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Y1&#39;</span><span class="p">],</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Y2&#39;</span><span class="p">]],</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Color&#39;</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Line Width&#39;</span><span class="p">])</span>
+                <span class="n">txt</span> <span class="o">=</span> <span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Text&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">txt</span><span class="p">[</span><span class="s1">&#39;X1&#39;</span><span class="p">],</span> <span class="n">txt</span><span class="p">[</span><span class="s1">&#39;Y1&#39;</span><span class="p">],</span> <span class="n">txt</span><span class="p">[</span><span class="s1">&#39;Text&#39;</span><span class="p">],</span> <span class="n">ha</span><span class="o">=</span><span class="n">txt</span><span class="p">[</span><span class="s1">&#39;HAlign&#39;</span><span class="p">],</span> <span class="n">va</span><span class="o">=</span><span class="n">txt</span><span class="p">[</span><span class="s1">&#39;VAlign&#39;</span><span class="p">],</span> <span class="n">fontdict</span><span class="o">=</span><span class="n">txt</span><span class="p">[</span><span class="s1">&#39;FontDict&#39;</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">ann</span><span class="p">[</span><span class="s1">&#39;Color&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.calculate_distance">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.calculate_distance">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculuates distance on a figure</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        p1 : _type_</span>
-<span class="sd">            _description_</span>
-<span class="sd">        p2 : _type_</span>
-<span class="sd">            _description_</span>
+<span class="sd">        p1 : [float]</span>
+<span class="sd">            First endpoint</span>
+<span class="sd">        p2 : [float]</span>
+<span class="sd">            Second endpoint</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -719,8 +910,10 @@
 <span class="sd">            Distance between two given points.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span><span class="p">:</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">dx</span>
-            <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">dy</span>
+            <span class="c1">#dx = self.parent.app_data.data[self.parent.app_data.sample_id].dx</span>
+            <span class="c1">#dy = self.parent.app_data.data[self.parent.app_data.sample_id].dy</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">dy</span> <span class="o">=</span> <span class="mi">1</span>
@@ -730,7 +923,7 @@
 
 <div class="viewcode-block" id="MplCanvas.plot_line">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.plot_line">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots line from distance calculation</span>
 
 <span class="sd">        Parameters</span>
@@ -743,21 +936,25 @@
 <span class="sd">        matplotlib.plot</span>
 <span class="sd">            Handle to line</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="n">plot_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">]</span>
+        <span class="c1">#plot_type = self.parent.app_data.plot_info[&#39;plot_type&#39;]</span>
         <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
         <span class="n">line_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span>
 
         <span class="c1"># plot line (keep only first returned handle)</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
-                <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">overlay_color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">line_width</span>
-            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="p">[</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="s1">&#39;:&#39;</span><span class="p">,</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">overlay_color</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="n">line_width</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">p</span></div>
 
  
 <div class="viewcode-block" id="MplCanvas.plot_text">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.plot_text">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds distance to plot and updates distance label</span>
 
 <span class="sd">        Updates distance in ``MainWindow.labelInfoDistance`` and adds distance</span>
@@ -772,16 +969,19 @@
 <span class="sd">        -------</span>
 <span class="sd">        matplotlib.text</span>
 <span class="sd">            Handle to text.</span>
+
+<span class="sd">        text_dict : dict</span>
+<span class="sd">            Dictionary needed to reconstruct distance label</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="n">plot_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">plot_info</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">]</span>
         <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span>
 
         <span class="c1"># compute distance</span>
-        <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_distance</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_distance</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+
+        <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_units</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
 
         <span class="c1"># Update distance label in widget </span>
-        <span class="n">distance_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">distance</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">preferences</span><span class="p">[</span><span class="s1">&#39;Units&#39;</span><span class="p">][</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D: </span><span class="si">{</span><span class="n">distance_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">distance_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="c1"># Update distance label on map</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span><span class="p">:</span>
@@ -813,17 +1013,25 @@
         <span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;family&#39;</span><span class="p">:</span><span class="n">style</span><span class="o">.</span><span class="n">font</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">:</span><span class="n">style</span><span class="o">.</span><span class="n">font_size</span><span class="o">-</span><span class="mi">2</span><span class="p">}</span>
         <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">dy</span><span class="p">,</span> <span class="n">distance_text</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">halign</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">valign</span><span class="p">,</span> <span class="n">fontdict</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">style</span><span class="o">.</span><span class="n">overlay_color</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">t</span></div>
+        <span class="n">text_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Text&#39;</span><span class="p">:</span> <span class="n">distance_text</span><span class="p">,</span>
+            <span class="s1">&#39;X1&#39;</span><span class="p">:</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span>
+            <span class="s1">&#39;Y1&#39;</span><span class="p">:</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">dy</span><span class="p">,</span>
+            <span class="s1">&#39;HAlign&#39;</span><span class="p">:</span> <span class="n">halign</span><span class="p">,</span>
+            <span class="s1">&#39;VAlign&#39;</span><span class="p">:</span> <span class="n">valign</span><span class="p">,</span>
+            <span class="s1">&#39;FontDict&#39;</span><span class="p">:</span> <span class="n">font</span><span class="p">,</span>
+        <span class="p">}</span> 
+
+        <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">text_dict</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.on_click">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.on_click">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle left/right clicks for distance calculation, polygons and profiles.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CursorShape</span><span class="o">.</span><span class="n">CrossCursor</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">==</span> <span class="s1">&#39;distance&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distanceOnClick</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
             <span class="k">return</span>
         
@@ -841,9 +1049,10 @@
 
 
 
+
 <div class="viewcode-block" id="MplCanvas.distanceOnClick">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.distanceOnClick">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distanceOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distanceOnClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates static endpoints of distance measuring line.</span>
 
 <span class="sd">        Updates the endpoint of the distance measuring line and calls methods that </span>
@@ -854,34 +1063,64 @@
 <span class="sd">        ----------</span>
 <span class="sd">        event : MouseEvent</span>
 <span class="sd">            Mouse click event.</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
-        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># First click</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">canvas_widget</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sv</span><span class="o">.</span><span class="n">labelInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D: 0 </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">preferences</span><span class="p">[</span><span class="s1">&#39;Units&#39;</span><span class="p">][</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Second click</span>
                 <span class="n">second_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">saved_line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">saved_dtext</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">))</span>
-                
-                <span class="bp">self</span><span class="o">.</span><span class="n">distance_reset</span><span class="p">()</span>
+                <span class="c1"># Plot permanent line and text</span>
+                <span class="n">line_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">)</span>
+                <span class="n">text_obj</span><span class="p">,</span> <span class="n">text_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">)</span>
+
+                <span class="c1"># Save to your existing lists if needed</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saved_line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saved_dtext</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_obj</span><span class="p">)</span>
+
+                <span class="n">new</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+                    <span class="s1">&#39;X1&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;Y1&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="s1">&#39;X2&#39;</span><span class="p">:</span> <span class="n">second_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;Y2&#39;</span><span class="p">:</span> <span class="n">second_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="s1">&#39;Text&#39;</span><span class="p">:</span> <span class="n">text_dict</span><span class="p">,</span>
+                    <span class="s1">&#39;Label&#39;</span><span class="p">:</span> <span class="n">text_obj</span><span class="o">.</span><span class="n">get_text</span><span class="p">(),</span>
+                    <span class="s1">&#39;Color&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_color</span><span class="p">,</span>
+                    <span class="s1">&#39;Size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">font_size</span><span class="p">,</span>
+                    <span class="s1">&#39;Width&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span>
+                    <span class="s1">&#39;Visible&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;object&#39;</span><span class="p">:</span> <span class="n">line_obj</span><span class="p">,</span>
+                    <span class="s1">&#39;text_object&#39;</span><span class="p">:</span> <span class="n">text_obj</span>
+                <span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">))</span>
+
+                <span class="c1"># Reset first_point so next click starts a new line</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.on_mouse_move">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.on_mouse_move">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_mouse_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_mouse_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Optional: handle dynamic feedback (e.g., while moving a polygon vertex).&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CursorShape</span><span class="o">.</span><span class="n">CrossCursor</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">==</span> <span class="s1">&#39;distance&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distanceOnMove</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
             <span class="k">return</span>
         
@@ -902,7 +1141,7 @@
 
 <div class="viewcode-block" id="MplCanvas.distanceOnMove">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.distanceOnMove">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distanceOnMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distanceOnMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates dynamic second point of distance measuring line.</span>
 
 <span class="sd">        Updates the second endpoint of the distance measuring line and calls methods that </span>
@@ -920,15 +1159,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
 
         <span class="n">second_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">,</span><span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">first_point</span><span class="p">,</span> <span class="n">second_point</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MplCanvas.distance_reset">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.distance_reset">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">distance_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distance_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets distance variables and clears plot</span>
 
 <span class="sd">        Sets ``MplCanvas.first_point`` to ``None``, ``MplCanvas.line`` and ``MplCanvas.dtext``.</span>
@@ -943,71 +1183,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dtext</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelInfoDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;D: N/A&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_tool</span> <span class="o">!=</span> <span class="s1">&#39;distance&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="kc">None</span></div>
 </div>
-
-
-
-<div class="viewcode-block" id="MplDialog">
-<a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplDialog">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MplDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">canvas</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;A plot dialog</span>
-
-<span class="sd">        This dialog is used to plot a matplotlib figure.  In general the dialog is used when a figure popped out from ``MainWindow.canvasWindow`` using ``MainWindow.toolButtonPopFigure``.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        parent : MainWindow</span>
-<span class="sd">            Calling class.</span>
-<span class="sd">        canvas : MplCanvas</span>
-<span class="sd">            Matplotlib plot canvas.</span>
-<span class="sd">        title : str, optional</span>
-<span class="sd">            Dialog title, by default &#39;&#39;</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="nb">super</span><span class="p">(</span><span class="n">MplDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-
-        <span class="c1"># Create a QVBoxLayout to hold the canvas and toolbar</span>
-        <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># Create a NavigationToolbar and add it to the layout</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span> <span class="o">=</span> <span class="n">NavigationToolbar</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># use custom buttons</span>
-        <span class="n">unwanted_buttons</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="s2">&quot;Forward&quot;</span><span class="p">,</span> <span class="s2">&quot;Customize&quot;</span><span class="p">,</span> <span class="s2">&quot;Subplots&quot;</span><span class="p">]</span>
-
-        <span class="n">icons_buttons</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;Home&quot;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;resources/icons/icon-home-64.svg&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;Pan&quot;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;resources/icons/icon-move-64.svg&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;Zoom&quot;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;resources/icons/icon-zoom-64.svg&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;Save&quot;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;resources/icons/icon-save-file-64.svg&quot;</span><span class="p">)</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="n">unwanted_buttons</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="n">icons_buttons</span><span class="p">:</span>
-                <span class="n">action</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icons_buttons</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="mi">24</span><span class="p">))</span>
-
-        <span class="c1"># Add toolbar to self.layout</span>
-        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="c1"># Add a matplotlib canvas to self.layout</span>
-        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># Create a button box for OK and Cancel buttons</span>
-        <span class="n">button_box</span> <span class="o">=</span> <span class="n">QDialogButtonBox</span><span class="p">(</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Close</span><span class="p">)</span>
-        <span class="n">button_box</span><span class="o">.</span><span class="n">rejected</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">)</span>
-        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button_box</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">clear_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">widgetSingleView</span><span class="o">.</span><span class="n">layout</span><span class="p">())</span></div>
 
 
 
@@ -1040,8 +1218,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1061,7 +1239,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1074,8 +1252,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

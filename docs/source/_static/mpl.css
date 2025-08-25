@@ -58,8 +58,18 @@ does not float with it.
     margin: 5px 2px;
 }
 
+/* Default (light mode) */
+.icon-links a[href*="minexcrc"] img {
+  content: url("_static/minex_crc_logo_black.svg");
+}
+
+/* Dark mode override */
 html[data-theme="dark"] .sphx-glr-thumbcontainer {
     background-color: rgb(63, 63, 63);
+}
+
+html[data-theme="dark"] .icon-links a[href*="minexcrc"] img {
+  content: url("_static/minex_crc_logo.svg");
 }
 
 /* Set a fixed height so that lazy loading does not change heights. Without a fixed

@@ -4,6 +4,11 @@ src.common.Logger
 .. automodule:: src.common.Logger
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,6 +21,10 @@ src.common.Logger
       no_log
       set_global_logger
    
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -24,3 +33,11 @@ src.common.Logger
       LoggerDock
       LoggerOptionsDialog
    
+   
+
+   
+   
+   
+
+
+

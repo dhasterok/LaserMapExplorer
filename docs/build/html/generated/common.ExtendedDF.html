@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=369bd9d1" />
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mpl.css?v=e5166e32" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/common.ExtendedDF';</script>
@@ -50,7 +47,6 @@
     <link rel="search" title="Search" href="../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -66,8 +62,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -75,6 +82,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -82,8 +90,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -117,7 +125,7 @@
     
     
     <img src="../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -179,11 +187,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -210,7 +222,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
       
@@ -221,11 +233,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -244,8 +260,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -327,7 +342,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
         
@@ -346,14 +361,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -371,6 +381,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -379,7 +391,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.ExtendedDF</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.ExtendedDF</li>
   </ul>
 </nav>
 </div>
@@ -399,9 +411,9 @@
   <section id="module-common.ExtendedDF">
 <span id="common-extendeddf"></span><h1>common.ExtendedDF<a class="headerlink" href="#module-common.ExtendedDF" title="Link to this heading">#</a></h1>
 <p class="rubric">Classes</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a>([data])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeDataFrame</span></code></a>([data])</p></td>
 <td><p>Creates a pandas DataFrame with custom attributes stored with each column.</p></td>
 </tr>
 </tbody>
@@ -409,14 +421,14 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="common.ExtendedDF.AttributeDataFrame">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.ExtendedDF.</span></span><span class="sig-name descname"><span class="pre">AttributeDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.ExtendedDF.</span></span><span class="sig-name descname"><span class="pre">AttributeDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/ExtendedDF.html#AttributeDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.ExtendedDF.AttributeDataFrame" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
 <p>Creates a pandas DataFrame with custom attributes stored with each column.</p>
 <p>Create a dataframe with column attributes or add attributes to existing columns of a
 dataframe and methods to get and set them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><em>pandas.DataFrame</em></a>) – Input dataframe, if none provided an empty dataframe can be created, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><em>pandas.DataFrame</em></a>) – Input dataframe, if none provided an empty dataframe can be created, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 <dl class="py method">
@@ -491,7 +503,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <dd class="field-odd"><p>Adds a dictionary <code class="docutils literal notranslate"><span class="pre">column_attributes</span></code> to a dataframe and the methods to add, set, and get column attributes and their values.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
+<dd class="field-even"><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -598,7 +610,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">abs</span></code>()</p></td>
 <td><p>Return a Series/DataFrame with absolute numeric value of each element.</p></td>
@@ -648,7 +660,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at_time</span></code>(time[, asof, axis])</p></td>
 <td><p>Select values at particular time of day (e.g., 9:30AM).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe" title="common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attributes_to_dataframe</span></code></a>([attributes])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe" title="common.ExtendedDF.AttributeDataFrame.attributes_to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attributes_to_dataframe</span></code></a>([attributes])</p></td>
 <td><p>Return selected attributes of all columns in the AttributeDataFrame as a new DataFrame.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backfill</span></code>(*[, axis, inplace, limit, downcast])</p></td>
@@ -684,7 +696,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>([deep])</p></td>
 <td><p>Make a copy of this object's indices and data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.copy_columns" title="common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_columns</span></code></a>([columns])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.copy_columns" title="common.ExtendedDF.AttributeDataFrame.copy_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_columns</span></code></a>([columns])</p></td>
 <td><p>Extract specified columns into a new AttributeDataFrame, preserving their attributes.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code>([method, min_periods, numeric_only])</p></td>
@@ -789,10 +801,10 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(key[, default])</p></td>
 <td><p>Get item from object for given key (ex: DataFrame column).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.get_attribute" title="common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute</span></code></a>(columns, attribute)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.get_attribute" title="common.ExtendedDF.AttributeDataFrame.get_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute</span></code></a>(columns, attribute)</p></td>
 <td><p>Get a single attribute from an AttributeDataFrame for one or more columns.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.get_attribute_dict" title="common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute_dict</span></code></a>(attribute_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.get_attribute_dict" title="common.ExtendedDF.AttributeDataFrame.get_attribute_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attribute_dict</span></code></a>(attribute_name)</p></td>
 <td><p>Creates a dictionary from an attribute where the unique values of the attribute becomes the keys and the items are lists with the column names that match each attribute_name.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groupby</span></code>([by, axis, level, as_index, sort, ...])</p></td>
@@ -825,7 +837,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate</span></code>([method, axis, limit, inplace, ...])</p></td>
 <td><p>Fill NaN values using an interpolation method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.is_attribute" title="common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_attribute</span></code></a>(column, attribute)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.is_attribute" title="common.ExtendedDF.AttributeDataFrame.is_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_attribute</span></code></a>(column, attribute)</p></td>
 <td><p>Check if a given attribute exists for the specified column.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isetitem</span></code>(loc, value)</p></td>
@@ -879,10 +891,10 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code>(cond[, other, inplace, axis, level])</p></td>
 <td><p>Replace values where the condition is True.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.match_attribute" title="common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attribute</span></code></a>(attribute, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.match_attribute" title="common.ExtendedDF.AttributeDataFrame.match_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attribute</span></code></a>(attribute, value)</p></td>
 <td><p>Returns a list of columns where a specific attribute matches the given value.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.match_attributes" title="common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attributes</span></code></a>(attributes_dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.match_attributes" title="common.ExtendedDF.AttributeDataFrame.match_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_attributes</span></code></a>(attributes_dict)</p></td>
 <td><p>Returns a list of columns where each attribute matches its corresponding value.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>([axis, skipna, numeric_only])</p></td>
@@ -1038,7 +1050,7 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sem</span></code>([axis, skipna, ddof, numeric_only])</p></td>
 <td><p>Return unbiased standard error of the mean over requested axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.set_attribute" title="common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attribute</span></code></a>(columns, attribute, values)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.set_attribute" title="common.ExtendedDF.AttributeDataFrame.set_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_attribute</span></code></a>(columns, attribute, values)</p></td>
 <td><p>Set an attribute for one or more columns.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axis</span></code>(labels, *[, axis, copy])</p></td>
@@ -1053,13 +1065,13 @@ updated with the new labels, and the output shows the modified DataFrame.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift</span></code>([periods, freq, axis, fill_value, suffix])</p></td>
 <td><p>Shift index by desired number of periods with an optional time <cite>freq</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.show_attributes" title="common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_attributes</span></code></a>([column])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.show_attributes" title="common.ExtendedDF.AttributeDataFrame.show_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_attributes</span></code></a>([column])</p></td>
 <td><p>Displays all attributes for a specific column or for the entire DataFrame.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skew</span></code>([axis, skipna, numeric_only])</p></td>
 <td><p>Return unbiased skew over requested axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame.sort_columns" title="common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_columns</span></code></a>(sorted_columns)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame.sort_columns" title="common.ExtendedDF.AttributeDataFrame.sort_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_columns</span></code></a>(sorted_columns)</p></td>
 <td><p>Sorts columns and attributes of an AttributeDataFrame object.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_index</span></code>(*[, axis, level, ascending, ...])</p></td>
@@ -1223,7 +1235,7 @@ will be included.</p>
 AttributeDataFrame and each row corresponds to an attribute.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)">pandas.DataFrame</a></p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -1253,7 +1265,7 @@ If no columns are specified, all columns will be copied.</p>
 <dd class="field-even"><p>A new AttributeDataFrame containing the selected columns and their attributes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../common.html#common.ExtendedDF.AttributeDataFrame" title="common.ExtendedDF.AttributeDataFrame">AttributeDataFrame</a></p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -1446,8 +1458,7 @@ df.set_attribute([‘Temperature’, ‘Pressure’], ‘units’, [‘Celsius�
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1475,13 +1486,13 @@ df.set_attribute([‘Temperature’, ‘Pressure’], ‘units’, [‘Celsius�
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/generated/common.ExtendedDF.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/common.ExtendedDF.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1496,8 +1507,8 @@ df.set_attribute([‘Temperature’, ‘Pressure’], ‘units’, [‘Celsius�
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1517,7 +1528,7 @@ df.set_attribute([‘Temperature’, ‘Pressure’], ‘units’, [‘Celsius�
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1530,8 +1541,7 @@ df.set_attribute([‘Temperature’, ‘Pressure’], ‘units’, [‘Celsius�
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

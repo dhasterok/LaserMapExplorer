@@ -1,8 +1,13 @@
-app.help\_mapping
+﻿app.help\_mapping
 =================
 
 .. automodule:: app.help_mapping
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -10,3 +15,15 @@ app.help\_mapping
    
       create_help_mapping
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,13 @@
-common.plot\_spider
+﻿common.plot\_spider
 ===================
 
 .. automodule:: common.plot_spider
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -14,3 +19,15 @@ common.plot\_spider
       plot_data
       plot_spider_norm
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

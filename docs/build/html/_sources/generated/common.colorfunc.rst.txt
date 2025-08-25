@@ -1,8 +1,13 @@
-common.colorfunc
+﻿common.colorfunc
 ================
 
 .. automodule:: common.colorfunc
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -11,4 +16,18 @@ common.colorfunc
       get_hex_color
       get_rgb_color
       is_valid_hex_color
+      qcolor_to_nrgb
+      qcolor_to_rgb
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

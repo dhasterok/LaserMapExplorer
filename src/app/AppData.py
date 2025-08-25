@@ -211,7 +211,7 @@ class AppData(Observable):
 
         # a dictionary of sample_id containing SampleObj data class
         self.data = parent.data
-        self.style = parent.style_data.
+        #self.style = parent.style_data.
 
         # a dictionary of the field_types in self.data[sample_id].processed_data
         self._field_dict = {}

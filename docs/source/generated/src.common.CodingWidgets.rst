@@ -4,6 +4,11 @@ src.common.CodingWidgets
 .. automodule:: src.common.CodingWidgets
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -11,6 +16,10 @@ src.common.CodingWidgets
       default_font
       load_highlight_rules
       save_highlight_rules
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -25,3 +34,11 @@ src.common.CodingWidgets
       RstBlockData
       RstHighlighter
    
+   
+
+   
+   
+   
+
+
+

@@ -1,6 +1,23 @@
-ui.IsotopeSelectionDialog
+﻿ui.IsotopeSelectionDialog
 =========================
 
 .. automodule:: ui.IsotopeSelectionDialog
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

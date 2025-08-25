@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/app/SpecialTools';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.SpecialTools</span></li>
+    <li class="breadcrumb-item active" aria-current="page">app.SpecialTools</li>
   </ul>
 </nav>
 </div>
@@ -388,257 +400,390 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.SpecialTools</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.odr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">odr</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy.odr</span> <span class="k">as</span> <span class="nn">odr</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QRect</span><span class="p">,</span> <span class="n">QSize</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span> 
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QRect</span><span class="p">,</span> <span class="n">QSize</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span> 
         <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QScrollArea</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span>
         <span class="n">QTableWidget</span><span class="p">,</span> <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QFrame</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QTabWidget</span><span class="p">,</span>
         <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span> <span class="n">QPushButton</span>
     <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomLineEdit</span>
-
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomPage</span><span class="p">,</span> <span class="n">CustomToolButton</span><span class="p">,</span> <span class="n">CustomLineEdit</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">ICONPATH</span>
+<span class="c1">#from src.common.geochronology import </span>
 
 <div class="viewcode-block" id="SpecialPage">
 <a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialPage">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpecialPage</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page_index</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">SpecialPage</span><span class="p">(</span><span class="n">CustomPage</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page_index</span><span class="p">,</span> <span class="n">dock</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dock</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dock</span> <span class="o">=</span> <span class="n">dock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_index</span> <span class="o">=</span> <span class="n">page_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_widgets</span><span class="p">()</span>
+
+        <span class="n">specfun</span> <span class="o">=</span> <span class="n">SpecialFunctions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SpecialPage.setupUI">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialPage.setupUI">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">321</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;PTtPage&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span> <span class="o">=</span> <span class="n">QTabWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;special_fcns&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">thermometry</span> <span class="o">=</span> <span class="n">ThermometryTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thermometry</span><span class="p">,</span> <span class="s2">&quot;Thermometry&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">barometry</span> <span class="o">=</span> <span class="n">BarmometryTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">barometry</span><span class="p">,</span> <span class="s2">&quot;Barmometry&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dating</span> <span class="o">=</span> <span class="n">DatingTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dating</span><span class="p">,</span> <span class="s2">&quot;Dating&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">diffusion</span> <span class="o">=</span> <span class="n">DiffusionTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion</span><span class="p">,</span> <span class="s2">&quot;Diffusion&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">special_fcns</span><span class="p">)</span>
+
+        <span class="n">page_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/resources/icons/icon-zoning-64.svg&quot;</span><span class="p">)</span>
+        <span class="n">page_name</span> <span class="o">=</span> <span class="s2">&quot;P-T-t Functions&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_index</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="o">.</span><span class="n">toolbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page_icon</span><span class="p">,</span> <span class="n">page_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="o">.</span><span class="n">toolbox</span><span class="o">.</span><span class="n">insertItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_index</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">page_icon</span><span class="p">,</span> <span class="n">page_name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="o">.</span><span class="n">toolbox</span><span class="o">.</span><span class="n">set_page_icons</span><span class="p">(</span>
+            <span class="n">page_name</span><span class="p">,</span>
+            <span class="n">light_icon</span> <span class="o">=</span> <span class="n">ICONPATH</span> <span class="o">/</span> <span class="s2">&quot;icon-zoning-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">dark_icon</span> <span class="o">=</span> <span class="n">ICONPATH</span> <span class="o">/</span> <span class="s2">&quot;icon-zoning-64.svg&quot;</span>
+        <span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="ThermometryTab">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.ThermometryTab">[docs]</a>
+<span class="k">class</span> <span class="nc">ThermometryTab</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
-        <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
-        <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
-        <span class="n">font</span><span class="o">.</span><span class="n">setStyleStrategy</span><span class="p">(</span><span class="n">QFont</span><span class="o">.</span><span class="n">StyleStrategy</span><span class="o">.</span><span class="n">PreferDefault</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_widgets</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">321</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;PTtPage&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_69</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_69</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_69</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_69&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shadow</span><span class="o">.</span><span class="n">Plain</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaSpecial&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsSpecial</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsSpecial</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">321</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsSpecial</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaWidgetContentsSpecial&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_64</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsSpecial</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_64</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_64</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_64&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ThermometryTab.setupUI">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.ThermometryTab.setupUI">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabThermometry&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span> <span class="o">=</span> <span class="n">QTabWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsSpecial</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabWidgetSpecialFcn&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabThermometry</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabThermometry</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabThermometry&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_16</span> <span class="o">=</span> <span class="n">QFormLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabThermometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_16</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_16</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;formLayout_16&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelThermometryMethod</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabThermometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelThermometryMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelThermometryMethod&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_16</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelThermometryMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxThermometryMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabThermometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxThermometryMethod</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxThermometryMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;ComboBoxThermometryMethod&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_16</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxThermometryMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabThermometry</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabBarometry</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabBarometry</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabBarometry&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_67</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_67</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_67</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_67&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shadow</span><span class="o">.</span><span class="n">Plain</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaBarometry&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="mi">38</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaWidgetContentsBarometry&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_17</span> <span class="o">=</span> <span class="n">QFormLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_17</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_17</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;formLayout_17&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelBarometryMethod</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelBarometryMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelBarometryMethod&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_17</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelBarometryMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxBarometryMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxBarometryMethod</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxBarometryMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;ComboBoxBarometryMethod&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formLayout_17</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxBarometryMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_67</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaBarometry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabBarometry</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabDating</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabDating</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabDating&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_68</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDating</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_68</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_68</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_68&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDating</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDating</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDating</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDating</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaDating&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">260</span><span class="p">,</span> <span class="mi">303</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaWidgetContents_2&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_58</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_58</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_58</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_58&quot;</span><span class="p">)</span>
+        <span class="n">form_layout</span> <span class="o">=</span> <span class="n">QFormLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">form_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">form_layout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;formLayout_16&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxThermometryMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxThermometryMethod</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxThermometryMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;ComboBoxThermometryMethod&quot;</span><span class="p">)</span>
+
+        <span class="n">form_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Method&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxThermometryMethod</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ThermometryTab.connect_widgets">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.ThermometryTab.connect_widgets">[docs]</a>
+    <span class="k">def</span> <span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+<div class="viewcode-block" id="BarmometryTab">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.BarmometryTab">[docs]</a>
+<span class="k">class</span> <span class="nc">BarmometryTab</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_widgets</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BarmometryTab.setupUI">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.BarmometryTab.setupUI">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabBarometry&quot;</span><span class="p">)</span>
+
+        <span class="n">tab_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_67&quot;</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shadow</span><span class="o">.</span><span class="n">Plain</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaBarometry&quot;</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area_contents</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+        <span class="n">tab_scroll_area_contents</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="mi">38</span><span class="p">))</span>
+        <span class="n">tab_scroll_area_contents</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaWidgetContentsBarometry&quot;</span><span class="p">)</span>
+
+        <span class="n">form_layout</span> <span class="o">=</span> <span class="n">QFormLayout</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
+        <span class="n">form_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">form_layout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;formLayout_17&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxBarometryMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxBarometryMethod</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxBarometryMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;ComboBoxBarometryMethod&quot;</span><span class="p">)</span>
+
+        <span class="n">form_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Method&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxBarometryMethod</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">tab_scroll_area</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BarmometryTab.connect_widgets">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.BarmometryTab.connect_widgets">[docs]</a>
+    <span class="k">def</span> <span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+<div class="viewcode-block" id="DatingTab">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.DatingTab">[docs]</a>
+<span class="k">class</span> <span class="nc">DatingTab</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_widgets</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DatingTab.setupUI">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.DatingTab.setupUI">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabDating&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabDating&quot;</span><span class="p">)</span>
+
+        <span class="n">tab_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area_contents</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+        <span class="n">tab_scroll_area_contents</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">260</span><span class="p">,</span> <span class="mi">303</span><span class="p">))</span>
+
+        <span class="n">scroll_area_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
+        <span class="n">scroll_area_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">scroll_area_layout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_58&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayoutDatingParams&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span> <span class="o">=</span> <span class="n">QFormLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;formLayoutDatingMethod&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingMethod</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingMethod</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelDatingMethod&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxDatingMethod&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelComputeRatios</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelComputeRatios</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelComputeRatios</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelComputeRatios&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelComputeRatios</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;checkBoxComputeRatios&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDatingMethod</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;gridLayoutDatingParams&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">125</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxIsotopeAgeFieldType3&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxIsotopeAgeField2&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxIsotopeAgeField3&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">125</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxIsotopeAgeFieldType2&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxIsotopeAgeField1&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope2</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope2</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope2</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelIsotope2&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope1</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope1</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope1</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelIsotope1&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">125</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxIsotopeAgeFieldType1&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelDecayConstant</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelDecayConstant</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelDecayConstant</span><span class="o">.</span><span class="n">setWordWrap</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelDecayConstant</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelDecayConstant&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelDecayConstant</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstant</span> <span class="o">=</span> <span class="n">CustomLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstant</span> <span class="o">=</span> <span class="n">CustomLineEdit</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignRight</span><span class="o">|</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignTrailing</span><span class="o">|</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;lineEditDecayConstant&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope3</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope3</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelIsotope3&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span> <span class="o">=</span> <span class="n">CustomLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span> <span class="o">=</span> <span class="n">CustomLineEdit</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignRight</span><span class="o">|</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignTrailing</span><span class="o">|</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;lineEditDecayConstantUncertainty&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridLayoutDatingParams</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonComputeAge</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonComputeAge</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonComputeAge</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;pushButtonComputeAge&quot;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushButtonComputeAge</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_58</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span><span class="p">)</span>
-        <span class="n">spacerItem15</span> <span class="o">=</span> <span class="n">QSpacerItem</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_58</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">spacerItem15</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDating</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents_2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_68</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDating</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDating</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabDiffusion</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabDiffusion</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabDiffusion&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_66</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDiffusion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_66</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_66</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_66&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDiffusion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shadow</span><span class="o">.</span><span class="n">Plain</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaDiffusion&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">236</span><span class="p">,</span> <span class="mi">234</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaWidgetContentsDiffusion&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_65</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="n">scroll_area_layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verticalLayoutDatingParams</span><span class="p">)</span>
+
+        <span class="n">spacer</span> <span class="o">=</span> <span class="n">QSpacerItem</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Policy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
+
+        <span class="n">scroll_area_layout</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">spacer</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">tab_scroll_area</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DatingTab.connect_widgets">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.DatingTab.connect_widgets">[docs]</a>
+    <span class="k">def</span> <span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Dating</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">specfun</span><span class="o">.</span><span class="n">callback_dating_method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">specfun</span><span class="o">.</span><span class="n">callback_dating_ratios</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonComputeAge</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">specfun</span><span class="o">.</span><span class="n">compute_date_map</span><span class="p">)</span></div>
+</div>
+
+
+
+
+<div class="viewcode-block" id="DiffusionTab">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.DiffusionTab">[docs]</a>
+<span class="k">class</span> <span class="nc">DiffusionTab</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DiffusionTab.setupUI">
+<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.DiffusionTab.setupUI">[docs]</a>
+    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabDiffusion&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tabDiffusion&quot;</span><span class="p">)</span>
+        <span class="n">tab_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shadow</span><span class="o">.</span><span class="n">Plain</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaDiffusion&quot;</span><span class="p">)</span>
+
+        <span class="n">tab_scroll_area_contents</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+        <span class="n">tab_scroll_area_contents</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">236</span><span class="p">,</span> <span class="mi">234</span><span class="p">))</span>
+        <span class="n">tab_scroll_area_contents</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;scrollAreaWidgetContentsDiffusion&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_65</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_65</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_65</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_65&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span> <span class="o">=</span> <span class="n">QFormLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;formLayoutDiffusion&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelDimensionality</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelDimensionality</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelDimensionality</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelDimensionality&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelDimensionality</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxDimensionality&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDimensionality</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingDiffusionMethod</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingDiffusionMethod</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingDiffusionMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelDatingDiffusionMethod&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelDatingDiffusionMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxDiffusionMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxDiffusionMethod</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxDiffusionMethod</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxDiffusionMethod</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;ComboBoxDiffusionMethod&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ComboBoxDiffusionMethod</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelRegion</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelRegion</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelRegion</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelRegion&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelRegion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxRegion</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxRegion</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxRegion</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxRegion</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxRegion&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxRegion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labelDiffusionProfile</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelDiffusionProfile</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labelDiffusionProfile</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;labelDiffusionProfile&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">LabelRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelDiffusionProfile</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDiffusionProfile</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDiffusionProfile</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDiffusionProfile</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">16777215</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDiffusionProfile</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;comboBoxDiffusionProfile&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="o">.</span><span class="n">ItemRole</span><span class="o">.</span><span class="n">FieldRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDiffusionProfile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_65</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formLayoutDiffusion</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_8</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_8</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;horizontalLayout_8&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetDiffusionConstants</span> <span class="o">=</span> <span class="n">QTableWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetDiffusionConstants</span> <span class="o">=</span> <span class="n">QTableWidget</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetDiffusionConstants</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;tableWidgetDiffusionConstants&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetDiffusionConstants</span><span class="o">.</span><span class="n">setColumnCount</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidgetDiffusionConstants</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -653,13 +798,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_10</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_10</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;verticalLayout_10&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="n">diffusion_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:resources/icons/icon-zoning-64.svg&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">diffusion_icon</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">24</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span> <span class="o">=</span> <span class="n">CustomToolButton</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">light_icon_unchecked</span><span class="o">=</span><span class="s2">&quot;icon-zoning-64.svg&quot;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">tab_scroll_area_contents</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;toolButtonDiffusionLoad&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_10</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolButtonDiffusionLoad</span><span class="p">)</span>
 
@@ -668,239 +811,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_8</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_10</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_65</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_8</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsDiffusion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_66</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaDiffusion</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabDiffusion</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_64</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabWidgetSpecialFcn</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContentsSpecial</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout_69</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaSpecial</span><span class="p">)</span>
-        <span class="n">page_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/resources/icons/icon-zoning-64.svg&quot;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">insertItem</span><span class="p">(</span><span class="n">page_index</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">page_icon</span><span class="p">,</span> <span class="s2">&quot;P-T-t Functions&quot;</span><span class="p">)</span>
-
-        <span class="n">specfun</span> <span class="o">=</span> <span class="n">SpecialFunctions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-
-        <span class="c1"># Dating</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">specfun</span><span class="o">.</span><span class="n">callback_dating_method</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">specfun</span><span class="o">.</span><span class="n">callback_dating_ratios</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonComputeAge</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">specfun</span><span class="o">.</span><span class="n">compute_date_map</span><span class="p">)</span></div>
-
-
-
-
-<div class="viewcode-block" id="SpecialFunctions">
-<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpecialFunctions</span><span class="p">():</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-
-
-
-<div class="viewcode-block" id="SpecialFunctions.callback_dating_ratios">
-<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.callback_dating_ratios">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">callback_dating_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">callback_dating_method</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="SpecialFunctions.callback_dating_method">
-<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.callback_dating_method">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">callback_dating_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates isotopes and decay constants when dating method changes.</span>
-
-<span class="sd">        Default decay constants are as follows:</span>
-<span class="sd">        - **Lu-Hf**: :math:`1.867 \\pm 0.008 \\times 10^{-5}` Ma (Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3)</span>
-
-<span class="sd">        - **Re-Os**: :math:`1.666 \\pm 0.005 \\times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span>
-
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">currentText</span><span class="p">():</span>
-            <span class="k">case</span> <span class="s2">&quot;Lu-Hf&quot;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-                    <span class="c1"># get list of analytes</span>
-                    <span class="n">analyte_list</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope1</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Lu175&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Analyte&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Lu175&quot;</span> <span class="ow">in</span> <span class="n">analyte_list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Analyte&quot;</span><span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Lu175&quot;</span><span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope2</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Hf176&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Analyte&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Hf176&quot;</span> <span class="ow">in</span> <span class="n">analyte_list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Analyte&quot;</span><span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Hf176&quot;</span><span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Hf178&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Analyte&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Hf178&quot;</span> <span class="ow">in</span> <span class="n">analyte_list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Analyte&quot;</span><span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Hf178&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># get list of ratios</span>
-                    <span class="n">ratio_list</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope1</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Hf176/Hf178&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Ratio&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Hf176/Hf178&quot;</span> <span class="ow">in</span> <span class="n">ratio_list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Ratio&quot;</span><span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Hf176/Hf178&quot;</span><span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope2</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Lu175/Hf178&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">currentText</span><span class="p">(</span><span class="s2">&quot;Ratio&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;Lu175/Hf178&quot;</span> <span class="ow">in</span> <span class="n">ratio_list</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Ratio&quot;</span><span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Lu175/Hf178&quot;</span><span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">currentText</span><span class="p">(</span><span class="s2">&quot;Ratio&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                    
-
-                <span class="c1"># Sonderlund et al., EPSL, 2004, https://doi.org/10.1016/S0012-821X(04)00012-3</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">1.867e-5</span> <span class="c1"># Ma</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">0.008e-5</span> <span class="c1"># Ma</span>
-            <span class="k">case</span> <span class="s2">&quot;Re-Os&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope1</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Re187&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="s2">&quot;Re187&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">analyte_list</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Analyte&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Re187&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope2</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Os187&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="s2">&quot;Os187&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">analyte_list</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Analyte&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Os187&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">labelIsotope3</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Os188&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="s2">&quot;Os188&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">analyte_list</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Analyte&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s2">&quot;Os188&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">1.666e-5</span> <span class="c1"># Ma</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lineEditDecayConstantUncertainty</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">0.005e-5</span> <span class="c1"># Ma</span>
-            <span class="k">case</span> <span class="s2">&quot;Sm-Nd&quot;</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">case</span> <span class="s2">&quot;Rb-Sr&quot;</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">case</span> <span class="s2">&quot;U-Pb&quot;</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">case</span> <span class="s2">&quot;Th-Pb&quot;</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">case</span> <span class="s2">&quot;Pb-Pb&quot;</span><span class="p">:</span>
-                <span class="k">pass</span></div>
-
-
-<div class="viewcode-block" id="SpecialFunctions.scatter_date">
-<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.scatter_date">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">scatter_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y0</span><span class="p">):</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">slope_only</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
-            <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">b</span>
-            <span class="k">return</span> <span class="n">model</span>
-
-        <span class="n">linear</span> <span class="o">=</span> <span class="n">odr</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">slope_only</span><span class="p">(</span><span class="n">y0</span><span class="p">))</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">odr</span><span class="o">.</span><span class="n">RealData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-        <span class="n">myodr</span> <span class="o">=</span> <span class="n">odr</span><span class="o">.</span><span class="n">ODR</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">linear</span><span class="p">,</span> <span class="n">beta0</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">myoutput</span> <span class="o">=</span> <span class="n">myodr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-        <span class="n">myoutput</span><span class="o">.</span><span class="n">pprint</span><span class="p">()</span></div>
-
-
-
-<div class="viewcode-block" id="SpecialFunctions.compute_date_map">
-<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.compute_date_map">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute_date_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute one of several date maps&quot;&quot;&quot;</span>
-        <span class="n">decay_constant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lineEditDecayConstant</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxDatingMethod</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
-        <span class="k">match</span> <span class="n">method</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;Lu-Hf&quot;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">checkBoxComputeRatios</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">Lu175</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-                        <span class="n">Hf176</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-                        <span class="n">Hf178</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField3</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType3</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-
-                        <span class="n">Hf176_Hf178</span> <span class="o">=</span> <span class="n">Hf176</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">Hf178</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-                        <span class="n">Lu175_Hf178</span> <span class="o">=</span> <span class="n">Lu175</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">Hf178</span><span class="p">[</span><span class="s1">&#39;array&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span><span class="s1">&#39;Could not compute ratios, check selected fields.&#39;</span><span class="p">)</span>
-                        <span class="k">return</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">Hf176_Hf178</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField1</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType1</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-                        <span class="n">Lu175_Hf178</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_map_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeField2</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxIsotopeAgeFieldType2</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span><span class="s1">&#39;Could not locate ratios, check selected fields.&#39;</span><span class="p">)</span>
-                        <span class="k">return</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="s1">&#39;computed_data&#39;</span><span class="p">][</span><span class="s1">&#39;Calculated&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="s1">&#39;computed_data&#39;</span><span class="p">][</span><span class="s1">&#39;Calculated&#39;</span><span class="p">][[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="s1">&#39;Y&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="s1">&#39;cropped_raw_data&#39;</span><span class="p">][[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="s1">&#39;Y&#39;</span><span class="p">]]</span>
-
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">date_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">Hf176_Hf178</span> <span class="o">-</span> <span class="mf">3.55</span><span class="p">)</span><span class="o">/</span><span class="n">Lu175_Hf178</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">decay_constant</span> 
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span><span class="s1">&#39;Something went wrong. Could not compute date map.&#39;</span><span class="p">)</span>
-
-            <span class="k">case</span> <span class="s2">&quot;Re-Os&quot;</span><span class="p">:</span>
-                <span class="k">pass</span>
-
-        <span class="c1"># save date_map to Calculated dataframe</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="s1">&#39;computed_data&#39;</span><span class="p">][</span><span class="s1">&#39;Calculated&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sample_id</span><span class="p">][</span><span class="s1">&#39;mask&#39;</span><span class="p">],</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">date_map</span>
-        
-        <span class="c1"># update styles and plot</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxColorByField</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s1">&#39;Calculated&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color_by_field_callback</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">comboBoxColorField</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color_field_callback</span><span class="p">()</span></div>
-
-        <span class="c1">#self.set_style_widgets(plot_type=&#39;field map&#39;)</span>
-
-        <span class="c1">#self.update_SV()</span>
-
-<div class="viewcode-block" id="SpecialFunctions.add_ree">
-<a class="viewcode-back" href="../../generated/app.SpecialTools.html#app.SpecialTools.SpecialFunctions.add_ree">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_ree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_df</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds predefined sums of rare earth elements to calculated fields</span>
-
-<span class="sd">        Computes four separate sums, LREE, MREE, HREE, and REE.  Elements not analyzed are igorned by the sum.</span>
-
-<span class="sd">        * ``lree = [&#39;la&#39;, &#39;ce&#39;, &#39;pr&#39;, &#39;nd&#39;, &#39;sm&#39;, &#39;eu&#39;, &#39;gd&#39;]``</span>
-<span class="sd">        * ``mree = [&#39;sm&#39;, &#39;eu&#39;, &#39;gd&#39;]``</span>
-<span class="sd">        * ``hree = [&#39;tb&#39;, &#39;dy&#39;, &#39;ho&#39;, &#39;er&#39;, &#39;tm&#39;, &#39;yb&#39;, &#39;lu&#39;]``</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        sample_df : pandas.DataFrame</span>
-<span class="sd">            Sample data</span>
-<span class="sd">        </span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        pandas.DataFrame</span>
-<span class="sd">            REE dataframe</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">lree</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;la&#39;</span><span class="p">,</span> <span class="s1">&#39;ce&#39;</span><span class="p">,</span> <span class="s1">&#39;pr&#39;</span><span class="p">,</span> <span class="s1">&#39;nd&#39;</span><span class="p">,</span> <span class="s1">&#39;sm&#39;</span><span class="p">,</span> <span class="s1">&#39;eu&#39;</span><span class="p">,</span> <span class="s1">&#39;gd&#39;</span><span class="p">]</span>
-        <span class="n">mree</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sm&#39;</span><span class="p">,</span> <span class="s1">&#39;eu&#39;</span><span class="p">,</span> <span class="s1">&#39;gd&#39;</span><span class="p">]</span>
-        <span class="n">hree</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tb&#39;</span><span class="p">,</span> <span class="s1">&#39;dy&#39;</span><span class="p">,</span> <span class="s1">&#39;ho&#39;</span><span class="p">,</span> <span class="s1">&#39;er&#39;</span><span class="p">,</span> <span class="s1">&#39;tm&#39;</span><span class="p">,</span> <span class="s1">&#39;yb&#39;</span><span class="p">,</span> <span class="s1">&#39;lu&#39;</span><span class="p">]</span>
-
-        <span class="c1"># Convert column names to lowercase and filter based on lree, hree, etc. lists</span>
-        <span class="n">lree_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">sample_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">iso</span><span class="p">)</span> <span class="k">for</span> <span class="n">iso</span> <span class="ow">in</span> <span class="n">lree</span><span class="p">])]</span>
-        <span class="n">hree_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">sample_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">iso</span><span class="p">)</span> <span class="k">for</span> <span class="n">iso</span> <span class="ow">in</span> <span class="n">hree</span><span class="p">])]</span>
-        <span class="n">mree_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">sample_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">iso</span><span class="p">)</span> <span class="k">for</span> <span class="n">iso</span> <span class="ow">in</span> <span class="n">mree</span><span class="p">])]</span>
-        <span class="n">ree_cols</span> <span class="o">=</span> <span class="n">lree_cols</span> <span class="o">+</span> <span class="n">hree_cols</span>
-
-        <span class="c1"># Sum up the values for each row</span>
-        <span class="n">ree_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">sample_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">ree_df</span><span class="p">[</span><span class="s1">&#39;LREE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_df</span><span class="p">[</span><span class="n">lree_cols</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">ree_df</span><span class="p">[</span><span class="s1">&#39;HREE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_df</span><span class="p">[</span><span class="n">hree_cols</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">ree_df</span><span class="p">[</span><span class="s1">&#39;MREE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_df</span><span class="p">[</span><span class="n">mree_cols</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">ree_df</span><span class="p">[</span><span class="s1">&#39;REE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_df</span><span class="p">[</span><span class="n">ree_cols</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">ree_df</span></div>
+        <span class="n">tab_scroll_area</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">tab_scroll_area_contents</span><span class="p">)</span>
+        <span class="n">tab_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">tab_scroll_area</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -932,8 +844,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -953,7 +865,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -966,8 +878,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

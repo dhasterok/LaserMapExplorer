@@ -4,10 +4,18 @@ app package
 Submodules
 ----------
 
-app.Actions module
+app.AppData module
 ------------------
 
-.. automodule:: app.Actions
+.. automodule:: app.AppData
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.BlocklyModules module
+------------------
+
+.. automodule:: app.BlocklyModules
    :members:
    :undoc-members:
    :show-inheritance:
@@ -84,6 +92,22 @@ app.PlotTree module
    :undoc-members:
    :show-inheritance:
 
+app.PlotViewerWindow module
+-------------------
+
+.. automodule:: app.ViewerWindow
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.Preprocessing module
+------------------
+
+.. automodule:: app.Preprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 app.Profile module
 ------------------
 
@@ -92,11 +116,19 @@ app.Profile module
    :undoc-members:
    :show-inheritance:
 
+app.ProfileMatplotlib module
+------------------
 
-app.SpecialFunctions module
+.. automodule:: app.ProfileMatplotlib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+app.SpecialTools module
 ---------------------------
 
-.. automodule:: app.SpecialFunctions
+.. automodule:: app.SpecialTools
    :members:
    :undoc-members:
    :show-inheritance:
@@ -105,6 +137,22 @@ app.SpotImporter module
 -----------------------
 
 .. automodule:: app.SpotImporter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.SpotTools module
+-----------------------
+
+.. automodule:: app.SpotTools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.StyleDict module
+-----------------------
+
+.. automodule:: app.StyleDict
    :members:
    :undoc-members:
    :show-inheritance:
@@ -145,6 +193,22 @@ app.config module
 -----------------
 
 .. automodule:: app.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.help_mapping module
+-----------------
+
+.. automodule:: app.help_mapping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+app.settings module
+-----------------
+
+.. automodule:: app.settings
    :members:
    :undoc-members:
    :show-inheritance:

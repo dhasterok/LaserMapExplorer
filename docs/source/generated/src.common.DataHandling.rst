@@ -4,6 +4,15 @@ src.common.DataHandling
 .. automodule:: src.common.DataHandling
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -12,3 +21,11 @@ src.common.DataHandling
       SampleObj
       XRFSampleObj
    
+   
+
+   
+   
+   
+
+
+

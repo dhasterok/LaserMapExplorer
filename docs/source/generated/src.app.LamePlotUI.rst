@@ -4,6 +4,15 @@ src.app.LamePlotUI
 .. automodule:: src.app.LamePlotUI
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -13,3 +22,11 @@ src.app.LamePlotUI
       NDimUI
       ScatterUI
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,17 @@
-ui.FieldSelectionDialog
+﻿ui.FieldSelectionDialog
 =======================
 
 .. automodule:: ui.FieldSelectionDialog
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.FieldSelectionDialog
    
       Ui_FieldDialog
    
+   
+
+   
+   
+   
+
+
+

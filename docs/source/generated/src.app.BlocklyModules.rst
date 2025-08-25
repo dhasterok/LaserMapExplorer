@@ -1,8 +1,17 @@
-src.app.BlocklyModules
+﻿src.app.BlocklyModules
 ======================
 
 .. automodule:: src.app.BlocklyModules
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ src.app.BlocklyModules
    
       LameBlockly
    
+   
+
+   
+   
+   
+
+
+

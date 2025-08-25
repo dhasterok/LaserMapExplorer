@@ -8,10 +8,10 @@ src.common.image\_color\_picker
 
    .. autosummary::
    
-      color_to_hex
-      color_to_hsv
-      color_to_rgb
+      debug_qpixmap
       main
+      sort_by_hue
+      sort_by_lab
    
    .. rubric:: Classes
 

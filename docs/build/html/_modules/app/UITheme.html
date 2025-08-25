@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/app/UITheme';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">app.UITheme</span></li>
+    <li class="breadcrumb-item active" aria-current="page">app.UITheme</li>
   </ul>
 </nav>
 </div>
@@ -388,20 +400,20 @@
                 <article class="bd-article">
                   
   <h1>Source code for app.UITheme</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">darkdetect</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QFontDatabase</span><span class="p">,</span> <span class="n">QIcon</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QSettings</span><span class="p">,</span> <span class="n">QSize</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QFontDatabase</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QAction</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QSettings</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QTimer</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">QDialog</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QSlider</span><span class="p">,</span>
     <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QFormLayout</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span>
-    <span class="n">QFrame</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QStyle</span>
+    <span class="n">QFrame</span><span class="p">,</span> <span class="n">QToolButton</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QStyle</span><span class="p">,</span> <span class="n">QGridLayout</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">RESOURCE_PATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">ICONPATH</span><span class="p">,</span> <span class="n">STYLE_PATH</span><span class="p">,</span> <span class="n">load_stylesheet</span>
 
 <div class="viewcode-block" id="default_font">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.default_font">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">default_font</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">default_font</span><span class="p">():</span>
     <span class="c1"># set default font for application</span>
     <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
     <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
@@ -410,27 +422,44 @@
     <span class="k">return</span> <span class="n">font</span></div>
 
 
+<div class="viewcode-block" id="apply_font_to_children">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.apply_font_to_children">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_font_to_children</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">font</span><span class="p">:</span> <span class="n">QFont</span><span class="p">):</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">widget</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="PreferencesManager">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PreferencesManager</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PreferencesManager</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
     <span class="n">scaleChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">fontFamilyChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">settingsChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
 
     <span class="n">SETTINGS_GROUP</span> <span class="o">=</span> <span class="s2">&quot;ui&quot;</span>
     <span class="n">KEY_SCALE</span> <span class="o">=</span> <span class="s2">&quot;scale&quot;</span>
     <span class="n">KEY_FONT_FAMILY</span> <span class="o">=</span> <span class="s2">&quot;font_family&quot;</span>
 
-    <span class="n">BASE_FONT_SIZE</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">DEFAULT_FONT_SIZE</span> <span class="o">=</span> <span class="mi">11</span>
     <span class="n">TOOLBAR_FONT_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">MIN_FONT</span> <span class="o">=</span> <span class="mi">6</span>
     <span class="n">MAX_FONT</span> <span class="o">=</span> <span class="mi">24</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">TOOLBAR_ICON_SIZE</span> <span class="o">=</span> <span class="mi">24</span>
+
+    <span class="n">TOOLBUTTON_ICON_SIZE</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">TOOLBUTTON_SIZE</span> <span class="o">=</span> <span class="mi">28</span>
+
+    <span class="n">RESET_BUTTON_ICON_SIZE</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">RESET_BUTTON_SIZE</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">QSettings</span><span class="p">(</span><span class="s2">&quot;YourOrg&quot;</span><span class="p">,</span> <span class="s2">&quot;YourApp&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">QSettings</span><span class="p">(</span><span class="s2">&quot;Adelaide University&quot;</span><span class="p">,</span> <span class="s2">&quot;LaME&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">beginGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SETTINGS_GROUP</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">KEY_SCALE</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">KEY_FONT_FAMILY</span><span class="p">,</span> <span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
@@ -438,7 +467,7 @@
 
 <div class="viewcode-block" id="PreferencesManager.save">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.save">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">beginGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SETTINGS_GROUP</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">KEY_SCALE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">KEY_FONT_FAMILY</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span><span class="p">)</span>
@@ -446,68 +475,86 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span>
 
     <span class="nd">@scale</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">-</span> <span class="n">v</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-6</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span> <span class="o">=</span> <span class="n">v</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaleChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">font_family</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">font_family</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span>
 
     <span class="nd">@font_family</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">font_family</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fam</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">font_family</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fam</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span> <span class="o">==</span> <span class="n">fam</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span> <span class="o">=</span> <span class="n">fam</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fontFamilyChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PreferencesManager.effective_font_size">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.effective_font_size">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">effective_font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesManager.default_font_size">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.default_font_size">[docs]</a>
+    <span class="k">def</span> <span class="nf">default_font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># base 11 scaled, clamped</span>
-        <span class="n">size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MIN_FONT</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_FONT</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="PreferencesManager.effective_toolbar_font_size">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.effective_toolbar_font_size">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">effective_toolbar_font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesManager.toolbar_font_size">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.toolbar_font_size">[docs]</a>
+    <span class="k">def</span> <span class="nf">toolbar_font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBAR_FONT_SIZE</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MIN_FONT</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_FONT</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="PreferencesManager.scale_size">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.scale_size">[docs]</a>
+    <span class="k">def</span> <span class="nf">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">base</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="PreferencesManager.property">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.property">[docs]</a>
+    <span class="k">def</span> <span class="nf">property</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="n">QFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_font_size</span><span class="p">()),</span>
+            <span class="s2">&quot;toolbar_font&quot;</span><span class="p">:</span> <span class="n">QFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_font_family</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_font_size</span><span class="p">()),</span>
+            <span class="s2">&quot;toolbar_icon_size&quot;</span><span class="p">:</span> <span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBAR_ICON_SIZE</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBAR_ICON_SIZE</span><span class="p">)),</span>
+            <span class="s2">&quot;toolbutton_icon_size&quot;</span><span class="p">:</span> <span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBUTTON_ICON_SIZE</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBUTTON_ICON_SIZE</span><span class="p">)),</span>
+            <span class="s2">&quot;toolbutton_size&quot;</span><span class="p">:</span> <span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBUTTON_SIZE</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TOOLBUTTON_SIZE</span><span class="p">)),</span>
+            <span class="s2">&quot;reset_button_icon_size&quot;</span><span class="p">:</span> <span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESET_BUTTON_ICON_SIZE</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESET_BUTTON_ICON_SIZE</span><span class="p">)),</span>
+            <span class="s2">&quot;reset_button_size&quot;</span><span class="p">:</span> <span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESET_BUTTON_SIZE</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RESET_BUTTON_SIZE</span><span class="p">)),</span>
+        <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="PreferencesManager.available_font_families">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesManager.available_font_families">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">available_font_families</span><span class="p">():</span>
-        <span class="n">db</span> <span class="o">=</span> <span class="n">QFontDatabase</span><span class="p">()</span>
-        <span class="n">families</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">families</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">available_font_families</span><span class="p">():</span>
+        <span class="n">families</span> <span class="o">=</span> <span class="n">QFontDatabase</span><span class="o">.</span><span class="n">families</span><span class="p">()</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">is_sans_serif</span><span class="p">(</span><span class="n">family</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-            <span class="c1"># crude heuristic: reject overly decorative by excluding known serif or script</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
-            <span class="c1"># Accept if it&#39;s not identified as a serif in its style hints</span>
-            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># could refine if needed</span>
+        <span class="c1"># def is_sans_serif(family: str) -&gt; bool:</span>
+        <span class="c1">#     # crude heuristic: reject overly decorative by excluding known serif or script</span>
+        <span class="c1">#     info = QFontDatabase.font(family, &quot;&quot;, 12)</span>
+        <span class="c1">#     # Accept if it&#39;s not identified as a serif in its style hints</span>
+        <span class="c1">#     return True  # could refine if needed</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">is_monospace</span><span class="p">(</span><span class="n">family</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">db</span><span class="o">.</span><span class="n">isFixedPitch</span><span class="p">(</span><span class="n">family</span><span class="p">)</span>
+        <span class="c1"># def is_monospace(family: str) -&gt; bool:</span>
+        <span class="c1">#     return QFontDatabase.isFixedPitch(family)</span>
 
-        <span class="c1"># Build whitelist: all monospaced plus families containing common sans keywords</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">families</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">is_monospace</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="c1"># # Build whitelist: all monospaced plus families containing common sans keywords</span>
+        <span class="c1"># result = set()</span>
+        <span class="c1"># for f in families:</span>
+        <span class="c1">#     if is_sans_serif(f) or is_monospace(f):</span>
+        <span class="c1">#         result.add(f)</span>
         <span class="c1"># Common generic sans serif families to include explicitly if present</span>
-        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span> <span class="s2">&quot;Arial&quot;</span><span class="p">,</span> <span class="s2">&quot;Helvetica&quot;</span><span class="p">,</span> <span class="s2">&quot;Ubuntu&quot;</span><span class="p">,</span> <span class="s2">&quot;Calibri&quot;</span><span class="p">,</span> <span class="s2">&quot;DejaVu Sans&quot;</span><span class="p">,</span> <span class="s2">&quot;Verdana&quot;</span><span class="p">,</span> <span class="s2">&quot;Tahoma&quot;</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.AppleSystemUIFont&quot;</span><span class="p">,</span> <span class="s2">&quot;Avenir&quot;</span><span class="p">,</span> <span class="s2">&quot;Futura&quot;</span><span class="p">,</span> <span class="s2">&quot;Candara&quot;</span><span class="p">,</span> <span class="s2">&quot;Myriad Pro&quot;</span> <span class="p">,</span><span class="s2">&quot;Myriad&quot;</span><span class="p">,</span> <span class="s2">&quot;Segoe UI&quot;</span><span class="p">,</span> <span class="s2">&quot;Arial&quot;</span><span class="p">,</span> <span class="s2">&quot;Helvetica&quot;</span><span class="p">,</span> <span class="s2">&quot;Ubuntu&quot;</span><span class="p">,</span> <span class="s2">&quot;Calibri&quot;</span><span class="p">,</span> <span class="s2">&quot;DejaVu Sans&quot;</span><span class="p">,</span> <span class="s2">&quot;Verdana&quot;</span><span class="p">,</span> <span class="s2">&quot;Tahoma&quot;</span><span class="p">,</span> <span class="s2">&quot;Aptos&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">families</span><span class="p">:</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
@@ -516,8 +563,8 @@
     
 <div class="viewcode-block" id="PreferencesDialog">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesDialog">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PreferencesDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefs</span><span class="p">:</span> <span class="s2">&quot;PreferencesManager&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PreferencesDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefs</span><span class="p">:</span> <span class="s2">&quot;PreferencesManager&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Preferences&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span> <span class="o">=</span> <span class="n">prefs</span>
@@ -536,8 +583,10 @@
         <span class="c1"># Scale slider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span> <span class="o">=</span> <span class="n">QSlider</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Orientation</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
-        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">setTickInterval</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
+        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
         <span class="n">slider_pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">scale</span> <span class="o">-</span> <span class="n">min_s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_s</span> <span class="o">-</span> <span class="n">min_s</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">slider_pos</span><span class="p">)</span>
         <span class="n">form</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;UI Scale:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="p">)</span>
@@ -575,16 +624,16 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_preview</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_preview</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_update_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
-        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
+    <span class="k">def</span> <span class="nf">_update_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
+        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
         <span class="n">slider_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_s</span> <span class="o">-</span> <span class="n">min_s</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">slider_pos</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_s</span>
         <span class="n">font_family</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_combo</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
-        <span class="n">font_size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">)</span>
+        <span class="n">font_size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">)</span>
         <span class="n">font_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span><span class="p">,</span> <span class="n">font_size</span><span class="p">))</span>
 
         <span class="c1"># Update preview label for clarity</span>
@@ -592,10 +641,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">preview_widget</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">_font_family</span> <span class="o">=</span> <span class="n">font_family</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preview_widget</span><span class="o">.</span><span class="n">update_preview</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_reset_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_reset_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># reset slider to scale = 1.0 and font to default</span>
-        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
-        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
+        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
+        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
         <span class="n">default_slider</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">min_s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_s</span> <span class="o">-</span> <span class="n">min_s</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">default_slider</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">font_combo</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">font_family</span><span class="p">)</span>
@@ -603,13 +652,14 @@
 
 <div class="viewcode-block" id="PreferencesDialog.accept">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreferencesDialog.accept">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">slider_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_slider</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
-        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
-        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">BASE_FONT_SIZE</span>
+        <span class="n">min_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MIN_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
+        <span class="n">max_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">MAX_FONT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">DEFAULT_FONT_SIZE</span>
         <span class="n">new_scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_s</span> <span class="o">-</span> <span class="n">min_s</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">slider_pos</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_s</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">new_scale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">font_family</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_combo</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">settingsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 </div>
 
@@ -619,39 +669,71 @@
 
 <div class="viewcode-block" id="PreviewWidget">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreviewWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PreviewWidget</span><span class="p">(</span><span class="n">QFrame</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefs</span><span class="p">:</span> <span class="s2">&quot;PreferencesManager&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PreviewWidget</span><span class="p">(</span><span class="n">QFrame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefs</span><span class="p">:</span> <span class="s2">&quot;PreferencesManager&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span> <span class="o">=</span> <span class="n">prefs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>  <span class="c1"># adjust as needed</span>
-        <span class="n">layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Box</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">350</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>  <span class="c1"># adjust as needed</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
 
         <span class="c1"># Toolbar-style button (icon + text)</span>
+        <span class="n">toolbar_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
+        <span class="n">toolbar_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Toolbar action&quot;</span><span class="p">)</span>
+        <span class="n">toolbar_label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Toolbar&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonStyle</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Toolbar action (icon + text)&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s2">&quot;LaME-64.svg&quot;</span><span class="p">)))</span>
 
         <span class="c1"># Normal toolbutton (icon only)</span>
+        <span class="n">icon_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
+        <span class="n">icon_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Normal icon&quot;</span><span class="p">)</span>
+        <span class="n">icon_label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Normal toolbutton (icon only)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Icons&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Normal toolbutton (icon only)&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s2">&quot;icon-launch-64.svg&quot;</span><span class="p">)))</span>
 
         <span class="c1"># Reset-style toolbutton (smaller)</span>
+        <span class="n">reset_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
+        <span class="n">reset_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Reset button&quot;</span><span class="p">)</span>
+        <span class="n">reset_label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span> <span class="o">=</span> <span class="n">QToolButton</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Reset button (small)&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s2">&quot;icon-reset-64.svg&quot;</span><span class="p">)))</span>
 
-        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="p">)</span>
-        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="p">)</span>
-        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_example</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_example</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;This is an example of the text size.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushbutton_example</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushbutton_example</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Click&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox_example</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox_example</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;Item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Item 2&quot;</span><span class="p">,</span> <span class="s2">&quot;Item 3&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">])</span>
+
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_example</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">toolbar_label</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">icon_label</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">reset_label</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushbutton_example</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushbutton_example</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">combobox_example</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># Connect to preference changes</span>
         <span class="n">prefs</span><span class="o">.</span><span class="n">scaleChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_preview</span><span class="p">)</span>
@@ -661,37 +743,42 @@
 
 <div class="viewcode-block" id="PreviewWidget.update_preview">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.PreviewWidget.update_preview">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">scale</span>
         <span class="n">font_family</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">font_family</span>
 
         <span class="c1"># Base font sizes</span>
-        <span class="n">base_font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">effective_font_size</span><span class="p">()</span>
-        <span class="n">toolbar_font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">effective_toolbar_font_size</span><span class="p">()</span>
+        <span class="n">default_font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">default_font_size</span><span class="p">()</span>
+        <span class="n">toolbar_font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">toolbar_font_size</span><span class="p">()</span>
 
         <span class="c1"># Apply fonts</span>
+        <span class="n">normal_font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">(</span><span class="n">font_family</span><span class="p">,</span> <span class="n">default_font_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_example</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">normal_font</span><span class="p">)</span>
+
         <span class="n">toolbar_font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">(</span><span class="n">font_family</span><span class="p">,</span> <span class="n">toolbar_font_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">toolbar_font</span><span class="p">)</span>
 
-        <span class="n">normal_font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">(</span><span class="n">font_family</span><span class="p">,</span> <span class="n">base_font_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">normal_font</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">normal_font</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushbutton_example</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">normal_font</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox_example</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">normal_font</span><span class="p">)</span>
+
         <span class="c1"># Icon/button sizing</span>
         <span class="c1"># Toolbar-style: icon 24x24 scaled</span>
-        <span class="n">tb_icon_dim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="n">scale</span><span class="p">)))</span>
+        <span class="n">tb_icon_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">TOOLBAR_ICON_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_example</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="n">tb_icon_dim</span><span class="p">,</span> <span class="n">tb_icon_dim</span><span class="p">))</span>
         <span class="c1"># Toolbar-style button overall size auto-adjusts (text + icon)</span>
 
         <span class="c1"># Normal toolbutton: base 28x28, icon 20x20 scaled</span>
-        <span class="n">tb_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">28</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
-        <span class="n">tb_icon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">20</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
+        <span class="n">tb_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">TOOLBUTTON_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
+        <span class="n">tb_icon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">TOOLBUTTON_ICON_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="n">tb_size</span><span class="p">,</span> <span class="n">tb_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normal_example</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="n">tb_icon</span><span class="p">,</span> <span class="n">tb_icon</span><span class="p">))</span>
 
         <span class="c1"># Reset button: base 20x20, icon 14x14</span>
-        <span class="n">reset_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">20</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
-        <span class="n">reset_icon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">14</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
+        <span class="n">reset_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">RESET_BUTTON_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
+        <span class="n">reset_icon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs</span><span class="o">.</span><span class="n">RESET_BUTTON_ICON_SIZE</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="n">reset_size</span><span class="p">,</span> <span class="n">reset_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_example</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="n">reset_icon</span><span class="p">,</span> <span class="n">reset_icon</span><span class="p">))</span></div>
 </div>
@@ -699,240 +786,125 @@
 
 <div class="viewcode-block" id="ThemeManager">
 <a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.ThemeManager">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ThemeManager</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="n">themeChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># &#39;dark&#39; or &#39;light&#39;</span>
+<span class="k">class</span> <span class="nc">ThemeManager</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages application theme (light/dark/auto) and notifies listeners.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_theme</span> <span class="o">=</span> <span class="s1">&#39;light&#39;</span>
+    <span class="n">theme_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># &quot;light&quot; or &quot;dark&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
-
-<div class="viewcode-block" id="ThemeManager.set_theme">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.ThemeManager.set_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theme</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">theme</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_theme</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_theme</span> <span class="o">=</span> <span class="n">theme</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">apply_theme</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">themeChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">theme</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="ThemeManager.apply_theme">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.ThemeManager.apply_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_theme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">RESOURCE_PATH</span> <span class="o">/</span> <span class="s1">&#39;styles&#39;</span> <span class="o">/</span> <span class="s1">&#39;dark.qss&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">RESOURCE_PATH</span> <span class="o">/</span> <span class="s1">&#39;styles&#39;</span> <span class="o">/</span> <span class="s1">&#39;light.qss&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div>
-</div>
-
-
-<div class="viewcode-block" id="UIThemes">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">UIThemes</span><span class="p">():</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">initial</span>  <span class="c1"># &quot;auto&quot;, &quot;dark&quot;, &quot;light&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 0=auto, 1=dark, 2=light</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-
-        <span class="c1"># set theme</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span><span class="p">)</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">highlight_color_dark</span> <span class="o">=</span> <span class="s1">&#39;#696880&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">highlight_color_light</span> <span class="o">=</span> <span class="s1">&#39;#FFFFC8&#39;</span>
 
-<div class="viewcode-block" id="UIThemes.switch_view_mode">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.switch_view_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">switch_view_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view_mode</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">view_mode</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">view_mode</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="n">view_mode</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_auto_detection</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mode</span><span class="p">)</span>
 
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span><span class="p">:</span>
-            <span class="k">case</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># auto</span>
-                <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
-                    <span class="c1">#self.set_dark_theme()</span>
-                    <span class="k">pass</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1">#self.set_light_theme()</span>
-                    <span class="k">pass</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">theme</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-sun-and-moon-64.svg&#39;</span><span class="p">)))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIconText</span><span class="p">(</span><span class="s1">&#39;Auto&#39;</span><span class="p">)</span>
-            <span class="k">case</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># dark</span>
-                <span class="c1">#self.set_dark_theme()</span>
-                <span class="k">pass</span>
-            <span class="k">case</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># light</span>
-                <span class="c1">#self.set_light_theme()</span>
-                <span class="k">pass</span></div>
+<div class="viewcode-block" id="ThemeManager.set_mode">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.ThemeManager.set_mode">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set mode to &#39;light&#39;, &#39;dark&#39;, or &#39;auto&#39;.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_auto_detection</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;dark&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stop_auto_detection</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="s2">&quot;dark&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;light&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stop_auto_detection</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="s2">&quot;light&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_view_mode_action</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="UIThemes.set_dark_theme">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.set_dark_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_dark_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ss</span> <span class="o">=</span> <span class="n">load_stylesheet</span><span class="p">(</span><span class="s1">&#39;dark.qss&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+<div class="viewcode-block" id="ThemeManager.cycle_mode">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.ThemeManager.cycle_mode">[docs]</a>
+    <span class="k">def</span> <span class="nf">cycle_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cycle through Auto → Dark → Light → Auto.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;dark&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;light&quot;</span><span class="p">)</span></div>
 
-        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
 
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-moon-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIconText</span><span class="p">(</span><span class="s1">&#39;Dark&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_start_auto_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Starts polling system theme.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_check_system_theme</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">60000</span><span class="p">)</span>  <span class="c1"># every 60 seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_system_theme</span><span class="p">()</span>
 
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">SelectAnalytes</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-atom-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">OpenProject</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-open-session-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">SaveProject</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-save-session-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">FullMap</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-fit-to-width-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">Crop</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-crop-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">SwapAxes</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-swap-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Reset Buttons</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonXAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonYAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonZAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonCAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1">#parent.toolButtonClusterColorReset.setIcon(QIcon(str(ICONPATH / &#39;icon-reset-dark-64.svg&#39;)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">toolButtonHistogramReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Samples</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-atom-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;process&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-histogram-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;dim_red&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-dimensional-analysis-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-cluster-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;scatter&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-ternary-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Spot Data</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;spot_tools&quot;</span><span class="p">):</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotMove</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-move-point-dark-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotToggle</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-show-hide-dark-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotSelectAll</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-select-all-dark-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotAnalysis</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-analysis-dark-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotRemove</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-delete-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1">#parent.toolButtonFilterSelectAll.setIcon(QIcon(str(ICONPATH / &#39;icon-select-all-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonFilterUp.setIcon(QIcon(str(ICONPATH / &#39;icon-up-arrow-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonFilterDown.setIcon(QIcon(str(ICONPATH / &#39;icon-down-arrow-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonFilterRemove.setIcon(QIcon(str(ICONPATH / &#39;icon-delete-dark-64.svg&#39;)))</span>
-        <span class="c1"># Polygons</span>
-        <span class="c1">#parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict[&#39;polygons&#39;],QIcon(str(ICONPATH / &#39;icon-polygon-new-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyCreate.setIcon(QIcon(str(ICONPATH / &#39;icon-polygon-new-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyAddPoint.setIcon(QIcon(str(ICONPATH / &#39;icon-add-point-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyRemovePoint.setIcon(QIcon(str(ICONPATH / &#39;icon-remove-point-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyMovePoint.setIcon(QIcon(str(ICONPATH / &#39;icon-move-point-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyLink.setIcon(QIcon(str(ICONPATH / &#39;icon-link-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyDelink.setIcon(QIcon(str(ICONPATH / &#39;icon-unlink-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPolyDelete.setIcon(QIcon(str(ICONPATH / &#39;icon-delete-dark-64.svg&#39;)))</span>
-        <span class="c1"># Profile</span>
-        <span class="c1">#parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict[&#39;profile&#39;],QIcon(str(ICONPATH / &#39;icon-profile-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonClearProfile.setIcon(QIcon(str(ICONPATH / &#39;icon-delete-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointDelete.setIcon(QIcon(str(ICONPATH / &#39;icon-delete-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointSelectAll.setIcon(QIcon(str(ICONPATH / &#39;icon-select-all-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointMove.setIcon(QIcon(str(ICONPATH / &#39;icon-move-point-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonProfileInterpolate.setIcon(QIcon(str(ICONPATH / &#39;icon-interpolate-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPlotProfile.setIcon(QIcon(str(ICONPATH / &#39;icon-profile-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointDown.setIcon(QIcon(str(ICONPATH / &#39;icon-down-arrow-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointUp.setIcon(QIcon(str(ICONPATH / &#39;icon-up-arrow-dark-64.svg&#39;)))</span>
-        <span class="c1"># Group Box Plot Tools</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonHome</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-home-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonRemoveAllMVPlots</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-delete-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonPopFigure</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-popout-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonAnnotate</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-annotate-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonPan</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-move-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonZoom</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-zoom-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-distance-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Calculator</span>
-        <span class="c1"># Style Toolbox</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-axes-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-text-and-scales-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;markers&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-marker-and-lines-dark-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-rgb-dark-64.svg&#39;</span><span class="p">)))</span></div>
+    <span class="k">def</span> <span class="nf">_stop_auto_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_poll_timer</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># Cluster tab</span>
-        <span class="c1">#parent.tabWidgetMask.setItemIcon(parent.mask_tab[&#39;cluster&#39;],QIcon(str(ICONPATH / &#39;icon-cluster-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonClusterLink.setIcon(QIcon(str(ICONPATH / &#39;icon-link-dark-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonClusterDelink.setIcon(QIcon(str(ICONPATH / &#39;icon-unlink-dark-64.svg&#39;)))</span>
+    <span class="k">def</span> <span class="nf">_check_system_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">system_theme</span> <span class="o">=</span> <span class="s2">&quot;dark&quot;</span> <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;light&quot;</span>
+        <span class="k">if</span> <span class="n">system_theme</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">system_theme</span><span class="p">)</span>
 
-<div class="viewcode-block" id="UIThemes.set_light_theme">
-<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.UIThemes.set_light_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_light_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ss</span> <span class="o">=</span> <span class="n">load_stylesheet</span><span class="p">(</span><span class="s1">&#39;light.qss&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+<div class="viewcode-block" id="ThemeManager.set_theme">
+<a class="viewcode-back" href="../../generated/app.UITheme.html#app.UITheme.ThemeManager.set_theme">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Force set theme to &#39;light&#39; or &#39;dark&#39; and notify listeners.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">theme</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;light&quot;</span><span class="p">,</span> <span class="s2">&quot;dark&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">theme</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_theme</span> <span class="o">=</span> <span class="n">theme</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_stylesheet</span><span class="p">(</span><span class="n">theme</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theme_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">theme</span><span class="p">)</span></div>
 
-        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
 
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-sun-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIconText</span><span class="p">(</span><span class="s1">&#39;Light&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_apply_stylesheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the appropriate QSS stylesheet.&quot;&quot;&quot;</span>
+        <span class="n">qss_file</span> <span class="o">=</span> <span class="n">STYLE_PATH</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">theme</span><span class="si">}</span><span class="s1">.qss&#39;</span>
+        <span class="k">if</span> <span class="n">qss_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">qss_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stylesheet not found: </span><span class="si">{</span><span class="n">qss_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">SelectAnalytes</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-atom-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">OpenProject</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-open-session-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">SaveProject</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-save-session-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">FullMap</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-fit-to-width-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">Crop</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-crop-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">SwapAxes</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-swap-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Reset Buttons</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonXAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonYAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonZAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonCAxisReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;mask_dock&quot;</span><span class="p">):</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">actionClusterColorReset</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-reset-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Samples</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-atom-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;process&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-histogram-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;dim_red&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-dimensional-analysis-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-cluster-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">control_dock</span><span class="o">.</span><span class="n">tab_dict</span><span class="p">[</span><span class="s1">&#39;scatter&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-ternary-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Spot Data</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;spot_tools&quot;</span><span class="p">):</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotMove</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-move-point-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotToggle</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-show-hide-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotSelectAll</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-select-all-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotAnalysis</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-analysis-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonSpotRemove</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Filter</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span><span class="s2">&quot;mask_dock&quot;</span><span class="p">):</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionFilterSelectAll</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-select-all-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionFilterUp</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-up-arrow-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionFilterDown</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-down-arrow-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionFilterRemove</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
-            <span class="c1"># Polygons</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">toolBox</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">mask_tab</span><span class="p">[</span><span class="s1">&#39;polygon&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-polygon-new-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyCreate</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-polygon-new-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyAddPoint</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-add-point-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyRemovePoint</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-remove-point-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyMovePoint</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-move-point-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyLink</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-link-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyDelink</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-unlink-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionPolyDelete</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Profile</span>
-        <span class="c1">#parent.toolBox.setItemIcon(parent.ui.control_dock.tab_dict[&#39;profile&#39;],QIcon(str(ICONPATH / &#39;icon-profile-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonClearProfile.setIcon(QIcon(str(ICONPATH / &#39;icon-delete-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointDelete.setIcon(QIcon(str(ICONPATH / &#39;icon-delete-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointSelectAll.setIcon(QIcon(str(ICONPATH / &#39;icon-select-all-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointMove.setIcon(QIcon(str(ICONPATH / &#39;icon-move-point-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonProfileInterpolate.setIcon(QIcon(str(ICONPATH / &#39;icon-interpolate-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPlotProfile.setIcon(QIcon(str(ICONPATH / &#39;icon-profile-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointDown.setIcon(QIcon(str(ICONPATH / &#39;icon-down-arrow-64.svg&#39;)))</span>
-        <span class="c1">#parent.toolButtonPointUp.setIcon(QIcon(str(ICONPATH / &#39;icon-up-arrow-64.svg&#39;)))</span>
-        <span class="c1"># Group Box Plot Tools</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonHome</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-home-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonRemoveAllMVPlots</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-delete-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonPopFigure</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-popout-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonAnnotate</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-annotate-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonPan</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-move-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonZoom</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-zoom-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolButtonDistance</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-distance-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Calculator</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">Calculator</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-calculator-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Style Toolbox</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-axes-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-text-and-scales-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;markers&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-marker-and-lines-64.svg&#39;</span><span class="p">)))</span>
-        <span class="n">parent</span><span class="o">.</span><span class="n">toolBoxStyle</span><span class="o">.</span><span class="n">setItemIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">style_tab</span><span class="p">[</span><span class="s1">&#39;colors&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-rgb-64.svg&#39;</span><span class="p">)))</span>
-        <span class="c1"># Cluster tab</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;mask_dock&quot;</span><span class="p">):</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">mask_dock</span><span class="o">.</span><span class="n">cluster_tab</span><span class="o">.</span><span class="n">setTabIcon</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">mask_tab</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">],</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-cluster-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionClusterLink</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-link-64.svg&#39;</span><span class="p">)))</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">actionClusterDelink</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ICONPATH</span> <span class="o">/</span> <span class="s1">&#39;icon-unlink-64.svg&#39;</span><span class="p">)))</span></div>
-</div>
+    <span class="k">def</span> <span class="nf">_update_view_mode_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update icon and tooltip based on current view_mode.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lame_action</span><span class="o">.</span><span class="n">ViewMode</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">icons</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">0</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;icon-sun-and-moon-64.svg&#39;</span><span class="p">,</span> <span class="s1">&#39;Theme:</span><span class="se">\n</span><span class="s1">Auto&#39;</span><span class="p">),</span>
+            <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;icon-moon-64.svg&#39;</span><span class="p">,</span> <span class="s1">&#39;Theme:</span><span class="se">\n</span><span class="s1">Dark&#39;</span><span class="p">),</span>
+            <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;icon-sun-64.svg&#39;</span><span class="p">,</span> <span class="s1">&#39;Theme:</span><span class="se">\n</span><span class="s1">Light&#39;</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="n">icon_file</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">icons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">view_mode</span><span class="p">]</span>
+        <span class="n">icon_path</span> <span class="o">=</span> <span class="n">ICONPATH</span> <span class="o">/</span> <span class="n">icon_file</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lame_action</span><span class="o">.</span><span class="n">ViewMode</span><span class="p">,</span> <span class="n">QAction</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lame_action</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">icon_path</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lame_action</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># QToolButton or similar</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lame_action</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">icon_path</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">lame_action</span><span class="o">.</span><span class="n">ViewMode</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+
+
+
 
 
 
@@ -965,8 +937,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -986,7 +958,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -999,8 +971,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

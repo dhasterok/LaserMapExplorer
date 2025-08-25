@@ -1,8 +1,17 @@
-common.scalebar
+﻿common.scalebar
 ===============
 
 .. automodule:: common.scalebar
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ common.scalebar
    
       scalebar
    
+   
+
+   
+   
+   
+
+
+

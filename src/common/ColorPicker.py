@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+"""
+Color Picker
+
+Created on Sat Aug 16 2025
+
+@author: Derrick Hasterok
+"""
+
 from __future__ import annotations
 import sys
 import numpy as np
@@ -11,7 +20,7 @@ from PyQt6.QtGui import (
     QPen, QGuiApplication, QWheelEvent
 )
 from PyQt6.QtCore import Qt, QPoint, QRect, QSize, pyqtSignal
-from src.common.ColorManager import color_to_hex, color_to_rgb, color_to_hex, convert_color_list
+from src.common.ColorManager import convert_color, convert_color_list
 
 from PIL import Image
 from sklearn.decomposition import PCA
@@ -28,15 +37,66 @@ MIN_ZOOM = 0.1
 MAX_ZOOM = 10.0
 
 def sort_by_hue(colors):
+    """
+    Sort a list of RGB colors by their hue.
+
+    Parameters
+    ----------
+    colors : list of tuple
+        List of colors, each as a 3-tuple (R, G, B) with values in [0, 1] or [0, 255].
+
+    Returns
+    -------
+    list of tuple
+        List of colors sorted by their hue in HSV space.
+    """
     return sorted(colors, key=lambda c: colorsys.rgb_to_hsv(*c)[0])
 
 class Magnifier(QWidget):
-    """Floating magnifier widget showing zoomed region around a point in an image.
-
-    The magnifier is DPI-aware and expects (image, image_pos_x, image_pos_y) where
-    image is a QImage in device pixel coordinates.
-    """
     def __init__(self, parent=None, grid_size:int=GRID_SIZE, zoom:int=DEFAULT_ZOOM, size:int=MAG_PREVIEW_SIZE):
+        """
+        Floating magnifier widget showing a zoomed region around a point in an image.
+
+        The magnifier is DPI-aware and expects (image, image_pos_x, image_pos_y) where
+        image is a QImage in device pixel coordinates.
+
+        Attributes
+        ----------
+        grid_size : int
+            Number of pixels in the magnifier grid (default GRID_SIZE).
+        zoom : int
+            Magnification factor for the preview (default DEFAULT_ZOOM).
+        preview_size : int
+            Size of the magnifier preview in pixels (default MAG_PREVIEW_SIZE).
+        pixel_size : int
+            Size of each magnified pixel in the preview.
+        _image : QImage
+            Image being magnified.
+        _img_x : int
+            X-coordinate of the center pixel in the image.
+        _img_y : int
+            Y-coordinate of the center pixel in the image.
+        _center_color : QColor
+            Color of the center pixel.
+
+        Parameters
+        ----------
+        parent : QWidget, optional
+            Parent widget.
+        grid_size : int
+            Number of pixels in the magnifier grid.
+        zoom : int
+            Magnification factor.
+        size : int
+            Preview window size.
+
+        Methods
+        -------
+        set_image_and_pos(image, img_x, img_y)
+            Set the image and center position for magnification.
+        paintEvent(event)
+            Paint the magnifier preview, showing the zoomed region, grid lines, and center color.
+        """
         super().__init__(parent, flags=Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
@@ -51,8 +111,19 @@ class Magnifier(QWidget):
         self._center_color = QColor(0,0,0)
 
     def set_image_and_pos(self, image: QImage, img_x: int, img_y: int):
-        """Set the image and center position (in image pixel coordinates)
-        image must be a QImage in device pixels (not scaled)
+        """
+        Set the image and center position for magnification.
+
+        Set the image and center position (in image pixel coordinates) image must be a QImage in device pixels (not scaled).
+
+        Parameters
+        ----------
+        image : QImage
+            Source image in device pixels (not scaled).
+        img_x : int
+            X-coordinate of the center pixel in image coordinates.
+        img_y : int
+            Y-coordinate of the center pixel in image coordinates.
         """
         self._image = image
         self._img_x = int(img_x)
@@ -62,6 +133,17 @@ class Magnifier(QWidget):
         self.update()
 
     def paintEvent(self, event):
+        """
+        Paint the magnifier preview.
+
+        Draws the zoomed region with grid lines, highlights the center pixel,
+        and displays a color swatch with RGB and hex values below the grid.
+
+        Parameters
+        ----------
+        event : QPaintEvent
+            The paint event from Qt.
+        """
         if self._image is None:
             return
         painter = QPainter(self)
@@ -121,8 +203,8 @@ class Magnifier(QWidget):
         painter.setPen(QPen(QColor(0,0,0)))
         painter.drawRect(sw_left, sw_top, sw_w, sw_h)
 
-        hex_text = color_to_hex(self._center_color)
-        rgb_color = color_to_rgb(self._center_color)
+        hex_text = convert_color(self._center_color, "qcolor", "hex")
+        rgb_color = convert_color(self._center_color, "qcolor", "rgb", norm_out=False)
         if rgb_color:
             rgb_text = f"RGB: {rgb_color[0]},{rgb_color[1]},{rgb_color[2]}"
         else:
@@ -132,17 +214,53 @@ class Magnifier(QWidget):
 
 
 class ImageColorPicker(QWidget):
-    """Main widget that shows an image and the magnifier. Emits colorPicked(hex).
-
-    Features:
-    - Load image from file, drag & drop, or paste from clipboard
-    - Hover updates magnifier (tool window)
-    - Click picks color and adds to palette
-    """
     colorPicked = pyqtSignal(str)
     paletteCreated = pyqtSignal(list)
 
     def __init__(self, parent=None):
+        """
+        Main widget that shows an image and a magnifier. Emits signals for picked colors.
+
+        Features
+        --------
+        - Load image from file, drag & drop, or paste from clipboard.
+        - Hover updates the magnifier preview (tool window).
+        - Click picks color and emits a signal.
+
+        Signals
+        -------
+        colorPicked : pyqtSignal(str)
+            Emitted when a color is picked. Argument is the color hex code.
+        paletteCreated : pyqtSignal(list)
+            Emitted when a palette is created. Argument is a list of color hex codes.
+
+        Methods
+        -------
+        open_image()
+            Open an image from a file dialog and display it.
+        paste_image()
+            Paste an image from the system clipboard and display it.
+        set_pixmap(pixmap)
+            Set the displayed pixmap and convert it to QImage for processing.
+        dragEnterEvent(event)
+            Accept drag events containing images or file URLs.
+        dropEvent(event)
+            Handle drop events. Accepts images or file URLs.
+        eventFilter(obj, event)
+            Filter mouse events on the image label (hover, click, leave).
+        widget_to_image_coords(widget_pos)
+            Convert widget coordinates to image pixel coordinates.
+        on_image_mouse_move(widget_pos)
+            Update magnifier based on mouse move over the image.
+        on_image_mouse_click(widget_pos)
+            Pick color at the mouse position and emit colorPicked signal.
+        wheelEvent(event)
+            Zoom the displayed image on mouse wheel scroll.
+        qpixmap_to_pil()
+            Convert the current QPixmap to a PIL Image in RGB format.
+        region_based_palette_qpixmap()
+            Generate a palette from the image using region-based K-means clustering.
+        """
         super().__init__()
         self.setWindowTitle('Image Color Picker')
         self.resize(900, 600)
@@ -207,6 +325,9 @@ class ImageColorPicker(QWidget):
 
     # ----------------- image loading -----------------
     def open_image(self):
+        """
+        Open an image from a file dialog and display it.
+        """
         path, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Images (*.png *.jpg *.bmp *.gif)')
         if path:
             pm = QPixmap(path)
@@ -216,6 +337,9 @@ class ImageColorPicker(QWidget):
             self.set_pixmap(pm)
 
     def paste_image(self):
+        """
+        Paste an image from the system clipboard and display it.
+        """
         clipboard = QApplication.clipboard()
         img = clipboard.image()
         if not img.isNull():
@@ -225,6 +349,16 @@ class ImageColorPicker(QWidget):
             QMessageBox.information(self, 'Info', 'No image in clipboard')
 
     def set_pixmap(self, pixmap: QPixmap):
+        """
+        Set the displayed pixmap and convert to QImage for processing.
+
+        Handles device pixel ratio and scales to fit the viewport if necessary.
+
+        Parameters
+        ----------
+        pixmap : QPixmap
+            Pixmap to display and process.
+        """
         # Ensure device pixel ratio handled
         dpr = pixmap.devicePixelRatio() or 1.0
         self._pixmap = pixmap
@@ -249,10 +383,26 @@ class ImageColorPicker(QWidget):
 
     # ----------------- drag & drop -----------------
     def dragEnterEvent(self, event):
+        """
+        Accept drag events containing images or file URLs.
+
+        Parameters
+        ----------
+        event : QDragEnterEvent
+            Drag event.
+        """
         if event.mimeData().hasImage() or event.mimeData().hasUrls():
             event.acceptProposedAction()
 
     def dropEvent(self, event):
+        """
+        Handle drop events. Accepts images or file URLs.
+
+        Parameters
+        ----------
+        event : QDropEvent
+            Drop event.
+        """
         if event.mimeData().hasImage():
             img = event.mimeData().imageData()
             pm = QPixmap.fromImage(img)
@@ -263,6 +413,23 @@ class ImageColorPicker(QWidget):
 
     # ----------------- event mapping -----------------
     def eventFilter(self, obj, event):
+        """
+        Filter mouse events on the image label.
+
+        Handles mouse move (update magnifier), click (pick color), and leave (hide magnifier).
+
+        Parameters
+        ----------
+        obj : QObject
+            Object that received the event.
+        event : QEvent
+            The event object.
+
+        Returns
+        -------
+        bool
+            True if the event was handled, otherwise False.
+        """
         # listen for mouse events on the image_label
         if obj is self.image_label:
             if event.type() == QMouseEvent.Type.MouseMove:
@@ -279,7 +446,19 @@ class ImageColorPicker(QWidget):
         return super().eventFilter(obj, event)
 
     def widget_to_image_coords(self, widget_pos: QPoint) -> Tuple[int, int]:
-        """Map widget coordinates to image pixel coordinates, safely."""
+        """
+        Convert widget coordinates to image pixel coordinates.
+
+        Parameters
+        ----------
+        widget_pos : QPoint
+            Position in widget coordinates.
+
+        Returns
+        -------
+        tuple of int or None
+            Corresponding (x, y) pixel coordinates in the image, or None if mapping is impossible.
+        """
         if self._image is None:
             return None  # nothing to map
 
@@ -302,6 +481,14 @@ class ImageColorPicker(QWidget):
         return (img_x, img_y)
 
     def on_image_mouse_move(self, widget_pos: QPoint):
+        """
+        Update magnifier based on mouse move over the image.
+
+        Parameters
+        ----------
+        widget_pos : QPoint
+            Mouse position in widget coordinates.
+        """
         if self._image is None:
             return  # nothing loaded yet
 
@@ -328,6 +515,14 @@ class ImageColorPicker(QWidget):
         self.magnifier.show()
 
     def on_image_mouse_click(self, widget_pos: QPoint):
+        """
+        Pick color at the mouse position and emit colorPicked signal.
+
+        Parameters
+        ----------
+        widget_pos : QPoint
+            Mouse click position in widget coordinates.
+        """
         if self._image is None:
             return  # ignore clicks until an image is loaded
 
@@ -337,12 +532,19 @@ class ImageColorPicker(QWidget):
         img_x, img_y = coords
 
         color = self._image.pixelColor(img_x, img_y)
-        hex_code = color_to_hex(color)
+        hex_code = convert_color(color, "qcolor", "hex")
         print(f"Picked color: {hex_code}")
         self.colorPicked.emit(hex_code)
 
     def wheelEvent(self, event: QWheelEvent):
-        """Zoom in/out on scroll wheel."""
+        """
+        Zoom the displayed image on mouse wheel scroll.
+
+        Parameters
+        ----------
+        event : QWheelEvent
+            Mouse wheel event.
+        """
         if self._pixmap is None:
             return
 
@@ -374,7 +576,14 @@ class ImageColorPicker(QWidget):
         self._display_scale = scaled.width() / self._image.width()
 
     def qpixmap_to_pil(self) -> Image.Image:
-        """Convert QPixmap to a PIL Image (RGB)."""
+        """
+        Convert the current QPixmap to a PIL Image in RGB format.
+
+        Returns
+        -------
+        PIL.Image.Image
+            The converted PIL image.
+        """
         qimg = self._pixmap.toImage().convertToFormat(QImage.Format.Format_RGB32)
         width, height = qimg.width(), qimg.height()
 
@@ -390,6 +599,11 @@ class ImageColorPicker(QWidget):
         return Image.fromarray(rgb, "RGB")    
 
     def region_based_palette_qpixmap(self):
+        """
+        Generate a palette from the image using region-based K-means clustering.
+
+        Downsamples the image, clusters colors, sorts by hue, and emits paletteCreated signal.
+        """
         grid_size = int(50)
         # Convert to PIL, downsample to emphasize regions
         pil_img = self.qpixmap_to_pil().convert("RGB")
@@ -411,4 +625,4 @@ class ImageColorPicker(QWidget):
         colors = sort_by_hue(colors=colors)
 
         # Example visualization
-        self.paletteCreated.emit(convert_color_list(colors, 'hex'))
+        self.paletteCreated.emit(convert_color_list(colors, 'rgb', 'hex'))

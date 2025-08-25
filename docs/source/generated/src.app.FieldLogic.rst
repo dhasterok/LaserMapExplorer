@@ -4,6 +4,15 @@ src.app.FieldLogic
 .. automodule:: src.app.FieldLogic
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -13,3 +22,11 @@ src.app.FieldLogic
       FieldDialog
       FieldLogicUI
    
+   
+
+   
+   
+   
+
+
+

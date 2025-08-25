@@ -4,6 +4,15 @@ src.app.DataAnalysis
 .. automodule:: src.app.DataAnalysis
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -13,3 +22,11 @@ src.app.DataAnalysis
       DimensionalReduction
       DimensionalReductionPage
    
+   
+
+   
+   
+   
+
+
+

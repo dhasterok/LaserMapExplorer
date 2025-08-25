@@ -1,8 +1,13 @@
-common.outliers
+﻿common.outliers
 ===============
 
 .. automodule:: common.outliers
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -12,3 +17,15 @@ common.outliers
       peirce_dev
       quantile_and_difference
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

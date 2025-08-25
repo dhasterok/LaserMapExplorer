@@ -4,6 +4,15 @@ src.app.MainToolBar
 .. automodule:: src.app.MainToolBar
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -12,3 +21,11 @@ src.app.MainToolBar
       MainMenubar
       MainToolbar
    
+   
+
+   
+   
+   
+
+
+

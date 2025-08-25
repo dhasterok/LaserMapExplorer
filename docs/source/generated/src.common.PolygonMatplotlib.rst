@@ -4,6 +4,15 @@ src.common.PolygonMatplotlib
 .. automodule:: src.common.PolygonMatplotlib
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -12,3 +21,11 @@ src.common.PolygonMatplotlib
       PolygonManager
       SerializablePolygon
    
+   
+
+   
+   
+   
+
+
+

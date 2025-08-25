@@ -1,8 +1,17 @@
-ui.AnalyteSelectionDialog
+﻿ui.AnalyteSelectionDialog
 =========================
 
 .. automodule:: ui.AnalyteSelectionDialog
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.AnalyteSelectionDialog
    
       Ui_Dialog
    
+   
+
+   
+   
+   
+
+
+

@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../_static/documentation_options.js?v=2709fde1"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/custom.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/common/Calculator';</script>
@@ -49,7 +46,6 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +61,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +81,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +89,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +124,7 @@
     
     
     <img src="../../_static/LaME-wide-64.svg" class="logo__image only-light" alt=""/>
-    <img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/LaME-wide-green-64.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">LaME v.0.0 beta</p>
@@ -178,11 +186,15 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
@@ -220,11 +232,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -241,8 +257,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -334,14 +349,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -359,6 +369,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -370,7 +382,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">common.Calculator</span></li>
+    <li class="breadcrumb-item active" aria-current="page">common.Calculator</li>
   </ul>
 </nav>
 </div>
@@ -388,27 +400,27 @@
                 <article class="bd-article">
                   
   <h1>Source code for common.Calculator</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numexpr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ne</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BASEDIR</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.varfunc</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial_match</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numexpr</span> <span class="k">as</span> <span class="nn">ne</span>
+<span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">BASEDIR</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">src.common.varfunc</span> <span class="kn">import</span> <span class="n">partial_match</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PyQt6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QPlainTextEdit</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
         <span class="n">QToolBar</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
         <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QFrame</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span> <span class="n">QScrollArea</span>
     <span class="p">)</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.CustomWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">CustomAction</span><span class="p">,</span> <span class="n">CustomToolButton</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.app.FieldLogic</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldLogicUI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.common.Logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
+<span class="kn">from</span> <span class="nn">src.common.CustomWidgets</span> <span class="kn">import</span> <span class="n">CustomComboBox</span><span class="p">,</span> <span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">CustomAction</span><span class="p">,</span> <span class="n">CustomToolButton</span>
+<span class="kn">from</span> <span class="nn">src.app.FieldLogic</span> <span class="kn">import</span> <span class="n">FieldLogicUI</span>
+<span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">LoggerConfig</span><span class="p">,</span> <span class="n">auto_log_methods</span>
 
 <div class="viewcode-block" id="calc_error">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.calc_error">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">calc_error</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">addinfo</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">calc_error</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">addinfo</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise a calculator-related error</span>
 
 <span class="sd">    Parameters</span>
@@ -430,7 +442,7 @@
 <div class="viewcode-block" id="CalculatorDock">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Calculator&#39;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CalculatorDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">FieldLogicUI</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CalculatorDock</span><span class="p">(</span><span class="n">CustomDockWidget</span><span class="p">,</span> <span class="n">FieldLogicUI</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a CustomFieldCalculator with UI controls inside a dock widget that can be added to a QMainWindow</span>
 
 <span class="sd">    Parameters</span>
@@ -452,7 +464,7 @@
 <span class="sd">    TypeError</span>
 <span class="sd">        Parent must be an instance of QMainWindow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># super().__init__(self, parent=None)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Calculator&#39;</span>
 
@@ -490,7 +502,7 @@
 
 <div class="viewcode-block" id="CalculatorDock.setupUI">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.setupUI">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Create container</span>
         <span class="n">scroll_area</span> <span class="o">=</span> <span class="n">QScrollArea</span><span class="p">()</span>
         <span class="n">scroll_area</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -582,7 +594,7 @@
         <span class="n">calculator_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFieldType</span><span class="p">)</span>
 
         <span class="n">field_layout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span> <span class="o">=</span> <span class="n">CustomComboBox</span><span class="p">(</span><span class="n">popup_callback</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span> <span class="o">=</span> <span class="n">CustomComboBox</span><span class="p">(</span><span class="n">popup_callback</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_field_combobox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFieldType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxField</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Select field&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_formula_button</span> <span class="o">=</span> <span class="n">CustomToolButton</span><span class="p">(</span>
@@ -599,6 +611,7 @@
 
         <span class="c1"># keypad_checkbox</span>
         <span class="n">keypad_checkbox</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">()</span>
+        <span class="n">keypad_checkbox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;show/hide keypad&quot;</span><span class="p">)</span>
 
         <span class="n">calculator_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">keypad_checkbox</span><span class="p">)</span>
 
@@ -641,7 +654,7 @@
                 <span class="p">(</span><span class="s1">&#39;not&#39;</span><span class="p">,</span>    <span class="s1">&#39; not &#39;</span><span class="p">,</span>     <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_insert_operator</span><span class="p">)</span>
             <span class="p">]</span>
         
-        <span class="k">def</span><span class="w"> </span><span class="nf">create_handler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">create_handler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">handler</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -676,7 +689,7 @@
 
 <div class="viewcode-block" id="CalculatorDock.connect_widgets">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.connect_widgets">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># connect actions to methods</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_new_field</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_new_field</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
@@ -691,13 +704,13 @@
 
 <div class="viewcode-block" id="CalculatorDock.connect_logger">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.connect_logger">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">connect_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="CalculatorDock.calc_help">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the help webpage associated with the calculator in the Help tab&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span><span class="s2">&quot;browser&quot;</span><span class="p">):</span>
@@ -711,7 +724,7 @@
         
 <div class="viewcode-block" id="CalculatorDock.calc_insert_operator">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_insert_operator">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_insert_operator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_insert_operator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Inserts an operator into the calculator</span>
 
 <span class="sd">        When the user pushes an operator button on the calculator, *operator* is inserted </span>
@@ -728,7 +741,7 @@
 
 <div class="viewcode-block" id="CalculatorDock.calc_insert_function">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_insert_function">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_insert_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_insert_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Inserts a func_name into the calculator</span>
 
 <span class="sd">        When the user pushes a function button on the calculator, *operator* is inserted </span>
@@ -759,7 +772,7 @@
     
 <div class="viewcode-block" id="CalculatorDock.calc_add_field">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_add_field">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds the selected field to the calculator</span>
 
 <span class="sd">        Adds the selected field as ``{field_type.field}``.  If the field is normalized,</span>
@@ -791,7 +804,7 @@
 
 <div class="viewcode-block" id="CalculatorDock.calc_load_dict">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_load_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_load_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_load_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads saved calculated fields</span>
 
 <span class="sd">        Loads the file saved in ``self.calc_filename``, unless the file is overridden by user preferences.  The file</span>
@@ -820,7 +833,7 @@
 
 <div class="viewcode-block" id="CalculatorDock.calc_delete_formula">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_delete_formula">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_delete_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_delete_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deletes a previously stored formula</span>
 <span class="sd">        </span>
 <span class="sd">        Removes the formula from ``MainWindow.formula_combobox``, the file given by ``MainWindow.calc_filename`` and </span>
@@ -860,7 +873,7 @@
     
 <div class="viewcode-block" id="CalculatorDock.calc_load_formula">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_load_formula">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_load_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_load_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads a predefined formula to use in the calculator&quot;&quot;&quot;</span>        
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxFormula</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
 
@@ -872,7 +885,7 @@
     
 <div class="viewcode-block" id="CalculatorDock.calc_set_add_formula">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calc_set_add_formula">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_set_add_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_set_add_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets whether to add a new function</span>
 
 <span class="sd">        Sets ``MainWindow.add_formula`` to ``True``, a flag used by ``MainWindow.calculate_new_field`` to determine</span>
@@ -883,7 +896,7 @@
 
 <div class="viewcode-block" id="CalculatorDock.calculate_new_field">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CalculatorDock.calculate_new_field">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_new_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_new_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a new field from ``CalculatorDock.calc_text_edit`` and updates UI</span>
 
 <span class="sd">        When ``CalculatorDock.toolButtonCalculate`` is clicked, ...</span>
@@ -949,13 +962,13 @@
 <div class="viewcode-block" id="CustomFieldCalculator">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CustomFieldCalculator">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Calculator&#39;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CustomFieldCalculator</span><span class="p">():</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CustomFieldCalculator</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Calculator&#39;</span>
         
 <div class="viewcode-block" id="CustomFieldCalculator.calc_parse">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CustomFieldCalculator.calc_parse">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ref_chem</span><span class="p">,</span> <span class="n">txt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ref_chem</span><span class="p">,</span> <span class="n">txt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepares expression for calculating a custom field </span>
 
 <span class="sd">        Parses ``MainWindow.calc_text_edit`` to produce an expression that can be evaluated.</span>
@@ -1074,7 +1087,7 @@
 
 <div class="viewcode-block" id="CustomFieldCalculator.calculate_new_field">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CustomFieldCalculator.calculate_new_field">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_new_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ref_chem</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_new_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ref_chem</span><span class="p">,</span> <span class="n">new_field</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a new field from ``MainWindow.calc_text_edit``</span>
 
 <span class="sd">        When ``MainWindow.toolButtonCalculate`` is clicked, ...</span>
@@ -1165,7 +1178,7 @@
 
 <div class="viewcode-block" id="CustomFieldCalculator.calc_evaluate_expr">
 <a class="viewcode-back" href="../../generated/common.Calculator.html#common.Calculator.CustomFieldCalculator.calc_evaluate_expr">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calc_evaluate_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">val_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_evaluate_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">val_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluates an expression and returns the result</span>
 
 <span class="sd">        Parameters</span>
@@ -1230,8 +1243,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1251,7 +1264,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
@@ -1264,8 +1277,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

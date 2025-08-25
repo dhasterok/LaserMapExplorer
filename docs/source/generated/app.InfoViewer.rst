@@ -4,6 +4,11 @@
 .. automodule:: app.InfoViewer
 
    
+   
+   
+
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
@@ -14,6 +19,10 @@
       increase_precision
       update_dataframe
       update_numpy_array
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -26,3 +35,11 @@
       MetadataTab
       PlotInfoTab
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,13 @@
-common.radar\_factory
+﻿common.radar\_factory
 =====================
 
 .. automodule:: common.radar_factory
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -10,3 +15,15 @@ common.radar\_factory
    
       radar_factory
    
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

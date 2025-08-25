@@ -1,8 +1,17 @@
-app.SpotImporter
+﻿app.SpotImporter
 ================
 
 .. automodule:: app.SpotImporter
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ app.SpotImporter
    
       SpotImporter
    
+   
+
+   
+   
+   
+
+
+

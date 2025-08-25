@@ -4,6 +4,15 @@
 .. automodule:: app.ImageProcessing
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -11,3 +20,11 @@
       ImageProcessing
       ImageProcessingUI
    
+   
+
+   
+   
+   
+
+
+

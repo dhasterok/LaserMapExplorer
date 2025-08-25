@@ -1,8 +1,17 @@
-common.PolygonMatplotlib
+﻿common.PolygonMatplotlib
 ========================
 
 .. automodule:: common.PolygonMatplotlib
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -12,3 +21,11 @@ common.PolygonMatplotlib
       PolygonManager
       SerializablePolygon
    
+   
+
+   
+   
+   
+
+
+

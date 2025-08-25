@@ -1,8 +1,13 @@
-common.varfunc
+﻿common.varfunc
 ==============
 
 .. automodule:: common.varfunc
 
+   
+   
+   
+
+   
    
    .. rubric:: Functions
 
@@ -10,9 +15,21 @@ common.varfunc
    
       partial_match
    
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
    
       ObservableDict
    
+   
+
+   
+   
+   
+
+
+

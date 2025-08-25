@@ -4,3 +4,20 @@
 .. automodule:: ui.QuickViewDialog
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

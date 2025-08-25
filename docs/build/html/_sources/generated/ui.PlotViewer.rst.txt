@@ -1,8 +1,17 @@
-ui.PlotViewer
+﻿ui.PlotViewer
 =============
 
 .. automodule:: ui.PlotViewer
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.PlotViewer
    
       Ui_widgetPlotViewer
    
+   
+
+   
+   
+   
+
+
+

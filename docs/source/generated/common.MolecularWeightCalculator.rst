@@ -1,8 +1,17 @@
-common.MolecularWeightCalculator
+﻿common.MolecularWeightCalculator
 ================================
 
 .. automodule:: common.MolecularWeightCalculator
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ common.MolecularWeightCalculator
    
       MolecularWeightCalculator
    
+   
+
+   
+   
+   
+
+
+

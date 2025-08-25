@@ -1,13 +1,33 @@
-app.SpecialTools
+﻿app.SpecialTools
 ================
 
 .. automodule:: app.SpecialTools
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
    
-      SpecialFunctions
+      BarmometryTab
+      DatingTab
+      DiffusionTab
       SpecialPage
+      ThermometryTab
    
+   
+
+   
+   
+   
+
+
+

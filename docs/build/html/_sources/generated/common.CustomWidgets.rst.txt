@@ -4,6 +4,15 @@
 .. automodule:: common.CustomWidgets
 
    
+   
+   
+
+   
+   
+   
+
+   
+   
    .. rubric:: Classes
 
    .. autosummary::
@@ -17,10 +26,20 @@
       CustomPage
       CustomSlider
       CustomTableWidget
+      CustomToolBox
       CustomToolButton
       CustomTreeView
       DoubleSlider
       RotatedHeaderView
       StandardItem
       ToggleSwitch
+      VisibilityWidget
    
+   
+
+   
+   
+   
+
+
+

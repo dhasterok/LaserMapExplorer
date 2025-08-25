@@ -1,8 +1,17 @@
-common.ExtendedDF
+﻿common.ExtendedDF
 =================
 
 .. automodule:: common.ExtendedDF
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ common.ExtendedDF
    
       AttributeDataFrame
    
+   
+
+   
+   
+   
+
+
+

@@ -1,8 +1,17 @@
-ui.MainWindow
+﻿ui.MainWindow
 =============
 
 .. automodule:: ui.MainWindow
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ ui.MainWindow
    
       Ui_MainWindow
    
+   
+
+   
+   
+   
+
+
+

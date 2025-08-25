@@ -1,8 +1,17 @@
-src.app.MainWindow
+﻿src.app.MainWindow
 ==================
 
 .. automodule:: src.app.MainWindow
 
+   
+   
+   
+
+   
+   
+   
+
+   
    
    .. rubric:: Classes
 
@@ -10,3 +19,11 @@ src.app.MainWindow
    
       MainWindow
    
+   
+
+   
+   
+   
+
+
+

@@ -41,8 +41,7 @@ python3 main.py
 
 # libraries needed
 darkdetect
-PyQt5
-pyqtgraph
+PyQt6
 pandas
 matplotlib
 cmcrameri
@@ -54,7 +53,7 @@ scikit-fuzzy
 opencv-python
 numexpr
 rst2pdf
-PyQtWebEngine
+PyQt6-WebEngine
 openpyxl
 
 you'll also need blockly

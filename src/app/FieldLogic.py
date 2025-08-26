@@ -11,7 +11,7 @@ from PyQt6.QtGui import ( QImage, QColor, QFont, QPixmap, QPainter, QBrush, QIco
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.FieldSelectionDialog import Ui_FieldDialog
 from src.app.config import BASEDIR, ICONPATH, RESOURCE_PATH
-
+from src.app.PlotAxisSettings import plot_axis_dict
 from src.common.ExtendedDF import AttributeDataFrame
 from src.common.CustomWidgets import CustomDockWidget, CustomPage, RotatedHeaderView, CustomComboBox, CustomToolBox
 from src.app.Preprocessing import PreprocessingUI
@@ -21,9 +21,7 @@ from src.app.DataAnalysis import ClusterPage, DimensionalReductionPage
 from src.app.SpotTools import SpotPage
 from src.app.SpecialTools import SpecialPage
 from src.common.Logger import LoggerConfig, auto_log_methods, log
-
 from src.common.LamePlot import plot_clusters
-
 
 class ControlDock(CustomDockWidget):
     def __init__(self, ui=None):
@@ -254,79 +252,78 @@ class ControlDock(CustomDockWidget):
 
     def connect_widgets(self):
         self.toolbox.currentChanged.connect(self.toolbox_changed)
-        self.comboBoxPlotType.currentTextChanged.connect(lambda: setattr(self.ui.style_data, 'plot_type', self.comboBoxPlotType.currentText()))
+        self.comboBoxPlotType.currentTextChanged.connect(lambda _: setattr(self.ui.style_data, 'plot_type', self.comboBoxPlotType.currentText()))
         self.comboBoxFieldTypeC.popup_callback = lambda: self.update_field_type_combobox_options(
             self.comboBoxFieldTypeC,
             self.comboBoxFieldC,
-            ax=3,
+            ax='c',
             user_activated=True
             )
-        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda: self.update_field_type(ax=3))
+        self.comboBoxFieldTypeC.currentTextChanged.connect(lambda _: self.update_field_type(ax='c'))
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldC,
             self.comboBoxFieldTypeC,
             spinbox=self.spinBoxFieldC,
-            ax=3,
+            ax='c',
             user_activated=True
             )
-        self.comboBoxFieldC.currentTextChanged.connect(lambda: self.update_field(ax=3))
+        self.comboBoxFieldC.currentTextChanged.connect(lambda _: self.update_field(ax='c'))
         # update spinbox associated with map/color field
-        self.spinBoxFieldC.valueChanged.connect(lambda: self.field_spinbox_changed(ax=3))
+        self.spinBoxFieldC.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='c'))
 
         self.comboBoxFieldTypeX.popup_callback = lambda: self.update_field_type_combobox_options(
             self.comboBoxFieldTypeX,
             self.comboBoxFieldX,
-            ax=0,
+            ax='x',
             user_activated=True
             )
-        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda: self.update_field_type(ax=0))
+        self.comboBoxFieldTypeX.currentTextChanged.connect(lambda _: self.update_field_type(ax='x'))
         self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldX,
             self.comboBoxFieldTypeX,
             spinbox=self.spinBoxFieldX,
-            ax=0,
+            ax='x',
             user_activated=True
             )
-        self.comboBoxFieldX.currentTextChanged.connect(lambda: self.update_field(ax=0))
+        self.comboBoxFieldX.currentTextChanged.connect(lambda _: self.update_field(ax='x'))
         # update spinbox associated with map/color field
-        self.spinBoxFieldX.valueChanged.connect(lambda: self.field_spinbox_changed(ax=0))
+        self.spinBoxFieldX.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='x'))
 
         self.comboBoxFieldTypeY.popup_callback = lambda: self.update_field_type_combobox_options(
             self.comboBoxFieldTypeY,
             self.comboBoxFieldY,
-            ax=1,
+            ax='y',
             user_activated=True
             )
-        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda: self.update_field_type(ax=1))
+        self.comboBoxFieldTypeY.currentTextChanged.connect(lambda _: self.update_field_type(ax='y'))
         self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldY,
             self.comboBoxFieldTypeY,
             spinbox=self.spinBoxFieldY,
-            ax=1,
+            ax='y',
             user_activated=True
             )
-        self.comboBoxFieldY.currentTextChanged.connect(lambda: self.update_field(ax=1))
+        self.comboBoxFieldY.currentTextChanged.connect(lambda _: self.update_field(ax='y'))
         # update spinbox associated with map/color field
-        self.spinBoxFieldY.valueChanged.connect(lambda: self.field_spinbox_changed(ax=1))
+        self.spinBoxFieldY.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='y'))
 
         self.comboBoxFieldTypeZ.popup_callback = lambda: self.update_field_type_combobox_options(
             self.comboBoxFieldTypeZ,
             self.comboBoxFieldZ,
-            ax=2,
+            ax='z',
             user_activated=True
             )
-        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda: self.update_field_type(ax=2))
+        self.comboBoxFieldTypeZ.currentTextChanged.connect(lambda _: self.update_field_type(ax='z'))
         self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldZ,
             self.comboBoxFieldTypeZ,
             spinbox=self.spinBoxFieldZ,
-            ax=2,
+            ax='z',
             user_activated=True
             )
-        self.comboBoxFieldZ.currentTextChanged.connect(lambda: self.update_field(ax=2))
-        self.spinBoxFieldZ.valueChanged.connect(lambda: self.field_spinbox_changed(ax=2))
+        self.comboBoxFieldZ.currentTextChanged.connect(lambda _: self.update_field(ax='z'))
+        self.spinBoxFieldZ.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='z'))
 
-        
         self.comboBoxRefMaterial.addItems(self.ui.app_data.ref_list.values)          # Select analyte Tab
         self.comboBoxRefMaterial.activated.connect(lambda: self.update_ref_chem_combobox(self.comboBoxRefMaterial.currentText())) 
         self.comboBoxRefMaterial.setCurrentIndex(self.ui.app_data.ref_index)
@@ -592,8 +589,8 @@ class ControlDock(CustomDockWidget):
 
         self.ui.plot_flag = False
         # update all plot widgets
-        for ax in range(4):
-            if self.ui.style_data.plot_axis_dict[self.ui.style_data.plot_type]['axis'][ax]:
+        for ax in ['x', 'y', 'z', 'c']:
+            if self.ui.style_data.plot_axis_dict[self.ui.style_data.plot_type].axis[ax]:
                 self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
                 self.update_field_type(ax, self.axis_widget_dict['parentbox'][ax].currentText())
         self.ui.plot_flag = True
@@ -681,70 +678,76 @@ class ControlDock(CustomDockWidget):
             self.ui.plot_flag = True
 
     def update_field_type_combobox_options(self, parentbox, childbox=None, ax=None, user_activated=False):
-        """Updates a field type comobobox list.
+        """Updates a field type combobox list.
 
-        This method can be used on popup or by forcing an update.
-        
+        Ensures signals are not emitted during list refresh and preserves the
+        previous selection if it is still valid. Only user interaction will
+        trigger currentTextChanged afterwards.
+
         Parameters
         ----------
         parentbox : CustomComboBox
-            Field type comobobox to be updated on popup
+            Field type combobox to be updated on popup
         childbox : CustomComboBox, optional
             Field combobox associated with parent combobox, by default None
-        ax : int, optional
-            Axis index, by default None
+        ax : str, optional
+            Axis string, by default None
         user_activated : bool, optional
             Indicates whether the call is user activated (True) or in response to
             code (False), by default False
         """
         if self.ui.app_data.sample_id == '' or self.ui.style_data.plot_type == '':
             return
-            
+
         old_list = parentbox.allItems()
         old_field_type = parentbox.currentText()
 
-        field_dict = self.ui.app_data.field_dict
         # get field type options from app_data
-        new_list = self.ui.app_data.get_field_type_list(ax, self.ui.style_data) 
+        new_list = self.ui.app_data.get_field_type_list(ax, self.ui.style_data)
 
-
-        # if the list hasn't changed then don't change anything
-        if old_list and new_list == old_list:
+        # if the list hasn't changed, no update is needed
+        if new_list == old_list:
             return
 
-        # update the parent box list of field types
+        # block signals while repopulating items
+        parentbox.blockSignals(True)
         parentbox.clear()
         parentbox.addItems(new_list)
 
-        # if previous field type is in the new list, then keep it as the current choice until selected
-        if user_activated:
-            return
-
+        # restore previous selection if possible, otherwise default to first item
         if old_field_type in new_list:
             parentbox.setCurrentIndex(new_list.index(old_field_type))
         else:
             parentbox.setCurrentIndex(0)
+        parentbox.blockSignals(False)
 
-        # if a childbox is supplied, then update it based on the field type
+        # handle child combobox if supplied
         if childbox is None:
             return
 
+        field_dict = self.ui.app_data.field_dict
+
         if parentbox.currentText() == 'none':
+            childbox.blockSignals(True)
             childbox.clear()
             childbox.setPlaceholderText('none')
+            childbox.blockSignals(False)
             return
 
-        if 'normalized' in old_field_type:
-            old_field_type = old_field_type.replace(' (normalized)','')
-        
-        if old_field_type not in new_list:
+        # normalize field type if needed
+        check_field_type = old_field_type.replace(' (normalized)', '') if 'normalized' in old_field_type else old_field_type
+
+        childbox.blockSignals(True)
+        if check_field_type not in new_list:
             childbox.clear()
             childbox.addItems(field_dict[new_list[0]])
             childbox.setCurrentIndex(0)
-        elif childbox.currentText() not in field_dict[old_field_type]:
+        elif childbox.currentText() not in field_dict.get(check_field_type, []):
             childbox.clear()
-            childbox.addItems(field_dict[old_field_type])
+            childbox.addItems(field_dict[check_field_type])
             childbox.setCurrentIndex(0)
+        childbox.blockSignals(False)
+
         
     def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, ax=None, add_none=False, user_activated=False):
         """Updates a field comobobox list.
@@ -766,51 +769,48 @@ class ControlDock(CustomDockWidget):
             Field combobox to be updated on popup
         parentbox : CustomComboBox, optional
             Field type comobobox associated with child combobox, by default None
-        ax : int, optional
-            Axis index, by default None
+        ax : str, optional
+            Axis string, by default None
         user_activated : bool, optional
             Indicates whether the call is user activated (True) or in response to
             code (False), by default False
         """
         old_list = childbox.allItems()
-        # if no parent combobox supplied, then assume field type is `analyte`
+        old_field = childbox.currentText()
+
+        # determine field type
         if parentbox is None:
             field_type = 'Analyte'
-
-        # if parent combobox has no field type selected, clear childbox and return
         elif parentbox.currentText() in [None, '', 'none', 'None']:
+            childbox.blockSignals(True)
             childbox.clear()
+            childbox.blockSignals(False)
             return
-
-        # if parent combobox is supplied, get the field list associated with current field type
         else:
             field_type = parentbox.currentText()
-            
+
         field_list = self.ui.app_data.get_field_list(field_type)
 
-        # add 'none' as first option if required
         if add_none:
-            field_list.insert(0,'none')
+            field_list.insert(0, 'none')
 
-        # if the new list is same as old, then nothing to update
-        if old_list == field_list:
+        # no change, do nothing
+        if field_list == old_list:
             return
-        
-        # clear and add a new list
-        old_field = childbox.currentText()
+
+        # block signals while rebuilding the list
+        childbox.blockSignals(True)
         childbox.clear()
         childbox.addItems(field_list)
 
-        # update the current index if old field is in the new list, otherwise set to first item
-        print(f"{childbox.currentText()}")
-        if user_activated:
-            return
-
+        # restore old selection if possible, else default to first item
         if old_field in field_list:
             childbox.setCurrentIndex(field_list.index(old_field))
         else:
             childbox.setCurrentIndex(0)
+        childbox.blockSignals(False)
 
+        # keep spinbox in sync if present
         if spinbox is not None:
             spinbox.blockSignals(True)
             spinbox.setMinimum(0)
@@ -819,6 +819,17 @@ class ControlDock(CustomDockWidget):
             spinbox.blockSignals(False)
  
     def update_field_type(self, ax, field_type=None):
+        """Used to update widgets associated with an axis after a field type change to either the combobox or underlying data.
+
+        Used to update, x, y, z, and c axes related widgets including fields, spinboxes, labels, limits and scale.
+
+        Parameters
+        ----------
+        ax : str
+            Axis, options include ``x``, ``y``, ``z``, and ``c``
+        field_type : str, optional
+            New field type value for axis to update ``app_data`` or combobox, by default None
+        """
         # only update field if the axis is enabled 
         if not self.ui.style_data.plot_axis_dict[self.ui.style_data.plot_type]['axis'][ax]:
             return
@@ -859,8 +870,8 @@ class ControlDock(CustomDockWidget):
 
         Parameters
         ----------
-        ax : int
-            Axis to update, [x,y,z,c] should be supplied as an integer, [0,1,2,3], respectively
+        ax : str
+            Axis, options include ``x``, ``y``, ``z``, and ``c``
         field : str, optional
             New field value for axis to update ``app_data`` or combobox, by default None
         """
@@ -973,8 +984,8 @@ class ControlDock(CustomDockWidget):
         
         Parameters
         ----------
-        ax : int
-            Axis to update, [x,y,z,c] should be supplied as an integer, [0,1,2,3], respectively
+        ax : str
+            Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
         spinbox = self.axis_widget_dict['spinbox'][ax]
         childbox = self.axis_widget_dict['childbox'][ax]

@@ -481,10 +481,32 @@ class StylingDock(CustomDockWidget):
         self.reindex_tab_dict()
 
         self.axis_widget_dict = {
-            'scalebox': [self.axes.comboBoxXScale, self.axes.comboBoxYScale, self.axes.comboBoxZScale, self.caxes.comboBoxCScale],
-            'axis_label': [self.axes.lineEditXLabel, self.axes.lineEditYLabel, self.axes.lineEditZLabel, self.caxes.lineEditCLabel],
-            'lbound': [self.axes.lineEditXLB, self.axes.lineEditYLB, self.axes.lineEditZLB, self.caxes.lineEditCLB],
-            'ubound': [self.axes.lineEditXUB, self.axes.lineEditYUB, self.axes.lineEditZUB, self.caxes.lineEditCUB],
+            'x': {
+                'scalebox': self.axes.comboBoxXScale,
+                'axis_label': self.axes.lineEditXLabel,
+                'lbound': self.axes.lineEditXLB,
+                'ubound': self.axes.lineEditXUB,
+                'reset_btn': self.axes.toolButtonXAxisReset,
+            },
+            'y': {'scalebox': self.axes.comboBoxYScale,
+                'axis_label': self.axes.lineEditYLabel,
+                'lbound': self.axes.lineEditYLB,
+                'ubound': self.axes.lineEditYUB,
+                'reset_btn': self.axes.toolButtonYAxisReset,
+            },
+            'z': {
+                'scalebox': self.axes.comboBoxZScale,
+                'axis_label': self.axes.lineEditZLabel,
+                'lbound': self.axes.lineEditZLB,
+                'ubound': self.axes.lineEditZUB,
+                'reset_btn': self.axes.toolButtonZAxisReset,
+            },
+            'c': {'scalebox': self.caxes.comboBoxCScale,
+                'axis_label': self.caxes.lineEditCLabel,
+                'lbound': self.caxes.lineEditCLB,
+                'ubound': self.caxes.lineEditCUB,
+                'reset_btn': self.caxes.toolButtonCAxisReset,
+            },
         }
 
         # toggles signals from widgets, if false, blocks widgets from sending signals
@@ -501,17 +523,14 @@ class StylingDock(CustomDockWidget):
         self.comboBoxStyleTheme.activated.connect(lambda: setattr(self, "style_dict", self.read_theme(self.comboBoxStyleTheme.currentText())))
         self.toolButtonSaveTheme.clicked.connect(self.save_style_theme)
 
-        self.ui.control_dock.comboBoxFieldX.activated.connect(lambda: self.axis_variable_changed(self.ui.control_dock.comboBoxFieldTypeX.currentText(), self.ui.control_dock.comboBoxFieldX.currentText(), 'x'))
-        self.ui.control_dock.comboBoxFieldY.activated.connect(lambda: self.axis_variable_changed(self.ui.control_dock.comboBoxFieldTypeY.currentText(), self.ui.control_dock.comboBoxFieldY.currentText(), 'y'))
-        self.ui.control_dock.comboBoxFieldZ.activated.connect(lambda: self.axis_variable_changed(self.ui.control_dock.comboBoxFieldTypeZ.currentText(), self.ui.control_dock.comboBoxFieldZ.currentText(), 'z'))
-
-        # callback functions
-
+        self.ui.control_dock.comboBoxFieldX.currentTextChanged.connect(lambda text: self.axis_variable_changed(text, 'x'))
+        self.ui.control_dock.comboBoxFieldY.currentTextChanged.connect(lambda text: self.axis_variable_changed(text, 'y'))
+        self.ui.control_dock.comboBoxFieldZ.currentTextChanged.connect(lambda text: self.axis_variable_changed(text, 'z'))
+        self.ui.control_dock.comboBoxFieldC.currentTextChanged.connect(lambda text: self.axis_variable_changed(text, 'c'))
 
         self.connect_widgets()
         self.connect_observer()
         self.connect_logger()
-
 
         self._signal_state = False
 
@@ -926,7 +945,7 @@ class StylingDock(CustomDockWidget):
     # ------------------------------------------------------------------
     # Axes
     # ------------------------------------------------------------------
-    def update_axis_limits(self, ax: str, new_lim: tuple=None):
+    def update_axis_limits(self, ax: str, new_lim: tuple|None=None):
 
         if ax == 'c':
             lower = getattr(self.caxes, f"lineEdit{ax.upper()}LB")
@@ -1938,8 +1957,8 @@ class StylingDock(CustomDockWidget):
             field_type = getattr(self.ui.control_dock, f"comboBoxFieldType{ax.upper()}")
             field = getattr(self.ui.control_dock, f"comboBoxField{ax.upper()}")
 
-            field_type.setCurrentText(getattr(style, f"{ax}field_type"))
-            field.setCurrentText(getattr(style, f"{ax}field"))
+            field_type.setCurrentText(getattr(self.ui.app_data, f"{ax}_field_type"))
+            field.setCurrentText(getattr(self.ui.app_data, f"{ax}_field"))
 
             # color properties
             self.ui.control_dock.update_field_type_combobox_options(
@@ -1947,22 +1966,22 @@ class StylingDock(CustomDockWidget):
                 field,
                 ax=i
             )
-            if getattr(self.ui.style_data, f"{ax}_field_type") is None or getattr(self.ui.style_data, f"{ax}_field_type") == '':
+            if getattr(self.ui.app_data, f"{ax}_field_type") is None or getattr(self.ui.app_data, f"{ax}_field_type") == '':
                 field_type.setCurrentIndex(0)
-                setattr(self.ui.style_data, f"{ax}_field_type", field_type.currentText())
+                setattr(self.ui.app_data, f"{ax}_field_type", field_type.currentText())
             else:
                 #field.setCurrentText(getattr(self.ui.style_data, f"{c}_field_type")
                 pass
 
-            if getattr(self.ui.style_data, f"{ax}_field_type") == '':
+            if getattr(self.ui.app_data, f"{ax}_field_type") == '':
                 field.clear()
             else:
                 self.ui.control_dock.update_field_combobox_options(field, field_type)
                 self.ui.control_dock.spinBoxFieldC.setMinimum(0)
                 self.ui.control_dock.spinBoxFieldC.setMaximum(field.count() - 1)
 
-            if getattr(self.ui.style_data, f"{ax}_field") in field.allItems():
-                field.setCurrentText(self.ui.style_data.c_field)
+            if getattr(self.ui.app_data, f"{ax}_field") in field.allItems():
+                field.setCurrentText(self.ui.app_data.c_field)
                 #self.ui.c_field_spinbox_changed()
             else:
                 #self.ui.style_data.c_field = self.ui.control_dock.comboBoxFieldC.currentText()
@@ -2029,7 +2048,7 @@ class StylingDock(CustomDockWidget):
         else:
             # set color scale options to linear/log
             self.caxes.comboBoxCScale.clear()
-            self.caxes.comboBoxCScale.addItems(data.scale_options(plot_type=self.ui.style_data.plot_type, ax='c', field_type=self.ui.style_data.cfield_type, field=self.ui.style_data.cfield))
+            self.caxes.comboBoxCScale.addItems(data.scale_options(plot_type=self.ui.style_data.plot_type, ax='c', field_type=self.ui.app_data.c_field_type, field=self.ui.app_data.c_field))
             self.ui.style_data.cscale = 'linear'
             self.caxes.comboBoxCScale.setCurrentText(self.ui.style_data.cscale)
             
@@ -2046,7 +2065,7 @@ class StylingDock(CustomDockWidget):
     # -------------------------------------
     # axes
     # -------------------------------------
-    def axis_variable_changed(self, field_type, field, ax="None"):
+    def axis_variable_changed(self, field, ax):
         """Updates axis variables when the field is changed.
 
         Parameters
@@ -2060,90 +2079,38 @@ class StylingDock(CustomDockWidget):
         """
         ui = self.ui
 
+        scalebox = self.axis_widget_dict[ax]['scalebox']
+        lbound = self.axis_widget_dict[ax]['lbound']
+        ubound = self.axis_widget_dict[ax]['ubound']
+        axis_label = self.axis_widget_dict[ax]['axis_label']
+        reset_btn = self.axis_widget_dict[ax]['reset_btn']
+
         if field == '' or field.lower() == 'none':
-            match ax:
-                case 'x':
-                    self.axes.lineEditXLB.setEnabled(False)
-                    self.axes.lineEditXUB.setEnabled(False)
-                    ui.comboBoxXScale.setEnabled(False)
-                    self.axes.lineEditXLabel.setEnabled(False)
-                    self.axes.lineEditXLB.setText('')
-                    self.axes.lineEditXUB.setText('')
-                    ui.comboBoxXScale.setCurrentText('')
-                    self.axes.lineEditXLabel.setText('')
-                case 'y':
-                    self.axes.lineEditYLB.setEnabled(False)
-                    self.axes.lineEditYUB.setEnabled(False)
-                    ui.comboBoxYScale.setEnabled(False)
-                    self.axes.lineEditYLabel.setEnabled(False)
-                    self.axes.lineEditYLB.setText('')
-                    self.axes.lineEditYUB.setText('')
-                    ui.comboBoxYScale.setCurrentText('')
-                    self.axes.lineEditYLabel.setText('')
-                case 'z':
-                    self.axes.lineEditZLB.setEnabled(False)
-                    self.axes.lineEditZUB.setEnabled(False)
-                    ui.comboBoxZScale.setEnabled(False)
-                    self.axes.lineEditZLabel.setEnabled(False)
-                    self.axes.lineEditZLB.setText('')
-                    self.axes.lineEditZUB.setText('')
-                    ui.comboBoxZScale.setCurrentText('')
-                    self.axes.lineEditZLabel.setText('')
+            for w in (lbound, ubound, axis_label):
+                w.setEnabled(False)
+                w.setText('')
+            scalebox.setEnabled(False)
+            scalebox.setText('')
+            reset_btn.setEnabled(False)
+            
             return
-        else:
-            amin, amax, scale, label = self.ui.style_data.get_axis_values(self.ui.app_data.current_data,field_type, field, ax)
 
-            plot_type = self.ui.style_data.plot_type
+        amin, amax, scale, label = self.ui.style_data.get_axis_values(self.ui.app_data.current_data, field)
 
-            self.ui.style_data.style_dict[plot_type][ax+'Lim'] = [amin, amax]
-            self.ui.style_data.style_dict[plot_type][ax+'norm'] = scale
-            self.ui.style_data.style_dict[plot_type][ax+'Label'] = label
+        plot_type = self.ui.style_data.plot_type
 
-            match ax:
-                case 'x':
-                    self.axes.lineEditXLB.setEnabled(True)
-                    self.axes.lineEditXUB.setEnabled(True)
-                    self.axes.comboBoxXScale.setEnabled(True)
-                    self.axes.lineEditXLabel.setEnabled(True)
-                    self.axes.lineEditXLB.value = amin
-                    self.axes.lineEditXUB.value = amax
-                    self.axes.comboBoxXScale.setCurrentText(scale)
-                    self.axes.lineEditXLabel.setText(label)
-                case 'y':
-                    self.axes.lineEditYLB.setEnabled(True)
-                    self.axes.lineEditYUB.setEnabled(True)
-                    self.axes.comboBoxYScale.setEnabled(True)
-                    self.axes.lineEditYLabel.setEnabled(True)
-                    self.axes.lineEditYLB.value = amin
-                    self.axes.lineEditYUB.value = amax
-                    self.axes.comboBoxYScale.setCurrentText(scale)
-                    self.axes.lineEditYLabel.setText(label)
-                case 'z':
-                    self.axes.lineEditZLB.setEnabled(True)
-                    self.axes.lineEditZUB.setEnabled(True)
-                    self.axes.comboBoxZScale.setEnabled(True)
-                    self.axes.lineEditZLabel.setEnabled(True)
-                    self.axes.lineEditZLB.value = amin
-                    self.axes.lineEditZUB.value = amax
-                    self.axes.comboBoxZScale.setCurrentText(scale)
-                    self.axes.lineEditZLabel.setText(label)
+        self.ui.style_data.set_axis_lim(ax, [amin, amax])
+        self.ui.style_data.set_axis_label(ax, scale)
+        self.ui.style_data.set_axis_label(ax, label)
 
-            self.ui.schedule_update()
+        for w in (lbound, ubound, axis_label, scalebox, reset_btn):
+            w.setEnabled(True)
+        lbound.value = amin
+        ubound.value = amax
+        scalebox.setCurrentText(scale)
+        axis_label.setText(label)
 
-        # self.axes.labelXLim.setEnabled(self.axes.lineEditXLB.isEnabled()) 
-        # self.axes.labelYLim.setEnabled(self.axes.lineEditYLB.isEnabled()) 
-        # self.axes.labelZLim.setEnabled(self.axes.lineEditZLB.isEnabled()) 
-        # self.axes.labelXScale.setEnabled(self.axes.comboBoxXScale.isEnabled())
-        # self.axes.labelYScale.setEnabled(self.axes.comboBoxYScale.isEnabled())
-        # self.axes.labelZScale.setEnabled(self.axes.comboBoxZScale.isEnabled())
-        # self.axes.labelXLabel.setEnabled(self.axes.lineEditXLabel.isEnabled())
-        # self.axes.labelYLabel.setEnabled(self.axes.lineEditYLabel.isEnabled())
-        # self.axes.labelZLabel.setEnabled(self.axes.lineEditZLabel.isEnabled())
-        self.axes.toolButtonXAxisReset.setEnabled(self.axes.lineEditXLB.isEnabled()) 
-        self.axes.toolButtonYAxisReset.setEnabled(self.axes.lineEditYLB.isEnabled()) 
-        self.axes.toolButtonZAxisReset.setEnabled(self.axes.lineEditZLB.isEnabled()) 
-
-
+        self.ui.schedule_update()
 
     def axis_label_edit_callback(self, ax, new_label):
         """Updates axis label in dictionaries from widget

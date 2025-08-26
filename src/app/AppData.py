@@ -181,6 +181,7 @@ class AppData(Observable):
         super().__init__()
 
         self.logger_key = 'Data'
+        self.ui = parent
 
         self.default_preferences = {
             'Units':{
@@ -385,7 +386,14 @@ class AppData(Observable):
         self.updating_cluster_table_flag = False
         self.update_pca_flag = False
 
-        self.axis = ['x','y','z','c']
+        self._x_field_type = None
+        self._y_field_type = None
+        self._z_field_type = None
+        self._c_field_type = None
+        self._x_field = None
+        self._y_field = None
+        self._z_field = None
+        self._c_field = None
         
         # create ternary colors dictionary
         df = pd.read_csv(STYLE_PATH / "ternary_colormaps.csv")
@@ -434,7 +442,7 @@ class AppData(Observable):
         ------
         ValueError if the axis index is invalid.
         """
-        setattr(self, f"{self.axis[ax]}_field", value)
+        setattr(self, f"{ax}_field", value)
 
     def get_field_type(self, ax):
         """
@@ -1216,23 +1224,29 @@ class AppData(Observable):
         
         return field_list
     
-    def get_field_type_list(self,ax, style_data):
+    def get_field_type_list(self, ax, style_data):
         """Updates the field type options in the UI
         
         This method updates the field type options in the UI based on the currently selected sample.
         It retrieves the field types for the selected sample and updates the UI accordingly.
+
+        Parameters
+        ----------
+        ax : str
+            Axis from ['x', 'y', 'z', 'c'].
+        style_data : dict
+
         """
         if self.sample_id == '':
             return
         
-        plot_type = style_data.plot_type
-        plot_dict = style_data.plot_axis_dict[plot_type]
+        plot_dict = style_data.plot_axis_dict[style_data.plot_type]
         field_dict = self.field_dict
 
         new_list = []
 
         # check if the list should include all options, global_list == True
-        if ax == 3 and 'cfield_type' in plot_dict:
+        if ax == 'c' and 'cfield_type' in plot_dict:
             # set the list based on style_data.plot_type and available field types
             new_list = [key for key in field_dict if key in plot_dict['cfield_type']]
         elif 'field_type' in plot_dict:

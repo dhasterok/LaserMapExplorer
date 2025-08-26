@@ -484,7 +484,7 @@ def plot_histogram(parent, data, app_data, style_data):
         x = get_scatter_data(data, app_data, style_data, processed=True)['x']
 
     # determine edges
-    xmin,xmax,xscale,xlbl = style_data.get_axis_values(data, x['type'],x['field'])
+    xmin,xmax,xscale,xlbl = style_data.get_axis_values(data, x['field'])
     style_data.xlim = [xmin, xmax]
     style_data.xscale = xscale
     #if xscale == 'log':
@@ -651,7 +651,7 @@ def plot_histogram(parent, data, app_data, style_data):
             style_data.set_axis_attributes('y', x['field'])
 
         # grab probablility axes limits
-        _, _, _, _, ymin, ymax = style_data.get_axis_values(data, x['type'],x['field'],ax='p')
+        _, _, _, _, ymin, ymax = style_data.get_axis_values(data, x['field'],ax='p')
 
         # x-axis
         canvas.axes.set_xlabel(xlbl, fontdict=font)
@@ -1259,8 +1259,8 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
         
 
     # axes
-    xmin, xmax, xscale, xlbl = style_data.get_axis_values(data, x['type'],x['field'])
-    ymin, ymax, yscale, ylbl = style_data.get_axis_values(data, y['type'],y['field'])
+    xmin, xmax, xscale, xlbl = style_data.get_axis_values(data, x['field'])
+    ymin, ymax, yscale, ylbl = style_data.get_axis_values(data, y['field'])
 
     # labels
     font = {'size':style_data.font_size}
@@ -1461,8 +1461,8 @@ def hist2dbiplot(canvas, data, app_data, style_data, x, y):
     add_colorbar(style_data, canvas, h[3])
 
     # axes
-    xmin, xmax, xscale, xlbl = style_data.get_axis_values(data, x['type'],x['field'])
-    ymin, ymax, yscale, ylbl = style_data.get_axis_values(data, y['type'],y['field'])
+    xmin, xmax, xscale, xlbl = style_data.get_axis_values(data, x['field'])
+    ymin, ymax, yscale, ylbl = style_data.get_axis_values(data, y['field'])
 
     # labels
     font = {'size':style_data.font_size}

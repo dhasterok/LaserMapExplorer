@@ -2,7 +2,6 @@ import re, copy, pickle
 from pathlib import Path
 from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
-from pyqtgraph import colormap
 import src.common.format as fmt
 import numpy as np
 import pandas as pd
@@ -12,6 +11,7 @@ from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import STYLE_PATH
+from src.app.PlotAxisSettings import plot_axis_dict
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods, log
 
@@ -502,7 +502,9 @@ class StyleData(Observable, StyleTheme):
         self.tick_dir_options = ['none', 'in', 'out', 'both']
         self.cbar_dir_options = ['none', 'vertical', 'horizontal']
 
-        self.default_plot_axis_dict()
+        #self.default_plot_axis_dict()
+        self.axis_settings = plot_axis_dict
+
 
         self.style_dict = self.default_style_dict()
 
@@ -541,128 +543,6 @@ class StyleData(Observable, StyleTheme):
         self._plot_type = value
         self.notify_observers("plot_type", value)
 
-
-    @property
-    def x_field_type(self):
-        """str : Field type for x field."""
-        return self._x_field_type
-
-    @x_field_type.setter
-    def x_field_type(self, new_field_type):
-        if new_field_type != self._x_field_type:
-            #self.validate_field_type(new_field_type)
-            self._x_field_type = new_field_type
-            self.notify_observers("field_type", 0, new_field_type)
-
-
-
-    @property
-    def y_field_type(self):
-        """str : Field type for y field."""
-        return self.style_dict[self.plot_type]['YFieldType']
-
-    @y_field_type.setter
-    def y_field_type(self, new_field_type):
-        if new_field_type != self.style_dict[self.plot_type]:
-            self.style_dict[self.plot_type]['YFieldType'] = new_field_type
-            self.notify_observers("field_type", 1, new_field_type)
-
-    @property
-    def z_field_type(self):
-        """str : Field type for z field."""
-        return self.style_dict[self.plot_type]['ZFieldType']
-
-    @z_field_type.setter
-    def z_field_type(self, new_field_type):
-        if new_field_type != self.style_dict[self.plot_type]['ZFieldType']:
-            #self.validate_field_type(new_field_type)
-            self.style_dict[self.plot_type]['ZFieldType'] = new_field_type
-            self.notify_observers("field_type", 2, new_field_type)
-
-    @property
-    def c_field_type(self):
-        """str : Field type for color field or map data."""
-        return self._c_field_type
-    
-    @c_field_type.setter
-    def c_field_type(self, new_field_type):
-        if new_field_type == self.style_dict[self.plot_type]['CFieldType']:
-            return
-
-        # update c_field_type
-        #self.validate_field_type(new_field_type)
-        self._c_field_type = new_field_type
-        self.notify_observers("field_type", 3, new_field_type)
-
-        # update c_field
-        if new_field_type in ['', 'none', 'None']:
-            self.c_field = ''
-        else:
-            self.c_field = self.ui.app_data.field_dict[new_field_type][0]
-
-
-    @property
-    def x_field(self):
-        """str : Field associated with x-axis or A-vertex on a ternary diagram."""
-        return self.style_dict[self.plot_type]['XField']
-    
-    @x_field.setter
-    def x_field(self, new_field):
-        if new_field == self.style_dict[self.plot_type]['XField']:
-            return
-    
-        self.style_dict[self.plot_type]['XField'] = new_field
-        self.notify_observers("field", 0, new_field)
-    
-    @property
-    def y_field(self):
-        """str : Field associated with y-axis or B-vertex on a ternary diagram."""
-        return self.style_dict[self.plot_type]['YField']
-    
-    @y_field.setter
-    def y_field(self, new_field):
-        if new_field == self.style_dict[self.plot_type]['YField']:
-            return
-    
-        self.style_dict[self.plot_type]['YField'] = new_field
-        self.notify_observers("field", 1, new_field)
-    
-    @property
-    def z_field(self):
-        """str : Field associated with z-axis or C-vertex on a ternary diagram."""
-        return self.style_dict[self.plot_type]['ZField']
-    
-    @z_field.setter
-    def z_field(self, new_field):
-        if new_field == self.style_dict[self.plot_type]['ZField']:
-            return
-    
-        self.style_dict[self.plot_type]['ZField'] = new_field
-        self.notify_observers("field", 2, new_field)
-
-    @property
-    def c_field(self):
-        """str : Field associated with color on many plots."""
-        return self.style_dict[self.plot_type]['CField']
-
-    @c_field.setter
-    def c_field(self, new_field):
-        if new_field == self.style_dict[self.plot_type]['CField']:
-            return
-
-        #self.validate_field(self._c_field_type, new_field)
-        self._c_field = new_field
-        self.notify_observers("field", 3, new_field)
-
-    @property
-    def xfield_type(self):
-        return self.style_dict[self.plot_type]['XFieldType']
-
-    @xfield_type.setter
-    def xfield_type(self, value):
-        self.style_dict[self.plot_type]['XFieldType'] = value
-        self.notify_observers("xfield_type", value)
-    
     @property
     def xlim(self):
         return self.style_dict[self.plot_type]['XLim']
@@ -1138,22 +1018,22 @@ class StyleData(Observable, StyleTheme):
         self.notify_observers("ternary_color_m", new_color)
 
     def get_axis_label(self, ax):
-        return getattr(self, f"{self.ui.app_data.axis[ax]}label")
+        return getattr(self, f"{ax}label")
 
     def set_axis_label(self, ax, new_label):
-        setattr(self, f"{self.ui.app_data.axis[ax]}label", new_label)
+        setattr(self, f"{ax}label", new_label)
 
     def get_axis_lim(self, ax):
-        return getattr(self, f"{self.ui.app_data.axis[ax]}lim")
+        return getattr(self, f"{ax}lim")
 
     def set_axis_lim(self, ax, new_lim):
-        setattr(self.ui.style_data, f"{self.ui.app_data.axis[ax]}lim", new_lim)
+        setattr(self.ui.style_data, f"{ax}lim", new_lim)
 
     def get_axis_scale(self, ax):
-        return getattr(self, f"{self.ui.app_data.axis[ax]}scale")
+        return getattr(self, f"{ax}scale")
 
     def set_axis_scale(self, ax, new_scale):
-        setattr(self, f"{self.ui.app_data.axis[ax]}scale", new_scale)
+        setattr(self, f"{ax}scale", new_scale)
 
     def toggle_mass(self, labels):
         """Removes mass from labels
@@ -1401,8 +1281,8 @@ class StyleData(Observable, StyleTheme):
                 
         if plot_type.lower() in self.map_plot_types:
             
-            xmin,xmax,xscale,_ = self.get_axis_values(data,'Analyte','Xc')
-            ymin,ymax,yscale,_ = self.get_axis_values(data,'Analyte','Yc')
+            xmin,xmax,xscale,_ = self.get_axis_values(data,'Xc')
+            ymin,ymax,yscale,_ = self.get_axis_values(data,'Yc')
 
             # set style dictionary values for X and Y
             # set style dictionary values for X and Y
@@ -1410,11 +1290,13 @@ class StyleData(Observable, StyleTheme):
             self.xlabel = 'X'
             style['XFieldType'] = 'Coordinate'
             style['XField'] = 'Xc'
+            self.xscale = xscale
 
             self.ylim = [ymin, ymax]
             self.ylabel = 'Y'
             style['YFieldType'] = 'Coordinate'
             style['YField'] = 'Yc'
+            self.yscale = yscale
 
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
@@ -1422,10 +1304,8 @@ class StyleData(Observable, StyleTheme):
             for ax_number, exist in enumerate(self.plot_axis_dict[plot_type]['axis_widgets']):
                 ax = axis_list[ax_number]
                 if exist and (ax is not 'c'):
-    
                     field = getattr(self.app_data,f'{ax}_field')
-                    self.set_axis_attributes(ax, field )
-
+                    self.set_axis_attributes(ax, field)
 
             self.scale_length = None
 
@@ -1441,7 +1321,7 @@ class StyleData(Observable, StyleTheme):
         else:
             style['CScale'] = 'linear'
 
-    def get_axis_values(self, data, field_type, field, ax=None):
+    def get_axis_values(self, data, field, ax=None):
         """Gets axis values
 
         Returns the axis parameters *field_type* > *field* for plotting, including the minimum and maximum vales,
@@ -1450,8 +1330,6 @@ class StyleData(Observable, StyleTheme):
 
         Parameters
         ----------
-        field_type : str
-            Field type of axis data
         field : str
             Field name of axis data
         ax : str, optional
@@ -1718,4 +1596,3 @@ class StyleData(Observable, StyleTheme):
     def print_properties(self):
         for attr, value in vars(self).items():
             log(f"{attr}: {value}", prefix="DEBUG")
-

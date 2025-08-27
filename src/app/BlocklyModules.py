@@ -24,7 +24,8 @@ from src.common.scalebar import scalebar
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict
 from src.common.LamePlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot, update_figure_font
-from src.app.FieldLogic import AnalyteDialog, FieldDialog
+from src.app.FieldLogic import AnalyteDialog
+from src.app.FieldDialog import FieldDialog
 from src.app.DataAnalysis import Clustering, DimensionalReduction
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.CustomMplCanvas as mplc

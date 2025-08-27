@@ -23,13 +23,13 @@ class PlotTree(CustomDockWidget):
         self.ui = parent
 
         #create plot tree
-        self.setupUI()
+        self.setup_ui()
         self.connect_logger()
         self.initialize_tree()
 
         self.show()
 
-    def setupUI(self):
+    def setup_ui(self):
         font = default_font()
 
         self.setFloating(True)

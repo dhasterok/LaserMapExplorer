@@ -25,7 +25,8 @@ from src.common.LamePlot import (
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
-from src.app.FieldLogic import ControlDock, AnalyteDialog, FieldDialog
+from src.app.FieldLogic import ControlDock, AnalyteDialog
+from src.app.FieldDialog import FieldDialog
 from src.app.StylingUI import StylingDock
 from src.app.LameStatusBar import MainStatusBar
 from src.common.TableFunctions import TableFcn as TableFcn

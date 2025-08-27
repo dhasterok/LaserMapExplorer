@@ -1,5 +1,6 @@
 import os, re
 from pathlib import Path
+from dataclasses import dataclass
 from PyQt6.QtCore import ( Qt, pyqtSignal, QObject, QEvent, QSize )
 from PyQt6.QtWidgets import (
     QMessageBox, QTableWidget, QDialog, QTableWidgetItem, QLabel, QComboBox,
@@ -11,7 +12,6 @@ from PyQt6.QtGui import ( QImage, QColor, QFont, QPixmap, QPainter, QBrush, QIco
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
 from src.ui.FieldSelectionDialog import Ui_FieldDialog
 from src.app.config import BASEDIR, ICONPATH, RESOURCE_PATH
-from src.app.PlotAxisSettings import plot_axis_dict
 from src.common.ExtendedDF import AttributeDataFrame
 from src.common.CustomWidgets import CustomDockWidget, CustomPage, RotatedHeaderView, CustomComboBox, CustomToolBox
 from src.app.Preprocessing import PreprocessingUI
@@ -22,31 +22,61 @@ from src.app.SpotTools import SpotPage
 from src.app.SpecialTools import SpecialPage
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 from src.common.LamePlot import plot_clusters
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .MainWindow import MainWindow
+
+@dataclass
+class AxisSettings:
+    """Axis-specific settings for plots.
+
+    This class stores settings that control the state of a single plot axis,
+    including its label, saved field type, saved field, and whether the axis
+    allows a 'None' option.
+
+    Attributes
+    ----------
+    label : str
+        Label text associated with this axis (e.g., "X", "Y", "Z", "Color").
+    saved_field_type : str or None
+        The last selected field type for this axis. ``None`` if not yet set.
+    saved_field : str or None
+        The last selected field value for this axis. ``None`` if not yet set.
+    add_none : bool
+        Whether to include a 'None' option for this axis in the UI.
+    """
+    label: str = ''
+    field_type: str | None = None
+    field: str | None = None
 
 class ControlDock(CustomDockWidget):
-    def __init__(self, ui=None):
+    def __init__(self, ui: "MainWindow"):
         super().__init__(parent=ui)
         self.setWindowTitle("Control Toolbox")
-
-        if not isinstance(ui, QMainWindow):
-            raise TypeError("Parent must be an instance of QMainWindow.")
 
         self.ui = ui
 
         self.setupUI()
 
         self.tab_dict = {}
+        self.field_control_settings = {}
         self.reindex_tab_dict()
 
         self.connect_widgets()
         self.connect_observers()
         self.connect_logger()
 
+        # self.axis_widget_dict = {
+        #     'label': [self.labelX, self.labelY, self.labelZ, self.labelC],
+        #     'parentbox': [self.comboBoxFieldTypeX, self.comboBoxFieldTypeY, self.comboBoxFieldTypeZ, self.comboBoxFieldTypeC],
+        #     'childbox': [self.comboBoxFieldX, self.comboBoxFieldY, self.comboBoxFieldZ, self.comboBoxFieldC],
+        #     'spinbox': [self.spinBoxFieldX, self.spinBoxFieldY, self.spinBoxFieldZ, self.spinBoxFieldC],
+        # }
         self.axis_widget_dict = {
-            'label': [self.labelX, self.labelY, self.labelZ, self.labelC],
-            'parentbox': [self.comboBoxFieldTypeX, self.comboBoxFieldTypeY, self.comboBoxFieldTypeZ, self.comboBoxFieldTypeC],
-            'childbox': [self.comboBoxFieldX, self.comboBoxFieldY, self.comboBoxFieldZ, self.comboBoxFieldC],
-            'spinbox': [self.spinBoxFieldX, self.spinBoxFieldY, self.spinBoxFieldZ, self.spinBoxFieldC],
+            'x': {'label': self.labelX, 'parentbox': self.comboBoxFieldTypeX, 'childbox': self.comboBoxFieldX, 'spinbox': self.spinBoxFieldX},
+            'y': {'label': self.labelY, 'parentbox': self.comboBoxFieldTypeY, 'childbox': self.comboBoxFieldY, 'spinbox': self.spinBoxFieldY},
+            'z': {'label': self.labelZ, 'parentbox': self.comboBoxFieldTypeZ, 'childbox': self.comboBoxFieldZ, 'spinbox': self.spinBoxFieldZ},
+            'c': {'label': self.labelC, 'parentbox': self.comboBoxFieldTypeC, 'childbox': self.comboBoxFieldC, 'spinbox': self.spinBoxFieldC},
         }
 
     def setupUI(self):
@@ -389,110 +419,102 @@ class ControlDock(CustomDockWidget):
         can be easily referenced by name.  At the same time, the dictionary ``self.field_control_settings`` retains the plot
         types available to each page of the control toolbox and the override options when polygons or profiles
         are active."""
-        # create diciontary for left tabs
-        self.tab_dict = {}
-        self.tab_dict.update({'spot': None})
-        self.tab_dict.update({'special': None})
+        # Create dictionary for left tabs
+        self.tab_dict = {'spot': None, 'special': None}
 
-        # create dictionaries for default plot styles
+        # Create default field control settings
         self.field_control_settings = {
-            -1: {'saved_index': 0,
-            'plot_list': ['field map'],
-            'label': ['','','','Map'],
-            'saved_field_type': [None, None, None, None],
-            'saved_field': [None, None, None, None]}
-        } # -1 is for digitizing polygons and profiles
+            -1: {  # -1 is for digitizing polygons and profiles
+                'saved_index': 0,
+                'plot_list': ['field map'],
+                'axes': {
+                    'x': AxisSettings(),
+                    'y': AxisSettings(),
+                    'z': AxisSettings(),
+                    'c': AxisSettings(label='Map')
+                }
+            }
+        }
 
-        for tid in range(0,self.toolbox.count()):
-            match self.toolbox.itemText(tid).lower():
+        for tid in range(self.toolbox.count()):
+            tab_name = self.toolbox.itemText(tid).lower()
+            match tab_name:
                 case 'preprocess':
-                    self.tab_dict.update({'process': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['process']: {
-                            'saved_index': 0,
-                            'plot_list': ['field map', 'gradient map'],
-                            'label': ['','','','Map'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['process'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['field map', 'gradient map'],
+                        'axes': {ax: AxisSettings() for ax in ['x','y','z','c']}
+                    }
                 case 'field viewer':
-                    self.tab_dict.update({'sample': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['sample']: {
-                            'saved_index': 0,
-                            'plot_list': ['field map', 'histogram', 'correlation'],
-                            'label': ['','','','Map'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['sample'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['field map', 'histogram', 'correlation'],
+                        'axes': {ax: AxisSettings() for ax in ['x','y','z','c']}
+                    }
                 case 'spot data':
-                    self.tab_dict.update({'spot': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['spot']: {
-                            'saved_index': 0,
-                            'plot_list': ['field map', 'gradient map'],
-                            'label': ['','','','Map'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]}
-                        }
-                    )
+                    self.tab_dict['spot'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['field map', 'gradient map'],
+                        'axes': {ax: AxisSettings() for ax in ['x','y','z','c']}
+                    }
                 case 'scatter and heatmaps':
-                    self.tab_dict.update({'scatter': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['scatter']: {
-                            'saved_index': 0,
-                            'plot_list': ['scatter', 'heatmap', 'ternary map'],
-                            'label': ['X','Y','Z','Color'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['scatter'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['scatter', 'heatmap', 'ternary map'],
+                        'axes': {
+                            'x': AxisSettings(label='X'),
+                            'y': AxisSettings(label='Y'),
+                            'z': AxisSettings(label='Z'),
+                            'c': AxisSettings(label='Color')
+                        }
+                    }
                 case 'n-dimensional':
-                    self.tab_dict.update({'ndim': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['ndim']: {
-                            'saved_index': 0,
-                            'plot_list': ['TEC', 'Radar'],
-                            'label': ['','','','Color'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['ndim'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['TEC', 'Radar'],
+                        'axes': {
+                            'x': AxisSettings(),
+                            'y': AxisSettings(),
+                            'z': AxisSettings(),
+                            'c': AxisSettings(label='Color')
+                        }
+                    }
                 case 'dimensional reduction':
-                    self.tab_dict.update({'dim_red': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['dim_red']: {
-                            'saved_index': 0,
-                            'plot_list': ['variance','basis vectors','dimension scatter','dimension heatmap','dimension score map'],
-                            'label': ['PC','PC','','Color'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['dim_red'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['variance','basis vectors','dimension scatter','dimension heatmap','dimension score map'],
+                        'axes': {
+                            'x': AxisSettings(label='PC'),
+                            'y': AxisSettings(label='PC'),
+                            'z': AxisSettings(),
+                            'c': AxisSettings(label='Color')
+                        }
+                    }
                 case 'clustering':
-                    self.tab_dict.update({'cluster': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['cluster']: {
-                            'saved_index': 0,
-                            'plot_list': ['cluster map', 'cluster score map', 'cluster performance'],
-                            'label': ['','','',''],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['cluster'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['cluster map', 'cluster score map', 'cluster performance'],
+                        'axes': {ax: AxisSettings() for ax in ['x','y','z','c']}
+                    }
                 case 'p-t-t functions':
-                    self.tab_dict.update({'special': tid})
-                    self.field_control_settings.update(
-                        {self.tab_dict['special']: {
-                            'saved_index': 0,
-                            'plot_list': ['field map', 'gradient map', 'cluster score map', 'dimension score map', 'profile'],
-                            'label': ['','','','Map'],
-                            'saved_field_type': [None, None, None, None],
-                            'saved_field': [None, None, None, None]
-                        }}
-                    )
+                    self.tab_dict['special'] = tid
+                    self.field_control_settings[tid] = {
+                        'saved_index': 0,
+                        'plot_list': ['field map', 'gradient map', 'cluster score map', 'dimension score map', 'profile'],
+                        'axes': {
+                            'x': AxisSettings(),
+                            'y': AxisSettings(),
+                            'z': AxisSettings(),
+                            'c': AxisSettings(label='Map')
+                        }
+                    }
 
     def toolbox_changed(self, tab_id=None):
         """Updates styles associated with toolbox page
@@ -513,7 +535,7 @@ class ControlDock(CustomDockWidget):
             plot_clusters(self,data,self.ui.app_data,self.ui.style_data)
         # run dim red before changing plot_type if user selects dim red tab
         if tab_id == self.tab_dict['dim_red'] :
-            if self.ui.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+            if self.ui.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
                 self.dimreduction.compute_dim_red(data, self.ui.app_data)
         # update the plot type comboBox options
         self.update_plot_type_combobox_options()
@@ -567,6 +589,8 @@ class ControlDock(CustomDockWidget):
         else:
             self.ui.style_data.plot_type = self.comboBoxPlotType.currentText()
 
+        plot_type = self.ui.style_data.plot_type
+
         # update ui
         match self.ui.style_data.plot_type.lower():
             case 'field map' | 'gradient map':
@@ -582,23 +606,24 @@ class ControlDock(CustomDockWidget):
             case _:
                 self.ui.lame_action.SwapAxes.setEnabled(False)
 
-        self.init_field_widgets(self.ui.style_data.plot_axis_dict, self.axis_widget_dict, plot_type=self.ui.style_data.plot_type)
+        self.init_field_widgets(self.ui.style_data.axis_settings, plot_type=plot_type)
 
         # update field widgets
         self.update_field_widgets()
 
         self.ui.plot_flag = False
         # update all plot widgets
-        for ax in ['x', 'y', 'z', 'c']:
-            if self.ui.style_data.plot_axis_dict[self.ui.style_data.plot_type].axis[ax]:
-                self.update_field(ax, self.axis_widget_dict['childbox'][ax].currentText())
-                self.update_field_type(ax, self.axis_widget_dict['parentbox'][ax].currentText())
+        axis_settings = self.ui.style_data.axis_settings[plot_type].axes
+        for ax, settings in axis_settings.items():
+            if settings.enabled:
+                self.update_field(ax, self.axis_widget_dict[ax]['childbox'].currentText())
+                self.update_field_type(ax, self.axis_widget_dict[ax]['parentbox'].currentText())
         self.ui.plot_flag = True
 
         if self.ui.style_data.plot_type != '':
             self.ui.schedule_update()
 
-    def init_field_widgets(self, plot_axis_dict, widget_dict, plot_type=None):
+    def init_field_widgets(self, axis_settings, plot_type=None):
         """
         Initializes widgets associated with axes for plotting
 
@@ -607,39 +632,35 @@ class ControlDock(CustomDockWidget):
 
         Parameters
         ----------
-        widget_dict : dict
-            Dictionary with field associated widgets and properties
-        
-        :see also: self.axis_widget_dict
+        axis_settings : dict
+            Dictionary with axes settings for axes widgets
+        plot_type : str, Optional
+            Plot type, by default None
         """
         if plot_type is None:
-            setting = plot_axis_dict[self.ui.style_data.plot_type]
-        else:
-            setting = plot_axis_dict[plot_type]
+            plot_type = self.ui.style_data.plot_type
+
+        axis_settings = axis_settings[plot_type].axes
 
         # enable and set visibility of widgets
-        widget_dict = self.axis_widget_dict
-        for ax in range(4):
-            label = widget_dict['label'][ax]
-            parentbox = widget_dict['parentbox'][ax]
-            childbox = widget_dict['childbox'][ax]
-            spinbox = widget_dict['spinbox'][ax]
+        for ax, setting in axis_settings.items():
+            widget_dict = self.axis_widget_dict[ax]
+            label, parentbox, childbox, spinbox = (
+                widget_dict[k] for k in ['label', 'parentbox', 'childbox', 'spinbox']
+            )
 
             # set field label text
-            label.setEnabled(setting['axis'][ax])
-            label.setVisible(setting['axis'][ax])
+            label.setEnabled(setting.enabled)
+            label.setVisible(setting.enabled)
 
             # set parent and child comboboxes
-            parentbox.setEnabled(setting['axis'][ax])
-            parentbox.setVisible(setting['axis'][ax])
-
-            childbox.setEnabled(setting['axis'][ax])
-            childbox.setVisible(setting['axis'][ax])
+            parentbox.setActive(setting.enabled)
+            childbox.setActive(setting.enabled)
 
             # set field spinboxes
             if spinbox is not None:
-                spinbox.setEnabled(setting['spinbox'][ax])
-                spinbox.setVisible(setting['spinbox'][ax])
+                spinbox.setEnabled(setting.spinbox)
+                spinbox.setVisible(setting.spinbox)
 
     def update_field_widgets(self):
         """Updates field widgets with saved settings
@@ -659,20 +680,22 @@ class ControlDock(CustomDockWidget):
             flag = True
             self.ui.plot_flag = False
 
-        widget_dict = self.axis_widget_dict
-        setting = self.field_control_settings[idx]
-        for ax in range(4):
-            widget_dict['label'][ax].setText(setting['label'][ax])
+        control_setting = self.field_control_settings[idx]
+        for ax, widget_dict in self.axis_widget_dict.items():
+            setting = control_setting['axes'][ax]
 
-            if setting['saved_field_type'][ax] is not None:
-                self.ui.app_data.set_field_type(ax, setting['save_field_type'][ax])
+            label, parentbox, childbox, spinbox = (
+                widget_dict[k] for k in ['label', 'parentbox', 'childbox', 'spinbox']
+            )
+            label.setText(setting.label)
+
+            if setting.field_type is not None:
+                self.ui.app_data.set_field_type(ax, setting.field_type)
             else:
-                parentbox = widget_dict['parentbox'][ax]
-                childbox = widget_dict['childbox'][ax]
                 self.update_field_type_combobox_options(parentbox, childbox, ax=ax)
 
-            if setting['saved_field'][ax] is not None:
-                self.ui.app_data.set_field(ax, setting['save_field'][ax])
+            if setting.field is not None:
+                self.ui.app_data.set_field(ax, setting.field)
 
         if flag:
             self.ui.plot_flag = True
@@ -831,12 +854,12 @@ class ControlDock(CustomDockWidget):
             New field type value for axis to update ``app_data`` or combobox, by default None
         """
         # only update field if the axis is enabled 
-        if not self.ui.style_data.plot_axis_dict[self.ui.style_data.plot_type]['axis'][ax]:
+        if not self.ui.style_data.axis_settings[self.ui.style_data.plot_type].axes[ax].enabled:
             return
 
-        parentbox = self.axis_widget_dict['parentbox'][ax]
-        childbox = self.axis_widget_dict['childbox'][ax]
-        spinbox = self.axis_widget_dict['spinbox'][ax]
+        label, parentbox, childbox, spinbox = (
+            self.axis_widget_dict[ax][k] for k in ['label', 'parentbox', 'childbox', 'spinbox']
+        )
 
         current_type = parentbox.currentText() if field_type is None else field_type
         if current_type in ['None', 'none', None]:
@@ -876,15 +899,15 @@ class ControlDock(CustomDockWidget):
             New field value for axis to update ``app_data`` or combobox, by default None
         """
         # only update field if the axis is enabled 
-        if not self.ui.style_data.plot_axis_dict[self.ui.style_data.plot_type]['axis'][ax]:
+        if not self.ui.style_data.axis_settings[self.ui.style_data.plot_type].axes[ax].enabled:
             return
-            #self.set_axis_lim(ax, [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')])
-            #self.set_axis_label(ax, data.processed_data.get_attribute(field,'label'])
-            #self.set_axis_scale(ax, data.processed_data.get_attribute(field,'norm'])
+            #self.set_axis_lim(ax, [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')])
+            #self.set_axis_label(ax, data.processed.get_attribute(field,'label'])
+            #self.set_axis_scale(ax, data.processed.get_attribute(field,'norm'])
 
-        parentbox = self.axis_widget_dict['parentbox'][ax]
-        childbox = self.axis_widget_dict['childbox'][ax]
-        spinbox = self.axis_widget_dict['spinbox'][ax]
+        label, parentbox, childbox, spinbox = (
+            self.axis_widget_dict[ax][k] for k in ['label', 'parentbox', 'childbox', 'spinbox']
+        )
 
         if parentbox.currentText() in ['None', 'none', None]:
             childbox.blockSignals(True)
@@ -916,32 +939,32 @@ class ControlDock(CustomDockWidget):
             spinbox.setValue(childbox.currentIndex())
 
         # update autoscale widgets
-        if ax == 3 and self.toolbox.currentIndex() == self.tab_dict['process']:
+        if ax == 'c' and self.toolbox.currentIndex() == self.tab_dict['process']:
             self.ui.update_autoscale_widgets(self.ui.app_data.get_field(ax), self.ui.app_data.get_field_type(ax))
 
         if field not in [None, '','none','None']:
             data = self.ui.app_data.current_data
 
             # update bin width for histograms
-            if ax == 0 and self.ui.style_data.plot_type == 'histogram':
+            if ax == 'x' and self.ui.style_data.plot_type == 'histogram':
                 # update hist_bin_width
                 self.ui.app_data.update_num_bins = False
                 self.ui.app_data.update_hist_bin_width()
                 self.ui.app_data.update_num_bins = True
 
             # initialize color widgets
-            if ax == 3:
+            if ax == 'c':
                 self.ui.style_dock.set_color_axis_widgets()
 
             # update axes properties
-            if ax == 3 and self.ui.style_data.plot_type not in ['correlation']:
-                self.ui.style_data.clim = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
-                self.ui.style_data.clabel = data.processed_data.get_attribute(field,'label')
-                self.ui.style_data.cscale = data.processed_data.get_attribute(field,'norm')
+            if ax == 'c' and self.ui.style_data.plot_type not in ['correlation']:
+                self.ui.style_data.clim = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
+                self.ui.style_data.clabel = data.processed.get_attribute(field,'label')
+                self.ui.style_data.cscale = data.processed.get_attribute(field,'norm')
             elif self.ui.style_data.plot_type not in []:
-                self.ui.style_data.set_axis_lim(ax, [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')])
-                self.ui.style_data.set_axis_label(ax, data.processed_data.get_attribute(field,'label'))
-                self.ui.style_data.set_axis_scale(ax, data.processed_data.get_attribute(field,'norm'))
+                self.ui.style_data.set_axis_lim(ax, [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')])
+                self.ui.style_data.set_axis_label(ax, data.processed.get_attribute(field,'label'))
+                self.ui.style_data.set_axis_scale(ax, data.processed.get_attribute(field,'norm'))
 
         else:
             self.ui.style_data.clabel = ''
@@ -987,8 +1010,8 @@ class ControlDock(CustomDockWidget):
         ax : str
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         """
-        spinbox = self.axis_widget_dict['spinbox'][ax]
-        childbox = self.axis_widget_dict['childbox'][ax]
+        spinbox = self.axis_widget_dict[ax]['spinbox']
+        childbox = self.axis_widget_dict[ax]['childbox']
 
         spinbox.blockSignals(True)
         if spinbox.value() != childbox.currentIndex():
@@ -1018,13 +1041,13 @@ class ControlDock(CustomDockWidget):
             
             # loop through normalized ratios and enable/disable ratios based
             # on the new reference's analytes
-            if self.app_data.sample_id == '':
+            if self.ui.app_data.sample_id == '':
                 return
 
             tree = 'Ratio (normalized)'
-            branch = self.app_data.sample_id
-            for ratio in self.data[branch].processed_data.match_attribute('data_type','Ratio'):
-                item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
+            branch = self.ui.app_data.sample_id
+            for ratio in self.ui.data[branch].processed.match_attribute('data_type','Ratio'):
+                item, check = self.ui.plot_tree.find_leaf(tree, branch, leaf=ratio)
                 if item is None:
                     raise TypeError(f"Missing item ({ratio}) in plot_tree.")
                 analyte_1, analyte_2 = ratio.split(' / ')
@@ -1132,7 +1155,7 @@ class FieldLogicUI():
         plot_type : str
             The plot type helps to define the set of field types available, by default ``''`` (no change)
         """
-        data_type_dict = self.data.processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data.processed.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
@@ -1272,7 +1295,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         if sample_id is None or sample_id == '':
             return
 
-        self.data = parent.data[sample_id].processed_data
+        self.data = parent.data[sample_id].processed
 
         self.norm_dict = {}
 
@@ -1693,7 +1716,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         if not self.default_dir:
             return
 
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", self.default_dir, "Text Files (*.txt);;All Files (*)")
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save File", str(self.default_dir), "Text Files (*.txt);;All Files (*)")
         if file_name:
             file_path = Path(file_name)
             with file_path.open('w') as f:
@@ -1714,7 +1737,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
     def load_selection(self):
         """Loads a saved analyte (and ratio) list and fill the analyte table"""
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", self.default_dir, "Text Files (*.txt);;All Files (*)")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", str(self.default_dir), "Text Files (*.txt);;All Files (*)")
         if file_name:
             file_path = Path(file_name)
             self.clear_selections()
@@ -1897,9 +1920,9 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         if not getattr(parent, 'sample_id', None):
             return
         self.parent = parent
+
         # Store the reference to BASEDIR from parent (if needed).
-        self.default_dir = os.path.join(parent.BASEDIR, "resources", "field_list") \
-                           if hasattr(parent, "BASEDIR") else os.getcwd()
+        self.default_dir = (RESOURCE_PATH / "field_list") if hasattr(parent, "RESOURCE_PATH") else Path.cwd()
 
         # Initialize fields dictionary: { field_type: [field1, field2, ...], ... }
         # You might already have this dictionary in your class.
@@ -2048,15 +2071,18 @@ class FieldDialog(QDialog, Ui_FieldDialog):
         (You can change the delimiter to anything else you prefer.)
         """
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Load Field List", self.default_dir,
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Load Field List", str(self.default_dir),
             "Text Files (*.txt);;All Files (*)", options=options
         )
-        if not file_name:
+
+        if not file_path:
             return
 
+        file_path = Path(file_path)
         loaded_fields = []
-        with open(file_name, 'r', encoding='utf-8') as file:
+
+        with file_path.open('r', encoding='utf-8') as file:
             for line in file:
                 line = line.strip()
                 if not line:
@@ -2065,15 +2091,11 @@ class FieldDialog(QDialog, Ui_FieldDialog):
                 if ',' in line:
                     f_type, f_name = line.split(',', 1)
                     loaded_fields.append((f_type, f_name))
-                else:
-                    # If the file doesn't have the correct format,
-                    # you could handle it here or skip.
-                    pass
 
         self.selected_fields = loaded_fields
         self.update_table()
 
-        self.filename = os.path.basename(file_name)
+        self.filename = file_path.name  # replaces os.path.basename
         self.unsaved_changes = False
         self.update_window_title()
 
@@ -2094,19 +2116,21 @@ class FieldDialog(QDialog, Ui_FieldDialog):
             return
 
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getSaveFileName(
-            self, "Save Field List", self.default_dir,
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save Field List", str(self.default_dir),
             "Text Files (*.txt);;All Files (*)", options=options
         )
-        if not file_name:
+
+        if not file_path:
             return
 
-        with open(file_name, 'w', encoding='utf-8') as file:
-            for (field_type, field_name) in self.selected_fields:
+        file_path = Path(file_path)
+        with file_path.open('w', encoding='utf-8') as file:
+            for field_type, field_name in self.selected_fields:
                 file.write(f"{field_type},{field_name}\n")
 
         QMessageBox.information(self, 'Success', 'Field list saved successfully.')
-        self.filename = os.path.basename(file_name)
+        self.filename = file_path.name  # replaces os.path.basename
         self.unsaved_changes = False
         self.update_window_title()
 
@@ -2210,8 +2234,7 @@ class FieldDialog(QDialog, Ui_FieldDialog):
             return
         self.parent = parent
         # Store the reference to BASEDIR from parent (if needed).
-        self.default_dir = os.path.join(parent.BASEDIR, "resources", "field_list") \
-                           if hasattr(parent, "BASEDIR") else os.getcwd()
+        self.default_dir = (RESOURCE_PATH / "field_list") if hasattr(parent, "RESOURCE_PATH") else Path.cwd()
 
         # Initialize fields dictionary: { field_type: [field1, field2, ...], ... }
         # You might already have this dictionary in your class.

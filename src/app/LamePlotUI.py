@@ -991,7 +991,7 @@ class NDimUI(CustomPage):
         elif calling_widget == 'analyteSetAdd':
             el_list = self.dock.ui.app_data.ndim_list_dict[self.comboBoxNDimAnalyteSet.currentText()]
 
-        analytes_list = self.dock.ui.app_data.current_data.processed_data.match_attribute('data_type','Analyte')
+        analytes_list = self.dock.ui.app_data.current_data.processed.match_attribute('data_type','Analyte')
 
         analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
 

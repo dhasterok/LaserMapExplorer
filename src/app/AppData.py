@@ -214,7 +214,7 @@ class AppData(Observable):
         self.data = parent.data
         #self.style = parent.style_data.
 
-        # a dictionary of the field_types in self.data[sample_id].processed_data
+        # a dictionary of the field_types in self.data[sample_id].processed
         self._field_dict = {}
 
         self._ndim_list = []
@@ -404,8 +404,6 @@ class AppData(Observable):
         for cmap in self.ternary_colormaps:
             self.color_schemes.append(cmap['scheme'])
 
-        self.axis = ['x','y','z','c']
-
 
     def get_field(self, ax):
         """
@@ -425,7 +423,7 @@ class AppData(Observable):
         ------
         ValueError if the axis index is invalid.
         """
-        return getattr(self, f"{self.axis[ax]}_field")
+        return getattr(self, f"{ax}_field")
 
     def set_field(self, ax, value):
         """
@@ -462,7 +460,7 @@ class AppData(Observable):
         ------
         ValueError if the axis index is invalid.
         """
-        return getattr(self, f"{self.axis[ax]}_field_type")
+        return getattr(self, f"{ax}_field_type")
 
     def set_field_type(self, ax, value):
         """
@@ -480,7 +478,7 @@ class AppData(Observable):
         ValueError if the axis index is invalid or if the field type does
             not exist in the current sample's processed data.
         """
-        setattr(self, f"{self.axis[ax]}_field_type", value)
+        setattr(self, f"{ax}_field_type", value)
 
     def validate_field_type(self, new_field_type):
         """Validates if the new field type exists in the current sample's processed data.
@@ -500,7 +498,7 @@ class AppData(Observable):
         """
         if self.sample_id == "":
             return False
-        data_types = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        data_types = self.data[self.sample_id].processed.get_attribute_dict('data_type')
         if new_field_type in data_types or new_field_type.lower() == 'none':
             return True
         else:
@@ -1163,7 +1161,7 @@ class AppData(Observable):
         This dictionary is used to populate field selection widgets and ensure valid selections.
         Coordinate fields are excluded from this dictionary.
         """
-        self._field_dict = self.data[self.sample_id].processed_data.get_attribute_dict('data_type')
+        self._field_dict = self.data[self.sample_id].processed.get_attribute_dict('data_type')
         if 'coordinate' in self._field_dict:
             self._field_dict.pop("coordinate")
         return self._field_dict
@@ -1171,7 +1169,7 @@ class AppData(Observable):
     def selected_fields(self, field_type='Analyte'):
         """list : The selected fields for the current sample."""
         if self.data and self.sample_id != '':
-            return self.data[self.sample_id].processed_data.match_attributes({'data_type':field_type, 'use': True})
+            return self.data[self.sample_id].processed.match_attributes({'data_type':field_type, 'use': True})
         else:
             return []
 
@@ -1205,7 +1203,7 @@ class AppData(Observable):
         if field_type == '' or field_type == 'none':
             return ['']
 
-        data = self.data[self.sample_id].processed_data
+        data = self.data[self.sample_id].processed
 
         if filter_type not in ['all', 'used']:
             raise ValueError("filter must be 'all' or 'used'.")
@@ -1224,7 +1222,7 @@ class AppData(Observable):
         
         return field_list
     
-    def get_field_type_list(self, ax, style_data):
+    def get_field_type_list(self, ax: str, style_data):
         """Updates the field type options in the UI
         
         This method updates the field type options in the UI based on the currently selected sample.
@@ -1240,18 +1238,18 @@ class AppData(Observable):
         if self.sample_id == '':
             return
         
-        plot_dict = style_data.plot_axis_dict[style_data.plot_type]
+        axis_settings = style_data.axis_settings[style_data.plot_type]
         field_dict = self.field_dict
 
         new_list = []
 
         # check if the list should include all options, global_list == True
-        if ax == 'c' and 'cfield_type' in plot_dict:
+        if ax == 'c' and getattr(axis_settings, "cfield_type", None):
             # set the list based on style_data.plot_type and available field types
-            new_list = [key for key in field_dict if key in plot_dict['cfield_type']]
-        elif 'field_type' in plot_dict:
+            new_list = [key for key in field_dict if key in axis_settings.cfield_type]
+        elif getattr(axis_settings, "field_type", None):
             # set the list based on style_data.plot_type and available field types
-            new_list = [key for key in field_dict if key in plot_dict['field_type']]
+            new_list = [key for key in field_dict if key in axis_settings.field_type]
         else:
             new_list = list(field_dict.keys())
 
@@ -1263,7 +1261,7 @@ class AppData(Observable):
                 new_list.insert(new_list.index('Ratio')+1, 'Ratio (normalized)')
 
         # add 'None' as first option if required.
-        if plot_dict['add_none'][ax]:
+        if axis_settings.axes[ax].add_none:
             new_list.insert(0,'none')
         
         return new_list
@@ -1363,7 +1361,7 @@ class AppData(Observable):
         Updates the cluster dictionary and selected cluster groups.
 
         This method checks if the current clustering method is available in
-        ``data.processed_data[method]``. If found, it retrieves and sorts
+        ``data.processed[method]``. If found, it retrieves and sorts
         the unique cluster labels, assigns colors using ``style_data``,
         and updates the internal dictionary (``self.cluster_dict``) with
         each cluster’s information. If a mask cluster (label 99) exists,
@@ -1373,16 +1371,16 @@ class AppData(Observable):
         ----------
         data : object 
             The data container with processed cluster information stored in
-            ``data.processed_data[method]``
+            ``data.processed[method]``
         style_data : object
             Object providing default cluster color assignments
         """
         if self.sample_id == '':
             return
         method =self.cluster_method
-        if method in data.processed_data.columns:
-            if not data.processed_data[method].empty:
-                clusters = data.processed_data[method].dropna().unique()
+        if method in data.processed.columns:
+            if not data.processed[method].empty:
+                clusters = data.processed[method].dropna().unique()
                 clusters.sort()
 
                 self.cluster_dict[method]['selected_clusters'] = []

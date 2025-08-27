@@ -245,19 +245,19 @@ class LameBlockly():
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
+        for analyte in self.data[self.app_data.sample_id].processed.match_attribute('data_type','Analyte'):
             if analyte in analyte_dict:
-                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
+                self.data[self.app_data.sample_id].processed.set_attribute(analyte, 'use', True)
             else:
-                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
+                self.data[self.app_data.sample_id].processed.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
-                if analyte not in self.data[self.app_data.sample_id].processed_data.columns:
+                if analyte not in self.data[self.app_data.sample_id].processed.columns:
                     analyte_1, analyte_2 = analyte.split(' / ') 
                     self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
 
-            self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+            self.data[self.app_data.sample_id].processed.set_attribute(analyte,'norm',norm)
 
 
 
@@ -320,7 +320,7 @@ class LameBlockly():
         Set names are consistent with QComboBox.
         """
         
-        data_type_dict = self.data[self.app_data.sample_id].processed_data.get_attribute_dict('data_type')
+        data_type_dict = self.data[self.app_data.sample_id].processed.get_attribute_dict('data_type')
         # add check for ratios
         if 'ratio' in data_type_dict:
             self.field_type_list.append('Ratio')
@@ -380,7 +380,7 @@ class LameBlockly():
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
         sample_id = self.app_data.sample_id
         # Apply to all analytes in sample
-        columns = self.data[self.app_data.sample_id].processed_data.columns
+        columns = self.data[self.app_data.sample_id].processed.columns
 
         # update column attributes
         if (lb and ub):
@@ -412,7 +412,7 @@ class LameBlockly():
         if self.app_data.sample_id == '':
             return ['']
 
-        data = self.data[self.app_data.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed
 
         match set_name:
             case 'Analyte' | 'Analyte (normalized)':

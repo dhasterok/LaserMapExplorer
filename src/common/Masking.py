@@ -484,11 +484,11 @@ class FilterTab():
                 chkBoxItem_select.setCheckState(Qt.CheckState.Unchecked)
                 analyte_1 = field
                 analyte_2 = None
-                scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed_data.get_attribute(field,'norm')
+                scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed.get_attribute(field,'norm')
             elif 'Ratio' in field_type:
                 chkBoxItem_select.setCheckState(Qt.CheckState.Unchecked)
                 analyte_1, analyte_2 = field.split(' / ')
-                scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed_data.get_attribute(field,'norm')
+                scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed.get_attribute(field,'norm')
             else:
                 scale = 'linear'
 
@@ -852,7 +852,7 @@ class PolygonTab():
                 # Create a grid of points covering the entire array
                 # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
 
-                points = pd.concat([self.data[sample_id].processed_data['X'], self.data[sample_id].processed_data['Y']] , axis=1).values
+                points = pd.concat([self.data[sample_id].processed['X'], self.data[sample_id].processed['Y']] , axis=1).values
                 # Use the path to determine which points are inside the polygon
                 inside_polygon = path.contains_points(points)
 
@@ -1043,9 +1043,9 @@ class ClusterTab():
         self.tableWidgetViewGroups.clearContents()
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
         method = app_data.cluster_method
-        if method in data.processed_data.columns:
-            if not data.processed_data[method].empty:
-                clusters = data.processed_data[method].dropna().unique()
+        if method in data.processed.columns:
+            if not data.processed[method].empty:
+                clusters = data.processed[method].dropna().unique()
                 clusters.sort()
                 # set number of rows in tableWidgetViewGroups
                 # set default colors for clusters and update associated widgets
@@ -1107,13 +1107,13 @@ class ClusterTab():
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
-            # Update self.parent.data.processed_data with the new name
-            if method in self.parent.data[app_data.sample_id].processed_data.columns:
+            # Update self.parent.data.processed with the new name
+            if method in self.parent.data[app_data.sample_id].processed.columns:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.parent.data[app_data.sample_id].processed_data.loc[:,method] == cluster_id
+                rows_to_update = self.parent.data[app_data.sample_id].processed.loc[:,method] == cluster_id
 
                 # Update these rows with the new name
-                self.parent.data[app_data.sample_id].processed_data.loc[rows_to_update, method] = new_name
+                self.parent.data[app_data.sample_id].processed.loc[rows_to_update, method] = new_name
 
             # update current_group to reflect the new cluster name
             app_data.cluster_dict[method][cluster_id]['name'] = new_name

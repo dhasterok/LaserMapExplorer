@@ -109,7 +109,7 @@ class SampleObj(Observable):
         Automatically update the crop_mask whenever crop bounds change.
     reset_crop : 
         Resets dataframe to original bounds.
-    raw_data :
+    raw :
     filter_df : (pandas.DataFrame) -- stores filters for each sample
         | 'field_type' : (str) -- field type
         | 'field' : (str) -- name of field
@@ -157,7 +157,7 @@ class SampleObj(Observable):
         | 'analysis data' : (pandas.DataFrame) --
         | 'cropped_raw_data' : (pandas.DataFrame) --
 
-    'processed_data' : (pandas.DataFrame) --
+    'processed' : (pandas.DataFrame) --
     'crop_mask' : (MaskObj) -- mask created from cropped axes.
     'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
     'polygon_mask' : (MaskObj) -- mask created from selected polygons.
@@ -202,8 +202,8 @@ class SampleObj(Observable):
         ])
 
         # will be AttributeDataFrame once data is loaded into them
-        self.raw_data = None
-        self.processed_data = None
+        self.raw = AttributeDataFrame()
+        self.processed = AttributeDataFrame()
 
         self._outlier_method_options = [
             'none',
@@ -284,16 +284,16 @@ class SampleObj(Observable):
         if not self._updating:
             self._updating = True
 
-            # Recalculates X for self.raw_data
-            # (does not use self.processed_data because the x limits will otherwise be incorrect)
-            # X = round(self.raw_data['Xc']/self._dx)
-            X = self.raw_data['Xc']/self._dx
+            # Recalculates X for self.raw
+            # (does not use self.processed because the x limits will otherwise be incorrect)
+            # X = round(self.raw['Xc']/self._dx)
+            X = self.raw['Xc']/self._dx
             self._dx = new_dx
             X_new = new_dx*X
 
-            # Extract cropped region and update self.processed_data
+            # Extract cropped region and update self.processed
             self._x = X_new[self.crop_mask]
-            self.processed_data['Xc'] = self._x
+            self.processed['Xc'] = self._x
             
             self._updating = False
 
@@ -309,15 +309,15 @@ class SampleObj(Observable):
         if not self._updating:
             self._updating = True
 
-            # Recalculates Y for self.raw_data
-            # (does not use self.processed_data because the y limits will otherwise be incorrect)
-            Y = self.raw_data['Y']/self._dy
+            # Recalculates Y for self.raw
+            # (does not use self.processed because the y limits will otherwise be incorrect)
+            Y = self.raw['Y']/self._dy
             self._dy = new_dy
             Y_new = new_dy*Y
 
-            # Extract cropped region and update self.processed_data
+            # Extract cropped region and update self.processed
             self._y = Y_new[self.crop_mask]
-            self.processed_data['Y'] = self._y
+            self.processed['Y'] = self._y
             
             self._updating = False
 
@@ -495,24 +495,24 @@ class SampleObj(Observable):
         self.crop=True
 
         self._crop_mask = (
-            (self.raw_data['Xc'] >= new_xlim[0]) & 
-            (self.raw_data['Xc'] <= new_xlim[1]) &
-            (self.raw_data['Yc'] <= self.raw_data['Yc'].max() - new_ylim[0]) &
-            (self.raw_data['Yc'] >= self.raw_data['Yc'].max() - new_ylim[1])
+            (self.raw['Xc'] >= new_xlim[0]) & 
+            (self.raw['Xc'] <= new_xlim[1]) &
+            (self.raw['Yc'] <= self.raw['Yc'].max() - new_ylim[0]) &
+            (self.raw['Yc'] >= self.raw['Yc'].max() - new_ylim[1])
         )
 
         #crop clipped_analyte_data based on self.crop_mask
-        self.raw_data[self.crop_mask].reset_index(drop=True)
-        self.processed_data = self.processed_data[self.crop_mask].reset_index(drop=True)
+        self.raw[self.crop_mask].reset_index(drop=True)
+        self.processed = self.processed[self.crop_mask].reset_index(drop=True)
 
-        self.x = self.processed_data['Xc']
-        self.y = self.processed_data['Yc']
+        self.x = self.processed['Xc']
+        self.y = self.processed['Yc']
 
-        self._crop_mask = np.ones_like(self.raw_data['Xc'], dtype=bool)
+        self._crop_mask = np.ones_like(self.raw['Xc'], dtype=bool)
 
         self.prep_data()
 
-    def scale_options(self, plot_type=None, ax=None, field_type=None, field=None):
+    def scale_options(self, plot_type=None, ax=None, field_type: str=None, field: str=None):
         """list : options for scaling the data."""
         scale_options = {
             'standard':['linear', 'log', 'inv_logit', 'symlog'],
@@ -532,7 +532,7 @@ class SampleObj(Observable):
 
     @property
     def valid_data_types(self):
-        """list : data types possible for in processed_data."""
+        """list : data types possible for in processed data."""
         return self._valid_data_types
 
     @valid_data_types.setter
@@ -553,29 +553,29 @@ class SampleObj(Observable):
             return
 
         self._current_field = new_field
-        if not hasattr(self,"processed_data"):
+        if not hasattr(self,"processed"):
             return
 
         if new_field is None:
             # if new_field is None, use first analyte field
-            field = self.processed_data.match_attribute('data_type','Analyte')[0]
+            field = self.processed.match_attribute('data_type','Analyte')[0]
 
-            self.negative_method = self.processed_data.get_attribute(field, 'negative_method')
-            self.outlier_method = self.processed_data.get_attribute(field, 'outlier_method')
-            self.smoothing_method = self.processed_data.get_attribute(field, 'smoothing_method')
-            self.data_min_quantile = self.processed_data.get_attribute(field,'lower_bound')
-            self.data_max_quantile = self.processed_data.get_attribute(field,'upper_bound')
-            self.data_min_diff_quantile = self.processed_data.get_attribute(field,'diff_lower_bound')
-            self.data_max_diff_quantile = self.processed_data.get_attribute(field,'diff_upper_bound')
+            self.negative_method = self.processed.get_attribute(field, 'negative_method')
+            self.outlier_method = self.processed.get_attribute(field, 'outlier_method')
+            self.smoothing_method = self.processed.get_attribute(field, 'smoothing_method')
+            self.data_min_quantile = self.processed.get_attribute(field,'lower_bound')
+            self.data_max_quantile = self.processed.get_attribute(field,'upper_bound')
+            self.data_min_diff_quantile = self.processed.get_attribute(field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed.get_attribute(field,'diff_upper_bound')
         else:
             # use new_field
-            self.negative_method = self.processed_data.get_attribute(new_field, 'negative_method')
-            self.outlier_method = self.processed_data.get_attribute(new_field, 'outlier_method')
-            self.smoothing_method = self.processed_data.get_attribute(new_field, 'smoothing_method')
-            self.data_min_quantile = self.processed_data.get_attribute(new_field,'lower_bound')
-            self.data_max_quantile = self.processed_data.get_attribute(new_field,'upper_bound')
-            self.data_min_diff_quantile = self.processed_data.get_attribute(new_field,'diff_lower_bound')
-            self.data_max_diff_quantile = self.processed_data.get_attribute(new_field,'diff_upper_bound')
+            self.negative_method = self.processed.get_attribute(new_field, 'negative_method')
+            self.outlier_method = self.processed.get_attribute(new_field, 'outlier_method')
+            self.smoothing_method = self.processed.get_attribute(new_field, 'smoothing_method')
+            self.data_min_quantile = self.processed.get_attribute(new_field,'lower_bound')
+            self.data_max_quantile = self.processed.get_attribute(new_field,'upper_bound')
+            self.data_min_diff_quantile = self.processed.get_attribute(new_field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed.get_attribute(new_field,'diff_upper_bound')
 
         self.notify_observers("apply_process_to_all_data", self._current_field)
 
@@ -631,30 +631,30 @@ class SampleObj(Observable):
 
         # use an ExtendedDF.AttributeDataFrame to add attributes to the columns
         # may includes analytes, ratios, and special data
-        self.raw_data = AttributeDataFrame(data=sample_df)
-        self.raw_data.set_attribute(list(self.raw_data.columns), 'data_type', data_type)
+        self.raw = AttributeDataFrame(data=sample_df)
+        self.raw.set_attribute(list(self.raw.columns), 'data_type', data_type)
 
-        self.x = self._orig_x = self.raw_data['Xc']
-        self.y = self._orig_y = self.raw_data['Yc']
+        self.x = self._orig_x = self.raw['Xc']
+        self.y = self._orig_y = self.raw['Yc']
         self._orig_dx = self.dx
         self._orig_dy = self.dy
 
         # initialize X and Y axes bounds for plotting and cropping, initially the entire map
-        self._xlim = [self.raw_data['Xc'].min(), self.raw_data['Xc'].max()]
-        self._ylim = [self.raw_data['Yc'].min(), self.raw_data['Yc'].max()]
+        self._xlim = [self.raw['Xc'].min(), self.raw['Xc'].max()]
+        self._ylim = [self.raw['Yc'].min(), self.raw['Yc'].max()]
 
         # initialize crop flag to false
         self.crop = False
 
         # Remove the ratio columns from the raw_data and store the rest
         #non_ratio_columns = [col for col in sample_df.columns if col not in ratio_columns]
-        #self.raw_data = sample_df[non_ratio_columns]
+        #self.raw = sample_df[non_ratio_columns]
 
         # set mask of size of analyte array
-        self._crop_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
-        self.filter_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
-        self.polygon_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
-        self.cluster_mask = np.ones_like(self.raw_data['Xc'].values, dtype=bool)
+        self._crop_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.filter_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.polygon_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.cluster_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
         self.mask = \
             self.crop_mask & \
             self.filter_mask & \
@@ -670,38 +670,38 @@ class SampleObj(Observable):
         self.reset_data_handling()
 
     def reset_data_handling(self):
-        """Resets processed_data back to raw before performing autoscaling.
+        """Resets processed data back to raw before performing autoscaling.
         
         Any computed fields will be removed."""
-        coordinate_columns = self.raw_data.match_attribute(attribute='data_type',value='coordinate')
-        self.raw_data.set_attribute(coordinate_columns, 'units', None)
-        self.raw_data.set_attribute(coordinate_columns, 'use', False)
+        coordinate_columns = self.raw.match_attribute(attribute='data_type',value='coordinate')
+        self.raw.set_attribute(coordinate_columns, 'units', None)
+        self.raw.set_attribute(coordinate_columns, 'use', False)
 
-        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='Analyte')
-        self.raw_data.set_attribute(analyte_columns, 'units', None)
-        self.raw_data.set_attribute(analyte_columns, 'use', True)
+        analyte_columns = self.raw.match_attribute(attribute='data_type',value='Analyte')
+        self.raw.set_attribute(analyte_columns, 'units', None)
+        self.raw.set_attribute(analyte_columns, 'use', True)
         # quantile bounds
-        self.raw_data.set_attribute(analyte_columns, 'lower_bound', 0.05)
-        self.raw_data.set_attribute(analyte_columns, 'upper_bound', 99.5)
+        self.raw.set_attribute(analyte_columns, 'lower_bound', 0.05)
+        self.raw.set_attribute(analyte_columns, 'upper_bound', 99.5)
         # quantile bounds for differences
-        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
-        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', 99)
+        self.raw.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
+        self.raw.set_attribute(analyte_columns, 'diff_upper_bound', 99)
         # linear/log scale
-        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
-        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
+        self.raw.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw.set_attribute(analyte_columns, 'auto_scale', True)
 
-        analyte_columns = self.raw_data.match_attribute(attribute='data_type',value='Ratio')
-        self.raw_data.set_attribute(analyte_columns, 'units', None)
-        self.raw_data.set_attribute(analyte_columns, 'use', True)
+        analyte_columns = self.raw.match_attribute(attribute='data_type',value='Ratio')
+        self.raw.set_attribute(analyte_columns, 'units', None)
+        self.raw.set_attribute(analyte_columns, 'use', True)
         # quantile bounds
-        self.raw_data.set_attribute(analyte_columns, 'lower_bound', self._default_lower_bound)
-        self.raw_data.set_attribute(analyte_columns, 'upper_bound', self._default_upper_bound)
+        self.raw.set_attribute(analyte_columns, 'lower_bound', self._default_lower_bound)
+        self.raw.set_attribute(analyte_columns, 'upper_bound', self._default_upper_bound)
         # quantile bounds for differences
-        self.raw_data.set_attribute(analyte_columns, 'diff_lower_bound', self._default_difference_lower_bound)
-        self.raw_data.set_attribute(analyte_columns, 'diff_upper_bound', self._default_difference_upper_bound)
+        self.raw.set_attribute(analyte_columns, 'diff_lower_bound', self._default_difference_lower_bound)
+        self.raw.set_attribute(analyte_columns, 'diff_upper_bound', self._default_difference_upper_bound)
         # linear/log scale
-        self.raw_data.set_attribute(analyte_columns, 'norm', 'linear')
-        self.raw_data.set_attribute(analyte_columns, 'auto_scale', True)
+        self.raw.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw.set_attribute(analyte_columns, 'auto_scale', True)
 
         # cluster data
         # This determines the optimal number of clusters and creates cluster indicies that are used for preprocessing.
@@ -733,11 +733,11 @@ class SampleObj(Observable):
         else:
             self.order = 'F'
 
-        self._swap_xy(self.raw_data)
-        self._swap_xy(self.processed_data)
+        self._swap_xy(self.raw)
+        self._swap_xy(self.processed)
 
-        self.x = self.raw_data['Xc']
-        self.y = self.raw_data['Yc']
+        self.x = self.raw['Xc']
+        self.y = self.raw['Yc']
 
         # swap orientation of original dx and dy to be consistent with X and Y
         self._orig_dx, self._orig_dy = self._orig_dy, self._orig_dx
@@ -784,21 +784,21 @@ class SampleObj(Observable):
 
         Recalculates X and Y for a dataframe
         """  
-        X = round(self.raw_data['Xc']/self.dx)
-        Y = round(self.raw_data['Yc']/self.dy)
+        X = round(self.raw['Xc']/self.dx)
+        Y = round(self.raw['Yc']/self.dy)
 
-        Xp = round(self.processed_data['Xc']/self.dx)
-        Yp = round(self.processed_data['Yc']/self.dy)
+        Xp = round(self.processed['Xc']/self.dx)
+        Yp = round(self.processed['Yc']/self.dy)
 
         dx = self.dx
         self.dx = self.dy
         self.dy = dx
 
-        self.raw_data['Xc'] = self.dx*X
-        self.raw_data['Yc'] = self.dy*Y
+        self.raw['Xc'] = self.dx*X
+        self.raw['Yc'] = self.dy*Y
 
-        self.processed_data['Xc'] = self.dx*Xp
-        self.processed_data['Yc'] = self.dy*Yp
+        self.processed['Xc'] = self.dx*Xp
+        self.processed['Yc'] = self.dy*Yp
 
     def reset_crop(self):
         """Reset the data to the original bounds.
@@ -816,7 +816,7 @@ class SampleObj(Observable):
     def compute_ratio(self, analyte_1, analyte_2):
         """Compute a ratio field from two analytes.
 
-        Ratios are computed on the processed_data, after negative handling, but before autoscaling.
+        Ratios are computed on the processed data, after negative handling, but before autoscaling.
 
         Parameters
         ----------
@@ -826,16 +826,16 @@ class SampleObj(Observable):
             Analyte field to be used as denominator of ratio.
         """
         # Create a mask where both analytes are positive
-        mask = (self.processed_data[analyte_1] > 0) & (self.processed_data[analyte_2] > 0)
+        mask = (self.processed[analyte_1] > 0) & (self.processed[analyte_2] > 0)
 
         # Calculate the ratio and set invalid values to NaN
-        ratio_array = np.where(mask, self.processed_data[analyte_1] / self.processed_data[analyte_2], np.nan)
+        ratio_array = np.where(mask, self.processed[analyte_1] / self.processed[analyte_2], np.nan)
 
         # Generate the ratio column name
         ratio_name = f'{analyte_1} / {analyte_2}'
 
         self.add_columns('Ratio',ratio_name,ratio_array)
-        self.processed_data.set_attribute(ratio_name, 'use', True)
+        self.processed.set_attribute(ratio_name, 'use', True)
 
     # ------------------------------------------
     # Dialogs
@@ -871,7 +871,7 @@ class SampleObj(Observable):
         """
         Add one or more columns to the sample object.
 
-        Adds one or more columns to `SampleObj.processed_data`. If a mask is provided,
+        Adds one or more columns to `SampleObj.processed`. If a mask is provided,
         the data is placed in the correct rows based on the mask.
 
         Parameters
@@ -884,7 +884,7 @@ class SampleObj(Observable):
             A 1D array (for single column) or 2D array (for multiple columns). The data to be added.
         mask : numpy.ndarray, optional
             A boolean mask that indicates which rows in the original data should be filled. If not provided,
-            the length of `array` must match the height of `processed_data`.
+            the length of `array` must match the height of `processed data`.
 
         Returns
         -------
@@ -899,9 +899,9 @@ class SampleObj(Observable):
         ValueError
             The number of columns in the array must match the length of `column_names` (if multiple columns are being added).
         ValueError
-            The length of array must match the height of `processed_data` if no mask is provided.
+            The length of array must match the height of `processed data` if no mask is provided.
         ValueError
-            If a mask is provided, its length must match the height of `processed_data`, and the number of `True` values
+            If a mask is provided, its length must match the height of `processed data`, and the number of `True` values
             in the mask must match the number of rows in `array`.
         """
         # Ensure column_names is a list, even if adding a single column
@@ -919,12 +919,12 @@ class SampleObj(Observable):
 
         # Check array length or mask
         if mask is None:
-            # No mask, array length must match the height of processed_data
-            if len(array) != self.processed_data.shape[0]:
+            # No mask, array length must match the height of processed data
+            if len(array) != self.processed.shape[0]:
                 raise ValueError("Length of (array) must be the same as the height of the data frame.")
         else:
             # Mask provided, check its validity
-            if len(mask) != self.processed_data.shape[0]:
+            if len(mask) != self.processed.shape[0]:
                 raise ValueError("The length of (mask) must be the same as the number of rows in the data frame.")
             if array.shape[0] != mask.sum():
                 raise ValueError("The number of rows in (array) must match the number of `True` values in the mask.")
@@ -934,7 +934,7 @@ class SampleObj(Observable):
         # Loop through each column
         for i, column_name in enumerate(column_names):
             # Check if the column already exists
-            if column_name in self.processed_data.columns:
+            if column_name in self.processed.columns:
                 result[column_name] = "overwritten"
             else:
                 result[column_name] = "added"
@@ -942,49 +942,49 @@ class SampleObj(Observable):
             # Create the new column array
             if mask is None:
                 # No mask: directly use the array for this column
-                self.processed_data[column_name] = array[:, i]
+                self.processed[column_name] = array[:, i]
             else:
                 # Masked: fill a new column initialized with NaNs, then assign the masked rows
-                full_column = np.full(self.processed_data.shape[0], np.nan)
+                full_column = np.full(self.processed.shape[0], np.nan)
                 full_column[mask] = array[:, i]
-                self.processed_data[column_name] = full_column
+                self.processed[column_name] = full_column
 
             # Set attributes for the newly added column
-            self.processed_data.set_attribute(column_name, 'data_type', data_type)
-            self.processed_data.set_attribute(column_name, 'units', None)
-            self.processed_data.set_attribute(column_name, 'use', False)
+            self.processed.set_attribute(column_name, 'data_type', data_type)
+            self.processed.set_attribute(column_name, 'units', None)
+            self.processed.set_attribute(column_name, 'use', False)
             # Set quantile bounds
-            self.processed_data.set_attribute(column_name, 'lower_bound', self._default_lower_bound)
-            self.processed_data.set_attribute(column_name, 'upper_bound', self._default_upper_bound)
+            self.processed.set_attribute(column_name, 'lower_bound', self._default_lower_bound)
+            self.processed.set_attribute(column_name, 'upper_bound', self._default_upper_bound)
             # Set quantile bounds for differences
-            self.processed_data.set_attribute(column_name, 'diff_lower_bound', self._default_difference_lower_bound)
-            self.processed_data.set_attribute(column_name, 'diff_upper_bound', self._default_difference_upper_bound)
+            self.processed.set_attribute(column_name, 'diff_lower_bound', self._default_difference_lower_bound)
+            self.processed.set_attribute(column_name, 'diff_upper_bound', self._default_difference_upper_bound)
 
-            self.processed_data.set_attribute(column_name,'label',self.create_label(column_name))
+            self.processed.set_attribute(column_name,'label',self.create_label(column_name))
 
             # Set min and max unmasked values
             if mask is None:
-                amin = np.min(self.processed_data[column_name])
-                amax = np.max(self.processed_data[column_name])
+                amin = np.min(self.processed[column_name])
+                amax = np.max(self.processed[column_name])
             else:
-                amin = np.min(self.processed_data[column_name][mask])
-                amax = np.max(self.processed_data[column_name][mask])
+                amin = np.min(self.processed[column_name][mask])
+                amax = np.max(self.processed[column_name][mask])
             
             if column_name not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
                 amin = fmt.oround(amin, order=2, toward=0)
                 amax = fmt.oround(amax, order=2, toward=1)
-            self.processed_data.set_attribute(column_name,'plot_min',amin)
-            self.processed_data.set_attribute(column_name,'plot_max',amax)
+            self.processed.set_attribute(column_name,'plot_min',amin)
+            self.processed.set_attribute(column_name,'plot_max',amax)
 
             # Set additional attributes
-            self.processed_data.set_attribute(column_name, 'norm', 'linear')
-            self.processed_data.set_attribute(column_name, 'negative_method', None)
-            self.processed_data.set_attribute(column_name, 'outlier_method', None)
-            self.processed_data.set_attribute(column_name, 'smoothing_method', None)
-            self.processed_data.set_attribute(column_name, 'auto_scale', False)
+            self.processed.set_attribute(column_name, 'norm', 'linear')
+            self.processed.set_attribute(column_name, 'negative_method', None)
+            self.processed.set_attribute(column_name, 'outlier_method', None)
+            self.processed.set_attribute(column_name, 'smoothing_method', None)
+            self.processed.set_attribute(column_name, 'auto_scale', False)
             # add probability axis associated with histograms
-            self.processed_data.set_attribute(column_name, 'p_min', None)
-            self.processed_data.set_attribute(column_name, 'p_max', None)
+            self.processed.set_attribute(column_name, 'p_min', None)
+            self.processed.set_attribute(column_name, 'p_max', None)
 
         # Return a message if a single column was added, or the result dictionary for multiple columns
         if len(column_names) == 1:
@@ -1006,15 +1006,15 @@ class SampleObj(Observable):
             Raises an error if the column is not a member of the AttributeDataFrame.
         """        
         # Check if the column exists
-        if column_name not in self.processed_data.columns:
+        if column_name not in self.processed.columns:
             raise ValueError(f"Column {column_name} does not exist in the DataFrame.")
         
         # Remove the column from the DataFrame
-        self.processed_data.drop(columns=[column_name], inplace=True)
+        self.processed.drop(columns=[column_name], inplace=True)
         
         # Remove associated attributes, if any
-        if column_name in self.processed_data.column_attributes:
-            del self.processed_data.column_attributes[column_name]
+        if column_name in self.processed.column_attributes:
+            del self.processed.column_attributes[column_name]
 
 
     def apply_field_filters(self):
@@ -1024,7 +1024,7 @@ class SampleObj(Observable):
         """        
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
         if self.filter_df.empty:
-            self.filter_mask = np.ones_like(self.processed_data['Xc'].values, dtype=bool)
+            self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
             return
 
         # by creating a mask based on min and max of the corresponding filter analytes
@@ -1043,27 +1043,27 @@ class SampleObj(Observable):
         """
         Sorts analyte columns in the raw and processed data according to the specified method.
 
-        This method retrieves a list of analytes from the `processed_data` DataFrame
-        and reorders the columns in both `raw_data` and `processed_data` based on the
+        This method retrieves a list of analytes from the ``processed`` data DataFrame
+        and reorders the columns in both ``raw`` and ``processed`` data based on the
         sorting strategy provided. The sorting is performed using an external function
-        `sort_analytes`, which takes the user-defined `method` and the analyte list as inputs.
+        ``sort_analytes``, which takes the user-defined ``method`` and the analyte list as inputs.
 
         Parameters
         ----------
         method : str
-            Sorting method selected by the user. This is passed to `sort_analytes` and
+            Sorting method selected by the user. This is passed to ``sort_analytes`` and
             determines the order in which analytes are arranged (e.g., alphabetical, PCA loadings,
             cluster association, etc.).
 
         Returns
         -------
         analyte_list : list
-            the original list of analytes found in `processed_data`.
+            the original list of analytes found in processed data.
         sorted_analyte_list : list
             the list of analytes sorted according to the provided method.
         """ 
         # retrieve analyte_list
-        analyte_list = self.processed_data.match_attribute('data_type','Analyte')
+        analyte_list = self.processed.match_attribute('data_type','Analyte')
 
         # sort analyte sort based on method chosen by user
         sorted_analyte_list = sort_analytes(method, analyte_list)
@@ -1073,23 +1073,23 @@ class SampleObj(Observable):
             return analyte_list, sorted_analyte_list  # No sorting needed
 
         # Reorder the columns of the DataFrame based on self.analyte_list
-        self.raw_data.sort_columns(sorted_analyte_list)
-        if hasattr(self, "processed_data"):
-            self.processed_data.sort_columns(sorted_analyte_list)
+        self.raw.sort_columns(sorted_analyte_list)
+        if hasattr(self, "processed"):
+            self.processed.sort_columns(sorted_analyte_list)
 
         return analyte_list, sorted_analyte_list
 
     def create_label(self, column_name):
         """Creates a default label for axes.
 
-        Creates a default label for axes on plots, using the column name in processed_data.
+        Creates a default label for axes on plots, using the column name in processed data.
 
         Parameters
         ----------
         column_name : str
-            Column in processed_data.
+            Column in processed data.
         """        
-        data_type = self.processed_data.get_attribute(column_name,'data_type') 
+        data_type = self.processed.get_attribute(column_name,'data_type') 
         label = None
         match data_type:
             case 'Analyte' | 'Analyte (normalized)': 
@@ -1099,7 +1099,7 @@ class SampleObj(Observable):
                 else:
                     label = f"{symbol}"
 
-                unit = self.processed_data.get_attribute(column_name,'units')
+                unit = self.processed.get_attribute(column_name,'units')
                 if data_type == 'Analyte':
                     label = f"{label} ({unit})"
                 else: # normalized analyte
@@ -1129,7 +1129,7 @@ class SampleObj(Observable):
                 else:   # normalized ratio
                     label = f"{label_1}$_N$ / {label_2}$_N$"
             case _:
-                unit = self.processed_data.get_attribute(column_name,'units')
+                unit = self.processed.get_attribute(column_name,'units')
                 if unit == None:
                     label = f"{column_name}"
                 else:
@@ -1145,12 +1145,12 @@ class SampleObj(Observable):
         # Step 1: Clustering
         # ------------------
         # Select columns where 'data_type' attribute is 'Analyte'
-        analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'Analyte') 
-            and (self.raw_data.get_attribute(col, 'use') is not None
-            and self.raw_data.get_attribute(col, 'use')) ]
+        analyte_columns = [col for col in self.raw.columns if (self.raw.get_attribute(col, 'data_type') == 'Analyte') 
+            and (self.raw.get_attribute(col, 'use') is not None
+            and self.raw.get_attribute(col, 'use')) ]
 
         # Extract the analyte data
-        analyte_data = self.raw_data[analyte_columns].values
+        analyte_data = self.raw[analyte_columns].values
 
         # Mask invalid data (e.g., NaN, inf)
         mask_valid = np.isfinite(analyte_data).all(axis=1)
@@ -1179,8 +1179,8 @@ class SampleObj(Observable):
 
         # if DEBUG_PLOT:
         #     # Reshape the full_labels array based on unique X and Y values
-        #     x_unique = self.raw_data['Xc'].nunique()  # Assuming 'X' is a column in raw_data
-        #     y_unique = self.raw_data['Yc'].nunique()  # Assuming 'Y' is a column in raw_data
+        #     x_unique = self.raw['Xc'].nunique()  # Assuming 'X' is a column in raw_data
+        #     y_unique = self.raw['Yc'].nunique()  # Assuming 'Y' is a column in raw_data
 
         #     # Ensure the reshaped array has the same shape as the spatial grid
         #     reshaped_labels = np.reshape(self.cluster_labels, (y_unique, x_unique), order='F')
@@ -1211,7 +1211,7 @@ class SampleObj(Observable):
         Raises
         ------
         AssertionError
-            processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
+            processed data has not yet been initialized.  processed data should be created when the sample is initialized and prep_data is
             run for the first time.
         """ 
         attribute_df = None
@@ -1219,48 +1219,48 @@ class SampleObj(Observable):
         ratio_columns = []
         if (field == None) or (field == 'all'):
             # Select columns where 'data_type' attribute is 'Analyte'
-            analyte_columns = self.raw_data.match_attributes({'data_type': 'Analyte', 'use': True})
-            # analyte_columns = self.raw_data.match_attribute('data_type', 'Analyte')
-            # analyte_columns = [col for col in analyte_columns if self.raw_data.get_attribute(col, 'use') is True]
-            # analyte_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'Analyte') 
-                # and (self.raw_data.get_attribute(col, 'use') is not None
-                # and self.raw_data.get_attribute(col, 'use')) ]
+            analyte_columns = self.raw.match_attributes({'data_type': 'Analyte', 'use': True})
+            # analyte_columns = self.raw.match_attribute('data_type', 'Analyte')
+            # analyte_columns = [col for col in analyte_columns if self.raw.get_attribute(col, 'use') is True]
+            # analyte_columns = [col for col in self.raw.columns if (self.raw.get_attribute(col, 'data_type') == 'Analyte') 
+                # and (self.raw.get_attribute(col, 'use') is not None
+                # and self.raw.get_attribute(col, 'use')) ]
 
             # Select columns where 'data_type' attribute is 'Ratio'
-            ratio_columns = self.raw_data.match_attributes({'data_type': 'Ratio', 'use': True})
-            # ratio_columns = self.raw_data.match_attribute('data_type', 'Ratio')
-            # ratio_columns = [col for col in ratio_columns if self.raw_data.get_attribute(col, 'use') is True]
-            # ratio_columns = [col for col in self.raw_data.columns if (self.raw_data.get_attribute(col, 'data_type') == 'Ratio') 
-            #     and (self.raw_data.get_attribute(col, 'use') is not None
-            #     and self.raw_data.get_attribute(col, 'use')) ]
+            ratio_columns = self.raw.match_attributes({'data_type': 'Ratio', 'use': True})
+            # ratio_columns = self.raw.match_attribute('data_type', 'Ratio')
+            # ratio_columns = [col for col in ratio_columns if self.raw.get_attribute(col, 'use') is True]
+            # ratio_columns = [col for col in self.raw.columns if (self.raw.get_attribute(col, 'data_type') == 'Ratio') 
+            #     and (self.raw.get_attribute(col, 'use') is not None
+            #     and self.raw.get_attribute(col, 'use')) ]
 
             columns = analyte_columns + ratio_columns
 
             # this needs to be updated to handle different negative handling methods for different fields.
-            # may need to create a copy of processed_data overwriting with raw_data
+            # may need to create a copy of processed data overwriting with raw data
             negative_method = self._negative_method
-            self.processed_data = copy.deepcopy(self.raw_data)
-            self.processed_data.set_attribute(analyte_columns, 'negative_method', negative_method)
+            self.processed = copy.deepcopy(self.raw)
+            self.processed.set_attribute(analyte_columns, 'negative_method', negative_method)
         else:
             columns = field
 
-        if not hasattr(self, 'processed_data'):
-            raise AssertionError("processed_data has not yet been defined.")
+        if not hasattr(self, 'processed'):
+            raise AssertionError("processed data has not yet been defined.")
 
         # Handle negative values
         # ----------------------
         # for col in analyte_columns:
-        #     if col not in self.raw_data.columns:
+        #     if col not in self.raw.columns:
         #         continue
 
         #     for idx in np.unique(self.cluster_labels):
         #         if np.isnan(idx):
         #             continue
         #         cluster_mask = self.cluster_labels == idx
-        #         print(f"{(col, idx)} before: {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}")
-        #         transformed_data = self.transform_array(self.processed_data[col][cluster_mask],self.processed_data.get_attribute(col,'negative_method'))
-        #         self.processed_data.loc[cluster_mask, col] = transformed_data
-        #         print(f"{(col, idx)} after : {sum(self.processed_data[col] < 0)}, {sum(self.processed_data[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
+        #         print(f"{(col, idx)} before: {sum(self.processed[col] < 0)}, {sum(self.processed[col][cluster_mask] < 0)}")
+        #         transformed_data = self.transform_array(self.processed[col][cluster_mask],self.processed.get_attribute(col,'negative_method'))
+        #         self.processed.loc[cluster_mask, col] = transformed_data
+        #         print(f"{(col, idx)} after : {sum(self.processed[col] < 0)}, {sum(self.processed[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
 
         # Compute ratios not included in raw_data
         # ---------------------------------------
@@ -1273,33 +1273,33 @@ class SampleObj(Observable):
                 columns = columns + col
                 self.compute_ratio(analyte_1, analyte_2)
 
-            self.processed_data.set_attribute(ratios_not_in_raw_data, 'lower_bound', attribute_df.loc['lower_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute(ratios_not_in_raw_data, 'upper_bound', attribute_df.loc['upper_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute(ratios_not_in_raw_data, 'diff_upper_bound', attribute_df.loc['diff_upper_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute(ratios_not_in_raw_data, 'diff_lower_bound', attribute_df.loc['diff_lower_bound', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute(ratios_not_in_raw_data, 'norm', attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
-            self.processed_data.set_attribute(ratios_not_in_raw_data, 'auto_scale', attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
+            self.processed.set_attribute(ratios_not_in_raw_data, 'lower_bound', attribute_df.loc['lower_bound', ratios_not_in_raw_data].tolist())
+            self.processed.set_attribute(ratios_not_in_raw_data, 'upper_bound', attribute_df.loc['upper_bound', ratios_not_in_raw_data].tolist())
+            self.processed.set_attribute(ratios_not_in_raw_data, 'diff_upper_bound', attribute_df.loc['diff_upper_bound', ratios_not_in_raw_data].tolist())
+            self.processed.set_attribute(ratios_not_in_raw_data, 'diff_lower_bound', attribute_df.loc['diff_lower_bound', ratios_not_in_raw_data].tolist())
+            self.processed.set_attribute(ratios_not_in_raw_data, 'norm', attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
+            self.processed.set_attribute(ratios_not_in_raw_data, 'auto_scale', attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
 
 
         # Clip outliers / autoscale the data
         # ------------------
         # loop over all fields
-        for col in (col for col in self.processed_data.columns if self.processed_data.get_attribute(col, 'data_type') != 'coordinate'):
+        for col in (col for col in self.processed.columns if self.processed.get_attribute(col, 'data_type') != 'coordinate'):
 
-            lq = self.processed_data.get_attribute(col, 'lower_bound')
-            uq = self.processed_data.get_attribute(col, 'upper_bound')
+            lq = self.processed.get_attribute(col, 'lower_bound')
+            uq = self.processed.get_attribute(col, 'upper_bound')
             # skip is autoscale is False for column
-            if not self.processed_data.get_attribute(col, 'autoscale'):
+            if not self.processed.get_attribute(col, 'autoscale'):
                 #clip data using ub and lb
-                lq_val = np.nanpercentile(self.processed_data[col], lq, axis=0)
-                uq_val = np.nanpercentile(self.processed_data[col], uq, axis=0)
-                self.processed_data[col] = np.clip(self.processed_data[col], lq_val, uq_val)
+                lq_val = np.nanpercentile(self.processed[col], lq, axis=0)
+                uq_val = np.nanpercentile(self.processed[col], uq, axis=0)
+                self.processed[col] = np.clip(self.processed[col], lq_val, uq_val)
                 continue
 
-            d_lq = self.processed_data.get_attribute(col, 'diff_lower_bound')
-            d_uq = self.processed_data.get_attribute(col, 'diff_upper_bound')
+            d_lq = self.processed.get_attribute(col, 'diff_lower_bound')
+            d_uq = self.processed.get_attribute(col, 'diff_upper_bound')
 
-            match self.processed_data.get_attribute(col, 'units'):
+            match self.processed.get_attribute(col, 'units'):
                 case 'ppm':
                     compositional = True
                     max_val = 1e6
@@ -1317,27 +1317,27 @@ class SampleObj(Observable):
             for idx in np.unique(self.cluster_labels):
                 cluster_mask = (self.cluster_labels == idx)
 
-                transformed_data = self.clip_outliers(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq)
-                self.processed_data.loc[cluster_mask, col] = transformed_data
+                transformed_data = self.clip_outliers(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq)
+                self.processed.loc[cluster_mask, col] = transformed_data
 
-                transformed_data = self.quantile_and_difference(self.processed_data[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
-                self.processed_data.loc[cluster_mask, col] = transformed_data
+                transformed_data = self.quantile_and_difference(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                self.processed.loc[cluster_mask, col] = transformed_data
 
         
         # Compute special fields?
         # -----------------------
-        for col in self.processed_data.columns:
-            self.processed_data.set_attribute(col,'label',self.create_label(col))
+        for col in self.processed.columns:
+            self.processed.set_attribute(col,'label',self.create_label(col))
             
             # Set min and max unmasked values
-            amin = np.min(self.processed_data[col])
-            amax = np.max(self.processed_data[col])
+            amin = np.min(self.processed[col])
+            amax = np.max(self.processed[col])
             
             if col not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
                 amin = fmt.oround(amin, order=2, toward=0)
                 amax = fmt.oround(amax, order=2, toward=1)
-            self.processed_data.set_attribute(col,'plot_min',amin)
-            self.processed_data.set_attribute(col,'plot_max',amax)
+            self.processed.set_attribute(col,'plot_min',amin)
+            self.processed.set_attribute(col,'plot_max',amax)
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """
@@ -1531,9 +1531,9 @@ class SampleObj(Observable):
             Update the scale information of the data, by default False
         """ 
         if field is not None: #if normalising single analyte
-            self.processed_data.set_attribute(field,'norm',norm)
+            self.processed.set_attribute(field,'norm',norm)
         else: #if normalising all analytes in sample
-            self.processed_data.set_attribute(self.processed_data.match_attribute('data_type','Analyte'),'norm',norm)
+            self.processed.set_attribute(self.processed.match_attribute('data_type','Analyte'),'norm',norm)
 
         self.prep_data(field)
 
@@ -1566,7 +1566,7 @@ class SampleObj(Observable):
 
         # if sample_id != self.sample_id:
         #     #axis mask is not used when plot analytes of a different sample
-        #     crop_mask  = np.ones_like( self.raw_data['Xc'], dtype=bool)
+        #     crop_mask  = np.ones_like( self.raw['Xc'], dtype=bool)
         # else:
         #     crop_mask = self.data[self.sample_id]['crop_mask']
         
@@ -1574,17 +1574,17 @@ class SampleObj(Observable):
         #crop_mask = self.crop_mask
         
         #crop plot if filter applied
-        df = self.processed_data[['Xc','Yc']]
+        df = self.processed[['Xc','Yc']]
 
         match field_type:
             case 'Analyte' | 'Analyte (normalized)':
                 # unnormalized
                 if processed:
-                    df['array'] = self.processed_data[field].values
+                    df['array'] = self.processed[field].values
                 else:
-                    df['array'] = self.raw_data[field].values
+                    df['array'] = self.raw[field].values
 
-                #norm = self.processed_data.get_attribute(field, 'norm')
+                #norm = self.processed.get_attribute(field, 'norm')
                 
                 #perform scaling for groups of analytes with same norm parameter
                 match norm:
@@ -1607,7 +1607,7 @@ class SampleObj(Observable):
                 field_2 = field.split(' / ')[1]
 
                 # unnormalized
-                df['array'] = self.processed_data[field].values
+                df['array'] = self.processed[field].values
                 
                 # normalize
                 if 'normalized' in field_type:
@@ -1625,7 +1625,7 @@ class SampleObj(Observable):
                         df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
 
             case _:#'PCA score' | 'Cluster' | 'Cluster score' | 'Special' | 'Computed':
-                df['array'] = self.processed_data[field].values
+                df['array'] = self.processed[field].values
             
         # ----begin debugging----
         # print(df.columns)
@@ -1647,13 +1647,13 @@ class SampleObj(Observable):
 
         # return normalised, filtered data with that will be used for analysis
         #use_analytes = self.data[self.sample_id]['Analyte_info'].loc[(self.data[self.sample_id]['Analyte_info']['use']==True), 'Analytes'].values
-        use_analytes = self.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
+        use_analytes = self.processed.match_attributes({'data_type': 'Analyte', 'use': True})
 
-        df = self.processed_data[use_analytes]
+        df = self.processed[use_analytes]
 
         #perform scaling for groups of analytes with same norm parameter
         for norm in ['log', 'symlog', 'inv_logit']:
-            analyte_set = self.processed_data.match_attributes({'data_type': 'Analyte', 'use': True, 'norm': norm})
+            analyte_set = self.processed.match_attributes({'data_type': 'Analyte', 'use': True, 'norm': norm})
             if not analyte_set:
                 continue
 
@@ -1694,7 +1694,7 @@ class SampleObj(Observable):
             return value_dict
 
         # add label
-        unit = self.processed_data.get_attribute(field, 'unit')
+        unit = self.processed.get_attribute(field, 'unit')
         if unit is None:
             value_dict['label'] = value_dict['field']
         else:
@@ -1874,7 +1874,7 @@ class SampleObj(Observable):
         if analyte_1 and not analyte_2:
             if (self.apply_outlier_to_all):
                 # Apply to all analytes in sample
-                columns = self.processed_data.columns
+                columns = self.processed.columns
 
                 # clear existing plot info from tree to ensure saved plots using most recent data
                 for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -1883,12 +1883,12 @@ class SampleObj(Observable):
                 columns = analyte_1
 
             # update column attributes
-            self.processed_data.set_attribute(columns, 'auto_scale', auto_scale)
-            self.processed_data.set_attribute(columns, 'upper_bound', ub)
-            self.processed_data.set_attribute(columns, 'lower_bound', lb)
-            self.processed_data.set_attribute(columns, 'diff_upper_bound', d_ub)
-            self.processed_data.set_attribute(columns, 'diff_lower_bound', d_lb)
-            self.processed_data.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
+            self.processed.set_attribute(columns, 'auto_scale', auto_scale)
+            self.processed.set_attribute(columns, 'upper_bound', ub)
+            self.processed.set_attribute(columns, 'lower_bound', lb)
+            self.processed.set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.processed.set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.processed.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
 
             # update data with new auto-scale/negative handling
             self.prep_data(sample_id)
@@ -1897,17 +1897,17 @@ class SampleObj(Observable):
         # else:
         #     if self.apply_outlier_to_all:
         #         # Apply to all ratios in sample
-        #         self.processed_data['ratio_info']['auto_scale'] = auto_scale
-        #         self.processed_data['ratio_info']['upper_bound']= ub
-        #         self.processed_data['ratio_info']['lower_bound'] = lb
-        #         self.processed_data['ratio_info']['d_l_bound'] = d_lb
-        #         self.processed_data['ratio_info']['d_u_bound'] = d_ub
+        #         self.processed['ratio_info']['auto_scale'] = auto_scale
+        #         self.processed['ratio_info']['upper_bound']= ub
+        #         self.processed['ratio_info']['lower_bound'] = lb
+        #         self.processed['ratio_info']['d_l_bound'] = d_lb
+        #         self.processed['ratio_info']['d_u_bound'] = d_ub
         #         self.prep_data(sample_id)
         #     else:
-        #         self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['Analyte_1']==analyte_1)
-        #                                     & (self.processed_data['ratio_info']['Analyte_2']==analyte_2),'auto_scale']  = auto_scale
-        #         self.processed_data['ratio_info'].loc[ (self.processed_data['ratio_info']['Analyte_1']==analyte_1)
-        #                                     & (self.processed_data['ratio_info']['Analyte_2']==analyte_2),
+        #         self.processed['ratio_info'].loc[ (self.processed['ratio_info']['Analyte_1']==analyte_1)
+        #                                     & (self.processed['ratio_info']['Analyte_2']==analyte_2),'auto_scale']  = auto_scale
+        #         self.processed['ratio_info'].loc[ (self.processed['ratio_info']['Analyte_1']==analyte_1)
+        #                                     & (self.processed['ratio_info']['Analyte_2']==analyte_2),
         #                                     ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
         #         self.prep_data(sample_id, analyte_1,analyte_2)
         return True  # User chose to proceed
@@ -2041,7 +2041,7 @@ class SampleObj(Observable):
     #             # Create a grid of points covering the entire array
     #             # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
 
-    #             points = pd.concat([self.data[sample_id].processed_data['X'], self.data[sample_id].processed_data['Y']] , axis=1).values
+    #             points = pd.concat([self.data[sample_id].processed['X'], self.data[sample_id].processed['Y']] , axis=1).values
     #             # Use the path to determine which points are inside the polygon
     #             inside_polygon = path.contains_points(points)
 
@@ -2086,7 +2086,7 @@ class SampleObj(Observable):
     #         selected_clusters = [cluster_idx for cluster_idx in range(self.app_data.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
 
     #     # create boolean array with selected_clusters == True
-    #     cluster_group = self.data[sample_id].processed_data.loc[:,method]
+    #     cluster_group = self.data[sample_id].processed.loc[:,method]
     #     ind = np.isin(cluster_group, selected_clusters)
     #     self.data[sample_id].cluster_mask = ind
 

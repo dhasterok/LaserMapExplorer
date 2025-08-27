@@ -826,6 +826,18 @@ class CustomComboBox(QComboBox):
             self.popup_callback()
         super().showPopup()
 
+    def setActive(self, active: bool):
+        """Simplifies setting visibility and enabling of CustomComboBox
+
+        Parameters
+        ----------
+        active : bool
+            Sets the state of visibility and enabling of widget
+        """
+        self.setVisible(active)
+        self.setEnabled(active)
+
+
 class CustomDockWidget(QDockWidget):
     """
     A custom QDockWidget that hides instead of closing when the user clicks the close button.
@@ -1286,21 +1298,33 @@ class ColorButton(QPushButton):
             self.color = new_color
 
 
-    def _apply_color(self, color: QColor|None):
+    def _apply_color(self, color: QColor | None):
         """
         Apply the given color to the button's background and update its text.
 
         Parameters
         ----------
-        color : QColor
+        color : QColor | None
             The new color to apply.
         """
         if color is None:
-            self.styles["background-color"] = "none;"
+            self.styles["background-color"] = "none"
+            text_color = "black"
         else:
             self.styles["background-color"] = color.name()
 
-        self.setStyleSheet("QPushButton {" + "; ".join(f"{k}: {v}" for k, v in self.styles.items()) + "; }")
+            # Compute relative luminance to decide text color
+            r, g, b = color.redF(), color.greenF(), color.blueF()
+            luminance = 0.299 * r + 0.587 * g + 0.114 * b
+            text_color = "#414042" if luminance > 0.5 else "#ffffff"
+
+        # apply both bg and fg
+        self.styles["color"] = text_color
+
+        self.setStyleSheet(
+            "QPushButton {" + "; ".join(f"{k}: {v}" for k, v in self.styles.items()) + "; }"
+        )
+
         if self.permanent_text is None:
             if color is None:
                 self.setText("None")

@@ -17,6 +17,9 @@ import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import BASEDIR, ICONPATH
 from src.common.Logger import auto_log_methods, log
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .MainWindow import MainWindow
 
 class AxesPage(CustomPage):
     def __init__(self, parent=None):
@@ -98,6 +101,7 @@ class AxesPage(CustomPage):
         self.toolButtonYAxisReset.setIconSize(QSize(14, 14))
 
         y_lim_label_layout.addWidget(y_lim_label)
+        y_lim_label_layout.setContentsMargins(0, 0, 0, 0)
         y_lim_label_layout.addWidget(self.toolButtonYAxisReset)
 
         self.widgetYLim = QWidget(parent=self)
@@ -111,6 +115,7 @@ class AxesPage(CustomPage):
         self.lineEditYUB.setObjectName("lineEditYUB")
 
         y_lim_layout.addWidget(self.lineEditYLB)
+        y_lim_layout.setContentsMargins(0, 0, 0, 0)
         y_lim_layout.addWidget(self.lineEditYUB)
 
         self.comboBoxYScale = QComboBox(parent=self)
@@ -146,10 +151,12 @@ class AxesPage(CustomPage):
         self.toolButtonZAxisReset.setIconSize(QSize(14, 14))
 
         z_lim_label_layout.addWidget(z_lim_label)
+        z_lim_label_layout.setContentsMargins(0, 0, 0, 0)
         z_lim_label_layout.addWidget(self.toolButtonZAxisReset)
 
         self.widgetZLim = QWidget(parent=self)
         z_lim_layout = QHBoxLayout()
+        z_lim_layout.setContentsMargins(0, 0, 0, 0)
         self.widgetZLim.setLayout(z_lim_layout)
 
         self.lineEditZLB = CustomLineEdit(parent=self)
@@ -468,7 +475,7 @@ class ColorsPage(CustomPage):
 
 @auto_log_methods(logger_key='Style')
 class StylingDock(CustomDockWidget):
-    def __init__(self, style_data, ui=None):
+    def __init__(self, ui: "MainWindow"):
         if not isinstance(ui, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
         super().__init__(parent=ui)
@@ -520,7 +527,7 @@ class StylingDock(CustomDockWidget):
         self.comboBoxStyleTheme.addItems(self.ui.style_data.load_theme_names())
         self.comboBoxStyleTheme.setCurrentIndex(0)
         
-        self.comboBoxStyleTheme.activated.connect(lambda: setattr(self, "style_dict", self.read_theme(self.comboBoxStyleTheme.currentText())))
+        self.comboBoxStyleTheme.activated.connect(lambda: setattr(self, "style_dict", self.ui.style_data.read_theme(self.comboBoxStyleTheme.currentText())))
         self.toolButtonSaveTheme.clicked.connect(self.save_style_theme)
 
         self.ui.control_dock.comboBoxFieldX.currentTextChanged.connect(lambda text: self.axis_variable_changed(text, 'x'))
@@ -581,8 +588,6 @@ class StylingDock(CustomDockWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolbox.sizePolicy().hasHeightForWidth())
         self.toolbox.setSizePolicy(sizePolicy)
-        self.toolbox.setFrameShape(QFrame.Shape.Panel)
-        self.toolbox.setFrameShadow(QFrame.Shadow.Raised)
         self.toolbox.setObjectName("toolBoxStyle")
 
         # Axes page
@@ -970,7 +975,7 @@ class StylingDock(CustomDockWidget):
 
         self.ui.schedule_update()
 
-    def update_axis_label(self, ax: str, new_text: str=None):
+    def update_axis_label(self, ax: str, new_text: str|None=None):
         
         if ax == 'c':
             ui_label = getattr(self.caxes, f"lineEdit{ax.upper()}Label")
@@ -988,7 +993,7 @@ class StylingDock(CustomDockWidget):
 
         self.ui.schedule_update()
 
-    def update_axis_scale(self, ax: str, new_text: str=None):
+    def update_axis_scale(self, ax: str, new_text: str|None=None):
         """Update axis scale combobox and triggers plot update.
 
         If `new_text` is None, it uses the current value of the combobox to set `self.[ax]scale`.
@@ -1149,7 +1154,7 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_overlay_color(self, new_color=None):
-        self.ui.overlay_color = new_color
+        self.ui.style_data.overlay_color = new_color
         self.annotations.colorButtonOverlayColor.color = new_color
         self.ui.schedule_update()
 
@@ -1297,7 +1302,7 @@ class StylingDock(CustomDockWidget):
             New mulitiplier for the line edit, by default None
         """
         if new_value is None:
-            self.ui.style_data.length_multiplier = self.ui.lineEditLengthMultipler.value
+            self.ui.style_data.length_multiplier = self.elements.lineEditLengthMultiplier.value
         else:
             if new_value == self.elements.lineEditLengthMultiplier.value:
                 return
@@ -1311,6 +1316,7 @@ class StylingDock(CustomDockWidget):
     def update_line_color(self, new_color=None):
         self.ui.style_data.line_color = new_color
         self.elements.colorButtonLineColor.color = new_color
+
         self.ui.schedule_update()
 
     # ------------------------------------------------------------------
@@ -1595,7 +1601,7 @@ class StylingDock(CustomDockWidget):
                 # color properties
                 # if color by field is set to clusters, then colormap fields are on,
                 # field is set by cluster table
-                if self.caxes.comboBoxFieldTypeC.currentText().lower() == 'none':
+                if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
                 else:
                     self.caxes.comboBoxCbarDirection.setEnabled(True)
@@ -1720,7 +1726,7 @@ class StylingDock(CustomDockWidget):
                     self.elements.doubleSpinBoxMarkerSize.setEnabled(True)
                     self.elements.sliderTransparency.setEnabled(True)
 
-                    ui.colorButtonMarkerColor.setEnabled(True)
+                    self.elements.colorButtonMarkerColor.setEnabled(True)
 
             case 'tec' | 'radar':
                 # axes properties
@@ -1728,7 +1734,7 @@ class StylingDock(CustomDockWidget):
                     self.axes.lineEditYLB.setEnabled(True)
                     self.axes.lineEditYUB.setEnabled(True)
                     self.axes.lineEditYLabel.setEnabled(True)
-                self.axes.lineEditAspectRation.setEnabled(True)
+                self.axes.lineEditAspectRatio.setEnabled(True)
                 self.axes.comboBoxTickDirection.setEnabled(True)
 
                 self.annotations.checkBoxShowMass.setEnabled(True)
@@ -1928,7 +1934,7 @@ class StylingDock(CustomDockWidget):
 
         # axes properties
         # set style dictionary values for Axes
-        for i, ax in enumerate(['x', 'y', 'z', 'c']):
+        for ax in ['x', 'y', 'z', 'c']:
             axes_obj = self.caxes if ax == 'c' else self.axes
 
             # Get axis-specific widgets
@@ -1964,7 +1970,7 @@ class StylingDock(CustomDockWidget):
             self.ui.control_dock.update_field_type_combobox_options(
                 field_type,
                 field,
-                ax=i
+                ax=ax
             )
             if getattr(self.ui.app_data, f"{ax}_field_type") is None or getattr(self.ui.app_data, f"{ax}_field_type") == '':
                 field_type.setCurrentIndex(0)
@@ -2028,9 +2034,9 @@ class StylingDock(CustomDockWidget):
         self.caxes.checkBoxReverseColormap.setChecked(style.cbar_reverse)
         
         field = self.ui.app_data.c_field
-        if field in list(data.processed_data.column_attributes.keys()):
-            self.ui.style_data.clim = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
-            self.ui.style_data.clabel = data.processed_data.get_attribute(field,'label')
+        if field in list(data.processed.column_attributes.keys()):
+            self.ui.style_data.clim = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
+            self.ui.style_data.clabel = data.processed.get_attribute(field,'label')
         else:
             self.ui.style_data.clim = style['CLim']
             self.ui.style_data.clabel = style['CLabel']
@@ -2135,7 +2141,7 @@ class StylingDock(CustomDockWidget):
 
         # change label in dictionary
         field = self.ui.control_dock.get_axis_field(ax)
-        data.processed_data.set_attribute(field,'label', new_label)
+        data.processed.set_attribute(field,'label', new_label)
         if ax == 'c':
             self.ui.style_data.style_dict[self.ui.style_data.plot_type][ax.upper()+'Label'] = new_label
         else:
@@ -2181,16 +2187,16 @@ class StylingDock(CustomDockWidget):
             field = self.ui.control_dock.get_axis_field(ax)
         if bound:
             if plot_type == 'histogram' and ax == 'y':
-                data.processed_data.set_attribute(field,'p_max', new_value)
+                data.processed.set_attribute(field,'p_max', new_value)
                 
             else:
-                data.processed_data.set_attribute(field,'plot_max', new_value)
+                data.processed.set_attribute(field,'plot_max', new_value)
                 
         else:
             if plot_type == 'histogram' and ax == 'y':
-                data.processed_data.set_attribute(field,'p_min', new_value)
+                data.processed.set_attribute(field,'p_min', new_value)
             else:
-                data.processed_data.set_attribute(field,'plot_min', new_value)
+                data.processed.set_attribute(field,'plot_min', new_value)
 
         if ax == 'c':
             self.ui.style_data.style_dict[plot_type][f'{ax.upper()}Lim'][bound] = new_value
@@ -2224,7 +2230,7 @@ class StylingDock(CustomDockWidget):
         field = self.ui.control_dock.get_axis_field(ax)
 
         if self._plot_type != 'heatmap':
-            data.processed_data.set_attribute(field,'norm',new_value)
+            data.processed.set_attribute(field,'norm',new_value)
 
         if ax == 'c':
             styles['CScale'] = new_value
@@ -2241,9 +2247,9 @@ class StylingDock(CustomDockWidget):
         field = self.ui.control_dock.comboBoxFieldC.currentText()
         if field == '':
             return
-        self.caxes.lineEditCLB.value = data.processed_data.get_attribute(field,'plot_min')
-        self.caxes.lineEditCUB.value = data.processed_data.get_attribute(field,'plot_max')
-        self.caxes.comboBoxCScale.setCurrentText(data.processed_data.get_attribute(field,'norm'))
+        self.caxes.lineEditCLB.value = data.processed.get_attribute(field,'plot_min')
+        self.caxes.lineEditCUB.value = data.processed.get_attribute(field,'plot_max')
+        self.caxes.comboBoxCScale.setCurrentText(data.processed.get_attribute(field,'norm'))
 
 
     def axis_reset_callback(self, ax):
@@ -2267,24 +2273,24 @@ class StylingDock(CustomDockWidget):
                 field = self.ui.control_dock.comboBoxFieldC.currentText()
                 if field == '':
                     return
-                data.processed_data.prep_data(field)
+                data.processed.prep_data(field)
 
             self.set_color_axis_widgets()
         else:
             match self.ui.control_dock.comboBoxPlotType.currentText().lower():
                 case 'field map' | 'cluster map' | 'cluster score map' | 'pca score':
                     field = ax.upper()
-                    data.processed_data.prep_data(field)
+                    data.processed.prep_data(field)
                     self.set_axis_widgets(ax, field)
                 case 'histogram':
                     field = self.ui.control_dock.comboBoxFieldC.currentText()
                     if ax == 'x':
                         field_type = self.ui.control_dock.comboBoxFieldTypeC.currentText()
-                        data.processed_data.prep_data(field)
+                        data.processed.prep_data(field)
                         self.set_axis_widgets(ax, field)
                     else:
-                        data.processed_data.set_attribute(field, 'p_min', None)
-                        data.processed_data.set_attribute(field, 'p_max', None)
+                        data.processed.set_attribute(field, 'p_min', None)
+                        data.processed.set_attribute(field, 'p_max', None)
 
                 case 'scatter' | 'heatmap':
                     match ax:
@@ -2299,7 +2305,7 @@ class StylingDock(CustomDockWidget):
                             field = self.ui.control_dock.comboBoxFieldZ.currentText()
                     if (field_type == '') | (field == ''):
                         return
-                    data.processed_data.prep_data(field)
+                    data.processed.prep_data(field)
                     self.set_axis_widgets(ax, field)
 
                 case 'PCA scatter' | 'PCA heatmap':
@@ -2308,7 +2314,7 @@ class StylingDock(CustomDockWidget):
                         field = self.ui.spinBoxPCX.currentText()
                     else:
                         field = self.ui.spinBoxPCY.currentText()
-                    data.processed_data.prep_data(field)
+                    data.processed.prep_data(field)
                     self.set_axis_widgets(ax, field)
 
                 case _:

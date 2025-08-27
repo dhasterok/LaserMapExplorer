@@ -66,7 +66,7 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     canvas = MplCanvas(parent=parent, map_flag=True)
 
     # get data for current map
-    #scale = data.processed_data.get_attribute(field, 'norm')
+    #scale = data.processed.get_attribute(field, 'norm')
     map_df = data.get_map_data(field, field_type)
 
     array_size = data.array_size
@@ -94,8 +94,8 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     canvas.array = reshaped_array
     canvas.dx = app_data.current_data.dx
     canvas.dy = app_data.current_data.dy
-    canvas.color_units = data.processed_data.column_attributes[field]['units']
-    canvas.distance_units = data.processed_data.column_attributes['Xc']['units']
+    canvas.color_units = data.processed.column_attributes[field]['units']
+    canvas.distance_units = data.processed.column_attributes['Xc']['units']
 
     add_colorbar(style_data, canvas, cax)
     match style_data.cscale:
@@ -523,7 +523,7 @@ def plot_histogram(parent, data, app_data, style_data):
 
         # Get the cluster labels for the data
         cluster_color, cluster_label, _ = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        cluster_group = data.processed_data.loc[:,method]
+        cluster_group = data.processed.loc[:,method]
         clusters = app_data.cluster_dict[method]['selected_clusters']
 
         hist_dfs = []
@@ -640,14 +640,14 @@ def plot_histogram(parent, data, app_data, style_data):
     else:
         font = {'font':style_data.font, 'size':style_data.font_size}
 
-    # set y-limits as p-axis min and max in data.processed_data.column_attributes
+    # set y-limits as p-axis min and max in data.processed.column_attributes
     if app_data.hist_plot_style != 'log-scaling' :
-        pmin = data.processed_data.get_attribute(x['field'], 'p_min')
-        pmax = data.processed_data.get_attribute(x['field'], 'p_max')
+        pmin = data.processed.get_attribute(x['field'], 'p_min')
+        pmax = data.processed.get_attribute(x['field'], 'p_max')
         if pmin is None or pmax is None:
             ymin, ymax = canvas.axes.get_ylim()
-            data.processed_data.set_attribute(x['field'], 'p_min', fmt.oround(ymin,order=2,toward=0))
-            data.processed_data.set_attribute(x['field'], 'p_max', fmt.oround(ymax,order=2,toward=1))
+            data.processed.set_attribute(x['field'], 'p_min', fmt.oround(ymin,order=2,toward=0))
+            data.processed.set_attribute(x['field'], 'p_max', fmt.oround(ymax,order=2,toward=1))
             style_data.set_axis_attributes('y', x['field'])
 
         # grab probablility axes limits
@@ -915,11 +915,11 @@ def plot_correlation(parent, data, app_data, style_data):
 
     # Calculate the correlation matrix
     method = app_data.corr_method.lower()
-    if app_data.cluster_method not in data.processed_data.columns:
+    if app_data.cluster_method not in data.processed.columns:
         correlation_matrix = df_filtered.corr(method=method)
     else:
         algorithm = app_data.cluster_method
-        cluster_group = data.processed_data.loc[:,algorithm]
+        cluster_group = data.processed.loc[:,algorithm]
         selected_clusters = app_data.cluster_dict[algorithm]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -1058,22 +1058,22 @@ def get_scatter_data(data, app_data, style_data, processed=True):
 
     # set axes widgets
     if (scatter_dict['x']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['x']['field'] not in data.processed_data.column_attributes:
+        if scatter_dict['x']['field'] not in data.processed.column_attributes:
             style_data.initialize_axis_values(data,scatter_dict['x']['type'], scatter_dict['x']['field'])
             style_data.set_axis_attributes(data,'x', scatter_dict['x']['field'])
 
     if (scatter_dict['y']['field'] is not None) and (scatter_dict['y']['field'] != ''):
-        if scatter_dict['y']['field'] not in data.processed_data.column_attributes:
+        if scatter_dict['y']['field'] not in data.processed.column_attributes:
             style_data.initialize_axis_values(data,scatter_dict['y']['type'], scatter_dict['y']['field'])
             style_data.set_axis_attributes('y', scatter_dict['y']['field'])
 
     if (scatter_dict['z']['field'] is not None) and (scatter_dict['z']['field'] != ''):
-        if scatter_dict['z']['field'] not in data.processed_data.column_attributes:
+        if scatter_dict['z']['field'] not in data.processed.column_attributes:
             style_data.initialize_axis_values(data,scatter_dict['z']['type'], scatter_dict['z']['field'])
             style_data.set_axis_attributes('z', scatter_dict['z']['field'])
 
     if (scatter_dict['c']['field'] is not None) and (scatter_dict['c']['field'] != ''):
-        if scatter_dict['c']['field'] not in data.processed_data.column_attributes:
+        if scatter_dict['c']['field'] not in data.processed.column_attributes:
             style_data.set_color_axis_widgets()
             style_data.set_axis_attributes('c', scatter_dict['c']['field'])
 
@@ -1226,7 +1226,7 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
                 return
 
         cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        cluster_group = data.processed_data.loc[:,method]
+        cluster_group = data.processed.loc[:,method]
         selected_clusters = app_data.cluster_dict[method]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -1367,7 +1367,7 @@ def ternary_scatter(canvas, data, app_data, style_data, x, y, z, c):
                 return
 
         cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        cluster_group = data.processed_data.loc[:,method]
+        cluster_group = data.processed.loc[:,method]
         selected_clusters = app_data.cluster_dict[method]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -1625,9 +1625,9 @@ def plot_ternary_map(parent, data, app_data, style_data):
     bfield = app_data.y_field
     cfield = app_data.z_field
 
-    a = data.processed_data.loc[:,afield].values
-    b = data.processed_data.loc[:,bfield].values
-    c = data.processed_data.loc[:,cfield].values
+    a = data.processed.loc[:,afield].values
+    b = data.processed.loc[:,bfield].values
+    c = data.processed.loc[:,cfield].values
 
     ca = get_rgb_color(get_hex_color(app_data.ternary_color_x))
     cb = get_rgb_color(get_hex_color(app_data.ternary_color_y))
@@ -1792,9 +1792,9 @@ def plot_ndim(parent, data, app_data, style_data):
     match plot_type:
         case 'Radar':
             axes_interval = 5
-            if cluster_flag and method in data.processed_data.columns:
+            if cluster_flag and method in data.processed.columns:
                 # Get the cluster labels for the data
-                cluster_group = data.processed_data[method][data.mask]
+                cluster_group = data.processed[method][data.mask]
 
                 df_filtered['clusters'] = cluster_group
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
@@ -1819,9 +1819,9 @@ def plot_ndim(parent, data, app_data, style_data):
                 
         case 'TEC':
             yl = [np.inf, -np.inf]
-            if cluster_flag and method in data.processed_data.columns:
+            if cluster_flag and method in data.processed.columns:
                 # Get the cluster labels for the data
-                cluster_group = data.processed_data[method][data.mask]
+                cluster_group = data.processed[method][data.mask]
 
                 df_filtered['clusters'] = cluster_group
 
@@ -1929,7 +1929,7 @@ def plot_score_map(parent,data, app_data, style_data):
             print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
             return canvas
 
-    reshaped_array = np.reshape(data.processed_data[field].values, data.array_size, order=data.order)
+    reshaped_array = np.reshape(data.processed[field].values, data.array_size, order=data.order)
 
     cax = canvas.axes.imshow(reshaped_array, cmap=style_data.cmap, aspect=data.aspect_ratio, interpolation='none')
     canvas.array = reshaped_array
@@ -1946,7 +1946,7 @@ def plot_score_map(parent,data, app_data, style_data):
     # add scalebar
     add_scalebar(data, app_data, style_data, canvas.axes)
 
-    return canvas, data.processed_data[field]
+    return canvas, data.processed[field]
 
 @log_call(logger_key='Plot')
 def plot_pca(parent, data, app_data, style_data):
@@ -2143,7 +2143,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, style_data):
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = data.processed_data.match_attribute('data_type','analyte')
+    analytes = data.processed.match_attribute('data_type','analyte')
 
     components = pca_results.components_
     # Number of components and variables
@@ -2231,7 +2231,7 @@ def plot_pca_components(pca_results,data, app_data, style_data,canvas):
         return
 
     # field labels
-    analytes = data.processed_data.match_attribute('data_type','analyte')
+    analytes = data.processed.match_attribute('data_type','analyte')
     nfields = len(analytes)
 
     # components
@@ -2496,7 +2496,7 @@ def plot_cluster_map(parent, data, app_data, style_data):
 
     # data frame for plotting
     #groups = data[plot_type][method].values
-    groups = data.processed_data[method].values
+    groups = data.processed[method].values
 
     reshaped_array = np.reshape(groups, data.array_size, order=data.order)
 
@@ -2526,7 +2526,7 @@ def plot_cluster_map(parent, data, app_data, style_data):
     # add scalebar
     add_scalebar(data, app_data, style_data, canvas.axes)
 
-    return canvas, data.processed_data[method]
+    return canvas, data.processed[method]
 
 def update_figure_font(canvas, font_name):
     """updates figure fonts without the need to recreate the figure.

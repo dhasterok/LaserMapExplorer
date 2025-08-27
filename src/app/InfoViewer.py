@@ -229,15 +229,15 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
 
         Notes
         -----
-        Assumes that `self.data.processed_data` and `self.plot_info` are already populated.
+        Assumes that `self.data.processed` and `self.plot_info` are already populated.
         Fields are not updated if none are selected.
         """
         idx = self.tabWidgetInfo.currentIndex()
         match self.tabWidgetInfo.tabText(idx).lower():
             case "metadata":
-                self.metadata_tab.update_metadata(self.data.processed_data)
+                self.metadata_tab.update_metadata(self.data.processed)
             case "data":
-                update_dataframe(self.data.processed_data, self.dataframe_tab.data_table)
+                update_dataframe(self.data.processed, self.dataframe_tab.data_table)
             case "field":
                 field = self.field_tab.field_combobox.currentText()
                 if not (field == ''):
@@ -692,7 +692,7 @@ class MetadataTab():
 
         self.field_combobox.activated.connect(self.update_table)
 
-        data = self.data.processed_data
+        data = self.data.processed
         data.attribute_callback = self.on_attribute_batch_changed
 
         self.update_metadata(data)
@@ -711,8 +711,8 @@ class MetadataTab():
         self.field_combobox.addItem("Selected")
         self.field_combobox.addItems(data.column_attributes.keys())
 
-        # self.selected_columns = list(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys())
-        # self.selected_rows = list(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys(1).keys())
+        # self.selected_columns = list(self.parent.data[self.parent.sample_id].processed.column_attributes.keys())
+        # self.selected_rows = list(self.parent.data[self.parent.sample_id].processed.column_attributes.keys(1).keys())
         self.selected_columns = set()
         self.selected_rows = set()
 
@@ -728,7 +728,7 @@ class MetadataTab():
         self.metadata_table.setRowCount(0)
         self.metadata_table.setColumnCount(0)
 
-        data = self.data.processed_data.column_attributes
+        data = self.data.processed.column_attributes
 
         # Determine the selected display option
         selected_option = self.field_combobox.currentText()
@@ -829,7 +829,7 @@ class MetadataTab():
             parent=self.metadata_table,
             row_labels=rows_to_display,
             column_keys=columns_to_display,
-            processed_data=self.data.processed_data,
+            processed_data=self.data.processed,
             special_rows={'plot_min', 'plot_max'},
             precision=PRECISION
         )
@@ -864,7 +864,7 @@ class MetadataTab():
     def toggle_all_columns(self):
         """Toggle all columns based on toolbar action."""
         if not self.columns_flag:
-            self.selected_columns = set(self.parent.data[self.parent.sample_id].processed_data.column_attributes.keys())
+            self.selected_columns = set(self.parent.data[self.parent.sample_id].processed.column_attributes.keys())
         else:
             self.selected_columns.clear()
 
@@ -879,7 +879,7 @@ class MetadataTab():
         """Toggle all rows based on toolbar action."""
         if not self.rows_flag:
             rows = set(
-                key for column in self.parent.data[self.parent.sample_id].processed_data.column_attributes.values()
+                key for column in self.parent.data[self.parent.sample_id].processed.column_attributes.values()
                 for key in column.keys()
             )
             self.selected_rows = rows
@@ -891,15 +891,15 @@ class MetadataTab():
 
     def update_column_attributes_on_checkbox_state(self, state, row_key, col_key):
         value = state == Qt.CheckState.Checked
-        if col_key not in self.data.processed_data.column_attributes:
-            self.data.processed_data.column_attributes[col_key] = {}
+        if col_key not in self.data.processed.column_attributes:
+            self.data.processed.column_attributes[col_key] = {}
 
-        self.data.processed_data.column_attributes[col_key][row_key] = value
+        self.data.processed.column_attributes[col_key][row_key] = value
 
     def update_column_attributes_on_combobox_change(self, value, row_key, col_key):
-        if col_key not in self.data.processed_data.column_attributes:
-            self.data.processed_data.column_attributes[col_key] = {}
-        self.data.processed_data.column_attributes[col_key][row_key] = value
+        if col_key not in self.data.processed.column_attributes:
+            self.data.processed.column_attributes[col_key] = {}
+        self.data.processed.column_attributes[col_key][row_key] = value
 
 
     def update_column_attributes_on_cell_change(self, item):
@@ -920,14 +920,14 @@ class MetadataTab():
             return  # Skip boolean — handled via checkbox callback
 
         # Update column_attributes
-        if col_key not in self.data.processed_data.column_attributes:
-            self.data.processed_data.column_attributes[col_key] = {}
+        if col_key not in self.data.processed.column_attributes:
+            self.data.processed.column_attributes[col_key] = {}
         
         # store attribute in specified dtype
         if attibute_dtype == float:
-            self.data.processed_data.column_attributes[col_key][row_key] = fmt.oround(float(item.text()), order=2, toward=0)
+            self.data.processed.column_attributes[col_key][row_key] = fmt.oround(float(item.text()), order=2, toward=0)
         else:
-            self.data.processed_data.column_attributes[col_key][row_key] = item.text()
+            self.data.processed.column_attributes[col_key][row_key] = item.text()
 
     def on_attribute_batch_changed(self, columns, attribute, values):
         # Map row keys and column keys to indices
@@ -1008,7 +1008,7 @@ class DataFrameTab():
             parent=toolbar,
         )
         self.action_sigfigs_more.triggered.connect(increase_precision)
-        self.action_sigfigs_more.triggered.connect(lambda: update_dataframe(self.data.processed_data, self.data_table))
+        self.action_sigfigs_more.triggered.connect(lambda: update_dataframe(self.data.processed, self.data_table))
         self.action_sigfigs_more.setToolTip("Increase the number of displayed digits")
 
         self.action_sigfigs_less = CustomAction(
@@ -1018,7 +1018,7 @@ class DataFrameTab():
             parent=toolbar
         )
         self.action_sigfigs_less.triggered.connect(decrease_precision)
-        self.action_sigfigs_less.triggered.connect(lambda: update_dataframe(self.data.processed_data, self.data_table))
+        self.action_sigfigs_less.triggered.connect(lambda: update_dataframe(self.data.processed, self.data_table))
         self.action_sigfigs_less.setToolTip("Reduce the number of displayed digits")
 
         toolbar.addAction(self.action_sigfigs_more)
@@ -1036,7 +1036,7 @@ class DataFrameTab():
         if not self.parent.data:
             return
 
-        update_dataframe(self.data.processed_data, self.data_table)
+        update_dataframe(self.data.processed, self.data_table)
 
 
 # -------------------------------
@@ -1167,7 +1167,7 @@ class FloatItemDelegate(QStyledItemDelegate):
         super().__init__(parent)
         self.row_labels = row_labels        # e.g., ['min', 'max', 'plot_min', 'plot_max', ...]
         self.column_keys = column_keys      # Mapping col_idx to key (e.g., ['Vp', 'Resistivity'])
-        self.processed_data = processed_data
+        self.processed = processed_data
         self.special_rows = special_rows or set()
         self.precision = precision
 
@@ -1184,7 +1184,7 @@ class FloatItemDelegate(QStyledItemDelegate):
 
             # If it's a plot_min or plot_max row, restrict range to actual data
             if row_label in self.special_rows:
-                col_data = self.processed_data[col_key]
+                col_data = self.processed[col_key]
                 amin, amax = np.min(col_data), np.max(col_data)
                 validator.setRange(amin, amax)
 

@@ -275,7 +275,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
                         save_data = self.data[self.sample_id].get_map_data(field, field_type)
                         filtered_image = self.noise_red_array
                     case 'cluster':
-                        save_data= self.data[self.sample_id].processed_data[field]
+                        save_data= self.data[self.sample_id].processed[field]
                     case _:
                         save_data = self.plot_info['data']
                     

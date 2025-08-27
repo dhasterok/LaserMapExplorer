@@ -736,7 +736,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # precalculate custom fields
         if self.calculator.precalculate_custom_fields:
             for name in self.calc_dict.keys():
-                if name in self.data[self.app_data.sample_id].processed_data.columns:
+                if name in self.data[self.app_data.sample_id].processed.columns:
                     continue
                 self.calculator.comboBoxFormula.setCurrentText(name)
                 self.calculator.calculate_new_field(save=False)
@@ -837,7 +837,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.hist_field_type = 'Analyte'
         field = ''
         if self.app_data.selected_analytes is None:
-            field = self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte')[0]
+            field = self.data[self.app_data.sample_id].processed.match_attribute('data_type','Analyte')[0]
         else:
             field = self.app_data.selected_analytes[0]
         self.app_data.hist_field = field
@@ -848,13 +848,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # update UI with auto scale and neg handling parameters from 'Analyte Info'
         self.update_spinboxes(field_type='Analyte', field=analyte_list[0])
         # update noise reduction, outlier detection, neg. handling, quantile bounds, diff bounds
-        self.data[self.app_data.sample_id].negative_method = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'negative_method')
-        self.data[self.app_data.sample_id].outlier_method = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'outlier_method')
-        self.data[self.app_data.sample_id].smoothing_method = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'smoothing_method')
-        self.data[self.app_data.sample_id].data_min_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'lower_bound')
-        self.data[self.app_data.sample_id].data_max_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'upper_bound')
-        self.data[self.app_data.sample_id].data_min_diff_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'diff_lower_bound')
-        self.data[self.app_data.sample_id].data_max_diff_quantile = self.data[self.app_data.sample_id].processed_data.get_attribute(field,'diff_upper_bound')
+        self.data[self.app_data.sample_id].negative_method = self.data[self.app_data.sample_id].processed.get_attribute(field,'negative_method')
+        self.data[self.app_data.sample_id].outlier_method = self.data[self.app_data.sample_id].processed.get_attribute(field,'outlier_method')
+        self.data[self.app_data.sample_id].smoothing_method = self.data[self.app_data.sample_id].processed.get_attribute(field,'smoothing_method')
+        self.data[self.app_data.sample_id].data_min_quantile = self.data[self.app_data.sample_id].processed.get_attribute(field,'lower_bound')
+        self.data[self.app_data.sample_id].data_max_quantile = self.data[self.app_data.sample_id].processed.get_attribute(field,'upper_bound')
+        self.data[self.app_data.sample_id].data_min_diff_quantile = self.data[self.app_data.sample_id].processed.get_attribute(field,'diff_lower_bound')
+        self.data[self.app_data.sample_id].data_max_diff_quantile = self.data[self.app_data.sample_id].processed.get_attribute(field,'diff_upper_bound')
 
         # reference chemistry is set when the data are initialized
         #self.data[self.app_data.sample_id].ref_chem = self.app_data.ref_chem
@@ -944,19 +944,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        for analyte in self.data[self.app_data.sample_id].processed_data.match_attribute('data_type','Analyte'):
+        for analyte in self.data[self.app_data.sample_id].processed.match_attribute('data_type','Analyte'):
             if analyte in list(analyte_dict.keys()):
-                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', True)
+                self.data[self.app_data.sample_id].processed.set_attribute(analyte, 'use', True)
             else:
-                self.data[self.app_data.sample_id].processed_data.set_attribute(analyte, 'use', False)
+                self.data[self.app_data.sample_id].processed.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
-                if analyte not in self.data[self.app_data.sample_id].processed_data.columns:
+                if analyte not in self.data[self.app_data.sample_id].processed.columns:
                     analyte_1, analyte_2 = analyte.split(' / ') 
                     self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
 
-            self.data[self.app_data.sample_id].processed_data.set_attribute(analyte,'norm',norm)
+            self.data[self.app_data.sample_id].processed.set_attribute(analyte,'norm',norm)
 
         self.plot_tree.update_tree(norm_update=True)
         #update analysis type combo in styles
@@ -1221,7 +1221,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             tree = 'Ratio (normalized)'
             branch = self.app_data.sample_id
-            for ratio in self.data[branch].processed_data.match_attribute('data_type','Ratio'):
+            for ratio in self.data[branch].processed.match_attribute('data_type','Ratio'):
                 item, check = self.plot_tree.find_leaf(tree, branch, leaf=ratio)
                 if item is None:
                     raise TypeError(f"Missing item ({ratio}) in plot_tree.")
@@ -1817,7 +1817,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         save_data = self.data[self.app_data.sample_id].get_map_data(field, field_type)
                         filtered_image = self.noise_red_array
                     case 'cluster':
-                        save_data= self.data[self.app_data.sample_id].processed_data[field]
+                        save_data= self.data[self.app_data.sample_id].processed[field]
                     case _:
                         save_data = self.plot_info['data']
                     
@@ -2188,9 +2188,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
 
         method = self.comboBoxClusterMethod.currentText()
-        if method in self.data[self.app_data.sample_id].processed_data.columns:
-            if not self.data[self.app_data.sample_id].processed_data[method].empty:
-                clusters = self.data[self.app_data.sample_id].processed_data[method].dropna().unique()
+        if method in self.data[self.app_data.sample_id].processed.columns:
+            if not self.data[self.app_data.sample_id].processed[method].empty:
+                clusters = self.data[self.app_data.sample_id].processed[method].dropna().unique()
                 clusters.sort()
 
                 self.app_data.cluster_dict[method]['selected_clusters'] = []
@@ -2390,7 +2390,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
         # get Auto scale parameters and neg handling from analyte info
-        data = self.data[self.app_data.sample_id].processed_data
+        data = self.data[self.app_data.sample_id].processed
         parameters = data.column_attributes[field]
 
         if self.canvasWindow.currentIndex() == self.tab_dict['sv']:

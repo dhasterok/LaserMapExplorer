@@ -192,7 +192,7 @@ class LameIO():
                         sample_dir = project_dir / sample_id
                         sample_dir.mkdir(parents=True, exist_ok=True)
                         # store raw data
-                        ui.data[sample_id].raw_data.to_csv(sample_dir / 'lame.csv', index=False)
+                        ui.data[sample_id].raw.to_csv(sample_dir / 'lame.csv', index=False)
                         # create rest of directories
                         (sample_dir / 'figure_data').mkdir()
                         (sample_dir / 'figures').mkdir()

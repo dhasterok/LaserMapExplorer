@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
 
         self.open_plot_tree()
 
-        self.style_dock = StylingDock(self.style_data, ui=self)
+        self.style_dock = StylingDock(ui=self)
         self.style_dock.toolbox.setCurrentIndex(0)
         self.style_dock.toolbox.layout().setSpacing(2)
 
@@ -306,7 +306,7 @@ class MainWindow(QMainWindow):
         self.control_dock.toolbox.setCurrentIndex(self.control_dock.tab_dict['sample'])
 
         if not enable:
-            self.control_dock.init_field_widgets(self.style_data.plot_axis_dict, self.style_dock.axis_widget_dict)
+            self.control_dock.init_field_widgets(self.style_data.axis_settings)
 
             self.control_dock.preprocess.setEnabled(False)
             self.control_dock.field_viewer.setEnabled(False)
@@ -475,7 +475,7 @@ class MainWindow(QMainWindow):
         # precalculate custom fields
         if hasattr(self, "calculator") and self.calculator.precalculate_custom_fields:
             for name in self.calc_dict:
-                if name in self.app_data.current_data.processed_data.columns:
+                if name in self.app_data.current_data.processed.columns:
                     continue
                 self.calculator.comboBoxFormula.setCurrentText(name)
                 self.calculator.calculate_new_field(save=False)
@@ -563,7 +563,7 @@ class MainWindow(QMainWindow):
         field = ''
         selected_analytes = self.app_data.selected_fields(field_type='Analyte')
         if len(selected_analytes) == 0:
-            field = data.processed_data.match_attribute('data_type','Analyte')[0]
+            field = data.processed.match_attribute('data_type','Analyte')[0]
         else:
             field = selected_analytes[0]
         self.app_data.c_field = field
@@ -682,7 +682,7 @@ class MainWindow(QMainWindow):
             return
 
         # get Auto scale parameters and neg handling from analyte info
-        parameters = self.app_data.current_data.processed_data.column_attributes[field]
+        parameters = self.app_data.current_data.processed.column_attributes[field]
 
         # update noise reduction, outlier detection, neg. handling, quantile bounds, diff bounds
         self.app_data.current_data.current_field = self.control_dock.comboBoxFieldC.currentText()
@@ -708,8 +708,8 @@ class MainWindow(QMainWindow):
         if hasattr(self, "mask_dock"):
             field = self.mask_dock.filter_tab.comboBoxFilterField.currentText()
 
-            self.mask_dock.filter_tab.lineEditFMin.value = self.app_data.current_data.processed_data[field].min()
-            self.mask_dock.filter_tab.lineEditFMax.value = self.app_data.current_data.processed_data[field].max()
+            self.mask_dock.filter_tab.lineEditFMin.value = self.app_data.current_data.processed[field].min()
+            self.mask_dock.filter_tab.lineEditFMax.value = self.app_data.current_data.processed[field].max()
 
 
     def update_selected_clusters_spinbox(self, new_selected_clusters):
@@ -759,35 +759,35 @@ class MainWindow(QMainWindow):
         invalid_values = [None, '', 'none', 'None']
         match self.style_data.plot_type:
             case 'field map':
-                axes = [3]
+                axes = ['c']
             case 'gradient map': 
-                axes = [3]
+                axes = ['c']
             case 'ternary map':
-                axes = [0,1,2]
+                axes = ['x','y','z']
             case 'correlation':
                 return True
             case 'histogram':
-                axes = [0]
+                axes = ['x']
             case 'scatter':
-                axes = [0,1]
+                axes = ['x','y']
             case 'heatmap':
-                axes = [0,1]
+                axes = ['x','y']
             case 'TEC' | 'radar':
                 return True
             case 'variance' | 'basis vectors' | 'performance':
                 return True
             case 'dimension score map':
-                axes = [3]
+                axes = ['c']
             case 'dimension scatter', 'dimension heatmap':
-                axes = [0,1]
+                axes = ['x','y']
             case 'cluster map':
-                axes = [3]
+                axes = ['c']
             case 'cluster score map':
-                axes = [3]
+                axes = ['c']
             case 'profile':
-                axes = [3]
+                axes = ['c']
             case 'polygon':
-                axes = [3]
+                axes = ['c']
 
         for ax in axes:
             if self.app_data.get_field_type(ax) in invalid_values:
@@ -889,7 +889,7 @@ class MainWindow(QMainWindow):
                 canvas, self.plot_info = plot_ternary_map(self, data, self.app_data, self.style_data)
 
             case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
-                if self.app_data.update_pca_flag or not data.processed_data.match_attribute('data_type','pca score'):
+                if self.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
                     self.control_dock.dimreduction.compute_dim_red(data, self.app_data)
                 canvas, self.plot_info = plot_pca(self, data, self.app_data, self.style_data)
 
@@ -1073,8 +1073,8 @@ class MainWindow(QMainWindow):
                 text += ':User: Your name here\n\n'
                 self.notes_dock.notes.print_info(text)
             case 'analytes':
-                analytes = data.processed_data.match_attribute('data_type', 'Analyte')
-                ratios = data.processed_data.match_attribute('data_type', 'Ratio')
+                analytes = data.processed.match_attribute('data_type', 'Analyte')
+                ratios = data.processed.match_attribute('data_type', 'Ratio')
                 text = ''
                 if analytes:
                     text += ':analytes collected: '+', '.join(analytes)
@@ -1099,14 +1099,14 @@ class MainWindow(QMainWindow):
                     return
 
                 # Retrieve analytes matching specified attributes
-                analytes = data.processed_data.match_attributes({'data_type': 'Analyte', 'use': True})
+                analytes = data.processed.match_attributes({'data_type': 'Analyte', 'use': True})
                 analytes = np.insert(analytes, 0, 'lambda')  # Insert 'lambda' at the start of the analytes array
 
                 # Calculate explained variance in percentage
                 explained_variance = self.pca_results.explained_variance_ratio_ * 100
 
                 # Retrieve PCA score headers matching the attribute condition
-                header = data.processed_data.match_attributes({'data_type': 'PCA score'})
+                header = data.processed.match_attributes({'data_type': 'PCA score'})
 
                 # Create a matrix with explained variance and PCA components
                 matrix = np.vstack([explained_variance, self.pca_results.components_])
@@ -1250,19 +1250,19 @@ class MainWindow(QMainWindow):
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        for analyte in self.app_data.current_data.processed_data.match_attribute('data_type','Analyte'):
+        for analyte in self.app_data.current_data.processed.match_attribute('data_type','Analyte'):
             if analyte in analyte_dict:
-                self.app_data.current_data.processed_data.set_attribute(analyte, 'use', True)
+                self.app_data.current_data.processed.set_attribute(analyte, 'use', True)
             else:
-                self.app_data.current_data.processed_data.set_attribute(analyte, 'use', False)
+                self.app_data.current_data.processed.set_attribute(analyte, 'use', False)
 
         for analyte, norm in analyte_dict.items():
             if '/' in analyte:
-                if analyte not in self.app_data.current_data.processed_data.columns:
+                if analyte not in self.app_data.current_data.processed.columns:
                     analyte_1, analyte_2 = analyte.split(' / ') 
                     self.app_data.current_data.compute_ratio(analyte_1, analyte_2)
 
-            self.app_data.current_data.processed_data.set_attribute(analyte,'norm',norm)
+            self.app_data.current_data.processed.set_attribute(analyte,'norm',norm)
 
         self.plot_tree.update_tree(norm_update=True)
 

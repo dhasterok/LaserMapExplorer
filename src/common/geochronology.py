@@ -19,7 +19,7 @@ class Geochronology():
 
         - **Re-Os**: :math:`1.666 \\pm 0.005 \\times 10^{-5}` Ma (Selby et al., GCA, 2007, https://doi.org/10.1016/j.gca.2007.01.008)
         """
-        data = self.parent.data[self.parent.sample_id].processed_data
+        data = self.parent.data[self.parent.sample_id].processed
 
         match self.parent.comboBoxDatingMethod.currentText():
             case "Lu-Hf":

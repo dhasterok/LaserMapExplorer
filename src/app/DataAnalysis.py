@@ -48,7 +48,7 @@ class Clustering():
         if max_clusters is None: 
             # set all masked data to cluster id 99
             n_clusters = [app_data.num_clusters]
-            data.processed_data[method] = 99
+            data.processed[method] = 99
         else:
             n_clusters = np.arange(1,app_data.max_clusters+1).astype(int)
             cluster_results = []
@@ -371,7 +371,7 @@ class ClusterPage(CustomPage, Clustering):
 
         # if PCA is not used for clustering, disable the PCA widgets
         if self.checkBoxWithPCA.isChecked() and self.checkBoxWithPCA.isEnabled():
-            self.spinBoxPCANumBasis.setMaximum(self.dock.ui.app_data.current_data.processed_data.get_attribute('PCA score').shape[1])
+            self.spinBoxPCANumBasis.setMaximum(self.dock.ui.app_data.current_data.processed.get_attribute('PCA score').shape[1])
             self.spinBoxPCANumBasis.setEnabled(True)
             #self.labelPCANumBasis.setEnabled(True)
         else:
@@ -556,8 +556,8 @@ class ClusterPage(CustomPage, Clustering):
         data = self.dock.ui.app_data.current_data
         method = self.dock.ui.app_data.cluster_method
         if self.dock.ui.app_data.update_cluster_flag or \
-                data.processed_data[method].empty or \
-                (method not in list(data.processed_data.columns)):
+                data.processed[method].empty or \
+                (method not in list(data.processed.columns)):
             # compute clusters
             self.dock.ui.statusbar.showMessage('Computing clusters')
             self.compute_clusters(data, self.dock.ui.app_data, max_clusters = None)

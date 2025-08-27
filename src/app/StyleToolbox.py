@@ -11,7 +11,7 @@ from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import STYLE_PATH
-from src.app.PlotAxisSettings import plot_axis_dict
+from src.app.PlotAxisSettings import axis_settings_dict
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods, log
 
@@ -406,7 +406,7 @@ class StyleData(Observable, StyleTheme):
     style_dict : dict of dict
         Dictionary with plot style information that saves the properties of style widgets.  There is a keyword
         for each plot type listed in ``comboBoxPlotType``.  The exact behavior of each style item may vary depending upon the
-        plot type.  While data related to plot and color axes may be stored in *style_dict*, *data.processed_data.column_attributes* stores labels, bounds and scale for most plot fields.
+        plot type.  While data related to plot and color axes may be stored in *style_dict*, *data.processed.column_attributes* stores labels, bounds and scale for most plot fields.
 
         style_dict[plot_type] -- plot types include ``field map``, ``histogram``, ``correlation``, ``gradient map``, ``scatter``, ``heatmap``, ``ternary map``
         ``TEC``, ``radar``, ``variance``, ``vectors``, ``pca scatter``, ``pca heatmap``, ``PCA Score``, ``Clusters``, ``Cluster Score``, ``profile``
@@ -502,9 +502,8 @@ class StyleData(Observable, StyleTheme):
         self.tick_dir_options = ['none', 'in', 'out', 'both']
         self.cbar_dir_options = ['none', 'vertical', 'horizontal']
 
-        #self.default_plot_axis_dict()
-        self.axis_settings = plot_axis_dict
-
+        # create the dictionary of plot axis features depending on plot type
+        self.axis_settings = axis_settings_dict
 
         self.style_dict = self.default_style_dict()
 
@@ -885,7 +884,6 @@ class StyleData(Observable, StyleTheme):
         else:
             raise TypeError("new_dir must be of type str.")
 
-
     @property
     def clim(self):
         return self.style_dict[self.plot_type]['CLim']
@@ -1017,25 +1015,25 @@ class StyleData(Observable, StyleTheme):
         self._ternary_color_m = new_color
         self.notify_observers("ternary_color_m", new_color)
 
-    def get_axis_label(self, ax):
+    def get_axis_label(self, ax: str):
         return getattr(self, f"{ax}label")
 
-    def set_axis_label(self, ax, new_label):
+    def set_axis_label(self, ax: str, new_label: str):
         setattr(self, f"{ax}label", new_label)
 
-    def get_axis_lim(self, ax):
+    def get_axis_lim(self, ax: str):
         return getattr(self, f"{ax}lim")
 
-    def set_axis_lim(self, ax, new_lim):
+    def set_axis_lim(self, ax: str, new_lim: list):
         setattr(self.ui.style_data, f"{ax}lim", new_lim)
 
-    def get_axis_scale(self, ax):
+    def get_axis_scale(self, ax: str):
         return getattr(self, f"{ax}scale")
 
-    def set_axis_scale(self, ax, new_scale):
+    def set_axis_scale(self, ax: str, new_scale: str):
         setattr(self, f"{ax}scale", new_scale)
 
-    def toggle_mass(self, labels):
+    def toggle_mass(self, labels: list[str]):
         """Removes mass from labels
 
         Removes mass if ``MainWindow.checkBoxShowMass.isChecked()`` is False
@@ -1080,187 +1078,6 @@ class StyleData(Observable, StyleTheme):
 
         return length
 
-    def default_plot_axis_dict(self):
-        self.plot_axis_dict = {
-            '': {
-                'axis': [False, False, False, False],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [False, False, False, False],
-                'lim_precision': [None, None, None, None],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, False],
-                'field_type': [''],
-                },
-            'field map': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, True],
-                },
-            'gradient map': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, True],
-                'field_type': ['Analyte','Ratio','Calculated','Special']
-                },
-            'correlation': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [False, False, False, True],
-                'lim_precision': [None, None, None, None],
-                'add_none': [False, False, False, True],
-                'spinbox': [False, False, False, True],
-                'cfield_type': ['Cluster']
-                },
-            'histogram': {
-                'axis': [True, False, False, True],
-                'axis_scale': [True, True, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [3, None, None, 3],
-                'add_none': [False, False, False, True],
-                'spinbox': [True, False, False, True],
-                'cfield_type': ['Cluster']
-                },
-            'scatter': {
-                'axis': [True, True, True, True],
-                'axis_scale': [True, True, True, True],
-                'axis_widgets': [True, True, True, True],
-                'lim_precision': [3, 3, 3, 3],
-                'add_none': [False, False, True, True],
-                'spinbox': [True, True, True, True],
-                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
-                },
-            'heatmap': {
-                'axis': [True, True, True, False],
-                'axis_scale': [True, True, True, True],
-                'axis_widgets': [True, True, True, True],
-                'lim_precision': [3, 3, 3, 3],
-                'add_none': [False, False, True, False],
-                'spinbox': [True, True, True, False],
-                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
-                },
-            'ternary map': {
-                'axis': [True, True, True, False],
-                'axis_scale': [True, True, False, False],
-                'axis_widgets': [True, True, False, False],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [True, True, True, False],
-                'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
-                },
-            'TEC': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, True, False, False],
-                'axis_widgets': [False, True, False, False],
-                'lim_precision': [None, 3, None, None],
-                'add_none': [False, False, False, True],
-                'spinbox': [False, False, False, True],
-                'field_type': ['Analyte'],
-                'cfield_type': ['Cluster']
-                },
-            'radar': {
-                'axis': [False, False, False, True],
-                'axis_scale': [True, False, False, False],
-                'axis_widgets': [False, False, False, False],
-                'lim_precision': [None, 3, None, None],
-                'add_none': [False, False, False, True],
-                'spinbox': [False, False, False, True],
-                'field_type': ['Analyte','Ratio','Calculated','PCA score','Special']
-                },
-            'variance': {
-                'axis': [False, False, False, False],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [False, False, False, True],
-                'lim_precision': [None, None, None, None],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, False]
-                },
-            'basis vectors': {
-                'axis': [False, False, False, False],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [False, False, False, False],
-                'lim_precision': [None, None, None, None],
-                'add_none': [False, False, False, False],
-                'spinbox': [True, True, False, False]
-                },
-            'dimension score map': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, True],
-                'field_type': ['PCA score']
-                },
-            'dimension scatter': {
-                'axis': [True, True, False, True],
-                'axis_scale': [True, True, True, True],
-                'axis_widgets': [True, True, True, True],
-                'lim_precision': [3, 3, 3, 3],
-                'add_none': [False, False, False, True],
-                'spinbox': [True, True, False, True],
-                'field_type': ['PCA score']
-                }, 
-            'dimension heatmap': {
-                'axis': [True, True, False, False],
-                'axis_scale': [True, True, True, True],
-                'axis_widgets': [True, True, True, True],
-                'lim_precision': [3, 3, 3, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [True, True, False, False],
-                'field_type': ['PCA score']
-                },
-            'cluster map': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, False],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, False],
-                'field_type': ['Cluster']
-                },
-            'cluster score map': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, True],
-                'field_type': ['Cluster score']
-                },
-            'cluster performance': {
-                'axis': [False, False, False, True],
-                'axis_scale': [True, True, False, False],
-                'axis_widgets': [True, True, False, False],
-                'lim_precision': [3, 3, None, None],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, False],
-                'field_type': ['Cluster']
-                },
-            'profile': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, True],
-                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
-                },
-            'polygon': {
-                'axis': [False, False, False, True],
-                'axis_scale': [False, False, False, False],
-                'axis_widgets': [True, True, False, True],
-                'lim_precision': [None, None, None, 3],
-                'add_none': [False, False, False, False],
-                'spinbox': [False, False, False, True],
-                'field_type': ['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
-                }
-        }
     
     def set_style_attributes(self, data, app_data, plot_type=None, style=None):
         """Sets values in style dictionary
@@ -1277,8 +1094,6 @@ class StyleData(Observable, StyleTheme):
         
         style = self.style_dict[plot_type]
 
-        axis_list = ['x', 'y', 'z', 'c']
-                
         if plot_type.lower() in self.map_plot_types:
             
             xmin,xmax,xscale,_ = self.get_axis_values(data,'Xc')
@@ -1301,20 +1116,21 @@ class StyleData(Observable, StyleTheme):
             if self.scale_length is None:
                 self.scale_length = self.default_scale_length()
         else:
-            for ax_number, exist in enumerate(self.plot_axis_dict[plot_type]['axis_widgets']):
-                ax = axis_list[ax_number]
-                if exist and (ax is not 'c'):
-                    field = getattr(self.app_data,f'{ax}_field')
+            axis_settings = self.axis_settings[plot_type].axes  # dict of AxisSettings
+
+            for ax, settings in axis_settings.items():
+                if settings.widgets and ax != 'c':   # check per-axis attribute
+                    field = getattr(self.app_data, f'{ax}_field')
                     self.set_axis_attributes(ax, field)
 
             self.scale_length = None
 
         self.aspect_ratio = data.aspect_ratio
 
-        if app_data.c_field in list(data.processed_data.column_attributes):
+        if app_data.c_field in list(data.processed.column_attributes):
             field = app_data.c_field
-            style['CLim'] = [data.processed_data.get_attribute(field,'plot_min'), data.processed_data.get_attribute(field,'plot_max')]
-            style['CLabel'] = data.processed_data.get_attribute(field,'label')
+            style['CLim'] = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
+            style['CLabel'] = data.processed.get_attribute(field,'label')
 
         if app_data.c_field_type == 'cluster':
             style['CScale'] = 'discrete'
@@ -1342,15 +1158,15 @@ class StyleData(Observable, StyleTheme):
         """ 
 
         # get axis values from processed data
-        amin = data.processed_data.get_attribute(field,'plot_min')
-        amax = data.processed_data.get_attribute(field,'plot_max')
-        scale = data.processed_data.get_attribute(field,'norm')
-        label = data.processed_data.get_attribute(field,'label')
+        amin = data.processed.get_attribute(field,'plot_min')
+        amax = data.processed.get_attribute(field,'plot_max')
+        scale = data.processed.get_attribute(field,'norm')
+        label = data.processed.get_attribute(field,'label')
 
         # if probability axis associated with histogram
         if ax == 'p':
-            pmin = data.processed_data.get_attribute(field,'p_min')
-            pmax = data.processed_data.get_attribute(field,'p_max')
+            pmin = data.processed.get_attribute(field,'p_min')
+            pmax = data.processed.get_attribute(field,'p_max')
             return amin, amax, scale, label, pmin, pmax
 
         return amin, amax, scale, label
@@ -1365,7 +1181,7 @@ class StyleData(Observable, StyleTheme):
         ax : str
             Axis 'x', 'y', or 'z'
         field : str
-            Field plotted on axis, used as column name to ``MainWindow.data.processed_data`` dataframe.
+            Field plotted on axis, used as column name to ``MainWindow.data.processed`` dataframe.
         """
         data = self.ui.app_data.current_data
 
@@ -1374,30 +1190,30 @@ class StyleData(Observable, StyleTheme):
 
         match ax:
             case 'x':
-                xmin = data.processed_data.get_attribute(field,'plot_min')
-                xmax = data.processed_data.get_attribute(field,'plot_max')
+                xmin = data.processed.get_attribute(field,'plot_min')
+                xmax = data.processed.get_attribute(field,'plot_max')
                 self.xlim = [xmin, xmax]
-                self.xlabel = data.processed_data.get_attribute(field,'label')
-                self.xscale = data.processed_data.get_attribute(field,'norm')
+                self.xlabel = data.processed.get_attribute(field,'label')
+                self.xscale = data.processed.get_attribute(field,'norm')
             case 'y':
                 if self.plot_type == 'histogram':
-                    ymin = data.processed_data.get_attribute(field,'p_min')
-                    ymax = data.processed_data.get_attribute(field,'p_max')
+                    ymin = data.processed.get_attribute(field,'p_min')
+                    ymax = data.processed.get_attribute(field,'p_max')
                     self.ylim = [ymin, ymax]
                     self.ylabel = self.app_data.hist_plot_style
                     self.yscale = 'linear'
                 else:
-                    ymin = data.processed_data.get_attribute(field,'plot_min')
-                    ymax = data.processed_data.get_attribute(field,'plot_max')
+                    ymin = data.processed.get_attribute(field,'plot_min')
+                    ymax = data.processed.get_attribute(field,'plot_max')
                     self.ylim = [ymin, ymax]
-                    self.ylabel = data.processed_data.get_attribute(field,'label')
-                    self.yscale = data.processed_data.get_attribute(field,'norm')
+                    self.ylabel = data.processed.get_attribute(field,'label')
+                    self.yscale = data.processed.get_attribute(field,'norm')
             case 'z':
-                zmin = data.processed_data.get_attribute(field,'plot_min')
-                zmax = data.processed_data.get_attribute(field,'plot_max')
+                zmin = data.processed.get_attribute(field,'plot_min')
+                zmax = data.processed.get_attribute(field,'plot_max')
                 self.zlim = [zmin, zmax]
-                self.zlabel = data.processed_data.get_attribute(field,'label')
-                self.zscale = data.processed_data.get_attribute(field,'norm')   
+                self.zlabel = data.processed.get_attribute(field,'label')
+                self.zscale = data.processed.get_attribute(field,'norm')   
     
     # color functions 
     def color_norm(self, N=None):

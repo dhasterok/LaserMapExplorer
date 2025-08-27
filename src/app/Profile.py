@@ -962,8 +962,8 @@ class Profiling:
     #     None
     #     """
     #     # Obtain field data of all fields that will be used for profiling
-    #     fields = self.data.processed_data.match_attribute('data_type', 'Analyte') + self.data.processed_data.match_attribute('data_type', 'Ratio')
-    #     field_data = self.data.processed_data[fields]
+    #     fields = self.data.processed.match_attribute('data_type', 'Analyte') + self.data.processed.match_attribute('data_type', 'Ratio')
+    #     field_data = self.data.processed[fields]
 
     #     # If updating an existing point, remove it first
     #     if point_index is not None:
@@ -1036,10 +1036,10 @@ class Profiling:
         """
         # Obtain field data of all fields that will be used for profiling
         fields = (
-            self.data.processed_data.match_attribute('data_type', 'Analyte') +
-            self.data.processed_data.match_attribute('data_type', 'Ratio')
+            self.data.processed.match_attribute('data_type', 'Analyte') +
+            self.data.processed.match_attribute('data_type', 'Ratio')
         )
-        field_data = self.data.processed_data[fields]
+        field_data = self.data.processed[fields]
 
         # If updating an existing point, remove it first
         if point_index is not None:

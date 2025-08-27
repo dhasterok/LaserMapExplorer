@@ -70,7 +70,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         if self.ui.app_data.sample_id == '':
             self.data = None
         else:
-            self.data = self.ui.data[self.ui.app_data.sample_id].processed_data
+            self.data = self.ui.data[self.ui.app_data.sample_id].processed
 
         FieldLogicUI.__init__(self, self.data)
 
@@ -404,7 +404,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         """Deletes a previously stored formula
         
         Removes the formula from ``MainWindow.formula_combobox``, the file given by ``MainWindow.calc_filename`` and 
-        ``parent.app_data.data[parent.app_data.sample_id].processed_data``.
+        ``parent.app_data.data[parent.app_data.sample_id].processed``.
         """
         func = 'calc_delete_formula'
 
@@ -487,7 +487,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
             new_field = self.comboBoxFormula.currentText()
 
         # Use CustomFieldCalculator to compute new field
-        self.cfc.calculate_new_field(self.ui.app_data.data[self.ui.app_data.sample_id].processed_data, self.ui.ref_chem, new_field)
+        self.cfc.calculate_new_field(self.ui.app_data.data[self.ui.app_data.sample_id].processed, self.ui.ref_chem, new_field)
 
         # update formula_combobox
         self.comboBoxFormula.addItem(new_field)
@@ -667,7 +667,7 @@ class CustomFieldCalculator():
             return
         else:   # conditionals
             # start with empty dataFrame
-            result = pd.DataFrame({new_field: np.nan*np.zeros_like(data.processed_data.iloc[:,0])})
+            result = pd.DataFrame({new_field: np.nan*np.zeros_like(data.processed.iloc[:,0])})
 
             # loop over cases (cond, expr)
             for i in range(0,len(cond),2):

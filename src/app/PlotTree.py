@@ -157,7 +157,7 @@ class PlotTree(CustomDockWidget):
             return
 
         # assign the two objects needed from self.ui
-        data = self.ui.app_data.data[sample_id].processed_data
+        data = self.ui.app_data.data[sample_id].processed
         treeView = self.treeView
 
         # add sample_id to analyte branch
@@ -392,14 +392,14 @@ class PlotTree(CustomDockWidget):
         self.unhighlight_tree(self.tree['Ratio'])
         self.unhighlight_tree(self.tree['Analyte'])
 
-        analytes = data.processed_data.match_attribute('data_type','Analyte')
-        ratios = data.processed_data.match_attribute('data_type','Ratio')
+        analytes = data.processed.match_attribute('data_type','Analyte')
+        ratios = data.processed.match_attribute('data_type','Ratio')
 
-        data.processed_data.set_attribute(analytes,'use',False)
+        data.processed.set_attribute(analytes,'use',False)
         treeView = self.treeView
 
         for analyte in analytes + ratios:
-            norm = data.processed_data.get_attribute(analyte,'norm')
+            norm = data.processed.get_attribute(analyte,'norm')
             if '/' in analyte:
                 analyte_1, analyte_2 = analyte.split(' / ')
 
@@ -438,7 +438,7 @@ class PlotTree(CustomDockWidget):
                     font.setItalic(True)
                     leaf_item_norm.setFont(font)
                     leaf_item_norm.setEnabled(False)
-                    data.processed_data.set_attribute(analyte, 'use', False)
+                    data.processed.set_attribute(analyte, 'use', False)
 
             else: #single analyte
 
@@ -450,7 +450,7 @@ class PlotTree(CustomDockWidget):
 
                 leaf_item.setBackground(QBrush(QColor(hexcolor)))
 
-                data.processed_data.set_attribute(analytes,'use',True)
+                data.processed.set_attribute(analytes,'use',True)
 
             if norm_update: #update if analytes are returned from analyte selection window
                 data.update_norm(norm, analyte)

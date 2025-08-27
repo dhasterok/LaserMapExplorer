@@ -660,7 +660,7 @@ class PreprocessingUI(CustomPage):
 
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = data.processed_data.match_attribute('data_type', 'Analyte') + data.processed_data.match_attribute('data_type', 'Ratio')
+            analyte_list = data.processed.match_attribute('data_type', 'Analyte') + data.processed.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
@@ -699,7 +699,7 @@ class PreprocessingUI(CustomPage):
     def update_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
 
-        data = self.dock.ui.data[self.dock.ui.app_data.sample_id].processed_data
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id].processed
 
         columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
@@ -711,7 +711,7 @@ class PreprocessingUI(CustomPage):
     def update_invalid_data_labels(self):
         """Updates flags on statusbar indicating negative/zero and nan values within the processed_data_frame"""        
 
-        data = self.dock.ui.data[self.dock.ui.app_data.sample_id].processed_data
+        data = self.dock.ui.data[self.dock.ui.app_data.sample_id].processed
 
         columns = data.match_attributes({'data_type': 'Analyte', 'use': True}) + data.match_attributes({'data_type': 'Ratio', 'use': True})
         negative_count = any(data[columns] <= 0)
@@ -778,7 +778,7 @@ class PreprocessingUI(CustomPage):
 
         if self.checkBoxApplyAll.isChecked():
             # Apply to all iolties
-            analyte_list = data.processed_data.match_attribute('data_type', 'Analyte') + data.processed_data.match_attribute('data_type', 'Ratio')
+            analyte_list = data.processed.match_attribute('data_type', 'Analyte') + data.processed.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:

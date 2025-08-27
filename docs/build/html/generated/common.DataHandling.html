@@ -415,17 +415,17 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj" title="common.DataHandling.LaserSampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LaserSampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj" title="common.DataHandling.LaserSampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LaserSampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p></dd>
 </dl>
 </p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
 <td><p>Creates a base sample object to store and manipulate geochemical data in map form</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj" title="common.DataHandling.XRFSampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XRFSampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj" title="common.DataHandling.XRFSampleObj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XRFSampleObj</span></code></a>(sample_id, file_path, ...[, ...])</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p></dd>
@@ -438,7 +438,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataHandling.</span></span><span class="sig-name descname"><span class="pre">LaserSampleObj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlier_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">negative_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_chem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#LaserSampleObj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.LaserSampleObj" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../common.html#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleObj</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleObj</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -471,9 +471,9 @@
 <dt><strong>ny</strong></dt><dd></dd>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">outlier_method</span></code></dt><dd><p>str : Method for predicting and clipping outliers.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.ref_chem" title="common.DataHandling.LaserSampleObj.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>dict : Reference chemistry</p>
+<dt><a class="reference internal" href="#common.DataHandling.LaserSampleObj.ref_chem" title="common.DataHandling.LaserSampleObj.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>dict : Reference chemistry</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">valid_data_types</span></code></dt><dd><p>list : data types possible for in processed_data.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">valid_data_types</span></code></dt><dd><p>list : data types possible for in processed data.</p>
 </dd>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></dt><dd><p>numpy.ndarray : Value of x-coordinate associated with map data</p>
 </dd>
@@ -493,88 +493,88 @@
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.add_columns" title="common.DataHandling.LaserSampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.add_columns" title="common.DataHandling.LaserSampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
 <td><p>Add one or more columns to the sample object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.add_observer" title="common.DataHandling.LaserSampleObj.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.add_observer" title="common.DataHandling.LaserSampleObj.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Register a callback function to be called when a property changes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.apply_field_filters" title="common.DataHandling.LaserSampleObj.apply_field_filters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_field_filters</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.apply_field_filters" title="common.DataHandling.LaserSampleObj.apply_field_filters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_field_filters</span></code></a>()</p></td>
 <td><p>Applies filters based on field values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.auto_scale" title="common.DataHandling.LaserSampleObj.auto_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_scale</span></code></a>(sample_id, field[, update])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.auto_scale" title="common.DataHandling.LaserSampleObj.auto_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_scale</span></code></a>(sample_id, field[, update])</p></td>
 <td><p>Auto-scales pixel values in map</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.clip_outliers" title="common.DataHandling.LaserSampleObj.clip_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_outliers</span></code></a>(array, outlier_method[, pl, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.clip_outliers" title="common.DataHandling.LaserSampleObj.clip_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_outliers</span></code></a>(array, outlier_method[, pl, ...])</p></td>
 <td><p>Attempts to remove outliers to by a method selected by the user.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.cluster_data" title="common.DataHandling.LaserSampleObj.cluster_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.cluster_data" title="common.DataHandling.LaserSampleObj.cluster_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_data</span></code></a>()</p></td>
 <td><p>Clusters data for use with data preprocessing</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.compute_ratio" title="common.DataHandling.LaserSampleObj.compute_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ratio</span></code></a>(analyte_1, analyte_2)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.compute_ratio" title="common.DataHandling.LaserSampleObj.compute_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ratio</span></code></a>(analyte_1, analyte_2)</p></td>
 <td><p>Compute a ratio field from two analytes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.confirm_reset" title="common.DataHandling.LaserSampleObj.confirm_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_reset</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.confirm_reset" title="common.DataHandling.LaserSampleObj.confirm_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_reset</span></code></a>()</p></td>
 <td><p>A simple dialog that ensures the user wishes to reset data</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.create_label" title="common.DataHandling.LaserSampleObj.create_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_label</span></code></a>(column_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.create_label" title="common.DataHandling.LaserSampleObj.create_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_label</span></code></a>(column_name)</p></td>
 <td><p>Creates a default label for axes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.delete_column" title="common.DataHandling.LaserSampleObj.delete_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_column</span></code></a>(column_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.delete_column" title="common.DataHandling.LaserSampleObj.delete_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_column</span></code></a>(column_name)</p></td>
 <td><p>Deletes a column and associated attributes from the AttributeDataFrame.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.get_map_data" title="common.DataHandling.LaserSampleObj.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field[, field_type, norm, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.get_map_data" title="common.DataHandling.LaserSampleObj.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field[, field_type, norm, ...])</p></td>
 <td><p>Retrieves and processes the mapping data for the given sample and analytes</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.get_processed_data" title="common.DataHandling.LaserSampleObj.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.get_processed_data" title="common.DataHandling.LaserSampleObj.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>()</p></td>
 <td><p>Gets the processed data for analysis</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.get_vector" title="common.DataHandling.LaserSampleObj.get_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vector</span></code></a>(field_type, field[, norm, processed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.get_vector" title="common.DataHandling.LaserSampleObj.get_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vector</span></code></a>(field_type, field[, norm, processed])</p></td>
 <td><p>Creates a dictionary of values for plotting</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.k_optimal_clusters" title="common.DataHandling.LaserSampleObj.k_optimal_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_optimal_clusters</span></code></a>(data[, max_clusters])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.k_optimal_clusters" title="common.DataHandling.LaserSampleObj.k_optimal_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_optimal_clusters</span></code></a>(data[, max_clusters])</p></td>
 <td><p>Predicts the optimal number of clusters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.notify_observers" title="common.DataHandling.LaserSampleObj.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.notify_observers" title="common.DataHandling.LaserSampleObj.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
 <td><p>Notify all registered observers of an event or property change.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.prep_data" title="common.DataHandling.LaserSampleObj.prep_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prep_data</span></code></a>([field])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.prep_data" title="common.DataHandling.LaserSampleObj.prep_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prep_data</span></code></a>([field])</p></td>
 <td><p>Applies adjustments to data data prior to analyses and plotting.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.remove_observer" title="common.DataHandling.LaserSampleObj.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.remove_observer" title="common.DataHandling.LaserSampleObj.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Deregister a callback function from an event.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.reset_crop" title="common.DataHandling.LaserSampleObj.reset_crop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_crop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.reset_crop" title="common.DataHandling.LaserSampleObj.reset_crop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_crop</span></code></a>()</p></td>
 <td><p>Reset the data to the original bounds.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.reset_data" title="common.DataHandling.LaserSampleObj.reset_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.reset_data" title="common.DataHandling.LaserSampleObj.reset_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data</span></code></a>()</p></td>
 <td><p>Reverts back to the original data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.reset_data_handling" title="common.DataHandling.LaserSampleObj.reset_data_handling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data_handling</span></code></a>()</p></td>
-<td><p>Resets processed_data back to raw before performing autoscaling.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.reset_data_handling" title="common.DataHandling.LaserSampleObj.reset_data_handling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data_handling</span></code></a>()</p></td>
+<td><p>Resets processed data back to raw before performing autoscaling.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.reset_resolution" title="common.DataHandling.LaserSampleObj.reset_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_resolution</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.reset_resolution" title="common.DataHandling.LaserSampleObj.reset_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_resolution</span></code></a>()</p></td>
 <td><p>Resets dx and dy to initial values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.scale_options" title="common.DataHandling.LaserSampleObj.scale_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_options</span></code></a>([plot_type, ax, field_type, field])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.scale_options" title="common.DataHandling.LaserSampleObj.scale_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_options</span></code></a>([plot_type, ax, field_type, field])</p></td>
 <td><p>list : options for scaling the data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.sort_data" title="common.DataHandling.LaserSampleObj.sort_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_data</span></code></a>(method)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.sort_data" title="common.DataHandling.LaserSampleObj.sort_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_data</span></code></a>(method)</p></td>
 <td><p>Sorts analyte columns in the raw and processed data according to the specified method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.swap_resolution" title="common.DataHandling.LaserSampleObj.swap_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_resolution</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.swap_resolution" title="common.DataHandling.LaserSampleObj.swap_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_resolution</span></code></a>()</p></td>
 <td><p>Swaps DX and DY for a dataframe, updates X and Y</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.swap_xy" title="common.DataHandling.LaserSampleObj.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.swap_xy" title="common.DataHandling.LaserSampleObj.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
 <td><p>Swaps data in a SampleObj.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.transform_array" title="common.DataHandling.LaserSampleObj.transform_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_array</span></code></a>(array, negative_method)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.transform_array" title="common.DataHandling.LaserSampleObj.transform_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_array</span></code></a>(array, negative_method)</p></td>
 <td><p>Negative and zero handling with clustering for noise detection.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.update_norm" title="common.DataHandling.LaserSampleObj.update_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_norm</span></code></a>([norm, field])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.update_norm" title="common.DataHandling.LaserSampleObj.update_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_norm</span></code></a>([norm, field])</p></td>
 <td><p>Update the norm of the data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.LaserSampleObj.update_resolution" title="common.DataHandling.LaserSampleObj.update_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_resolution</span></code></a>(axis, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.LaserSampleObj.update_resolution" title="common.DataHandling.LaserSampleObj.update_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_resolution</span></code></a>(axis, value)</p></td>
 <td><p>Updates DX and DY for a dataframe</p></td>
 </tr>
 </tbody>
@@ -584,7 +584,7 @@
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj.add_columns">
 <span class="sig-name descname"><span class="pre">add_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.add_columns" title="Link to this definition">#</a></dt>
 <dd><p>Add one or more columns to the sample object.</p>
-<p>Adds one or more columns to <cite>SampleObj.processed_data</cite>. If a mask is provided,
+<p>Adds one or more columns to <cite>SampleObj.processed</cite>. If a mask is provided,
 the data is placed in the correct rows based on the mask.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -593,7 +593,7 @@ the data is placed in the correct rows based on the mask.</p>
 <li><p><strong>column_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name or names of the columns to add. If a column already exists, it will be overwritten.</p></li>
 <li><p><strong>array</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – A 1D array (for single column) or 2D array (for multiple columns). The data to be added.</p></li>
 <li><p><strong>mask</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>, </em><em>optional</em>) – A boolean mask that indicates which rows in the original data should be filled. If not provided,
-the length of <cite>array</cite> must match the height of <cite>processed_data</cite>.</p></li>
+the length of <cite>array</cite> must match the height of <cite>processed data</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -607,8 +607,8 @@ and “overwritten” or “added” as values if multiple columns are added.</p
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – Valid types are given in <cite>SampleObj._valid_data_types</cite>.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The number of columns in the array must match the length of <cite>column_names</cite> (if multiple columns are being added).</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The length of array must match the height of <cite>processed_data</cite> if no mask is provided.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If a mask is provided, its length must match the height of <cite>processed_data</cite>, and the number of <cite>True</cite> values
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The length of array must match the height of <cite>processed data</cite> if no mask is provided.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If a mask is provided, its length must match the height of <cite>processed data</cite>, and the number of <cite>True</cite> values
 in the mask must match the number of rows in <cite>array</cite>.</p></li>
 </ul>
 </dd>
@@ -680,7 +680,7 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj.compute_ratio">
 <span class="sig-name descname"><span class="pre">compute_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyte_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.compute_ratio" title="Link to this definition">#</a></dt>
 <dd><p>Compute a ratio field from two analytes.</p>
-<p>Ratios are computed on the processed_data, after negative handling, but before autoscaling.</p>
+<p>Ratios are computed on the processed data, after negative handling, but before autoscaling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -709,10 +709,10 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj.create_label">
 <span class="sig-name descname"><span class="pre">create_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.create_label" title="Link to this definition">#</a></dt>
 <dd><p>Creates a default label for axes.</p>
-<p>Creates a default label for axes on plots, using the column name in processed_data.</p>
+<p>Creates a default label for axes on plots, using the column name in processed data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Column in processed_data.</p>
+<dd class="field-odd"><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Column in processed data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -830,7 +830,7 @@ unusable due to incorrect calibrations, particularly for low and high element co
 <p>These calculations start from the cropped data, but do not include chemical, polygonal, or cluster filtering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – processed data has not yet been initialized.  processed data should be created when the sample is initialized and prep_data is
 run for the first time.</p>
 </dd>
 </dl>
@@ -872,7 +872,7 @@ computations, etc.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj.reset_data_handling">
 <span class="sig-name descname"><span class="pre">reset_data_handling</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.reset_data_handling" title="Link to this definition">#</a></dt>
-<dd><p>Resets processed_data back to raw before performing autoscaling.</p>
+<dd><p>Resets processed data back to raw before performing autoscaling.</p>
 <p>Any computed fields will be removed.</p>
 </dd></dl>
 
@@ -884,7 +884,7 @@ computations, etc.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj.scale_options">
-<span class="sig-name descname"><span class="pre">scale_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.scale_options" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">scale_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.scale_options" title="Link to this definition">#</a></dt>
 <dd><p>list : options for scaling the data.</p>
 </dd></dl>
 
@@ -892,19 +892,19 @@ computations, etc.</p>
 <dt class="sig sig-object py" id="common.DataHandling.LaserSampleObj.sort_data">
 <span class="sig-name descname"><span class="pre">sort_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.LaserSampleObj.sort_data" title="Link to this definition">#</a></dt>
 <dd><p>Sorts analyte columns in the raw and processed data according to the specified method.</p>
-<p>This method retrieves a list of analytes from the <cite>processed_data</cite> DataFrame
-and reorders the columns in both <cite>raw_data</cite> and <cite>processed_data</cite> based on the
+<p>This method retrieves a list of analytes from the <code class="docutils literal notranslate"><span class="pre">processed</span></code> data DataFrame
+and reorders the columns in both <code class="docutils literal notranslate"><span class="pre">raw</span></code> and <code class="docutils literal notranslate"><span class="pre">processed</span></code> data based on the
 sorting strategy provided. The sorting is performed using an external function
-<cite>sort_analytes</cite>, which takes the user-defined <cite>method</cite> and the analyte list as inputs.</p>
+<code class="docutils literal notranslate"><span class="pre">sort_analytes</span></code>, which takes the user-defined <code class="docutils literal notranslate"><span class="pre">method</span></code> and the analyte list as inputs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sorting method selected by the user. This is passed to <cite>sort_analytes</cite> and
+<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sorting method selected by the user. This is passed to <code class="docutils literal notranslate"><span class="pre">sort_analytes</span></code> and
 determines the order in which analytes are arranged (e.g., alphabetical, PCA loadings,
 cluster association, etc.).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>analyte_list</strong> (<em>list</em>) – the original list of analytes found in <cite>processed_data</cite>.</p></li>
+<li><p><strong>analyte_list</strong> (<em>list</em>) – the original list of analytes found in processed data.</p></li>
 <li><p><strong>sorted_analyte_list</strong> (<em>list</em>) – the list of analytes sorted according to the provided method.</p></li>
 </ul>
 </p>
@@ -1087,8 +1087,8 @@ keys and the items are lists with the column names that match each attribute_nam
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="common.DataHandling.SampleObj.raw_data">
-<span class="sig-name descname"><span class="pre">raw_data</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.raw_data" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="common.DataHandling.SampleObj.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.raw" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1152,7 +1152,7 @@ keys and the items are lists with the column names that match each attribute_nam
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">'processed_data'</span></span></dt>
+<span class="sig-name descname"><span class="pre">'processed'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)">pandas.DataFrame</a>) –</p>
@@ -1165,7 +1165,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <span class="sig-name descname"><span class="pre">'crop_mask'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference internal" href="src.common.Masking.html#src.common.Masking.MaskObj" title="src.common.Masking.MaskObj">MaskObj</a>) – mask created from cropped axes.</p>
+<dd class="field-odd"><p>(<a class="reference internal" href="common.Masking.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from cropped axes.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1185,7 +1185,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <span class="sig-name descname"><span class="pre">'polygon_mask'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference internal" href="src.common.Masking.html#src.common.Masking.MaskObj" title="src.common.Masking.MaskObj">MaskObj</a>) – mask created from selected polygons.</p>
+<dd class="field-odd"><p>(<a class="reference internal" href="common.Masking.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from selected polygons.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1195,7 +1195,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <span class="sig-name descname"><span class="pre">'cluster_mask'</span></span></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference internal" href="src.common.Masking.html#src.common.Masking.MaskObj" title="src.common.Masking.MaskObj">MaskObj</a>) – mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.</p>
+<dd class="field-odd"><p>(<a class="reference internal" href="common.Masking.html#common.Masking.MaskObj" title="common.Masking.MaskObj">MaskObj</a>) – mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1213,48 +1213,48 @@ keys and the items are lists with the column names that match each attribute_nam
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.apply_outlier_to_all" title="common.DataHandling.SampleObj.apply_outlier_to_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_outlier_to_all</span></code></a></dt><dd><p>bool : flag that indicates whether the outlier method should be applied to all analytes.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.apply_outlier_to_all" title="common.DataHandling.SampleObj.apply_outlier_to_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_outlier_to_all</span></code></a></dt><dd><p>bool : flag that indicates whether the outlier method should be applied to all analytes.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.array_size" title="common.DataHandling.SampleObj.array_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array_size</span></code></a></dt><dd><p>tuple : (int, int) Size of map in pixels</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.array_size" title="common.DataHandling.SampleObj.array_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array_size</span></code></a></dt><dd><p>tuple : (int, int) Size of map in pixels</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.aspect_ratio" title="common.DataHandling.SampleObj.aspect_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aspect_ratio</span></code></a></dt><dd><p>float : Aspect ratio of maps (dy / dx).</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.aspect_ratio" title="common.DataHandling.SampleObj.aspect_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aspect_ratio</span></code></a></dt><dd><p>float : Aspect ratio of maps (dy / dx).</p>
 </dd>
 <dt><strong>auto_scale_value</strong></dt><dd></dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.crop_mask" title="common.DataHandling.SampleObj.crop_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crop_mask</span></code></a></dt><dd><p>numpy.ndarray: Boolean mask used to crop the raw data. True values will be used.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.crop_mask" title="common.DataHandling.SampleObj.crop_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crop_mask</span></code></a></dt><dd><p>numpy.ndarray: Boolean mask used to crop the raw data. True values will be used.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.current_field" title="common.DataHandling.SampleObj.current_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_field</span></code></a></dt><dd><p>str :</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.current_field" title="common.DataHandling.SampleObj.current_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_field</span></code></a></dt><dd><p>str :</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.data_max_diff_quantile" title="common.DataHandling.SampleObj.data_max_diff_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_max_diff_quantile</span></code></a></dt><dd><p>float : maximum quantile for differences used for autoscaling.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.data_max_diff_quantile" title="common.DataHandling.SampleObj.data_max_diff_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_max_diff_quantile</span></code></a></dt><dd><p>float : maximum quantile for differences used for autoscaling.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.data_max_quantile" title="common.DataHandling.SampleObj.data_max_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_max_quantile</span></code></a></dt><dd><p>float : maximum quantile used for autoscaling.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.data_max_quantile" title="common.DataHandling.SampleObj.data_max_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_max_quantile</span></code></a></dt><dd><p>float : maximum quantile used for autoscaling.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.data_min_diff_quantile" title="common.DataHandling.SampleObj.data_min_diff_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_min_diff_quantile</span></code></a></dt><dd><p>float : minimum quantile for differences used for autoscaling.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.data_min_diff_quantile" title="common.DataHandling.SampleObj.data_min_diff_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_min_diff_quantile</span></code></a></dt><dd><p>float : minimum quantile for differences used for autoscaling.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.data_min_quantile" title="common.DataHandling.SampleObj.data_min_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_min_quantile</span></code></a></dt><dd><p>float : minimum quantile used for autoscaling.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.data_min_quantile" title="common.DataHandling.SampleObj.data_min_quantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_min_quantile</span></code></a></dt><dd><p>float : minimum quantile used for autoscaling.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.dx" title="common.DataHandling.SampleObj.dx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dx</span></code></a></dt><dd><p>float : Width of pixels in x-direction.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.dx" title="common.DataHandling.SampleObj.dx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dx</span></code></a></dt><dd><p>float : Width of pixels in x-direction.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.dy" title="common.DataHandling.SampleObj.dy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dy</span></code></a></dt><dd><p>float : Width of pixels in y-direction.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.dy" title="common.DataHandling.SampleObj.dy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dy</span></code></a></dt><dd><p>float : Width of pixels in y-direction.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.negative_method" title="common.DataHandling.SampleObj.negative_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_method</span></code></a></dt><dd><p>str : Method for negative handling.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.negative_method" title="common.DataHandling.SampleObj.negative_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_method</span></code></a></dt><dd><p>str : Method for negative handling.</p>
 </dd>
 <dt><strong>nx</strong></dt><dd></dd>
 <dt><strong>ny</strong></dt><dd></dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.outlier_method" title="common.DataHandling.SampleObj.outlier_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outlier_method</span></code></a></dt><dd><p>str : Method for predicting and clipping outliers.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.outlier_method" title="common.DataHandling.SampleObj.outlier_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outlier_method</span></code></a></dt><dd><p>str : Method for predicting and clipping outliers.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.valid_data_types" title="common.DataHandling.SampleObj.valid_data_types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">valid_data_types</span></code></a></dt><dd><p>list : data types possible for in processed_data.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.valid_data_types" title="common.DataHandling.SampleObj.valid_data_types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">valid_data_types</span></code></a></dt><dd><p>list : data types possible for in processed data.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.x" title="common.DataHandling.SampleObj.x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></a></dt><dd><p>numpy.ndarray : Value of x-coordinate associated with map data</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.x" title="common.DataHandling.SampleObj.x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></a></dt><dd><p>numpy.ndarray : Value of x-coordinate associated with map data</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.x_range" title="common.DataHandling.SampleObj.x_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_range</span></code></a></dt><dd><p>float : Range of pixels in x-direction.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.x_range" title="common.DataHandling.SampleObj.x_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_range</span></code></a></dt><dd><p>float : Range of pixels in x-direction.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.xlim" title="common.DataHandling.SampleObj.xlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xlim</span></code></a></dt><dd><p>list : (float, float) Limits of pixels in x-direction.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.xlim" title="common.DataHandling.SampleObj.xlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xlim</span></code></a></dt><dd><p>list : (float, float) Limits of pixels in x-direction.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.y" title="common.DataHandling.SampleObj.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a></dt><dd><p>numpy.ndarray : Value of y-coordinate associated with map data</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.y" title="common.DataHandling.SampleObj.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a></dt><dd><p>numpy.ndarray : Value of y-coordinate associated with map data</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.y_range" title="common.DataHandling.SampleObj.y_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_range</span></code></a></dt><dd><p>float : Range of pixels in y-direction.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.y_range" title="common.DataHandling.SampleObj.y_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_range</span></code></a></dt><dd><p>float : Range of pixels in y-direction.</p>
 </dd>
-<dt><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.ylim" title="common.DataHandling.SampleObj.ylim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ylim</span></code></a></dt><dd><p>list : (float, float) Limits of pixels in y-direction.</p>
+<dt><a class="reference internal" href="#common.DataHandling.SampleObj.ylim" title="common.DataHandling.SampleObj.ylim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ylim</span></code></a></dt><dd><p>list : (float, float) Limits of pixels in y-direction.</p>
 </dd>
 </dl>
 </dd>
@@ -1262,88 +1262,88 @@ keys and the items are lists with the column names that match each attribute_nam
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.add_columns" title="common.DataHandling.SampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.add_columns" title="common.DataHandling.SampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
 <td><p>Add one or more columns to the sample object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.add_observer" title="common.DataHandling.SampleObj.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.add_observer" title="common.DataHandling.SampleObj.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Register a callback function to be called when a property changes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.apply_field_filters" title="common.DataHandling.SampleObj.apply_field_filters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_field_filters</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.apply_field_filters" title="common.DataHandling.SampleObj.apply_field_filters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_field_filters</span></code></a>()</p></td>
 <td><p>Applies filters based on field values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.auto_scale" title="common.DataHandling.SampleObj.auto_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_scale</span></code></a>(sample_id, field[, update])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.auto_scale" title="common.DataHandling.SampleObj.auto_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_scale</span></code></a>(sample_id, field[, update])</p></td>
 <td><p>Auto-scales pixel values in map</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.clip_outliers" title="common.DataHandling.SampleObj.clip_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_outliers</span></code></a>(array, outlier_method[, pl, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.clip_outliers" title="common.DataHandling.SampleObj.clip_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_outliers</span></code></a>(array, outlier_method[, pl, ...])</p></td>
 <td><p>Attempts to remove outliers to by a method selected by the user.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.cluster_data" title="common.DataHandling.SampleObj.cluster_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.cluster_data" title="common.DataHandling.SampleObj.cluster_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_data</span></code></a>()</p></td>
 <td><p>Clusters data for use with data preprocessing</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.compute_ratio" title="common.DataHandling.SampleObj.compute_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ratio</span></code></a>(analyte_1, analyte_2)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.compute_ratio" title="common.DataHandling.SampleObj.compute_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ratio</span></code></a>(analyte_1, analyte_2)</p></td>
 <td><p>Compute a ratio field from two analytes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.confirm_reset" title="common.DataHandling.SampleObj.confirm_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_reset</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.confirm_reset" title="common.DataHandling.SampleObj.confirm_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_reset</span></code></a>()</p></td>
 <td><p>A simple dialog that ensures the user wishes to reset data</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.create_label" title="common.DataHandling.SampleObj.create_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_label</span></code></a>(column_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.create_label" title="common.DataHandling.SampleObj.create_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_label</span></code></a>(column_name)</p></td>
 <td><p>Creates a default label for axes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.delete_column" title="common.DataHandling.SampleObj.delete_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_column</span></code></a>(column_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.delete_column" title="common.DataHandling.SampleObj.delete_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_column</span></code></a>(column_name)</p></td>
 <td><p>Deletes a column and associated attributes from the AttributeDataFrame.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.get_map_data" title="common.DataHandling.SampleObj.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field[, field_type, norm, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.get_map_data" title="common.DataHandling.SampleObj.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field[, field_type, norm, ...])</p></td>
 <td><p>Retrieves and processes the mapping data for the given sample and analytes</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.get_processed_data" title="common.DataHandling.SampleObj.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.get_processed_data" title="common.DataHandling.SampleObj.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>()</p></td>
 <td><p>Gets the processed data for analysis</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.get_vector" title="common.DataHandling.SampleObj.get_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vector</span></code></a>(field_type, field[, norm, processed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.get_vector" title="common.DataHandling.SampleObj.get_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vector</span></code></a>(field_type, field[, norm, processed])</p></td>
 <td><p>Creates a dictionary of values for plotting</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.k_optimal_clusters" title="common.DataHandling.SampleObj.k_optimal_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_optimal_clusters</span></code></a>(data[, max_clusters])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.k_optimal_clusters" title="common.DataHandling.SampleObj.k_optimal_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_optimal_clusters</span></code></a>(data[, max_clusters])</p></td>
 <td><p>Predicts the optimal number of clusters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.notify_observers" title="common.DataHandling.SampleObj.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.notify_observers" title="common.DataHandling.SampleObj.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
 <td><p>Notify all registered observers of an event or property change.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.prep_data" title="common.DataHandling.SampleObj.prep_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prep_data</span></code></a>([field])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.prep_data" title="common.DataHandling.SampleObj.prep_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prep_data</span></code></a>([field])</p></td>
 <td><p>Applies adjustments to data data prior to analyses and plotting.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.remove_observer" title="common.DataHandling.SampleObj.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.remove_observer" title="common.DataHandling.SampleObj.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Deregister a callback function from an event.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#id122" title="common.DataHandling.SampleObj.reset_crop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_crop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="common.DataHandling.SampleObj.reset_crop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_crop</span></code></a>()</p></td>
 <td><p>Reset the data to the original bounds.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.reset_data" title="common.DataHandling.SampleObj.reset_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.reset_data" title="common.DataHandling.SampleObj.reset_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data</span></code></a>()</p></td>
 <td><p>Reverts back to the original data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.reset_data_handling" title="common.DataHandling.SampleObj.reset_data_handling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data_handling</span></code></a>()</p></td>
-<td><p>Resets processed_data back to raw before performing autoscaling.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.reset_data_handling" title="common.DataHandling.SampleObj.reset_data_handling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data_handling</span></code></a>()</p></td>
+<td><p>Resets processed data back to raw before performing autoscaling.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.reset_resolution" title="common.DataHandling.SampleObj.reset_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_resolution</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.reset_resolution" title="common.DataHandling.SampleObj.reset_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_resolution</span></code></a>()</p></td>
 <td><p>Resets dx and dy to initial values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.scale_options" title="common.DataHandling.SampleObj.scale_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_options</span></code></a>([plot_type, ax, field_type, field])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.scale_options" title="common.DataHandling.SampleObj.scale_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_options</span></code></a>([plot_type, ax, field_type, field])</p></td>
 <td><p>list : options for scaling the data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.sort_data" title="common.DataHandling.SampleObj.sort_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_data</span></code></a>(method)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.sort_data" title="common.DataHandling.SampleObj.sort_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_data</span></code></a>(method)</p></td>
 <td><p>Sorts analyte columns in the raw and processed data according to the specified method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.swap_resolution" title="common.DataHandling.SampleObj.swap_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_resolution</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.swap_resolution" title="common.DataHandling.SampleObj.swap_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_resolution</span></code></a>()</p></td>
 <td><p>Swaps DX and DY for a dataframe, updates X and Y</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.swap_xy" title="common.DataHandling.SampleObj.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.swap_xy" title="common.DataHandling.SampleObj.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
 <td><p>Swaps data in a SampleObj.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.transform_array" title="common.DataHandling.SampleObj.transform_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_array</span></code></a>(array, negative_method)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.transform_array" title="common.DataHandling.SampleObj.transform_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_array</span></code></a>(array, negative_method)</p></td>
 <td><p>Negative and zero handling with clustering for noise detection.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.update_norm" title="common.DataHandling.SampleObj.update_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_norm</span></code></a>([norm, field])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.update_norm" title="common.DataHandling.SampleObj.update_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_norm</span></code></a>([norm, field])</p></td>
 <td><p>Update the norm of the data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.SampleObj.update_resolution" title="common.DataHandling.SampleObj.update_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_resolution</span></code></a>(axis, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.SampleObj.update_resolution" title="common.DataHandling.SampleObj.update_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_resolution</span></code></a>(axis, value)</p></td>
 <td><p>Updates DX and DY for a dataframe</p></td>
 </tr>
 </tbody>
@@ -1353,7 +1353,7 @@ keys and the items are lists with the column names that match each attribute_nam
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.add_columns">
 <span class="sig-name descname"><span class="pre">add_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.add_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.add_columns" title="Link to this definition">#</a></dt>
 <dd><p>Add one or more columns to the sample object.</p>
-<p>Adds one or more columns to <cite>SampleObj.processed_data</cite>. If a mask is provided,
+<p>Adds one or more columns to <cite>SampleObj.processed</cite>. If a mask is provided,
 the data is placed in the correct rows based on the mask.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1362,7 +1362,7 @@ the data is placed in the correct rows based on the mask.</p>
 <li><p><strong>column_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name or names of the columns to add. If a column already exists, it will be overwritten.</p></li>
 <li><p><strong>array</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – A 1D array (for single column) or 2D array (for multiple columns). The data to be added.</p></li>
 <li><p><strong>mask</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>, </em><em>optional</em>) – A boolean mask that indicates which rows in the original data should be filled. If not provided,
-the length of <cite>array</cite> must match the height of <cite>processed_data</cite>.</p></li>
+the length of <cite>array</cite> must match the height of <cite>processed data</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1376,8 +1376,8 @@ and “overwritten” or “added” as values if multiple columns are added.</p
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – Valid types are given in <cite>SampleObj._valid_data_types</cite>.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The number of columns in the array must match the length of <cite>column_names</cite> (if multiple columns are being added).</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The length of array must match the height of <cite>processed_data</cite> if no mask is provided.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If a mask is provided, its length must match the height of <cite>processed_data</cite>, and the number of <cite>True</cite> values
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The length of array must match the height of <cite>processed data</cite> if no mask is provided.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If a mask is provided, its length must match the height of <cite>processed data</cite>, and the number of <cite>True</cite> values
 in the mask must match the number of rows in <cite>array</cite>.</p></li>
 </ul>
 </dd>
@@ -1487,7 +1487,7 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.compute_ratio">
 <span class="sig-name descname"><span class="pre">compute_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyte_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.compute_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.compute_ratio" title="Link to this definition">#</a></dt>
 <dd><p>Compute a ratio field from two analytes.</p>
-<p>Ratios are computed on the processed_data, after negative handling, but before autoscaling.</p>
+<p>Ratios are computed on the processed data, after negative handling, but before autoscaling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1516,10 +1516,10 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.create_label">
 <span class="sig-name descname"><span class="pre">create_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.create_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.create_label" title="Link to this definition">#</a></dt>
 <dd><p>Creates a default label for axes.</p>
-<p>Creates a default label for axes on plots, using the column name in processed_data.</p>
+<p>Creates a default label for axes on plots, using the column name in processed data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Column in processed_data.</p>
+<dd class="field-odd"><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Column in processed data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1752,7 +1752,7 @@ unusable due to incorrect calibrations, particularly for low and high element co
 <p>These calculations start from the cropped data, but do not include chemical, polygonal, or cluster filtering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – processed data has not yet been initialized.  processed data should be created when the sample is initialized and prep_data is
 run for the first time.</p>
 </dd>
 </dl>
@@ -1783,7 +1783,7 @@ computations, etc.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.reset_data_handling">
 <span class="sig-name descname"><span class="pre">reset_data_handling</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.reset_data_handling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.reset_data_handling" title="Link to this definition">#</a></dt>
-<dd><p>Resets processed_data back to raw before performing autoscaling.</p>
+<dd><p>Resets processed data back to raw before performing autoscaling.</p>
 <p>Any computed fields will be removed.</p>
 </dd></dl>
 
@@ -1795,7 +1795,7 @@ computations, etc.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.scale_options">
-<span class="sig-name descname"><span class="pre">scale_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.scale_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.scale_options" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">scale_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.scale_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.scale_options" title="Link to this definition">#</a></dt>
 <dd><p>list : options for scaling the data.</p>
 </dd></dl>
 
@@ -1803,19 +1803,19 @@ computations, etc.</p>
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.sort_data">
 <span class="sig-name descname"><span class="pre">sort_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#SampleObj.sort_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.SampleObj.sort_data" title="Link to this definition">#</a></dt>
 <dd><p>Sorts analyte columns in the raw and processed data according to the specified method.</p>
-<p>This method retrieves a list of analytes from the <cite>processed_data</cite> DataFrame
-and reorders the columns in both <cite>raw_data</cite> and <cite>processed_data</cite> based on the
+<p>This method retrieves a list of analytes from the <code class="docutils literal notranslate"><span class="pre">processed</span></code> data DataFrame
+and reorders the columns in both <code class="docutils literal notranslate"><span class="pre">raw</span></code> and <code class="docutils literal notranslate"><span class="pre">processed</span></code> data based on the
 sorting strategy provided. The sorting is performed using an external function
-<cite>sort_analytes</cite>, which takes the user-defined <cite>method</cite> and the analyte list as inputs.</p>
+<code class="docutils literal notranslate"><span class="pre">sort_analytes</span></code>, which takes the user-defined <code class="docutils literal notranslate"><span class="pre">method</span></code> and the analyte list as inputs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sorting method selected by the user. This is passed to <cite>sort_analytes</cite> and
+<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sorting method selected by the user. This is passed to <code class="docutils literal notranslate"><span class="pre">sort_analytes</span></code> and
 determines the order in which analytes are arranged (e.g., alphabetical, PCA loadings,
 cluster association, etc.).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>analyte_list</strong> (<em>list</em>) – the original list of analytes found in <cite>processed_data</cite>.</p></li>
+<li><p><strong>analyte_list</strong> (<em>list</em>) – the original list of analytes found in processed data.</p></li>
 <li><p><strong>sorted_analyte_list</strong> (<em>list</em>) – the list of analytes sorted according to the provided method.</p></li>
 </ul>
 </p>
@@ -1883,7 +1883,7 @@ pixel dimensions Dx or Dy</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="common.DataHandling.SampleObj.valid_data_types">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_data_types</span></span><a class="headerlink" href="#common.DataHandling.SampleObj.valid_data_types" title="Link to this definition">#</a></dt>
-<dd><p>data types possible for in processed_data.</p>
+<dd><p>data types possible for in processed data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
@@ -1962,7 +1962,7 @@ pixel dimensions Dx or Dy</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">common.DataHandling.</span></span><span class="sig-name descname"><span class="pre">XRFSampleObj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlier_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">negative_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/common/DataHandling.html#XRFSampleObj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#common.DataHandling.XRFSampleObj" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../common.html#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleObj</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleObj</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -1995,7 +1995,7 @@ pixel dimensions Dx or Dy</p>
 <dt><strong>ny</strong></dt><dd></dd>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">outlier_method</span></code></dt><dd><p>str : Method for predicting and clipping outliers.</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">valid_data_types</span></code></dt><dd><p>list : data types possible for in processed_data.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">valid_data_types</span></code></dt><dd><p>list : data types possible for in processed data.</p>
 </dd>
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></dt><dd><p>numpy.ndarray : Value of x-coordinate associated with map data</p>
 </dd>
@@ -2015,88 +2015,88 @@ pixel dimensions Dx or Dy</p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.add_columns" title="common.DataHandling.XRFSampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.add_columns" title="common.DataHandling.XRFSampleObj.add_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_columns</span></code></a>(data_type, column_names, array)</p></td>
 <td><p>Add one or more columns to the sample object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.add_observer" title="common.DataHandling.XRFSampleObj.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.add_observer" title="common.DataHandling.XRFSampleObj.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Register a callback function to be called when a property changes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.apply_field_filters" title="common.DataHandling.XRFSampleObj.apply_field_filters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_field_filters</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.apply_field_filters" title="common.DataHandling.XRFSampleObj.apply_field_filters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_field_filters</span></code></a>()</p></td>
 <td><p>Applies filters based on field values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.auto_scale" title="common.DataHandling.XRFSampleObj.auto_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_scale</span></code></a>(sample_id, field[, update])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.auto_scale" title="common.DataHandling.XRFSampleObj.auto_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">auto_scale</span></code></a>(sample_id, field[, update])</p></td>
 <td><p>Auto-scales pixel values in map</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.clip_outliers" title="common.DataHandling.XRFSampleObj.clip_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_outliers</span></code></a>(array, outlier_method[, pl, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.clip_outliers" title="common.DataHandling.XRFSampleObj.clip_outliers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_outliers</span></code></a>(array, outlier_method[, pl, ...])</p></td>
 <td><p>Attempts to remove outliers to by a method selected by the user.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.cluster_data" title="common.DataHandling.XRFSampleObj.cluster_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.cluster_data" title="common.DataHandling.XRFSampleObj.cluster_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_data</span></code></a>()</p></td>
 <td><p>Clusters data for use with data preprocessing</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.compute_ratio" title="common.DataHandling.XRFSampleObj.compute_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ratio</span></code></a>(analyte_1, analyte_2)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.compute_ratio" title="common.DataHandling.XRFSampleObj.compute_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ratio</span></code></a>(analyte_1, analyte_2)</p></td>
 <td><p>Compute a ratio field from two analytes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.confirm_reset" title="common.DataHandling.XRFSampleObj.confirm_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_reset</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.confirm_reset" title="common.DataHandling.XRFSampleObj.confirm_reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">confirm_reset</span></code></a>()</p></td>
 <td><p>A simple dialog that ensures the user wishes to reset data</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.create_label" title="common.DataHandling.XRFSampleObj.create_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_label</span></code></a>(column_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.create_label" title="common.DataHandling.XRFSampleObj.create_label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_label</span></code></a>(column_name)</p></td>
 <td><p>Creates a default label for axes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.delete_column" title="common.DataHandling.XRFSampleObj.delete_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_column</span></code></a>(column_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.delete_column" title="common.DataHandling.XRFSampleObj.delete_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_column</span></code></a>(column_name)</p></td>
 <td><p>Deletes a column and associated attributes from the AttributeDataFrame.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.get_map_data" title="common.DataHandling.XRFSampleObj.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field[, field_type, norm, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.get_map_data" title="common.DataHandling.XRFSampleObj.get_map_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_data</span></code></a>(field[, field_type, norm, ...])</p></td>
 <td><p>Retrieves and processes the mapping data for the given sample and analytes</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.get_processed_data" title="common.DataHandling.XRFSampleObj.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.get_processed_data" title="common.DataHandling.XRFSampleObj.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>()</p></td>
 <td><p>Gets the processed data for analysis</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.get_vector" title="common.DataHandling.XRFSampleObj.get_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vector</span></code></a>(field_type, field[, norm, processed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.get_vector" title="common.DataHandling.XRFSampleObj.get_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vector</span></code></a>(field_type, field[, norm, processed])</p></td>
 <td><p>Creates a dictionary of values for plotting</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.k_optimal_clusters" title="common.DataHandling.XRFSampleObj.k_optimal_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_optimal_clusters</span></code></a>(data[, max_clusters])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.k_optimal_clusters" title="common.DataHandling.XRFSampleObj.k_optimal_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_optimal_clusters</span></code></a>(data[, max_clusters])</p></td>
 <td><p>Predicts the optimal number of clusters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.notify_observers" title="common.DataHandling.XRFSampleObj.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.notify_observers" title="common.DataHandling.XRFSampleObj.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
 <td><p>Notify all registered observers of an event or property change.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.prep_data" title="common.DataHandling.XRFSampleObj.prep_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prep_data</span></code></a>([field])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.prep_data" title="common.DataHandling.XRFSampleObj.prep_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prep_data</span></code></a>([field])</p></td>
 <td><p>Applies adjustments to data data prior to analyses and plotting.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.remove_observer" title="common.DataHandling.XRFSampleObj.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.remove_observer" title="common.DataHandling.XRFSampleObj.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Deregister a callback function from an event.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.reset_crop" title="common.DataHandling.XRFSampleObj.reset_crop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_crop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.reset_crop" title="common.DataHandling.XRFSampleObj.reset_crop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_crop</span></code></a>()</p></td>
 <td><p>Reset the data to the original bounds.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.reset_data" title="common.DataHandling.XRFSampleObj.reset_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.reset_data" title="common.DataHandling.XRFSampleObj.reset_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data</span></code></a>()</p></td>
 <td><p>Reverts back to the original data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.reset_data_handling" title="common.DataHandling.XRFSampleObj.reset_data_handling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data_handling</span></code></a>()</p></td>
-<td><p>Resets processed_data back to raw before performing autoscaling.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.reset_data_handling" title="common.DataHandling.XRFSampleObj.reset_data_handling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_data_handling</span></code></a>()</p></td>
+<td><p>Resets processed data back to raw before performing autoscaling.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.reset_resolution" title="common.DataHandling.XRFSampleObj.reset_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_resolution</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.reset_resolution" title="common.DataHandling.XRFSampleObj.reset_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_resolution</span></code></a>()</p></td>
 <td><p>Resets dx and dy to initial values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.scale_options" title="common.DataHandling.XRFSampleObj.scale_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_options</span></code></a>([plot_type, ax, field_type, field])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.scale_options" title="common.DataHandling.XRFSampleObj.scale_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale_options</span></code></a>([plot_type, ax, field_type, field])</p></td>
 <td><p>list : options for scaling the data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.sort_data" title="common.DataHandling.XRFSampleObj.sort_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_data</span></code></a>(method)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.sort_data" title="common.DataHandling.XRFSampleObj.sort_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_data</span></code></a>(method)</p></td>
 <td><p>Sorts analyte columns in the raw and processed data according to the specified method.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.swap_resolution" title="common.DataHandling.XRFSampleObj.swap_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_resolution</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.swap_resolution" title="common.DataHandling.XRFSampleObj.swap_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_resolution</span></code></a>()</p></td>
 <td><p>Swaps DX and DY for a dataframe, updates X and Y</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.swap_xy" title="common.DataHandling.XRFSampleObj.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.swap_xy" title="common.DataHandling.XRFSampleObj.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
 <td><p>Swaps data in a SampleObj.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.transform_array" title="common.DataHandling.XRFSampleObj.transform_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_array</span></code></a>(array, negative_method)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.transform_array" title="common.DataHandling.XRFSampleObj.transform_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform_array</span></code></a>(array, negative_method)</p></td>
 <td><p>Negative and zero handling with clustering for noise detection.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.update_norm" title="common.DataHandling.XRFSampleObj.update_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_norm</span></code></a>([norm, field])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.update_norm" title="common.DataHandling.XRFSampleObj.update_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_norm</span></code></a>([norm, field])</p></td>
 <td><p>Update the norm of the data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../common.html#common.DataHandling.XRFSampleObj.update_resolution" title="common.DataHandling.XRFSampleObj.update_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_resolution</span></code></a>(axis, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#common.DataHandling.XRFSampleObj.update_resolution" title="common.DataHandling.XRFSampleObj.update_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_resolution</span></code></a>(axis, value)</p></td>
 <td><p>Updates DX and DY for a dataframe</p></td>
 </tr>
 </tbody>
@@ -2106,7 +2106,7 @@ pixel dimensions Dx or Dy</p>
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj.add_columns">
 <span class="sig-name descname"><span class="pre">add_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.add_columns" title="Link to this definition">#</a></dt>
 <dd><p>Add one or more columns to the sample object.</p>
-<p>Adds one or more columns to <cite>SampleObj.processed_data</cite>. If a mask is provided,
+<p>Adds one or more columns to <cite>SampleObj.processed</cite>. If a mask is provided,
 the data is placed in the correct rows based on the mask.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2115,7 +2115,7 @@ the data is placed in the correct rows based on the mask.</p>
 <li><p><strong>column_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name or names of the columns to add. If a column already exists, it will be overwritten.</p></li>
 <li><p><strong>array</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – A 1D array (for single column) or 2D array (for multiple columns). The data to be added.</p></li>
 <li><p><strong>mask</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>, </em><em>optional</em>) – A boolean mask that indicates which rows in the original data should be filled. If not provided,
-the length of <cite>array</cite> must match the height of <cite>processed_data</cite>.</p></li>
+the length of <cite>array</cite> must match the height of <cite>processed data</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2129,8 +2129,8 @@ and “overwritten” or “added” as values if multiple columns are added.</p
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – Valid types are given in <cite>SampleObj._valid_data_types</cite>.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The number of columns in the array must match the length of <cite>column_names</cite> (if multiple columns are being added).</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The length of array must match the height of <cite>processed_data</cite> if no mask is provided.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If a mask is provided, its length must match the height of <cite>processed_data</cite>, and the number of <cite>True</cite> values
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – The length of array must match the height of <cite>processed data</cite> if no mask is provided.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If a mask is provided, its length must match the height of <cite>processed data</cite>, and the number of <cite>True</cite> values
 in the mask must match the number of rows in <cite>array</cite>.</p></li>
 </ul>
 </dd>
@@ -2202,7 +2202,7 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj.compute_ratio">
 <span class="sig-name descname"><span class="pre">compute_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyte_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyte_2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.compute_ratio" title="Link to this definition">#</a></dt>
 <dd><p>Compute a ratio field from two analytes.</p>
-<p>Ratios are computed on the processed_data, after negative handling, but before autoscaling.</p>
+<p>Ratios are computed on the processed data, after negative handling, but before autoscaling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2231,10 +2231,10 @@ high or low (even negative) values.</p>
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj.create_label">
 <span class="sig-name descname"><span class="pre">create_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.create_label" title="Link to this definition">#</a></dt>
 <dd><p>Creates a default label for axes.</p>
-<p>Creates a default label for axes on plots, using the column name in processed_data.</p>
+<p>Creates a default label for axes on plots, using the column name in processed data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Column in processed_data.</p>
+<dd class="field-odd"><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Column in processed data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2352,7 +2352,7 @@ unusable due to incorrect calibrations, particularly for low and high element co
 <p>These calculations start from the cropped data, but do not include chemical, polygonal, or cluster filtering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – processed_data has not yet been initialized.  processed_data should be created when the sample is initialized and prep_data is
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – processed data has not yet been initialized.  processed data should be created when the sample is initialized and prep_data is
 run for the first time.</p>
 </dd>
 </dl>
@@ -2383,7 +2383,7 @@ computations, etc.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj.reset_data_handling">
 <span class="sig-name descname"><span class="pre">reset_data_handling</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.reset_data_handling" title="Link to this definition">#</a></dt>
-<dd><p>Resets processed_data back to raw before performing autoscaling.</p>
+<dd><p>Resets processed data back to raw before performing autoscaling.</p>
 <p>Any computed fields will be removed.</p>
 </dd></dl>
 
@@ -2395,7 +2395,7 @@ computations, etc.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj.scale_options">
-<span class="sig-name descname"><span class="pre">scale_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.scale_options" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">scale_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.scale_options" title="Link to this definition">#</a></dt>
 <dd><p>list : options for scaling the data.</p>
 </dd></dl>
 
@@ -2403,19 +2403,19 @@ computations, etc.</p>
 <dt class="sig sig-object py" id="common.DataHandling.XRFSampleObj.sort_data">
 <span class="sig-name descname"><span class="pre">sort_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#common.DataHandling.XRFSampleObj.sort_data" title="Link to this definition">#</a></dt>
 <dd><p>Sorts analyte columns in the raw and processed data according to the specified method.</p>
-<p>This method retrieves a list of analytes from the <cite>processed_data</cite> DataFrame
-and reorders the columns in both <cite>raw_data</cite> and <cite>processed_data</cite> based on the
+<p>This method retrieves a list of analytes from the <code class="docutils literal notranslate"><span class="pre">processed</span></code> data DataFrame
+and reorders the columns in both <code class="docutils literal notranslate"><span class="pre">raw</span></code> and <code class="docutils literal notranslate"><span class="pre">processed</span></code> data based on the
 sorting strategy provided. The sorting is performed using an external function
-<cite>sort_analytes</cite>, which takes the user-defined <cite>method</cite> and the analyte list as inputs.</p>
+<code class="docutils literal notranslate"><span class="pre">sort_analytes</span></code>, which takes the user-defined <code class="docutils literal notranslate"><span class="pre">method</span></code> and the analyte list as inputs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sorting method selected by the user. This is passed to <cite>sort_analytes</cite> and
+<dd class="field-odd"><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Sorting method selected by the user. This is passed to <code class="docutils literal notranslate"><span class="pre">sort_analytes</span></code> and
 determines the order in which analytes are arranged (e.g., alphabetical, PCA loadings,
 cluster association, etc.).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>analyte_list</strong> (<em>list</em>) – the original list of analytes found in <cite>processed_data</cite>.</p></li>
+<li><p><strong>analyte_list</strong> (<em>list</em>) – the original list of analytes found in processed data.</p></li>
 <li><p><strong>sorted_analyte_list</strong> (<em>list</em>) – the list of analytes sorted according to the provided method.</p></li>
 </ul>
 </p>
@@ -2547,7 +2547,7 @@ pixel dimensions Dx or Dy</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj"><code class="docutils literal notranslate"><span class="pre">SampleObj</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.update_crop_mask"><code class="docutils literal notranslate"><span class="pre">SampleObj.update_crop_mask</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.reset_crop"><code class="docutils literal notranslate"><span class="pre">SampleObj.reset_crop</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.raw_data"><code class="docutils literal notranslate"><span class="pre">SampleObj.raw_data</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.raw"><code class="docutils literal notranslate"><span class="pre">SampleObj.raw</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.filter_df"><code class="docutils literal notranslate"><span class="pre">SampleObj.filter_df</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.add_columns"><code class="docutils literal notranslate"><span class="pre">SampleObj.add_columns()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common.DataHandling.SampleObj.add_observer"><code class="docutils literal notranslate"><span class="pre">SampleObj.add_observer()</span></code></a></li>

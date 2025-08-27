@@ -260,9 +260,7 @@
       
       
       
-        
-      
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -352,6 +350,15 @@
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
   </div>
@@ -406,7 +413,7 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData" title="app.AppData.AppData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AppData</span></code></a>(parent)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData" title="app.AppData.AppData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AppData</span></code></a>(parent)</p></td>
 <td><p>AppData is a central data model and state manager for the LaserMapExplorer application.</p></td>
 </tr>
 </tbody>
@@ -1133,103 +1140,103 @@ serving as the authoritative source of state for all data analysis and visualiza
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference internal" href="../app.html#id0" title="app.AppData.AppData.apply_noise_red"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_noise_red</span></code></a></dt><dd><p>str : Whether to apply noise reduction.</p>
+<dt><a class="reference internal" href="#id0" title="app.AppData.AppData.apply_noise_red"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_noise_red</span></code></a></dt><dd><p>str : Whether to apply noise reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.c_field" title="app.AppData.AppData.c_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field</span></code></a></dt><dd><p>str : Field associated with color on many plots.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.c_field" title="app.AppData.AppData.c_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field</span></code></a></dt><dd><p>str : Field associated with color on many plots.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.c_field_type" title="app.AppData.AppData.c_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field_type</span></code></a></dt><dd><p>str : Field type for color field or map data.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.c_field_type" title="app.AppData.AppData.c_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_field_type</span></code></a></dt><dd><p>str : Field type for color field or map data.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id1" title="app.AppData.AppData.cluster_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_distance</span></code></a></dt><dd><p>str : The distance metric used in clustering.</p>
+<dt><a class="reference internal" href="#id1" title="app.AppData.AppData.cluster_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_distance</span></code></a></dt><dd><p>str : The distance metric used in clustering.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id2" title="app.AppData.AppData.cluster_exponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_exponent</span></code></a></dt><dd><p>float : The exponent used in fuzzy c-means clustering.</p>
+<dt><a class="reference internal" href="#id2" title="app.AppData.AppData.cluster_exponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_exponent</span></code></a></dt><dd><p>float : The exponent used in fuzzy c-means clustering.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id4" title="app.AppData.AppData.cluster_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method</span></code></a></dt><dd><p>str : The current clustering method used for data analysis.</p>
+<dt><a class="reference internal" href="#id4" title="app.AppData.AppData.cluster_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method</span></code></a></dt><dd><p>str : The current clustering method used for data analysis.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>list : The available clustering methods.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.cluster_method_options" title="app.AppData.AppData.cluster_method_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_method_options</span></code></a></dt><dd><p>list : The available clustering methods.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id5" title="app.AppData.AppData.cluster_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_seed</span></code></a></dt><dd><p>int : The random seed used for clustering.</p>
+<dt><a class="reference internal" href="#id5" title="app.AppData.AppData.cluster_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_seed</span></code></a></dt><dd><p>int : The random seed used for clustering.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id6" title="app.AppData.AppData.corr_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_method</span></code></a></dt><dd><p>str : The method used for correlation plots.</p>
+<dt><a class="reference internal" href="#id6" title="app.AppData.AppData.corr_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_method</span></code></a></dt><dd><p>str : The method used for correlation plots.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id7" title="app.AppData.AppData.corr_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_squared</span></code></a></dt><dd><p>bool : Whether to use squared correlation values.</p>
+<dt><a class="reference internal" href="#id7" title="app.AppData.AppData.corr_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr_squared</span></code></a></dt><dd><p>bool : Whether to use squared correlation values.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.current_data" title="app.AppData.AppData.current_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_data</span></code></a></dt><dd><p>SampleObj : The current sample object <code class="docutils literal notranslate"><span class="pre">self.data[self.sample_id]</span></code>.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.current_data" title="app.AppData.AppData.current_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_data</span></code></a></dt><dd><p>SampleObj : The current sample object <code class="docutils literal notranslate"><span class="pre">self.data[self.sample_id]</span></code>.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id8" title="app.AppData.AppData.default_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_hist_num_bins</span></code></a></dt><dd><p>int : The default number of histogram bins.</p>
+<dt><a class="reference internal" href="#id8" title="app.AppData.AppData.default_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_hist_num_bins</span></code></a></dt><dd><p>int : The default number of histogram bins.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id9" title="app.AppData.AppData.dim_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_method</span></code></a></dt><dd><p>str : The method used for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#id9" title="app.AppData.AppData.dim_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_method</span></code></a></dt><dd><p>str : The method used for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id10" title="app.AppData.AppData.dim_red_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_precondition</span></code></a></dt><dd><p>bool : Whether to precondition the dimensionality reduction with PCA.</p>
+<dt><a class="reference internal" href="#id10" title="app.AppData.AppData.dim_red_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_precondition</span></code></a></dt><dd><p>bool : Whether to precondition the dimensionality reduction with PCA.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.dim_red_x" title="app.AppData.AppData.dim_red_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x</span></code></a></dt><dd><p>int : The x-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x" title="app.AppData.AppData.dim_red_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x</span></code></a></dt><dd><p>int : The x-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.dim_red_x_max" title="app.AppData.AppData.dim_red_x_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x_max</span></code></a></dt><dd><p>int : The maximum x-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_x_max" title="app.AppData.AppData.dim_red_x_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_x_max</span></code></a></dt><dd><p>int : The maximum x-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.dim_red_y" title="app.AppData.AppData.dim_red_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y</span></code></a></dt><dd><p>int : The y-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y" title="app.AppData.AppData.dim_red_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y</span></code></a></dt><dd><p>int : The y-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.dim_red_y_max" title="app.AppData.AppData.dim_red_y_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y_max</span></code></a></dt><dd><p>int : The maximum y-axis index for dimensionality reduction.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.dim_red_y_max" title="app.AppData.AppData.dim_red_y_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim_red_y_max</span></code></a></dt><dd><p>int : The maximum y-axis index for dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id11" title="app.AppData.AppData.edge_detection_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detection_method</span></code></a></dt><dd><p>str : The method used for edge detection.</p>
+<dt><a class="reference internal" href="#id11" title="app.AppData.AppData.edge_detection_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_detection_method</span></code></a></dt><dd><p>str : The method used for edge detection.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id12" title="app.AppData.AppData.equalize_color_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equalize_color_scale</span></code></a></dt><dd><p>bool : Whether to equalize the color scale for histograms.</p>
+<dt><a class="reference internal" href="#id12" title="app.AppData.AppData.equalize_color_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equalize_color_scale</span></code></a></dt><dd><p>bool : Whether to equalize the color scale for histograms.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id13" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>dict : A dictionary of field names and their types for the current sample.</p>
+<dt><a class="reference internal" href="#id13" title="app.AppData.AppData.field_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">field_dict</span></code></a></dt><dd><p>dict : A dictionary of field names and their types for the current sample.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id18" title="app.AppData.AppData.gradient_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_flag</span></code></a></dt><dd><p>bool : Whether to plot the gradient.</p>
+<dt><a class="reference internal" href="#id18" title="app.AppData.AppData.gradient_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_flag</span></code></a></dt><dd><p>bool : Whether to plot the gradient.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id19" title="app.AppData.AppData.heatmap_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heatmap_style</span></code></a></dt><dd><p>str : The style of heatmap to use.</p>
+<dt><a class="reference internal" href="#id19" title="app.AppData.AppData.heatmap_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heatmap_style</span></code></a></dt><dd><p>str : The style of heatmap to use.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id20" title="app.AppData.AppData.hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_bin_width</span></code></a></dt><dd><p>float : The width of histogram bins.</p>
+<dt><a class="reference internal" href="#id20" title="app.AppData.AppData.hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_bin_width</span></code></a></dt><dd><p>float : The width of histogram bins.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id21" title="app.AppData.AppData.hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_num_bins</span></code></a></dt><dd><p>int : The number of histogram bins.</p>
+<dt><a class="reference internal" href="#id21" title="app.AppData.AppData.hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_num_bins</span></code></a></dt><dd><p>int : The number of histogram bins.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id22" title="app.AppData.AppData.hist_plot_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_plot_style</span></code></a></dt><dd><p>str : The style of histogram plot to use.</p>
+<dt><a class="reference internal" href="#id22" title="app.AppData.AppData.hist_plot_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_plot_style</span></code></a></dt><dd><p>str : The style of histogram plot to use.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id24" title="app.AppData.AppData.max_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_clusters</span></code></a></dt><dd><p>int : The maximum number of clusters allowed for testing cluster performance.</p>
+<dt><a class="reference internal" href="#id24" title="app.AppData.AppData.max_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_clusters</span></code></a></dt><dd><p>int : The maximum number of clusters allowed for testing cluster performance.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id25" title="app.AppData.AppData.ndim_analyte_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_analyte_set</span></code></a></dt><dd><p>str : The set of analytes used for N-Dim analysis.</p>
+<dt><a class="reference internal" href="#id25" title="app.AppData.AppData.ndim_analyte_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_analyte_set</span></code></a></dt><dd><p>str : The set of analytes used for N-Dim analysis.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id26" title="app.AppData.AppData.ndim_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_list</span></code></a></dt><dd><p>list : The list of analytes used for N-Dim analysis.</p>
+<dt><a class="reference internal" href="#id26" title="app.AppData.AppData.ndim_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_list</span></code></a></dt><dd><p>list : The list of analytes used for N-Dim analysis.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id27" title="app.AppData.AppData.ndim_quantile_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_quantile_index</span></code></a></dt><dd><p>int : The index of the quantile set used for N-Dim analysis.</p>
+<dt><a class="reference internal" href="#id27" title="app.AppData.AppData.ndim_quantile_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim_quantile_index</span></code></a></dt><dd><p>int : The index of the quantile set used for N-Dim analysis.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id28" title="app.AppData.AppData.noise_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_method</span></code></a></dt><dd><p>str : The method used for noise reduction.</p>
+<dt><a class="reference internal" href="#id28" title="app.AppData.AppData.noise_red_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_method</span></code></a></dt><dd><p>str : The method used for noise reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id29" title="app.AppData.AppData.noise_red_option1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option1</span></code></a></dt><dd><p>int | float : The first option for noise reduction method.</p>
+<dt><a class="reference internal" href="#id29" title="app.AppData.AppData.noise_red_option1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option1</span></code></a></dt><dd><p>int | float : The first option for noise reduction method.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id30" title="app.AppData.AppData.noise_red_option2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option2</span></code></a></dt><dd><p>int | float : The second option for noise reduction method.</p>
+<dt><a class="reference internal" href="#id30" title="app.AppData.AppData.noise_red_option2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">noise_red_option2</span></code></a></dt><dd><p>int | float : The second option for noise reduction method.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id31" title="app.AppData.AppData.norm_reference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm_reference</span></code></a></dt><dd><p>str : The reference used for normalizing analyte and ratio data.</p>
+<dt><a class="reference internal" href="#id31" title="app.AppData.AppData.norm_reference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm_reference</span></code></a></dt><dd><p>str : The reference used for normalizing analyte and ratio data.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id32" title="app.AppData.AppData.num_basis_for_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_basis_for_precondition</span></code></a></dt><dd><p>int : The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
+<dt><a class="reference internal" href="#id32" title="app.AppData.AppData.num_basis_for_precondition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_basis_for_precondition</span></code></a></dt><dd><p>int : The number of basis vectors to use for preconditioning in dimensionality reduction.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id33" title="app.AppData.AppData.num_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_clusters</span></code></a></dt><dd><p>int : The number of clusters to use in clustering.</p>
+<dt><a class="reference internal" href="#id33" title="app.AppData.AppData.num_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_clusters</span></code></a></dt><dd><p>int : The number of clusters to use in clustering.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id34" title="app.AppData.AppData.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>pd.Series : The reference chemistry for the current reference index.</p>
+<dt><a class="reference internal" href="#id34" title="app.AppData.AppData.ref_chem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_chem</span></code></a></dt><dd><p>pd.Series : The reference chemistry for the current reference index.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id35" title="app.AppData.AppData.ref_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_index</span></code></a></dt><dd><p>int : The index of the reference chemistry source used for normalization.</p>
+<dt><a class="reference internal" href="#id35" title="app.AppData.AppData.ref_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_index</span></code></a></dt><dd><p>int : The index of the reference chemistry source used for normalization.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id36" title="app.AppData.AppData.sample_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_id</span></code></a></dt><dd><p>str : The ID/name of the currently selected sample.</p>
+<dt><a class="reference internal" href="#id36" title="app.AppData.AppData.sample_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_id</span></code></a></dt><dd><p>str : The ID/name of the currently selected sample.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id37" title="app.AppData.AppData.sample_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_list</span></code></a></dt><dd><p>list : A list of sample IDs in the current sample list.</p>
+<dt><a class="reference internal" href="#id37" title="app.AppData.AppData.sample_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_list</span></code></a></dt><dd><p>list : A list of sample IDs in the current sample list.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id38" title="app.AppData.AppData.scatter_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter_preset</span></code></a></dt><dd><p>str : The preset for scatter plot styles.</p>
+<dt><a class="reference internal" href="#id38" title="app.AppData.AppData.scatter_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter_preset</span></code></a></dt><dd><p>str : The preset for scatter plot styles.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id39" title="app.AppData.AppData.selected_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_clusters</span></code></a></dt><dd><p>list : The list of selected clusters for masking.</p>
+<dt><a class="reference internal" href="#id39" title="app.AppData.AppData.selected_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_clusters</span></code></a></dt><dd><p>list : The list of selected clusters for masking.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#id42" title="app.AppData.AppData.sort_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_method</span></code></a></dt><dd><p>(str): The method used to sort the sample list.</p>
+<dt><a class="reference internal" href="#id42" title="app.AppData.AppData.sort_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_method</span></code></a></dt><dd><p>(str): The method used to sort the sample list.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.x_field" title="app.AppData.AppData.x_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field</span></code></a></dt><dd><p>str : Field associated with x-axis or A-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.x_field" title="app.AppData.AppData.x_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field</span></code></a></dt><dd><p>str : Field associated with x-axis or A-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.x_field_type" title="app.AppData.AppData.x_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field_type</span></code></a></dt><dd><p>str : Field type for x field.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.x_field_type" title="app.AppData.AppData.x_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_field_type</span></code></a></dt><dd><p>str : Field type for x field.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.y_field" title="app.AppData.AppData.y_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field</span></code></a></dt><dd><p>str : Field associated with y-axis or B-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.y_field" title="app.AppData.AppData.y_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field</span></code></a></dt><dd><p>str : Field associated with y-axis or B-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.y_field_type" title="app.AppData.AppData.y_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field_type</span></code></a></dt><dd><p>str : Field type for y field.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.y_field_type" title="app.AppData.AppData.y_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_field_type</span></code></a></dt><dd><p>str : Field type for y field.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.z_field" title="app.AppData.AppData.z_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field</span></code></a></dt><dd><p>str : Field associated with z-axis or C-vertex on a ternary diagram.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.z_field" title="app.AppData.AppData.z_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field</span></code></a></dt><dd><p>str : Field associated with z-axis or C-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="../app.html#app.AppData.AppData.z_field_type" title="app.AppData.AppData.z_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field_type</span></code></a></dt><dd><p>str : Field type for z field.</p>
+<dt><a class="reference internal" href="#app.AppData.AppData.z_field_type" title="app.AppData.AppData.z_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_field_type</span></code></a></dt><dd><p>str : Field type for z field.</p>
 </dd>
 </dl>
 </dd>
@@ -1237,55 +1244,55 @@ serving as the authoritative source of state for all data analysis and visualiza
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData.add_observer" title="app.AppData.AppData.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.add_observer" title="app.AppData.AppData.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Register a callback function to be called when a property changes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#id3" title="app.AppData.AppData.cluster_group_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_group_changed</span></code></a>(data, style_data)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="app.AppData.AppData.cluster_group_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_group_changed</span></code></a>(data, style_data)</p></td>
 <td><p>Updates the cluster dictionary and selected cluster groups.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#id14" title="app.AppData.AppData.generate_random_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_random_seed</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id14" title="app.AppData.AppData.generate_random_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_random_seed</span></code></a>()</p></td>
 <td><p>Generates a random seed for clustering.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#id15" title="app.AppData.AppData.get_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field</span></code></a>(ax)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id15" title="app.AppData.AppData.get_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field</span></code></a>(ax)</p></td>
 <td><p>Returns the field associated with the specified axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#id16" title="app.AppData.AppData.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([field_type, filter_type])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id16" title="app.AppData.AppData.get_field_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_list</span></code></a>([field_type, filter_type])</p></td>
 <td><p>Gets the fields associated with a defined set</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#id17" title="app.AppData.AppData.get_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_type</span></code></a>(ax)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id17" title="app.AppData.AppData.get_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_type</span></code></a>(ax)</p></td>
 <td><p>Returns the field type associated with the specified axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData.get_field_type_list" title="app.AppData.AppData.get_field_type_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_type_list</span></code></a>(ax, style_data)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.get_field_type_list" title="app.AppData.AppData.get_field_type_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_field_type_list</span></code></a>(ax, style_data)</p></td>
 <td><p>Updates the field type options in the UI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#id23" title="app.AppData.AppData.histogram_reset_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram_reset_bins</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id23" title="app.AppData.AppData.histogram_reset_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram_reset_bins</span></code></a>()</p></td>
 <td><p>Resets number of histogram bins to the default.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData.notify_observers" title="app.AppData.AppData.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.notify_observers" title="app.AppData.AppData.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
 <td><p>Notify all registered observers of an event or property change.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData.remove_observer" title="app.AppData.AppData.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.AppData.AppData.remove_observer" title="app.AppData.AppData.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
 <td><p>Deregister a callback function from an event.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData.selected_fields" title="app.AppData.AppData.selected_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_fields</span></code></a>([field_type])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.AppData.AppData.selected_fields" title="app.AppData.AppData.selected_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selected_fields</span></code></a>([field_type])</p></td>
 <td><p>list : The selected fields for the current sample.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#id40" title="app.AppData.AppData.set_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_field</span></code></a>(ax, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id40" title="app.AppData.AppData.set_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_field</span></code></a>(ax, value)</p></td>
 <td><p>Sets the field associated with the specified axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#id41" title="app.AppData.AppData.set_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_field_type</span></code></a>(ax, value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id41" title="app.AppData.AppData.set_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_field_type</span></code></a>(ax, value)</p></td>
 <td><p>Sets the field type associated with the specified axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#id43" title="app.AppData.AppData.update_hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_bin_width</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id43" title="app.AppData.AppData.update_hist_bin_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_bin_width</span></code></a>()</p></td>
 <td><p>Updates the bin width for histograms</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#id44" title="app.AppData.AppData.update_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_num_bins</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id44" title="app.AppData.AppData.update_hist_num_bins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_hist_num_bins</span></code></a>()</p></td>
 <td><p>Updates the number of bins for histograms</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../app.html#app.AppData.AppData.update_ref_chem_index" title="app.AppData.AppData.update_ref_chem_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ref_chem_index</span></code></a>(ref_val)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.AppData.AppData.update_ref_chem_index" title="app.AppData.AppData.update_ref_chem_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ref_chem_index</span></code></a>(ref_val)</p></td>
 <td><p>Changes reference computing normalized analytes</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../app.html#id46" title="app.AppData.AppData.validate_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_field_type</span></code></a>(new_field_type)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id46" title="app.AppData.AppData.validate_field_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_field_type</span></code></a>(new_field_type)</p></td>
 <td><p>Validates if the new field type exists in the current sample's processed data.</p></td>
 </tr>
 </tbody>
@@ -1365,7 +1372,7 @@ serving as the authoritative source of state for all data analysis and visualiza
 <span class="sig-name descname"><span class="pre">cluster_group_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.cluster_group_changed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
 <dd><p>Updates the cluster dictionary and selected cluster groups.</p>
 <p>This method checks if the current clustering method is available in
-<code class="docutils literal notranslate"><span class="pre">data.processed_data[method]</span></code>. If found, it retrieves and sorts
+<code class="docutils literal notranslate"><span class="pre">data.processed[method]</span></code>. If found, it retrieves and sorts
 the unique cluster labels, assigns colors using <code class="docutils literal notranslate"><span class="pre">style_data</span></code>,
 and updates the internal dictionary (<code class="docutils literal notranslate"><span class="pre">self.cluster_dict</span></code>) with
 each cluster’s information. If a mask cluster (label 99) exists,
@@ -1374,7 +1381,7 @@ it is separately handled and assigned the last color.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – The data container with processed cluster information stored in
-<code class="docutils literal notranslate"><span class="pre">data.processed_data[method]</span></code></p></li>
+<code class="docutils literal notranslate"><span class="pre">data.processed[method]</span></code></p></li>
 <li><p><strong>style_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – Object providing default cluster color assignments</p></li>
 </ul>
 </dd>
@@ -1442,7 +1449,7 @@ it is separately handled and assigned the last color.</p>
 <dd><p>The current sample object <code class="docutils literal notranslate"><span class="pre">self.data[self.sample_id]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="src.common.DataHandling.html#src.common.DataHandling.SampleObj" title="src.common.DataHandling.SampleObj">SampleObj</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="common.DataHandling.html#common.DataHandling.SampleObj" title="common.DataHandling.SampleObj">SampleObj</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1643,10 +1650,18 @@ in analysis.  The options for <code class="docutils literal notranslate"><span c
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.AppData.AppData.get_field_type_list">
-<span class="sig-name descname"><span class="pre">get_field_type_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_type_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field_type_list" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_field_type_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/AppData.html#AppData.get_field_type_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.AppData.AppData.get_field_type_list" title="Link to this definition">#</a></dt>
 <dd><p>Updates the field type options in the UI</p>
 <p>This method updates the field type options in the UI based on the currently selected sample.
 It retrieves the field types for the selected sample and updates the UI accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Axis from [‘x’, ‘y’, ‘z’, ‘c’].</p></li>
+<li><p><strong>style_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

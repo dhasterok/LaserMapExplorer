@@ -33,6 +33,7 @@
    src.app.CropImage
    src.app.CustomTableWidget
    src.app.DataAnalysis
+   src.app.FieldDialog
    src.app.FieldLogic
    src.app.ImageProcessing
    src.app.InfoViewer
@@ -42,6 +43,7 @@
    src.app.MainToolBar
    src.app.MainWindow
    src.app.MapImporter
+   src.app.PlotAxisSettings
    src.app.PlotTree
    src.app.PlotViewerWindow
    src.app.Preprocessing

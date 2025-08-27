@@ -18,8 +18,8 @@ src.app.FieldLogic
    .. autosummary::
    
       AnalyteDialog
+      AxisSettings
       ControlDock
-      FieldDialog
       FieldLogicUI
    
    

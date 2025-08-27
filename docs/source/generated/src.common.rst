@@ -37,6 +37,7 @@
    src.common.CustomMplCanvas
    src.common.CustomWidgets
    src.common.DataHandling
+   src.common.DualWidgetList
    src.common.ExtendedDF
    src.common.LamePlot
    src.common.Logger

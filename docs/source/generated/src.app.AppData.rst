@@ -1,4 +1,4 @@
-﻿src.app.AppData
+src.app.AppData
 ===============
 
 .. automodule:: src.app.AppData

@@ -29,7 +29,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=e5166e32" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -221,7 +221,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
       
@@ -339,7 +339,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
         
@@ -427,15 +427,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
 
         <span class="c1">#create plot tree</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setupUI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_ui</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect_logger</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize_tree</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PlotTree.setupUI">
-<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.setupUI">[docs]</a>
-    <span class="k">def</span> <span class="nf">setupUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PlotTree.setup_ui">
+<a class="viewcode-back" href="../../generated/app.PlotTree.html#app.PlotTree.PlotTree.setup_ui">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">font</span> <span class="o">=</span> <span class="n">default_font</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setFloating</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -572,7 +572,7 @@
             <span class="k">return</span>
 
         <span class="c1"># assign the two objects needed from self.ui</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed_data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">processed</span>
         <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span>
 
         <span class="c1"># add sample_id to analyte branch</span>
@@ -822,14 +822,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Ratio&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unhighlight_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="s1">&#39;Analyte&#39;</span><span class="p">])</span>
 
-        <span class="n">analytes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
-        <span class="n">ratios</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
+        <span class="n">analytes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Analyte&#39;</span><span class="p">)</span>
+        <span class="n">ratios</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span><span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
 
-        <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analytes</span><span class="p">,</span><span class="s1">&#39;use&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analytes</span><span class="p">,</span><span class="s1">&#39;use&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">treeView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span>
 
         <span class="k">for</span> <span class="n">analyte</span> <span class="ow">in</span> <span class="n">analytes</span> <span class="o">+</span> <span class="n">ratios</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">analyte</span><span class="p">,</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">analyte</span><span class="p">,</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">analyte</span><span class="p">:</span>
                 <span class="n">analyte_1</span><span class="p">,</span> <span class="n">analyte_2</span> <span class="o">=</span> <span class="n">analyte</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; / &#39;</span><span class="p">)</span>
 
@@ -868,7 +868,7 @@
                     <span class="n">font</span><span class="o">.</span><span class="n">setItalic</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                     <span class="n">leaf_item_norm</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
                     <span class="n">leaf_item_norm</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analyte</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analyte</span><span class="p">,</span> <span class="s1">&#39;use&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span> <span class="c1">#single analyte</span>
 
@@ -880,7 +880,7 @@
 
                 <span class="n">leaf_item</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="n">hexcolor</span><span class="p">)))</span>
 
-                <span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analytes</span><span class="p">,</span><span class="s1">&#39;use&#39;</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">analytes</span><span class="p">,</span><span class="s1">&#39;use&#39;</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">norm_update</span><span class="p">:</span> <span class="c1">#update if analytes are returned from analyte selection window</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">update_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">analyte</span><span class="p">)</span></div>

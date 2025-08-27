@@ -29,7 +29,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=369bd9d1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mpl.css?v=e5166e32" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -221,7 +221,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
       
@@ -339,7 +339,7 @@
           
           
           
-          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo.svg" class="icon-link-image" alt="MinEx CRC"/></a>
+          <a href="https://minexcrc.com.au/" title="MinEx CRC" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/minex_crc_logo_black.svg" class="icon-link-image" alt="MinEx CRC"/></a>
         </li>
 </ul></div>
         
@@ -1426,8 +1426,8 @@
     <span class="c1">#     None</span>
     <span class="c1">#     &quot;&quot;&quot;</span>
     <span class="c1">#     # Obtain field data of all fields that will be used for profiling</span>
-    <span class="c1">#     fields = self.data.processed_data.match_attribute(&#39;data_type&#39;, &#39;Analyte&#39;) + self.data.processed_data.match_attribute(&#39;data_type&#39;, &#39;Ratio&#39;)</span>
-    <span class="c1">#     field_data = self.data.processed_data[fields]</span>
+    <span class="c1">#     fields = self.data.processed.match_attribute(&#39;data_type&#39;, &#39;Analyte&#39;) + self.data.processed.match_attribute(&#39;data_type&#39;, &#39;Ratio&#39;)</span>
+    <span class="c1">#     field_data = self.data.processed[fields]</span>
 
     <span class="c1">#     # If updating an existing point, remove it first</span>
     <span class="c1">#     if point_index is not None:</span>
@@ -1502,10 +1502,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Obtain field data of all fields that will be used for profiling</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">)</span> <span class="o">+</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Analyte&#39;</span><span class="p">)</span> <span class="o">+</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="o">.</span><span class="n">match_attribute</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">field_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed_data</span><span class="p">[</span><span class="n">fields</span><span class="p">]</span>
+        <span class="n">field_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">processed</span><span class="p">[</span><span class="n">fields</span><span class="p">]</span>
 
         <span class="c1"># If updating an existing point, remove it first</span>
         <span class="k">if</span> <span class="n">point_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

@@ -1,4 +1,4 @@
-﻿src.app.BlocklyModules
+src.app.BlocklyModules
 ======================
 
 .. automodule:: src.app.BlocklyModules

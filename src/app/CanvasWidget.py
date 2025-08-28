@@ -225,31 +225,51 @@ class CanvasWidget(QWidget):
         new_canvas : MplCanvas
             The new canvas to be added to the SingleView tab.
         """
+        # Clean up existing matplotlib toolbar first
+        if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
+            try:
+                self.mpl_toolbar.setParent(None)
+                self.mpl_toolbar.close()
+                del self.mpl_toolbar
+            except:
+                pass
+            finally:
+                self.mpl_toolbar = None
+
         # Clear the existing layout
         self.clear_layout(self.single_view.layout())
         
         # Add the new canvas to the layout
         if not self.single_view.layout():
             self.single_view.setLayout(QVBoxLayout())
+        
         layout = self.single_view.layout()
         if layout is not None:
             layout.addWidget(new_canvas)
+        
         new_canvas.show()
-        new_canvas.add_observer("xpos", self.toolbar.update_sv_info)
-        new_canvas.add_observer("ypos", self.toolbar.update_sv_info)
-        new_canvas.add_observer("value", self.toolbar.update_sv_info)
-        new_canvas.add_observer("distance", self.toolbar.update_sv_info)
+        
+        # Add observers safely
+        try:
+            new_canvas.add_observer("xpos", self.toolbar.update_sv_info)
+            new_canvas.add_observer("ypos", self.toolbar.update_sv_info)
+            new_canvas.add_observer("value", self.toolbar.update_sv_info)
+            new_canvas.add_observer("distance", self.toolbar.update_sv_info)
+        except AttributeError:
+            # Canvas doesn't support observers, that's ok
+            pass
         
         try:
             # Recreate the NavigationToolbar with the new canvas
             self.mpl_toolbar = NavigationToolbar(new_canvas, self.single_view)
-            #hide the toolbar
+            # hide the toolbar
             self.mpl_toolbar.hide()
             if layout is not None:
                 layout.addWidget(self.mpl_toolbar)
-        except:
-            # canvas is not a MplCanvas  
-            pass
+        except Exception as e:
+            # Canvas is not a MplCanvas or other error
+            print(f"Could not create navigation toolbar: {e}")
+            self.mpl_toolbar = None
 
         self.single_view.show()
 
@@ -326,59 +346,93 @@ class CanvasWidget(QWidget):
         top_parent = get_top_parent(self)
         plot_tree = getattr(top_parent, 'plot_tree', None) if top_parent and hasattr(top_parent, 'plot_tree') else None
 
+        # Collect widgets to remove first
+        widgets_to_remove = []
         for i in reversed(range(layout.count())):
             item = layout.itemAt(i)
             if item is not None:
                 widget = item.widget()
                 if widget is not None:
-                    # Check if widget is referenced in PlotTree
-                    keep_widget = False
-                    if plot_tree is not None:
-                        # Try to find a plot_info referencing this widget
-                        # Search all trees and branches for a matching figure
-                        for tree_name, tree_items in plot_tree.tree.items():
-                            for branch_idx in range(tree_items.rowCount()):
-                                branch_item = tree_items.child(branch_idx)
-                                for leaf_idx in range(branch_item.rowCount()):
-                                    leaf_item = branch_item.child(leaf_idx)
-                                    plot_info = leaf_item.data(role=Qt.ItemDataRole.UserRole)
-                                    if plot_info and isinstance(plot_info, dict) and plot_info.get('figure') is widget:
-                                        keep_widget = True
-                                        break
-                                if keep_widget:
-                                    break
-                            if keep_widget:
+                    widgets_to_remove.append((widget, item))
+
+        # Now process each widget
+        for widget, item in widgets_to_remove:
+            # Check if widget is referenced in PlotTree
+            keep_widget = False
+            if plot_tree is not None:
+                # Try to find a plot_info referencing this widget
+                # Search all trees and branches for a matching figure
+                for tree_name, tree_items in plot_tree.tree.items():
+                    for branch_idx in range(tree_items.rowCount()):
+                        branch_item = tree_items.child(branch_idx)
+                        for leaf_idx in range(branch_item.rowCount()):
+                            leaf_item = branch_item.child(leaf_idx)
+                            plot_info = leaf_item.data(role=Qt.ItemDataRole.UserRole)
+                            if plot_info and isinstance(plot_info, dict) and plot_info.get('figure') is widget:
+                                keep_widget = True
                                 break
+                        if keep_widget:
+                            break
                     if keep_widget:
-                        widget.hide()
-                        layout.removeWidget(widget)
-                    else:
-                        layout.removeWidget(widget)
-                        widget.setParent(None)
-                        widget.deleteLater()
+                        break
+            
+            # Remove from layout first
+            layout.removeWidget(widget)
+            
+            if keep_widget:
+                # Just hide, don't delete
+                widget.hide()
+                # Ensure widget has a valid parent to prevent garbage collection
+                if widget.parent() is None:
+                    widget.setParent(self)
+            else:
+                # Proper cleanup before deletion
+                try:
+                    # Disconnect all signals to prevent callbacks on deleted widget
+                    widget.blockSignals(True)
+                    
+                    # If it's a matplotlib canvas, clean it up properly
+                    if hasattr(widget, 'figure'):
+                        if hasattr(widget.figure, 'clear'):
+                            widget.figure.clear()
+                        if hasattr(widget.figure, 'canvas'):
+                            widget.figure.canvas = None
+                    
+                    # Clean up any observers if present
+                    if hasattr(widget, 'observers'):
+                        widget.observers.clear()
+                    
+                    # Set parent to None and delete immediately
+                    widget.setParent(None)
+                    widget.close()
+                    del widget  # Immediate deletion instead of deleteLater()
+                    
+                except Exception as e:
+                    print(f"Error during widget cleanup: {e}")
+                    # Fallback to original method
+                    widget.setParent(None)
+                    widget.deleteLater()
 
+        # Clear the rest of the multiview specific cleanup
         if self.canvasWindow.currentIndex() == self.tab_dict['mv']:
-            list = self.toolbar.mv.comboBoxMVPlots.allItems()
-            if not list:
-                return
-
-            for i, _ in enumerate(list):
-                # get data from comboBoxMVPlots
-                data = self.toolbar.mv.comboBoxMVPlots.itemData(i, role=Qt.ItemDataRole.UserRole)
-
-                # get plot_info from tree location and
-                # reset view to False and position to none
-                plot_info = self.ui.plot_tree.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
-                #print(plot_info)
-                plot_info['view'][1] = False
-                plot_info['position'] = None
+            list_items = self.toolbar.mv.comboBoxMVPlots.allItems()
+            if list_items:
+                for i, _ in enumerate(list_items):
+                    # get data from comboBoxMVPlots
+                    data = self.toolbar.mv.comboBoxMVPlots.itemData(i, role=Qt.ItemDataRole.UserRole)
+                    if data:
+                        # get plot_info from tree location and reset view to False and position to none
+                        plot_info = self.ui.plot_tree.retrieve_plotinfo_from_tree(tree=data[2], branch=data[3], leaf=data[4])
+                        if plot_info:
+                            plot_info['view'][1] = False
+                            plot_info['position'] = None
             
             # clear hover information for lasermaps
             self.multi_view_index = []
             self.multiview_info_label = {}
 
             # clear plot list in comboBox
-            self.toolbar.mv.comboBoxMVPlots.clear()        
+            self.toolbar.mv.comboBoxMVPlots.clear()       
 
     def add_plotwidget_to_canvas(self, plot_info, position=None):
         """Adds plot to selected view.

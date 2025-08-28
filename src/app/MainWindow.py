@@ -820,102 +820,113 @@ class MainWindow(QMainWindow):
             return
 
         data = self.app_data.current_data
+
+        # Clean up previous canvas reference
+        old_canvas = getattr(self, 'mpl_canvas', None)
+
         
-        match self.style_data.plot_type:
-            case 'field map':
-                sample_id = self.app_data.sample_id
-                field_type = self.app_data.c_field_type
-                field = self.app_data.c_field
+        try:
+            match self.style_data.plot_type:
+                case 'field map':
+                    sample_id = self.app_data.sample_id
+                    field_type = self.app_data.c_field_type
+                    field = self.app_data.c_field
 
-                if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
-                    canvas, self.plot_info,_ =  plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
-                    # show increated profiles if exists
-                    if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
-                        self.profile_dock.profiling.clear_plot()
-                        self.profile_dock.profiling.plot_existing_profile(self.plot)
-                    elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.mask_dock.polygon_tab.polygon_manager.polygons):  
-                        self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
-                        self.mask_dock.polygon_tab.polygon_manager.plot_existing_polygon(canvas)
-
-                    
-                else:
-                    if self.control_dock.toolbox.currentIndex() == self.control_dock.tab_dict['process']:
-                        canvas, self.plot_info, hist_canvas = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=True)
-
-                        self.canvas_widget.clear_layout(self.control_dock.preprocess.widgetHistView.layout())
-
-                        layout = self.control_dock.preprocess.widgetHistView.layout()
-                        if layout is not None:
-                            layout.addWidget(hist_canvas)
+                    if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
+                        canvas, self.plot_info,_ =  plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
+                        # show increated profiles if exists
+                        if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
+                            self.profile_dock.profiling.clear_plot()
+                            self.profile_dock.profiling.plot_existing_profile(self.plot)
+                        elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.mask_dock.polygon_tab.polygon_manager.polygons):  
+                            self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
+                            self.mask_dock.polygon_tab.polygon_manager.plot_existing_polygon(canvas)
                     else:
-                        canvas, self.plot_info, _ = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
+                        if self.control_dock.toolbox.currentIndex() == self.control_dock.tab_dict['process']:
+                            canvas, self.plot_info, hist_canvas = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=True)
+
+                            self.canvas_widget.clear_layout(self.control_dock.preprocess.widgetHistView.layout())
+
+                            layout = self.control_dock.preprocess.widgetHistView.layout()
+                            if layout is not None:
+                                layout.addWidget(hist_canvas)
+                        else:
+                            canvas, self.plot_info, _ = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
+                    
+                    # Store reference BEFORE adding to canvas
+                    self.mpl_canvas = canvas
+                    self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)
+
+                    if hasattr(self,"info_dock"):
+                        self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
+                    
+                    return
+
+                case 'gradient map':
+                    if self.control_dock.noise_reduction.comboBoxNoiseReductionMethod.currentText() == 'none':
+                        QMessageBox.warning(self,'Warning','Noise reduction must be performed before computing a gradient.')
+                        return
+                    self.control_dock.noise_reduction.noise_reduction_method_callback()
+                case 'correlation':
+                    if self.control_dock.correlation.comboBoxCorrelationMethod.currentText() == 'none':
+                        return
+                    canvas, self.plot_info = plot_correlation(self, data, self.app_data, self.style_data)
+
+
+                case 'TEC' | 'Radar':
+                    canvas, self.plot_info = plot_ndim(self, data, self.app_data, self.style_data)
+
+                case 'histogram':
+                    canvas, self.plot_info = plot_histogram(self, data, self.app_data, self.style_data)
+
+                case 'scatter' | 'heatmap':
+                    if self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldY.currentText():
+                        return
+                    canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.style_data)
+
+                case 'ternary map':
+                    if self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldY.currentText() or \
+                        self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldZ.currentText() or \
+                        self.control_dock.comboBoxFieldY.currentText() == self.control_dock.comboBoxFieldZ.currentText():
+                        return
+
+                    canvas, self.plot_info = plot_ternary_map(self, data, self.app_data, self.style_data)
+
+                case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
+                    if self.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
+                        self.control_dock.dimreduction.compute_dim_red(data, self.app_data)
+                    canvas, self.plot_info = plot_pca(self, data, self.app_data, self.style_data)
+
+                case 'cluster map' | 'cluster score map':
+                    self.control_dock.clustering.compute_clusters_update_groups()
+                    canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.style_data)
+
+                case 'cluster performance':
+                    # compute performace as a function of number of clusters
+                    self.control_dock.clustering.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
+                    canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.style_data)
+
+            # For non-field map cases, add canvas to layout
+            if 'canvas' in locals() and canvas:
+                layout = self.canvas_widget.single_view.layout()
+                if layout is not None:
+                    self.canvas_widget.clear_layout(layout)
+                    layout.addWidget(canvas)
+                else:
+                    print("Warning: single_view.layout() is None")
+
+                # Store reference after successful addition
                 self.mpl_canvas = canvas
-                self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)
-                    # I think add_tree_item is done in add_plotwidget_to_canvas, so it doesn't need to be repeated here
-                    #self.plot_tree.add_tree_item(self.plot_info)
 
-                if hasattr(self,"info_dock"):
-                    self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
-                
-                return
+            # add plot info to info_dock
+            if hasattr(self,"info_dock") and hasattr(self, 'plot_info'):
+                self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
-            case 'gradient map':
-                if self.control_dock.noise_reduction.comboBoxNoiseReductionMethod.currentText() == 'none':
-                    QMessageBox.warning(self,'Warning','Noise reduction must be performed before computing a gradient.')
-                    return
-                self.control_dock.noise_reduction.noise_reduction_method_callback()
-            case 'correlation':
-                if self.control_dock.correlation.comboBoxCorrelationMethod.currentText() == 'none':
-                    return
-                canvas, self.plot_info = plot_correlation(self, data, self.app_data, self.style_data)
-
-
-            case 'TEC' | 'Radar':
-                canvas, self.plot_info = plot_ndim(self, data, self.app_data, self.style_data)
-
-            case 'histogram':
-                canvas, self.plot_info = plot_histogram(self, data, self.app_data, self.style_data)
-
-            case 'scatter' | 'heatmap':
-                if self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldY.currentText():
-                    return
-                canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.style_data)
-
-            case 'ternary map':
-                if self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldY.currentText() or \
-                    self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldZ.currentText() or \
-                    self.control_dock.comboBoxFieldY.currentText() == self.control_dock.comboBoxFieldZ.currentText():
-                    return
-
-                canvas, self.plot_info = plot_ternary_map(self, data, self.app_data, self.style_data)
-
-            case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
-                if self.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
-                    self.control_dock.dimreduction.compute_dim_red(data, self.app_data)
-                canvas, self.plot_info = plot_pca(self, data, self.app_data, self.style_data)
-
-            case 'cluster map' | 'cluster score map':
-                self.control_dock.clustering.compute_clusters_update_groups()
-                canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.style_data)
-
-            case 'cluster performance':
-                # compute performace as a function of number of clusters
-                self.control_dock.clustering.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
-                canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.style_data)
-
-        # add canvas to layout
-        if canvas:
-            layout = self.canvas_widget.single_view.layout()
-            if layout is not None:
-                self.canvas_widget.clear_layout(layout)
-                layout.addWidget(canvas)
-            else:
-                print("Warning: single_view.layout() is None")
-
-        # add plot info to info_dock
-        if hasattr(self,"info_dock"):
-            self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
-
+        except Exception as e:
+            print(f"Error in update_SV: {e}")
+            # Restore old canvas if new one failed
+            if old_canvas is not None:
+                self.mpl_canvas = old_canvas
 
 
     # -------------------------------------

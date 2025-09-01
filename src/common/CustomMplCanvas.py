@@ -1,7 +1,7 @@
 import copy
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import (
-    Qt, QSize
+    Qt, pyqtSignal, QSize
 )
 from PyQt6.QtWidgets import (
     QVBoxLayout, QDialog, QInputDialog, QDialogButtonBox, QMenu
@@ -16,8 +16,6 @@ import pandas as pd
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import matplotlib as mpl
 from src.app.config import ICONPATH
-from src.common.Observable import Observable
-
 
 # Matplotlib Canvas object
 # -------------------------------
@@ -45,10 +43,10 @@ class SimpleMplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(SimpleMplCanvas, self).__init__(self.fig)
 
-        self.parent = parent
+        self.ui = parent
 
 
-class MplCanvas(FigureCanvas, Observable):
+class MplCanvas(FigureCanvas):
     """Matplotlib canvas object for interactive plots
 
     Parameters
@@ -63,7 +61,11 @@ class MplCanvas(FigureCanvas, Observable):
         Height in inches, by default 4
     proj : str, optional
         Projection, by default None
-    """    
+    """
+    locationChanged = pyqtSignal()  # x, y 
+    valueChanged = pyqtSignal()  # value 
+    distanceChanged = pyqtSignal()  # distance
+
     def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False):
         #create MPLCanvas with existing figure (required when loading saved projects)
         if fig:
@@ -78,13 +80,7 @@ class MplCanvas(FigureCanvas, Observable):
 
         if parent is None:
             return
-        self.parent = parent
-        
-        # if ui components does are not part of parent initialise them seperately
-        if ui:
-            self.ui = ui
-        else:
-            self.ui = parent
+        self.ui = parent
 
         # indicates whether the data are map form (x, y, value) or simply (x, y)
         self.map_flag = map_flag
@@ -170,7 +166,7 @@ class MplCanvas(FigureCanvas, Observable):
         if self._xpos == value:
             return
         self._xpos = value
-        self.notify_observers("xpos", value)
+        self.locationChanged.emit()
 
     @property
     def ypos(self):
@@ -182,7 +178,7 @@ class MplCanvas(FigureCanvas, Observable):
         if self._ypos == value:
             return
         self._ypos = value
-        self.notify_observers("ypos", value)
+        self.locationChanged.emit()
 
     @property
     def value(self):
@@ -194,7 +190,7 @@ class MplCanvas(FigureCanvas, Observable):
         if self._value == value:
             return
         self._value = value
-        self.notify_observers("value", value)
+        self.valueChanged.emit()
 
     @property
     def distance(self):
@@ -206,7 +202,7 @@ class MplCanvas(FigureCanvas, Observable):
         if self._distance == value:
             return
         self._distance = value
-        self.notify_observers("distance",value)
+        self.distanceChanged.emit()
 
     def toggle_tool(self, tool, enable=None):
         if tool == 'home':
@@ -319,11 +315,11 @@ class MplCanvas(FigureCanvas, Observable):
             elif y_i > self.array.shape[0]-1:
                 y_i = self.array.shape[0]-1
             
-            #x = x_i*self.parent.dx
-            #y = y_i*self.parent.dy
-            # if self.parent.app_data.sample_id in self.parent.app_data.data:
-            #     x = x_i*self.parent.app_data.data[self.parent.app_data.sample_id].dx
-            #     y = y_i*self.parent.app_data.data[self.parent.app_data.sample_id].dy
+            #x = x_i*self.ui.dx
+            #y = y_i*self.ui.dy
+            # if self.ui.app_data.sample_id in self.ui.app_data.data:
+            #     x = x_i*self.ui.app_data.data[self.ui.app_data.sample_id].dx
+            #     y = y_i*self.ui.app_data.data[self.ui.app_data.sample_id].dy
             # else:
             #     return
             x = x_i*self.dx
@@ -409,8 +405,8 @@ class MplCanvas(FigureCanvas, Observable):
         if not ok:
             return
 
-        overlay_color = self.parent.style_data.overlay_color
-        font_size = self.parent.style_data.font_size
+        overlay_color = self.ui.style_data.overlay_color
+        font_size = self.ui.style_data.font_size
         annotation_obj = self.axes.text(x, y, txt, color=overlay_color, fontsize=font_size, visible=True)
         self.draw()
 
@@ -459,8 +455,8 @@ class MplCanvas(FigureCanvas, Observable):
             Distance between two given points.
         """
         if self.map_flag:
-            #dx = self.parent.app_data.data[self.parent.app_data.sample_id].dx
-            #dy = self.parent.app_data.data[self.parent.app_data.sample_id].dy
+            #dx = self.ui.app_data.data[self.ui.app_data.sample_id].dx
+            #dy = self.ui.app_data.data[self.ui.app_data.sample_id].dy
             dx = self.dx
             dy = self.dy
         else:
@@ -482,9 +478,9 @@ class MplCanvas(FigureCanvas, Observable):
         matplotlib.plot
             Handle to line
         """        
-        #plot_type = self.parent.app_data.plot_info['plot_type']
-        overlay_color = self.parent.style_data.overlay_color
-        line_width = self.parent.style_data.line_width
+        #plot_type = self.ui.app_data.plot_info['plot_type']
+        overlay_color = self.ui.style_data.overlay_color
+        line_width = self.ui.style_data.line_width
 
         # plot line (keep only first returned handle)
         p = self.axes.plot(
@@ -516,7 +512,7 @@ class MplCanvas(FigureCanvas, Observable):
         text_dict : dict
             Dictionary needed to reconstruct distance label
         """        
-        style = self.parent.style_data
+        style = self.ui.style_data
 
         # compute distance
         self.distance = self.calculate_distance(p1, p2)
@@ -528,8 +524,8 @@ class MplCanvas(FigureCanvas, Observable):
 
         # Update distance label on map
         if self.map_flag:
-            xrange = self.parent.app_data.data[self.parent.app_data.sample_id].x.nunique()*self.parent.app_data.data[self.parent.app_data.sample_id].aspect_ratio
-            yrange = self.parent.app_data.data[self.parent.app_data.sample_id].y.nunique()
+            xrange = self.ui.app_data.data[self.ui.app_data.sample_id].x.nunique()*self.ui.app_data.data[self.ui.app_data.sample_id].aspect_ratio
+            yrange = self.ui.app_data.data[self.ui.app_data.sample_id].y.nunique()
 
             xl = self.axes.get_xlim()
             xrange = xl[1] - xl[0]
@@ -626,9 +622,9 @@ class MplCanvas(FigureCanvas, Observable):
                     'Y2': second_point[1],
                     'Text': text_dict,
                     'Label': text_obj.get_text(),
-                    'Color': self.parent.style_data.line_color,
-                    'Size': self.parent.style.font_size,
-                    'Width': self.parent.style_data.line_width,
+                    'Color': self.ui.style_data.line_color,
+                    'Size': self.ui.style.font_size,
+                    'Width': self.ui.style_data.line_width,
                     'Visible': True,
                     'object': line_obj,
                     'text_object': text_obj

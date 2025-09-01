@@ -1,5 +1,7 @@
 import re, copy, pickle
 from pathlib import Path
+from typing import List
+from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
 import src.common.format as fmt
@@ -12,7 +14,6 @@ import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.config import STYLE_PATH
 from src.app.PlotAxisSettings import axis_settings_dict
-from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods, log
 
 VALID_MARKERS = {k for k in Line2D.markers if isinstance(k, str) and k.strip()}
@@ -319,7 +320,7 @@ class StyleTheme():
 
 
 @auto_log_methods(logger_key='Style')
-class StyleData(Observable, StyleTheme):
+class StyleData(QObject, StyleTheme):
     """Manages plot styling for different plot types and syncs with main window UI.
 
     Attributes
@@ -460,6 +461,36 @@ class StyleData(Observable, StyleTheme):
             Prints debugging messages to stdout, by default ``False``
 
     """    
+    plotTypeChanged = pyqtSignal(str) 
+    axisLimChanged = pyqtSignal(str, list)
+    axisLabelChanged = pyqtSignal(str, str)
+    axisScaleChanged = pyqtSignal(str, str)
+    aspectRatioChanged = pyqtSignal(float)
+    tickDirChanged = pyqtSignal(str)
+    fontFamilyChanged = pyqtSignal(str)
+    fontSizeChanged = pyqtSignal(float)
+    scaleDirChanged = pyqtSignal(str)
+    scaleLocationChanged = pyqtSignal(str)
+    scaleLengthChanged = pyqtSignal(float)
+    overlayColorChanged = pyqtSignal(str)
+    showMassChanged = pyqtSignal(bool)
+    markerChanged = pyqtSignal(str)
+    markerSizeChanged = pyqtSignal(float)
+    markerColorChanged = pyqtSignal(str)
+    markerAlphaChanged = pyqtSignal(int)
+    lineWidthChanged = pyqtSignal(float)
+    lengthMultiplierChanged = pyqtSignal(float)
+    lineColorChanged = pyqtSignal(str)
+    colormapChanged = pyqtSignal(str)
+    cbarReverseChanged = pyqtSignal(bool)
+    cbarDirChanged = pyqtSignal(str)
+    heatmapResolutionChanged = pyqtSignal(int)
+    ternaryColormapChanged = pyqtSignal(str)
+    ternaryXColorChanged = pyqtSignal(str)
+    ternaryYColorChanged = pyqtSignal(str)
+    ternaryZColorChanged = pyqtSignal(str)
+    ternaryMColorChanged = pyqtSignal(str)
+
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.logger_key = 'Style'
@@ -528,29 +559,28 @@ class StyleData(Observable, StyleTheme):
             )
 
         self._marker_dict = new_dict
-
-        # at the moment, this is not needed though if the user was ever able to update the
-        # marker dictionary, this should allow it to automatically run an observer function.
-        self.notify_observers("marker_dict", self._marker_dict)
-        
+    
     @property
     def plot_type(self):
         return self._plot_type
 
     @plot_type.setter
-    def plot_type(self, value):
+    def plot_type(self, value: str):
+        if value == self._plot_type:
+            return
+
         self._plot_type = value
-        self.notify_observers("plot_type", value)
+        self.plotTypeChanged.emit(value)
 
     @property
     def xlim(self):
         return self.style_dict[self.plot_type]['XLim']
 
     @xlim.setter
-    def xlim(self, value):
+    def xlim(self, value: list[float]):
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self.plot_type]['XLim'] = value
-            self.notify_observers("xlim", 'x', value)
+            self.axisLimChanged.emit('x', value)
         else:
             raise ValueError("xlim must be a list of two floats or None.")
         
@@ -560,10 +590,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['XLabel']
 
     @xlabel.setter
-    def xlabel(self, label):
+    def xlabel(self, label: str):
         if label is None or isinstance(label, str):
             self.style_dict[self.plot_type]['XLabel'] = label
-            self.notify_observers("xlabel", 'x', label)
+            self.axisLabelChanged.emit('x', label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -572,14 +602,9 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['XScale']
 
     @xscale.setter
-    def xscale(self, scale):
-        # if self._is_valid_scale(scale):
-        #     self.style_dict[self.plot_type]['XScale'] = scale
-        #     self.notify_observers("xscale", 'x', scale)
-        # else:
-        #     raise TypeError("scale must be linear, log, logit, or symlog.")
+    def xscale(self, scale: str):
         self.style_dict[self.plot_type]['XScale'] = scale
-        self.notify_observers("xscale", 'x', scale)
+        self.axisScaleChanged.emit('x', scale)
         
 
     @property
@@ -587,10 +612,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['YLim']
 
     @ylim.setter
-    def ylim(self, value):
+    def ylim(self, value: list[float]):
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self.plot_type]['YLim'] = value
-            self.notify_observers("ylim", 'y', value)
+            self.axisLimChanged.emit('y', value)
         else:
             raise ValueError("ylim must be a list of two floats or None.")
 
@@ -599,10 +624,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['YLabel']
 
     @ylabel.setter
-    def ylabel(self, label):
+    def ylabel(self, label: str):
         if label is None or isinstance(label, str):
             self.style_dict[self.plot_type]['YLabel'] = label
-            self.notify_observers("ylabel", 'y', label)
+            self.axisLabelChanged.emit('y', label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -611,24 +636,19 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['YScale']
 
     @yscale.setter
-    def yscale(self, scale):
-        # if self._is_valid_scale(scale):
-        #     self.style_dict[self.plot_type]['YScale'] = scale
-        #     self.notify_observers("yscale", 'y', scale)
-        # else:
-        #     raise TypeError("scale must be linear, log, logit, or symlog.")
+    def yscale(self, scale: str):
         self.style_dict[self.plot_type]['YScale'] = scale
-        self.notify_observers("yscale", 'y', scale)
+        self.axisScaleChanged.emit('y', scale)
 
     @property
     def zlim(self):
         return self.style_dict[self.plot_type]['ZLim']
 
     @zlim.setter
-    def zlim(self, value):
+    def zlim(self, value: list[float]):
         if value is None or self._is_valid_bounds(value):
             self.style_dict[self.plot_type]['ZLim'] = value
-            self.notify_observers("zlim", 'z', value)
+            self.axisLimChanged.emit('z', value)
         else:
             raise ValueError("zlim must be a list of two floats or None.")
 
@@ -637,10 +657,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['ZLabel']
 
     @zlabel.setter
-    def zlabel(self, label):
+    def zlabel(self, label: str):
         if label is None or isinstance(label, str):
             self.style_dict[self.plot_type]['ZLabel'] = label
-            self.notify_observers("zlabel", 'z', label)
+            self.axisLabelChanged.emit('z', label)
         else:
             raise TypeError("label must be of type str or None.")
 
@@ -649,24 +669,19 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['ZScale']
 
     @zscale.setter
-    def zscale(self, scale):
-        # if self._is_valid_scale(scale):
-        #     self.style_dict[self.plot_type]['ZScale'] = scale
-        #     self.notify_observers("zscale", 'z', scale)
-        # else:
-        #     raise TypeError("scale must be linear, log, logit,  or symlog.")
+    def zscale(self, scale: str):
         self.style_dict[self.plot_type]['ZScale'] = scale
-        self.notify_observers("zscale", 'z', scale)
+        self.axisScaleChanged.emit('z', scale)
 
     @property
     def aspect_ratio(self):
         return self.style_dict[self.plot_type]['AspectRatio']
 
     @aspect_ratio.setter
-    def aspect_ratio(self, value):
+    def aspect_ratio(self, value: float):
         if value is None or isinstance(value, float):
             self.style_dict[self.plot_type]['AspectRatio'] = value
-            self.notify_observers("aspect_ratio", value)
+            self.aspectRatioChanged.emit(value)
         else:
             raise TypeError("aspect_ratio must be of type float or None.")
 
@@ -676,10 +691,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['TickDir']
 
     @tick_dir.setter
-    def tick_dir(self, new_dir):
+    def tick_dir(self, new_dir: str):
         if isinstance(new_dir, str):
             self.style_dict[self.plot_type]['TickDir'] = new_dir
-            self.notify_observers("tick_dir", new_dir)
+            self.tickDirChanged.emit(new_dir)
         else:
             raise TypeError("tickdir must be of type str.")
 
@@ -688,10 +703,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['Font']
 
     @font.setter
-    def font(self, font_family):
+    def font(self, font_family: str):
         if isinstance(font_family, str):
             self.style_dict[self.plot_type]['Font'] = font_family
-            self.notify_observers("font_family", font_family)
+            self.fontFamilyChanged.emit(font_family)
         else:
             raise TypeError("font_family must be of type str.")
 
@@ -700,10 +715,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['FontSize']
 
     @font_size.setter
-    def font_size(self, value):
+    def font_size(self, value: float):
         if isinstance(value, float):
             self.style_dict[self.plot_type]['FontSize'] = value
-            self.notify_observers("font_size", value)
+            self.fontSizeChanged.emit(value)
         else:
             raise TypeError("font_size must be of type float.")
 
@@ -712,10 +727,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['ScaleDir']
 
     @scale_dir.setter
-    def scale_dir(self, new_dir):
+    def scale_dir(self, new_dir: str):
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
             self.style_dict[self.plot_type]['ScaleDir'] = new_dir
-            self.notify_observers("scale_dir", new_dir)
+            self.scaleDirChanged.emit(new_dir)
         else:
             raise TypeError("new_dir must be of type str.")
 
@@ -724,9 +739,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['ScaleLocation']
 
     @scale_location.setter
-    def scale_location(self, location):
+    def scale_location(self, location: str):
         if (location is not None) and isinstance(location, str) and (location in ['northeast', 'northwest', 'southwest', 'southeast']):
             self.style_dict[self.plot_type]['ScaleLocation'] = location
+            self.scaleLocationChanged.emit(location)
         else:
             raise TypeError("location must be of type str.")
 
@@ -735,14 +751,23 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['ScaleLength']
 
     @scale_length.setter
-    def scale_length(self, length):
+    def scale_length(self, length: float):
         if length is None or isinstance(length, float):
             x_range = self.xlim[1] - self.xlim[0] if self.xlim else None
             y_range = self.ylim[1] - self.ylim[0] if self.ylim else None
+
             scale_dir = self.style_dict[self.plot_type]['ScaleDir']
-            if (length is None) or ((length <= 0) or (scale_dir == 'horizontal' and x_range and length > x_range) or (scale_dir == 'vertical' and y_range and length > y_range)):
+
+            if (length is None) or ((length <= 0) \
+                    or (scale_dir == 'horizontal' and x_range and length > x_range) \
+                    or (scale_dir == 'vertical' and y_range and length > y_range)):
+
                 length = self.default_scale_length()
+                if length is None:
+                    return
+
             self.style_dict[self.plot_type]['ScaleLength'] = length
+            self.scaleLengthChanged.emit(length)
         else:
             raise TypeError("length must be of type float.")
 
@@ -751,9 +776,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['OverlayColor']
 
     @overlay_color.setter
-    def overlay_color(self, hexstr):
+    def overlay_color(self, hexstr: str):
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self.plot_type]['OverlayColor'] = hexstr
+            self.overlayColorChanged.emit(hexstr)
         else:
             raise TypeError("color must be a hex string, #rrggbb")
 
@@ -763,13 +789,13 @@ class StyleData(Observable, StyleTheme):
         return self._show_mass
 
     @show_mass.setter
-    def show_mass(self, flag):
+    def show_mass(self, flag: bool):
         if flag == self._show_mass:
             return
 
         self._show_mass = flag
 
-        self.notify_observers("show_mass", flag)
+        self.showMassChanged.emit(flag)
 
     @property
     def marker(self):
@@ -780,6 +806,7 @@ class StyleData(Observable, StyleTheme):
     def marker(self, symbol):
         if isinstance(symbol, str):
             self.style_dict[self.plot_type]['Marker'] = symbol
+            self.markerChanged.emit(symbol)
         else:
             raise TypeError("marker_symbol must be of type str.")
 
@@ -792,6 +819,7 @@ class StyleData(Observable, StyleTheme):
     def marker_size(self, size):
         if isinstance(size, float):
             self.style_dict[self.plot_type]['MarkerSize'] = size
+            self.markerSizeChanged.emit(size)
         else:
             raise TypeError("size must be of type int.")
 
@@ -800,9 +828,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['MarkerColor']
 
     @marker_color.setter
-    def marker_color(self, hexstr):
+    def marker_color(self, hexstr: str|None):
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self.plot_type]['MarkerColor'] = hexstr
+            self.markerColorChanged.emit(hexstr)
         else:
             raise TypeError("hexstr must be a hex string, #rrggbb")
 
@@ -811,9 +840,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['MarkerAlpha']
 
     @marker_alpha.setter
-    def marker_alpha(self, alpha):
-        if isinstance(alpha, int) and 0 <= alpha <= 100:
+    def marker_alpha(self, alpha: float):
+        if isinstance(alpha, float) and 0 <= alpha <= 100:
             self.style_dict[self.plot_type]['MarkerAlpha'] = alpha
+            self.markerAlphaChanged.emit(alpha)
         else:
             raise TypeError("alpha must be of type int and [0,100].")
 
@@ -823,9 +853,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['LineWidth']
 
     @line_width.setter
-    def line_width(self, width):
+    def line_width(self, width: float):
         if isinstance(width, float):
             self.style_dict[self.plot_type]['LineWidth'] = width
+            self.lineWidthChanged.emit(width)
         else:
             raise TypeError("width must be of type float.")
 
@@ -834,9 +865,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['LineMultiplier']
 
     @length_multiplier.setter
-    def length_multiplier(self, value):
+    def length_multiplier(self, value: float):
         if value is None or isinstance(value, float):
             self.style_dict[self.plot_type]['LineMultiplier'] = value
+            self.lengthMultiplierChanged.emit(value)
         else:
             raise TypeError("value must be of type float or None.")
 
@@ -845,9 +877,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['LineColor']
 
     @line_color.setter
-    def line_color(self, hexstr):
+    def line_color(self, hexstr: str|None):
         if hexstr is None or self._is_valid_hex_color(hexstr):
             self.style_dict[self.plot_type]['LineColor'] = hexstr
+            self.lineColorChanged.emit(hexstr)
         else:
             raise TypeError("hexstr must be a hex string, #rrggbb")
 
@@ -856,9 +889,10 @@ class StyleData(Observable, StyleTheme):
         return self.style_dict[self.plot_type]['Colormap']
 
     @cmap.setter
-    def cmap(self, name):
+    def cmap(self, name: str|None):
         if (name is None) or isinstance(name, str):
             self.style_dict[self.plot_type]['Colormap'] = name
+            self.colormapChanged.emit(name)
         else:
             raise TypeError("name must be of type str or None.")
 
@@ -873,6 +907,8 @@ class StyleData(Observable, StyleTheme):
         else:
             raise TypeError("flag must be of type bool or None.")
 
+        self.cbarReverseChanged.emit(flag)
+
     @property
     def cbar_dir(self):
         return self.style_dict[self.plot_type]['CbarDir']
@@ -880,9 +916,11 @@ class StyleData(Observable, StyleTheme):
     @cbar_dir.setter
     def cbar_dir(self, new_dir):
         if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
-            self.style_dict[self.plot_type]['CbarDir'] = new_dir
+            self.cbarDirChanged.emit(new_dir)
         else:
             raise TypeError("new_dir must be of type str.")
+
+        self.style_dict[self.plot_type]['CbarDir'] = new_dir
 
     @property
     def clim(self):
@@ -891,10 +929,11 @@ class StyleData(Observable, StyleTheme):
     @clim.setter
     def clim(self, value):
         if value is None or self._is_valid_bounds(value):
-            self.style_dict[self.plot_type]['CLim'] = value
-            self.notify_observers("clim", 'c', value)
+            self.axisLimChanged.emit('c', value)
         else:
             raise ValueError("clim must be a list of two floats or None.")
+
+        self.style_dict[self.plot_type]['CLim'] = value
 
     @property
     def clabel(self):
@@ -904,9 +943,10 @@ class StyleData(Observable, StyleTheme):
     def clabel(self, label):
         if label is None or isinstance(label, str):
             self.style_dict[self.plot_type]['CLabel'] = label
-            self.notify_observers("clabel", 'c', label)
         else:
             raise TypeError("label must be of type str or None.")
+
+        self.axisLabelChanged.emit('c', label)
 
     @property
     def cscale(self):
@@ -920,7 +960,7 @@ class StyleData(Observable, StyleTheme):
         # else:
         #     raise TypeError("scale must be linear, log, logit, or symlog.")
         self.style_dict[self.plot_type]['CScale'] = scale
-        self.notify_observers("cscale", 'c', scale)
+        self.axisScaleChanged.emit('c', scale)
 
     @property
     def resolution(self):
@@ -942,7 +982,7 @@ class StyleData(Observable, StyleTheme):
         else:
             raise TypeError("value must be an int or None.")
 
-        self.notify_observers("resolution", value)
+        self.heatmapResolutionChanged.emit(value)
 
     ### Ternary Map ###
     @property
@@ -961,7 +1001,7 @@ class StyleData(Observable, StyleTheme):
         self.ternary_color_y = self.ternary_colormaps[self._ternary_colormap]['y']
         self.ternary_color_z = self.ternary_colormaps[self._ternary_colormap]['z']
         self.ternary_color_m = self.ternary_colormaps[self._ternary_colormap]['m']
-        self.notify_observers("ternary_colormap", new_cmap)
+        self.ternaryColormapChanged.emit(new_cmap)
 
     @property
     def ternary_color_x(self):
@@ -974,7 +1014,7 @@ class StyleData(Observable, StyleTheme):
             return
     
         self._ternary_color_x = new_color
-        self.notify_observers("ternary_color_x", new_color)
+        self.ternaryXColorChanged.emit(new_color)
 
     @property
     def ternary_color_y(self):
@@ -987,7 +1027,7 @@ class StyleData(Observable, StyleTheme):
             return
     
         self._ternary_color_y = new_color
-        self.notify_observers("ternary_color_y", new_color)
+        self.ternaryYColorChanged.emit(new_color)
 
     @property
     def ternary_color_z(self):
@@ -1000,7 +1040,7 @@ class StyleData(Observable, StyleTheme):
             return
     
         self._ternary_color_z = new_color
-        self.notify_observers("ternary_color_z", new_color)
+        self.ternaryZColorChanged.emit(new_color)
 
     @property
     def ternary_color_m(self):
@@ -1013,7 +1053,7 @@ class StyleData(Observable, StyleTheme):
             return
     
         self._ternary_color_m = new_color
-        self.notify_observers("ternary_color_m", new_color)
+        self.ternaryMColorChanged.emit(new_color)
 
     def get_axis_label(self, ax: str):
         return getattr(self, f"{ax}label")
@@ -1025,7 +1065,7 @@ class StyleData(Observable, StyleTheme):
         return getattr(self, f"{ax}lim")
 
     def set_axis_lim(self, ax: str, new_lim: list):
-        setattr(self.ui.style_data, f"{ax}lim", new_lim)
+        setattr(self, f"{ax}lim", new_lim)
 
     def get_axis_scale(self, ax: str):
         return getattr(self, f"{ax}scale")
@@ -1053,13 +1093,14 @@ class StyleData(Observable, StyleTheme):
 
         return labels
 
-    def default_scale_length(self):
+    def default_scale_length(self) -> float|None:
         """Sets default length of a scale bar for map-type plots
 
         Returns
         -------
-        float
-            Length of scalebar dependent on direction of scalebar.
+        float | None
+            Returns ``None`` if plot is not a map type, or self.scale_dir is ``'none'``.  Otherwise,
+            returns length of scalebar dependent on direction of scalebar.
         """        
         if (self.plot_type not in self.map_plot_types) or (self.scale_dir == 'none'):
             return None

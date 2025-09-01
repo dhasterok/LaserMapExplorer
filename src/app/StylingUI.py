@@ -747,7 +747,7 @@ class StylingDock(CustomDockWidget):
         
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.ui.style_data.add_observer("plot_type", self.update_plot_type)
+        self.ui.style_data.plotTypeChanged.connect(lambda new_plot_type: self.update_plot_type(new_plot_type))
 
         # these are commented out because they should now be handled by updates
         # to plot data from the control dock, which should force updates
@@ -760,38 +760,29 @@ class StylingDock(CustomDockWidget):
         # self.ui.app_data.add_observer("c_field_type", self.update_field_type)
         # self.ui.app_data.add_observer("c_field", self.update_field)
 
-        self.ui.style_data.add_observer("xlim", self.update_axis_limits)
-        self.ui.style_data.add_observer("xlabel", self.update_axis_label)
-        self.ui.style_data.add_observer("xscale", self.update_axis_scale)
-        self.ui.style_data.add_observer("ylim", self.update_axis_limits)
-        self.ui.style_data.add_observer("ylabel", self.update_axis_label)
-        self.ui.style_data.add_observer("yscale", self.update_axis_scale)
-        self.ui.style_data.add_observer("zlim", self.update_axis_limits)
-        self.ui.style_data.add_observer("zlabel", self.update_axis_label)
-        self.ui.style_data.add_observer("zscale", self.update_axis_scale)
-        self.ui.style_data.add_observer("aspect_ratio", self.update_aspect_ratio)
-        self.ui.style_data.add_observer("tick_dir", self.update_tick_dir)
-        self.ui.style_data.add_observer("font_family", self.update_font_family)
-        self.ui.style_data.add_observer("font_size", self.update_font_size)
-        self.ui.style_data.add_observer("scale_dir", self.update_scale_direction)
-        self.ui.style_data.add_observer("scale_location", self.update_scale_location)
-        self.ui.style_data.add_observer("scale_length", self.update_scale_length)
-        self.ui.style_data.add_observer("overlay_color", self.update_overlay_color)
-        self.ui.style_data.add_observer("show_mass", self.update_show_mass)
-        self.ui.style_data.add_observer("marker_symbol", self.update_marker_symbol)
-        self.ui.style_data.add_observer("marker_size", self.update_marker_size)
-        self.ui.style_data.add_observer("marker_color", self.update_marker_color)
-        self.ui.style_data.add_observer("marker_alpha", self.update_marker_transparency)
-        self.ui.style_data.add_observer("line_width", self.update_line_width)
-        self.ui.style_data.add_observer("length_multiplier", self.update_length_multiplier)
-        self.ui.style_data.add_observer("line_color", self.update_line_color)
-        self.ui.style_data.add_observer("cmap", self.update_field_colormap)
-        self.ui.style_data.add_observer("cbar_reverse", self.update_cbar_reverse)
-        self.ui.style_data.add_observer("cbar_direction", self.update_cbar_direction)
-        self.ui.style_data.add_observer("clim", self.update_axis_limits)
-        self.ui.style_data.add_observer("clabel", self.update_axis_label)
-        self.ui.style_data.add_observer("cscale", self.update_axis_scale)
-        self.ui.style_data.add_observer("resolution", self.update_resolution)
+        self.ui.style_data.axisLimChanged.connect(lambda ax, new_lim: self.update_axis_limits(ax, new_lim))
+        self.ui.style_data.axisLabelChanged.connect(lambda ax, new_text: self.update_axis_label(ax, new_text))
+        self.ui.style_data.axisScaleChanged.connect(lambda ax, new_text: self.update_axis_scale(ax, new_text))
+        self.ui.style_data.aspectRatioChanged.connect(lambda value: self.update_aspect_ratio(value))
+        self.ui.style_data.tickDirChanged.connect(lambda direction: self.update_tick_dir(direction))
+        self.ui.style_data.fontFamilyChanged.connect(lambda new_font: self.update_font_family(new_font))
+        self.ui.style_data.fontSizeChanged.connect(lambda value: self.update_font_size(value))
+        self.ui.style_data.scaleDirChanged.connect(lambda direction: self.update_scale_direction(direction))
+        self.ui.style_data.scaleLocationChanged.connect(lambda location: self.update_scale_location(location))
+        self.ui.style_data.scaleLengthChanged.connect(lambda value: self.update_scale_length(value))
+        self.ui.style_data.overlayColorChanged.connect(lambda new_color: self.update_overlay_color(new_color))
+        self.ui.style_data.showMassChanged.connect(lambda state: self.update_show_mass(state))
+        self.ui.style_data.markerChanged.connect(lambda new_text: self.update_marker_symbol(new_text))
+        self.ui.style_data.markerSizeChanged.connect(lambda value: self.update_marker_size(value))
+        self.ui.style_data.markerColorChanged.connect(lambda new_color: self.update_marker_color(new_color))
+        self.ui.style_data.markerAlphaChanged.connect(lambda value: self.update_marker_transparency(value))
+        self.ui.style_data.lineWidthChanged.connect(lambda value: self.update_line_width(value))
+        self.ui.style_data.lengthMultiplierChanged.connect(lambda value: self.update_length_multiplier(value))
+        self.ui.style_data.lineColorChanged.connect(lambda new_color: self.update_line_color(new_color))
+        self.ui.style_data.colormapChanged.connect(lambda cmap: self.update_field_colormap(cmap))
+        self.ui.style_data.cbarReverseChanged.connect(lambda state: self.update_cbar_reverse(state))
+        self.ui.style_data.cbarDirChanged.connect(lambda direction: self.update_cbar_direction(direction))
+        self.ui.style_data.heatmapResolutionChanged.connect(lambda value: self.update_resolution(value))
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -962,7 +953,9 @@ class StylingDock(CustomDockWidget):
         ui_lim = [lower.value, upper.value]
 
         if new_lim is None:
+            self.ui.style_data.blockSignals(True)
             setattr(self, f"{ax}lim", ui_lim)
+            self.ui.style_data.blockSignals(False)
         else:
             if list(new_lim) == ui_lim:
                 return
@@ -983,7 +976,9 @@ class StylingDock(CustomDockWidget):
             ui_label = getattr(self.axes, f"lineEdit{ax.upper()}Label")
 
         if new_text is None:
+            self.ui.style_data.blockSignals(True)
             setattr(self, f"{ax}label", ui_label.text())
+            self.ui.style_data.blockSignals(False)
         else:
             if new_text == ui_label.text():
                 return
@@ -1012,7 +1007,9 @@ class StylingDock(CustomDockWidget):
             scale_combo = getattr(self.axes, f"comboBox{ax.upper()}Scale")
 
         if  new_text is None:
+            self.ui.style_data.blockSignals(True)
             setattr(self, f"{ax}_scale", scale_combo.currentText())
+            self.ui.style_data.blockSignals(False)
         else:
             if new_text == scale_combo.currentText():
                 return
@@ -1042,7 +1039,9 @@ class StylingDock(CustomDockWidget):
             New value for the line edit, by default None
         """
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.aspect_ratio = self.axes.lineEditAspectRatio.value
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.axes.lineEditAspectRatio.value:
                 return
@@ -1066,7 +1065,9 @@ class StylingDock(CustomDockWidget):
             New direction for the combobox, by default None
         """
         if new_dir is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.tick_dir = self.axes.comboBoxTickDirection.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_dir == self.axes.comboBoxTickDirection.currentText():
                 return
@@ -1093,7 +1094,9 @@ class StylingDock(CustomDockWidget):
             New direction for the combobox, by default None
         """
         if new_text is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.scale_dir = self.annotations.comboBoxScaleDirection.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_text == self.annotations.comboBoxScaleDirection.currentText():
                 return
@@ -1117,7 +1120,9 @@ class StylingDock(CustomDockWidget):
             New location for the combobox, by default None
         """
         if new_text is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.scale_location = self.annotations.comboBoxScaleLocation.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_text == self.annotations.comboBoxScaleLocation.currentText():
                 return
@@ -1142,7 +1147,9 @@ class StylingDock(CustomDockWidget):
             New location for the combobox, by default None
         """
         if not new_value:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.scale_length = self.annotations.lineEditScaleLength.value
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.annotations.lineEditScaleLength.value:
                 return
@@ -1171,7 +1178,9 @@ class StylingDock(CustomDockWidget):
             New state for the checkbox, by default None
         """
         if new_state is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.show_mass = self.annotations.checkBoxShowMass.isChecked()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_state == self.annotations.checkBoxShowMass.isChecked():
                 return
@@ -1198,7 +1207,9 @@ class StylingDock(CustomDockWidget):
             New marker for the combobox, by default None
         """
         if new_marker is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.marker = self.elements.comboBoxMarker.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_marker == self.elements.comboBoxMarker.currentText():
                 return
@@ -1222,7 +1233,9 @@ class StylingDock(CustomDockWidget):
             New size for the spinbox, by default None
         """
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.marker_size = self.elements.doubleSpinBoxMarkerSize.value()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.elements.doubleSpinBoxMarkerSize.value():
                 return
@@ -1233,8 +1246,17 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_marker_color(self, new_color=None):
-        self.ui.style_data.marker_color = new_color
-        self.elements.colorButtonMarkerColor.color = new_color
+        if new_color is None:
+            self.ui.style_data.blockSignals(True)
+            self.ui.style_data.marker_color = new_color
+            self.ui.style_data.blockSignals(False)
+        else:
+            if new_color == self.elements.colorButtonMarkerColor.color:
+                return
+
+            self.elements.colorButtonMarkerColor.blockSignals(True)
+            self.elements.colorButtonMarkerColor.color = new_color
+            self.elements.colorButtonMarkerColor.blockSignals(False)
 
         self.ui.schedule_update()
 
@@ -1251,7 +1273,9 @@ class StylingDock(CustomDockWidget):
             New transparency for the slider, by default None
         """
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.marker_alpha = self.elements.sliderTransparency.value()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.elements.sliderTransparency.value():
                 return
@@ -1278,7 +1302,9 @@ class StylingDock(CustomDockWidget):
             New width for the spinbox, by default None
         """
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.line_width = self.elements.doubleSpinBoxLineWidth.value()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.elements.doubleSpinBoxLineWidth.value():
                 return
@@ -1302,7 +1328,9 @@ class StylingDock(CustomDockWidget):
             New mulitiplier for the line edit, by default None
         """
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.length_multiplier = self.elements.lineEditLengthMultiplier.value
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.elements.lineEditLengthMultiplier.value:
                 return
@@ -1314,8 +1342,15 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_line_color(self, new_color=None):
-        self.ui.style_data.line_color = new_color
-        self.elements.colorButtonLineColor.color = new_color
+        if new_color is None:
+            self.ui.style_data.blockSignals(True)
+            self.ui.style_data.line_color = new_color
+            self.ui.style_data.blockSignals(False)
+        else:
+            if new_color == self.elements.colorButtonLineColor.color:
+                self.elements.colorButtonLineColor.blockSignals(True)
+                self.elements.colorButtonLineColor.color = new_color
+                self.elements.colorButtonLineColor.blockSignals(False)
 
         self.ui.schedule_update()
 
@@ -1335,7 +1370,9 @@ class StylingDock(CustomDockWidget):
             New font family for the combobox, by default None
         """
         if new_font is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.font = self.annotations.fontComboBox.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_font == self.annotations.fontComboBox.currentText():
                 return
@@ -1359,7 +1396,9 @@ class StylingDock(CustomDockWidget):
             New font size for the spinbox, by default None
         """
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.font_size = self.annotations.doubleSpinBoxFontSize.value()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.annotations.doubleSpinBoxFontSize.value():
                 return
@@ -1386,7 +1425,9 @@ class StylingDock(CustomDockWidget):
             New colormap for the combobox, by default None
         """
         if new_text is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.cmap = self.caxes.comboBoxFieldColormap.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_text == self.caxes.comboBoxFieldColormap.currentText():
                 return
@@ -1402,7 +1443,9 @@ class StylingDock(CustomDockWidget):
 
     def update_cbar_reverse(self, new_value):
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.cbar_reverse = self.caxes.checkBoxReverseColormap.isChecked()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.caxes.checkBoxReverseColormap.isChecked():
                 return
@@ -1426,7 +1469,9 @@ class StylingDock(CustomDockWidget):
             New colormap direction for the combobox, by default None
         """
         if new_text is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.cbar_dir = self.caxes.comboBoxCbarDirection.currentText()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_text == self.caxes.comboBoxCbarDirection.currentText():
                 return
@@ -1443,7 +1488,9 @@ class StylingDock(CustomDockWidget):
     def update_resolution(self, new_value=None):
 
         if new_value is None:
+            self.ui.style_data.blockSignals(True)
             self.ui.style_data.resolution = self.caxes.spinBoxHeatmapResolution.value()
+            self.ui.style_data.blockSignals(False)
         else:
             if new_value == self.caxes.spinBoxHeatmapResolution.value():
                 return
@@ -1844,7 +1891,7 @@ class StylingDock(CustomDockWidget):
         ui = self.ui
 
         # axes properties
-        ui.labelXLim.setEnabled(self.axes.lineEditXLB.isEnabled())
+        self.axes.labelXLim.setEnabled(self.axes.lineEditXLB.isEnabled())
         ui.toolButtonXAxisReset.setEnabled(ui.labelXLim.isEnabled())
         ui.labelXScale.setEnabled(ui.comboBoxXScale.isEnabled())
         ui.labelYLim.setEnabled(self.axes.lineEditYLB.isEnabled())

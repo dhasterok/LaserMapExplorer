@@ -169,13 +169,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../labels.html">
-    <no title>
-  </a>
-</li>
-
   </ul>
 </nav></div>
       
@@ -302,13 +295,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../labels.html">
-    <no title>
-  </a>
-</li>
-
   </ul>
 </nav></div>
           
@@ -426,7 +412,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.StyleToolbox.</span></span><span class="sig-name descname"><span class="pre">StyleData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="src.common.Observable.html#src.common.Observable.Observable" title="src.common.Observable.Observable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observable</span></code></a>, <a class="reference internal" href="#app.StyleToolbox.StyleTheme" title="app.StyleToolbox.StyleTheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">StyleTheme</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code>, <a class="reference internal" href="#app.StyleToolbox.StyleTheme" title="app.StyleToolbox.StyleTheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">StyleTheme</span></code></a></p>
 <p>Manages plot styling for different plot types and syncs with main window UI.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.plot_type">
@@ -904,18 +890,18 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <dt><strong>font_size</strong></dt><dd></dd>
 <dt><strong>length_multiplier</strong></dt><dd></dd>
 <dt><strong>line_color</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#id11" title="app.StyleToolbox.StyleData.line_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_width</span></code></a></dt><dd><p>float : Line width for plots with lines</p>
+<dt><a class="reference internal" href="#id37" title="app.StyleToolbox.StyleData.line_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_width</span></code></a></dt><dd><p>float : Line width for plots with lines</p>
 </dd>
-<dt><a class="reference internal" href="#id14" title="app.StyleToolbox.StyleData.marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker</span></code></a></dt><dd><p>str : Marker key name associated with self.marker_dict</p>
+<dt><a class="reference internal" href="#id40" title="app.StyleToolbox.StyleData.marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker</span></code></a></dt><dd><p>str : Marker key name associated with self.marker_dict</p>
 </dd>
 <dt><strong>marker_alpha</strong></dt><dd></dd>
 <dt><strong>marker_color</strong></dt><dd></dd>
 <dt><strong>marker_dict</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#id18" title="app.StyleToolbox.StyleData.marker_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker_size</span></code></a></dt><dd><p>double : Marker size for plots with markers</p>
+<dt><a class="reference internal" href="#id52" title="app.StyleToolbox.StyleData.marker_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker_size</span></code></a></dt><dd><p>double : Marker size for plots with markers</p>
 </dd>
 <dt><strong>overlay_color</strong></dt><dd></dd>
 <dt><strong>plot_type</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#id21" title="app.StyleToolbox.StyleData.resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution</span></code></a></dt><dd><p>int : Resolution for heatmaps.</p>
+<dt><a class="reference internal" href="#id59" title="app.StyleToolbox.StyleData.resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution</span></code></a></dt><dd><p>int : Resolution for heatmaps.</p>
 </dd>
 <dt><strong>scale_dir</strong></dt><dd></dd>
 <dt><strong>scale_length</strong></dt><dd></dd>
@@ -930,9 +916,9 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 </dd>
 <dt><a class="reference internal" href="#app.StyleToolbox.StyleData.ternary_color_z" title="app.StyleToolbox.StyleData.ternary_color_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_color_z</span></code></a></dt><dd><p>str : The color for the C-vertex on a ternary diagram.</p>
 </dd>
-<dt><a class="reference internal" href="#id25" title="app.StyleToolbox.StyleData.ternary_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_colormap</span></code></a></dt><dd><p>str : The colormap used for ternary maps.</p>
+<dt><a class="reference internal" href="#id81" title="app.StyleToolbox.StyleData.ternary_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ternary_colormap</span></code></a></dt><dd><p>str : The colormap used for ternary maps.</p>
 </dd>
-<dt><a class="reference internal" href="#id26" title="app.StyleToolbox.StyleData.tick_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tick_dir</span></code></a></dt><dd><p>str : Tick direction for plot.</p>
+<dt><a class="reference internal" href="#id84" title="app.StyleToolbox.StyleData.tick_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tick_dir</span></code></a></dt><dd><p>str : Tick direction for plot.</p>
 </dd>
 <dt><strong>xlabel</strong></dt><dd></dd>
 <dt><strong>xlim</strong></dt><dd></dd>
@@ -949,20 +935,62 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.add_observer" title="app.StyleToolbox.StyleData.add_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code></a>(event_name, callback)</p></td>
-<td><p>Register a callback function to be called when a property changes.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">blockSignals</span></code>(self, b)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">childEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code>(self)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.color_norm" title="app.StyleToolbox.StyleData.color_norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">color_norm</span></code></a>([N])</p></td>
 <td><p>Normalize colors for colormap</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.create_custom_colormap" title="app.StyleToolbox.StyleData.create_custom_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_custom_colormap</span></code></a>(name[, N])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">connectNotify</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.create_custom_colormap" title="app.StyleToolbox.StyleData.create_custom_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_custom_colormap</span></code></a>(name[, N])</p></td>
 <td><p>Creates custom colormaps</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">customEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.default_scale_length" title="app.StyleToolbox.StyleData.default_scale_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_scale_length</span></code></a>()</p></td>
 <td><p>Sets default length of a scale bar for map-type plots</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.default_style_dict" title="app.StyleToolbox.StyleData.default_style_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_style_dict</span></code></a>()</p></td>
 <td><p>Generates a dictionary of default plot styles for various plot types.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deleteLater</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnect</span></code>(-&gt; bool disconnect)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnectNotify</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dumpObjectInfo</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dumpObjectTree</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dynamicPropertyNames</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">event</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eventFilter</span></code>(self, a0, a1)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findChild</span></code>(-&gt; QObjectT)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findChildren</span></code>(...)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.get_axis_values" title="app.StyleToolbox.StyleData.get_axis_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axis_values</span></code></a>(data, field[, ax])</p></td>
 <td><p>Gets axis values</p></td>
@@ -973,20 +1001,74 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.get_colormap" title="app.StyleToolbox.StyleData.get_colormap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_colormap</span></code></a>([N])</p></td>
 <td><p>Gets the color map</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.input_theme_name_dlg" title="app.StyleToolbox.StyleData.input_theme_name_dlg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_theme_name_dlg</span></code></a>(style_dict)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inherits</span></code>(self, classname)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.input_theme_name_dlg" title="app.StyleToolbox.StyleData.input_theme_name_dlg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_theme_name_dlg</span></code></a>(style_dict)</p></td>
 <td><p>Opens a dialog to save style theme</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.load_theme_names" title="app.StyleToolbox.StyleData.load_theme_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_theme_names</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">installEventFilter</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isQuickItemType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isSignalConnected</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWidgetType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isWindowType</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">killTimer</span></code>(self, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.load_theme_names" title="app.StyleToolbox.StyleData.load_theme_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_theme_names</span></code></a>()</p></td>
 <td><p>Loads theme names and adds them to the theme comboBox</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.notify_observers" title="app.StyleToolbox.StyleData.notify_observers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_observers</span></code></a>(event_name, *args, **kwargs)</p></td>
-<td><p>Notify all registered observers of an event or property change.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metaObject</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveToThread</span></code>(self, thread)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">objectName</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyqtConfigure</span></code>(...)</p></td>
+<td><p>Each keyword argument is either the name of a Qt property or a Qt signal.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.read_theme" title="app.StyleToolbox.StyleData.read_theme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_theme</span></code></a>(name)</p></td>
 <td><p>Reads a style theme</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.remove_observer" title="app.StyleToolbox.StyleData.remove_observer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_observer</span></code></a>(event_name, callback)</p></td>
-<td><p>Deregister a callback function from an event.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">receivers</span></code>(self, signal)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">removeEventFilter</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sender</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">senderSignalIndex</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setObjectName</span></code>(self, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setParent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setProperty</span></code>(self, name, value)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.set_axis_attributes" title="app.StyleToolbox.StyleData.set_axis_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axis_attributes</span></code></a>(ax, field)</p></td>
 <td><p>Sets axis attributes in the style toolbox</p></td>
@@ -997,14 +1079,59 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <tr class="row-even"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.set_style_attributes" title="app.StyleToolbox.StyleData.set_style_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_style_attributes</span></code></a>(data, app_data[, ...])</p></td>
 <td><p>Sets values in style dictionary</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">signalsBlocked</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">startTimer</span></code>(self, interval[, timerType])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread</span></code>(self)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timerEvent</span></code>(self, a0)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#app.StyleToolbox.StyleData.toggle_mass" title="app.StyleToolbox.StyleData.toggle_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_mass</span></code></a>(labels)</p></td>
 <td><p>Removes mass from labels</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tr</span></code>(sourceText[, disambiguation, n])</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="pst-scrollable-table-container"><table class="table">
 <tbody>
+<tr class="row-odd"><td><p><strong>aspectRatioChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>axisLabelChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>axisLimChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>axisScaleChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>cbarDirChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>cbarReverseChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>colormapChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>destroyed</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>fontFamilyChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>fontSizeChanged</strong></p></td>
+<td></td>
+</tr>
 <tr class="row-odd"><td><p><strong>get_axis_label</strong></p></td>
 <td></td>
 </tr>
@@ -1014,7 +1141,49 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <tr class="row-odd"><td><p><strong>get_axis_scale</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>print_properties</strong></p></td>
+<tr class="row-even"><td><p><strong>heatmapResolutionChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>lengthMultiplierChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>lineColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>lineWidthChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>markerAlphaChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>markerChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>markerColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>markerSizeChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>objectNameChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>overlayColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>plotTypeChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>print_properties</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>scaleDirChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>scaleLengthChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>scaleLocationChanged</strong></p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p><strong>set_axis_label</strong></p></td>
@@ -1026,13 +1195,51 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <tr class="row-odd"><td><p><strong>set_axis_scale</strong></p></td>
 <td></td>
 </tr>
+<tr class="row-even"><td><p><strong>showMassChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>ternaryColormapChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>ternaryMColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>ternaryXColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>ternaryYColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>ternaryZColorChanged</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>tickDirChanged</strong></p></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 </div>
-<dl class="py method">
-<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.add_observer">
-<span class="sig-name descname"><span class="pre">add_observer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.add_observer" title="Link to this definition">#</a></dt>
-<dd><p>Register a callback function to be called when a property changes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.aspectRatioChanged">
+<span class="sig-name descname"><span class="pre">aspectRatioChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.aspectRatioChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id1"><span class="problematic" id="id2">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -1040,29 +1247,144 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aspect_ratio</span></span><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.axisLabelChanged">
+<span class="sig-name descname"><span class="pre">axisLabelChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.axisLabelChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id3"><span class="problematic" id="id4">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.axisLimChanged">
+<span class="sig-name descname"><span class="pre">axisLimChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.axisLimChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id5"><span class="problematic" id="id6">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.axisScaleChanged">
+<span class="sig-name descname"><span class="pre">axisScaleChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.axisScaleChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id7"><span class="problematic" id="id8">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.cbarDirChanged">
+<span class="sig-name descname"><span class="pre">cbarDirChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.cbarDirChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id9"><span class="problematic" id="id10">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.cbarReverseChanged">
+<span class="sig-name descname"><span class="pre">cbarReverseChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.cbarReverseChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id11"><span class="problematic" id="id12">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cbar_dir</span></span><a class="headerlink" href="#id1" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id13">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cbar_dir</span></span><a class="headerlink" href="#id13" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cbar_reverse</span></span><a class="headerlink" href="#id2" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id14">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cbar_reverse</span></span><a class="headerlink" href="#id14" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id3">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clabel</span></span><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id15">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clabel</span></span><a class="headerlink" href="#id15" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id4">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span><a class="headerlink" href="#id4" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id16">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span><a class="headerlink" href="#id16" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id5">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmap</span></span><a class="headerlink" href="#id5" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id17">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmap</span></span><a class="headerlink" href="#id17" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1078,6 +1400,29 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>matplotlib.colors.Norm</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.colormapChanged">
+<span class="sig-name descname"><span class="pre">colormapChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.colormapChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id18"><span class="problematic" id="id19">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1104,20 +1449,21 @@ plot type.  While data related to plot and color axes may be stored in <em>style
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id6">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cscale</span></span><a class="headerlink" href="#id6" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id20">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cscale</span></span><a class="headerlink" href="#id20" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.default_scale_length">
-<span class="sig-name descname"><span class="pre">default_scale_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.default_scale_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.default_scale_length" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">default_scale_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleData.default_scale_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleData.default_scale_length" title="Link to this definition">#</a></dt>
 <dd><p>Sets default length of a scale bar for map-type plots</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Length of scalebar dependent on direction of scalebar.</p>
+<dd class="field-odd"><p>Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if plot is not a map type, or self.scale_dir is <code class="docutils literal notranslate"><span class="pre">'none'</span></code>.  Otherwise,
+returns length of scalebar dependent on direction of scalebar.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1274,13 +1620,59 @@ these values, such as setting <cite>Colormap</cite>, axis fields, aspect ratio, 
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id7">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">font</span></span><a class="headerlink" href="#id7" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id21">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">font</span></span><a class="headerlink" href="#id21" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.fontFamilyChanged">
+<span class="sig-name descname"><span class="pre">fontFamilyChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.fontFamilyChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id22"><span class="problematic" id="id23">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.fontSizeChanged">
+<span class="sig-name descname"><span class="pre">fontSizeChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.fontSizeChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id24"><span class="problematic" id="id25">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id8">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">font_size</span></span><a class="headerlink" href="#id8" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id26">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">font_size</span></span><a class="headerlink" href="#id26" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1360,6 +1752,29 @@ no axis needs to be supplied.  For a probability axis associated with histogram 
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.heatmapResolutionChanged">
+<span class="sig-name descname"><span class="pre">heatmapResolutionChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.heatmapResolutionChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id27"><span class="problematic" id="id28">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.input_theme_name_dlg">
 <span class="sig-name descname"><span class="pre">input_theme_name_dlg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.input_theme_name_dlg" title="Link to this definition">#</a></dt>
@@ -1379,19 +1794,88 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.lengthMultiplierChanged">
+<span class="sig-name descname"><span class="pre">lengthMultiplierChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.lengthMultiplierChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id29"><span class="problematic" id="id30">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id9">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length_multiplier</span></span><a class="headerlink" href="#id9" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id31">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length_multiplier</span></span><a class="headerlink" href="#id31" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.lineColorChanged">
+<span class="sig-name descname"><span class="pre">lineColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.lineColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id32"><span class="problematic" id="id33">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.lineWidthChanged">
+<span class="sig-name descname"><span class="pre">lineWidthChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.lineWidthChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id34"><span class="problematic" id="id35">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id36">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_color</span></span><a class="headerlink" href="#id36" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id10">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_color</span></span><a class="headerlink" href="#id10" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="id11">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_width</span></span><a class="headerlink" href="#id11" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id37">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_width</span></span><a class="headerlink" href="#id37" title="Link to this definition">#</a></dt>
 <dd><p>Line width for plots with lines</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1404,7 +1888,7 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.load_theme_names">
 <span class="sig-name descname"><span class="pre">load_theme_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.load_theme_names" title="Link to this definition">#</a></dt>
 <dd><p>Loads theme names and adds them to the theme comboBox</p>
-<p>Looks for saved style themes (<a href="#id12"><span class="problematic" id="id13">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
+<p>Looks for saved style themes (<a href="#id38"><span class="problematic" id="id39">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of style themes</p>
@@ -1416,8 +1900,8 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id14">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker</span></span><a class="headerlink" href="#id14" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id40">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker</span></span><a class="headerlink" href="#id40" title="Link to this definition">#</a></dt>
 <dd><p>Marker key name associated with self.marker_dict</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1426,24 +1910,116 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.markerAlphaChanged">
+<span class="sig-name descname"><span class="pre">markerAlphaChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.markerAlphaChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id41"><span class="problematic" id="id42">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.markerChanged">
+<span class="sig-name descname"><span class="pre">markerChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.markerChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id43"><span class="problematic" id="id44">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.markerColorChanged">
+<span class="sig-name descname"><span class="pre">markerColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.markerColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id45"><span class="problematic" id="id46">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.markerSizeChanged">
+<span class="sig-name descname"><span class="pre">markerSizeChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.markerSizeChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id47"><span class="problematic" id="id48">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id15">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_alpha</span></span><a class="headerlink" href="#id15" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id49">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_alpha</span></span><a class="headerlink" href="#id49" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id16">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_color</span></span><a class="headerlink" href="#id16" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id50">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_color</span></span><a class="headerlink" href="#id50" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id17">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_dict</span></span><a class="headerlink" href="#id17" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id51">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_dict</span></span><a class="headerlink" href="#id51" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id18">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_size</span></span><a class="headerlink" href="#id18" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id52">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_size</span></span><a class="headerlink" href="#id52" title="Link to this definition">#</a></dt>
 <dd><p>Marker size for plots with markers</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1452,20 +2028,60 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.notify_observers">
-<span class="sig-name descname"><span class="pre">notify_observers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.notify_observers" title="Link to this definition">#</a></dt>
-<dd><p>Notify all registered observers of an event or property change.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.overlayColorChanged">
+<span class="sig-name descname"><span class="pre">overlayColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.overlayColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id53"><span class="problematic" id="id54">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id19">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">overlay_color</span></span><a class="headerlink" href="#id19" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id55">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">overlay_color</span></span><a class="headerlink" href="#id55" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.plotTypeChanged">
+<span class="sig-name descname"><span class="pre">plotTypeChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.plotTypeChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id56"><span class="problematic" id="id57">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id20">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_type</span></span><a class="headerlink" href="#id20" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id58">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_type</span></span><a class="headerlink" href="#id58" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1490,15 +2106,9 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.remove_observer">
-<span class="sig-name descname"><span class="pre">remove_observer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.StyleToolbox.StyleData.remove_observer" title="Link to this definition">#</a></dt>
-<dd><p>Deregister a callback function from an event.</p>
-</dd></dl>
-
 <dl class="py property">
-<dt class="sig sig-object py" id="id21">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#id21" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id59">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#id59" title="Link to this definition">#</a></dt>
 <dd><p>Resolution for heatmaps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -1510,19 +2120,88 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.scaleDirChanged">
+<span class="sig-name descname"><span class="pre">scaleDirChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.scaleDirChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id60"><span class="problematic" id="id61">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.scaleLengthChanged">
+<span class="sig-name descname"><span class="pre">scaleLengthChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.scaleLengthChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id62"><span class="problematic" id="id63">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.scaleLocationChanged">
+<span class="sig-name descname"><span class="pre">scaleLocationChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.scaleLocationChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id64"><span class="problematic" id="id65">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id22">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_dir</span></span><a class="headerlink" href="#id22" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id66">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_dir</span></span><a class="headerlink" href="#id66" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id23">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_length</span></span><a class="headerlink" href="#id23" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id67">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_length</span></span><a class="headerlink" href="#id67" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id24">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_location</span></span><a class="headerlink" href="#id24" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id68">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_location</span></span><a class="headerlink" href="#id68" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1587,6 +2266,29 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.showMassChanged">
+<span class="sig-name descname"><span class="pre">showMassChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.showMassChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id69"><span class="problematic" id="id70">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleData.show_mass">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">show_mass</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.show_mass" title="Link to this definition">#</a></dt>
@@ -1594,6 +2296,121 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternaryColormapChanged">
+<span class="sig-name descname"><span class="pre">ternaryColormapChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternaryColormapChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id71"><span class="problematic" id="id72">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternaryMColorChanged">
+<span class="sig-name descname"><span class="pre">ternaryMColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternaryMColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id73"><span class="problematic" id="id74">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternaryXColorChanged">
+<span class="sig-name descname"><span class="pre">ternaryXColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternaryXColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id75"><span class="problematic" id="id76">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternaryYColorChanged">
+<span class="sig-name descname"><span class="pre">ternaryYColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternaryYColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id77"><span class="problematic" id="id78">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.ternaryZColorChanged">
+<span class="sig-name descname"><span class="pre">ternaryZColorChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.ternaryZColorChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id79"><span class="problematic" id="id80">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1643,8 +2460,8 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id25">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#id25" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id81">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ternary_colormap</span></span><a class="headerlink" href="#id81" title="Link to this definition">#</a></dt>
 <dd><p>The colormap used for ternary maps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1653,9 +2470,32 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.StyleToolbox.StyleData.tickDirChanged">
+<span class="sig-name descname"><span class="pre">tickDirChanged</span></span><a class="headerlink" href="#app.StyleToolbox.StyleData.tickDirChanged" title="Link to this definition">#</a></dt>
+<dd><p>int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pyqtSignal(<a href="#id82"><span class="problematic" id="id83">*</span></a>types, name</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str = …, revision</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
-<dt class="sig sig-object py" id="id26">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tick_dir</span></span><a class="headerlink" href="#id26" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id84">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tick_dir</span></span><a class="headerlink" href="#id84" title="Link to this definition">#</a></dt>
 <dd><p>Tick direction for plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1683,38 +2523,38 @@ and the name is returned, so it can be added to a list of style themes.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id27">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlabel</span></span><a class="headerlink" href="#id27" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id85">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlabel</span></span><a class="headerlink" href="#id85" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id28">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlim</span></span><a class="headerlink" href="#id28" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id86">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xlim</span></span><a class="headerlink" href="#id86" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id29">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xscale</span></span><a class="headerlink" href="#id29" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id87">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xscale</span></span><a class="headerlink" href="#id87" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id30">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><a class="headerlink" href="#id30" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id88">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylabel</span></span><a class="headerlink" href="#id88" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id31">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylim</span></span><a class="headerlink" href="#id31" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id89">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ylim</span></span><a class="headerlink" href="#id89" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id32">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yscale</span></span><a class="headerlink" href="#id32" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id90">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yscale</span></span><a class="headerlink" href="#id90" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id33">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zlabel</span></span><a class="headerlink" href="#id33" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id91">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zlabel</span></span><a class="headerlink" href="#id91" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1925,7 +2765,7 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <dt class="sig sig-object py" id="app.StyleToolbox.StyleTheme.load_theme_names">
 <span class="sig-name descname"><span class="pre">load_theme_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app/StyleToolbox.html#StyleTheme.load_theme_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.StyleToolbox.StyleTheme.load_theme_names" title="Link to this definition">#</a></dt>
 <dd><p>Loads theme names and adds them to the theme comboBox</p>
-<p>Looks for saved style themes (<a href="#id34"><span class="problematic" id="id35">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
+<p>Looks for saved style themes (<a href="#id92"><span class="problematic" id="id93">*</span></a>.sty) in <code class="docutils literal notranslate"><span class="pre">resources/styles/</span></code> directory and adds them to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of style themes</p>
@@ -2022,67 +2862,93 @@ and the name is returned, so it can be added to a list of style themes.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.map_plot_types"><code class="docutils literal notranslate"><span class="pre">StyleData.map_plot_types</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.marker_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_dict</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.style_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.style_dict</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.add_observer"><code class="docutils literal notranslate"><span class="pre">StyleData.add_observer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.aspectRatioChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.aspectRatioChanged</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">StyleData.aspect_ratio</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">StyleData.cbar_dir</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">StyleData.cbar_reverse</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">StyleData.clabel</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">StyleData.clim</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">StyleData.cmap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.axisLabelChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.axisLabelChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.axisLimChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.axisLimChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.axisScaleChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.axisScaleChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.cbarDirChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.cbarDirChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.cbarReverseChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.cbarReverseChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><code class="docutils literal notranslate"><span class="pre">StyleData.cbar_dir</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">StyleData.cbar_reverse</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">StyleData.clabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">StyleData.clim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">StyleData.cmap</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.color_norm"><code class="docutils literal notranslate"><span class="pre">StyleData.color_norm()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.colormapChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.colormapChanged</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.create_custom_colormap"><code class="docutils literal notranslate"><span class="pre">StyleData.create_custom_colormap()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">StyleData.cscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">StyleData.cscale</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.default_scale_length"><code class="docutils literal notranslate"><span class="pre">StyleData.default_scale_length()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.default_style_dict"><code class="docutils literal notranslate"><span class="pre">StyleData.default_style_dict()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">StyleData.font</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">StyleData.font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21"><code class="docutils literal notranslate"><span class="pre">StyleData.font</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.fontFamilyChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.fontFamilyChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.fontSizeChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.fontSizeChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26"><code class="docutils literal notranslate"><span class="pre">StyleData.font_size</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_label"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_label()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_lim"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_lim()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_scale"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_scale()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_axis_values"><code class="docutils literal notranslate"><span class="pre">StyleData.get_axis_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_cluster_colormap"><code class="docutils literal notranslate"><span class="pre">StyleData.get_cluster_colormap()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.get_colormap"><code class="docutils literal notranslate"><span class="pre">StyleData.get_colormap()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.heatmapResolutionChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.heatmapResolutionChanged</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.input_theme_name_dlg"><code class="docutils literal notranslate"><span class="pre">StyleData.input_theme_name_dlg()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">StyleData.length_multiplier</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">StyleData.line_color</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11"><code class="docutils literal notranslate"><span class="pre">StyleData.line_width</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.lengthMultiplierChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.lengthMultiplierChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id31"><code class="docutils literal notranslate"><span class="pre">StyleData.length_multiplier</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.lineColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.lineColorChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.lineWidthChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.lineWidthChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id36"><code class="docutils literal notranslate"><span class="pre">StyleData.line_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id37"><code class="docutils literal notranslate"><span class="pre">StyleData.line_width</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.load_theme_names"><code class="docutils literal notranslate"><span class="pre">StyleData.load_theme_names()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">StyleData.marker</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_alpha</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_color</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_dict</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id18"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_size</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.notify_observers"><code class="docutils literal notranslate"><span class="pre">StyleData.notify_observers()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id19"><code class="docutils literal notranslate"><span class="pre">StyleData.overlay_color</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">StyleData.plot_type</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id40"><code class="docutils literal notranslate"><span class="pre">StyleData.marker</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.markerAlphaChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.markerAlphaChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.markerChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.markerChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.markerColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.markerColorChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.markerSizeChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.markerSizeChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id49"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id50"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id51"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id52"><code class="docutils literal notranslate"><span class="pre">StyleData.marker_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.overlayColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.overlayColorChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id55"><code class="docutils literal notranslate"><span class="pre">StyleData.overlay_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.plotTypeChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.plotTypeChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id58"><code class="docutils literal notranslate"><span class="pre">StyleData.plot_type</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.print_properties"><code class="docutils literal notranslate"><span class="pre">StyleData.print_properties()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.read_theme"><code class="docutils literal notranslate"><span class="pre">StyleData.read_theme()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.remove_observer"><code class="docutils literal notranslate"><span class="pre">StyleData.remove_observer()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id21"><code class="docutils literal notranslate"><span class="pre">StyleData.resolution</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id22"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_dir</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id23"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_length</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id24"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_location</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id59"><code class="docutils literal notranslate"><span class="pre">StyleData.resolution</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.scaleDirChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.scaleDirChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.scaleLengthChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.scaleLengthChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.scaleLocationChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.scaleLocationChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id66"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_dir</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id67"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id68"><code class="docutils literal notranslate"><span class="pre">StyleData.scale_location</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_attributes"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_attributes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_label"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_label()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_lim"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_lim()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_axis_scale"><code class="docutils literal notranslate"><span class="pre">StyleData.set_axis_scale()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_default_cluster_colors"><code class="docutils literal notranslate"><span class="pre">StyleData.set_default_cluster_colors()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.set_style_attributes"><code class="docutils literal notranslate"><span class="pre">StyleData.set_style_attributes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.showMassChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.showMassChanged</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.show_mass"><code class="docutils literal notranslate"><span class="pre">StyleData.show_mass</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternaryColormapChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.ternaryColormapChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternaryMColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.ternaryMColorChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternaryXColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.ternaryXColorChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternaryYColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.ternaryYColorChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternaryZColorChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.ternaryZColorChanged</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_m"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_m</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_x"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_x</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_y"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_y</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.ternary_color_z"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_color_z</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id25"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_colormap</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id26"><code class="docutils literal notranslate"><span class="pre">StyleData.tick_dir</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id81"><code class="docutils literal notranslate"><span class="pre">StyleData.ternary_colormap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.tickDirChanged"><code class="docutils literal notranslate"><span class="pre">StyleData.tickDirChanged</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id84"><code class="docutils literal notranslate"><span class="pre">StyleData.tick_dir</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.toggle_mass"><code class="docutils literal notranslate"><span class="pre">StyleData.toggle_mass()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id27"><code class="docutils literal notranslate"><span class="pre">StyleData.xlabel</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id28"><code class="docutils literal notranslate"><span class="pre">StyleData.xlim</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id29"><code class="docutils literal notranslate"><span class="pre">StyleData.xscale</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id30"><code class="docutils literal notranslate"><span class="pre">StyleData.ylabel</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id31"><code class="docutils literal notranslate"><span class="pre">StyleData.ylim</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id32"><code class="docutils literal notranslate"><span class="pre">StyleData.yscale</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id33"><code class="docutils literal notranslate"><span class="pre">StyleData.zlabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id85"><code class="docutils literal notranslate"><span class="pre">StyleData.xlabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id86"><code class="docutils literal notranslate"><span class="pre">StyleData.xlim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id87"><code class="docutils literal notranslate"><span class="pre">StyleData.xscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id88"><code class="docutils literal notranslate"><span class="pre">StyleData.ylabel</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id89"><code class="docutils literal notranslate"><span class="pre">StyleData.ylim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id90"><code class="docutils literal notranslate"><span class="pre">StyleData.yscale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id91"><code class="docutils literal notranslate"><span class="pre">StyleData.zlabel</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.zlim"><code class="docutils literal notranslate"><span class="pre">StyleData.zlim</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#app.StyleToolbox.StyleData.zscale"><code class="docutils literal notranslate"><span class="pre">StyleData.zscale</span></code></a></li>
 </ul>

@@ -1,5 +1,5 @@
 import sys
-import os
+from pathlib import Path
 import json
 import numpy as np
 from PyQt6.QtCore import Qt, QPoint, QRect, pyqtSignal, QPointF, QEvent, QStandardPaths
@@ -16,6 +16,7 @@ def fix_bounds(x):
 # --------------------------- color patch widgets -----------------------------
 class HueSlider(QSlider):
     def __init__(self, parent=None):
+        """Vertical slider for selecting hue (0-360 degrees)"""
         super().__init__(Qt.Orientation.Vertical, parent)
         h = 280
         self.setFixedHeight(248)
@@ -27,6 +28,7 @@ class HueSlider(QSlider):
         self.setValue(180)
 
     def paintEvent(self, event):
+        """Custom paint to show hue gradient and handle"""
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)  # smoother edges
         rect = self.rect()
@@ -81,14 +83,21 @@ class DualPatch(QWidget):
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
     def set_selected(self, rgb):
+        """Set selected color (rgb tuple with values 0..1)"""
         self.sel = rgb
         self.update()
 
     def set_hover(self, rgb):
+        """Set hover color (rgb tuple with values 0..1)"""
         self.hover = rgb
         self.update()
 
     def paintEvent(self, event):
+        """Draw the two color patches
+        
+        Left half: selected color
+        Right half: hover color
+        """
         p = QPainter(self)
         w = self.width()
         h = self.height()
@@ -113,6 +122,48 @@ class TernaryHVWidget(QWidget):
     """
     Ternary with vertices: Black (bottom-left), White (bottom-right), Pure Hue (top).
     A saturation multiplier slider can globally reduce S after picking from triangle.
+
+    The hue is set externally (0.0-1.0 range). The triangle is rendered internally.
+    The user can hover to see color under mouse, and click to pick a color.
+    The selected color is emitted as RGB (0.0-1.0 range) via pickColor signal.
+    The hover color is emitted via hoverColor signal.
+    The widget size is fixed to an equilateral triangle with some margin.
+    The triangle is rendered to a QImage for efficiency.
+    The saturation scale can be set externally (0.0-1.0 range).
+    3D color space is HSV with V=1.0 plane, projected to 2D triangle.
+    2D coordinates are converted to barycentric weights against triangle vertices,
+    then mixed to get RGB color.
+    3 vertices: Black (0,0,0), White (1,1,1), Pure Hue (from hue value).
+    The pure hue is computed from HSV(hue,1,1) converted to RGB.
+    The saturation scale is applied by converting to HSV, scaling S, and converting back to RGB.
+    The triangle is redrawn when hue or saturation scale changes.
+    2D point-in-triangle test is done using barycentric coordinates.
+    Mouse move events update hover color and emit signal.
+    Mouse click events set selected color and emit signal.
+    The widget handles resizing and maintains aspect ratio.
+    The cursor changes to a circle when hovering over the triangle.
+
+    Methods
+    -------
+    set_hue(h): Set hue value (0.0-1.0 range) and redraw triangle.
+    set_saturation_scale(s): Set saturation scale (0.0-1.0 range) and redraw triangle.
+    sizeHint(): Return preferred size.
+    paintEvent(event): Draw the triangle and cursors.
+    mouseMoveEvent(event): Update hover color and emit signal.
+    mousePressEvent(event): Set selected color and emit signal.
+    
+    Signals
+    -------
+    hoverColor(tuple): Emitted when hover color changes (RGB tuple 0.0-1.0).
+    pickColor(tuple): Emitted when a color is picked (RGB tuple 0.0-1.0).
+
+    Note
+    ----
+    This widget does not handle saving/loading colors; it only provides color selection functionality.
+    The parent dialog or application should manage color history and persistence.
+    The widget assumes a fixed aspect ratio for the triangle and does not support arbitrary resizing.
+    The widget uses numpy for efficient array computations during rendering.
+    The widget uses colormath for color space conversions.
     """
 
     # Signals emit RGB as three floats in 0..1
@@ -135,6 +186,13 @@ class TernaryHVWidget(QWidget):
 
     # --------------------------- geometry helpers ---------------------------
     def triangle_vertices(self):
+        """Return (left, right, top) vertices of triangle as QPoint
+        
+        Returns
+        -------
+        (left, right, top) : tuple of QPoint
+            Vertices of the equilateral triangle within the widget.
+        """
         w, h = self.width(), self.height()
         m = self.margin
         # Equilateral triangle inscribed in widget rect
@@ -145,7 +203,18 @@ class TernaryHVWidget(QWidget):
         return left, right, top
 
     def _barycentric(self, x, y):
-        """Return (t1,t2,t3) for point against triangle (left,right,top)."""
+        """Return (t1,t2,t3) for point against triangle (left,right,top).
+        
+        Parameters
+        ----------
+        x, y : float
+            Point coordinates in widget space.
+            
+        Returns
+        -------
+        (t1, t2, t3) : tuple of floats
+            Barycentric coordinates corresponding to (left, right, top) vertices.
+        """
         left, right, top = self.triangle_vertices()
         x1, y1 = left.x(), left.y()
         x2, y2 = right.x(), right.y()
@@ -159,6 +228,12 @@ class TernaryHVWidget(QWidget):
         return (t1, t2, t3)
 
     def _inside(self, l):
+        """Check if barycentric coords are all >= 0 (inside triangle)
+        
+        Returns
+        -------
+        bool
+            Returns True if point is inside triangle, False otherwise."""
         t1, t2, t3 = l
         eps = -1e-6
         return (t1 >= eps) and (t2 >= eps) and (t3 >= eps)
@@ -183,6 +258,7 @@ class TernaryHVWidget(QWidget):
 
     # ------------------------------ rendering ------------------------------
     def _render_triangle(self):
+        """Render the triangle to a QImage for efficient drawing."""
         w, h = self.width(), self.height()
         if w <= 2*self.margin or h <= 2*self.margin:
             self._img = None
@@ -256,19 +332,23 @@ class TernaryHVWidget(QWidget):
         self.update()
 
     def set_saturation_scale(self, s):
+        """Set saturation scale (expects 0.0-1.0 range)"""
         self.sat_scale = fix_bounds(s)
         self._render_triangle()
         self.update()
 
     def sizeHint(self):
+        """Return preferred size."""
         return self.minimumSize()
 
     # ------------------------------ events ---------------------------------
     def resizeEvent(self, event):
+        """Handle resize: re-render triangle."""
         self._render_triangle()
         super().resizeEvent(event)
 
     def paintEvent(self, event):
+        """Draw the triangle and cursors."""
         p = QPainter(self)
         if self._img is None:
             self._render_triangle()
@@ -297,6 +377,18 @@ class TernaryHVWidget(QWidget):
         p.end()
 
     def _color_at_point(self, pos):
+        """Return RGB tuple (0..1) at given QPoint, or None if outside triangle.
+        
+        Parameters
+        ----------
+        pos : QPoint
+            Point in widget coordinates.
+        
+        Returns
+        -------
+        (r, g, b) : tuple of floats
+            RGB color at point, or None if outside triangle.
+        """
         t = self._barycentric(pos.x(), pos.y())
         if t is None:
             return None
@@ -305,6 +397,7 @@ class TernaryHVWidget(QWidget):
         return self.mix_color(t)
 
     def mouseMoveEvent(self, event):
+        """Update hover color and emit signal."""
         self.hover_pos = event.position().toPoint()
         c = self._color_at_point(self.hover_pos)
         if c is not None:
@@ -313,6 +406,7 @@ class TernaryHVWidget(QWidget):
         self.update()
 
     def mousePressEvent(self, event):
+        """Set selected color and emit signal."""
         if event.button() == Qt.MouseButton.LeftButton:
             pos = event.position().toPoint()
             c = self._color_at_point(pos)
@@ -325,8 +419,61 @@ class TernaryHVWidget(QWidget):
 # ------------------------------- dialog --------------------------------
 
 class ColorSelectorDialog(QDialog):
-    """Color selector as a dialog that can return a color or None"""
-    
+    """Color selector as a dialog that can return a color or None
+
+    This dialog provides a color picker with 3 areas:
+    - TernaryHVWidget: triangle for selecting saturation/value at fixed hue
+    - HueSlider: vertical slider for selecting hue
+    - Display area: shows selected color, hover color, text boxes for HSV/RGB/HEX,
+      buttons for Save/OK/Cancel, and color history
+
+    The user can pick a color by clicking in the triangle, adjusting the hue slider,
+    or entering values in the text boxes. The selected color is shown in the display area.
+    The dialog maintains a history of up to 16 saved colors, which are shown as buttons.
+    The user can save the current selected color to the history, and restore colors by clicking
+    the history buttons. The history is persisted across sessions in a JSON file.
+    The dialog returns the selected color as a hex string if OK is pressed, or None if Cancelled.
+
+    Methods
+    -------
+    setupUI(): Set up the user interface components.
+    get_config_path(): Get path for storing color history.
+    load_color_history(): Load color history from file.
+    save_color_history(): Save color history to file.
+    eventFilter(source, event): Event filter to strip units when editing text boxes.    
+    on_text_H_finished(): Handle hue text editing finished.
+    on_text_SV_finished(source): Handle saturation/value text editing finished.
+    on_text_RGB_finished(source): Handle RGB text editing finished.
+    on_text_hex_finished(): Handle HEX text editing finished.
+    on_hover_color(rgb): Update hover color display.
+    on_pick_color(rgb): Update selected color display.
+    restore_color(button): Restore color from history button.
+    save_color(): Save current selected color to history.
+    _on_hue_changed(value): Handle hue slider value changed.
+    accept(): Override accept to set selected_color before closing.
+    reject(): Override reject to clear selected_color before closing.
+
+
+    Parameters
+    ----------
+    initial_color : str or None
+        Initial color as hex string (e.g. "#ff0000") or None for white.
+    parent : QWidget or None
+        Parent widget.
+
+    Returns
+    -------
+    selected_color : str or None
+        Selected color as hex string if OK was pressed, or None if Cancelled.
+
+      
+    Usage:
+        dlg = ColorSelectorDialog(initial_color="#ff0000")
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            color = dlg.selected_color  # hex string
+        else:
+            color = None
+    """
     def __init__(self, initial_color=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Color Selector")
@@ -353,6 +500,7 @@ class ColorSelectorDialog(QDialog):
         self.hue_slider.setValue(int(hsv[0] * 360))  # Convert from 0-1 to 0-360
 
     def setupUI(self):
+        """Set up the user interface components."""
         font = self.font()
         font.setPixelSize(11)
         self.setFont(font)
@@ -464,29 +612,32 @@ class ColorSelectorDialog(QDialog):
         self.ternary.hoverColor.connect(self.on_hover_color)
         self.ternary.pickColor.connect(self.on_pick_color)
 
-    def get_config_path(self):
+    def get_config_path(self) -> Path:
         """Get path for storing color history"""
-        config_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation)
-        os.makedirs(config_dir, exist_ok=True)
-        return os.path.join(config_dir, "color_history.json")
+        config_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation))
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir / "color_history.json"
 
     def load_color_history(self):
         """Load color history from file"""
         try:
-            config_path = self.get_config_path()
-            if os.path.exists(config_path):
-                with open(config_path, 'r') as f:
+            config_path = self.get_config_path()  # already returns a Path
+            if config_path.exists():
+                with config_path.open('r', encoding='utf-8') as f:
                     data = json.load(f)
                     self.color_history = data.get('history', [None] * 16)
+
                     # Ensure we have exactly 16 entries
                     while len(self.color_history) < 16:
                         self.color_history.append(None)
                     self.color_history = self.color_history[:16]
-                    
+
                     # Update button displays
                     for btn, color in zip(self.history_buttons, self.color_history):
                         if color is not None:
-                            btn.setStyleSheet(f"background-color: {color}; border: 1px solid #111111; border-radius: 4px;")
+                            btn.setStyleSheet(
+                                f"background-color: {color}; border: 1px solid #111111; border-radius: 4px;"
+                            )
                             btn.setToolTip(color)
         except Exception as e:
             print(f"Error loading color history: {e}")
@@ -497,7 +648,7 @@ class ColorSelectorDialog(QDialog):
         try:
             config_path = self.get_config_path()
             data = {'history': self.color_history}
-            with open(config_path, 'w') as f:
+            with config_path.open('w') as f:
                 json.dump(data, f)
         except Exception as e:
             print(f"Error saving color history: {e}")
@@ -620,6 +771,7 @@ class ColorSelectorDialog(QDialog):
         self.current_color = rgb
 
     def on_hover_color(self, rgb):
+        """Update hover color display."""
         self.patches.set_hover(rgb)
 
     def save_color(self):

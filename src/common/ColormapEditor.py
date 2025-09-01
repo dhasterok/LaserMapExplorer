@@ -1892,8 +1892,12 @@ class ContinuousColorWidget(QWidget):
         if 0 <= index < len(self.model.color_points):
             #color = QColorDialog.getColor(self.model.color_points[index].color, self)
             initial_color = convert_color(self.model.color_points[index].color, "qcolor", "hex")
-            print(initial_color)
-            color = QColor(select_color(initial_color, self))
+            hex_color = select_color(initial_color, self)
+
+            if hex_color is None:
+                return
+
+            color = QColor(hex_color)
             if color.isValid():
                 self.model.change_color(index, color)
 

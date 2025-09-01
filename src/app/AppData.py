@@ -3,12 +3,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
+from PyQt6.QtCore import QObject, pyqtSignal
 from src.app.config import APPDATA_PATH, STYLE_PATH
 from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods
 
 @auto_log_methods(logger_key='Data')
-class AppData(Observable):
+class AppData(QObject, Observable):
     """
     AppData is a central data model and state manager for the LaserMapExplorer application.
 
@@ -177,8 +178,14 @@ class AppData(Observable):
     This class is designed to be used as a singleton or shared instance within the application,
     serving as the authoritative source of state for all data analysis and visualization operations.
     """
+    sampleChanged = pyqtSignal(str)
+    sampleListChanged = pyqtSignal(list)
+    fieldTypeChanged = pyqtSignal(str, str)
+    fieldChanged = pyqtSignal(str, str)
+    normReferenceChanged = pyqtSignal(str)
+
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(parent)
 
         self.logger_key = 'Data'
         self.ui = parent
@@ -561,8 +568,8 @@ class AppData(Observable):
         self._sample_id = new_list[0]
 
         # notify observers to update widgets
-        self.notify_observers("sample_list", new_list)
-        self.notify_observers("sample_id", self._sample_id)
+        self.sampleListChanged.emit(new_list)
+        self.sampleChanged.emit(self._sample_id)
 
     @property
     def sample_id(self):
@@ -575,7 +582,7 @@ class AppData(Observable):
             return
 
         self._sample_id = new_id
-        self.notify_observers("sample_id", new_id)
+        self.sampleChanged.emit(new_id)
 
     @property
     def current_data(self):
@@ -774,7 +781,7 @@ class AppData(Observable):
         if new_field_type != self._x_field_type:
             self.validate_field_type(new_field_type)
             self._x_field_type = new_field_type
-            self.notify_observers("field_type", 0, new_field_type)
+            self.fieldTypeChanged.emit('x', new_field_type)
 
     @property
     def y_field_type(self):
@@ -786,7 +793,7 @@ class AppData(Observable):
         if new_field_type != self._y_field_type:
             self.validate_field_type(new_field_type)
             self._y_field_type = new_field_type
-            self.notify_observers("field_type", 1, new_field_type)
+            self.fieldTypeChanged.emit('y', new_field_type)
 
     @property
     def z_field_type(self):
@@ -798,7 +805,7 @@ class AppData(Observable):
         if new_field_type != self._z_field_type:
             self.validate_field_type(new_field_type)
             self._z_field_type = new_field_type
-            self.notify_observers("field_type", 2, new_field_type)
+            self.fieldTypeChanged.emit('z', new_field_type)
 
     @property
     def c_field_type(self):
@@ -813,7 +820,7 @@ class AppData(Observable):
         # update c_field_type
         #self.validate_field_type(new_field_type)
         self._c_field_type = new_field_type
-        self.notify_observers("field_type", 3, new_field_type)
+        self.fieldTypeChanged.emit('c', new_field_type)
 
         # update c_field
         if new_field_type in ['', 'none', 'None']:
@@ -833,7 +840,7 @@ class AppData(Observable):
             return
     
         self._x_field = new_field
-        self.notify_observers("field", 0, new_field)
+        self.fieldChanged.emit('x', new_field)
     
     @property
     def y_field(self):
@@ -846,7 +853,7 @@ class AppData(Observable):
             return
     
         self._y_field = new_field
-        self.notify_observers("field", 1, new_field)
+        self.fieldChanged.emit('y', new_field)
     
     @property
     def z_field(self):
@@ -859,7 +866,7 @@ class AppData(Observable):
             return
     
         self._z_field = new_field
-        self.notify_observers("field", 2, new_field)
+        self.fieldChanged.emit('z', new_field)
 
     @property
     def c_field(self):
@@ -873,7 +880,7 @@ class AppData(Observable):
 
         #self.validate_field(self._c_field_type, new_field)
         self._c_field = new_field
-        self.notify_observers("field", 3, new_field)
+        self.fieldChanged.emit('c', new_field)
 
     @property
     def scatter_preset(self):
@@ -915,7 +922,7 @@ class AppData(Observable):
             return
     
         self._norm_reference = new_ref
-        self.notify_observers("norm_reference", new_ref)
+        self.normReferenceChanged.emit(new_ref)
 
     @property
     def ndim_analyte_set(self):

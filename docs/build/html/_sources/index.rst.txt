@@ -45,7 +45,7 @@ Check the `GitHub Issues <https://github.com/dhasterok/LaserMapExplorer/issues>`
 
 If you would like to contribute in any way to the improvement of the program, have feature requests or would like to help with documentation, please contact us via the GitHub project page or using the email link on the :doc:`contact` page.
 
-Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_ by developers at the `University of Adelaide <https://www.adelaide.edu.au/>`_.
+Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.au/>`_ by developers at the `Adelaide University <https://www.adelaideuni.edu.au/>`_.
 
 .. toctree::
    :maxdepth: 1
@@ -55,4 +55,3 @@ Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.a
    tutorials
    documentation
    contact
-   labels

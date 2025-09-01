@@ -765,23 +765,23 @@ class MainToolbar(QToolBar):
         self.comboBoxSampleId.activated.connect(lambda: log(f"comboBoxSampleId, value=[{self.comboBoxSampleId.currentText()}]", prefix="UI"))
 
     def connect_observers(self):
-        self.ui.app_data.add_observer("ref_chem", self.update_ref_index_combobox)
-        self.ui.app_data.add_observer("sample_list", self.update_sample_list_combobox)
-        self.ui.app_data.add_observer("sample_id", self.update_sample_id_combobox)
+        self.ui.app_data.normReferenceChanged.connect(lambda new_text: self.update_ref_index_combobox(new_text))
+        self.ui.app_data.sampleListChanged.connect(lambda new_list: self.update_sample_list_combobox(new_list))
+        self.ui.app_data.sampleChanged.connect(lambda new_sample: self.update_sample_id_combobox(new_sample))
 
     def update_ref_index_combobox(self, new_index):
         rev_val = self.ui.app_data.ref_list[new_index]
         self.ui.dock.update_ref_chem_combobox(rev_val)
 
-    def update_sample_list_combobox(self, new_sample_list):
+    def update_sample_list_combobox(self, new_sample_list: list):
         """Updates ``MainWindow.comboBoxSampleID.items()``
 
         Called as an update to ``app_data.sample_list``.  Updates sample ID list.
 
         Parameters
         ----------
-        value : str
-            New sample ID.
+        new_sample_list : list
+            New list of sample IDs.
         """
         # Populate the comboBoxSampleId with the sample names
         self.comboBoxSampleId.clear()

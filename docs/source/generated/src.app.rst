@@ -27,6 +27,7 @@
    :toctree:
    :recursive:
 
+   src.app.AnalyteDialog
    src.app.AppData
    src.app.BlocklyModules
    src.app.CanvasWidget

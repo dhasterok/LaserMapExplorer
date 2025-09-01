@@ -1,4 +1,4 @@
-from PyQt6.QtCore import ( Qt, QSize )
+from PyQt6.QtCore import ( Qt, QSize, QTimer )
 from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
     QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy, QToolButton,
@@ -9,6 +9,7 @@ from PyQt6.QtGui import QFont, QIcon, QCursor
 from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
 from src.app.config import APPDATA_PATH, ICONPATH, get_top_parent
 
+import gc
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
@@ -122,11 +123,13 @@ class CanvasWidget(QWidget):
         elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
             layout = self.multi_view.layout() 
             if layout is not None:
-                layout.addWidget(canvas)
+                #layout.addWidget(canvas)
+                QTimer.singleShot(0, lambda: layout.addWidget(canvas))
         elif self.canvasWindow.currentIndex() == self.tab_dict['qv']:
             layout = self.quick_view.layout()
             if layout is not None:
-                layout.addWidget(canvas)
+                #layout.addWidget(canvas)
+                QTimer.singleShot(0, lambda: layout.addWidget(canvas))
         else:
             raise ValueError("Invalid tab index.")
 
@@ -209,6 +212,7 @@ class CanvasWidget(QWidget):
         for widget in self.multiview_info_label[selected_plot_name+'1']:
             widget.setParent(None)
             widget.deleteLater()
+            gc.collect()
         del self.multiview_info_label[selected_plot_name+'1']
         del self.lasermaps[selected_plot_name+'1']
         #self.axis_widget_dict[selected_plot_name] = widget
@@ -245,16 +249,16 @@ class CanvasWidget(QWidget):
         
         layout = self.single_view.layout()
         if layout is not None:
-            layout.addWidget(new_canvas)
+            #layout.addWidget(new_canvas)
+            QTimer.singleShot(0, lambda: layout.addWidget(new_canvas))
         
         new_canvas.show()
         
         # Add observers safely
         try:
-            new_canvas.add_observer("xpos", self.toolbar.update_sv_info)
-            new_canvas.add_observer("ypos", self.toolbar.update_sv_info)
-            new_canvas.add_observer("value", self.toolbar.update_sv_info)
-            new_canvas.add_observer("distance", self.toolbar.update_sv_info)
+            new_canvas.locationChanged.connect(lambda: self.toolbar.update_sv_info())
+            new_canvas.valueChanged.connect(lambda: self.toolbar.update_sv_info())
+            new_canvas.distanceChanged.connect(lambda: self.toolbar.update_sv_info())
         except AttributeError:
             # Canvas doesn't support observers, that's ok
             pass
@@ -397,6 +401,12 @@ class CanvasWidget(QWidget):
                             widget.figure.clear()
                         if hasattr(widget.figure, 'canvas'):
                             widget.figure.canvas = None
+
+                    if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
+                        self.mpl_toolbar.setParent(None)  # remove from the Qt layout
+
+                    if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
+                        self.mpl_toolbar.canvas = None
                     
                     # Clean up any observers if present
                     if hasattr(widget, 'observers'):
@@ -405,13 +415,25 @@ class CanvasWidget(QWidget):
                     # Set parent to None and delete immediately
                     widget.setParent(None)
                     widget.close()
-                    del widget  # Immediate deletion instead of deleteLater()
+                    #del widget  # Immediate deletion instead of deleteLater()
+                    widget.blockSignals(True)
+                    try:
+                        widget.disconnect()
+                    except Exception:
+                        pass
+                    widget.deleteLater()
+                    # gc.collect()
                     
                 except Exception as e:
                     print(f"Error during widget cleanup: {e}")
                     # Fallback to original method
                     widget.setParent(None)
+                    try:
+                        widget.disconnect()
+                    except Exception:
+                        pass
                     widget.deleteLater()
+                    # gc.collect()
 
         # Clear the rest of the multiview specific cleanup
         if self.canvasWindow.currentIndex() == self.tab_dict['mv']:

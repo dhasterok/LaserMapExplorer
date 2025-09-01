@@ -1,3 +1,11 @@
+"""
+Blüberry - Colormap Editor
+
+A simple dialog to create and edit colormaps.
+
+Author: Derrick Hasterok
+Date: 2024-06-20
+"""
 import sys
 from PyQt6.QtWidgets import QDialog, QApplication
 from src.common.ColormapEditor import ColormapEditorDialog

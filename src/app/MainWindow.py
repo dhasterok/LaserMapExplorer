@@ -1,14 +1,13 @@
-import sys, os, re, copy, random, darkdetect
+import os
 from datetime import datetime
-from PyQt6.QtCore import ( Qt, QTimer, QUrl, QSize, QRectF, QMetaObject )
+import traceback
+from PyQt6.QtCore import ( Qt, QUrl, QMetaObject )
 from PyQt6.QtWidgets import (
-    QCheckBox, QTableWidgetItem, QVBoxLayout, QGridLayout,
-    QMessageBox, QHeaderView, QMenu, QFileDialog, QWidget, QToolButton,
-    QDialog, QLabel, QTableWidget, QInputDialog, QAbstractItemView, QComboBox,
-    QSplashScreen, QApplication, QMainWindow, QSizePolicy, QSpacerItem, QToolBar, QTreeView
+    QMessageBox,  QToolButton, QDialog, QLabel, QComboBox,
+    QApplication, QMainWindow, QSizePolicy, QTreeView
 ) # type: ignore
-from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon ) 
-from src.common.CustomWidgets import CustomPage, CustomToolButton, CustomComboBox, CustomAction
+from PyQt6.QtGui import ( QIcon ) 
+from src.common.CustomWidgets import CustomToolButton, CustomComboBox, CustomAction
 from src.app.UITheme import ThemeManager, PreferencesManager, apply_font_to_children
 from src.app.AppData import AppData
 from src.app.StyleToolbox import StyleData
@@ -25,7 +24,8 @@ from src.common.LamePlot import (
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
-from src.app.FieldLogic import ControlDock, AnalyteDialog
+from src.app.FieldLogic import ControlDock
+from src.app.AnalyteDialog import AnalyteDialog
 from src.app.FieldDialog import FieldDialog
 from src.app.StylingUI import StylingDock
 from src.app.LameStatusBar import MainStatusBar
@@ -924,6 +924,8 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             print(f"Error in update_SV: {e}")
+            print("Type of object:", type(e))
+            traceback.print_exc()
             # Restore old canvas if new one failed
             if old_canvas is not None:
                 self.mpl_canvas = old_canvas

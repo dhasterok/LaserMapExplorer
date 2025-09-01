@@ -168,13 +168,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../labels.html">
-    <no title>
-  </a>
-</li>
-
   </ul>
 </nav></div>
       
@@ -299,13 +292,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../labels.html">
-    <no title>
-  </a>
-</li>
-
   </ul>
 </nav></div>
           
@@ -403,7 +389,7 @@
 <span></span><span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QIcon</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span>
+    <span class="n">Qt</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QSize</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QDialogButtonBox</span><span class="p">,</span> <span class="n">QMenu</span>
@@ -418,8 +404,6 @@
 <span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QT</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">ICONPATH</span>
-<span class="kn">from</span> <span class="nn">src.common.Observable</span> <span class="kn">import</span> <span class="n">Observable</span>
-
 
 <span class="c1"># Matplotlib Canvas object</span>
 <span class="c1"># -------------------------------</span>
@@ -449,13 +433,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SimpleMplCanvas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span></div>
 
 
 
 <div class="viewcode-block" id="MplCanvas">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas">[docs]</a>
-<span class="k">class</span> <span class="nc">MplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MplCanvas</span><span class="p">(</span><span class="n">FigureCanvas</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib canvas object for interactive plots</span>
 
 <span class="sd">    Parameters</span>
@@ -470,7 +454,11 @@
 <span class="sd">        Height in inches, by default 4</span>
 <span class="sd">    proj : str, optional</span>
 <span class="sd">        Projection, by default None</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">locationChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>  <span class="c1"># x, y </span>
+    <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>  <span class="c1"># value </span>
+    <span class="n">distanceChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>  <span class="c1"># distance</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub</span><span class="o">=</span><span class="mi">111</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1">#create MPLCanvas with existing figure (required when loading saved projects)</span>
         <span class="k">if</span> <span class="n">fig</span><span class="p">:</span>
@@ -485,13 +473,7 @@
 
         <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-        
-        <span class="c1"># if ui components does are not part of parent initialise them seperately</span>
-        <span class="k">if</span> <span class="n">ui</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">ui</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
 
         <span class="c1"># indicates whether the data are map form (x, y, value) or simply (x, y)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span> <span class="o">=</span> <span class="n">map_flag</span>
@@ -577,7 +559,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xpos</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_xpos</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;xpos&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ypos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -589,7 +571,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ypos</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ypos</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;ypos&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -601,7 +583,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -613,7 +595,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distanceChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
 <div class="viewcode-block" id="MplCanvas.toggle_tool">
 <a class="viewcode-back" href="../../generated/common.CustomMplCanvas.html#common.CustomMplCanvas.MplCanvas.toggle_tool">[docs]</a>
@@ -749,11 +731,11 @@
             <span class="k">elif</span> <span class="n">y_i</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="n">y_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
             
-            <span class="c1">#x = x_i*self.parent.dx</span>
-            <span class="c1">#y = y_i*self.parent.dy</span>
-            <span class="c1"># if self.parent.app_data.sample_id in self.parent.app_data.data:</span>
-            <span class="c1">#     x = x_i*self.parent.app_data.data[self.parent.app_data.sample_id].dx</span>
-            <span class="c1">#     y = y_i*self.parent.app_data.data[self.parent.app_data.sample_id].dy</span>
+            <span class="c1">#x = x_i*self.ui.dx</span>
+            <span class="c1">#y = y_i*self.ui.dy</span>
+            <span class="c1"># if self.ui.app_data.sample_id in self.ui.app_data.data:</span>
+            <span class="c1">#     x = x_i*self.ui.app_data.data[self.ui.app_data.sample_id].dx</span>
+            <span class="c1">#     y = y_i*self.ui.app_data.data[self.ui.app_data.sample_id].dy</span>
             <span class="c1"># else:</span>
             <span class="c1">#     return</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x_i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
@@ -854,8 +836,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
-        <span class="n">font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">font_size</span>
+        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
+        <span class="n">font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">font_size</span>
         <span class="n">annotation_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">overlay_color</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
 
@@ -910,8 +892,8 @@
 <span class="sd">            Distance between two given points.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span><span class="p">:</span>
-            <span class="c1">#dx = self.parent.app_data.data[self.parent.app_data.sample_id].dx</span>
-            <span class="c1">#dy = self.parent.app_data.data[self.parent.app_data.sample_id].dy</span>
+            <span class="c1">#dx = self.ui.app_data.data[self.ui.app_data.sample_id].dx</span>
+            <span class="c1">#dy = self.ui.app_data.data[self.ui.app_data.sample_id].dy</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
             <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
         <span class="k">else</span><span class="p">:</span>
@@ -936,9 +918,9 @@
 <span class="sd">        matplotlib.plot</span>
 <span class="sd">            Handle to line</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="c1">#plot_type = self.parent.app_data.plot_info[&#39;plot_type&#39;]</span>
-        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
-        <span class="n">line_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span>
+        <span class="c1">#plot_type = self.ui.app_data.plot_info[&#39;plot_type&#39;]</span>
+        <span class="n">overlay_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">overlay_color</span>
+        <span class="n">line_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span>
 
         <span class="c1"># plot line (keep only first returned handle)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
@@ -973,7 +955,7 @@
 <span class="sd">        text_dict : dict</span>
 <span class="sd">            Dictionary needed to reconstruct distance label</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span>
 
         <span class="c1"># compute distance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_distance</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
@@ -985,8 +967,8 @@
 
         <span class="c1"># Update distance label on map</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_flag</span><span class="p">:</span>
-            <span class="n">xrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">aspect_ratio</span>
-            <span class="n">yrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+            <span class="n">xrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">aspect_ratio</span>
+            <span class="n">yrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">app_data</span><span class="o">.</span><span class="n">sample_id</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
 
             <span class="n">xl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
             <span class="n">xrange</span> <span class="o">=</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1089,9 +1071,9 @@
                     <span class="s1">&#39;Y2&#39;</span><span class="p">:</span> <span class="n">second_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                     <span class="s1">&#39;Text&#39;</span><span class="p">:</span> <span class="n">text_dict</span><span class="p">,</span>
                     <span class="s1">&#39;Label&#39;</span><span class="p">:</span> <span class="n">text_obj</span><span class="o">.</span><span class="n">get_text</span><span class="p">(),</span>
-                    <span class="s1">&#39;Color&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_color</span><span class="p">,</span>
-                    <span class="s1">&#39;Size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">font_size</span><span class="p">,</span>
-                    <span class="s1">&#39;Width&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span>
+                    <span class="s1">&#39;Color&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_color</span><span class="p">,</span>
+                    <span class="s1">&#39;Size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">font_size</span><span class="p">,</span>
+                    <span class="s1">&#39;Width&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">style_data</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span>
                     <span class="s1">&#39;Visible&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="s1">&#39;object&#39;</span><span class="p">:</span> <span class="n">line_obj</span><span class="p">,</span>
                     <span class="s1">&#39;text_object&#39;</span><span class="p">:</span> <span class="n">text_obj</span>

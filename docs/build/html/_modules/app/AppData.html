@@ -168,13 +168,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../labels.html">
-    <no title>
-  </a>
-</li>
-
   </ul>
 </nav></div>
       
@@ -299,13 +292,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../labels.html">
-    <no title>
-  </a>
-</li>
-
   </ul>
 </nav></div>
           
@@ -405,6 +391,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">src.common.csvdict</span> <span class="k">as</span> <span class="nn">csvdict</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
 <span class="kn">from</span> <span class="nn">src.app.config</span> <span class="kn">import</span> <span class="n">APPDATA_PATH</span><span class="p">,</span> <span class="n">STYLE_PATH</span>
 <span class="kn">from</span> <span class="nn">src.common.Observable</span> <span class="kn">import</span> <span class="n">Observable</span>
 <span class="kn">from</span> <span class="nn">src.common.Logger</span> <span class="kn">import</span> <span class="n">auto_log_methods</span>
@@ -412,7 +399,7 @@
 <div class="viewcode-block" id="AppData">
 <a class="viewcode-back" href="../../generated/app.AppData.html#app.AppData.AppData">[docs]</a>
 <span class="nd">@auto_log_methods</span><span class="p">(</span><span class="n">logger_key</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">AppData</span><span class="p">(</span><span class="n">Observable</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">AppData</span><span class="p">(</span><span class="n">QObject</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    AppData is a central data model and state manager for the LaserMapExplorer application.</span>
 
@@ -581,8 +568,14 @@
 <span class="sd">    This class is designed to be used as a singleton or shared instance within the application,</span>
 <span class="sd">    serving as the authoritative source of state for all data analysis and visualization operations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sampleChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">sampleListChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">fieldTypeChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">fieldChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">normReferenceChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger_key</span> <span class="o">=</span> <span class="s1">&#39;Data&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">parent</span>
@@ -983,8 +976,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span> <span class="o">=</span> <span class="n">new_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># notify observers to update widgets</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;sample_list&quot;</span><span class="p">,</span> <span class="n">new_list</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;sample_id&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampleListChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampleChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -997,7 +990,7 @@
             <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id</span> <span class="o">=</span> <span class="n">new_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;sample_id&quot;</span><span class="p">,</span> <span class="n">new_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampleChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_id</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1196,7 +1189,7 @@
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_field_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_field_type</span><span class="p">(</span><span class="n">new_field_type</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fieldTypeChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">y_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1208,7 +1201,7 @@
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_field_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_field_type</span><span class="p">(</span><span class="n">new_field_type</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_y_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fieldTypeChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">z_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1220,7 +1213,7 @@
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z_field_type</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_field_type</span><span class="p">(</span><span class="n">new_field_type</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_z_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fieldTypeChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">c_field_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1235,7 +1228,7 @@
         <span class="c1"># update c_field_type</span>
         <span class="c1">#self.validate_field_type(new_field_type)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_c_field_type</span> <span class="o">=</span> <span class="n">new_field_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field_type&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldTypeChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">new_field_type</span><span class="p">)</span>
 
         <span class="c1"># update c_field</span>
         <span class="k">if</span> <span class="n">new_field_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">]:</span>
@@ -1255,7 +1248,7 @@
             <span class="k">return</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">_x_field</span> <span class="o">=</span> <span class="n">new_field</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">y_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1268,7 +1261,7 @@
             <span class="k">return</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">_y_field</span> <span class="o">=</span> <span class="n">new_field</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">z_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1281,7 +1274,7 @@
             <span class="k">return</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">_z_field</span> <span class="o">=</span> <span class="n">new_field</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">c_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1295,7 +1288,7 @@
 
         <span class="c1">#self.validate_field(self._c_field_type, new_field)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_c_field</span> <span class="o">=</span> <span class="n">new_field</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">new_field</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">scatter_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1337,7 +1330,7 @@
             <span class="k">return</span>
     
         <span class="bp">self</span><span class="o">.</span><span class="n">_norm_reference</span> <span class="o">=</span> <span class="n">new_ref</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">notify_observers</span><span class="p">(</span><span class="s2">&quot;norm_reference&quot;</span><span class="p">,</span> <span class="n">new_ref</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normReferenceChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_ref</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ndim_analyte_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

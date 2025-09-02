@@ -9,6 +9,8 @@ import {enableSampleIDsBlockFunction} from './custom_blocks'
 
 // ========== Exposing update functions for Python-side call ==========
 
+
+
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variableaxis_and_labels
@@ -236,7 +238,91 @@ export function updateFieldDropdown(block, fieldTypeValue, fieldName) {
     });
 }
 
+function getPlotParent(block) {
+  /** Returns the plot-producing parent block, or null. */
+  const prev = block.getPreviousBlock();
+  return prev && typeof prev.plotName !== 'undefined' ? prev : null;
+}
 
+// helper_functions.js
+
+/**
+ * Initialize the "directory" field of the save_plot block with the app's selected directory,
+ * using the Qt bridge if available. If the bridge call is synchronous, use its return value;
+ * if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a preview update.
+ *
+ * @param {Blockly.Block} block - The save_plot block instance.
+ */
+export function setDefaultSaveDir(block) {
+  const field = block.getField('DIRECTORY');
+
+  const setAndPreview = (dir) => {
+    if (field) {
+      const cur = field.getValue();
+      if (!cur || cur === 'path/to/folder') {
+        field.setValue(dir || '.');
+      }
+    }
+    updateSavePlotPreview(block);
+  };
+
+  try {
+    const bridge = window.blocklyBridge;
+    if (bridge && typeof bridge.getSelectedDir === 'function') {
+      const res = bridge.getSelectedDir(); // may be string or Promise
+      if (res && typeof res.then === 'function') {
+        res.then(setAndPreview).catch(() => setAndPreview('.'));
+      } else {
+        setAndPreview(res || '.');
+      }
+    } else {
+      setAndPreview('.');
+    }
+  } catch (_) {
+    setAndPreview('.');
+  }
+}
+
+/**
+ * Compute and render live preview strings for the figure and data output paths
+ * based on the block's current field values (directory, basename, toggles, types).
+ *
+ * @param {Blockly.Block} block - The save_plot block instance.
+ */
+export function updateSavePlotPreview(block) {
+  const dir      = (block.getFieldValue('DIRECTORY') || '.').trim();
+  const parent = getPlotParent(block);
+  
+  const baseFld = block.getField('BASENAME');
+  let baseName  = (baseFld ? baseFld.getValue() : '').trim();
+
+  // If empty, auto-fill from parent (if any)
+  if (!baseName && parent) {
+    baseName = parent.plotName || 'plot';
+    if (baseFld) baseFld.setValue(baseName);
+  }
+  if (!baseName) baseName = 'plot';
+
+
+  const saveFig  = block.getFieldValue('SAVE_FIGURE') === 'TRUE';
+  const figType  = (block.getFieldValue('FIG_TYPE')   || 'png').trim();
+  const saveData = block.getFieldValue('SAVE_DATA')   === 'TRUE';
+  const dataType = (block.getFieldValue('DATA_TYPE')  || 'csv').trim();
+
+  const baseDir  = dir || '.';
+  const figPath  = saveFig  ? `./figures/${baseName}.${figType}` : '—';
+  const dataPath = saveData ? `./data/${baseName}.${dataType}`   : '—';
+
+  const figPrev  = block.getField('FIG_PREVIEW');
+  const dataPrev = block.getField('DATA_PREVIEW');
+  
+  if (figPrev && typeof figPrev.setValue === 'function')  figPrev.setValue(figPath);
+  if (dataPrev && typeof dataPrev.setValue === 'function') dataPrev.setValue(dataPath);
+
+  // Warn/disable if not connected to a plot
+  const ok = !!parent;
+  block.setWarningText(ok ? null : 'Attach directly under a plot block.');
+}
 
 
 /**

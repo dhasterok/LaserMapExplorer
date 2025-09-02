@@ -3,7 +3,7 @@ import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import {registerFieldColour, FieldColour} from '@blockly/field-colour';
 registerFieldColour();
 import { sample_ids,fieldTypeList, baseDir } from './globals';
-import {updateFieldDropdown,updateFieldTypeDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain, listSelectorChanged, updateNDimListDropdown} from './helper_functions'
+import {updateFieldDropdown,updateFieldTypeDropdown,addDefaultStylingBlocks,updateStylingChain, updateHistogramOptions, isBlockInChain, listSelectorChanged, updateNDimListDropdown, updateSavePlotPreview,setDefaultSaveDir } from './helper_functions'
 var enableSampleIDsBlock = false; // Initially false
 window.Blockly = Blockly.Blocks
 
@@ -908,15 +908,14 @@ const plot_map = {
             .appendField(new Blockly.FieldCheckbox('TRUE'), 'SHOW_MAP');
 
         this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
+        this.setNextStatement(true, 'PLOT_OUTPUT');
         this.setTooltip('Configure and render a plot with specified type and settings.');
         this.setHelpUrl('');
         this.setColour(285);
 
         this.plotType = 'field map'
-        
-        
-        
+
+        this.plotName =  this.getFieldValue('field')|| 'plot';
 
         
         
@@ -939,6 +938,7 @@ const plot_map = {
             });
             const fieldDropdown = this.getField('field');
             fieldDropdown.setValidator((newValue) => {
+                this.plotName = newValue || 'plot';
                 const c_field = newValue;
                 const c_field_type = this.getFieldValue('fieldType');
                 this.argDict = {
@@ -2486,6 +2486,77 @@ const export_figure = {
     }
 };
 Blockly.Blocks['export_figure'] = export_figure;
+
+Blockly.Blocks['save_plot'] = {
+  init: function() {
+    this.appendDummyInput().appendField("save plot");
+
+     // Minimal change-dir dropdown used as a button
+    const changeDir = new Blockly.FieldDropdown([["current path","IDLE"], ["change…","CHANGE"]], (v) => {
+      if (v !== "CHANGE") return v;           // only act on explicit select
+      const f = this.getField('DIRECTORY');
+      const cur = (f ? f.getValue() : "") || "";
+      const r = window.blocklyBridge.selectDirectory(cur);
+      (r && typeof r.then === 'function') ? r.then(p => { if (p) f.setValue(p); updateSavePlotPreview(this); this.getField('CHANGE_DIR')?.setValue('IDLE'); })
+                                    : (r && f.setValue(r));
+      this.getField('CHANGE_DIR')?.setValue('IDLE');  // reset to neutral
+      updateSavePlotPreview(this);
+      return 'IDLE';
+    });
+    
+    this.appendDummyInput()
+        .appendField("directory")
+        .appendField(new Blockly.FieldTextInput("path/to/folder"), "DIRECTORY")
+        .appendField(changeDir, "CHANGE_DIR");
+    changeDir.setValue('IDLE');  // neutral default
+
+    this.appendDummyInput()
+        .appendField("basename")
+        .appendField(new Blockly.FieldTextInput(""), "BASENAME");
+
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "SAVE_FIGURE")
+        .appendField("save figure as")
+        .appendField(new Blockly.FieldDropdown([
+          ["png","png"], ["jpg","jpg"], ["svg","svg"], ["pdf","pdf"]
+        ]), "FIG_TYPE");
+
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "SAVE_DATA")
+        .appendField("save data as")
+        .appendField(new Blockly.FieldDropdown([
+          ["csv","csv"], ["xlsx","xlsx"], ["parquet","parquet"]
+        ]), "DATA_TYPE");
+
+    // Live preview labels (use Serializable so we can update text)
+    this.appendDummyInput()
+        .appendField("figure path:")
+        .appendField(new Blockly.FieldLabelSerializable("—"), "FIG_PREVIEW");
+
+    this.appendDummyInput()
+        .appendField("data path:")
+        .appendField(new Blockly.FieldLabelSerializable("—"), "DATA_PREVIEW");
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+    this.setTooltip("Save current canvas figure and/or data to disk.");
+    this.setHelpUrl("");
+
+    // Fetch default dir once the block is created
+    setDefaultSaveDir(this);
+
+    // Live updates when any relevant field changes
+    const block = this;
+    this.setOnChange(function(e) {
+      // Only recompute on field changes to our block
+      if (!e || e.blockId !== block.id) return;
+      updateSavePlotPreview(block);
+    });
+  }
+};
+
+
 
 const profiling = {
     init: function() {

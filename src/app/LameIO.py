@@ -641,7 +641,7 @@ class LameIO():
         except Exception as e:
             self.status_manager.show_message(f"Figure save failed: {e}")
 
-    def save_plot(self, canvas: MplCanvas, save_figure_flag=True, save_data_flag=True, parent=None):
+    def save_plot(self, canvas: MplCanvas, save_figure_flag=True, save_data_flag=True, parent=None, settings=None):
         """
         Open SaveDialog and save figure, data, or both from the given canvas.
 
@@ -655,13 +655,26 @@ class LameIO():
             If True, allow saving data.
         parent : QWidget | None
             Parent widget for SavePlotDialog
+        settings : dict | None
+            If provided, bypass the SavePlotDialog and use these values directly:
+        {
+            "directory": str | Path,
+            "basename": str,
+            "fig_type": str,   # e.g. "png", "pdf", "svg"
+            "data_type": str   # e.g. "csv", "npy", "parquet"
+        }
         """
-        dlg = SavePlotDialog(parent, basename=canvas.plot_name)
-        if dlg.exec() != QDialog.DialogCode.Accepted:
-            self.status_manager.show_message("Save cancelled")
+        if canvas is None:
+            self.status_manager.show_message("Save failed: no active canvas")
             return
 
-        settings = dlg.get_values()
+        if settings is None:
+            dlg = SavePlotDialog(parent, basename=canvas.plot_name)
+            if dlg.exec() != QDialog.DialogCode.Accepted:
+                self.status_manager.show_message("Save cancelled")
+                return
+
+            settings = dlg.get_values()
 
         save_dir = Path(settings['directory'])
         if not settings['basename']:

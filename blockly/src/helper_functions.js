@@ -185,11 +185,11 @@ window.updateFieldTypeList = updateFieldTypeList;
  * Also triggers update of the Field dropdown.
  * @param {Blockly.Block} block 
  * @param {string} plotType 
- * @param {number} axisNum  // e.g., 3 for 'C'
+ * @param {string} axisNum  // 'x', 'y','z', 'c'
  * @param {string} fieldTypeName  // e.g., 'fieldType' 
  * @param {string} fieldName
  */
-export function updateFieldTypeDropdown(block, plotType, axisNum=3, fieldTypeName, fieldName) {
+export function updateFieldTypeDropdown(block, plotType, axisNum='c', fieldTypeName, fieldName) {
     window.blocklyBridge.getFieldTypeList(axisNum.toString(), plotType).then((response) => {
         const options = response.map(option => [option, option]);
         const fieldTypeDropdown = block.getField(fieldTypeName);

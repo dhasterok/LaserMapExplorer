@@ -927,9 +927,9 @@ const plot_map = {
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             //  Attach validators to fieldType and field
-            // Default: axisNum = 3 for 'C' axis; adjust as needed
-            const axisNum = 3;
-            updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType', 'field');
+            // Default: axis = 'c' for 'C' axis; adjust as needed
+            const axis = 'c';
+            updateFieldTypeDropdown(this, this.plotType, axis, 'fieldType', 'field');
 
             // Attach validators to dropdowns
             const fieldTypeDropdown = this.getField('fieldType');
@@ -1060,8 +1060,8 @@ const plot_histogram = {
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
             // update style dictionaries
             updateHistogramOptions(this);
-            const axisNum = 1;
-            updateFieldTypeDropdown(this, this.plotType, axisNum, 'fieldType', 'field');
+            const axis = 'x';
+            updateFieldTypeDropdown(this, this.plotType, axis, 'fieldType', 'field');
 
             // 3) Attach validators to fieldType and field
             const fieldTypeDropdown = this.getField('fieldType');
@@ -1255,15 +1255,15 @@ const plot_ternary = {
 
         // Default plot type
         this.plotType = 'scatter';
-        const axisIndexMap = { X: 0, Y: 1, Z: 1 };
+        const axisIndexMap = { X: 'x', Y: 'y', Z: 'z' };
         if (!this.isInFlyout) {
             const defaultBlocks = ['x_axis', 'y_axis', 'z_axis', 'colormap'];
             addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
 
             // Set up validators and chain updates
-            ['X','Y','Z'].forEach(axis => {
-                const axisNum = axisIndexMap[axis];
-                updateFieldTypeDropdown(this, this.plotType, axisNum, `fieldType${axis}`, `field${axis}`);
+            ['X','Y','Z'].forEach(axisVal => {
+                const axis = axisIndexMap[axisVal];
+                updateFieldTypeDropdown(this, this.plotType, axis, `fieldType${axis}`, `field${axis}`);
 
                 const fieldTypeDropdown = this.getField(`fieldType${axis}`);
                 fieldTypeDropdown.setValidator((newValue) => {

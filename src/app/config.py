@@ -38,7 +38,9 @@ def get_top_parent(widget: QWidget):
 
     w = widget
     while w is not None:
-        if isinstance(w, (QMainWindow, Workflow)):
+        if isinstance(w, (QMainWindow)):
             return w
+        elif isinstance(w, (Workflow)):
+            return w.bridge.lame_blockly
         w = w.parentWidget()
     return None  # fallback if nothing found

@@ -79,7 +79,7 @@ class BlocklyBridge(QObject):
     def getFieldTypeList(self, ax, plot_type):
         print('get_field_list')
         self.lame_blockly.style_data.plot_type = plot_type
-        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.style_data)
+        return self.lame_blockly.app_data.get_field_type_list(ax, self.lame_blockly.style_data)
 
     @pyqtSlot(result=str)
     def getBaseDir(self):

@@ -1418,3 +1418,33 @@ class PlotWindow(QDialog):
         layout.addWidget(button_box,2)
 
         #self.parent.clear_layout(self.parent.layout())
+
+
+class CanvasDialog(QDialog):
+    """
+    A non-modal top-level window that hosts a full CanvasWidget instance.
+    Use this from BlocklyModules so it appears as a separate window.
+    """
+    def __init__(self, ui, parent=None):
+        # parent: keep it the top-level main window if available
+        super().__init__(parent)
+        self.setObjectName("CanvasDialog")
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+        self.setWindowTitle("Canvas")
+        self.resize(800, 600)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # Host a fresh CanvasWidget inside this dialog (independent from MainWindow’s central widget)
+        self.canvas_widget = CanvasWidget(ui=ui, parent=self)
+        layout.addWidget(self.canvas_widget)
+    
+    def closeEvent(self, event):
+        """Hide instead of destroying; keeps C++ object alive."""
+        event.ignore()
+        self.hide()
+
+    def get_canvas(self) -> "CanvasWidget":
+        return self.canvas_widget

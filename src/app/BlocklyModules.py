@@ -4,7 +4,8 @@ import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
-from PyQt6.QtWidgets import QWidget, QDialog
+from PyQt6.QtWidgets import QWidget, QDialog, QVBoxLayout
+from PyQt6.QtCore import QObject
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.gridspec as gs
 from matplotlib.path import Path
@@ -49,10 +50,11 @@ from src.app.AppData import AppData
 from src.common.Status import StatusMessageManager
 import os
 import json
-from src.app.CanvasWidget import CanvasWidget
+from src.app.CanvasWidget import CanvasWidget, CanvasDialog
 
-class LameBlockly():
+class LameBlockly(QObject):
     def __init__(self,parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
         # setup initial logging options
         # self.logger = LogCounter()
         self.logger_options = {
@@ -75,6 +77,7 @@ class LameBlockly():
         self.lasermaps = {}
         self.outlier_method = 'none'
         self.negative_method = 'ignore negatives'
+        self.parent = parent
         self.calc_dict = {}
         self.csv_files = []
         self.laser_map_dict = {}
@@ -105,8 +108,17 @@ class LameBlockly():
         
         self.style_data = StyleData(self)
         
-        self.canvas_widget = CanvasWidget(ui=self, parent=None)
-        self.canvas_widget.show()
+        # Create a popup dialog
+        popup = QDialog(parent)
+        popup.setWindowTitle("Plot Viewer")
+        layout = QVBoxLayout(popup)
+
+        # Pass popup as the parent to CanvasWidget
+        self.canvas_widget = CanvasWidget(ui=self, parent=popup)
+        layout.addWidget(self.canvas_widget)
+
+        popup.setLayout(layout)
+        #popup.exec_()
         # # Initialise plotviewer form
         # self.plot_viewer = PlotViewer(self)
         self.update_bins = False
@@ -148,6 +160,22 @@ class LameBlockly():
                 # Select analyte Tab
         #-------------------------
         self.ref_selected = False
+
+    def ensure_canvas_popup(self):
+        """
+        Ensures there is a visible popup window hosting a CanvasWidget.
+        Reuses the dialog if already open; otherwise creates a new one.
+        """
+        dlg_exists = hasattr(self, "canvas_dialog") and self.canvas_dialog is not None
+        if not dlg_exists or not self.canvas_dialog.isVisible():
+            self.canvas_dialog = CanvasDialog(ui=self, parent=self.parent)
+            self.canvas_widget = self.canvas_dialog.get_canvas()
+            self.canvas_dialog.show()
+        else:
+            # Bring to front if already open
+            self.canvas_dialog.raise_()
+            self.canvas_dialog.activateWindow()
+
 
     def change_sample(self, index, save_analysis= True):
         """Changes sample and plots first map

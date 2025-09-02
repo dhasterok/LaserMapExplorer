@@ -1,4 +1,6 @@
 import re, os, copy
+import uuid
+from datetime import datetime
 import numpy as np
 import pandas as pd
 from src.common.ExtendedDF import AttributeDataFrame
@@ -11,6 +13,7 @@ import src.common.format as fmt
 from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
+from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
 from src.common.format import symlog, inv_logit
@@ -18,7 +21,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 
 
 @auto_log_methods(logger_key='Data')
-class SampleObj(Observable):
+class SampleObj(Observable, QObject):
     """Creates a base sample object to store and manipulate geochemical data in map form
     
     The sample object is initially constructed from the data within a *.lame.csv file and loaded into
@@ -164,12 +167,23 @@ class SampleObj(Observable):
     'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
     'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
     """
+    # PyQt signals for annotation management
+    annotationAdded = pyqtSignal(str, dict)  # plot_id, annotation_data
+    annotationUpdated = pyqtSignal(str, str, dict)  # plot_id, annotation_id, updates
+    annotationRemoved = pyqtSignal(str, str)  # plot_id, annotation_id
+    annotationVisibilityChanged = pyqtSignal(str, str, bool)  # plot_id, annotation_id, visible
+
     def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
-        super().__init__()
+        # Initialize both parent classes
+        Observable.__init__(self)
+        QObject.__init__(self)
 
         self.ui = ui
 
         self.logger_key = 'Data'
+        
+        # Plot annotations storage
+        self.plot_annotations = {}  # plot_id -> list[annotation_data]
 
         self.sample_id = sample_id
         self.file_path = file_path
@@ -2099,6 +2113,145 @@ class SampleObj(Observable):
     #     if update_plot:
     #         self.apply_filters(fullmap=False)
 
+    # ==========================================
+    # ANNOTATION MANAGEMENT METHODS
+    # ==========================================
+    
+    def add_annotation(self, plot_id, annotation_data):
+        """
+        Add annotation to a specific plot.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Unique plot identifier
+        annotation_data : dict
+            Annotation data containing type, position, style, etc.
+        """
+        if plot_id not in self.plot_annotations:
+            self.plot_annotations[plot_id] = []
+        
+        # Add unique ID if not present
+        if 'id' not in annotation_data:
+            annotation_data['id'] = self._generate_annotation_id()
+            
+        # Add timestamps
+        annotation_data['created_at'] = datetime.now()
+        annotation_data['modified_at'] = datetime.now()
+        
+        self.plot_annotations[plot_id].append(annotation_data)
+        
+        # Emit signal
+        self.annotationAdded.emit(plot_id, annotation_data)
+    
+    def get_annotations(self, plot_id):
+        """
+        Get all annotations for a plot.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+            
+        Returns
+        -------
+        list
+            List of annotation dictionaries
+        """
+        return self.plot_annotations.get(plot_id, [])
+    
+    def update_annotation(self, plot_id, annotation_id, updates):
+        """
+        Update specific annotation properties.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        annotation_id : str
+            Annotation identifier
+        updates : dict
+            Dictionary of properties to update
+        """
+        if plot_id in self.plot_annotations:
+            for annotation in self.plot_annotations[plot_id]:
+                if annotation['id'] == annotation_id:
+                    annotation.update(updates)
+                    annotation['modified_at'] = datetime.now()
+                    
+                    # Emit specific signal based on what was updated
+                    if 'visible' in updates:
+                        self.annotationVisibilityChanged.emit(
+                            plot_id, annotation_id, updates['visible']
+                        )
+                    
+                    self.annotationUpdated.emit(plot_id, annotation_id, updates)
+                    break
+    
+    def remove_annotation(self, plot_id, annotation_id):
+        """
+        Remove annotation by ID.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        annotation_id : str
+            Annotation identifier
+        """
+        if plot_id in self.plot_annotations:
+            original_count = len(self.plot_annotations[plot_id])
+            self.plot_annotations[plot_id] = [
+                ann for ann in self.plot_annotations[plot_id] 
+                if ann['id'] != annotation_id
+            ]
+            
+            # Only emit if annotation was actually removed
+            if len(self.plot_annotations[plot_id]) < original_count:
+                self.annotationRemoved.emit(plot_id, annotation_id)
+    
+    def clear_annotations_for_plot(self, plot_id):
+        """
+        Clear all annotations for a specific plot.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        """
+        if plot_id in self.plot_annotations:
+            annotation_ids = [ann['id'] for ann in self.plot_annotations[plot_id]]
+            self.plot_annotations[plot_id] = []
+            
+            # Emit removal signal for each annotation
+            for annotation_id in annotation_ids:
+                self.annotationRemoved.emit(plot_id, annotation_id)
+    
+    def get_annotation_by_id(self, plot_id, annotation_id):
+        """
+        Get specific annotation by ID.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        annotation_id : str
+            Annotation identifier
+            
+        Returns
+        -------
+        dict or None
+            Annotation data or None if not found
+        """
+        if plot_id in self.plot_annotations:
+            for annotation in self.plot_annotations[plot_id]:
+                if annotation['id'] == annotation_id:
+                    return annotation
+        return None
+    
+    def _generate_annotation_id(self):
+        """Generate unique annotation ID."""
+        return str(uuid.uuid4())[:8]  # Short unique ID
 
 
 @auto_log_methods(logger_key='Data')

@@ -384,7 +384,7 @@ class ControlDock(CustomDockWidget):
         self.ui.app_data.fieldTypeChanged.connect(lambda ax, new_text: self.update_field_type(ax, new_text))
         self.ui.app_data.fieldChanged.connect(lambda ax, new_text: self.update_field(ax, new_text))
 
-        self.ui.app_data.add_observer("norm_reference", self.update_norm_reference_combobox)
+        self.ui.app_data.normReferenceChanged.connect(lambda new_text: self.update_norm_reference_combobox(new_text))
 
     def connect_logger(self):
         """Connects widgets to logger."""

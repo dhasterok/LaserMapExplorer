@@ -47,6 +47,11 @@ from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
+from src.app.PlotRegistry import PlotRegistry
+
+from src.common.CustomMplCanvas import MplCanvas
+import faulthandler
+faulthandler.enable()
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
@@ -117,6 +122,9 @@ class MainWindow(QMainWindow):
         #       data structure and properties (DataHandling), data
         self.app_data = AppData(parent=self)
         self.style_data = StyleData(parent=self)
+        
+        # initialize plot registry for canvas and metadata management
+        self.plot_registry = PlotRegistry(app_data=self.app_data, max_cached_canvases=10)
 
         # used to schedule plot updates
         self.scheduler = Scheduler(callback=self.update_SV)
@@ -154,6 +162,11 @@ class MainWindow(QMainWindow):
 
         # Force initial update of theme
         self._apply_theme_to_buttons(self.theme_manager.theme)
+
+        # self.mpl_canvas = MplCanvas()
+        # self.mpl_canvas.axes.clear()
+        # self.mpl_canvas.axes.imshow()
+        # self.mpl_canvas.draw()
 
 
     def setupUI(self):
@@ -432,7 +445,7 @@ class MainWindow(QMainWindow):
 
     def connect_app_data_observers(self, app_data):
         #app_data.add_observer("sort_method", self.update_sort_method)
-        app_data.add_observer("selected_clusters", self.update_selected_clusters_spinbox)
+        app_data.selectedClustersChanged.connect(self.update_selected_clusters_spinbox)
 
     # -------------------------------
     # UI update functions
@@ -942,6 +955,8 @@ class MainWindow(QMainWindow):
         """
         if not hasattr(self, 'plot_tree'):
             self.plot_tree = PlotTree(self)
+            # Connect plot registry to plot tree
+            self.plot_tree.plot_registry = self.plot_registry
 
             self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.plot_tree)
             self.plot_tree.setFloating(False)
@@ -949,6 +964,35 @@ class MainWindow(QMainWindow):
             self.statusbar.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.plot_tree, button=self.toolButtonRightDock))
 
         self.plot_tree.show()
+
+    def add_plotwidget_to_canvas(self, plot_info, position=None):
+        """Add plot to canvas using the registry system.
+        
+        This method serves as a bridge between the old plot_info approach
+        and the new registry-based canvas management.
+        
+        Parameters
+        ----------
+        plot_info : dict
+            Plot information dictionary
+        position : tuple, optional
+            Position for multi-view plots
+        """
+        if not hasattr(self, 'canvas_widget'):
+            log("CanvasWidget not available", "WARNING")
+            return
+            
+        # Get or create canvas using registry
+        plot_id = plot_info.get('plot_id')
+        if plot_id:
+            # Canvas from registry
+            canvas = self.plot_registry.get_or_create_canvas(plot_id)
+            if canvas:
+                # Update plot_info with canvas reference for backward compatibility
+                plot_info['figure'] = canvas
+        
+        # Use existing CanvasWidget logic
+        self.canvas_widget.add_plotwidget_to_canvas(plot_info, position)
 
     def open_workflow(self):
         """Opens Workflow dock.

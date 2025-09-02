@@ -355,7 +355,7 @@ class PreprocessingUI(CustomPage):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
+        self.dock.ui.app_data.applyAutoscaleChanged.connect(lambda flag: self.update_autoscale_checkbox(flag))
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -398,7 +398,7 @@ class PreprocessingUI(CustomPage):
         data.add_observer("data_max_quantile", self.update_data_max_quantile)
         data.add_observer("data_min_diff_quantile", self.update_data_min_diff_quantile)
         data.add_observer("data_max_diff_quantile", self.update_data_max_diff_quantile)
-        self.dock.ui.app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
+        self.dock.ui.app_data.equalizeColorScaleChanged.connect(self.update_equalize_color_scale_toolbutton)
         data.add_observer("data_auto_scale_value", self.update_auto_scale_value)
         data.add_observer("apply_outlier_to_all", self.update_apply_outlier_to_all)
         data.add_observer("outlier_method", self.update_outlier_method)

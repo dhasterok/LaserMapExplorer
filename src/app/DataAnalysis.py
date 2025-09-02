@@ -300,14 +300,14 @@ class ClusterPage(CustomPage, Clustering):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("cluster_method", self.update_cluster_method)
-        self.dock.ui.app_data.add_observer("max_clusters", self.update_max_clusters)
-        self.dock.ui.app_data.add_observer("num_clusters", self.update_num_clusters)
-        self.dock.ui.app_data.add_observer("cluster_seed", self.update_cluster_seed)
-        self.dock.ui.app_data.add_observer("cluster_exponent", self.update_cluster_exponent)
-        self.dock.ui.app_data.add_observer("cluster_distance", self.update_cluster_distance)
-        self.dock.ui.app_data.add_observer("dim_red_precondition", self.update_dim_red_precondition)
-        self.dock.ui.app_data.add_observer("num_basis_for_precondition", self.update_num_basis_for_precondition)
+        self.dock.ui.app_data.clusterMethodChanged.connect(lambda _: self.update_cluster_method)
+        self.dock.ui.app_data.maxClustersChanged.connect(self.update_max_clusters)
+        self.dock.ui.app_data.numClustersChanged.connect(self.update_num_clusters)
+        self.dock.ui.app_data.clusterSeedChanged.connect(self.update_cluster_seed)
+        self.dock.ui.app_data.clusterExponentChanged.connect(self.update_cluster_exponent)
+        self.dock.ui.app_data.clusterDistanceChanged.connect(self.update_cluster_distance)
+        self.dock.ui.app_data.clusterPreconditionChanged.connect(self.update_dim_red_precondition)
+        self.dock.ui.app_data.numBasisChanged.connect(self.update_num_basis_for_precondition)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -684,11 +684,9 @@ class DimensionalReductionPage(CustomPage, DimensionalReduction):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("dim_red_method", self.update_dim_red_method_combobox)
-        self.dock.ui.app_data.add_observer("dim_red_x", self.update_dim_red_x_spinbox)
-        self.dock.ui.app_data.add_observer("dim_red_y", self.update_dim_red_y_spinbox)
-        self.dock.ui.app_data.add_observer("dim_red_x_max", self.update_dim_red_x_max_spinbox)
-        self.dock.ui.app_data.add_observer("dim_red_y_max", self.update_dim_red_y_max_spinbox)
+        self.dock.ui.app_data.dimRedMethodChanged.connect(lambda method: self.update_dim_red_method_combobox(method))
+        self.dock.ui.app_data.dimRedValueChanged.connect(lambda ax, new_value: self.update_dim_red_spinbox(ax, new_value))
+        self.dock.ui.app_data.dimRedMaxValueChanged.connect(lambda ax, new_value: self.update_dim_red_max_spinbox(ax, new_value))
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -701,18 +699,12 @@ class DimensionalReductionPage(CustomPage, DimensionalReduction):
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['dim_red']:
             self.dock.ui.schedule_update()
 
-    def update_dim_red_x_spinbox(self, new_value):
-        self.spinBoxPCX.setValue(int(new_value))
+    def update_dim_red_spinbox(self, ax, new_value):
+        spinbox = getattr(self, f"spinBoxPC{ax.upper()}")
+        spinbox.setValue(int(new_value))
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['dim_red']:
             self.dock.ui.schedule_update()
 
-    def update_dim_red_y_spinbox(self, new_value):
-        self.spinBoxPCY.setValue(int(new_value))
-        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['dim_red']:
-            self.dock.ui.schedule_update()
-
-    def update_dim_red_x_max_spinbox(self, new_value):
-        self.spinBoxPCX.setMaximum(int(new_value))
-
-    def update_dim_red_y_max_spinbox(self, new_value):
-        self.spinBoxPCY.setMaximum(int(new_value))
+    def update_dim_red_max_spinbox(self, ax, new_value):
+        spinbox = getattr(self, f"spinBoxPC{ax.upper()}")
+        spinbox.setMaximum(int(new_value))

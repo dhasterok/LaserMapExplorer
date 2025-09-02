@@ -123,13 +123,13 @@ class CanvasWidget(QWidget):
         elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
             layout = self.multi_view.layout() 
             if layout is not None:
-                #layout.addWidget(canvas)
-                QTimer.singleShot(0, lambda: layout.addWidget(canvas))
+                layout.addWidget(canvas)
+                #QTimer.singleShot(0, lambda: layout.addWidget(canvas))
         elif self.canvasWindow.currentIndex() == self.tab_dict['qv']:
             layout = self.quick_view.layout()
             if layout is not None:
-                #layout.addWidget(canvas)
-                QTimer.singleShot(0, lambda: layout.addWidget(canvas))
+                layout.addWidget(canvas)
+                #QTimer.singleShot(0, lambda: layout.addWidget(canvas))
         else:
             raise ValueError("Invalid tab index.")
 
@@ -249,8 +249,8 @@ class CanvasWidget(QWidget):
         
         layout = self.single_view.layout()
         if layout is not None:
-            #layout.addWidget(new_canvas)
-            QTimer.singleShot(0, lambda: layout.addWidget(new_canvas))
+            layout.addWidget(new_canvas)
+            #QTimer.singleShot(0, lambda: layout.addWidget(new_canvas))
         
         new_canvas.show()
         
@@ -1103,6 +1103,85 @@ class CanvasToolBar(QGroupBox):
             units = canvas.distance_units or ''
             if distance:
                 self.sv.labelInfoDistance.setText(f"D: {distance:.2f} {units}")
+
+    def save_current_plot_to_tree(self):
+        """Save the current plot displayed on canvas to the plot tree and registry."""
+        try:
+            current_plot_info = None
+            
+            # Try to get current plot info from SingleView
+            if (self.canvasWindow.currentIndex() == self.tab_dict['sv'] and 
+                hasattr(self, 'sv_widget') and self.sv_widget):
+                
+                # Check if sv_widget has the plot information we need
+                if hasattr(self.sv_widget, 'plot_name') and hasattr(self.sv_widget, 'sample_obj'):
+                    sample_obj = self.sv_widget.sample_obj
+                    if sample_obj and hasattr(sample_obj, 'sample_id'):
+                        # Build plot_info from canvas properties
+                        current_plot_info = {
+                            'sample_id': sample_obj.sample_id,
+                            'plot_name': getattr(self.sv_widget, 'plot_name', 'Saved Plot'),
+                            'figure': self.sv_widget,
+                            'view': [True, False],
+                            'position': None,
+                        }
+                        
+                        # Try to get plot type from style data
+                        if hasattr(self.ui, 'style_data') and hasattr(self.ui.style_data, 'plot_type'):
+                            current_plot_info['plot_type'] = self.ui.style_data.plot_type
+                        else:
+                            current_plot_info['plot_type'] = 'field map'  # default
+                        
+                        # Try to get field info from UI
+                        if hasattr(self.ui, 'control_dock'):
+                            if hasattr(self.ui.control_dock, 'comboBoxColorByField'):
+                                field_type = self.ui.control_dock.comboBoxColorByField.currentText()
+                                if field_type:
+                                    current_plot_info['field_type'] = field_type
+                                    
+                            if hasattr(self.ui.control_dock, 'comboBoxColorField'):
+                                field = self.ui.control_dock.comboBoxColorField.currentText()
+                                if field:
+                                    current_plot_info['field'] = field
+            
+            # If we couldn't get from SingleView, try to get from UI plot_info
+            if not current_plot_info and hasattr(self.ui, 'plot_info') and self.ui.plot_info:
+                current_plot_info = self.ui.plot_info.copy()
+                # Ensure it has required fields
+                if 'view' not in current_plot_info:
+                    current_plot_info['view'] = [True, False]
+                if 'position' not in current_plot_info:
+                    current_plot_info['position'] = None
+            
+            if not current_plot_info:
+                log("No current plot available to save", "WARNING")
+                return False
+                
+            # Validate required fields
+            required_fields = ['sample_id', 'plot_type']
+            for field in required_fields:
+                if field not in current_plot_info:
+                    log(f"Plot info missing required field: {field}", "WARNING")
+                    return False
+            
+            # Register plot in registry if registry is available
+            if hasattr(self.ui, 'plot_registry') and self.ui.plot_registry:
+                plot_id = self.ui.plot_registry.register_plot(current_plot_info)
+                log(f"Registered plot in registry: {plot_id}", "INFO")
+            
+            # Add to plot tree
+            if hasattr(self.ui, 'plot_tree') and self.ui.plot_tree:
+                self.ui.plot_tree.add_tree_item(current_plot_info)
+                plot_name = current_plot_info.get('plot_name', 'Saved Plot')
+                log(f"Added plot to tree: {plot_name}", "INFO")
+                return True
+            else:
+                log("Plot tree not available", "WARNING")
+                return False
+                
+        except Exception as e:
+            log(f"Error saving plot to tree: {e}", "ERROR")
+            return False
 
 # QuickViewDialog gui
 # -------------------------------

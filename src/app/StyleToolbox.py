@@ -486,10 +486,7 @@ class StyleData(QObject, StyleTheme):
     cbarDirChanged = pyqtSignal(str)
     heatmapResolutionChanged = pyqtSignal(int)
     ternaryColormapChanged = pyqtSignal(str)
-    ternaryXColorChanged = pyqtSignal(str)
-    ternaryYColorChanged = pyqtSignal(str)
-    ternaryZColorChanged = pyqtSignal(str)
-    ternaryMColorChanged = pyqtSignal(str)
+    ternaryColorChanged = pyqtSignal(str, str)
 
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -529,6 +526,17 @@ class StyleData(QObject, StyleTheme):
         self.custom_color_dict = csvdict.import_csv_to_dict(STYLE_PATH / "custom_colormaps.csv")
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
+
+        # create ternary colors dictionary
+        df = pd.read_csv(STYLE_PATH / "ternary_colormaps.csv")
+        self.ternary_colormaps = df.to_dict(orient='records')
+
+
+        self.color_schemes = []
+        for cmap in self.ternary_colormaps:
+            self.color_schemes.append(cmap['scheme'])
+
+
 
         self.tick_dir_options = ['none', 'in', 'out', 'both']
         self.cbar_dir_options = ['none', 'vertical', 'horizontal']
@@ -1014,7 +1022,7 @@ class StyleData(QObject, StyleTheme):
             return
     
         self._ternary_color_x = new_color
-        self.ternaryXColorChanged.emit(new_color)
+        self.ternaryColorChanged.emit('x', new_color)
 
     @property
     def ternary_color_y(self):
@@ -1027,7 +1035,7 @@ class StyleData(QObject, StyleTheme):
             return
     
         self._ternary_color_y = new_color
-        self.ternaryYColorChanged.emit(new_color)
+        self.ternaryColorChanged.emit('y', new_color)
 
     @property
     def ternary_color_z(self):
@@ -1040,7 +1048,7 @@ class StyleData(QObject, StyleTheme):
             return
     
         self._ternary_color_z = new_color
-        self.ternaryZColorChanged.emit(new_color)
+        self.ternaryColorChanged.emit('z', new_color)
 
     @property
     def ternary_color_m(self):
@@ -1053,7 +1061,7 @@ class StyleData(QObject, StyleTheme):
             return
     
         self._ternary_color_m = new_color
-        self.ternaryMColorChanged.emit(new_color)
+        self.ternaryColorChanged.emit('m', new_color)
 
     def get_axis_label(self, ax: str):
         return getattr(self, f"{ax}label")
@@ -1433,6 +1441,54 @@ class StyleData(QObject, StyleTheme):
             return bool(re.fullmatch(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})", hex_color))
         return False
     
+    def initialize_axis_values(self, field_type, field):
+        """Initialize axis values for plotting
+        
+        Updates axis limits and labels based on the current field data.
+        This method is called when setting up plots to ensure axis values
+        are properly initialized from the data.
+        
+        Parameters
+        ----------
+        field_type : str
+            The field type ('Analyte', 'Ratio', 'Calculated', etc.)
+        field : str
+            The field name to initialize axis values for
+        """
+        try:
+            # Get current sample data
+            data = self.app_data.current_data
+            if not data or not hasattr(data, 'processed'):
+                log(f"No processed data available for field {field}", "WARNING")
+                return
+            
+            # Check if field exists in processed data
+            if not hasattr(data.processed, field):
+                log(f"Field {field} not found in processed data", "WARNING")
+                return
+                
+            # Set axis attributes for plotting
+            # This typically involves setting up x, y, and potentially z axes
+            # based on the plot type and field being displayed
+            
+            # For map plots, typically set z-axis (color axis) values
+            if hasattr(self, 'plot_type') and 'map' in self.plot_type.lower():
+                self.set_axis_attributes('z', field)
+            # For scatter/correlation plots, may need x and y axes
+            elif hasattr(self, 'plot_type') and any(plot_type in self.plot_type.lower() 
+                                                   for plot_type in ['scatter', 'correlation']):
+                # Set both x and y axis attributes if this is a 2D plot
+                self.set_axis_attributes('x', field)
+                self.set_axis_attributes('y', field)
+            else:
+                # Default: set primary axis (usually color/z-axis for most plots)
+                self.set_axis_attributes('z', field)
+                
+            log(f"Initialized axis values for {field_type}>{field}", "INFO")
+            
+        except Exception as e:
+            log(f"Error initializing axis values for {field}: {e}", "ERROR")
+
     # ----------------------------------------------------------------------
     # Add central widget‑state registry
     # ----------------------------------------------------------------------

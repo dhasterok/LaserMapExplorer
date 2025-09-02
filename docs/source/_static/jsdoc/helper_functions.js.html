@@ -37,6 +37,8 @@ import {enableSampleIDsBlockFunction} from './custom_blocks'
 
 // ========== Exposing update functions for Python-side call ==========
 
+
+
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variableaxis_and_labels
@@ -213,11 +215,11 @@ window.updateFieldTypeList = updateFieldTypeList;
  * Also triggers update of the Field dropdown.
  * @param {Blockly.Block} block 
  * @param {string} plotType 
- * @param {number} axisNum  // e.g., 3 for 'C'
+ * @param {string} axisNum  // 'x', 'y','z', 'c'
  * @param {string} fieldTypeName  // e.g., 'fieldType' 
  * @param {string} fieldName
  */
-export function updateFieldTypeDropdown(block, plotType, axisNum=3, fieldTypeName, fieldName) {
+export function updateFieldTypeDropdown(block, plotType, axisNum='c', fieldTypeName, fieldName) {
     window.blocklyBridge.getFieldTypeList(axisNum.toString(), plotType).then((response) => {
         const options = response.map(option => [option, option]);
         const fieldTypeDropdown = block.getField(fieldTypeName);
@@ -264,7 +266,91 @@ export function updateFieldDropdown(block, fieldTypeValue, fieldName) {
     });
 }
 
+function getPlotParent(block) {
+  /** Returns the plot-producing parent block, or null. */
+  const prev = block.getPreviousBlock();
+  return prev &amp;&amp; typeof prev.plotName !== 'undefined' ? prev : null;
+}
 
+// helper_functions.js
+
+/**
+ * Initialize the "directory" field of the save_plot block with the app's selected directory,
+ * using the Qt bridge if available. If the bridge call is synchronous, use its return value;
+ * if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a preview update.
+ *
+ * @param {Blockly.Block} block - The save_plot block instance.
+ */
+export function setDefaultSaveDir(block) {
+  const field = block.getField('DIRECTORY');
+
+  const setAndPreview = (dir) => {
+    if (field) {
+      const cur = field.getValue();
+      if (!cur || cur === 'path/to/folder') {
+        field.setValue(dir || '.');
+      }
+    }
+    updateSavePlotPreview(block);
+  };
+
+  try {
+    const bridge = window.blocklyBridge;
+    if (bridge &amp;&amp; typeof bridge.getSelectedDir === 'function') {
+      const res = bridge.getSelectedDir(); // may be string or Promise
+      if (res &amp;&amp; typeof res.then === 'function') {
+        res.then(setAndPreview).catch(() => setAndPreview('.'));
+      } else {
+        setAndPreview(res || '.');
+      }
+    } else {
+      setAndPreview('.');
+    }
+  } catch (_) {
+    setAndPreview('.');
+  }
+}
+
+/**
+ * Compute and render live preview strings for the figure and data output paths
+ * based on the block's current field values (directory, basename, toggles, types).
+ *
+ * @param {Blockly.Block} block - The save_plot block instance.
+ */
+export function updateSavePlotPreview(block) {
+  const dir      = (block.getFieldValue('DIRECTORY') || '.').trim();
+  const parent = getPlotParent(block);
+  
+  const baseFld = block.getField('BASENAME');
+  let baseName  = (baseFld ? baseFld.getValue() : '').trim();
+
+  // If empty, auto-fill from parent (if any)
+  if (!baseName &amp;&amp; parent) {
+    baseName = parent.plotName || 'plot';
+    if (baseFld) baseFld.setValue(baseName);
+  }
+  if (!baseName) baseName = 'plot';
+
+
+  const saveFig  = block.getFieldValue('SAVE_FIGURE') === 'TRUE';
+  const figType  = (block.getFieldValue('FIG_TYPE')   || 'png').trim();
+  const saveData = block.getFieldValue('SAVE_DATA')   === 'TRUE';
+  const dataType = (block.getFieldValue('DATA_TYPE')  || 'csv').trim();
+
+  const baseDir  = dir || '.';
+  const figPath  = saveFig  ? `./figures/${baseName}.${figType}` : '—';
+  const dataPath = saveData ? `./data/${baseName}.${dataType}`   : '—';
+
+  const figPrev  = block.getField('FIG_PREVIEW');
+  const dataPrev = block.getField('DATA_PREVIEW');
+  
+  if (figPrev &amp;&amp; typeof figPrev.setValue === 'function')  figPrev.setValue(figPath);
+  if (dataPrev &amp;&amp; typeof dataPrev.setValue === 'function') dataPrev.setValue(dataPath);
+
+  // Warn/disable if not connected to a plot
+  const ok = !!parent;
+  block.setWarningText(ok ? null : 'Attach directly under a plot block.');
+}
 
 
 /**
@@ -1355,13 +1441,13 @@ function updateMarksAndLinesBlock(block, style) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Aug 08 2025 19:32:21 GMT+0930 (Australian Central Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Sep 02 2025 19:04:19 GMT+0930 (Australian Central Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

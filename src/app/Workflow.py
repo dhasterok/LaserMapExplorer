@@ -1,6 +1,6 @@
 import sys, os, json
 from PyQt6.QtWidgets import ( 
-    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar, QLabel
+    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar, QLabel, QFileDialog
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
@@ -79,7 +79,7 @@ class BlocklyBridge(QObject):
     def getFieldTypeList(self, ax, plot_type):
         print('get_field_list')
         self.lame_blockly.style_data.plot_type = plot_type
-        return self.lame_blockly.app_data.get_field_type_list(int(ax), self.lame_blockly.style_data)
+        return self.lame_blockly.app_data.get_field_type_list(ax, self.lame_blockly.style_data)
 
     @pyqtSlot(result=str)
     def getBaseDir(self):
@@ -98,6 +98,37 @@ class BlocklyBridge(QObject):
         saved_lists = self.lame_blockly.get_saved_lists(type)
         return saved_lists
     
+    @pyqtSlot(result=str)
+    def getSelectedDir(self) -> str:
+        """
+        Return the last-selected directory used for saving outputs.
+
+        Returns
+        -------
+        str
+            Absolute or user-resolved path to the save directory. Empty string if unavailable.
+        """
+        try:
+            return str(self.lame_blockly.app_data.selected_directory)
+        except Exception:
+            return ""
+        
+    @pyqtSlot(str, result=str)
+    def selectDirectory(self, start_dir: str = "") -> str:
+        """
+        Open a native directory chooser starting at start_dir (or app selected_dir),
+        and return the selected path, or '' if the user cancels.
+        """
+        try:
+            base = start_dir or str(getattr(self.lame_blockly.app_data, 'selected_dir', "")) or ""
+        except Exception:
+            base = ""
+        path = QFileDialog.getExistingDirectory(
+            parent=None,
+            caption="Select Save Directory",
+            directory=base
+        )
+        return path or ""
 
     @pyqtSlot(result=list)
     def getCurrentDimensions(self):

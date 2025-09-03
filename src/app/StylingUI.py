@@ -2084,9 +2084,9 @@ class StylingDock(CustomDockWidget):
         if field in list(data.processed.column_attributes.keys()):
             self.ui.style_data.clim = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
             self.ui.style_data.clabel = data.processed.get_attribute(field,'label')
-        else:
-            self.ui.style_data.clim = style['CLim']
-            self.ui.style_data.clabel = style['CLabel']
+        # else:
+        #     self.ui.style_data.clim = style.clim
+        #     self.ui.style_data.clabel = style.clabel
         
         if self.ui.app_data.c_field_type == 'cluster':
             # set color field to active cluster method

@@ -1261,9 +1261,9 @@ const plot_ternary = {
             addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
 
             // Set up validators and chain updates
-            ['X','Y','Z'].forEach(axisVal => {
-                const axis = axisIndexMap[axisVal];
-                updateFieldTypeDropdown(this, this.plotType, axis, `fieldType${axis}`, `field${axis}`);
+            ['X','Y','Z'].forEach(axis => {
+                const axisVal = axisIndexMap[axis];
+                updateFieldTypeDropdown(this, this.plotType, axisVal, `fieldType${axis}`, `field${axis}`);
 
                 const fieldTypeDropdown = this.getField(`fieldType${axis}`);
                 fieldTypeDropdown.setValidator((newValue) => {

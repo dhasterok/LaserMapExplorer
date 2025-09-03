@@ -246,8 +246,9 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     code +=`self.app_data.corr_squared =${r_2}\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
-    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
-    code += `self.canvas_widget.show()\n`
+         code += `self.ensure_canvas_popup()\n`;
+        code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+        code += `self.canvas_dialog.show()\n`;
     return code;
 };
 
@@ -284,8 +285,9 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     // Plot command
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas,  self.plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
-    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
-    code += `self.canvas_widget.show()\n`;
+         code += `self.ensure_canvas_popup()\n`;
+        code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+        code += `self.canvas_dialog.show()\n`;
 
     return code;
 };
@@ -310,8 +312,9 @@ pythonGenerator.forBlock['plot_biplot'] = function(block, generator) {
     `self.app_data.y_field_type =${fyType}\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `self.ensure_canvas_popup()\n`;
     code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
-    code += `self.canvas_widget.show()\n`;
+    code += `self.canvas_dialog.show()\n`;
     return code;
 };
 
@@ -329,8 +332,9 @@ pythonGenerator.forBlock['plot_ternary'] = function(block, generator) {
     let code = subBlocksCode + '\n';
     code += `self.style_data.plot_type = ${plotType}\n`;
     code += `canvas, self.plot_info =  plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `self.ensure_canvas_popup()\n`;
     code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
-    code += `self.canvas_widget.show()\n`;
+    code += `self.canvas_dialog.show()\n`;
     return code;
 };
 
@@ -346,12 +350,13 @@ pythonGenerator.forBlock['plot_ternary_map'] = function(block, generator) {
 
     let code = subBlocksCode + '\n';
     code += `self.style_data.plot_type = 'ternary_map'\n`;
-    code += `canvas, plot_info = plot_ternary_map(self, data=self.data[self.app_data.sample_id], `
+    code += `canvas, self.plot_info = plot_ternary_map(self, data=self.data[self.app_data.sample_id], `
         + `field_type_x=${fields.fieldTypeX}, field_x=${fields.fieldX}, `
         + `field_type_y=${fields.fieldTypeY}, field_y=${fields.fieldY}, `
         + `field_type_z=${fields.fieldTypeZ}, field_z=${fields.fieldZ})\n`;
-    code += `self.add_plotwidget_to_plot_viewer(plot_info)\n`;
-    code += `self.canvas_widget.show()\n`;
+    code += `self.ensure_canvas_popup()\n`;
+    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+    code += `self.canvas_dialog.show()\n`;
     return code;
 };
 

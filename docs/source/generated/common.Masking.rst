@@ -4,15 +4,6 @@
 .. automodule:: common.Masking
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -23,11 +14,3 @@
       MaskObj
       PolygonTab
    
-   
-
-   
-   
-   
-
-
-

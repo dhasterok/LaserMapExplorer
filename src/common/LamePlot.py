@@ -341,7 +341,7 @@ def plot_map_pg(parent, sample_id, field_type, field, add_histogram=False):
         }
 
     #parent.plot_widget_dict[parent.plot_info['tree']][parent.plot_info['sample_id']][parent.plot_info['plot_name']] = {'info':parent.plot_info, 'view':view, 'position':None}
-    parent.parent.canvas_widget.add_plotwidget_to_canvas(parent.plot_info)
+    parent.parent.canvas_widget.add_canvas_to_window(parent.plot_info)
 
     #parent.update_tree(plot_info=parent.plot_info)
     parent.plot_tree.add_tree_item(parent.plot_info)
@@ -395,7 +395,7 @@ def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
             print(f"Warning issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}")
             return
 
-    bin_width = (np.nanmax(array) - np.nanmin(array)) / app_data.default_hist_num_bins
+    bin_width = (np.nanmax(array) - np.nanmin(array)) / app_data._default_hist_num_bins
     edges = np.arange(np.nanmin(array), np.nanmax(array) + bin_width, bin_width)
 
     if sum(mask) != len(mask):

@@ -4,11 +4,6 @@
 .. automodule:: common.format
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -22,15 +17,3 @@
       parse_isotope
       symlog
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

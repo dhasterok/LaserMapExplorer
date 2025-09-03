@@ -4,11 +4,6 @@ src.common.LamePlot
 .. automodule:: src.common.LamePlot
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -39,15 +34,3 @@ src.common.LamePlot
       ternary_scatter
       update_figure_font
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

@@ -80,7 +80,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
         current_plot_df : dict, optional
             Defaults to None
         """
-        #print('add_plotwidget_to_canvas')
+        #print('add_canvas_to_window')
         if self.widgetSingleView:
             self.sv_widget = plot_info['figure']
             self.update_canvas(self.sv_widget)

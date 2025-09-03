@@ -962,11 +962,6 @@ class StyleData(QObject, StyleTheme):
 
     @cscale.setter
     def cscale(self, scale):
-        # if self._is_valid_scale(scale):
-        #     self.style_dict[self.plot_type]['CScale'] = scale
-        #     self.notify_observers("cscale", 'c', scale)
-        # else:
-        #     raise TypeError("scale must be linear, log, logit, or symlog.")
         self.style_dict[self.plot_type]['CScale'] = scale
         self.axisScaleChanged.emit('c', scale)
 
@@ -1493,15 +1488,15 @@ class StyleData(QObject, StyleTheme):
     # Add central widget‑state registry
     # ----------------------------------------------------------------------
     # ❷ helper to update state + notify observers
-    def _set_widget_state(self, key: str, enabled: bool) -> None:
-        """
-        Record the desired enabled/disabled state of a UI control.
-        An observer in the MainWindow should translate the event
-        '<key>_enabled' → widget.setEnabled(enabled).
-        """
-        if self.widget_state.get(key) != enabled:
-            self.widget_state[key] = enabled
-            self.notify_observers(f"{key}_enabled", enabled)
+    # def _set_widget_state(self, key: str, enabled: bool) -> None:
+    #     """
+    #     Record the desired enabled/disabled state of a UI control.
+    #     An observer in the MainWindow should translate the event
+    #     '<key>_enabled' → widget.setEnabled(enabled).
+    #     """
+    #     if self.widget_state.get(key) != enabled:
+    #         self.widget_state[key] = enabled
+    #         self.notify_observers(f"{key}_enabled", enabled)
 
     # -------------------------------------
     # Debugging fuctions

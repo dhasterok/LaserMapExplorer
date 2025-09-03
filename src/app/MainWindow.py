@@ -567,10 +567,10 @@ class MainWindow(QMainWindow):
         data = self.app_data.current_data
 
         # update dx, dy, nx, ny
-        self.control_dock.preprocess.update_dx_lineedit(data.dx)
-        self.control_dock.preprocess.update_dy_lineedit(data.dy)
-        self.control_dock.preprocess.update_nx_lineedit(data.nx)
-        self.control_dock.preprocess.update_nx_lineedit(data.ny)
+        self.control_dock.preprocess.update_dimension('x', data.dx)
+        self.control_dock.preprocess.update_dimension('y', data.dy)
+        self.control_dock.preprocess.update_resolution('x', data.nx)
+        self.control_dock.preprocess.update_resolution('y', data.ny)
 
         # update c_field_type and c_field
         self.app_data.c_field_type = 'Analyte'
@@ -583,7 +583,7 @@ class MainWindow(QMainWindow):
         self.app_data.c_field = field
 
         # hist_bin_width and should be updated along with hist_num_bins
-        self.app_data.hist_num_bins = self.app_data.default_hist_num_bins
+        self.app_data.hist_num_bins = self.app_data._default_hist_num_bins
 
         # update UI with auto scale and neg handling parameters from 'Analyte Info'
         self.update_autoscale_widgets(field=self.control_dock.comboBoxFieldC.currentText(), field_type=self.control_dock.comboBoxFieldTypeC.currentText())
@@ -868,7 +868,7 @@ class MainWindow(QMainWindow):
                     
                     # Store reference BEFORE adding to canvas
                     self.mpl_canvas = canvas
-                    self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)
+                    self.canvas_widget.add_canvas_to_window(self.plot_info)
 
                     if hasattr(self,"info_dock"):
                         self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
@@ -965,7 +965,7 @@ class MainWindow(QMainWindow):
 
         self.plot_tree.show()
 
-    def add_plotwidget_to_canvas(self, plot_info, position=None):
+    def add_canvas_to_window(self, plot_info, position=None):
         """Add plot to canvas using the registry system.
         
         This method serves as a bridge between the old plot_info approach
@@ -992,7 +992,7 @@ class MainWindow(QMainWindow):
                 plot_info['figure'] = canvas
         
         # Use existing CanvasWidget logic
-        self.canvas_widget.add_plotwidget_to_canvas(plot_info, position)
+        self.canvas_widget.add_canvas_to_window(plot_info, position)
 
     def open_workflow(self):
         """Opens Workflow dock.

@@ -4,26 +4,9 @@
 .. automodule:: ui.PlotViewer
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       Ui_widgetPlotViewer
    
-   
-
-   
-   
-   
-
-
-

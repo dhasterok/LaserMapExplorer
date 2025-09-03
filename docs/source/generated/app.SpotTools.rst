@@ -4,26 +4,9 @@
 .. automodule:: app.SpotTools
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       SpotPage
    
-   
-
-   
-   
-   
-
-
-

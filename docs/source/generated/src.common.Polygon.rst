@@ -4,15 +4,6 @@ src.common.Polygon
 .. automodule:: src.common.Polygon
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,11 +11,3 @@ src.common.Polygon
       Polygon
       PolygonManager
    
-   
-
-   
-   
-   
-
-
-

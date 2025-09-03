@@ -638,11 +638,6 @@ class AppData(QObject):
         self.equalizeColorScaleChanged.emit(flag)
 
     @property
-    def default_hist_num_bins(self):
-        """int : The default number of histogram bins."""
-        return self._default_hist_num_bins
-
-    @property
     def hist_bin_width(self):
         """float : The width of histogram bins."""
         return self._hist_bin_width
@@ -1341,7 +1336,7 @@ class AppData(QObject):
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to the default."""
-        self.hist_num_bins = self.default_hist_num_bins
+        self.hist_num_bins = self._default_hist_num_bins
 
     def update_ref_chem_index(self, ref_val):
         """Changes reference computing normalized analytes

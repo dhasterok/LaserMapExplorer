@@ -4,11 +4,6 @@
 .. automodule:: common.plot_spider
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -19,15 +14,3 @@
       plot_data
       plot_spider_norm
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

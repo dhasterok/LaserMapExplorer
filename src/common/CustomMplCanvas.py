@@ -65,6 +65,7 @@ class MplCanvas(FigureCanvas):
     locationChanged = pyqtSignal()  # x, y 
     valueChanged = pyqtSignal()  # value 
     distanceChanged = pyqtSignal()  # distance
+    annotationsUpdated = pyqtSignal(list)  # list of annotations
 
     def __init__(self, fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False, plot_id=None, sample_obj=None):
         #create MPLCanvas with existing figure (required when loading saved projects)
@@ -433,7 +434,7 @@ class MplCanvas(FigureCanvas):
         self.annotations.append(new)
         # Store in registry for persistence
         self._store_annotation_in_registry(new)
-        self.notify_observers("annotations", copy.deepcopy(self.annotations))
+        self.annotationsUpdated.emit(copy.deepcopy(self.annotations))
 
     def redraw_annotations(self):
         for ann in self.annotations:

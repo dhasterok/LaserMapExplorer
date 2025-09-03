@@ -103,9 +103,8 @@ class HistogramUI(QGroupBox):
 
     def connect_widgets(self):
         """Connects histogram widgets to methods."""
-        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda _: self.update_hist_bin_width(self.doubleSpinBoxBinWidth.value()))
-        self.spinBoxNBins.valueChanged.connect(lambda _: self.update_hist_num_bins(self.spinBoxNBins.value()))
-        self.toolButtonHistogramReset.clicked.connect(lambda: self.ui.spinBox)
+        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda value: self.update_hist_bin_width(value))
+        self.spinBoxNBins.valueChanged.connect(lambda value: self.update_hist_num_bins(value))
 
         self.comboBoxHistType.clear()
         self.comboBoxHistType.addItems(self._histogram_type_options)
@@ -113,9 +112,7 @@ class HistogramUI(QGroupBox):
         self.dock.ui.app_data.hist_plot_style = self._histogram_type_options[0]
         self.comboBoxHistType.activated.connect(lambda _: self.update_hist_plot_style())
 
-        self.toolButtonHistogramReset.clicked.connect(self.dock.ui.app_data.histogram_reset_bins)
-
-        self.comboBoxHistType.activated.connect(self.dock.ui.schedule_update)
+        self.toolButtonHistogramReset.clicked.connect(lambda _: self.dock.ui.app_data.histogram_reset_bins())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -172,7 +169,7 @@ class HistogramUI(QGroupBox):
         else:
             # if value is 0, set to default number of bins
             if value == 0:
-                self.dock.ui.app_data.reset_hist_num_bins()
+                self.dock.ui.app_data.histogram_reset_bins()
 
             # update spinBoxNBins with new value
             if self.spinBoxNBins.value() == value:

@@ -1,12 +1,12 @@
-﻿common.ScheduleTimer
+src.app.PlotRegistry
 ====================
 
-.. automodule:: common.ScheduleTimer
+.. automodule:: src.app.PlotRegistry
 
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      Scheduler
+      PlotRegistry
    

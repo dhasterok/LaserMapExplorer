@@ -10,7 +10,6 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import src.common.format as fmt
-from src.common.Observable import Observable
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -21,7 +20,7 @@ from src.common.Logger import LoggerConfig, auto_log_methods
 
 
 @auto_log_methods(logger_key='Data')
-class SampleObj(Observable, QObject):
+class SampleObj(QObject):
     """Creates a base sample object to store and manipulate geochemical data in map form
     
     The sample object is initially constructed from the data within a *.lame.csv file and loaded into
@@ -173,10 +172,22 @@ class SampleObj(Observable, QObject):
     annotationRemoved = pyqtSignal(str, str)  # plot_id, annotation_id
     annotationVisibilityChanged = pyqtSignal(str, str, bool)  # plot_id, annotation_id, visible
 
+    pixelDimensionChanged = pyqtSignal(str, float)  # axis, new_value
+    imageResolutionChanged = pyqtSignal(str, int)  # axis, new_value
+    dataQuantileChanged = pyqtSignal(str, float)  # bound, new_value
+    dataDiffQuantileChanged = pyqtSignal(str, float)  # bound, new_value
+
+    applyOutlierAllChanged = pyqtSignal(bool)  # new state
+    outlierMethodChanged = pyqtSignal(str)  # new method
+    negativeMethodChanged = pyqtSignal(str)  # new method
+    autoscaleStateChanged = pyqtSignal(bool)  # new value
+
+    currentFieldUpdated = pyqtSignal(str)  # new field
+    
+
     def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
         # Initialize both parent classes
-        Observable.__init__(self)
-        QObject.__init__(self)
+        super().__init__()
 
         self.ui = ui
 
@@ -209,6 +220,8 @@ class SampleObj(Observable, QObject):
         self._ny = 0
         self._dx = 0
         self._dy = 0
+
+        self._auto_scale_flag = True
 
         # filter dataframe
         self.filter_df = pd.DataFrame(columns=[
@@ -311,7 +324,7 @@ class SampleObj(Observable, QObject):
             
             self._updating = False
 
-            self.notify_observers("dx", self._dx)
+            self.pixelDimensionChanged.emit("x", self._dx)
         
     @property
     def dy(self):
@@ -335,7 +348,7 @@ class SampleObj(Observable, QObject):
             
             self._updating = False
 
-            self.notify_observers("dy", self._dy)
+            self.pixelDimensionChanged.emit("y", self._dx)
         
     @property
     def nx(self):
@@ -347,7 +360,7 @@ class SampleObj(Observable, QObject):
             return
 
         self._nx = new_nx
-        self.notify_observers("nx", self._nx)
+        self.imageResolutionChanged.emit("x", self._ny)
 
     @property
     def ny(self):
@@ -359,7 +372,7 @@ class SampleObj(Observable, QObject):
             return
 
         self._ny = new_ny
-        self.notify_observers("ny", self._ny)   
+        self.imageResolutionChanged.emit("y", self._ny)
 
     # Cropped X-axis limits
     @property
@@ -401,24 +414,24 @@ class SampleObj(Observable, QObject):
         return self._apply_outlier_to_all
     
     @apply_outlier_to_all.setter
-    def apply_outlier_to_all(self, new_apply_outlier_to_all):
-        if new_apply_outlier_to_all == self._apply_outlier_to_all:
+    def apply_outlier_to_all(self, state):
+        if state == self._apply_outlier_to_all:
             return
     
-        self._apply_outlier_to_all = new_apply_outlier_to_all
-        self.notify_observers("apply_outlier_to_all", new_apply_outlier_to_all)
+        self._apply_outlier_to_all = state
+        self.applyOutlierAllChanged.emit(state)
 
     @property
-    def auto_scale_value(self):
-        return self._auto_scale_value
+    def auto_scale_flag(self):
+        return self._auto_scale_flag
     
-    @auto_scale_value.setter
-    def auto_scale_value(self, new_auto_scale_value):
-        if new_auto_scale_value == self._auto_scale_value:
+    @auto_scale_flag.setter
+    def auto_scale_flag(self, flag):
+        if flag == self._auto_scale_flag:
             return
-        self._auto_scale_value = new_auto_scale_value
+        self._auto_scale_flag = flag
         self.prep_data()
-        self.notify_observers("auto_scale_value", new_auto_scale_value)
+        self.autoscaleStateChanged.emit(flag)
 
 
     @property
@@ -432,7 +445,7 @@ class SampleObj(Observable, QObject):
             return
         self._outlier_method = method
         self.prep_data()
-        self.notify_observers("outlier_method", method)
+        self.outlierMethodChanged.emit(method)
 
     @property
     def negative_method(self):
@@ -445,7 +458,7 @@ class SampleObj(Observable, QObject):
             return
         self._negative_method = method
         self.prep_data()
-        self.notify_observers("negative_method", method)
+        self.negativeMethodChanged.emit(method)
 
     @property
     def data_min_quantile(self):
@@ -453,12 +466,12 @@ class SampleObj(Observable, QObject):
         return self._data_min_quantile
     
     @data_min_quantile.setter
-    def data_min_quantile(self, new_data_min_quantile):
-        if new_data_min_quantile == self._data_min_quantile:
+    def data_min_quantile(self, value):
+        if value == self._data_min_quantile:
             return
     
-        self._data_min_quantile = new_data_min_quantile
-        self.notify_observers("data_min_quantile", new_data_min_quantile)
+        self._data_min_quantile = value
+        self.dataQuantileChanged.emit("min", value)
 
     @property
     def data_max_quantile(self):
@@ -466,12 +479,12 @@ class SampleObj(Observable, QObject):
         return self._data_max_quantile
     
     @data_max_quantile.setter
-    def data_max_quantile(self, new_data_max_quantile):
-        if new_data_max_quantile == self._data_max_quantile:
+    def data_max_quantile(self, value):
+        if value == self._data_max_quantile:
             return
     
-        self._data_max_quantile = new_data_max_quantile
-        self.notify_observers("data_max_quantile", new_data_max_quantile)
+        self._data_max_quantile = value
+        self.dataQuantileChanged.emit("max", value)
 
     @property
     def data_min_diff_quantile(self):
@@ -479,12 +492,12 @@ class SampleObj(Observable, QObject):
         return self._data_min_diff_quantile
     
     @data_min_diff_quantile.setter
-    def data_min_diff_quantile(self, new_data_min_diff_quantile):
-        if new_data_min_diff_quantile == self._data_min_diff_quantile:
+    def data_min_diff_quantile(self, value):
+        if value == self._data_min_diff_quantile:
             return
     
-        self._data_min_diff_quantile = new_data_min_diff_quantile
-        self.notify_observers("data_min_diff_quantile", new_data_min_diff_quantile)
+        self._data_min_diff_quantile = value
+        self.dataDiffQuantileChanged.emit("min", value)
 
     @property
     def data_max_diff_quantile(self):
@@ -492,12 +505,12 @@ class SampleObj(Observable, QObject):
         return self._data_max_diff_quantile
     
     @data_max_diff_quantile.setter
-    def data_max_diff_quantile(self, new_data_max_diff_quantile):
-        if new_data_max_diff_quantile == self._data_max_diff_quantile:
+    def data_max_diff_quantile(self, new_value):
+        if new_value == self._data_max_diff_quantile:
             return
     
-        self._data_max_diff_quantile = new_data_max_diff_quantile
-        self.notify_observers("data_max_diff_quantile", new_data_max_diff_quantile)
+        self._data_max_diff_quantile = new_value
+        self.dataDiffQuantileChanged.emit("max", value)
 
     @property
     def crop_mask(self):
@@ -591,7 +604,7 @@ class SampleObj(Observable, QObject):
             self.data_min_diff_quantile = self.processed.get_attribute(new_field,'diff_lower_bound')
             self.data_max_diff_quantile = self.processed.get_attribute(new_field,'diff_upper_bound')
 
-        self.notify_observers("apply_process_to_all_data", self._current_field)
+        self.currentFieldUpdated.emit(self._current_field)
 
     # validation functions
     def _is_valid_oulier_method(self, text):
@@ -1860,7 +1873,7 @@ class SampleObj(Observable, QObject):
         ub = self.data_max_quantile
         d_lb = self.data_min_diff_quantile
         d_ub = self.data_max_diff_quantile
-        auto_scale = self.auto_scale_value
+        auto_scale = self.auto_scale_flag
 
         if auto_scale and not update:
             #reset to default auto scale values
@@ -1873,7 +1886,7 @@ class SampleObj(Observable, QObject):
             self.data_max_quantile = ub
             self.data_min_diff_quantile.value = d_lb
             self.data_max_diff_quantile = d_ub
-            self.auto_scale_value = True
+            self.auto_scale_flag = True
 
         elif not auto_scale and not update:
             # show unbounded plot when auto scale switched off
@@ -1882,7 +1895,7 @@ class SampleObj(Observable, QObject):
             self.data_min_quantile = lb
             self.data_max_quantile = ub
             self.data_min_diff_quantile.setEnabled(False)
-            self.auto_scale_value = False
+            self.auto_scale_flag = False
 
         # if update is true
         if analyte_1 and not analyte_2:

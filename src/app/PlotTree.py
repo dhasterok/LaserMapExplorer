@@ -354,7 +354,7 @@ class PlotTree(CustomDockWidget):
                 self.ui.style_data.set_style_widgets()
                 
                 # Add to canvas using registry
-                self.ui.add_plotwidget_to_canvas(self.plot_info)
+                self.ui.add_canvas_to_window(self.plot_info)
                 
                 # Update UI fields to match the plot
                 self.ui.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'], field_type, field)
@@ -389,7 +389,7 @@ class PlotTree(CustomDockWidget):
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis']:
 
             if self.plot_info:
-                self.ui.add_plotwidget_to_canvas(self.plot_info)
+                self.ui.add_canvas_to_window(self.plot_info)
                 # Handle style updates safely
                 plot_type = self.plot_info.get('plot_type')
                 style = self.plot_info.get('style')

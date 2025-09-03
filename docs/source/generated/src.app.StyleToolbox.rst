@@ -4,15 +4,6 @@ src.app.StyleToolbox
 .. automodule:: src.app.StyleToolbox
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,11 +11,3 @@ src.app.StyleToolbox
       StyleData
       StyleTheme
    
-   
-
-   
-   
-   
-
-
-

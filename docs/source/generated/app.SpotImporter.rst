@@ -4,26 +4,9 @@
 .. automodule:: app.SpotImporter
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       SpotImporter
    
-   
-
-   
-   
-   
-
-
-

@@ -4,11 +4,6 @@ src.common.ColormapEditor
 .. automodule:: src.common.ColormapEditor
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,10 +11,6 @@ src.common.ColormapEditor
       fix_positions
       fix_positions_after_removal
       get_cmr_colormap_names
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -41,11 +32,3 @@ src.common.ColormapEditor
       ReverseColorPoints
       SpaceEvenlyPointsCommand
    
-   
-
-   
-   
-   
-
-
-

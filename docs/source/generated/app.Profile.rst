@@ -4,15 +4,6 @@
 .. automodule:: app.Profile
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -21,11 +12,3 @@
       ProfileDock
       Profiling
    
-   
-
-   
-   
-   
-
-
-

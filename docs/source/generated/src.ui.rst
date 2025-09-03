@@ -4,37 +4,19 @@
 .. automodule:: src.ui
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-
 .. rubric:: Modules
 
 .. autosummary::
    :toctree:
    :recursive:
 
-   src.ui.AnalyteSelectionDialog
-   src.ui.FieldSelectionDialog
-   src.ui.FileSelectorDialog
-   src.ui.IsotopeSelectionDialog
-   src.ui.MainWindow
-   src.ui.MapImportDialog
-   src.ui.PlotViewer
-   src.ui.PreferencesWindow
-   src.ui.QuickViewDialog
-   src.ui.SpotImportDialog
-
+   AnalyteSelectionDialog
+   FieldSelectionDialog
+   FileSelectorDialog
+   IsotopeSelectionDialog
+   MainWindow
+   MapImportDialog
+   PlotViewer
+   PreferencesWindow
+   QuickViewDialog
+   SpotImportDialog

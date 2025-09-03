@@ -65,8 +65,9 @@ class MplCanvas(FigureCanvas):
     locationChanged = pyqtSignal()  # x, y 
     valueChanged = pyqtSignal()  # value 
     distanceChanged = pyqtSignal()  # distance
+    annotationsUpdated = pyqtSignal(list)  # list of annotations
 
-    def __init__(self,fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False):
+    def __init__(self, fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False, plot_id=None, sample_obj=None):
         #create MPLCanvas with existing figure (required when loading saved projects)
         if fig:
             self.fig = fig
@@ -81,6 +82,10 @@ class MplCanvas(FigureCanvas):
         if parent is None:
             return
         self.ui = parent
+        
+        # Registry integration (for persistence across canvas recreation)
+        self.plot_id = plot_id
+        self.sample_obj = sample_obj
 
         # indicates whether the data are map form (x, y, value) or simply (x, y)
         self.map_flag = map_flag
@@ -120,7 +125,9 @@ class MplCanvas(FigureCanvas):
         self.dtext = None
         self.saved_line = []
         self.saved_dtext = []
-        self.annotations = [] 
+        
+        # Keep existing annotations list for backward compatibility
+        self.annotations = []
         
         self.interaction_mode = None
         self.distance_cid_press = None
@@ -129,6 +136,10 @@ class MplCanvas(FigureCanvas):
         self.mpl_connect('motion_notify_event', self.mouseLocation)
         
         self.mpl_toolbar = NavigationToolbar(self)
+        
+        # Load existing annotations from registry if available
+        if self.sample_obj and self.plot_id:
+            self._load_annotations_from_registry()
 
     @property
     def plot_name(self):
@@ -421,7 +432,9 @@ class MplCanvas(FigureCanvas):
             'object': annotation_obj
         }
         self.annotations.append(new)
-        self.notify_observers("annotations", copy.deepcopy(self.annotations))
+        # Store in registry for persistence
+        self._store_annotation_in_registry(new)
+        self.annotationsUpdated.emit(copy.deepcopy(self.annotations))
 
     def redraw_annotations(self):
         for ann in self.annotations:
@@ -630,6 +643,8 @@ class MplCanvas(FigureCanvas):
                     'text_object': text_obj
                 }
                 self.annotations.append(new)
+                # Store in registry for persistence
+                self._store_annotation_in_registry(new)
                 self.notify_observers("annotations", copy.deepcopy(self.annotations))
 
                 # Reset first_point so next click starts a new line
@@ -709,5 +724,161 @@ class MplCanvas(FigureCanvas):
         self.draw()
         if self.active_tool != 'distance':
             self.distance = None
+
+    # ==========================================
+    # REGISTRY INTEGRATION METHODS (HYBRID APPROACH)
+    # ==========================================
+    
+    def _load_annotations_from_registry(self):
+        """Load annotations from registry and recreate them in the annotations list."""
+        if not self.sample_obj or not self.plot_id:
+            return
+            
+        try:
+            registry_annotations = self.sample_obj.get_annotations(self.plot_id)
+            
+            for reg_ann in registry_annotations:
+                # Convert registry format to canvas format
+                canvas_ann = self._registry_to_canvas_format(reg_ann)
+                if canvas_ann:
+                    # Recreate matplotlib object
+                    mpl_obj = self._recreate_matplotlib_object(canvas_ann)
+                    canvas_ann['object'] = mpl_obj
+                    self.annotations.append(canvas_ann)
+                    
+        except Exception as e:
+            print(f"Error loading annotations from registry: {e}")
+    
+    def _registry_to_canvas_format(self, registry_ann):
+        """Convert registry annotation format to canvas annotation format."""
+        try:
+            if registry_ann['type'] == 'text':
+                return {
+                    'Type': 'text',
+                    'X1': registry_ann['position'][0],
+                    'Y1': registry_ann['position'][1],
+                    'Text': registry_ann['text'],
+                    'Color': registry_ann['style']['color'],
+                    'Size': registry_ann['style'].get('font_size', 12),
+                    'Visible': registry_ann.get('visible', True),
+                    'registry_id': registry_ann['id']  # Keep reference to registry
+                }
+            elif registry_ann['type'] == 'line':
+                positions = registry_ann['position']
+                return {
+                    'Type': 'line',
+                    'X1': positions[0][0],
+                    'Y1': positions[0][1], 
+                    'X2': positions[-1][0],
+                    'Y2': positions[-1][1],
+                    'Text': registry_ann.get('text', ''),
+                    'Color': registry_ann['style']['color'],
+                    'Width': registry_ann['style'].get('line_width', 2),
+                    'Visible': registry_ann.get('visible', True),
+                    'registry_id': registry_ann['id'],
+                    'positions': positions  # Store all positions for multi-point lines
+                }
+        except KeyError as e:
+            print(f"Missing key in registry annotation: {e}")
+            return None
+    
+    def _recreate_matplotlib_object(self, canvas_ann):
+        """Recreate matplotlib object from canvas annotation."""
+        try:
+            if canvas_ann['Type'] == 'text':
+                return self.axes.text(
+                    canvas_ann['X1'], canvas_ann['Y1'], canvas_ann['Text'],
+                    color=canvas_ann['Color'],
+                    fontsize=canvas_ann['Size'],
+                    visible=canvas_ann['Visible']
+                )
+            elif canvas_ann['Type'] == 'line':
+                if 'positions' in canvas_ann:
+                    # Multi-point line
+                    positions = canvas_ann['positions']
+                    x_coords, y_coords = zip(*positions)
+                else:
+                    # Simple two-point line
+                    x_coords = [canvas_ann['X1'], canvas_ann['X2']]
+                    y_coords = [canvas_ann['Y1'], canvas_ann['Y2']]
+                
+                line_obj = self.axes.plot(
+                    x_coords, y_coords,
+                    color=canvas_ann['Color'],
+                    linewidth=canvas_ann.get('Width', 2),
+                    visible=canvas_ann['Visible']
+                )[0]
+                
+                # Add text if present
+                if canvas_ann.get('Text'):
+                    mid_x = sum(x_coords) / len(x_coords)
+                    mid_y = sum(y_coords) / len(y_coords)
+                    text_obj = self.axes.text(
+                        mid_x, mid_y, canvas_ann['Text'],
+                        color=canvas_ann['Color'],
+                        fontsize=canvas_ann.get('Size', 12),
+                        ha='center', va='center',
+                        bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8),
+                        visible=canvas_ann['Visible']
+                    )
+                    return [line_obj, text_obj]  # Return both objects
+                
+                return line_obj
+                
+        except Exception as e:
+            print(f"Error recreating matplotlib object: {e}")
+            return None
+    
+    def _store_annotation_in_registry(self, canvas_annotation):
+        """Store a canvas annotation in the registry for persistence."""
+        if not self.sample_obj or not self.plot_id:
+            return
+            
+        try:
+            # Convert canvas format to registry format
+            registry_ann = self._canvas_to_registry_format(canvas_annotation)
+            if registry_ann:
+                self.sample_obj.add_annotation(self.plot_id, registry_ann)
+                # Store registry ID back in canvas annotation for updates
+                canvas_annotation['registry_id'] = registry_ann.get('id')
+                
+        except Exception as e:
+            print(f"Error storing annotation in registry: {e}")
+    
+    def _canvas_to_registry_format(self, canvas_ann):
+        """Convert canvas annotation format to registry format."""
+        try:
+            if canvas_ann['Type'].lower() == 'text':
+                return {
+                    'type': 'text',
+                    'text': canvas_ann['Text'],
+                    'position': (canvas_ann['X1'], canvas_ann['Y1']),
+                    'style': {
+                        'color': canvas_ann['Color'],
+                        'font_size': canvas_ann.get('Size', 12),
+                        'font_family': 'Arial'  # Default
+                    },
+                    'visible': canvas_ann.get('Visible', True)
+                }
+            elif canvas_ann['Type'].lower() == 'line':
+                if 'positions' in canvas_ann:
+                    positions = canvas_ann['positions']
+                else:
+                    positions = [(canvas_ann['X1'], canvas_ann['Y1']), 
+                               (canvas_ann['X2'], canvas_ann['Y2'])]
+                
+                return {
+                    'type': 'line',
+                    'text': canvas_ann.get('Text', ''),
+                    'position': positions,
+                    'style': {
+                        'color': canvas_ann['Color'],
+                        'line_width': canvas_ann.get('Width', 2)
+                    },
+                    'visible': canvas_ann.get('Visible', True)
+                }
+        except KeyError as e:
+            print(f"Missing key in canvas annotation: {e}")
+            return None
 
 

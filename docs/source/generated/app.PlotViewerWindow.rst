@@ -4,26 +4,9 @@
 .. automodule:: app.PlotViewerWindow
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       PlotViewer
    
-   
-
-   
-   
-   
-
-
-

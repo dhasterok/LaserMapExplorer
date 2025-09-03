@@ -4,15 +4,6 @@ src.app.ImageProcessing
 .. automodule:: src.app.ImageProcessing
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,11 +11,3 @@ src.app.ImageProcessing
       ImageProcessing
       ImageProcessingUI
    
-   
-
-   
-   
-   
-
-
-

@@ -532,7 +532,7 @@ class MainActions(QObject):
         self.PolygonMask.triggered.connect(lambda: log("lame_action.PolygonMask", prefix="UI"))
         self.ClusterMask.triggered.connect(lambda: log("lame_action.ClusterMask", prefix="UI"))
         self.UpdatePlot.triggered.connect(lambda: log("lame_action.UpdatePlot", prefix="UI"))
-        self.SavePlotToTree.triggered.connect(lambda: log("lame_action.SavePlotToTree", prefix="UI"))
+        self.SavePlotToTree.triggered.connect(self._save_plot_to_tree)
         self.Notes.triggered.connect(lambda: log("lame_action.Notes", prefix="UI"))
         self.Calculator.triggered.connect(lambda: log("lame_action.Calculator", prefix="UI"))
         self.ReportBug.triggered.connect(lambda: log("lame_action.ReportBug", prefix="UI"))
@@ -578,6 +578,20 @@ class MainActions(QObject):
             self.ui.setCursor(Qt.CursorShape.WhatsThisCursor)
         else:
             self.ui.setCursor(Qt.CursorShape.ArrowCursor)
+
+    def _save_plot_to_tree(self):
+        """Save the current plot to the tree via CanvasWidget."""
+        try:
+            if hasattr(self.ui, 'canvas_widget') and self.ui.canvas_widget:
+                result = self.ui.canvas_widget.save_current_plot_to_tree()
+                if result:
+                    log("Successfully saved plot to tree", "INFO")
+                else:
+                    log("Failed to save plot to tree", "WARNING")
+            else:
+                log("Canvas widget not available", "WARNING")
+        except Exception as e:
+            log(f"Error in save plot to tree action: {e}", "ERROR")
 
 class MainMenubar(QMenuBar):
     def __init__(self, ui, lame_action: MainActions):

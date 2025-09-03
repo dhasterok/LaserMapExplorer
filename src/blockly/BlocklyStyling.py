@@ -55,11 +55,8 @@ class StylingBlocks(StyleData, StyleTheme):
         self.add_observer("resolution", self.update_resolution)
 
         # ternary maps
-        self.add_observer("ternary_colormap", self.update_ternary_colormap)
-        self.add_observer("ternary_color_x", self.update_ternary_color_x)
-        self.add_observer("ternary_color_y", self.update_ternary_color_y)
-        self.add_observer("ternary_color_z", self.update_ternary_color_z)
-        self.add_observer("ternary_color_m", self.update_ternary_color_m)
+        self.ternaryColormapChanged.connect(lambda cmap: self.update_ternary_colormap(cmap))
+        self.ternaryColorChanged.connect(lambda ax, color: self.update_ternary_color(ax, color))
 
 
 

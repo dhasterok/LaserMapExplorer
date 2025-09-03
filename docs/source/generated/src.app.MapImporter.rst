@@ -4,15 +4,6 @@ src.app.MapImporter
 .. automodule:: src.app.MapImporter
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,11 +11,3 @@ src.app.MapImporter
       FileSelectData
       MapImporter
    
-   
-
-   
-   
-   
-
-
-

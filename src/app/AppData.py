@@ -5,11 +5,10 @@ import pandas as pd
 import src.common.csvdict as csvdict
 from PyQt6.QtCore import QObject, pyqtSignal
 from src.app.config import APPDATA_PATH, STYLE_PATH
-from src.common.Observable import Observable
 from src.common.Logger import auto_log_methods
 
 @auto_log_methods(logger_key='Data')
-class AppData(QObject, Observable):
+class AppData(QObject):
     """
     AppData is a central data model and state manager for the LaserMapExplorer application.
 
@@ -183,6 +182,49 @@ class AppData(QObject, Observable):
     fieldTypeChanged = pyqtSignal(str, str)
     fieldChanged = pyqtSignal(str, str)
     normReferenceChanged = pyqtSignal(str)
+    normIndexChanged = pyqtSignal(int)
+
+    scatterPresetChanged = pyqtSignal(str)
+    heatmapStyleChanged = pyqtSignal(str)
+
+    ndimAnalyteSetChanged = pyqtSignal(str)
+    ndimListChanged = pyqtSignal(list)
+    ndimQuantileIndexChanged = pyqtSignal(int)
+
+    noiseRedMethodChanged = pyqtSignal(str)
+    noiseRedOption1Changed = pyqtSignal(float)
+    noiseRedOption2Changed = pyqtSignal(float)
+    applyNoiseRedChanged = pyqtSignal(str)
+    gradientFlagChanged = pyqtSignal(bool)
+    edgeDetectionMethodChanged = pyqtSignal(str)
+
+    applyAutoscaleChanged = pyqtSignal(bool)
+    equalizeColorScaleChanged = pyqtSignal(bool)
+
+    defaultHistNumBinsChanged = pyqtSignal(int)
+    histBinWidthChanged = pyqtSignal(float)
+    histNumBinsChanged = pyqtSignal(int)
+    histPlotStyleChanged = pyqtSignal(str)
+
+    corrMethodChanged = pyqtSignal(str)
+    corrSquaredChanged = pyqtSignal(bool)
+
+    dimRedMethodChanged = pyqtSignal(str)
+    dimRedValueChanged = pyqtSignal(int)
+    dimRedMaxValueChanged = pyqtSignal(int)
+
+    clusterMethodChanged = pyqtSignal(str)
+    maxClustersChanged = pyqtSignal(int)
+    numClustersChanged = pyqtSignal(int)
+    clusterSeedChanged = pyqtSignal(int)
+    clusterExponentChanged = pyqtSignal(float)
+    clusterDistanceChanged = pyqtSignal(str)
+    selectedClustersChanged = pyqtSignal(list)
+    clusterPreconditionChanged = pyqtSignal(bool)
+    numBasisChanged = pyqtSignal(int)
+
+    sortMethodChanged = pyqtSignal(str)
+
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -402,16 +444,6 @@ class AppData(QObject, Observable):
         self._z_field = None
         self._c_field = None
         
-        # create ternary colors dictionary
-        df = pd.read_csv(STYLE_PATH / "ternary_colormaps.csv")
-        self.ternary_colormaps = df.to_dict(orient='records')
-
-
-        self.color_schemes = []
-        for cmap in self.ternary_colormaps:
-            self.color_schemes.append(cmap['scheme'])
-
-
     def get_field(self, ax):
         """
         Returns the field associated with the specified axis.
@@ -530,7 +562,7 @@ class AppData(QObject, Observable):
             return
 
         self._sort_method = new_method
-        self.notify_observers("sort_method", new_method)
+        self.sortMethodChanged.emit(new_method)
 
     @property
     def ref_index(self):
@@ -543,7 +575,7 @@ class AppData(QObject, Observable):
             return
 
         self._ref_index = new_index
-        self.notify_observers("ref_index", new_index)
+        self.normIndexChanged.emit("ref_index", new_index)
 
     @property
     def ref_chem(self):
@@ -603,12 +635,7 @@ class AppData(QObject, Observable):
             return
     
         self._equalize_color_scale = flag
-        self.notify_observers("equalize_color_scale", flag)
-
-    @property
-    def default_hist_num_bins(self):
-        """int : The default number of histogram bins."""
-        return self._default_hist_num_bins
+        self.equalizeColorScaleChanged.emit(flag)
 
     @property
     def hist_bin_width(self):
@@ -621,7 +648,7 @@ class AppData(QObject, Observable):
             return
 
         self._hist_bin_width = width
-        self.notify_observers("hist_bin_width", width)
+        self.histBinWidthChanged.emit(width)
 
         # update hist_num_bins
         if self.update_num_bins:
@@ -641,7 +668,7 @@ class AppData(QObject, Observable):
             return
         
         self._hist_num_bins = num_bins
-        self.notify_observers("hist_num_bins", num_bins)
+        self.histNumBinsChanged.emit(num_bins)
 
         # update hist_bin_width
         if self.update_bin_width:
@@ -663,7 +690,7 @@ class AppData(QObject, Observable):
             raise ValueError("Unknown histogram plot style")
 
         self._hist_plot_style = hist_style
-        self.notify_observers("hist_plot_style", hist_style)
+        self.histPlotStyleChanged.emit(hist_style)
 
     @property
     def corr_method(self):
@@ -678,7 +705,7 @@ class AppData(QObject, Observable):
             raise ValueError("Unknown correlation plot type")
     
         self._corr_method = method
-        self.notify_observers("corr_method", method)
+        self.corrMethodChanged.emit(method)
 
     @property
     def corr_squared(self):
@@ -691,7 +718,7 @@ class AppData(QObject, Observable):
             return
     
         self._corr_squared = flag
-        self.notify_observers("@corr_squared", flag)
+        self.corrSquaredChanged.emit(flag)
 
     @property
     def noise_red_method(self):
@@ -704,7 +731,7 @@ class AppData(QObject, Observable):
             return
     
         self._noise_red_method = method
-        self.notify_observers("noise_red_method", method)
+        self.noiseRedMethodChanged.emit(method)
 
     @property
     def noise_red_option1(self):
@@ -717,7 +744,7 @@ class AppData(QObject, Observable):
             return
     
         self._noise_red_option1 = value
-        self.notify_observers("noise_red_option1", value)
+        self.noiseRedOption1Changed.emit(value)
 
     @property
     def noise_red_option2(self):
@@ -730,7 +757,7 @@ class AppData(QObject, Observable):
             return
     
         self._noise_red_option2 = value
-        self.notify_observers("noise_red_option2", value)
+        self.noiseRedOption2Changed.emit(value)
 
     @property
     def apply_noise_red(self):
@@ -743,7 +770,7 @@ class AppData(QObject, Observable):
             return
     
         self._apply_noise_red = flag
-        self.notify_observers("apply_noise_red", flag)
+        self.applyNoiseRedChanged.emit(flag)
     
     @property
     def gradient_flag(self):
@@ -756,7 +783,7 @@ class AppData(QObject, Observable):
             return
     
         self._gradient_flag = flag
-        self.notify_observers("gradient_flag", flag)
+        self.gradientFlagChanged.emit(flag)
 
     @property
     def edge_detection_method(self):
@@ -893,7 +920,7 @@ class AppData(QObject, Observable):
             return
     
         self._scatter_preset = new_scatter_preset
-        self.notify_observers("scatter_preset", new_scatter_preset)
+        self.scatterPresetChanged.emit(new_scatter_preset)
 
     ### Heatmap Properties ###
     @property
@@ -907,7 +934,7 @@ class AppData(QObject, Observable):
             return
     
         self._heatmap_style = new_style
-        self.notify_observers("heatmap_style", new_style)
+        self.heatmapStyleChanged.emit(new_style)
 
 
     ### Multidimensional Properties ###
@@ -937,7 +964,7 @@ class AppData(QObject, Observable):
             raise ValueError(f"N Dim list ({new_list}) is not a defined option.")
     
         self._ndim_analyte_set = new_list
-        self.notify_observers("ndim_analyte_set", new_list) 
+        self.ndimAnalyteSetChanged.emit(new_list) 
 
     @property
     def ndim_list(self):
@@ -947,7 +974,7 @@ class AppData(QObject, Observable):
     @ndim_list.setter
     def ndim_list(self, new_list):
         self._ndim_list = new_list
-        self.notify_observers("ndim_list", new_list)
+        self.ndimListChanged.emit(new_list)
 
     @property
     def ndim_quantile_index(self):
@@ -960,7 +987,7 @@ class AppData(QObject, Observable):
             return
     
         self._ndim_quantile_index = new_index
-        self.notify_observers("ndim_quantile_index", new_index)
+        self.ndimQuantileIndexChanged.emit(new_index)
 
     ### Dimensional Reduction Properties ###
     @property
@@ -974,7 +1001,7 @@ class AppData(QObject, Observable):
             return
     
         self._dim_red_method = method
-        self.notify_observers("dim_red_method", method)
+        self.dimRedMethodChanged.emit(method)
 
     @property
     def dim_red_x(self):
@@ -987,7 +1014,7 @@ class AppData(QObject, Observable):
             return
     
         self._dim_red_x = new_value
-        self.notify_observers("dim_red_x", new_value)
+        self.dimRedValueChanged.emit('x', new_value)
 
     @property
     def dim_red_x_max(self):
@@ -999,7 +1026,7 @@ class AppData(QObject, Observable):
         if new_max == self._dim_red_x_max:
             return
         self._dim_red_x_max = new_max
-        self.notify_observers("dim_red_x_max", new_max)
+        self.dimRedMaxValueChanged.emit('x', new_max)
 
     @property
     def dim_red_y(self):
@@ -1012,7 +1039,7 @@ class AppData(QObject, Observable):
             return
     
         self._dim_red_y = new_value
-        self.notify_observers("dim_red_x", new_value)
+        self.dimRedValueChanged.emit('y', new_value)
     
     @property
     def dim_red_y_max(self):
@@ -1024,7 +1051,7 @@ class AppData(QObject, Observable):
         if new_max == self._dim_red_x_max:
             return
         self._dim_red_x_max = new_max
-        self.notify_observers("dim_red_y_max", new_max)
+        self.dimRedMaxValueChanged.emit('y', new_max)
 
     ### Cluster Properties ###
     @property
@@ -1046,7 +1073,7 @@ class AppData(QObject, Observable):
 
         self._cluster_method = method
         self._set_clustering_parameters()
-        self.notify_observers("cluster_method", method)
+        self.clusterMethodChanged.emit(method)
 
     @property
     def max_clusters(self):
@@ -1059,7 +1086,7 @@ class AppData(QObject, Observable):
             return
     
         self._max_clusters = new_value
-        self.notify_observers("max_clusters", new_value)
+        self.maxClustersChanged.emit(new_value)
 
     @property
     def num_clusters(self):
@@ -1074,7 +1101,7 @@ class AppData(QObject, Observable):
         self._num_clusters = new_value
         # update cluster dict with new number of clusters
         self.cluster_dict[self._cluster_method]['n_clusters'] = self._num_clusters
-        self.notify_observers("num_clusters", new_value)
+        self.numClustersChanged.emit("num_clusters", new_value)
 
     @property
     def cluster_seed(self):
@@ -1089,7 +1116,7 @@ class AppData(QObject, Observable):
         self._cluster_seed = new_value
         # update cluster dict with new seed
         self.cluster_dict[self._cluster_method]['seed'] = self._cluster_seed
-        self.notify_observers("cluster_seed", new_value)
+        self.clusterSeedChanged.emit("cluster_seed", new_value)
 
     @property
     def cluster_exponent(self):
@@ -1104,7 +1131,7 @@ class AppData(QObject, Observable):
         self._cluster_exponent = new_value
         # update cluster dict with new cluster exponent value
         self.cluster_dict[self._cluster_method]['exponent'] = self._cluster_exponent
-        self.notify_observers("cluster_exponent", new_value)
+        self.clusterExponentChanged.emit(new_value)
 
     @property
     def cluster_distance(self):
@@ -1119,7 +1146,7 @@ class AppData(QObject, Observable):
         self._cluster_distance = new_value
         # update cluster dict with new cluster distance method
         self.cluster_dict[self._cluster_method]['distance'] = self._cluster_distance
-        self.notify_observers("cluster_distance", new_value)
+        self.clusterDistanceChanged.emit(new_value)
 
     @property
     def selected_clusters(self):
@@ -1132,7 +1159,7 @@ class AppData(QObject, Observable):
             return
     
         self._selected_clusters = new_list
-        self.notify_observers("selected_clusters", new_list)
+        self.selectedClustersChanged.emit("selected_clusters", new_list)
 
     @property
     def dim_red_precondition(self):
@@ -1145,7 +1172,7 @@ class AppData(QObject, Observable):
             return
     
         self._dim_red_precondition = flag
-        self.notify_observers("dim_red_precondition", flag)
+        self.clusterPreconditionChanged.emit(flag)
 
     @property
     def num_basis_for_precondition(self):
@@ -1159,7 +1186,7 @@ class AppData(QObject, Observable):
             return
     
         self._num_basis_for_precondition = new_value
-        self.notify_observers("num_basis_for_precondition", new_value)
+        self.numBasisChanged.emit(new_value)
 
     @property
     def field_dict(self):
@@ -1309,7 +1336,7 @@ class AppData(QObject, Observable):
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to the default."""
-        self.hist_num_bins = self.default_hist_num_bins
+        self.hist_num_bins = self._default_hist_num_bins
 
     def update_ref_chem_index(self, ref_val):
         """Changes reference computing normalized analytes

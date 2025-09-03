@@ -495,16 +495,61 @@ class PlotInfoTab():
         ----------
         state : int
             The checkbox state (0 for unchecked, 2 for checked).
-        annotation : matplotlib.text.Annotation
-            The annotation object to be toggled.
+        index : int
+            The index of the annotation in the annotations list.
         """
-        # Show or hide the annotation
-        self.parent.plot_info['figure'].annotations[index]["visible"] = bool(state)
-        #annotation.set_visible(bool(state))
-        #self.parent.canvas.draw()
+        canvas = self.parent.plot_info['figure']
+        if index >= len(canvas.annotations):
+            return
+            
+        # Update annotation data
+        annotation_data = canvas.annotations[index]
+        visible = bool(state)
+        annotation_data["Visible"] = visible
+        
+        # Update matplotlib object visibility
+        matplotlib_obj = annotation_data.get('object')
+        if matplotlib_obj:
+            if isinstance(matplotlib_obj, list):
+                # Handle line+text objects
+                for obj in matplotlib_obj:
+                    obj.set_visible(visible)
+            else:
+                matplotlib_obj.set_visible(visible)
+        
+        # Update registry if annotation has registry_id
+        if hasattr(canvas, 'sample_obj') and canvas.plot_id and 'registry_id' in annotation_data:
+            canvas.sample_obj.update_annotation(canvas.plot_id, annotation_data['registry_id'], {'visible': visible})
+        
+        canvas.draw()
 
     def change_annotation_color(self, color, index):
-        self.parent.plot_info['figure'].annotations[index]["Color"] = color
+        """Update annotation color both in data and matplotlib object."""
+        canvas = self.parent.plot_info['figure']
+        if index >= len(canvas.annotations):
+            return
+            
+        # Update annotation data
+        annotation_data = canvas.annotations[index]
+        annotation_data["Color"] = color
+        
+        # Update matplotlib object color
+        matplotlib_obj = annotation_data.get('object')
+        if matplotlib_obj:
+            if isinstance(matplotlib_obj, list):
+                # Handle line+text objects
+                for obj in matplotlib_obj:
+                    obj.set_color(color)
+            else:
+                matplotlib_obj.set_color(color)
+        
+        # Update registry if annotation has registry_id
+        if hasattr(canvas, 'sample_obj') and canvas.plot_id and 'registry_id' in annotation_data:
+            updates = {'style': annotation_data.get('style', {})}
+            updates['style']['color'] = color
+            canvas.sample_obj.update_annotation(canvas.plot_id, annotation_data['registry_id'], updates)
+        
+        canvas.draw()
 
     def update_annotation_from_table(self, item):
         """
@@ -521,24 +566,52 @@ class PlotInfoTab():
         # Update the annotation from the table
         row = item.row()
         canvas = self.parent.plot_info['figure']
-        annotation = list(canvas.annotations.keys())[row]
+        if row >= len(canvas.annotations):
+            return  # Safety check
+            
+        annotation_data = canvas.annotations[row]
+        matplotlib_obj = annotation_data.get('object')
 
-        # Update value
+        # Update value in annotation data and matplotlib object
         match item.column():
             case 1: # text
                 new_text = item.text()
-                canvas.annotations[row]['Text'] = new_text
-                annotation.set_text(new_text)
+                annotation_data['Text'] = new_text
+                if matplotlib_obj and hasattr(matplotlib_obj, 'set_text'):
+                    matplotlib_obj.set_text(new_text)
             case 2: # font size
                 new_size = float(item.text())
-                if canvas.annotations[row]['Type'] == 'Text':
-                    canvas.annotations[row]['Size'] = new_size
+                if annotation_data['Type'].lower() == 'text':
+                    annotation_data['Size'] = new_size
+                    if matplotlib_obj and hasattr(matplotlib_obj, 'set_fontsize'):
+                        matplotlib_obj.set_fontsize(new_size)
                 else:
-                    canvas.annotations[row]['Text']['FontDict']['size'] = new_size
+                    # For line annotations with text labels
+                    if isinstance(annotation_data.get('Text'), dict):
+                        annotation_data['Text']['FontDict']['size'] = new_size
             case 3: # line width
                 new_width = float(item.text())
-                canvas.annotations[row]['Width'] = new_width
-        self.parent.canvas.draw()
+                annotation_data['Width'] = new_width
+                if matplotlib_obj and hasattr(matplotlib_obj, 'set_linewidth'):
+                    matplotlib_obj.set_linewidth(new_width)
+        
+        # Update registry if annotation has registry_id
+        if hasattr(canvas, 'sample_obj') and canvas.plot_id and 'registry_id' in annotation_data:
+            # Update the annotation in registry via sample object
+            updates = {}
+            if item.column() == 1:
+                updates['text'] = new_text
+            elif item.column() == 2:
+                updates['style'] = annotation_data.get('style', {})
+                updates['style']['font_size'] = new_size
+            elif item.column() == 3:
+                updates['style'] = annotation_data.get('style', {})
+                updates['style']['line_width'] = new_width
+            
+            if updates:
+                canvas.sample_obj.update_annotation(canvas.plot_id, annotation_data['registry_id'], updates)
+        
+        canvas.draw()
 
     def export_plot_info(self):
         if not hasattr(self.parent.ui,"notes_dock") or not self.parent.ui.plot_info:

@@ -4,15 +4,6 @@ src.app.ProfileMatplotlib
 .. automodule:: src.app.ProfileMatplotlib
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,11 +11,3 @@ src.app.ProfileMatplotlib
       Profile
       Profiling
    
-   
-
-   
-   
-   
-
-
-

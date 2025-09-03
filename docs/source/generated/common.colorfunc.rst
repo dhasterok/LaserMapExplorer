@@ -4,11 +4,6 @@
 .. automodule:: common.colorfunc
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -19,15 +14,3 @@
       qcolor_to_nrgb
       qcolor_to_rgb
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

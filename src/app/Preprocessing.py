@@ -332,10 +332,10 @@ class PreprocessingUI(CustomPage):
         )
 
     def connect_widgets(self):
-        self.lineEditDX.editingFinished.connect(self.update_dx)
-        self.lineEditDY.editingFinished.connect(self.update_dy)
-        self.lineEditResolutionNx.editingFinished.connect(self.update_nx_lineedit)
-        self.lineEditResolutionNx.editingFinished.connect(self.update_ny_lineedit)
+        self.lineEditDX.editingFinished.connect(lambda _: self.update_dimension('x'))
+        self.lineEditDY.editingFinished.connect(lambda _: self.update_dimension('y'))
+        self.lineEditResolutionNx.editingFinished.connect(lambda _: self.update_resolution('x'))
+        self.lineEditResolutionNx.editingFinished.connect(lambda _: self.update_resolution('y'))
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)
@@ -355,7 +355,7 @@ class PreprocessingUI(CustomPage):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("apply_process_to_all_data", self.update_autoscale_checkbox)
+        self.dock.ui.app_data.applyAutoscaleChanged.connect(lambda flag: self.update_autoscale_checkbox(flag))
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -390,19 +390,15 @@ class PreprocessingUI(CustomPage):
         data : SampleObj
             Connects data notifiers to preprocess observer functions
         """
-        data.add_observer("nx", self.update_nx_lineedit)
-        data.add_observer("ny", self.update_ny_lineedit)
-        data.add_observer("dx", self.update_dx_lineedit)
-        data.add_observer("dy", self.update_dy_lineedit)
-        data.add_observer("data_min_quantile", self.update_data_min_quantile)
-        data.add_observer("data_max_quantile", self.update_data_max_quantile)
-        data.add_observer("data_min_diff_quantile", self.update_data_min_diff_quantile)
-        data.add_observer("data_max_diff_quantile", self.update_data_max_diff_quantile)
-        self.dock.ui.app_data.add_observer("equalize_color_scale", self.update_equalize_color_scale_toolbutton)
-        data.add_observer("data_auto_scale_value", self.update_auto_scale_value)
-        data.add_observer("apply_outlier_to_all", self.update_apply_outlier_to_all)
-        data.add_observer("outlier_method", self.update_outlier_method)
-        data.add_observer("outlier_method", self.update_negative_handling_method)
+        data.pixelDimensionChanged.connect(lambda ax, value: self.update_dimension(ax, value))
+        data.imageResolutionChanged.connect(lambda ax, value: self.update_resolution(ax, value))
+        data.dataQuantileChanged.connect(lambda bound, value: self.update_data_quantile(bound, value))
+        data.dataDiffQuantileChanged.connect(lambda bound, value: self.update_data_diff_quantile(bound, value))
+        self.dock.ui.app_data.equalizeColorScaleChanged.connect(self.update_equalize_color_scale_toolbutton)
+        data.autoscaleStateChanged.connect(lambda state: self.toggle_autoscale(state))
+        data.applyOutlierAllChanged.connect(lambda state: self.update_apply_outlier_to_all(state))
+        data.outlierMethodChanged.connect(lambda method: self.update_outlier_method(method))
+        data.negativeMethodChanged.connect(lambda method: self.update_negative_handling_method(method))
 
     def update_equalize_color_scale_toolbutton(self, value):
         self.toolButtonScaleEqualize.setChecked(value)
@@ -413,48 +409,40 @@ class PreprocessingUI(CustomPage):
             pass
             self.dock.ui.schedule_update()
 
-    def update_nx_lineedit(self,value):
-        """Updates ``MainWindow.lineEditResolutionNx.value``
+    def update_resolution(self, ax, value):
+        """Updates ``lineEditResolutionNx`` and ``lineEditResolutionNy`` values
+
         Called as an update to ``app_data.n_x``.  Updates Nx and  Schedules a plot update.
 
         Parameters
         ----------
+        ax : str
+            Axis to update ('x' or 'y').
         value : str
             x dimension.
         """
-        self.lineEditResolutionNx.value = value
+        line_edit = getattr(self, f"lineEditResolution{ax.upper()}")
+        setattr(line_edit, "value", value)
         if self.dock.ui.control_dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
             self.dock.ui.schedule_update()
 
-    def update_ny_lineedit(self,value):
-        """
-        Updates ``MainWindow.lineEditResolutionNy.value``
+    def update_dimension(self, ax, value):
+        """Updates ``lineEditDX`` and ``lineEditDY`` values
 
-        Called when ``app_data.n_y`` changes. Updates the Ny resolution
-        input field and schedules a plot update if the process tab is active.
-
-        Parameters
-        ----------
-        value : str
-            y dimension.
-        """
-        self.lineEditResolutionNy.value = value
-        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
-            self.dock.ui.schedule_update()
-
-    def update_dx_lineedit(self,value):
-        """Updates ``MainWindow.lineEditDX.value``
         Called as an update to ``app_data.dx``.  Updates dx and schedules a plot update.
 
         Parameters
         ----------
+        ax : str
+            Axis to update ('x' or 'y').
         value : str
             x dimension.
         """
-        self.lineEditDX.value = value
+        line_edit = getattr(self, f"lineEdit{ax.upper()}")
+        setattr(line_edit, "value", value)
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
             self.dock.ui.schedule_update()
-            field = 'Xc'
+            field = f"{ax.upper()}c"
             if isinstance(self.dock.ui.plot_info, dict) \
                 and 'field_type' in self.dock.ui.plot_info \
                 and 'field' in self.dock.ui.plot_info:
@@ -463,64 +451,30 @@ class PreprocessingUI(CustomPage):
                 # update limits in styling tabs
                 self.dock.ui.style_data.set_axis_attributes("x",field)
 
-    def update_dy_lineedit(self,value):
-        """Updates ``MainWindow.lineEditDY.value``
-        Called as an update to ``app_data.dy``.  Updates dy and schedules a plot update.
-
-        Parameters
-        ----------
-        value : str
-            y dimension.
-        """
-        self.lineEditDY.value = value
-        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
-            self.dock.ui.schedule_update()
-            field = 'Yc'
-            if isinstance(self.dock.ui.plot_info, dict) \
-                and 'field_type' in self.dock.ui.plot_info \
-                and 'field' in self.dock.ui.plot_info:
-                # update x axis limits in style_dict 
-                self.dock.ui.style_data.initialize_axis_values(self.dock.ui.plot_info['field_type'], self.dock.ui.plot_info['field'])
-                # update limits in styling tabs
-                self.dock.ui.style_data.set_axis_attributes("y",field)
-
-
-    def update_data_min_quantile(self,value):
+    def update_data_quantile(self, bound, value):
         """Updates ``MainWindow.lineEditLowerQuantile.value``
         Called as an update to ``DataHandling.lineEditLowerQuantile``. 
 
         Parameters
         ----------
+        bound : str
+            'min' or 'max' to indicate which quantile to update.
         value : float
             Lower quantile value.
         """
-        self.lineEditLowerQuantile.value = value
+        if bound == 'min':
+            line_edit = getattr(self, f"lineEditLowerQuantile")
+        else:
+            line_edit = getattr(self, f"lineEditUpperQuantile")
+        setattr(line_edit, "value", value)
+
         self.update_labels()
         if hasattr(self,"mask_dock"):
             self.dock.ui.mask_dock.filter_tab.update_filter_values()
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
             self.dock.ui.scheduler.schedule_update()
 
-
-    def update_data_max_quantile(self,value):
-        """
-        Updates ``MainWindow.lineEditUpperQuantile.value``
-
-        Called when the upper quantile threshold changes.
-
-        Parameters
-        ----------
-        value : float
-            Upper quantile value.
-        """
-        self.lineEditUpperQuantile.value = value
-        self.update_labels()
-        if hasattr(self,"mask_dock"):
-            self.dock.ui.mask_dock.filter_tab.update_filter_values()
-        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
-            self.dock.ui.schedule_update()
-
-    def update_data_min_diff_quantile(self,value):
+    def update_data_diff_quantile(self, bound, value):
         """
         Updates ``MainWindow.lineEditDifferenceLowerQuantile.value``
 
@@ -528,46 +482,33 @@ class PreprocessingUI(CustomPage):
 
         Parameters
         ----------
+        bound : str
+            'min' or 'max' to indicate which quantile to update.
         value : float
             Lower difference quantile value.
         """
-        self.lineEditDifferenceLowerQuantile.value = value
+        if bound == 'min':
+            line_edit = getattr(self, f"lineEditDifferenceLowerQuantile")
+        else:
+            line_edit = getattr(self, f"lineEditDifferenceUpperQuantile")
+        setattr(line_edit, "value", value)
+
         self.update_labels()
         if hasattr(self,"mask_dock"):
             self.dock.ui.mask_dock.filter_tab.update_filter_values()
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
             self.dock.ui.schedule_update()
 
-    def update_data_max_diff_quantile(self,value):
-        """
-        Updates ``MainWindow.lineEditDifferenceUpperQuantile.value``
-
-        Called when the upper difference quantile threshold changes.
+    def toggle_autoscale(self, flag):
+        """Updates ``toolButtonAutoScale`` checked state 
 
         Parameters
         ----------
-        value : float
-            Upper difference quantile value.
+        flag : bool
+            Whether autoscaling is enabled.
         """
-        self.lineEditDifferenceUpperQuantile.value = value
-        self.update_labels()
-        if hasattr(self,"mask_dock"):
-            self.dock.ui.mask_dock.filter_tab.update_filter_values()
-        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
-            self.dock.ui.schedule_update()
-
-
-    def update_auto_scale_value(self,value):
-        """Updates ``MainWindow.lineEditLowerQuantile.value``
-        Called as an update to ``DataHandling.lineEditLowerQuantile``. 
-        
-        Parameters
-        ----------
-        value : float
-            lower quantile value.
-        """
-        self.toolButtonAutoScale.setChecked(value)
-        if value:
+        self.toolButtonAutoScale.setChecked(flag)
+        if flag:
             self.lineEditDifferenceLowerQuantile.setEnabled(True)
             self.lineEditDifferenceUpperQuantile.setEnabled(True)
         else:

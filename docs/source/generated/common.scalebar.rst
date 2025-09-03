@@ -4,26 +4,9 @@
 .. automodule:: common.scalebar
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       scalebar
    
-   
-
-   
-   
-   
-
-
-

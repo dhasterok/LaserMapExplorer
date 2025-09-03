@@ -4,26 +4,9 @@
 .. automodule:: common.radar_factory
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       radar_factory
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

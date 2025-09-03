@@ -4,15 +4,6 @@ src.app.PlotAxisSettings
 .. automodule:: src.app.PlotAxisSettings
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -20,11 +11,3 @@ src.app.PlotAxisSettings
       AxisControls
       PlotSettings
    
-   
-
-   
-   
-   
-
-
-

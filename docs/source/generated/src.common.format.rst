@@ -4,11 +4,6 @@ src.common.format
 .. automodule:: src.common.format
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -22,15 +17,3 @@ src.common.format
       parse_isotope
       symlog
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

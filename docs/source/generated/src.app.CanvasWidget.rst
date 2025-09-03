@@ -4,19 +4,11 @@ src.app.CanvasWidget
 .. automodule:: src.app.CanvasWidget
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
+      CanvasDialog
       CanvasToolBar
       CanvasWidget
       MultiViewTab
@@ -28,11 +20,3 @@ src.app.CanvasWidget
       QuickViewTab
       SingleViewTab
    
-   
-
-   
-   
-   
-
-
-

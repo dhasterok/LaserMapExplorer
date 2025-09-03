@@ -103,9 +103,8 @@ class HistogramUI(QGroupBox):
 
     def connect_widgets(self):
         """Connects histogram widgets to methods."""
-        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda _: self.update_hist_bin_width(self.doubleSpinBoxBinWidth.value()))
-        self.spinBoxNBins.valueChanged.connect(lambda _: self.update_hist_num_bins(self.spinBoxNBins.value()))
-        self.toolButtonHistogramReset.clicked.connect(lambda: self.ui.spinBox)
+        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda value: self.update_hist_bin_width(value))
+        self.spinBoxNBins.valueChanged.connect(lambda value: self.update_hist_num_bins(value))
 
         self.comboBoxHistType.clear()
         self.comboBoxHistType.addItems(self._histogram_type_options)
@@ -113,15 +112,13 @@ class HistogramUI(QGroupBox):
         self.dock.ui.app_data.hist_plot_style = self._histogram_type_options[0]
         self.comboBoxHistType.activated.connect(lambda _: self.update_hist_plot_style())
 
-        self.toolButtonHistogramReset.clicked.connect(self.dock.ui.app_data.histogram_reset_bins)
-
-        self.comboBoxHistType.activated.connect(self.dock.ui.schedule_update)
+        self.toolButtonHistogramReset.clicked.connect(lambda _: self.dock.ui.app_data.histogram_reset_bins())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("hist_bin_width", self.update_hist_bin_width)
-        self.dock.ui.app_data.add_observer("hist_num_bins", self.update_hist_num_bins)
-        self.dock.ui.app_data.add_observer("hist_plot_style", self.update_hist_plot_style)
+        self.dock.ui.app_data.histBinWidthChanged.connect(self.update_hist_bin_width)
+        self.dock.ui.app_data.histNumBinsChanged.connect(self.update_hist_num_bins)
+        self.dock.ui.app_data.histPlotStyleChanged.connect(self.update_hist_plot_style)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -172,7 +169,7 @@ class HistogramUI(QGroupBox):
         else:
             # if value is 0, set to default number of bins
             if value == 0:
-                self.dock.ui.app_data.reset_hist_num_bins()
+                self.dock.ui.app_data.histogram_reset_bins()
 
             # update spinBoxNBins with new value
             if self.spinBoxNBins.value() == value:
@@ -295,8 +292,8 @@ class CorrelationUI(QGroupBox):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("corr_method", self.update_corr_method)
-        self.dock.ui.app_data.add_observer("corr_squared", self.update_corr_squared)
+        self.dock.ui.app_data.corrMethodChanged.connect(self.update_corr_method)
+        self.dock.ui.app_data.corrSquaredChanged.connect(self.update_corr_squared)
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -566,7 +563,7 @@ class ScatterUI(CustomPage):
         self.toolButtonScatterSavePreset.clicked.connect(self.save_scatter_preset)
 
         self.comboBoxTernaryColormap.clear()
-        self.comboBoxTernaryColormap.addItems(self.dock.ui.app_data.color_schemes)
+        self.comboBoxTernaryColormap.addItems(self.dock.ui.style_data.color_schemes)
         self.comboBoxTernaryColormap.addItem('user defined')
         self.comboBoxTernaryColormap.setCurrentIndex(0)
 
@@ -580,15 +577,12 @@ class ScatterUI(CustomPage):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("scatter_preset", self.update_scatter_preset_combobox)
-        self.dock.ui.app_data.add_observer("heatmap_style", self.update_heatmap_style_combobox)
+        self.dock.ui.app_data.scatterPresetChanged.connect(self.update_scatter_preset_combobox)
+        self.dock.ui.app_data.heatmapStyleChanged.connect(self.update_heatmap_style_combobox)
 
         # ternary maps
-        self.dock.ui.app_data.add_observer("ternary_colormap", self.update_ternary_colormap)
-        self.dock.ui.app_data.add_observer("ternary_color_x", self.update_ternary_color_x)
-        self.dock.ui.app_data.add_observer("ternary_color_y", self.update_ternary_color_y)
-        self.dock.ui.app_data.add_observer("ternary_color_z", self.update_ternary_color_z)
-        self.dock.ui.app_data.add_observer("ternary_color_m", self.update_ternary_color_m)
+        self.dock.ui.style_data.ternaryColormapChanged.connect(self.update_ternary_colormap)
+        self.dock.ui.style_data.ternaryColorChanged.connect(lambda ax, color: self.update_ternary_color(ax, color))
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -655,7 +649,7 @@ class ScatterUI(CustomPage):
         name, ok = QInputDialog.getText(self.dock.ui, 'Custom ternary colormap', 'Enter new colormap name:')
         if ok:
             # update colormap structure
-            self.dock.ui.app_data.ternary_colormaps.append({'scheme': name,
+            self.dock.ui.style_data.ternary_colormaps.append({'scheme': name,
                     'top': get_hex_color(self.colorButtonTCmapXColor.palette().button().color()),
                     'left': get_hex_color(self.colorButtonTCmapYColor.palette().button().color()),
                     'right': get_hex_color(self.colorButtonTCmapZColor.palette().button().color()),
@@ -664,7 +658,7 @@ class ScatterUI(CustomPage):
             self.comboBoxTernaryColormap.addItem(name)
             self.comboBoxTernaryColormap.setCurrentText(name)
             # add new row to file
-            df = pd.DataFrame.from_dict(self.dock.ui.app_data.ternary_colormaps)
+            df = pd.DataFrame.from_dict(self.dock.ui.style_data.ternary_colormaps)
             try:
                 df.to_csv('resources/styles/ternary_colormaps_new.csv', index=False)
             except Exception as e:
@@ -681,7 +675,7 @@ class ScatterUI(CustomPage):
         Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
         Map from Ternary groupbox.  The ternary colored chemical map is updated.
         """
-        for cmap in self.dock.ui.app_data.ternary_colormaps:
+        for cmap in self.dock.ui.style_data.ternary_colormaps:
             if cmap['scheme'] == self.comboBoxTernaryColormap.currentText():
                 self.colorButtonTCmapXColor.color = cmap['top']
                 self.colorButtonTCmapYColor.color = cmap['left']
@@ -716,26 +710,11 @@ class ScatterUI(CustomPage):
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter'] and self.dock.ui.style_data.plot_type == 'ternary map':
             self.dock.ui.schedule_update()
 
-    def update_ternary_color_x(self, new_color):
-        self.colorButtonTCmapXColor.color = new_color
+    def update_ternary_color(self, ax, new_color):
+        button = getattr(self, f"colorButtonTCmap{ax.upper()}Color")
+        button.color = new_color
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
-
-    def update_ternary_color_y(self, new_color):
-        self.colorButtonTCmapYColor.color = new_color
-        if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
-            self.dock.ui.schedule_update()
-
-    def update_ternary_color_z(self, new_color):
-        self.colorButtonTCmapZColor.color = new_color
-        if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
-            self.dock.ui.schedule_update()
-
-    def update_ternary_color_m(self, new_color):
-        self.colorButtonTCmapMColor.color = new_color
-        if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
-            self.dock.ui.schedule_update()
-
 
 
 @auto_log_methods(logger_key="Plot")
@@ -934,12 +913,10 @@ class NDimUI(CustomPage):
         self.toolButtonNDimSelectAll.clicked.connect(lambda _: self.tableWidgetNDim.selectAll())
         self.toolButtonNDimSaveList.clicked.connect(lambda _: self.save_ndim_list())
 
-        
-
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.add_observer("ndim_analyte_set", self.update_ndim_analyte_set)
-        self.dock.ui.app_data.add_observer("ndim_quantile_index", self.update_ndim_quantile_index)
+        self.dock.ui.app_data.ndimAnalyteSetChanged.connect(self.update_ndim_analyte_set)
+        self.dock.ui.app_data.ndimQuantileIndexChanged.connect(self.update_ndim_quantile_index)
 
     def connect_logger(self):
         """Connects widgets to logger."""

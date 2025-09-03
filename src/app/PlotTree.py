@@ -8,6 +8,7 @@ from src.app.UITheme import default_font
 
 import src.common.CustomMplCanvas as mplc
 from src.common.Logger import LoggerConfig, auto_log_methods, log
+from src.app.PlotRegistry import PlotRegistry
 
 from src.app.config import ICONPATH
 
@@ -21,6 +22,9 @@ class PlotTree(CustomDockWidget):
         self.logger_key = 'Tree'
 
         self.ui = parent
+        
+        # Initialize plot registry (will be properly connected when MainWindow initializes)
+        self.plot_registry = None
 
         #create plot tree
         self.setup_ui()
@@ -257,7 +261,7 @@ class PlotTree(CustomDockWidget):
         # sort by denominator and then numerator?
 
     def retrieve_plotinfo_from_tree(self, tree_index=None, tree=None, branch=None, leaf=None):
-        """Gets the plot_info associated with a tree location
+        """Gets the plot_info associated with a tree location using registry system
         
         Can recall the plot info given the index into the tree (top level group in ``Plot Selector``), or by the tree, branch, leaf location.
         
@@ -278,33 +282,31 @@ class PlotTree(CustomDockWidget):
             Plot_info dictionary with plot widget and information about the plot construction, 
             returns True if the branch exists
         """
-        #print('retrieve_table_data')
+        if not self.plot_registry:
+            log("Plot registry not available", "WARNING")
+            return None, False
+            
+        # Build tree key from parameters
         if tree_index is not None:
-            tree = tree_index.parent().parent().data()
-            branch = tree_index.parent().data()
-            leaf = tree_index.data()
+            tree_key = tree_index.data(Qt.ItemDataRole.UserRole)
+        else:
+            # Build tree key from individual parameters
+            tree_key = f"{tree}:{branch}:{leaf}"
 
-        item,item_flag = self.find_leaf(tree, branch, leaf)
-
-        if not item_flag:
-            return None, True
-
-        if not item.isEnabled():
+        if not tree_key:
+            log("No tree key found", "WARNING")
             return None, False
 
-        # ----start debugging----
-        # print(tree_index)
-        # print('item')
-        # print(tree+':'+branch+':'+leaf)
-        # ----end debugging----
-
-        plot_info = item.data(role=Qt.ItemDataRole.UserRole)
-
-        # ----start debugging----
-        # print(plot_info)
-        # print('\nsuccessfully retrieved plot info\n')
-        # ----end debugging----
-
+        # Get plot info from registry using tree key
+        plot_info = self.plot_registry.get_plot_by_tree_key(tree_key)
+        
+        if plot_info is None:
+            # Check if the tree item exists but plot not registered
+            item, item_flag = self.find_leaf(tree or tree_key.split(':')[0], 
+                                           branch or tree_key.split(':')[1], 
+                                           leaf or tree_key.split(':')[2])
+            return None, item_flag
+        
         return plot_info, True
 
     def tree_double_click(self,tree_index):
@@ -317,48 +319,85 @@ class PlotTree(CustomDockWidget):
         val : PyQt5.QtCore.QModelIndex
             Item selected in ``Plot Selector``
         """
-        # get double-click result
-        self.plot_info, flag = self.retrieve_plotinfo_from_tree(tree_index=tree_index)
-
-        if not flag:
+        if not self.plot_registry:
+            log("Plot registry not available", "WARNING")
             return
+
+        # Get tree key from clicked item
+        tree_key = tree_index.data(Qt.ItemDataRole.UserRole)
+        
+        # Get plot info from registry using tree key (if it exists)
+        if tree_key:
+            self.plot_info = self.plot_registry.get_plot_by_tree_key(tree_key)
+        else:
+            # No tree_key means this is a persistent leaf item for quick map creation
+            self.plot_info = None
+        
+        flag = self.plot_info is not None
 
         tree = tree_index.parent().parent().data()
         branch = tree_index.parent().data()
         leaf = tree_index.data()
 
+        # Set main UI plot_info for compatibility with other components
+        self.ui.plot_info = self.plot_info
+        
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
-            self.ui.style_data.initialize_axis_values(tree, leaf)
-            self.ui.style_data.set_style_widgets()
             if self.plot_info:
-                log("plot_info exists, adding to canvas", "NOTE")
-
-                self.ui.add_plotwidget_to_canvas(self.plot_info)
-                # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                self.ui.update_fields(self.ui.plot_info['sample_id'], self.ui.plot_info['plot_type'],self.ui.plot_info['field_type'], self.ui.plot_info['field'])
-                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
-                self.ui.update_spinboxes(self.ui.plot_info['field'],self.ui.plot_info['field_type'])
+                # Existing plot: regenerate from registry data
+                log("plot_info exists, regenerating from registry", "NOTE")
+                
+                # Initialize axis values with the plot's field data
+                field_type = self.plot_info.get('field_type', tree)
+                field = self.plot_info.get('field', leaf)
+                self.ui.style_data.initialize_axis_values(field_type, field)
+                self.ui.style_data.set_style_widgets()
+                
+                # Add to canvas using registry
+                self.ui.add_canvas_to_window(self.plot_info)
+                
+                # Update UI fields to match the plot
+                self.ui.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'], field_type, field)
+                self.ui.update_spinboxes(field=field, field_type=field_type)
             else:
-                log("plot_info does not exist, creating map", "NOTE")
+                # Persistent leaf item: create new field map plot
+                log("Creating new field map plot for persistent item", "NOTE")
 
-                # print('tree_double_click: plot_map_pg')
-                if self.ui.toolBox.currentIndex() not in [self.ui.control_dock.tab_dict['sample'], self.ui.control_dock.tab_dict['process']]:
-                    self.ui.toolBox.setCurrentIndex(self.ui.control_dock.tab_dict['sample'])
+                # Set correct toolbox tab
+                if self.ui.control_dock.toolbox.currentIndex() not in [self.ui.control_dock.tab_dict['sample'], self.ui.control_dock.tab_dict['process']]:
+                    self.ui.control_dock.toolbox.setCurrentIndex(self.ui.control_dock.tab_dict['sample'])
 
-                # updates comboBoxColorByField and comboBoxColorField comboboxes and creates new plot
-                self.ui.update_fields(branch,'field map',tree, leaf, plot=True)
+                # First update UI fields to set correct field/field_type in widgets
+                # This must happen BEFORE setting style data
+                self.ui.update_fields(branch, 'field map', tree, leaf, plot=False)
+                
+                # Now initialize style data for the specific field AFTER widgets are set
+                self.ui.style_data.initialize_axis_values(tree, leaf)
+                self.ui.style_data.plot_type = 'field map'
+                self.ui.style_data.set_style_widgets()
 
-                #update UI with auto scale and neg handling parameters from 'Analyte/Ratio Info'
+                # Update spinboxes to match the field
                 self.ui.update_spinboxes(field=leaf, field_type=tree)
+                
+                # Finally create the plot - this should use the correct field now
+                # Since widgets are already set, we can trigger plot creation
+                if hasattr(self.ui, 'plot_map_mpl'):
+                    self.ui.plot_map_mpl()
+                elif hasattr(self.ui, 'update_SV'):
+                    self.ui.update_SV()
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis']:
 
             if self.plot_info:
-                self.ui.add_plotwidget_to_canvas(self.plot_info)
-                self.ui.style_data.style_dict[self.plot_info.plot_type] = self.plot_info.style
-                self.ui.style_data.plot_type = self.plot_info.plot_type
+                self.ui.add_canvas_to_window(self.plot_info)
+                # Handle style updates safely
+                plot_type = self.plot_info.get('plot_type')
+                style = self.plot_info.get('style')
+                if plot_type and style:
+                    self.ui.style_data.style_dict[plot_type] = style
+                    self.ui.style_data.plot_type = plot_type
                 # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                #self.ui.update_fields(self.ui.plot_info['sample_id'], self.ui.plot_info['plot_type'],self.ui.plot_info['field_type'], self.ui.plot_info['field'])
+                #self.ui.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'],self.plot_info['field_type'], self.plot_info['field'])
 
         else:
             raise ValueError(f"Unknown tree type {tree}.")
@@ -463,7 +502,7 @@ class PlotTree(CustomDockWidget):
         plot_info : dict
             Plot related data (including plot widget) to tree item associated with the plot.
         """
-        if plot_info is None:
+        if plot_info is None or self.plot_registry is None:
             return
 
         #print('add_tree_item')
@@ -475,10 +514,14 @@ class PlotTree(CustomDockWidget):
 
         tree_items = self.get_tree_items(tree)
         
+        # Register plot in registry first
+        plot_id = self.plot_registry.register_plot(plot_info)
         
-        # Ensure there's a persistent reference to items.
-        # if not hasattr(self, 'item_refs'):
-        #     self.item_refs = {}  # Initialize once
+        # Create tree key for this location
+        tree_key = f"{tree}:{sample_id}:{leaf}"
+        
+        # Link tree key to plot ID
+        self.plot_registry.link_to_tree(tree_key, plot_id)
         
         #check if leaf is in tree
         item,check = self.find_leaf(tree=tree, branch=sample_id, leaf=leaf)
@@ -490,8 +533,8 @@ class PlotTree(CustomDockWidget):
             # create new leaf item
             plot_item = StandardItem(leaf)
 
-            # store plot dictionary in leaf
-            plot_item.setData(plot_info, role=Qt.ItemDataRole.UserRole)
+            # store tree key instead of full plot_info
+            plot_item.setData(tree_key, role=Qt.ItemDataRole.UserRole)
 
             sample_id_item.appendRow(plot_item)
             tree_items.appendRow(sample_id_item)
@@ -505,21 +548,16 @@ class PlotTree(CustomDockWidget):
             # create new leaf item
             plot_item = StandardItem(leaf)
 
-            # store plot dictionary in leaf
-            plot_item.setData(plot_info, role=Qt.ItemDataRole.UserRole)
+            # store tree key instead of full plot_info
+            plot_item.setData(tree_key, role=Qt.ItemDataRole.UserRole)
 
             #item is sample id item (branch)
             item.appendRow(plot_item)
-            
-            # Update reference
-            # self.item_refs[(tree, sample_id, leaf)] = plot_item
 
         # sample id item exists and plot item exists
         elif item is not None and check: 
-            # store plot dictionary in tree
-            item.setData(plot_info, role=Qt.ItemDataRole.UserRole)
-            
-            # self.item_refs[(tree, sample_id, leaf)] = item
+            # Update existing item with tree key
+            item.setData(tree_key, role=Qt.ItemDataRole.UserRole)
  
     def unhighlight_tree(self, tree):
         """Reset the highlight of all items in the tree.

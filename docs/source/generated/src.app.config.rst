@@ -4,11 +4,6 @@ src.app.config
 .. automodule:: src.app.config
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,15 +11,3 @@ src.app.config
       get_top_parent
       load_stylesheet
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

@@ -4,11 +4,6 @@ src.common.ColorManager
 .. automodule:: src.common.ColorManager
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,21 +11,9 @@ src.common.ColorManager
       convert_color
       convert_color_list
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       ColorConverter
    
-   
-
-   
-   
-   
-
-
-

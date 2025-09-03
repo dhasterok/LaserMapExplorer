@@ -4,20 +4,3 @@
 .. automodule:: ui.IsotopeSelectionDialog
 
    
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

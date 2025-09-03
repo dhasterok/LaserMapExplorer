@@ -820,12 +820,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # trigger update to plot
         self.schedule_update()
 
-    def connect_data_observers(self, data):
-        data.add_observer("nx", self.update_nx_lineedit)
-        data.add_observer("ny", self.update_ny_lineedit)
-        data.add_observer("dx", self.update_dx_lineedit)
-        data.add_observer("dy", self.update_dy_lineedit)
-
     def update_ui_on_sample_change(self):
         # update dx, dy, nx, ny
         self.update_dx_lineedit(self.data[self.app_data.sample_id].dx)
@@ -841,9 +835,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             field = self.app_data.selected_analytes[0]
         self.app_data.hist_field = field
-
-        # hist_bin_width and should be updated along with hist_num_bins
-        self.app_data.hist_num_bins = self.app_data.default_hist_num_bins
 
         # update UI with auto scale and neg handling parameters from 'Analyte Info'
         self.update_spinboxes(field_type='Analyte', field=analyte_list[0])

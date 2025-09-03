@@ -751,15 +751,6 @@ class StylingDock(CustomDockWidget):
 
         # these are commented out because they should now be handled by updates
         # to plot data from the control dock, which should force updates
-        #self.ui.app_data.add_observer("x_field_type", self.update_field_type)
-        # self.ui.app_data.add_observer("x_field", self.update_field)
-        # self.ui.app_data.add_observer("y_field_type", self.update_field_type)
-        # self.ui.app_data.add_observer("y_field", self.update_field)
-        # self.ui.app_data.add_observer("z_field_type", self.update_field_type)
-        # self.ui.app_data.add_observer("z_field", self.update_field)
-        # self.ui.app_data.add_observer("c_field_type", self.update_field_type)
-        # self.ui.app_data.add_observer("c_field", self.update_field)
-
         self.ui.style_data.axisLimChanged.connect(lambda ax, new_lim: self.update_axis_limits(ax, new_lim))
         self.ui.style_data.axisLabelChanged.connect(lambda ax, new_text: self.update_axis_label(ax, new_text))
         self.ui.style_data.axisScaleChanged.connect(lambda ax, new_text: self.update_axis_scale(ax, new_text))
@@ -1890,65 +1881,20 @@ class StylingDock(CustomDockWidget):
         """Toggles style labels based on enabled/disabled style widgets."""        
         ui = self.ui
 
-        # axes properties
-        self.axes.labelXLim.setEnabled(self.axes.lineEditXLB.isEnabled())
-        ui.toolButtonXAxisReset.setEnabled(ui.labelXLim.isEnabled())
-        ui.labelXScale.setEnabled(ui.comboBoxXScale.isEnabled())
-        ui.labelYLim.setEnabled(self.axes.lineEditYLB.isEnabled())
-        ui.toolButtonYAxisReset.setEnabled(ui.labelYLim.isEnabled())
-        ui.labelYScale.setEnabled(ui.comboBoxYScale.isEnabled())
-        ui.labelZLim.setEnabled(self.axes.lineEditZLB.isEnabled())
-        ui.toolButtonZAxisReset.setEnabled(ui.labelZLim.isEnabled())
-        ui.labelZScale.setEnabled(ui.comboBoxZScale.isEnabled())
-        ui.labelXLabel.setEnabled(self.axes.lineEditXLabel.isEnabled())
-        ui.labelYLabel.setEnabled(self.axes.lineEditYLabel.isEnabled())
-        ui.labelZLabel.setEnabled(self.axes.lineEditZLabel.isEnabled())
-        ui.labelAspectRatio.setEnabled(self.axes.lineEditAspectRation.isEnabled())
-        ui.labelTickDirection.setEnabled(ui.comboBoxTickDirection.isEnabled())
-
-        # scalebar properties
-        ui.labelScaleLocation.setEnabled(self.annotations.comboBoxScaleLocation.isEnabled())
-        ui.labelScaleDirection.setEnabled(self.annotations.comboBoxScaleDirection.isEnabled())
-        if self.annotations.colorButtonOverlayColor.isEnabled():
-            self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: %s;" % self.ui.style_data.style_dict[self.ui.style_data.plot_type]['OverlayColor'])
-            ui.labelOverlayColor.setEnabled(True)
-        else:
-            self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
-            ui.labelOverlayColor.setEnabled(False)
-        ui.labelScaleLength.setEnabled(self.annotations.lineEditScaleLength.isEnabled())
-
-        # marker properties
-        ui.labelMarker.setEnabled(ui.comboBoxMarker.isEnabled())
-        ui.labelMarkerSize.setEnabled(ui.doubleSpinBoxMarkerSize.isEnabled())
-        ui.labelMarkerAlpha.setEnabled(ui.sliderTransparencyAlpha.isEnabled())
-        ui.labelTransparency.setEnabled(ui.sliderTransparencyAlpha.isEnabled())
-
-        # line properties
-        ui.labelLineWidth.setEnabled(ui.doubleSpinBoxLineWidth.isEnabled())
-        if ui.colorButtonLineColor.isEnabled():
-            ui.colorButtonLineColor.setStyleSheet("background-color: %s;" % self.ui.style_data.style_dict[self.ui.style_data.plot_type]['LineColor'])
-            ui.labelLineColor.setEnabled(True)
-        else:
-            ui.colorButtonLineColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
-            ui.labelLineColor.setEnabled(False)
-        ui.labelLengthMultiplier.setEnabled(ui.lineEditLengthMultiplier.isEnabled())
+        # axes properties - only toggle widgets that actually exist
+        self.axes.toolButtonXAxisReset.setEnabled(self.axes.lineEditXLB.isEnabled())
+        self.axes.toolButtonYAxisReset.setEnabled(self.axes.lineEditYLB.isEnabled())
+        self.axes.toolButtonZAxisReset.setEnabled(self.axes.lineEditZLB.isEnabled())
 
         # color properties
-        if ui.colorButtonMarkerColor.isEnabled():
-            ui.colorButtonMarkerColor.setStyleSheet("background-color: %s;" % self.ui.style_data.style_dict[self.ui.style_data.plot_type]['MarkerColor'])
-            ui.labelMarkerColor.setEnabled(True)
-        else:
-            ui.colorButtonMarkerColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
-            ui.labelMarkerColor.setEnabled(False)
-        ui.checkBoxReverseColormap.setEnabled(ui.comboBoxFieldColormap.isEnabled())
-        ui.labelReverseColormap.setEnabled(ui.checkBoxReverseColormap.isEnabled())
-        ui.labelFieldColormap.setEnabled(ui.comboBoxFieldColormap.isEnabled())
-        ui.labelCScale.setEnabled(ui.comboBoxCScale.isEnabled())
-        ui.labelCBounds.setEnabled(self.caxes.lineEditCLB.isEnabled())
-        ui.toolButtonCAxisReset.setEnabled(ui.labelCBounds.isEnabled())
-        ui.labelCbarDirection.setEnabled(ui.comboBoxCbarDirection.isEnabled())
-        ui.labelCLabel.setEnabled(self.axes.lineEditCLabel.isEnabled())
-        ui.labelHeatmapResolution.setEnabled(ui.spinBoxHeatmapResolution.isEnabled())
+        self.caxes.toolButtonCAxisReset.setEnabled(self.caxes.lineEditCLB.isEnabled())
+        self.caxes.checkBoxReverseColormap.setEnabled(self.caxes.comboBoxFieldColormap.isEnabled())
+        
+        # scalebar properties - update overlay color styling
+        if hasattr(self, 'annotations') and self.annotations.colorButtonOverlayColor.isEnabled():
+            self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: %s;" % self.ui.style_data.style_dict[self.ui.style_data.plot_type]['OverlayColor'])
+        elif hasattr(self, 'annotations'):
+            self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: %s;" % '#e6e6e6')
 
     def set_style_widgets(self):
         """Sets values in right toolbox style page
@@ -2153,7 +2099,7 @@ class StylingDock(CustomDockWidget):
         plot_type = self.ui.style_data.plot_type
 
         self.ui.style_data.set_axis_lim(ax, [amin, amax])
-        self.ui.style_data.set_axis_label(ax, scale)
+        self.ui.style_data.set_axis_scale(ax, scale)
         self.ui.style_data.set_axis_label(ax, label)
 
         for w in (lbound, ubound, axis_label, scalebox, reset_btn):
@@ -2288,15 +2234,25 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def set_color_axis_widgets(self):
-        """Sets the color axis limits and label widgets."""
+        """Sets the color axis limits, label, and related widgets."""
         data = self.ui.app_data.current_data
 
         field = self.ui.control_dock.comboBoxFieldC.currentText()
         if field == '':
             return
-        self.caxes.lineEditCLB.value = data.processed.get_attribute(field,'plot_min')
-        self.caxes.lineEditCUB.value = data.processed.get_attribute(field,'plot_max')
-        self.caxes.comboBoxCScale.setCurrentText(data.processed.get_attribute(field,'norm'))
+        
+        # Update color axis bounds and scale
+        if data and data.processed:
+            self.caxes.lineEditCLB.value = data.processed.get_attribute(field,'plot_min')
+            self.caxes.lineEditCUB.value = data.processed.get_attribute(field,'plot_max')
+            self.caxes.comboBoxCScale.setCurrentText(data.processed.get_attribute(field,'norm'))
+            
+            # Update color axis label
+            label = data.processed.get_attribute(field,'label')
+            self.caxes.lineEditCLabel.setText(label)
+            
+            # Update style data
+            self.ui.style_data.clabel = label
 
 
     def axis_reset_callback(self, ax):

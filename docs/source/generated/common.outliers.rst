@@ -4,11 +4,6 @@
 .. automodule:: common.outliers
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -17,15 +12,3 @@
       peirce_dev
       quantile_and_difference
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

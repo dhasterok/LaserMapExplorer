@@ -1046,7 +1046,7 @@ const plot_histogram = {
         this.histNumBins = 100;
         // Add default blocks for styling only if not in flyout
         if (!this.isInFlyout) {
-            const initialFieldType = this.getFieldValue('fieldType');
+            
             const defaultBlocks = [
                 'aspect_ratio',
                 'tick_direction',
@@ -1056,13 +1056,15 @@ const plot_histogram = {
                 'transparency',
                 'font'
             ];
-            updateFieldDropdown(this,initialFieldType);
+            
             addDefaultStylingBlocks(this,this.workspace, defaultBlocks);
-            // update style dictionaries
-            updateHistogramOptions(this);
+
             const axis = 'x';
             updateFieldTypeDropdown(this, this.plotType, axis, 'fieldType', 'field');
-
+            // const initialFieldType = this.getFieldValue('fieldType');
+            // updateFieldDropdown(this,initialFieldType);
+            // // update style dictionaries
+            // updateHistogramOptions(this);
             // 3) Attach validators to fieldType and field
             const fieldTypeDropdown = this.getField('fieldType');
             fieldTypeDropdown.setValidator((newValue) => {

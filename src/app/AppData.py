@@ -648,7 +648,10 @@ class AppData(QObject):
             return
 
         self._hist_bin_width = width
-        self.histBinWidthChanged.emit(width)
+        
+        # Only emit signal if not blocked
+        if not self.signalsBlocked():
+            self.histBinWidthChanged.emit(width)
 
         # update hist_num_bins
         if self.update_num_bins:
@@ -668,7 +671,10 @@ class AppData(QObject):
             return
         
         self._hist_num_bins = num_bins
-        self.histNumBinsChanged.emit(num_bins)
+        
+        # Only emit signal if not blocked
+        if not self.signalsBlocked():
+            self.histNumBinsChanged.emit(num_bins)
 
         # update hist_bin_width
         if self.update_bin_width:
@@ -1336,7 +1342,13 @@ class AppData(QObject):
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to the default."""
+        # Block signals to prevent circular updates during reset
+        self.blockSignals(True)
         self.hist_num_bins = self._default_hist_num_bins
+        self.blockSignals(False)
+        
+        # Emit the signal manually to update UI
+        self.histNumBinsChanged.emit(self._default_hist_num_bins)
 
     def update_ref_chem_index(self, ref_val):
         """Changes reference computing normalized analytes

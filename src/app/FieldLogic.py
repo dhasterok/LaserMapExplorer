@@ -290,20 +290,20 @@ class ControlDock(CustomDockWidget):
             self.comboBoxFieldTypeC,
             self.comboBoxFieldC,
             ax='c',
-            user_activated=True
+            user_action=True
         )
         self.comboBoxFieldTypeC.currentTextChanged.connect(
-            lambda new_field_type: self.update_field_type(ax='c', field_type=new_field_type, user_activated=True)
+            lambda new_field_type: self.update_field_type(ax='c', field_type=new_field_type, user_action=True)
         )
         self.comboBoxFieldC.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldC,
             self.comboBoxFieldTypeC,
             spinbox=self.spinBoxFieldC,
             ax='c',
-            user_activated=True
+            user_action=True
         )
         self.comboBoxFieldC.currentTextChanged.connect(
-            lambda new_field: self.update_field(ax='c', field=new_field, user_activated=True)
+            lambda new_field: self.update_field(ax='c', field=new_field, user_action=True)
         )
         # update spinbox associated with map/color field
         self.spinBoxFieldC.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='c'))
@@ -312,20 +312,20 @@ class ControlDock(CustomDockWidget):
             self.comboBoxFieldTypeX,
             self.comboBoxFieldX,
             ax='x',
-            user_activated=True
+            user_action=True
         )
         self.comboBoxFieldTypeX.currentTextChanged.connect(
-            lambda new_field_type: self.update_field_type(ax='x', field_type=new_field_type, user_activated=True)
+            lambda new_field_type: self.update_field_type(ax='x', field_type=new_field_type, user_action=True)
         )
         self.comboBoxFieldX.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldX,
             self.comboBoxFieldTypeX,
             spinbox=self.spinBoxFieldX,
             ax='x',
-            user_activated=True
+            user_action=True
         )
         self.comboBoxFieldX.currentTextChanged.connect(
-            lambda new_field: self.update_field(ax='x', field=new_field, user_activated=True)
+            lambda new_field: self.update_field(ax='x', field=new_field, user_action=True)
         )
         # update spinbox associated with map/color field
         self.spinBoxFieldX.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='x'))
@@ -334,20 +334,20 @@ class ControlDock(CustomDockWidget):
             self.comboBoxFieldTypeY,
             self.comboBoxFieldY,
             ax='y',
-            user_activated=True
+            user_action=True
             )
         self.comboBoxFieldTypeY.currentTextChanged.connect(
-            lambda new_field_type: self.update_field_type(ax='y', field_type=new_field_type, user_activated=True)
+            lambda new_field_type: self.update_field_type(ax='y', field_type=new_field_type, user_action=True)
         )
         self.comboBoxFieldY.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldY,
             self.comboBoxFieldTypeY,
             spinbox=self.spinBoxFieldY,
             ax='y',
-            user_activated=True
+            user_action=True
             )
         self.comboBoxFieldY.currentTextChanged.connect(
-            lambda new_field: self.update_field(ax='y', field=new_field, user_activated=True)
+            lambda new_field: self.update_field(ax='y', field=new_field, user_action=True)
         )
         # update spinbox associated with map/color field
         self.spinBoxFieldY.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='y'))
@@ -356,20 +356,20 @@ class ControlDock(CustomDockWidget):
             self.comboBoxFieldTypeZ,
             self.comboBoxFieldZ,
             ax='z',
-            user_activated=True
+            user_action=True
             )
         self.comboBoxFieldTypeZ.currentTextChanged.connect(
-            lambda new_field_type: self.update_field_type(ax='z', field_type=new_field_type, user_activated=True)
+            lambda new_field_type: self.update_field_type(ax='z', field_type=new_field_type, user_action=True)
         )
         self.comboBoxFieldZ.popup_callback = lambda: self.update_field_combobox_options(
             self.comboBoxFieldZ,
             self.comboBoxFieldTypeZ,
             spinbox=self.spinBoxFieldZ,
             ax='z',
-            user_activated=True
+            user_action=True
             )
         self.comboBoxFieldZ.currentTextChanged.connect(
-            lambda new_field: self.update_field(ax='z', field=new_field, user_activated=True)
+            lambda new_field: self.update_field(ax='z', field=new_field, user_action=True)
         )
         self.spinBoxFieldZ.valueChanged.connect(lambda _: self.field_spinbox_changed(ax='z'))
 
@@ -751,7 +751,7 @@ class ControlDock(CustomDockWidget):
         if flag:
             self.ui.plot_flag = True
 
-    def update_field_type_combobox_options(self, parentbox, childbox=None, ax=None, user_activated=False):
+    def update_field_type_combobox_options(self, parentbox, childbox=None, ax=None, user_action=False):
         """Updates a field type combobox list.
 
         Ensures signals are not emitted during list refresh and preserves the
@@ -766,7 +766,7 @@ class ControlDock(CustomDockWidget):
             Field combobox associated with parent combobox, by default None
         ax : str, optional
             Axis string, by default None
-        user_activated : bool, optional
+        user_action : bool, optional
             Indicates whether the call is user activated (True) or in response to
             code (False), by default False
         """
@@ -823,7 +823,7 @@ class ControlDock(CustomDockWidget):
         childbox.blockSignals(False)
 
         
-    def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, ax=None, add_none=False, user_activated=False):
+    def update_field_combobox_options(self, childbox, parentbox=None, spinbox=None, ax=None, add_none=False, user_action=False):
         """Updates a field comobobox list.
 
         Executed on popup of a field combobox or by forcing an update to the list
@@ -845,7 +845,7 @@ class ControlDock(CustomDockWidget):
             Field type comobobox associated with child combobox, by default None
         ax : str, optional
             Axis string, by default None
-        user_activated : bool, optional
+        user_action : bool, optional
             Indicates whether the call is user activated (True) or in response to
             code (False), by default False
         """
@@ -892,7 +892,7 @@ class ControlDock(CustomDockWidget):
             spinbox.setValue(childbox.currentIndex())
             spinbox.blockSignals(False)
  
-    def update_field_type(self, ax, field_type=None, user_activated=False):
+    def update_field_type(self, ax, field_type=None, user_action=False):
         """Used to update widgets associated with an axis after a field type change to either the combobox or underlying data.
 
         Used to update, x, y, z, and c axes related widgets including fields, spinboxes, labels, limits and scale.
@@ -903,7 +903,7 @@ class ControlDock(CustomDockWidget):
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         field_type : str, optional
             New field type value for axis to update ``app_data`` or combobox, by default None
-        user_activated : bool
+        user_action : bool
             Indicated whether the user has triggered the change
         """
         # only update field if the axis is enabled 
@@ -925,7 +925,7 @@ class ControlDock(CustomDockWidget):
             self.ui.app_data.set_field(ax, 'None')
             return
 
-        if field_type is None or user_activated:   # user interaction, or direct setting of combobox
+        if field_type is None or user_action:   # user interaction, or direct setting of combobox
             # set field type property to combobox
             self.ui.app_data.blockSignals(True)
             self.ui.app_data.set_field_type(ax, parentbox.currentText())
@@ -941,7 +941,7 @@ class ControlDock(CustomDockWidget):
         self.ui.schedule_update()
 
 
-    def update_field(self, ax, field=None, user_activated=False):
+    def update_field(self, ax, field=None, user_action=False):
         """Used to update widgets associated with an axis after a field change to either the combobox or underlying data.
 
         Used to update, x, y, z, and c axes related widgets including fields, spinboxes, labels, limits and scale.  
@@ -952,7 +952,7 @@ class ControlDock(CustomDockWidget):
             Axis, options include ``x``, ``y``, ``z``, and ``c``
         field : str, optional
             New field value for axis to update ``app_data`` or combobox, by default None
-        user_activated : bool
+        user_action : bool
             Indicated whether the user has triggered the change
         """
         # only update field if the axis is enabled 
@@ -973,7 +973,7 @@ class ControlDock(CustomDockWidget):
             self.ui.style_data.clabel = ''
             return
 
-        if field is None or user_activated:   # user interaction, or direct setting of combobox
+        if field is None or user_action:   # user interaction, or direct setting of combobox
             # set field property to combobox
             self.ui.app_data.blockSignals(True)
             self.ui.app_data.set_field(ax, childbox.currentText())

@@ -7,7 +7,8 @@ from PyQt6.QtCore import Qt, QSize, QUrl
 from PyQt6.QtWidgets import (
         QTextEdit, QWidget, QVBoxLayout, QMessageBox, QLabel,
         QToolBar, QComboBox, QCheckBox, QHBoxLayout, QTableWidgetItem, QTableWidget, QTabWidget,
-        QAbstractItemView, QHeaderView, QStyledItemDelegate, QLineEdit, QSpacerItem, QDialog
+        QAbstractItemView, QHeaderView, QStyledItemDelegate, QLineEdit, QSpacerItem, QDialog,
+        QTreeWidget, QTreeWidgetItem
     )
 from PyQt6.QtGui import QDoubleValidator
 
@@ -201,6 +202,7 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
         self.dataframe_tab = DataFrameTab(self)
         self.field_tab = FieldTab(self)
         self.plot_info_tab = PlotInfoTab(self)
+        self.properties_tab = PropertiesTab(self)
 
         dock_layout.addWidget(self.tabWidgetInfo)
         self.setWidget(self.dockWidgetInfo)
@@ -244,6 +246,8 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
                     update_numpy_array(self.data.get_map_data(field), self.field_tab.field_table)
             case "plot info":
                 self.plot_info_tab.update_plot_info_tab(self.ui.plot_info)
+            case "properties":
+                self.properties_tab.update_properties()
 
 # -------------------------------
 # Plot Info Tab functions
@@ -1265,3 +1269,176 @@ class FloatItemDelegate(QStyledItemDelegate):
                 editor.setValidator(validator)
 
         return editor
+
+
+# -------------------------------
+# Properties Tab functions  
+# -------------------------------
+class PropertiesTab():
+    """
+    Properties Tab for interrogating AppData and StyleData properties.
+    
+    This tab provides a hierarchical tree view of all properties from both 
+    AppData and StyleData objects, allowing users to inspect the current 
+    state of application data and styling configuration.
+    
+    Parameters
+    ----------
+    parent : InfoDock
+        The parent info dock widget containing this tab.
+    """
+    
+    def __init__(self, parent):
+        self.parent = parent
+        
+        self.properties_tab = QWidget()
+        self.properties_tab.setObjectName("Properties Tab")
+        tab_layout = QVBoxLayout(self.properties_tab)
+        tab_layout.setContentsMargins(6, 6, 6, 6)
+        
+        # Create toolbar for refresh action
+        toolbar = QToolBar()
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)
+        tab_layout.addWidget(toolbar)
+        
+        self.action_refresh = CustomAction(
+            text="Refresh Properties",
+            light_icon_unchecked="icon-refresh-64.svg",
+            dark_icon_unchecked="icon-refresh-dark-64.svg", 
+            parent=toolbar
+        )
+        self.action_refresh.triggered.connect(self.update_properties)
+        self.action_refresh.setToolTip("Refresh property values")
+        
+        toolbar.addAction(self.action_refresh)
+        
+        # Create tree widget for displaying properties
+        self.properties_tree = QTreeWidget(self.properties_tab)
+        self.properties_tree.setObjectName("properties_tree")
+        self.properties_tree.setHeaderLabels(["Property", "Value", "Type"])
+        self.properties_tree.setAlternatingRowColors(True)
+        self.properties_tree.setRootIsDecorated(True)
+        
+        # Set column widths
+        header = self.properties_tree.header()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch) 
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        
+        tab_layout.addWidget(self.properties_tree)
+        
+        # Add tab to parent widget
+        self.parent.tabWidgetInfo.addTab(self.properties_tab, "Properties")
+        
+        # Initial population of properties
+        self.update_properties()
+    
+    def update_properties(self):
+        """
+        Update the properties tree with current values from AppData and StyleData.
+        
+        This method clears the existing tree and repopulates it with current
+        property values from both the application data and style data objects.
+        """
+        self.properties_tree.clear()
+        
+        # Add AppData properties
+        if hasattr(self.parent, 'app_data') and self.parent.app_data:
+            app_data_item = QTreeWidgetItem(self.properties_tree)
+            app_data_item.setText(0, "AppData") 
+            app_data_item.setText(1, "Application Data Properties")
+            app_data_item.setText(2, "AppData")
+            app_data_item.setExpanded(True)
+            
+            self._add_object_properties(app_data_item, self.parent.app_data, "AppData")
+        
+        # Add StyleData properties  
+        if hasattr(self.parent.ui, 'style_toolbox') and hasattr(self.parent.ui.style_toolbox, 'style_data'):
+            style_data_item = QTreeWidgetItem(self.properties_tree)
+            style_data_item.setText(0, "StyleData")
+            style_data_item.setText(1, "Style Configuration Properties") 
+            style_data_item.setText(2, "StyleData")
+            style_data_item.setExpanded(True)
+            
+            self._add_object_properties(style_data_item, self.parent.ui.style_toolbox.style_data, "StyleData")
+    
+    def _add_object_properties(self, parent_item, obj, obj_name):
+        """
+        Add properties from an object to the tree widget.
+        
+        Parameters
+        ---------- 
+        parent_item : QTreeWidgetItem
+            The parent item in the tree to add properties under.
+        obj : object
+            The object to extract properties from.
+        obj_name : str
+            Name of the object for error reporting.
+        """
+        if not obj:
+            return
+            
+        # Get all property names by inspecting the class
+        property_names = []
+        for attr_name in dir(obj.__class__):
+            attr = getattr(obj.__class__, attr_name)
+            if isinstance(attr, property):
+                property_names.append(attr_name)
+        
+        # Sort properties alphabetically 
+        property_names.sort()
+        
+        # Add each property to the tree
+        for prop_name in property_names:
+            try:
+                # Get the property value
+                prop_value = getattr(obj, prop_name)
+                prop_type = type(prop_value).__name__
+                
+                # Create tree item
+                prop_item = QTreeWidgetItem(parent_item)
+                prop_item.setText(0, prop_name)
+                prop_item.setText(2, prop_type)
+                
+                # Format the value based on type
+                if prop_value is None:
+                    prop_item.setText(1, "None")
+                elif isinstance(prop_value, (str, int, float, bool)):
+                    prop_item.setText(1, str(prop_value))
+                elif isinstance(prop_value, (list, tuple)):
+                    if len(prop_value) <= 10:  # Show short lists/tuples directly
+                        prop_item.setText(1, str(prop_value))
+                    else:
+                        prop_item.setText(1, f"{prop_type} (length: {len(prop_value)})")
+                        # Add first few items as children
+                        for i, item in enumerate(prop_value[:5]):
+                            child_item = QTreeWidgetItem(prop_item)
+                            child_item.setText(0, f"[{i}]")
+                            child_item.setText(1, str(item))
+                            child_item.setText(2, type(item).__name__)
+                        if len(prop_value) > 5:
+                            more_item = QTreeWidgetItem(prop_item)
+                            more_item.setText(0, "...")
+                            more_item.setText(1, f"({len(prop_value) - 5} more items)")
+                elif isinstance(prop_value, dict):
+                    if len(prop_value) <= 10:  # Show small dicts
+                        prop_item.setText(1, f"dict ({len(prop_value)} items)")
+                        for key, value in list(prop_value.items())[:5]:
+                            child_item = QTreeWidgetItem(prop_item)
+                            child_item.setText(0, str(key))
+                            child_item.setText(1, str(value))
+                            child_item.setText(2, type(value).__name__)
+                    else:
+                        prop_item.setText(1, f"dict ({len(prop_value)} items)")
+                elif hasattr(prop_value, '__dict__'):  # Object with attributes
+                    prop_item.setText(1, f"{prop_type} object")
+                else:
+                    prop_item.setText(1, f"{prop_type}: {str(prop_value)[:50]}...")
+                    
+            except Exception as e:
+                # Handle properties that might raise exceptions when accessed
+                prop_item = QTreeWidgetItem(parent_item)
+                prop_item.setText(0, prop_name)
+                prop_item.setText(1, f"Error: {str(e)}")
+                prop_item.setText(2, "Error")

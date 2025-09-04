@@ -2,7 +2,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import ( 
         QWidget, QLineEdit, QTableWidget, QComboBox, QPushButton, QCheckBox, QWidget, QTreeView,
         QMenu, QDockWidget, QHeaderView, QToolButton, QSlider, QVBoxLayout, QHBoxLayout, QLabel,
-        QSizePolicy, QScrollArea, QLayout, QColorDialog, QToolBox
+        QSizePolicy, QScrollArea, QLayout, QToolBox
     )
 from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QFont, QDoubleValidator, QIcon, QCursor, QPainter,
@@ -12,6 +12,7 @@ from PyQt6.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
 import src.common.format as fmt
 import pandas as pd
 
+from src.common.ColorSelector import select_color
 from src.common.colorfunc import is_valid_hex_color
 from src.app.UITheme import default_font, ThemeManager
 from src.app.config import ICONPATH
@@ -1188,7 +1189,7 @@ class ColorButton(QPushButton):
     and emits a signal whenever the color changes.
 
     Features:
-    - Emits `colorChanged(QColor)` when the button's color is updated.
+    - Emits `colorChanged(str)` with hex color when the button's color is updated.
     - Maintains a history of recently used colors for quick access.
     - Displays the selected color as the button background.
 
@@ -1206,8 +1207,8 @@ class ColorButton(QPushButton):
     
     Signals
     -------
-    colorChanged(QColor)
-        Emitted when the button's background color changes.
+    colorChanged(str)
+        Emitted when the button's background color changes. Emits hex string.
 
     Parameters
     ----------
@@ -1223,12 +1224,12 @@ class ColorButton(QPushButton):
     -------
 
     btn = ColorButton("Pick Color")
-    btn.colorChanged.connect(lambda c: print("New color:", c.name()))
+    btn.colorChanged.connect(lambda hex_color: print("New color:", hex_color))
 
     """
 
-    # Signal that emits the new QColor
-    colorChanged = pyqtSignal(QColor)
+    # Signal that emits the new color as hex string
+    colorChanged = pyqtSignal(str)
 
     def __init__(self, permanent_text=None, ui=None, parent=None, initial_color=None):
         super().__init__(parent=parent)
@@ -1267,35 +1268,34 @@ class ColorButton(QPushButton):
             value = None
             self._apply_color(value)
             self.colorChanged.emit(value)
-        elif not isinstance(value, QColor):
-            value = QColor(value)
+        else:
+            if not isinstance(value, QColor):
+                value = QColor(value)
 
-        if value.isValid():
-            self._apply_color(value)
-            self._update_history(value)
-            self.colorChanged.emit(value)
+            if value.isValid():
+                self._apply_color(value)
+                self._update_history(value)
+                # Emit hex string instead of QColor
+                self.colorChanged.emit(value.name())
 
     def select_color(self):
         """
-        Open a QColorDialog to allow the user to select a color.
+        Open a ColorSelector to allow the user to select a color.
 
         - Initializes the dialog with the current color.
-        - Populates the custom color slots with recent history.
         - Updates the button background and text when a new color is selected.
-        - Emits `colorChanged(QColor)` if the color changes.
+        - Emits `colorChanged(str)` with hex string if the color changes.
         """
         old_color = self.color
-        dlg = QColorDialog(self.ui)
-        dlg.setCurrentColor(old_color)
+        initial_hex = old_color.name() if old_color.isValid() else None
+        
+        # Use ColorSelector.select_color function
+        selected_hex = select_color(initial_color=initial_hex, parent=self)
 
-        # Populate custom colors from history
-        for idx, col in enumerate(self._color_history[:self._max_history]):
-            QColorDialog.setCustomColor(idx, col)
-
-        new_color = dlg.getColor(initial=old_color, parent=self.ui)
-
-        if new_color.isValid() and new_color != old_color:
-            self.color = new_color
+        if selected_hex and selected_hex != initial_hex:
+            new_color = QColor(selected_hex)
+            if new_color.isValid():
+                self.color = new_color
 
 
     def _apply_color(self, color: QColor | None):

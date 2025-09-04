@@ -702,7 +702,7 @@ class StylingDock(CustomDockWidget):
 
         # overlay and annotation properties
         self.annotations.checkBoxShowMass.stateChanged.connect(lambda _: self.update_show_mass())
-        self.annotations.colorButtonOverlayColor.clicked.connect(lambda _: self.update_overlay_color())
+        self.annotations.colorButtonOverlayColor.colorChanged.connect(self.update_overlay_color)
         self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: white;")
 
         # add list of colormaps to comboBoxFieldColormap and set callbacks
@@ -721,12 +721,12 @@ class StylingDock(CustomDockWidget):
         self.elements.doubleSpinBoxMarkerSize.valueChanged.connect(lambda _: self.update_marker_size())
         self.elements.sliderTransparency.sliderReleased.connect(lambda: self.update_marker_transparency())
         self.elements.colorButtonMarkerColor.setStyleSheet("background-color: white;")
-        self.elements.colorButtonMarkerColor.clicked.connect(lambda _: self.update_marker_color())
+        self.elements.colorButtonMarkerColor.colorChanged.connect(self.update_marker_color)
 
         self.elements.doubleSpinBoxLineWidth.valueChanged.connect(lambda _: self.update_line_width())
         self.elements.lineEditLengthMultiplier.editingFinished.connect(lambda _: self.update_length_multiplier())
         self.elements.colorButtonLineColor.setStyleSheet("background-color: white;")
-        self.elements.colorButtonLineColor.clicked.connect(lambda _: self.update_line_color())
+        self.elements.colorButtonLineColor.colorChanged.connect(self.update_line_color)
         # marker color
 
         # colors
@@ -1152,8 +1152,10 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_overlay_color(self, new_color=None):
+        """Update overlay color from hex string (called by ColorButton.colorChanged signal)"""
+        self.ui.style_data.blockSignals(True)
         self.ui.style_data.overlay_color = new_color
-        self.annotations.colorButtonOverlayColor.color = new_color
+        self.ui.style_data.blockSignals(False)
         self.ui.schedule_update()
 
     def update_show_mass(self, new_state=None):
@@ -1237,17 +1239,11 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_marker_color(self, new_color=None):
-        if new_color is None:
-            self.ui.style_data.blockSignals(True)
-            self.ui.style_data.marker_color = new_color
-            self.ui.style_data.blockSignals(False)
-        else:
-            if new_color == self.elements.colorButtonMarkerColor.color:
-                return
-
-            self.elements.colorButtonMarkerColor.blockSignals(True)
-            self.elements.colorButtonMarkerColor.color = new_color
-            self.elements.colorButtonMarkerColor.blockSignals(False)
+        """Update marker color from hex string (called by ColorButton.colorChanged signal)"""
+        # Update style_data with hex string
+        self.ui.style_data.blockSignals(True)
+        self.ui.style_data.marker_color = new_color
+        self.ui.style_data.blockSignals(False)
 
         self.ui.schedule_update()
 
@@ -1333,16 +1329,10 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def update_line_color(self, new_color=None):
-        if new_color is None:
-            self.ui.style_data.blockSignals(True)
-            self.ui.style_data.line_color = new_color
-            self.ui.style_data.blockSignals(False)
-        else:
-            if new_color == self.elements.colorButtonLineColor.color:
-                self.elements.colorButtonLineColor.blockSignals(True)
-                self.elements.colorButtonLineColor.color = new_color
-                self.elements.colorButtonLineColor.blockSignals(False)
-
+        """Update line color from hex string (called by ColorButton.colorChanged signal)"""
+        self.ui.style_data.blockSignals(True)
+        self.ui.style_data.line_color = new_color
+        self.ui.style_data.blockSignals(False)
         self.ui.schedule_update()
 
     # ------------------------------------------------------------------
@@ -1497,59 +1487,86 @@ class StylingDock(CustomDockWidget):
     # general style functions
     # -------------------------------------
     def disable_style_widgets(self):
-        """Disables all style related widgets."""        
-
-        # x-axis widgets
-        self.axes.lineEditXLB.setEnabled(False)
-        self.axes.lineEditXUB.setEnabled(False)
-        self.axes.comboBoxXScale.setEnabled(False)
-        self.axes.lineEditXLabel.setEnabled(False)
-
-        # y-axis widgets
-        self.axes.lineEditYLB.setEnabled(False)
-        self.axes.lineEditYUB.setEnabled(False)
-        self.axes.comboBoxYScale.setEnabled(False)
-        self.axes.lineEditYLabel.setEnabled(False)
-
-        # z-axis widgets
-        self.axes.lineEditZLB.setEnabled(False)
-        self.axes.lineEditZUB.setEnabled(False)
-        self.axes.comboBoxZScale.setEnabled(False)
-        self.axes.lineEditZLabel.setEnabled(False)
-
-        # other axis properties
-        self.axes.lineEditAspectRatio.setEnabled(False)
-        self.axes.comboBoxTickDirection.setEnabled(False)
-
-        # annotations
+        """Disables all style related widgets using helper methods."""        
+        # Disable all axis widgets
+        for axis in ['x', 'y', 'z']:
+            if axis in self.axis_widget_dict:
+                widgets = self.axis_widget_dict[axis]
+                widgets['lbound'].setEnabled(False)
+                widgets['ubound'].setEnabled(False)
+                widgets['scalebox'].setEnabled(False)
+                widgets['axis_label'].setEnabled(False)
+        
+        # Disable using helper methods with False flags
+        self._enable_common(show_mass=False, tick_dir=False, aspect=False, heatmap_res=False)
+        self._enable_scalebar(enabled=False)
+        self._enable_markers(basic=False, size=False, transparency=False, color=False)
+        self._enable_lines(width=False, color=False, multiplier=False)
+        self._enable_colormap(full=False)
+        
+        # Additional widgets not covered by helpers
         self.annotations.fontComboBox.setEnabled(False)
         self.annotations.doubleSpinBoxFontSize.setEnabled(False)
-        self.annotations.checkBoxShowMass.setEnabled(False)
-
-        # scale
-        self.annotations.comboBoxScaleDirection.setEnabled(False)
-        self.annotations.comboBoxScaleLocation.setEnabled(False)
-        self.annotations.lineEditScaleLength.setEnabled(False)
-        self.annotations.colorButtonOverlayColor.setEnabled(False)
-
-        # markers and lines
-        self.elements.comboBoxMarker.setEnabled(False)
-        self.elements.doubleSpinBoxMarkerSize.setEnabled(False)
-        self.elements.colorButtonMarkerColor.setEnabled(False)
-        self.elements.sliderTransparency.setEnabled(False)
-        self.elements.doubleSpinBoxLineWidth.setEnabled(False)
-        self.elements.colorButtonLineColor.setEnabled(False)
-        self.elements.lineEditLengthMultiplier.setEnabled(False)
-
-        # coloring
-        self.caxes.spinBoxHeatmapResolution.setEnabled(False)
-        self.caxes.comboBoxFieldColormap.setEnabled(False)
         self.caxes.checkBoxReverseColormap.setEnabled(False)
-        self.caxes.lineEditCLB.setEnabled(False)
-        self.caxes.lineEditCUB.setEnabled(False)
-        self.caxes.comboBoxCScale.setEnabled(False)
-        self.caxes.lineEditCLabel.setEnabled(False)
-        self.caxes.comboBoxCbarDirection.setEnabled(False)
+
+    def _enable_axes(self, plot_type=None):
+        """Enable axis widgets based on axis_settings_dict configuration"""
+        from .PlotAxisSettings import axis_settings_dict
+        
+        if plot_type is None:
+            plot_type = self.ui.style_data.plot_type.lower()
+        
+        if plot_type in axis_settings_dict:
+            plot_settings = axis_settings_dict[plot_type]
+            for axis, controls in plot_settings.axes.items():
+                if axis in self.axis_widget_dict and controls.enabled:
+                    widgets = self.axis_widget_dict[axis]
+                    
+                    # Enable bounds if widgets flag is set
+                    if controls.widgets:
+                        widgets['lbound'].setEnabled(True)
+                        widgets['ubound'].setEnabled(True)
+                        widgets['axis_label'].setEnabled(True)
+                    
+                    # Enable scale if scale flag is set
+                    if controls.scale:
+                        widgets['scalebox'].setEnabled(True)
+
+    def _enable_markers(self, basic=True, size=True, transparency=True, color=False):
+        """Enable/disable marker widgets using flag values directly"""
+        self.elements.comboBoxMarker.setEnabled(basic)
+        self.elements.doubleSpinBoxMarkerSize.setEnabled(size)
+        self.elements.sliderTransparency.setEnabled(transparency)
+        self.elements.colorButtonMarkerColor.setEnabled(color)
+
+    def _enable_lines(self, width=True, color=True, multiplier=False):
+        """Enable/disable line widgets using flag values directly"""
+        self.elements.doubleSpinBoxLineWidth.setEnabled(width)
+        self.elements.colorButtonLineColor.setEnabled(color)
+        self.elements.lineEditLengthMultiplier.setEnabled(multiplier)
+
+    def _enable_colormap(self, full=True):
+        """Enable/disable colormap widgets using flag values directly"""
+        self.caxes.comboBoxFieldColormap.setEnabled(full)
+        self.caxes.lineEditCLB.setEnabled(full)
+        self.caxes.lineEditCUB.setEnabled(full)
+        self.caxes.comboBoxCScale.setEnabled(full)
+        self.caxes.comboBoxCbarDirection.setEnabled(full)
+        self.caxes.lineEditCLabel.setEnabled(full)
+
+    def _enable_scalebar(self, enabled=True):
+        """Enable/disable scale/annotation widgets using flag value directly"""
+        self.annotations.comboBoxScaleDirection.setEnabled(enabled)
+        self.annotations.comboBoxScaleLocation.setEnabled(enabled)
+        self.annotations.lineEditScaleLength.setEnabled(enabled)
+        self.annotations.colorButtonOverlayColor.setEnabled(enabled)
+
+    def _enable_common(self, show_mass=True, tick_dir=False, aspect=False, heatmap_res=False):
+        """Enable/disable commonly used widgets using flag values directly"""
+        self.annotations.checkBoxShowMass.setEnabled(show_mass)
+        self.axes.comboBoxTickDirection.setEnabled(tick_dir)
+        self.axes.lineEditAspectRatio.setEnabled(aspect)
+        self.caxes.spinBoxHeatmapResolution.setEnabled(heatmap_res)
 
     def toggle_style_widgets(self):
         """Enables/disables all style widgets
@@ -1557,320 +1574,188 @@ class StylingDock(CustomDockWidget):
         Toggling of enabled states are based on ``MainWindow.toolBox`` page and the current plot type
         selected in ``MainWindow.comboBoxPlotType."""
         ui = self.ui
-
-        #print('toggle_style_widgets')
         plot_type = self.ui.style_data.plot_type.lower()
 
         self.disable_style_widgets()
 
-        # annotation properties
+        # Always enable basic annotation properties
         self.annotations.fontComboBox.setEnabled(True)
         self.annotations.doubleSpinBoxFontSize.setEnabled(True)
         match plot_type.lower():
             case 'field map' | 'gradient map':
-                # axes properties
-                self.axes.lineEditXLB.setEnabled(True)
-                self.axes.lineEditXUB.setEnabled(True)
-
-                self.axes.lineEditYLB.setEnabled(True)
-                self.axes.lineEditYUB.setEnabled(True)
-
-                # scalebar properties
-                self.annotations.comboBoxScaleDirection.setEnabled(True)
-                self.annotations.comboBoxScaleLocation.setEnabled(True)
-                self.annotations.lineEditScaleLength.setEnabled(True)
-                self.annotations.colorButtonOverlayColor.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # marker properties
+                self._enable_axes()
+                self._enable_scalebar()
+                self._enable_common(show_mass=True)
+                
+                # marker properties (conditional)
                 if ui.app_data.sample_id != '' and len(ui.data[ui.app_data.sample_id].spotdata) != 0:
-                    self.elements.comboBoxMarker.setEnabled(True)
-                    self.elements.doubleSpinBoxMarkerSize.setEnabled(True)
-                    self.elements.sliderTransparency.setEnabled(True)
-
-                    self.elements.colorButtonMarkerColor.setEnabled(True)
-
-                # line properties
-                self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.colorButtonLineColor.setEnabled(True)
-
-                # color properties
-                self.caxes.comboBoxFieldColormap.setEnabled(True)
-                self.caxes.lineEditCLB.setEnabled(True)
-                self.caxes.lineEditCUB.setEnabled(True)
-                self.caxes.comboBoxCScale.setEnabled(True)
-                self.caxes.comboBoxCbarDirection.setEnabled(True)
-                self.caxes.lineEditCLabel.setEnabled(True)
+                    self._enable_markers(color=True)
+                
+                self._enable_lines()
+                self._enable_colormap()
 
             case 'correlation' | 'basis vectors':
-                # axes properties
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # color properties
+                self._enable_axes()
+                self._enable_common(show_mass=True, tick_dir=True)
+                # Partial colormap (no scale or label)
                 self.caxes.comboBoxFieldColormap.setEnabled(True)
                 self.caxes.lineEditCLB.setEnabled(True)
                 self.caxes.lineEditCUB.setEnabled(True)
                 self.caxes.comboBoxCbarDirection.setEnabled(True)
 
             case 'histogram':
-                # axes properties
-                self.axes.lineEditXLB.setEnabled(True)
-                self.axes.lineEditXUB.setEnabled(True)
-                self.axes.comboBoxXScale.setEnabled(True)
-                self.axes.lineEditYLB.setEnabled(True)
-                self.axes.lineEditYUB.setEnabled(True)
-                self.axes.lineEditXLabel.setEnabled(True)
-                self.axes.lineEditYLabel.setEnabled(True)
-                self.axes.lineEditAspectRatio.setEnabled(True)
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # marker properties
-                self.elements.sliderTransparency.setEnabled(True)
-
-                # line properties
-                self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.colorButtonLineColor.setEnabled(True)
-
-                # color properties
-                # if color by field is set to clusters, then colormap fields are on,
-                # field is set by cluster table
+                self._enable_axes()
+                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
+                self._enable_markers(basic=False, size=False, transparency=True, color=False)
+                self._enable_lines()
+                
+                # Color properties (conditional based on field type)
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
                 else:
                     self.caxes.comboBoxCbarDirection.setEnabled(True)
 
             case 'scatter' | 'PCA scatter':
-                # axes properties
+                # Complex conditional axis logic - could use axis_settings_dict but keeping existing logic
                 if (self.ui.control_dock.toolbox.currentIndex() != self.ui.control_dock.tab_dict['scatter']) or (self.ui.control_dock.comboBoxFieldZ.currentText() == ''):
-                    self.axes.lineEditXLB.setEnabled(True)
-                    self.axes.lineEditXUB.setEnabled(True)
-                    self.axes.comboBoxXScale.setEnabled(True)
-                    self.axes.lineEditYLB.setEnabled(True)
-                    self.axes.lineEditYUB.setEnabled(True)
-                    self.axes.comboBoxYScale.setEnabled(True)
+                    # Enable X/Y bounds and scales
+                    for axis in ['x', 'y']:
+                        widgets = self.axis_widget_dict[axis]
+                        widgets['lbound'].setEnabled(True)
+                        widgets['ubound'].setEnabled(True)
+                        widgets['scalebox'].setEnabled(True)
 
-                self.axes.lineEditXLabel.setEnabled(True)
-                self.axes.lineEditYLabel.setEnabled(True)
+                # Always enable X/Y labels
+                self.axis_widget_dict['x']['axis_label'].setEnabled(True)
+                self.axis_widget_dict['y']['axis_label'].setEnabled(True)
+                
+                # Z axis if field is not empty
                 if self.ui.control_dock.comboBoxFieldZ.currentText() != '':
-                    self.axes.lineEditZLB.setEnabled(True)
-                    self.axes.lineEditZUB.setEnabled(True)
-                    self.axes.comboBoxZScale.setEnabled(True)
-                    self.axes.lineEditZLabel.setEnabled(True)
-                self.axes.lineEditAspectRatio.setEnabled(True)
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # marker properties
-                self.elements.comboBoxMarker.setEnabled(True)
-                self.elements.doubleSpinBoxMarkerSize.setEnabled(True)
-                self.elements.sliderTransparency.setEnabled(True)
-
-                # line properties
+                    z_widgets = self.axis_widget_dict['z']
+                    z_widgets['lbound'].setEnabled(True)
+                    z_widgets['ubound'].setEnabled(True)
+                    z_widgets['scalebox'].setEnabled(True)
+                    z_widgets['axis_label'].setEnabled(True)
+                
+                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
+                self._enable_markers(color=False)  # No color by default
+                
+                # Line properties (only if no Z field)
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
-                    self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                    self.elements.colorButtonLineColor.setEnabled(True)
+                    self._enable_lines()
 
-                if plot_type == 'PCA scatter':
-                    self.elements.lineEditLengthMultiplier.setEnabled(True)
+                # PCA-specific
+                if plot_type == 'pca scatter':
+                    self._enable_lines(multiplier=True)
 
-                # color properties
-                # if color by field is none, then use marker color,
-                # otherwise turn off marker color and turn all field and colormap properties to on
+                # Color properties (conditional)
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
-
                 elif self.ui.control_dock.comboBoxFieldTypeC.currentText() == 'cluster':
-
-                    self.caxes.comboBoxCbarDirection.setEnabled(True)
-
-                    self.caxes.comboBoxFieldColormap.setEnabled(True)
-                    self.caxes.lineEditCLB.setEnabled(True)
-                    self.caxes.lineEditCUB.setEnabled(True)
-                    self.caxes.comboBoxCScale.setEnabled(True)
-                    self.caxes.comboBoxCbarDirection.setEnabled(True)
-                    self.caxes.lineEditCLabel.setEnabled(True)
+                    self._enable_colormap()
 
             case 'heatmap' | 'PCA heatmap':
-                # axes properties
+                # Similar axis logic to scatter but with different Z-axis conditions
                 if (self.ui.control_dock.toolbox.currentIndex() != self.ui.control_dock.tab_dict['scatter']) or (self.ui.control_dock.comboBoxFieldZ.currentText() == ''):
-                    self.axes.lineEditXLB.setEnabled(True)
-                    self.axes.lineEditXUB.setEnabled(True)
-                    self.axes.comboBoxXScale.setEnabled(True)
-                    self.axes.lineEditYLB.setEnabled(True)
-                    self.axes.lineEditYUB.setEnabled(True)
-                    self.axes.comboBoxYScale.setEnabled(True)
+                    # Enable X/Y bounds and scales
+                    for axis in ['x', 'y']:
+                        widgets = self.axis_widget_dict[axis]
+                        widgets['lbound'].setEnabled(True)
+                        widgets['ubound'].setEnabled(True)
+                        widgets['scalebox'].setEnabled(True)
 
-                self.axes.lineEditXLabel.setEnabled(True)
-                self.axes.lineEditYLabel.setEnabled(True)
+                # Always enable X/Y labels
+                self.axis_widget_dict['x']['axis_label'].setEnabled(True)
+                self.axis_widget_dict['y']['axis_label'].setEnabled(True)
+                
+                # Z axis (different condition than scatter)
                 if (self.ui.control_dock.toolbox.currentIndex() == self.ui.control_dock.tab_dict['scatter']) and (self.ui.control_dock.comboBoxFieldZ.currentText() == ''):
-                    self.axes.lineEditZLB.setEnabled(True)
-                    self.axes.lineEditZUB.setEnabled(True)
-                    self.axes.comboBoxZScale.setEnabled(True)
-                    self.axes.lineEditZLabel.setEnabled(True)
-                self.axes.lineEditAspectRatio.setEnabled(True)
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # line properties
+                    z_widgets = self.axis_widget_dict['z']
+                    z_widgets['lbound'].setEnabled(True)
+                    z_widgets['ubound'].setEnabled(True)
+                    z_widgets['scalebox'].setEnabled(True)
+                    z_widgets['axis_label'].setEnabled(True)
+                
+                self._enable_common(show_mass=True, tick_dir=True, aspect=True, heatmap_res=True)
+                
+                # Line properties (only if no Z field)
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
-                    self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                    self.elements.colorButtonLineColor.setEnabled(True)
+                    self._enable_lines()
 
-                if plot_type == 'PCA heatmap':
-                    self.elements.lineEditLengthMultiplier.setEnabled(True)
+                # PCA-specific
+                if plot_type == 'pca heatmap':
+                    self._enable_lines(multiplier=True)
 
-                # color properties
-                self.caxes.comboBoxFieldColormap.setEnabled(True)
-                self.caxes.lineEditCLB.setEnabled(True)
-                self.caxes.lineEditCUB.setEnabled(True)
-                self.caxes.comboBoxCScale.setEnabled(True)
-                self.caxes.comboBoxCbarDirection.setEnabled(True)
-                self.caxes.lineEditCLabel.setEnabled(True)
-
-                self.caxes.spinBoxHeatmapResolution.setEnabled(True)
+                self._enable_colormap()
             case 'ternary map':
-                # axes properties
-                self.axes.lineEditXLB.setEnabled(True)
-                self.axes.lineEditXUB.setEnabled(True)
-                self.axes.comboBoxXScale.setEnabled(True)
-                self.axes.lineEditYLB.setEnabled(True)
-                self.axes.lineEditYUB.setEnabled(True)
-                self.axes.comboBoxYScale.setEnabled(True)
-                self.axes.lineEditZLB.setEnabled(True)
-                self.axes.lineEditZUB.setEnabled(True)
-                self.axes.comboBoxZScale.setEnabled(True)
-                self.axes.lineEditYLabel.setEnabled(True)
-                self.axes.lineEditYLabel.setEnabled(True)
-                self.axes.lineEditZLabel.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # scalebar properties
-                self.annotations.comboBoxScaleDirection.setEnabled(True)
-                self.annotations.comboBoxScaleLocation.setEnabled(True)
-                self.annotations.lineEditScaleLength.setEnabled(True)
-                self.annotations.colorButtonOverlayColor.setEnabled(True)
-
-                # marker properties
+                # Enable all X/Y/Z axes with bounds, scales, and labels
+                for axis in ['x', 'y', 'z']:
+                    widgets = self.axis_widget_dict[axis]
+                    widgets['lbound'].setEnabled(True)
+                    widgets['ubound'].setEnabled(True)
+                    widgets['scalebox'].setEnabled(True)
+                    widgets['axis_label'].setEnabled(True)
+                
+                self._enable_common(show_mass=True)
+                self._enable_scalebar()
+                
+                # Conditional markers
                 if not self.ui.app_data.current_data.spotdata.empty:
-                    self.elements.comboBoxMarker.setEnabled(True)
-                    self.elements.doubleSpinBoxMarkerSize.setEnabled(True)
-                    self.elements.sliderTransparency.setEnabled(True)
-
-                    self.elements.colorButtonMarkerColor.setEnabled(True)
+                    self._enable_markers(color=True)
 
             case 'tec' | 'radar':
-                # axes properties
                 if plot_type == 'tec':
-                    self.axes.lineEditYLB.setEnabled(True)
-                    self.axes.lineEditYUB.setEnabled(True)
-                    self.axes.lineEditYLabel.setEnabled(True)
-                self.axes.lineEditAspectRatio.setEnabled(True)
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # scalebar properties
+                    y_widgets = self.axis_widget_dict['y']
+                    y_widgets['lbound'].setEnabled(True)
+                    y_widgets['ubound'].setEnabled(True)
+                    y_widgets['axis_label'].setEnabled(True)
+                
+                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
+                # Scale length only (not full scalebar)
                 self.annotations.lineEditScaleLength.setEnabled(True)
-
-                # marker properties
-                self.elements.sliderTransparency.setEnabled(True)
-
-                # line properties
-                self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.colorButtonLineColor.setEnabled(True)
-
-                # color properties
+                self._enable_markers(basic=False, size=False, transparency=True, color=False)
+                self._enable_lines()
+                
+                # Conditional color
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
                 elif self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'cluster':
                     self.caxes.comboBoxCbarDirection.setEnabled(True)
 
             case 'variance' | 'cluster performance':
-                # axes properties
-                self.axes.lineEditAspectRatio.setEnabled(True)
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                # scalebar properties
+                self._enable_common(show_mass=False, tick_dir=True, aspect=True)
+                # Partial scalebar (length and color only)
                 self.annotations.lineEditScaleLength.setEnabled(True)
                 self.annotations.colorButtonOverlayColor.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(False)
-
-                # marker properties
-                self.elements.comboBoxMarker.setEnabled(True)
-                self.elements.doubleSpinBoxMarkerSize.setEnabled(True)
-
-                # line properties
-                self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.colorButtonLineColor.setEnabled(True)
-
-                # color properties
-                self.elements.colorButtonMarkerColor.setEnabled(True)
+                self._enable_markers(transparency=False, color=True)
+                self._enable_lines()
 
             case 'pca score' | 'cluster score' | 'cluster map':
-                # axes properties
-                self.axes.lineEditXLB.setEnabled(True)
-                self.axes.lineEditXUB.setEnabled(True)
-                self.axes.lineEditYLB.setEnabled(True)
-                self.axes.lineEditYUB.setEnabled(True)
-
-                # scalebar properties
-                self.annotations.comboBoxScaleDirection.setEnabled(True)
-                self.annotations.comboBoxScaleLocation.setEnabled(True)
-                self.annotations.lineEditScaleLength.setEnabled(True)
-                self.annotations.colorButtonOverlayColor.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(False)
-
-                # marker properties
-                # if len(ui.spotdata) != 0:
-                #     ui.comboBoxMarker.setEnabled(True)
-                #     ui.doubleSpinBoxMarkerSize.setEnabled(True)
-                #     ui.sliderTransparencyAlpha.setEnabled(True)
-                #     ui.labelMarkerAlpha.setEnabled(True)
-                #     ui.colorButtonMarkerColor.setEnabled(True)
-
-                # line properties
-                self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.colorButtonLineColor.setEnabled(True)
-
-                # color properties
+                # X/Y bounds only
+                for axis in ['x', 'y']:
+                    widgets = self.axis_widget_dict[axis]
+                    widgets['lbound'].setEnabled(True)
+                    widgets['ubound'].setEnabled(True)
+                
+                self._enable_scalebar()
+                self._enable_common(show_mass=False)
+                self._enable_lines()
+                
+                # Conditional colormap (not for clusters)
                 if plot_type != 'clusters':
-                    self.caxes.comboBoxFieldColormap.setEnabled(True)
-                    self.caxes.lineEditCLB.setEnabled(True)
-                    self.caxes.lineEditCUB.setEnabled(True)
-                    self.caxes.comboBoxCScale.setEnabled(True)
-                    self.caxes.comboBoxCbarDirection.setEnabled(True)
-                    self.caxes.lineEditCLabel.setEnabled(True)
+                    self._enable_colormap()
             case 'profile':
-                # axes properties
-                self.axes.lineEditXLB.setEnabled(True)
-                self.axes.lineEditXUB.setEnabled(True)
-                self.axes.lineEditAspectRatio.setEnabled(True)
-                self.axes.comboBoxTickDirection.setEnabled(True)
-
-                self.annotations.checkBoxShowMass.setEnabled(True)
-
-                # scalebar properties
+                # X bounds only
+                x_widgets = self.axis_widget_dict['x']
+                x_widgets['lbound'].setEnabled(True)
+                x_widgets['ubound'].setEnabled(True)
+                
+                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
+                # Scale length only
                 self.annotations.lineEditScaleLength.setEnabled(True)
-
-                # marker properties
-                self.elements.comboBoxMarker.setEnabled(True)
-                self.elements.doubleSpinBoxMarkerSize.setEnabled(True)
-
-                # line properties
-                self.elements.doubleSpinBoxLineWidth.setEnabled(True)
-                self.elements.colorButtonLineColor.setEnabled(True)
-
-                # color properties
+                self._enable_markers(transparency=False, color=False)
+                self._enable_lines()
+                # Color properties  
                 self.elements.colorButtonMarkerColor.setEnabled(True)
                 self.caxes.comboBoxFieldColormap.setEnabled(True)
         
@@ -2381,57 +2266,32 @@ class StylingDock(CustomDockWidget):
         self.ui.schedule_update()
 
     def overlay_color_callback(self):
-        """Updates color of overlay markers
+        """Updates color of overlay markers (legacy method - now handled by colorChanged signal)
 
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.colorButtonOverlayColor`` color.
+        Uses ColorSelector to select new marker color and then updates plot.
         """
-        plot_type = self.ui.control_dock.comboBoxPlotType.currentText()
-        # change color
+        # This method is now handled automatically by the colorChanged signal connection
+        # but keeping for backwards compatibility
         self.annotations.colorButtonOverlayColor.select_color()
-
-        color = get_hex_color(self.annotations.colorButtonOverlayColor.palette().button().color())
-        # update style
-        if self.ui.style_data.style_dict[plot_type]['OverlayColor'] == color:
-            return
-
-        self.ui.style_data.style_dict[plot_type]['OverlayColor'] = color
-        # update plot
-        self.ui.schedule_update()
 
     # lines
     # -------------------------------------
     def line_color_callback(self):
-        """Updates color of plot markers
+        """Updates color of plot lines (legacy method - now handled by colorChanged signal)
 
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.colorButtonLineColor`` color.
+        Uses ColorSelector to select new line color and then updates plot.
         """
-        # change color
+        # This method is now handled automatically by the colorChanged signal connection
+        # but keeping for backwards compatibility
         self.elements.colorButtonLineColor.select_color()
-        color = get_hex_color(self.elements.colorButtonLineColor.palette().button().color())
-        if self.line_color == color:
-            return
-
-        # update style
-        self.line_color = color
-
-        # update plot
-        self.ui.schedule_update()
 
     # colors
     # -------------------------------------
     def marker_color_callback(self):
-        """Updates color of plot markers
+        """Updates color of plot markers (legacy method - now handled by colorChanged signal)
 
-        Uses ``QColorDialog`` to select new marker color and then updates plot on change of backround ``MainWindow.colorButtonMarkerColor`` color.
+        Uses ColorSelector to select new marker color and then updates plot.
         """
-        # change color
-        self.button_color_select(self.elements.colorButtonMarkerColor)
-        color = get_hex_color(self.elements.colorButtonMarkerColor.palette().button().color())
-        if self.marker_color == color:
-            return
-
-        # update style
-        self.marker_color = color
-
-        # update plot
-        self.ui.schedule_update()
+        # This method is now handled automatically by the colorChanged signal connection
+        # but keeping for backwards compatibility
+        self.elements.colorButtonMarkerColor.select_color()

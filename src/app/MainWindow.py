@@ -20,7 +20,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 from src.common.LamePlot import (
-    plot_map_mpl, plot_histogram, plot_correlation, get_scatter_data, plot_scatter,
+    create_plot, plot_map_mpl, plot_histogram, plot_correlation, get_scatter_data, plot_scatter,
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
@@ -43,13 +43,11 @@ from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
 from src.app.config import BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet
 from src.app.settings import prefs
-from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.app.PlotRegistry import PlotRegistry
 
-from src.common.CustomMplCanvas import MplCanvas
 import faulthandler
 faulthandler.enable()
 
@@ -825,12 +823,18 @@ class MainWindow(QMainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
+
+        #create_plot(self, app_data, style_data)
         # check to make sure that the basic elements of a plot are satisfied, i.e.,
         #   sample_id is not an empty str
         #   plot_type is not empty or none
         #   field types and fields are valid for the appropriate axes
         if self.app_data.sample_id == '' or self.style_data.plot_type in [None, '', 'none', 'None'] or not self.check_valid_fields():
             return
+
+        # Prevent recursive updates during plotting by disabling plot_flag
+        old_plot_flag = self.plot_flag
+        self.plot_flag = False
 
         data = self.app_data.current_data
 
@@ -942,6 +946,9 @@ class MainWindow(QMainWindow):
             # Restore old canvas if new one failed
             if old_canvas is not None:
                 self.mpl_canvas = old_canvas
+        finally:
+            # Always restore plot_flag to prevent infinite loops
+            self.plot_flag = old_plot_flag
 
 
     # -------------------------------------

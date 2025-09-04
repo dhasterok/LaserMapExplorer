@@ -246,9 +246,16 @@ class MplCanvas(FigureCanvas):
                 # Toggle zoom mode in Matplotlib
                 self.mpl_toolbar.zoom()  # Assuming your Matplotlib canvas has a toolbar with a zoom function
             case 'annotate':
-                pass
+                self.setCursorPosition()
+                self.setCursor(Qt.CursorShape.CrossCursor)
             case 'distance':
-                self.enable_distance_mode()
+                # Only enable distance mode for map-type plots
+                if self.map_flag:
+                    self.enable_distance_mode()
+                else:
+                    # Disable the distance button if it's not a map
+                    if hasattr(self.ui, 'canvas_widget') and hasattr(self.ui.canvas_widget, 'toolbar'):
+                        self.ui.canvas_widget.toolbar.sv.toolButtonDistance.setChecked(False)
             case 'preference':
                 self.mpl_toolbar.edit_parameters()
             case 'axes':
@@ -261,8 +268,11 @@ class MplCanvas(FigureCanvas):
             case 'zoom':
                 self.mpl_toolbar.zoom()  # toggles off
             case 'annotate':
-                # Add logic to disable annotate mode if needed
-                pass
+                # Disconnect annotation event handler
+                if hasattr(self, 'cid') and self.cid is not None:
+                    self.mpl_disconnect(self.cid)
+                    self.cid = None
+                self.unsetCursor()
             case 'distance':
                 # Disconnect mouse events or clear state
                 self.disable_distance_mode()
@@ -282,12 +292,14 @@ class MplCanvas(FigureCanvas):
         self.distance_cid_move = None
 
     def enterEvent(self, event):
-        # Set cursor to cross when the mouse enters the window
-        self.setCursor(Qt.CursorShape.CrossCursor)
+        # Set cursor to cross when the mouse enters the window and a tool is active
+        if self.active_tool in ['annotate', 'distance']:
+            self.setCursor(Qt.CursorShape.CrossCursor)
 
     def leaveEvent(self, event):
         # Reset cursor to default when the mouse leaves the window
-        self.unsetCursor()
+        if self.active_tool in ['annotate', 'distance']:
+            self.unsetCursor()
 
     def mouseLocation(self,event):
         """Get mouse location on axes for display
@@ -414,8 +426,15 @@ class MplCanvas(FigureCanvas):
         # get text
         txt, ok = QInputDialog.getText(self, 'Figure', 'Enter text:')
         if not ok:
+            # Restore cursor after dialog cancellation
+            if self.active_tool == 'annotate':
+                self.setCursor(Qt.CursorShape.CrossCursor)
             return
 
+        # Restore cursor after dialog completion
+        if self.active_tool == 'annotate':
+            self.setCursor(Qt.CursorShape.CrossCursor)
+            
         overlay_color = self.ui.style_data.overlay_color
         font_size = self.ui.style_data.font_size
         annotation_obj = self.axes.text(x, y, txt, color=overlay_color, fontsize=font_size, visible=True)
@@ -438,15 +457,20 @@ class MplCanvas(FigureCanvas):
 
     def redraw_annotations(self):
         for ann in self.annotations:
-            if not ann['Visibile']:
+            if not ann.get('Visible', True):
                 continue
 
             if ann['Type'] == "text":
                 self.axes.text(ann['X1'], ann['Y1'], ann['Text'],
                             color=ann['Color'], fontsize=ann['Size'])
             elif ann['Type'] == 'line':
+                # Ensure line width is valid
+                line_width = ann.get('Line Width', 1.0)
+                if line_width is None or line_width <= 0:
+                    line_width = 1.0
+                    
                 self.axes.plot([ann['X1'], ann['X2']], [ann['Y1'], ann['Y2']],
-                            color=ann['Color'], linewidth=ann['Line Width'])
+                            color=ann['Color'], linewidth=line_width)
                 txt = ann['Text']
                 self.axes.text(txt['X1'], txt['Y1'], txt['Text'], ha=txt['HAlign'], va=txt['VAlign'], fontdict=txt['FontDict'], c=ann['Color'])
 
@@ -467,7 +491,11 @@ class MplCanvas(FigureCanvas):
         float
             Distance between two given points.
         """
-        if self.map_flag:
+        # Check if points are valid
+        if p1 is None or p2 is None or p1[0] is None or p1[1] is None or p2[0] is None or p2[1] is None:
+            return 0.0
+            
+        if self.map_flag and self.dx is not None and self.dy is not None:
             #dx = self.ui.app_data.data[self.ui.app_data.sample_id].dx
             #dy = self.ui.app_data.data[self.ui.app_data.sample_id].dy
             dx = self.dx
@@ -494,6 +522,10 @@ class MplCanvas(FigureCanvas):
         #plot_type = self.ui.app_data.plot_info['plot_type']
         overlay_color = self.ui.style_data.overlay_color
         line_width = self.ui.style_data.line_width
+        
+        # Ensure line width is valid (not None, not 0, not negative)
+        if line_width is None or line_width <= 0:
+            line_width = 1.0
 
         # plot line (keep only first returned handle)
         p = self.axes.plot(
@@ -525,6 +557,12 @@ class MplCanvas(FigureCanvas):
         text_dict : dict
             Dictionary needed to reconstruct distance label
         """        
+        # Validate coordinates
+        if (p1 is None or p2 is None or 
+            p1[0] is None or p1[1] is None or 
+            p2[0] is None or p2[1] is None):
+            return None, {}
+            
         style = self.ui.style_data
 
         # compute distance
@@ -543,7 +581,13 @@ class MplCanvas(FigureCanvas):
             xl = self.axes.get_xlim()
             xrange = xl[1] - xl[0]
             yl = self.axes.get_ylim()
-            xrange = yl[1] - yl[0]
+            yrange = yl[1] - yl[0]  # Fixed: was using xrange instead of yrange
+        else:
+            # For non-map plots, use axis limits
+            xl = self.axes.get_xlim()
+            yl = self.axes.get_ylim()
+            xrange = xl[1] - xl[0]
+            yrange = yl[1] - yl[0]
 
         # x-shift for text
         dx = 0.03*xrange
@@ -579,7 +623,6 @@ class MplCanvas(FigureCanvas):
         """Handle left/right clicks for distance calculation, polygons and profiles."""
         if event.inaxes != self.axes:
             return
-        self.setCursor(Qt.CursorShape.CrossCursor)
         if self.active_tool == 'distance':
             self.distanceOnClick(event)
             return
@@ -610,7 +653,7 @@ class MplCanvas(FigureCanvas):
         event : MouseEvent
             Mouse click event.
         """
-        if event.inaxes:
+        if event.inaxes and event.xdata is not None and event.ydata is not None:
             if self.first_point is None:
                 # First click
                 self.first_point = (event.xdata, event.ydata)
@@ -624,8 +667,10 @@ class MplCanvas(FigureCanvas):
                 text_obj, text_dict = self.plot_text(self.first_point, second_point)
 
                 # Save to your existing lists if needed
-                self.saved_line.append(line_obj)
-                self.saved_dtext.append(text_obj)
+                if line_obj is not None:
+                    self.saved_line.append(line_obj)
+                if text_obj is not None:
+                    self.saved_dtext.append(text_obj)
 
                 new = {
                     "Type": "line",
@@ -650,10 +695,16 @@ class MplCanvas(FigureCanvas):
                 # Reset first_point so next click starts a new line
                 self.first_point = None
                 if self.line:
-                    self.line.remove()
+                    try:
+                        self.line.remove()
+                    except ValueError:
+                        pass
                     self.line = None
                 if self.dtext:
-                    self.dtext.remove()
+                    try:
+                        self.dtext.remove()
+                    except ValueError:
+                        pass
                     self.dtext = None
                 self.distance = None
 
@@ -663,8 +714,6 @@ class MplCanvas(FigureCanvas):
         """Optional: handle dynamic feedback (e.g., while moving a polygon vertex)."""
         if event.inaxes != self.axes:
             return
-
-        self.setCursor(Qt.CursorShape.CrossCursor)
         if (self.active_tool == 'distance') and (self.first_point is not None) and event.inaxes:
             self.distanceOnMove(event)
             return
@@ -696,14 +745,24 @@ class MplCanvas(FigureCanvas):
         """        
         
         if self.line:
-            self.line.remove()
+            try:
+                self.line.remove()
+            except ValueError:
+                # Line not in list, that's ok
+                pass
         if self.dtext:
-            self.dtext.remove()
+            try:
+                self.dtext.remove()
+            except ValueError:
+                # Text not in list, that's ok
+                pass
 
         second_point = (event.xdata,event.ydata)
-        if self.first_point:
+        if self.first_point and event.xdata is not None and event.ydata is not None:
             self.line = self.plot_line(self.first_point, second_point)
-            self.dtext, _ = self.plot_text(self.first_point, second_point)
+            dtext, _ = self.plot_text(self.first_point, second_point)
+            if dtext is not None:
+                self.dtext = dtext
 
             self.draw()
 
@@ -716,10 +775,16 @@ class MplCanvas(FigureCanvas):
         """        
         self.first_point = None
         if self.line:
-            self.line.remove()
+            try:
+                self.line.remove()
+            except ValueError:
+                pass
             self.line = None
         if self.dtext:
-            self.dtext.remove()
+            try:
+                self.dtext.remove()
+            except ValueError:
+                pass
             self.dtext = None
         self.draw()
         if self.active_tool != 'distance':

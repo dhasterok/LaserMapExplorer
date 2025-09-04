@@ -635,6 +635,25 @@ class ControlDock(CustomDockWidget):
         # update field widgets
         self.update_field_widgets()
 
+        # For field maps, set X and Y axes to coordinate fields
+        if plot_type in ['field map', 'gradient map']:
+            # Set X and Y to coordinate fields for maps
+            self.comboBoxFieldTypeX.setCurrentText('coordinate')
+            self.comboBoxFieldX.setCurrentText('Xc')
+            self.comboBoxFieldTypeY.setCurrentText('coordinate')
+            self.comboBoxFieldY.setCurrentText('Yc')
+            
+            # Update the app_data to reflect these changes
+            self.ui.app_data.set_field_type('x', 'coordinate')
+            self.ui.app_data.set_field('x', 'Xc')
+            self.ui.app_data.set_field_type('y', 'coordinate')
+            self.ui.app_data.set_field('y', 'Yc')
+            
+            # Manually trigger axis_variable_changed to update styling widgets
+            if hasattr(self.ui, 'styling_dock'):
+                self.ui.styling_dock.axis_variable_changed('Xc', 'x')
+                self.ui.styling_dock.axis_variable_changed('Yc', 'y')
+
         self.ui.plot_flag = False
         # update all plot widgets
         axis_settings = self.ui.style_data.axis_settings[plot_type].axes
@@ -717,11 +736,17 @@ class ControlDock(CustomDockWidget):
                 self.ui.app_data.set_field_type(ax, setting.field_type)
             else:
                 self.update_field_type_combobox_options(parentbox, childbox, ax=ax)
+                # If no saved field type and 'none' is available, select it
+                if 'none' in parentbox.allItems():
+                    parentbox.setCurrentText('none')
 
             if setting.field is not None:
                 self.ui.app_data.set_field(ax, setting.field)
             else:
                 self.update_field_combobox_options(childbox, parentbox, spinbox, ax=ax)
+                # If no saved field and 'none' is available, select it  
+                if 'none' in childbox.allItems():
+                    childbox.setCurrentText('none')
 
         if flag:
             self.ui.plot_flag = True

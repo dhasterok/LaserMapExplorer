@@ -41,8 +41,6 @@ class SampleObj(QObject):
         Method used to handle negative values in the dataset
     ref_chem : pandas.DataFrame
         Reference chemistry for normalizing data
-    debug : bool, optional
-        If true, will result in verbose output to stdout
     
     Methods
     -------
@@ -505,11 +503,11 @@ class SampleObj(QObject):
         return self._data_max_diff_quantile
     
     @data_max_diff_quantile.setter
-    def data_max_diff_quantile(self, new_value):
-        if new_value == self._data_max_diff_quantile:
+    def data_max_diff_quantile(self, value):
+        if value == self._data_max_diff_quantile:
             return
     
-        self._data_max_diff_quantile = new_value
+        self._data_max_diff_quantile = value
         self.dataDiffQuantileChanged.emit("max", value)
 
     @property
@@ -1365,6 +1363,10 @@ class SampleObj(QObject):
                 amax = fmt.oround(amax, order=2, toward=1)
             self.processed.set_attribute(col,'plot_min',amin)
             self.processed.set_attribute(col,'plot_max',amax)
+            
+            # Set norm attribute for coordinate fields if not already set
+            if self.processed.get_attribute(col, 'data_type') == 'coordinate' and self.processed.get_attribute(col, 'norm') is None:
+                self.processed.set_attribute(col, 'norm', 'linear')
 
     def k_optimal_clusters(self, data, max_clusters=int(10)):
         """

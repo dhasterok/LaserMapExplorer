@@ -2095,6 +2095,9 @@ class StylingDock(CustomDockWidget):
             return
 
         amin, amax, scale, label = self.ui.style_data.get_axis_values(self.ui.app_data.current_data, field)
+        
+        # Debug output to help verify the method is called and values are correct
+        print(f"DEBUG: axis_variable_changed called for field '{field}', ax '{ax}': min={amin}, max={amax}, scale={scale}, label={label}")
 
         plot_type = self.ui.style_data.plot_type
 
@@ -2242,7 +2245,7 @@ class StylingDock(CustomDockWidget):
             return
         
         # Update color axis bounds and scale
-        if data and data.processed:
+        if data:
             self.caxes.lineEditCLB.value = data.processed.get_attribute(field,'plot_min')
             self.caxes.lineEditCUB.value = data.processed.get_attribute(field,'plot_max')
             self.caxes.comboBoxCScale.setCurrentText(data.processed.get_attribute(field,'norm'))

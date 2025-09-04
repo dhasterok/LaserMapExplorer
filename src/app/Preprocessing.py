@@ -421,7 +421,7 @@ class PreprocessingUI(CustomPage):
         value : str
             x dimension.
         """
-        line_edit = getattr(self, f"lineEditResolution{ax.upper()}")
+        line_edit = getattr(self, f"lineEditResolutionN{ax}")
         setattr(line_edit, "value", value)
         if self.dock.ui.control_dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
             self.dock.ui.schedule_update()
@@ -438,7 +438,7 @@ class PreprocessingUI(CustomPage):
         value : str
             x dimension.
         """
-        line_edit = getattr(self, f"lineEdit{ax.upper()}")
+        line_edit = getattr(self, f"lineEditD{ax.upper()}")
         setattr(line_edit, "value", value)
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['process']:
             self.dock.ui.schedule_update()

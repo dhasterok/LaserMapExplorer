@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+from typing import TYPE_CHECKING
 from PyQt6.QtCore import ( Qt, QRect, QSize )
 from PyQt6.QtWidgets import ( 
     QCheckBox, QTableWidgetItem, QMessageBox, QInputDialog, QGroupBox, QFormLayout, QVBoxLayout,
@@ -13,6 +14,9 @@ import src.common.csvdict as csvdict
 from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.common.Logger import log, auto_log_methods
 from src.app.config import ICONPATH
+
+if TYPE_CHECKING:
+    from src.app.FieldLogic import ControlDock
 
 
 @auto_log_methods(logger_key="Plot")
@@ -46,7 +50,7 @@ class HistogramUI(QGroupBox):
     update_hist_plot_style(new_plot_style=None)
         Updates the histogram plot style combobox and triggers a plot update.
     """
-    def __init__(self, dock=None):
+    def __init__(self, dock: 'ControlDock' = None):
         super().__init__(dock)
 
         self.dock = dock
@@ -103,8 +107,8 @@ class HistogramUI(QGroupBox):
 
     def connect_widgets(self):
         """Connects histogram widgets to methods."""
-        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda value: self.update_hist_bin_width(value))
-        self.spinBoxNBins.valueChanged.connect(lambda value: self.update_hist_num_bins(value))
+        self.doubleSpinBoxBinWidth.valueChanged.connect(lambda value: self.update_hist_bin_width(value, user_action=True))
+        self.spinBoxNBins.valueChanged.connect(lambda value: self.update_hist_num_bins(value, user_action=True))
 
         self.comboBoxHistType.clear()
         self.comboBoxHistType.addItems(self._histogram_type_options)
@@ -116,9 +120,9 @@ class HistogramUI(QGroupBox):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.histBinWidthChanged.connect(self.update_hist_bin_width)
-        self.dock.ui.app_data.histNumBinsChanged.connect(self.update_hist_num_bins)
-        self.dock.ui.app_data.histPlotStyleChanged.connect(self.update_hist_plot_style)
+        self.dock.ui.app_data.histBinWidthChanged.connect(lambda value: self.update_hist_bin_width(value))
+        self.dock.ui.app_data.histNumBinsChanged.connect(lambda value: self.update_hist_num_bins(value))
+        self.dock.ui.app_data.histPlotStyleChanged.connect(lambda method: self.update_hist_plot_style(method))
 
     def connect_logger(self):
         """Connects widgets to logger."""
@@ -126,7 +130,7 @@ class HistogramUI(QGroupBox):
         self.spinBoxNBins.valueChanged.connect(lambda: log(f"spinBoxNBins value=[{self.spinBoxNBins.value()}]", prefix="UI"))
         self.toolButtonHistogramReset.clicked.connect(lambda: log("toolButtonHistogramReset", prefix="UI"))
 
-    def update_hist_bin_width(self, value=None):
+    def update_hist_bin_width(self, value, user_action=False):
         """ Updates histogram bin width.
         
         If `value` is None, it uses the current value of `doubleSpinBoxBinWidth`.
@@ -137,9 +141,11 @@ class HistogramUI(QGroupBox):
         value : float, optional
             New value for the histogram bin width, by default None
         """
-        if value is None:
+        if user_action:
             # use current value of doubleSpinBoxBinWidth
+            self.dock.ui.app_data.blockSignals(True)
             self.dock.ui.app_data.hist_bin_width = self.doubleSpinBoxBinWidth.value()
+            self.dock.ui.app_data.blockSignals(False)
         else:
             # update doubleSpinBoxBinWidth with new value
             if self.doubleSpinBoxBinWidth.value() == value:
@@ -152,7 +158,7 @@ class HistogramUI(QGroupBox):
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['sample'] and self.dock.ui.style_data.plot_type == "histogram":
             self.dock.ui.schedule_update()
 
-    def update_hist_num_bins(self, value=None):
+    def update_hist_num_bins(self, value, user_action=False):
         """ Updates histogram number of bins.
         
         If `value` is None, it uses the current value of `spinBoxNBins`.
@@ -162,10 +168,14 @@ class HistogramUI(QGroupBox):
         ----------
         value : int, optional
             New value for the histogram number of bins, by default None
+        user_action : bool, optional
+            Whether the update was triggered by user interaction with a widget, by default False
         """
-        if value is None:
+        if user_action:
             # use current value of spinBoxNBins
+            self.dock.ui.app_data.blockSignals(True)
             self.dock.ui.app_data.hist_num_bins = self.spinBoxNBins.value()
+            self.dock.ui.app_data.blockSignals(False)
         else:
             # if value is 0, set to default number of bins
             if value == 0:
@@ -183,7 +193,7 @@ class HistogramUI(QGroupBox):
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['sample'] and self.dock.ui.style_data.plot_type == "histogram":
             self.dock.ui.schedule_update()
 
-    def update_hist_plot_style(self, new_plot_style=None):
+    def update_hist_plot_style(self, new_plot_style=None, user_action=False):
         """
         Updates histogram plot style combobox and triggers plot update.
 
@@ -194,10 +204,14 @@ class HistogramUI(QGroupBox):
         ----------
         new_plot_style : str, optional
             New style for the histogram plot, by default None
+        user_action : bool, optional
+            Whether the update was triggered by user interaction with a widget, by default False
         """
-        if new_plot_style is None:
+        if not new_plot_style or user_action:
             # use current text of combobox
+            self.dock.ui.app_data.blockSignals(True)
             self.dock.ui.app_data.hist_plot_style = self.comboBoxHistType.currentText()
+            self.dock.ui.app_data.blockSignals(False)
         else:
             # update combobox with new plot style
             if self.comboBoxHistType.currentText() == new_plot_style:
@@ -242,7 +256,7 @@ class CorrelationUI(QGroupBox):
     correlation_squared_callback()
         Produces a plot of the squared correlation and updates the color limits and colormap.
     """
-    def __init__(self, dock):
+    def __init__(self, dock: 'ControlDock'):
         super().__init__(dock)
 
         self.dock = dock
@@ -412,7 +426,7 @@ class CorrelationUI(QGroupBox):
     
 @auto_log_methods(logger_key="Plot")
 class ScatterUI(CustomPage):
-    def __init__(self, dock):
+    def __init__(self, dock: 'ControlDock'):
         super().__init__(obj_name="ScatterPage", parent=dock)
         self.logger_key = "Plot"
         self.dock = dock
@@ -614,10 +628,10 @@ class ScatterUI(CustomPage):
         if ok:
             try:
                 self.dock.ui.app_data.scatter_preset_dict[name] = [
-                    self.dock.toolbox.comboBoxFieldX.currentText(),
-                    self.dock.toolbox.comboBoxFieldY.currentText(),
-                    self.dock.toolbox.comboBoxFieldZ.currentText(),
-                    self.dock.toolbox.comboBoxFieldC.currentText(),
+                    self.dock.comboBoxFieldX.currentText(),
+                    self.dock.comboBoxFieldY.currentText(),
+                    self.dock.comboBoxFieldZ.currentText(),
+                    self.dock.comboBoxFieldC.currentText(),
                 ]
 
                 # export the csv
@@ -719,7 +733,7 @@ class ScatterUI(CustomPage):
 
 @auto_log_methods(logger_key="Plot")
 class NDimUI(CustomPage):
-    def __init__(self, dock):
+    def __init__(self, dock: 'ControlDock'):
         super().__init__("NDimPage", parent=dock)
         self.dock = dock
         self.logger_key = "Plot"

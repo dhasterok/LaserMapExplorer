@@ -304,7 +304,11 @@ class LameBlockly(QObject):
 
         self.style_data.plot_type = 'histogram'
         self.app_data.x_field =field
+        self.app_data.y_field =field
+        self.app_data.c_field =field
         self.app_data.x_field_type =field_type
+        self.app_data.y_field_type =field_type
+        self.app_data.c_field_type =field_type
         self.app_data.hist_plot_style = hist_type
         self.app_data.hist_num_bins = n_bins
         plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)
@@ -546,3 +550,20 @@ class LameBlockly(QObject):
             self.blockly.runJavaScript(
                 f"updateStylingChain(workspace.getBlockById('{self.block_id}'))"
             )
+
+    def add_canvas_to_layout(self, canvas):
+        """
+        Adds the given canvas to the layout of the canvas widget.
+        """
+        if self.canvas_widget:
+            # For non-field map cases, add canvas to layout
+            if 'canvas' in locals() and canvas:
+                layout = self.canvas_widget.single_view.layout()
+                if layout is not None:
+                    self.canvas_widget.clear_layout(layout)
+                    layout.addWidget(canvas)
+                else:
+                    print("Warning: single_view.layout() is None")
+
+                # Store reference after successful addition
+                self.mpl_canvas = canvas

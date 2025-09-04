@@ -213,11 +213,12 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     const showMap = block.getFieldValue('SHOW_MAP') === 'TRUE';
     if (showMap) {
         code += `self.ensure_canvas_popup()\n`;
-        code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+        code += `self.mpl_canvas = canvas\n`;
+        code += `self.canvas_widget.add_canvas_to_window(self.plot_info)\n`;
         code += `self.canvas_dialog.show()\n`;
     }
     else {
-        code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+        code += `self.add_canvas_to_layout(canvas)\n`;
     }
     return code;
 };
@@ -247,7 +248,7 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
          code += `self.ensure_canvas_popup()\n`;
-        code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+        code += `self.add_canvas_to_layout(canvas)\n`;
         code += `self.canvas_dialog.show()\n`;
     return code;
 };
@@ -286,7 +287,7 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas,  self.plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
          code += `self.ensure_canvas_popup()\n`;
-        code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+        code += `self.add_canvas_to_layout(canvas)\n`;
         code += `self.canvas_dialog.show()\n`;
 
     return code;
@@ -313,7 +314,7 @@ pythonGenerator.forBlock['plot_biplot'] = function(block, generator) {
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
     code += `self.ensure_canvas_popup()\n`;
-    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+    code += `self.add_canvas_to_layout(canvas)\n`;
     code += `self.canvas_dialog.show()\n`;
     return code;
 };
@@ -333,7 +334,7 @@ pythonGenerator.forBlock['plot_ternary'] = function(block, generator) {
     code += `self.style_data.plot_type = ${plotType}\n`;
     code += `canvas, self.plot_info =  plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
     code += `self.ensure_canvas_popup()\n`;
-    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+    code += `self.add_canvas_to_layout(canvas)\n`;
     code += `self.canvas_dialog.show()\n`;
     return code;
 };
@@ -355,7 +356,7 @@ pythonGenerator.forBlock['plot_ternary_map'] = function(block, generator) {
         + `field_type_y=${fields.fieldTypeY}, field_y=${fields.fieldY}, `
         + `field_type_z=${fields.fieldTypeZ}, field_z=${fields.fieldZ})\n`;
     code += `self.ensure_canvas_popup()\n`;
-    code += `self.canvas_widget.add_plotwidget_to_canvas(self.plot_info)\n`;
+    code += `self.add_canvas_to_layout(canvas)\n`;
     code += `self.canvas_dialog.show()\n`;
     return code;
 };

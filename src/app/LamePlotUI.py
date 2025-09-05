@@ -582,12 +582,13 @@ class ScatterUI(CustomPage):
         self.comboBoxTernaryColormap.setCurrentIndex(0)
 
         # dialog for adding and saving new colormaps
-        self.toolButtonSaveTernaryColormap.clicked.connect(self.input_ternary_name_dlg)
+        self.toolButtonSaveTernaryColormap.clicked.connect(lambda _: self.input_ternary_name_dlg())
 
-        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda: self.ternary_colormap_changed())
+        self.comboBoxTernaryColormap.currentIndexChanged.connect(lambda _: self.ternary_colormap_changed())
 
         self.ternary_colormap_changed()
 
+        self.toolButtonTernaryMap.clicked.connect(lambda _: self.ternary_map_button_clicked())
 
     def connect_observer(self):
         """Connects properties to observer functions."""
@@ -729,6 +730,12 @@ class ScatterUI(CustomPage):
         button.color = new_color
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
+
+    def ternary_map_button_clicked(self):
+        """Handles ternary map button click by setting plot type and updating plot."""
+        if self.dock.ui.style_data.plot_type != 'ternary map':
+            self.dock.ui.style_data.plot_type = 'ternary map'
+        self.dock.ui.update_SV()
 
 
 @auto_log_methods(logger_key="Plot")

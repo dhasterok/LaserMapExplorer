@@ -649,7 +649,10 @@ class AppData(QObject):
             return
 
         self._hist_bin_width = width
-        self.histBinWidthChanged.emit(width)
+        
+        # Only emit signal if not blocked
+        if not self.signalsBlocked():
+            self.histBinWidthChanged.emit(width)
 
         # update hist_num_bins
         if self.update_num_bins:
@@ -669,7 +672,10 @@ class AppData(QObject):
             return
         
         self._hist_num_bins = num_bins
-        self.histNumBinsChanged.emit(num_bins)
+        
+        # Only emit signal if not blocked
+        if not self.signalsBlocked():
+            self.histNumBinsChanged.emit(num_bins)
 
         # update hist_bin_width
         if self.update_bin_width:
@@ -806,48 +812,52 @@ class AppData(QObject):
 
     @x_field_type.setter
     def x_field_type(self, new_field_type):
-        if new_field_type != self._x_field_type:
+        current_field_type = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['XFieldType']
+        if new_field_type != current_field_type:
             self.validate_field_type(new_field_type)
-            self._x_field_type = new_field_type
+            self.ui.style_data.style_dict[self.ui.style_data.plot_type]['XFieldType'] = new_field_type
             self.fieldTypeChanged.emit('x', new_field_type)
 
     @property
     def y_field_type(self):
         """str : Field type for y field."""
-        return self._y_field_type
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['YFieldType']
 
     @y_field_type.setter
     def y_field_type(self, new_field_type):
-        if new_field_type != self._y_field_type:
+        current_field_type = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['YFieldType']
+        if new_field_type != current_field_type:
             self.validate_field_type(new_field_type)
-            self._y_field_type = new_field_type
+            self.ui.style_data.style_dict[self.ui.style_data.plot_type]['YFieldType'] = new_field_type
             self.fieldTypeChanged.emit('y', new_field_type)
 
     @property
     def z_field_type(self):
         """str : Field type for z field."""
-        return self._z_field_type
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['ZFieldType']
 
     @z_field_type.setter
     def z_field_type(self, new_field_type):
-        if new_field_type != self._z_field_type:
+        current_field_type = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['ZFieldType']
+        if new_field_type != current_field_type:
             self.validate_field_type(new_field_type)
-            self._z_field_type = new_field_type
+            self.ui.style_data.style_dict[self.ui.style_data.plot_type]['ZFieldType'] = new_field_type
             self.fieldTypeChanged.emit('z', new_field_type)
 
     @property
     def c_field_type(self):
         """str : Field type for color field or map data."""
-        return self._c_field_type
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CFieldType']
     
     @c_field_type.setter
     def c_field_type(self, new_field_type):
-        if new_field_type == self._c_field_type:
+        current_field_type = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CFieldType']
+        if new_field_type == current_field_type:
             return
 
         # update c_field_type
         #self.validate_field_type(new_field_type)
-        self._c_field_type = new_field_type
+        self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CFieldType'] = new_field_type
         self.fieldTypeChanged.emit('c', new_field_type)
 
         # update c_field
@@ -860,54 +870,58 @@ class AppData(QObject):
     @property
     def x_field(self):
         """str : Field associated with x-axis or A-vertex on a ternary diagram."""
-        return self._x_field
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['XField']
     
     @x_field.setter
     def x_field(self, new_field):
-        if new_field == self._x_field:
+        current_field = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['XField']
+        if new_field == current_field:
             return
     
-        self._x_field = new_field
+        self.ui.style_data.style_dict[self.ui.style_data.plot_type]['XField'] = new_field
         self.fieldChanged.emit('x', new_field)
     
     @property
     def y_field(self):
         """str : Field associated with y-axis or B-vertex on a ternary diagram."""
-        return self._y_field
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['YField']
     
     @y_field.setter
     def y_field(self, new_field):
-        if new_field == self._y_field:
+        current_field = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['YField']
+        if new_field == current_field:
             return
     
-        self._y_field = new_field
+        self.ui.style_data.style_dict[self.ui.style_data.plot_type]['YField'] = new_field
         self.fieldChanged.emit('y', new_field)
     
     @property
     def z_field(self):
         """str : Field associated with z-axis or C-vertex on a ternary diagram."""
-        return self._z_field
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['ZField']
     
     @z_field.setter
     def z_field(self, new_field):
-        if new_field == self._z_field:
+        current_field = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['ZField']
+        if new_field == current_field:
             return
     
-        self._z_field = new_field
+        self.ui.style_data.style_dict[self.ui.style_data.plot_type]['ZField'] = new_field
         self.fieldChanged.emit('z', new_field)
 
     @property
     def c_field(self):
         """str : Field associated with color on many plots."""
-        return self._c_field
+        return self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CField']
 
     @c_field.setter
     def c_field(self, new_field):
-        if new_field == self._c_field:
+        current_field = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CField']
+        if new_field == current_field:
             return
 
         #self.validate_field(self._c_field_type, new_field)
-        self._c_field = new_field
+        self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CField'] = new_field
         self.fieldChanged.emit('c', new_field)
 
     @property
@@ -1337,7 +1351,13 @@ class AppData(QObject):
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to the default."""
+        # Block signals to prevent circular updates during reset
+        self.blockSignals(True)
         self.hist_num_bins = self._default_hist_num_bins
+        self.blockSignals(False)
+        
+        # Emit the signal manually to update UI
+        self.histNumBinsChanged.emit(self._default_hist_num_bins)
 
     def update_ref_chem_index(self, ref_val):
         """Changes reference computing normalized analytes

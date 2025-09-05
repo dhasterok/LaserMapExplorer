@@ -262,6 +262,9 @@ class CanvasWidget(QWidget):
         except AttributeError:
             # Canvas doesn't support observers, that's ok
             pass
+            
+        # Update tool availability based on canvas type
+        self.toolbar.sv.update_tool_availability(new_canvas)
         
         try:
             # Recreate the NavigationToolbar with the new canvas
@@ -928,6 +931,18 @@ class NavigationWidgetsSV(VisibilityWidget):
         self.toolButtonZoom.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonZoom))
         self.toolButtonAnnotate.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonAnnotate))
         self.toolButtonDistance.clicked.connect(lambda _: self.update_button_state(button=self.toolButtonDistance))
+
+    def update_tool_availability(self, canvas=None):
+        """Update tool availability based on current canvas/plot type."""
+        if canvas is None or not hasattr(canvas, 'map_flag'):
+            return
+            
+        # Enable/disable distance tool based on whether this is a map
+        is_map = canvas.map_flag
+        self.toolButtonDistance.setEnabled(is_map)
+        
+        if not is_map and self.toolButtonDistance.isChecked():
+            self.toolButtonDistance.setChecked(False)
 
     def reset_buttons(self):
         if not self.isVisible():

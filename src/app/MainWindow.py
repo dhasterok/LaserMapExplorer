@@ -20,7 +20,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 from src.common.LamePlot import (
-    plot_map_mpl, plot_histogram, plot_correlation, get_scatter_data, plot_scatter,
+    create_plot, plot_map_mpl, plot_histogram, plot_correlation, get_scatter_data, plot_scatter,
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
@@ -43,13 +43,11 @@ from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
 from src.app.config import BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet
 from src.app.settings import prefs
-from src.common.colorfunc import get_hex_color, get_rgb_color
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.app.PlotRegistry import PlotRegistry
 
-from src.common.CustomMplCanvas import MplCanvas
 import faulthandler
 faulthandler.enable()
 
@@ -756,8 +754,6 @@ class MainWindow(QMainWindow):
 
             return ref_index
 
-
-
     # -------------------------------------
     # General plot functions
     # -------------------------------------
@@ -825,12 +821,13 @@ class MainWindow(QMainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
-        # check to make sure that the basic elements of a plot are satisfied, i.e.,
-        #   sample_id is not an empty str
-        #   plot_type is not empty or none
-        #   field types and fields are valid for the appropriate axes
+        # UI-specific validation checks
         if self.app_data.sample_id == '' or self.style_data.plot_type in [None, '', 'none', 'None'] or not self.check_valid_fields():
             return
+
+        # Prevent recursive updates during plotting by disabling plot_flag
+        old_plot_flag = self.plot_flag
+        self.plot_flag = False
 
         data = self.app_data.current_data
 
@@ -839,15 +836,20 @@ class MainWindow(QMainWindow):
 
         
         try:
+            # Handle UI-specific preprocessing and validations
+            canvas = None
+            self.plot_info = None
+            hist_canvas = None
+            
+            # Handle plot type specific UI validations and preprocessing
             match self.style_data.plot_type:
                 case 'field map':
-                    sample_id = self.app_data.sample_id
-                    field_type = self.app_data.c_field_type
-                    field = self.app_data.c_field
-
+                    # Field map has special UI handling for mask/profile modes and histogram
                     if (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) or (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()):
-                        canvas, self.plot_info,_ =  plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
-                        # show increated profiles if exists
+                        # Mask/profile mode - use create_plot directly
+                        canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                        
+                        # Handle profile/mask specific UI updates
                         if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                             self.profile_dock.profiling.clear_plot()
                             self.profile_dock.profiling.plot_existing_profile(self.plot)
@@ -855,84 +857,86 @@ class MainWindow(QMainWindow):
                             self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
                             self.mask_dock.polygon_tab.polygon_manager.plot_existing_polygon(canvas)
                     else:
+                        # Always use create_plot for main canvas
+                        canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                        
+                        # Handle histogram separately if needed (UI-specific feature)
                         if self.control_dock.toolbox.currentIndex() == self.control_dock.tab_dict['process']:
-                            canvas, self.plot_info, hist_canvas = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=True)
-
-                            self.canvas_widget.clear_layout(self.control_dock.preprocess.widgetHistView.layout())
-
-                            layout = self.control_dock.preprocess.widgetHistView.layout()
-                            if layout is not None:
-                                layout.addWidget(hist_canvas)
-                        else:
-                            canvas, self.plot_info, _ = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=False)
-                    
-                    # Store reference BEFORE adding to canvas
-                    self.mpl_canvas = canvas
-                    self.canvas_widget.add_canvas_to_window(self.plot_info)
-
-                    if hasattr(self,"info_dock"):
-                        self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
-                    
-                    return
-
+                            from src.common.LamePlot import plot_map_mpl
+                            field_type = self.app_data.c_field_type
+                            field = self.app_data.c_field
+                            _, _, hist_canvas = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=True)
+                            
+                            # Handle histogram UI placement
+                            if hist_canvas:
+                                self.canvas_widget.clear_layout(self.control_dock.preprocess.widgetHistView.layout())
+                                layout = self.control_dock.preprocess.widgetHistView.layout()
+                                if layout is not None:
+                                    layout.addWidget(hist_canvas)
+                            
+                    # Handle field map canvas placement (special case)
+                    if canvas:
+                        self.mpl_canvas = canvas
+                        self.canvas_widget.add_canvas_to_window(self.plot_info)
+                        
                 case 'gradient map':
+                    # UI validation for gradient map
                     if self.control_dock.noise_reduction.comboBoxNoiseReductionMethod.currentText() == 'none':
+                        from PyQt6.QtWidgets import QMessageBox
                         QMessageBox.warning(self,'Warning','Noise reduction must be performed before computing a gradient.')
                         return
+                    # Perform noise reduction computation (UI-specific)
                     self.control_dock.noise_reduction.noise_reduction_method_callback()
+                    # Note: gradient plotting would go here after noise reduction
+                    
                 case 'correlation':
+                    # UI validation for correlation
                     if self.control_dock.correlation.comboBoxCorrelationMethod.currentText() == 'none':
                         return
-                    canvas, self.plot_info = plot_correlation(self, data, self.app_data, self.style_data)
-
-
-                case 'TEC' | 'Radar':
-                    canvas, self.plot_info = plot_ndim(self, data, self.app_data, self.style_data)
-
-                case 'histogram':
-                    canvas, self.plot_info = plot_histogram(self, data, self.app_data, self.style_data)
-
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                    
                 case 'scatter' | 'heatmap':
-                    if self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldY.currentText():
-                        return
-                    canvas, self.plot_info = plot_scatter(self, data, self.app_data, self.style_data)
-
+                    # UI validation for scatter/heatmap - field comparison
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                    
                 case 'ternary map':
-                    if self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldY.currentText() or \
-                        self.control_dock.comboBoxFieldX.currentText() == self.control_dock.comboBoxFieldZ.currentText() or \
-                        self.control_dock.comboBoxFieldY.currentText() == self.control_dock.comboBoxFieldZ.currentText():
-                        return
-
-                    canvas, self.plot_info = plot_ternary_map(self, data, self.app_data, self.style_data)
-
+                    # UI validation for ternary map - field comparisons
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                    
                 case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
+                    # Handle PCA computation (UI-specific)
                     if self.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
                         self.control_dock.dimreduction.compute_dim_red(data, self.app_data)
-                    canvas, self.plot_info = plot_pca(self, data, self.app_data, self.style_data)
-
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                    
                 case 'cluster map' | 'cluster score map':
+                    # Handle clustering computation (UI-specific)
                     self.control_dock.clustering.compute_clusters_update_groups()
-                    canvas, self.plot_info = plot_clusters(self, data, self.app_data, self.style_data)
-
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                    
                 case 'cluster performance':
-                    # compute performace as a function of number of clusters
+                    # Handle cluster performance computation (UI-specific)
                     self.control_dock.clustering.compute_clusters(data, self.app_data, max_clusters = self.app_data.max_clusters)
-                    canvas, self.plot_info = cluster_performance_plot(self, data, self.app_data, self.style_data)
-
-            # For non-field map cases, add canvas to layout
-            if 'canvas' in locals() and canvas:
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+                    
+                case _:
+                    # For other plot types, use create_plot directly
+                    canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
+            
+            # Handle canvas placement for non-field map plots
+            if canvas and self.style_data.plot_type != 'field map':
                 layout = self.canvas_widget.single_view.layout()
                 if layout is not None:
                     self.canvas_widget.clear_layout(layout)
                     layout.addWidget(canvas)
                 else:
                     print("Warning: single_view.layout() is None")
-
+                
                 # Store reference after successful addition
                 self.mpl_canvas = canvas
 
-            # add plot info to info_dock
-            if hasattr(self,"info_dock") and hasattr(self, 'plot_info'):
+            # Add plot info to info_dock (UI-specific)
+            if hasattr(self,"info_dock") and hasattr(self, 'plot_info') and self.plot_info:
                 self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
         except Exception as e:
@@ -942,6 +946,9 @@ class MainWindow(QMainWindow):
             # Restore old canvas if new one failed
             if old_canvas is not None:
                 self.mpl_canvas = old_canvas
+        finally:
+            # Always restore plot_flag to prevent infinite loops
+            self.plot_flag = old_plot_flag
 
 
     # -------------------------------------

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import traceback
 
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel, QVBoxLayout
@@ -22,6 +23,96 @@ from src.common.radar import Radar
 from src.common.scalebar import scalebar
 from src.common.ternary_plot import ternary
 from src.common.Logger import LoggerConfig, log_call, log
+
+def create_plot(parent, data, app_data, style_data):
+    """Creates a plot without UI dependencies.
+    
+    This function handles the core plotting logic without requiring UI components.
+    It can be used by both UI (MainWindow.update_SV) and non-UI (Blockly) contexts.
+    
+    Parameters
+    ----------
+    parent : object
+        Parent object for MplCanvas initialization (required for annotation/tracking tools)
+    data : object
+        Data object containing processed data
+    app_data : object
+        Application data object containing settings
+    style_data : object
+        Plot style object providing styling information
+    
+    Returns
+    -------
+    tuple
+        (canvas, plot_info) - The matplotlib canvas and plot information dict
+    """
+    # Basic validation - only data-related checks
+    if app_data.sample_id == '' or style_data.plot_type in [None, '', 'none', 'None']:
+        return None, None
+
+    canvas = None
+    plot_info = None
+    
+    try:
+        match style_data.plot_type:
+            case 'field map':
+                field_type = app_data.c_field_type
+                field = app_data.c_field
+                canvas, plot_info, _ = plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_histogram=False)
+                
+            case 'gradient map':
+                # Note: gradient map logic would go here
+                # For now, skip as it requires noise reduction preprocessing
+                pass
+                
+            case 'correlation':
+                if app_data.corr_method == 'none':
+                    return None, None
+                canvas, plot_info = plot_correlation(parent, data, app_data, style_data)
+
+            case 'TEC' | 'Radar':
+                canvas, plot_info = plot_ndim(parent, data, app_data, style_data)
+
+            case 'histogram':
+                canvas, plot_info = plot_histogram(parent, data, app_data, style_data)
+
+            case 'scatter' | 'heatmap':
+                # Check if fields are the same
+                if hasattr(app_data, 'x_field') and hasattr(app_data, 'y_field'):
+                    if app_data.x_field == app_data.y_field:
+                        return None, None
+                canvas, plot_info = plot_scatter(parent, data, app_data, style_data)
+
+            case 'ternary map':
+                # Check if any fields are the same
+                if (hasattr(app_data, 'x_field') and hasattr(app_data, 'y_field') and hasattr(app_data, 'z_field')):
+                    if (app_data.x_field == app_data.y_field or 
+                        app_data.x_field == app_data.z_field or 
+                        app_data.y_field == app_data.z_field):
+                        return None, None
+                canvas, plot_info = plot_ternary_map(parent, data, app_data, style_data)
+
+            case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
+                # Check if PCA needs to be computed - this is data-related, not UI-related
+                if app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
+                    # Note: PCA computation should be done by caller before calling create_plot
+                    return None, None
+                canvas, plot_info = plot_pca(parent, data, app_data, style_data)
+
+            case 'cluster map' | 'cluster score map':
+                # Note: clustering computation should be done by caller before calling create_plot
+                canvas, plot_info = plot_clusters(parent, data, app_data, style_data)
+
+            case 'cluster performance':
+                # Note: cluster performance computation should be done by caller before calling create_plot
+                canvas, plot_info = cluster_performance_plot(parent, data, app_data, style_data)
+
+    except Exception as e:
+        print(f"Error in create_plot: {e}")
+        traceback.print_exc()
+        return None, None
+        
+    return canvas, plot_info
 
 @log_call(logger_key='Plot')
 def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_histogram=False):
@@ -478,10 +569,20 @@ def plot_histogram(parent, data, app_data, style_data):
     x = dict()
     if app_data.hist_plot_style == 'log-scaling' and app_data.c_field_type == 'Analyte':
         print('raw_data for log-scaling')
-        x = get_scatter_data(data, app_data, style_data, processed=False)['x']
+        scatter_data = get_scatter_data(data, app_data, style_data, processed=False)
+        x = scatter_data['x'] if scatter_data and 'x' in scatter_data else None
     else:
         print('processed_data for histogram')
-        x = get_scatter_data(data, app_data, style_data, processed=True)['x']
+        scatter_data = get_scatter_data(data, app_data, style_data, processed=True)
+        x = scatter_data['x'] if scatter_data and 'x' in scatter_data else None
+    
+    # Check if x data was successfully retrieved
+    if x is None or 'array' not in x or x['array'] is None:
+        print(f"Error: Unable to retrieve data for histogram. Field: {app_data.c_field}, Field Type: {app_data.c_field_type}")
+        # Create empty canvas and return
+        canvas = MplCanvas(parent=parent)
+        canvas.plot_name = "error"
+        return canvas, {}
 
     # determine edges
     xmin,xmax,xscale,xlbl = style_data.get_axis_values(data, x['field'])
@@ -571,7 +672,15 @@ def plot_histogram(parent, data, app_data, style_data):
                 log_counts = np.log10(len(sorted_data) - np.arange(len(sorted_data)))
 
                 # Plot the data
-                canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
+                if lw == 0:
+                    lw = 1
+                canvas.axes.plot(
+                    log_values,
+                    log_counts,
+                    label=cluster_label[int(i)],
+                    color=bar_color,
+                    lw=lw
+                )
                 
                 # Store data
                 df = pd.DataFrame({
@@ -623,15 +732,20 @@ def plot_histogram(parent, data, app_data, style_data):
             sorted_data = np.sort(filtered_data)
 
             # Calculate log(number of values > x)
-            #log_values = np.log10(sorted_data)
             counts = len(sorted_data) - np.arange(len(sorted_data))
 
             # Plot the data
-            #canvas.axes.plot(log_values, log_counts, label=cluster_label[int(i)], color=bar_color, lw=lw)
-            canvas.axes.plot(sorted_data, counts, color=bar_color, lw=lw, alpha=style_data.marker_alpha/100)
+            if lw == 0:
+                lw = 1
+            canvas.axes.plot(
+                sorted_data,
+                counts,
+                color=bar_color,
+                lw=lw,
+                alpha=style_data.marker_alpha/100)
             canvas.data = pd.DataFrame({
-            'value': sorted_data,
-            'count': counts
+                'value': sorted_data,
+                'count': counts
             })
     # axes
     # label font
@@ -668,7 +782,11 @@ def plot_histogram(parent, data, app_data, style_data):
 
         # y-axis
         canvas.axes.set_ylabel(app_data.hist_plot_style, fontdict=font)
-        canvas.axes.set_ylim(ymin,ymax)
+        # For CDF histograms, y-axis should be [0, 1]
+        if app_data.hist_plot_style == 'CDF':
+            canvas.axes.set_ylim(0, 1)
+        else:
+            canvas.axes.set_ylim(ymin,ymax)
     else:
         canvas.axes.set_xscale('log',base=10)
         canvas.axes.set_yscale('log',base=10)

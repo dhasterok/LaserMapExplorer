@@ -89,6 +89,18 @@ class BlocklyBridge(QObject):
     def getRefValueList(self):
         
         return self.lame_blockly.app_data.ref_list.tolist()
+    
+    @pyqtSlot(result=list)
+    def getNDimAnalyteSets(self):
+        # Return e.g. ["majors", "full trace", "REE", "metals"]
+        return list(self.lame_blockly.app_data.ndim_list_dict.keys())
+
+    @pyqtSlot(result=list)
+    def getNDimQuantiles(self):
+        # Return list of {label, value}, kept simple
+        q = self.lame_blockly.app_data.ndim_quantiles
+        return [{"label": f"{q[k]}", "value": int(k)} for k in sorted(q.keys())]
+
 
     @pyqtSlot(str,result=list)
     def getSavedLists(self,type):

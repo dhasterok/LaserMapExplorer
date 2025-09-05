@@ -1229,7 +1229,7 @@ class StyleData(QObject, StyleTheme):
         """
         data = self.ui.app_data.current_data
 
-        if field == '':
+        if field == '' or field is None:
             return
 
         match ax:

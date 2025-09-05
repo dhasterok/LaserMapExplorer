@@ -1,5 +1,6 @@
 import copy, random
 from pathlib import Path
+import re
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
@@ -382,11 +383,11 @@ class AppData(QObject):
         if 'REE' in self.ndim_list_dict:
             self._ndim_analyte_set = 'REE'
         else:
-            self._ndim_analyte_set = list(self.ndim_list_dict.keys())[0]
+            self._ndim_analyte_set = next(iter(self.ndim_list_dict))
 
         self.ndim_analyte_df = pd.DataFrame(columns=['use', 'Analyte'])
 
-        self._ndim_analyte_set = self.ndim_list_dict[next(iter(self.ndim_list_dict))]
+        
         self.ndim_quantiles = {
             0: [0.5],
             1: [0.25, 0.75],
@@ -1350,13 +1351,52 @@ class AppData(QObject):
         """
         ref_index = self.ref_list.tolist().index(ref_val)
 
-        if ref_index:
+        if ref_index is not None:
             self._ref_index = ref_index
             self.data[self.sample_id].ref_chem = self.ref_chem
 
             return ref_index
         else:
             raise ValueError(f"Reference value ({ref_val}) not found in reference list.")
+        
+    def update_ndim_list(self, el_list):
+        """
+        Extend the active N-dimensional analyte list (``self.ndim_list``) by resolving
+        input analyte tokens against available analyte columns in the current dataset.
+
+        Resolution is performed by:
+        1) collecting columns from ``self.current_data.processed`` where
+            ``data_type == 'Analyte'``; and
+        2) matching each input token in ``el_list`` to those column names with a
+            case-insensitive comparison after removing digits from both sides
+            (e.g., ``'Ce'`` matches ``'Ce140'``, ``'Ce142'``).
+
+        Parameters
+        ----------
+        el_list : Sequence[str]
+            Iterable of analyte names or isotopic labels (e.g., ``["La", "Ce140"]``).
+
+        Returns
+        -------
+        None
+        
+        Examples
+        --------
+        >>> self.ndim_list = []
+        >>> # Suppose analyte columns are: ['La', 'Ce140', 'Ce142', 'Nd146', 'Mg']
+        >>> self.update_ndim_list(['Ce', 'Nd'])
+        >>> self.ndim_list
+        ['Ce140', 'Ce142', 'Nd146']
+        """
+        analytes_list = self.current_data.processed.match_attribute('data_type', 'Analyte')
+        analytes = [
+            col
+            for iso in el_list
+            for col in analytes_list
+            if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '', iso).lower()
+        ]
+        self.ndim_list.extend(analytes)
+        self.ndim_list = list(dict.fromkeys(self.ndim_list))  # Remove duplicates while preserving order
 
     def _set_clustering_parameters(self):
         """Sets clustering parameters

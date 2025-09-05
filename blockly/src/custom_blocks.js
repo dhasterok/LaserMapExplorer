@@ -298,54 +298,43 @@ Blockly.common.defineBlocks({
 
 
  // Define the select_analytes block
+// Define the select_ref_val block
 const select_ref_val = {
-    init: function() {
-      this.appendDummyInput('NAME')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Select Reference value ');
-  
-      // Reference value selection
-      this.appendDummyInput('refValue')
+  init: function () {
+    const block = this;
+
+    block.appendDummyInput('NAME')
+      .setAlign(Blockly.inputs.Align.CENTRE)
+      .appendField('Select Reference value');
+
+    block.appendDummyInput('refValue')
       .appendField('Ref. value')
       .appendField(new Blockly.FieldDropdown([
-          ['bulk silicate Earth [MS95] McD', 'bulk_silicate_earth'],
-          ['option 2', 'option_2']
+        ['bulk silicate Earth [MS95] McD', 'bulk_silicate_earth'],
+        ['option 2', 'option_2']
       ]), 'refValueDropdown');
 
-  
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setTooltip('');
-      this.setHelpUrl('');
-      this.setColour(180);
-      
-      if (!this.isInFlyout) {
-        // Populate dropdown asynchronously
-        updateRefOptions();
-    }
-    
-    // Function to update the analyte options asynchronously
-     function updateRefOptions() {
-      // Call the Python function getAnalyteList through the WebChannel
-      window.blocklyBridge.getRefValueList().then((response) => {
-        // Map the response to the required format for Blockly dropdowns
-        const options = response.map(option => [option, option]);
-        const dropdown = this.getField('refValueDropdown');
-        if (dropdown){
-            // Clear existing options and add new ones
-        dropdown.menuGenerator_ = options;
-        dropdown.setValue(options[0][1]);  // Set the first option as the default
-        dropdown.forceRerender();  // Refresh dropdown to display updated options
-        }
-        
+    block.setPreviousStatement(true, null);
+    block.setNextStatement(true, null);
+    block.setColour(180);
 
-      }).catch(error => {
-        console.error('Error fetching reference list:', error);
-      });
-        }
-    }
+    if (!block.workspace || block.workspace.isFlyout) return;
+
+    // Update options from Python
+    window.blocklyBridge?.getRefValueList?.().then((response) => {
+      const options = response.map(opt => [opt, opt]);
+      const dropdown = block.getField('refValueDropdown');
+      if (dropdown && options.length) {
+        dropdown.menuGenerator_ = options; // update
+        dropdown.setValue(options[0][1]);  // default
+        dropdown.forceRerender?.();        // refresh
+      }
+    }).catch(err => console.error('Error fetching reference list:', err));
+  }
 };
-Blockly.common.defineBlocks({ select_ref_val: select_ref_val }); 
+
+Blockly.common.defineBlocks({ select_ref_val });
+
 
 // Define the change_pixel_dimensions block
 const change_pixel_dimensions= {
@@ -1170,8 +1159,8 @@ const plot_biplot = {
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
             addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
             // update fieldType dropdowns for X and Y
-            updateFieldTypeDropdown(this, this.plotType, 0, 'fieldTypeX', 'fieldX');
-            updateFieldTypeDropdown(this, this.plotType, 1, 'fieldTypeY', 'fieldY');
+            updateFieldTypeDropdown(this, this.plotType, 'x', 'fieldTypeX', 'fieldX');
+            updateFieldTypeDropdown(this, this.plotType, 'y', 'fieldTypeY', 'fieldY');
 
             // Attach validators to fieldType and field for X and Y
             const fieldTypeXDropdown = this.getField('fieldTypeX');
@@ -1386,68 +1375,106 @@ Blockly.common.defineBlocks({ plot_ternary_map: plot_ternary_map });
    Compatibility Diagram (TEC)
    ================================ */
 const plot_ndim = {
-    init: function () {
-        this.appendDummyInput('header')
-            .appendField('Compatibility diagram')
-            .setAlign(Blockly.inputs.Align.CENTRE);
+  init: function () {
+    const block = this;
 
-        // N-dim list selector (dynamic)
-        this.appendDummyInput('NDIM')
-            .appendField('N-dim list')
-            .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimList');
+    block.appendDummyInput('header')
+      .appendField('Compatibility diagram')
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
-        // Styling chain
-        this.appendStatementInput('styling')
-            .setCheck('styling')
-            .appendField('Styling');
+    block.appendDummyInput('ASET')
+      .appendField('Defined set')
+      .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimAnalyteSet');
 
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setTooltip('TEC (spider) diagram. Requires Reference value to be set.');
-        this.setHelpUrl('');
-        this.setColour(285);
+    block.appendDummyInput('QSEL')
+      .appendField('Quantiles')
+      .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'ndimQuantiles');
 
-        // Plot type is handled in generator via plot_ndim (TEC branch)
-        this.plotType = 'TEC';
+    // Styling chain
+    block.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
 
-        if (!this.isInFlyout) {
-            // Choose sensible defaults for TEC
-            const defaultBlocks = ['font', 'line_properties', 'transparency', 'colormap'];
-            addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+    block.setPreviousStatement(true, null);
+    block.setNextStatement(true, null);
+    block.setTooltip('TEC (spider) diagram. Requires Reference value to be set.');
+    block.setHelpUrl('');
+    block.setColour(285);
 
-            // Populate N-dim dropdown from app (dynamic)
-            updateNDimListDropdown(this, 'ndimList');
+    block.plotType = 'TEC';
 
-            const ndimDropdown = this.getField('ndimList');
-            ndimDropdown.setValidator((newValue) => {
-                // Push current context to styling
-                updateStylingChain(this, getNDimArgDict(this));
-                return newValue;
-            });
+    if (!block.workspace || block.workspace.isFlyout) return;
+
+    // Defaults for TEC
+    const defaultBlocks = ['font', 'line_properties', 'transparency', 'colormap'];
+    addDefaultStylingBlocks(block, block.workspace, defaultBlocks);
+
+    // Populate dropdowns
+    updateNDimListDropdown(block, 'ndimList');
+    updateAnalyteSetDropdown(block, 'ndimAnalyteSet');
+    updateQuantilesDropdown(block, 'ndimQuantiles');
+
+    // // Keep styling args in sync when user changes any selector
+    // const refresh = () => updateStylingChain(block);
+
+    // block.getField('ndimList')?.setValidator(() => { refresh(); return null; });
+    // block.getField('ndimAnalyteSet')?.setValidator(() => { refresh(); return null; });
+    // block.getField('ndimQuantiles')?.setValidator(() => { refresh(); return null; });
+
+    // Keep styles in sync when chain mutates
+    block.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if (event.type === Blockly.Events.BLOCK_CREATE ||
+          event.type === Blockly.Events.BLOCK_MOVE ||
+          event.type === Blockly.Events.BLOCK_DELETE) {
+        if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+          updateStylingChain(this);
         }
+      }
+    });
 
-        // Keep styles in sync when chain mutates
-        this.setOnChange(function (event) {
-            if (!this.workspace || this.isInFlyout) return;
-            if (event.type === Blockly.Events.BLOCK_CREATE ||
-                event.type === Blockly.Events.BLOCK_MOVE ||
-                event.type === Blockly.Events.BLOCK_DELETE) {
-                if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
-                    updateStylingChain(this, getNDimArgDict(this));
-                }
-            }
-        });
-
-        // Helper to assemble arg dict for Python side
-        function getNDimArgDict(block) {
-            return {
-                plot_type: block.plotType,            // 'TEC'
-                ndim_list_key: block.getFieldValue('ndimList')
-            };
-        }
+    function updateAnalyteSetDropdown(b, fieldName) {
+      window.blocklyBridge?.getNDimAnalyteSets?.()
+        .then((keys) => {
+          const opts = (keys || []).map(k => [k, k]);
+          const dd = b.getField(fieldName);
+          if (dd && opts.length) {
+            dd.menuGenerator_ = opts;           // simple, compatible with your codebase
+            const keep = dd.getValue();
+            const values = new Set(opts.map(o => o[1]));
+            dd.setValue(values.has(keep) ? keep : opts[0][1]);
+            dd.forceRerender?.();
+          }
+        })
+        .catch(err => console.error('Analyte sets error:', err));
     }
+
+    function updateQuantilesDropdown(b, fieldName) {
+      window.blocklyBridge?.getNDimQuantiles?.()
+        .then((items) => {
+          // Accept [{label, value}, ...] or strings
+          const opts = (items || []).map(it => {
+            if (typeof it === 'string') return [it, it];
+            const label = String(it.label ?? it.value ?? '');
+            const value = String(it.value ?? label);
+            return [label, value];
+          });
+          const dd = b.getField(fieldName);
+          if (dd && opts.length) {
+            dd.menuGenerator_ = opts;
+            const keep = dd.getValue();
+            const values = new Set(opts.map(o => o[1]));
+            dd.setValue(values.has(keep) ? keep : opts[0][1]);
+            dd.forceRerender?.();
+          }
+        })
+        .catch(err => console.error('Quantiles error:', err));
+    }
+  }
 };
-Blockly.common.defineBlocks({ plot_ndim: plot_ndim });
+
+Blockly.common.defineBlocks({ plot_ndim });
+
 
 /* ================================
    Radar Plot
@@ -2252,22 +2279,6 @@ const properties_v1 = {
     }
 };
 Blockly.Blocks['properties_v1'] = properties_v1;
-
-const reference_value = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField('Reference Value')
-            .appendField(new Blockly.FieldDropdown([
-                ['Bulk Silicate Earth [MS95] McD', 'bulk_silicate_earth'],
-                ['Option 2', 'option_2']
-            ]), 'REF_VALUE');
-        this.setOutput(true, 'ReferenceValue');
-        this.setColour(160);
-        this.setTooltip('Selects a reference value');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['reference_value'] = reference_value;
 
 const data_scaling = {
     init: function() {

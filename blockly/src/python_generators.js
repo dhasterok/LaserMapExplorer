@@ -86,8 +86,8 @@ pythonGenerator.forBlock['select_field_from_type'] = function(block, generator) 
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
     const refValue = block.getFieldValue('refValueDropdown'); // Get selected dropdown value
-    let code = ` self.ref_selected = True\n`; // Python function call
-    code += ` self.app_data.update_ref_chem_index('${refValue}')\n`; // Python function call
+    let code = `self.ref_selected = True\n`; // Python function call
+    code += `self.app_data.update_ref_chem_index('${refValue}')\n`; // Python function call
     return code;
 };
 
@@ -365,35 +365,48 @@ pythonGenerator.forBlock['plot_ternary_map'] = function(block, generator) {
    Generator: Compatibility (TEC)
    ================================ */
 pythonGenerator.forBlock['plot_ndim'] = function (block, generator) {
-    const ndimKey = generator.quote_(block.getFieldValue('ndimList') || '');
-    let sub = generator.statementToCode(block, 'styling') || '';
-    sub = sub.replace(/^ +/gm, '');
+  const ndimKey        = generator.quote_(block.getFieldValue('ndimList') || '');
+  const analyteSetKey  = generator.quote_(block.getFieldValue('ndimAnalyteSet') || '');
+  const quantIdxRaw    = block.getFieldValue('ndimQuantiles') || '2';
 
-    const plotType = "'TEC'";
-    const block_id = generator.quote_(block.id);
+  let sub = generator.statementToCode(block, 'styling') || '';
+  sub = sub.replace(/^ +/gm, '');
 
-    let code = '';
-    code += sub + '\n';
-    code += `self.block_id = ${block_id}\n`;
-    code += `self.style_data.plot_type = ${plotType}\n`;
-// Set ndim list (support either a resolver or direct assignment)
-    code += `if hasattr(self.app_data, 'set_ndim_list_from_key'):\n`;
-    code += `    self.app_data.set_ndim_list_from_key(${ndimKey})\n`;
-    code += `else:\n`;
-    code += `    self.app_data.ndim_list_key = ${ndimKey}\n`;
-    code += `self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n`;
+  const plotType = "'TEC'";
+  const block_id = generator.quote_(block.id);
 
-    // Reference check (required by plot_ndim)
-    code += `if not self.ref_selected:\n`;
-    code += `    self.status_manager.show_message("Reference value is required above for Compatibility diagram (TEC).")\n`;
-    code += `else:\n`;
-    code += `    canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
-    code += `    if canvas is not None:\n`;
-    code += `        self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `        self.canvas_widget.show()\n`;
+  let code = '';
+  code += sub + '\n';
+  code += `self.block_id = ${block_id}\n`;
+  code += `self.style_data.plot_type = ${plotType}\n`;
 
-    return code;
+  code += `self.app_data._ndim_analyte_set = ${analyteSetKey}\n`;
+  code += `if  self.app_data._ndim_analyte_set in self.app_data.ndim_list_dict:\n`;
+  code += `    self.app_data.update_ndim_list(self.app_data.ndim_list_dict[self.app_data._ndim_analyte_set])\n`;
+
+  // --- Apply Quantiles (new) ---
+  code += `# Quantile index used by plot_ndim -> app_data.ndim_quantile_index\n`;
+  code += `try:\n`;
+  code += `    self.app_data.ndim_quantile_index = int(${quantIdxRaw})\n`;
+  code += `except Exception:\n`;
+  code += `    self.app_data.ndim_quantile_index = 0\n`;
+
+  // Rebuild style attributes with the current data/app settings
+  code += `self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n`;
+
+  // Reference check (required by plot_ndim)
+  code += `if not self.ref_selected:\n`;
+  code += `    self.status_manager.show_message("Reference value is required above for Compatibility diagram (TEC).")\n`;
+  code += `else:\n`;
+  code += `    canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `    if canvas is not None:\n`;
+  code += `        self.ensure_canvas_popup()\n`;
+  code += `        self.add_canvas_to_layout(canvas)\n`;
+  code += `        self.canvas_dialog.show()\n`;
+
+  return code;
 };
+
 
 /* ================================
    Generator: Radar

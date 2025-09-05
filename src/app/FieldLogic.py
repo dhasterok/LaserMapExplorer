@@ -1089,7 +1089,7 @@ class ControlDock(CustomDockWidget):
             Name of reference value from combobox/dropdown
         """
         # update `self.app_data.ref_chem`
-        ref_index = self.update_ref_chem_combobox_BE(ref_val)
+        ref_index = self.ui.app_data.update_ref_chem_index(ref_val)
 
         if ref_index:
             self.comboBoxRefMaterial.setCurrentIndex(ref_index)

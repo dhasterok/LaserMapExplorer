@@ -208,8 +208,9 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // generator.INDENT +`self.update_axis_limits(style_dict, ${field})\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     // 5) Plot
-    code += `canvas, self.plot_info, _ = plot_map_mpl(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data, field_type = ${field_type},field = ${field}, add_histogram=False)\n`;
-    
+
+    code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
+    // 6) Show plot in popup or layout    
     const showMap = block.getFieldValue('SHOW_MAP') === 'TRUE';
     if (showMap) {
         code += `self.ensure_canvas_popup()\n`;
@@ -246,7 +247,7 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     code +=`self.app_data.corr_method =${corr_method}\n`;
     code +=`self.app_data.corr_squared =${r_2}\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
-    code += `canvas, self.plot_info = plot_correlation(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
          code += `self.ensure_canvas_popup()\n`;
         code += `self.add_canvas_to_layout(canvas)\n`;
         code += `self.canvas_dialog.show()\n`;
@@ -285,7 +286,7 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     `self.app_data.hist_num_bins=${nBinsVal}\n`;
     // Plot command
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
-    code += `canvas,  self.plot_info = plot_histogram(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
          code += `self.ensure_canvas_popup()\n`;
         code += `self.add_canvas_to_layout(canvas)\n`;
         code += `self.canvas_dialog.show()\n`;
@@ -312,7 +313,7 @@ pythonGenerator.forBlock['plot_biplot'] = function(block, generator) {
     `self.app_data.y_field =${fy}\n` +
     `self.app_data.y_field_type =${fyType}\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
-    code += `canvas, self.plot_info = plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
     code += `self.ensure_canvas_popup()\n`;
     code += `self.add_canvas_to_layout(canvas)\n`;
     code += `self.canvas_dialog.show()\n`;
@@ -332,7 +333,7 @@ pythonGenerator.forBlock['plot_ternary'] = function(block, generator) {
     const plotType =  generator.quote_(block.plotType)
     let code = subBlocksCode + '\n';
     code += `self.style_data.plot_type = ${plotType}\n`;
-    code += `canvas, self.plot_info =  plot_scatter(self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
     code += `self.ensure_canvas_popup()\n`;
     code += `self.add_canvas_to_layout(canvas)\n`;
     code += `self.canvas_dialog.show()\n`;
@@ -351,10 +352,7 @@ pythonGenerator.forBlock['plot_ternary_map'] = function(block, generator) {
 
     let code = subBlocksCode + '\n';
     code += `self.style_data.plot_type = 'ternary_map'\n`;
-    code += `canvas, self.plot_info = plot_ternary_map(self, data=self.data[self.app_data.sample_id], `
-        + `field_type_x=${fields.fieldTypeX}, field_x=${fields.fieldX}, `
-        + `field_type_y=${fields.fieldTypeY}, field_y=${fields.fieldY}, `
-        + `field_type_z=${fields.fieldTypeZ}, field_z=${fields.fieldZ})\n`;
+    code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
     code += `self.ensure_canvas_popup()\n`;
     code += `self.add_canvas_to_layout(canvas)\n`;
     code += `self.canvas_dialog.show()\n`;
@@ -382,7 +380,7 @@ pythonGenerator.forBlock['plot_ndim'] = function (block, generator) {
 
   code += `self.app_data._ndim_analyte_set = ${analyteSetKey}\n`;
   code += `if  self.app_data._ndim_analyte_set in self.app_data.ndim_list_dict:\n`;
-  code += `    self.app_data.update_ndim_list(self.app_data.ndim_list_dict[self.app_data._ndim_analyte_set])\n`;
+  code += `    self.app_data.update_ndim_list(self.app_data.ndim_list_dict[self.app_data._ndim_analyte_set)\n`;
 
   // --- Apply Quantiles (new) ---
   code += `# Quantile index used by plot_ndim -> app_data.ndim_quantile_index\n`;
@@ -398,7 +396,7 @@ pythonGenerator.forBlock['plot_ndim'] = function (block, generator) {
   code += `if not self.ref_selected:\n`;
   code += `    self.status_manager.show_message("Reference value is required above for Compatibility diagram (TEC).")\n`;
   code += `else:\n`;
-  code += `    canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `    canvas, self.plot_info = create_plot(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
   code += `    if canvas is not None:\n`;
   code += `        self.ensure_canvas_popup()\n`;
   code += `        self.add_canvas_to_layout(canvas)\n`;
@@ -433,7 +431,7 @@ pythonGenerator.forBlock['plot_radar'] = function (block, generator) {
     code += `if not getattr(self.app_data, 'ref_data', None) or self.app_data.ref_index is None:\n`;
     code += `    print("Reference value is required above for Radar plot.")\n`;
     code += `else:\n`;
-    code += `    canvas, self.plot_info = plot_ndim(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+    code += `    canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
     code += `    if canvas is not None:\n`;
     code += `        self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
     code += `        self.canvas_widget.show()\n`;

@@ -1498,18 +1498,17 @@ class StylingDock(CustomDockWidget):
                 widgets['axis_label'].setEnabled(False)
         
         # Disable using helper methods with False flags
-        self._enable_common(show_mass=False, tick_dir=False, aspect=False, heatmap_res=False)
-        self._enable_scalebar(enabled=False)
-        self._enable_markers(basic=False, size=False, transparency=False, color=False)
-        self._enable_lines(width=False, color=False, multiplier=False)
-        self._enable_colormap(full=False)
+        self._toggle_common(show_mass=False, tick_dir=False, aspect=False, heatmap_res=False)
+        self._toggle_scalebar(enable=False)
+        self._toggle_markers(basic=False, transparency=False, color=False)
+        self._toggle_lines(width=False, color=False, multiplier=False)
+        self._toggle_colormap(enable=False)
         
         # Additional widgets not covered by helpers
         self.annotations.fontComboBox.setEnabled(False)
         self.annotations.doubleSpinBoxFontSize.setEnabled(False)
-        self.caxes.checkBoxReverseColormap.setEnabled(False)
 
-    def _enable_axes(self, plot_type=None):
+    def _toggle_axes(self, plot_type=None):
         """Enable axis widgets based on axis_settings_dict configuration"""
         from .PlotAxisSettings import axis_settings_dict
         
@@ -1532,36 +1531,33 @@ class StylingDock(CustomDockWidget):
                     if controls.scale:
                         widgets['scalebox'].setEnabled(True)
 
-    def _enable_markers(self, basic=True, size=True, transparency=True, color=False):
+    def _toggle_markers(self, basic=True, transparency=True, color=False):
         """Enable/disable marker widgets using flag values directly"""
         self.elements.comboBoxMarker.setEnabled(basic)
-        self.elements.doubleSpinBoxMarkerSize.setEnabled(size)
+        self.elements.doubleSpinBoxMarkerSize.setEnabled(basic)
         self.elements.sliderTransparency.setEnabled(transparency)
         self.elements.colorButtonMarkerColor.setEnabled(color)
 
-    def _enable_lines(self, width=True, color=True, multiplier=False):
+    def _toggle_lines(self, width=True, color=True, multiplier=False):
         """Enable/disable line widgets using flag values directly"""
         self.elements.doubleSpinBoxLineWidth.setEnabled(width)
         self.elements.colorButtonLineColor.setEnabled(color)
         self.elements.lineEditLengthMultiplier.setEnabled(multiplier)
 
-    def _enable_colormap(self, full=True):
+    def _toggle_colormap(self, enable=True):
         """Enable/disable colormap widgets using flag values directly"""
-        self.caxes.comboBoxFieldColormap.setEnabled(full)
-        self.caxes.lineEditCLB.setEnabled(full)
-        self.caxes.lineEditCUB.setEnabled(full)
-        self.caxes.comboBoxCScale.setEnabled(full)
-        self.caxes.comboBoxCbarDirection.setEnabled(full)
-        self.caxes.lineEditCLabel.setEnabled(full)
+        self.caxes.comboBoxFieldColormap.setEnabled(enable)
+        self.caxes.comboBoxCbarDirection.setEnabled(enable)
+        self.caxes.checkBoxReverseColormap.setEnabled(enable)
 
-    def _enable_scalebar(self, enabled=True):
+    def _toggle_scalebar(self, enable=True):
         """Enable/disable scale/annotation widgets using flag value directly"""
-        self.annotations.comboBoxScaleDirection.setEnabled(enabled)
-        self.annotations.comboBoxScaleLocation.setEnabled(enabled)
-        self.annotations.lineEditScaleLength.setEnabled(enabled)
-        self.annotations.colorButtonOverlayColor.setEnabled(enabled)
+        self.annotations.comboBoxScaleDirection.setEnabled(enable)
+        self.annotations.comboBoxScaleLocation.setEnabled(enable)
+        self.annotations.lineEditScaleLength.setEnabled(enable)
+        self.annotations.colorButtonOverlayColor.setEnabled(enable)
 
-    def _enable_common(self, show_mass=True, tick_dir=False, aspect=False, heatmap_res=False):
+    def _toggle_common(self, show_mass=True, tick_dir=False, aspect=False, heatmap_res=False):
         """Enable/disable commonly used widgets using flag values directly"""
         self.annotations.checkBoxShowMass.setEnabled(show_mass)
         self.axes.comboBoxTickDirection.setEnabled(tick_dir)
@@ -1578,25 +1574,25 @@ class StylingDock(CustomDockWidget):
 
         self.disable_style_widgets()
 
+        self._toggle_axes(plot_type=plot_type)
+
         # Always enable basic annotation properties
         self.annotations.fontComboBox.setEnabled(True)
         self.annotations.doubleSpinBoxFontSize.setEnabled(True)
         match plot_type.lower():
             case 'field map' | 'gradient map':
-                self._enable_axes()
-                self._enable_scalebar()
-                self._enable_common(show_mass=True)
+                self._toggle_scalebar()
+                self._toggle_common(show_mass=True)
                 
                 # marker properties (conditional)
                 if ui.app_data.sample_id != '' and len(ui.data[ui.app_data.sample_id].spotdata) != 0:
-                    self._enable_markers(color=True)
+                    self._toggle_markers(color=True)
                 
-                self._enable_lines()
-                self._enable_colormap()
+                self._toggle_lines()
+                self._toggle_colormap()
 
             case 'correlation' | 'basis vectors':
-                self._enable_axes()
-                self._enable_common(show_mass=True, tick_dir=True)
+                self._toggle_common(show_mass=True, tick_dir=True)
                 # Partial colormap (no scale or label)
                 self.caxes.comboBoxFieldColormap.setEnabled(True)
                 self.caxes.lineEditCLB.setEnabled(True)
@@ -1604,10 +1600,9 @@ class StylingDock(CustomDockWidget):
                 self.caxes.comboBoxCbarDirection.setEnabled(True)
 
             case 'histogram':
-                self._enable_axes()
-                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
-                self._enable_markers(basic=False, size=False, transparency=True, color=False)
-                self._enable_lines()
+                self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
+                self._toggle_markers(basic=False, transparency=True, color=False)
+                self._toggle_lines()
                 
                 # Color properties (conditional based on field type)
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
@@ -1616,15 +1611,6 @@ class StylingDock(CustomDockWidget):
                     self.caxes.comboBoxCbarDirection.setEnabled(True)
 
             case 'scatter' | 'PCA scatter':
-                # Complex conditional axis logic - could use axis_settings_dict but keeping existing logic
-                if (self.ui.control_dock.toolbox.currentIndex() != self.ui.control_dock.tab_dict['scatter']) or (self.ui.control_dock.comboBoxFieldZ.currentText() == ''):
-                    # Enable X/Y bounds and scales
-                    for axis in ['x', 'y']:
-                        widgets = self.axis_widget_dict[axis]
-                        widgets['lbound'].setEnabled(True)
-                        widgets['ubound'].setEnabled(True)
-                        widgets['scalebox'].setEnabled(True)
-
                 # Always enable X/Y labels
                 self.axis_widget_dict['x']['axis_label'].setEnabled(True)
                 self.axis_widget_dict['y']['axis_label'].setEnabled(True)
@@ -1637,84 +1623,53 @@ class StylingDock(CustomDockWidget):
                     z_widgets['scalebox'].setEnabled(True)
                     z_widgets['axis_label'].setEnabled(True)
                 
-                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
-                self._enable_markers(color=False)  # No color by default
+                self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
+                self._toggle_markers(color=False)  # No color by default
                 
                 # Line properties (only if no Z field)
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
-                    self._enable_lines()
+                    self._toggle_lines()
 
                 # PCA-specific
                 if plot_type == 'pca scatter':
-                    self._enable_lines(multiplier=True)
+                    self._toggle_lines(multiplier=True)
 
                 # Color properties (conditional)
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
                 elif self.ui.control_dock.comboBoxFieldTypeC.currentText() == 'cluster':
-                    self._enable_colormap()
+                    self._toggle_colormap()
 
             case 'heatmap' | 'PCA heatmap':
-                # Similar axis logic to scatter but with different Z-axis conditions
-                if (self.ui.control_dock.toolbox.currentIndex() != self.ui.control_dock.tab_dict['scatter']) or (self.ui.control_dock.comboBoxFieldZ.currentText() == ''):
-                    # Enable X/Y bounds and scales
-                    for axis in ['x', 'y']:
-                        widgets = self.axis_widget_dict[axis]
-                        widgets['lbound'].setEnabled(True)
-                        widgets['ubound'].setEnabled(True)
-                        widgets['scalebox'].setEnabled(True)
-
                 # Always enable X/Y labels
                 self.axis_widget_dict['x']['axis_label'].setEnabled(True)
                 self.axis_widget_dict['y']['axis_label'].setEnabled(True)
                 
-                # Z axis (different condition than scatter)
-                if (self.ui.control_dock.toolbox.currentIndex() == self.ui.control_dock.tab_dict['scatter']) and (self.ui.control_dock.comboBoxFieldZ.currentText() == ''):
-                    z_widgets = self.axis_widget_dict['z']
-                    z_widgets['lbound'].setEnabled(True)
-                    z_widgets['ubound'].setEnabled(True)
-                    z_widgets['scalebox'].setEnabled(True)
-                    z_widgets['axis_label'].setEnabled(True)
-                
-                self._enable_common(show_mass=True, tick_dir=True, aspect=True, heatmap_res=True)
+                self._toggle_common(show_mass=True, tick_dir=True, aspect=True, heatmap_res=True)
                 
                 # Line properties (only if no Z field)
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
-                    self._enable_lines()
+                    self._toggle_lines()
 
                 # PCA-specific
                 if plot_type == 'pca heatmap':
-                    self._enable_lines(multiplier=True)
+                    self._toggle_lines(multiplier=True)
 
-                self._enable_colormap()
+                self._toggle_colormap()
             case 'ternary map':
-                # Enable all X/Y/Z axes with bounds, scales, and labels
-                for axis in ['x', 'y', 'z']:
-                    widgets = self.axis_widget_dict[axis]
-                    widgets['lbound'].setEnabled(True)
-                    widgets['ubound'].setEnabled(True)
-                    widgets['scalebox'].setEnabled(True)
-                    widgets['axis_label'].setEnabled(True)
-                
-                self._enable_common(show_mass=True)
-                self._enable_scalebar()
+                self._toggle_common(show_mass=True)
+                self._toggle_scalebar()
                 
                 # Conditional markers
                 if not self.ui.app_data.current_data.spotdata.empty:
-                    self._enable_markers(color=True)
+                    self._toggle_markers(color=True)
 
             case 'tec' | 'radar':
-                if plot_type == 'tec':
-                    y_widgets = self.axis_widget_dict['y']
-                    y_widgets['lbound'].setEnabled(True)
-                    y_widgets['ubound'].setEnabled(True)
-                    y_widgets['axis_label'].setEnabled(True)
-                
-                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
+                self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
                 # Scale length only (not full scalebar)
                 self.annotations.lineEditScaleLength.setEnabled(True)
-                self._enable_markers(basic=False, size=False, transparency=True, color=False)
-                self._enable_lines()
+                self._toggle_markers(basic=False, transparency=True, color=False)
+                self._toggle_lines()
                 
                 # Conditional color
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
@@ -1723,38 +1678,27 @@ class StylingDock(CustomDockWidget):
                     self.caxes.comboBoxCbarDirection.setEnabled(True)
 
             case 'variance' | 'cluster performance':
-                self._enable_common(show_mass=False, tick_dir=True, aspect=True)
+                self._toggle_common(show_mass=False, tick_dir=True, aspect=True)
                 # Partial scalebar (length and color only)
                 self.annotations.lineEditScaleLength.setEnabled(True)
                 self.annotations.colorButtonOverlayColor.setEnabled(True)
-                self._enable_markers(transparency=False, color=True)
-                self._enable_lines()
+                self._toggle_markers(transparency=False, color=True)
+                self._toggle_lines()
 
             case 'pca score' | 'cluster score' | 'cluster map':
-                # X/Y bounds only
-                for axis in ['x', 'y']:
-                    widgets = self.axis_widget_dict[axis]
-                    widgets['lbound'].setEnabled(True)
-                    widgets['ubound'].setEnabled(True)
-                
-                self._enable_scalebar()
-                self._enable_common(show_mass=False)
-                self._enable_lines()
+                self._toggle_scalebar()
+                self._toggle_common(show_mass=False)
+                self._toggle_lines()
                 
                 # Conditional colormap (not for clusters)
                 if plot_type != 'clusters':
-                    self._enable_colormap()
+                    self._toggle_colormap()
             case 'profile':
-                # X bounds only
-                x_widgets = self.axis_widget_dict['x']
-                x_widgets['lbound'].setEnabled(True)
-                x_widgets['ubound'].setEnabled(True)
-                
-                self._enable_common(show_mass=True, tick_dir=True, aspect=True)
+                self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
                 # Scale length only
                 self.annotations.lineEditScaleLength.setEnabled(True)
-                self._enable_markers(transparency=False, color=False)
-                self._enable_lines()
+                self._toggle_markers(transparency=False, color=False)
+                self._toggle_lines()
                 # Color properties  
                 self.elements.colorButtonMarkerColor.setEnabled(True)
                 self.caxes.comboBoxFieldColormap.setEnabled(True)

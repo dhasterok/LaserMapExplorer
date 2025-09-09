@@ -8,6 +8,11 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from src.app.config import APPDATA_PATH, STYLE_PATH
 from src.common.Logger import auto_log_methods
 
+from typing import TYPE_CHECKING, Union
+if TYPE_CHECKING:
+    from .MainWindow import MainWindow
+    from .BlocklyModules import LameBlockly
+
 @auto_log_methods(logger_key='Data')
 class AppData(QObject):
     """
@@ -227,7 +232,7 @@ class AppData(QObject):
     sortMethodChanged = pyqtSignal(str)
 
 
-    def __init__(self, parent):
+    def __init__(self, parent:  Union["MainWindow", "LameBlockly"]):
         super().__init__(parent)
 
         self.logger_key = 'Data'
@@ -436,15 +441,6 @@ class AppData(QObject):
         self.updating_cluster_table_flag = False
         self.update_pca_flag = False
 
-        self._x_field_type = None
-        self._y_field_type = None
-        self._z_field_type = None
-        self._c_field_type = None
-        self._x_field = None
-        self._y_field = None
-        self._z_field = None
-        self._c_field = None
-        
     def get_field(self, ax):
         """
         Returns the field associated with the specified axis.
@@ -920,7 +916,6 @@ class AppData(QObject):
         if new_field == current_field:
             return
 
-        #self.validate_field(self._c_field_type, new_field)
         self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CField'] = new_field
         self.fieldChanged.emit('c', new_field)
 
@@ -1326,7 +1321,7 @@ class AppData(QObject):
             return
 
         # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self._c_field, self._c_field_type)
+        map_df = self.data[self.sample_id].get_map_data(self.c_field, self.c_field_type)
 
         # update bin width
         data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
@@ -1343,11 +1338,11 @@ class AppData(QObject):
             return
 
         # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self._c_field, self._c_field_type)
+        map_df = self.data[self.sample_id].get_map_data(self.c_field, self.c_field_type)
 
         # update n bins
         data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
-        self.hist_num_bins = int( data_range / self._hist_bin_width)
+        self.hist_num_bins = max(1, round(data_range / self.hist_bin_width))
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to the default."""

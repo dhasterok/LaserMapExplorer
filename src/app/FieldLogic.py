@@ -17,6 +17,7 @@ from src.app.SpotTools import SpotPage
 from src.app.SpecialTools import SpecialPage
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 from src.common.LamePlot import plot_clusters
+
 from typing import List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from .MainWindow import MainWindow
@@ -1072,6 +1073,12 @@ class ControlDock(CustomDockWidget):
         if spinbox.value() != childbox.currentIndex():
             childbox.setCurrentIndex(spinbox.value())
             self.update_field(ax)
+            
+            # Ensure styling updates are applied (especially for colorbar labels)
+            if hasattr(self.ui, 'style_dock') and hasattr(self.ui.style_dock, 'axis_variable_changed'):
+                field_text = childbox.currentText()
+                if field_text:
+                    self.ui.style_dock.axis_variable_changed(field_text, ax)
         spinbox.blockSignals(False)
 
     def update_norm_reference_combobox(self, new_norm_reference):

@@ -142,10 +142,9 @@ class HistogramUI(QGroupBox):
             New value for the histogram bin width, by default None
         """
         if user_action:
-            # use current value of doubleSpinBoxBinWidth
-            self.dock.ui.app_data.blockSignals(True)
+            # use current value of doubleSpinBoxBinWidth and update app_data
             self.dock.ui.app_data.hist_bin_width = self.doubleSpinBoxBinWidth.value()
-            self.dock.ui.app_data.blockSignals(False)
+            # This will automatically trigger bin count update via the property setter
         else:
             # update doubleSpinBoxBinWidth with new value
             if self.doubleSpinBoxBinWidth.value() == value:
@@ -172,10 +171,9 @@ class HistogramUI(QGroupBox):
             Whether the update was triggered by user interaction with a widget, by default False
         """
         if user_action:
-            # use current value of spinBoxNBins
-            self.dock.ui.app_data.blockSignals(True)
+            # use current value of spinBoxNBins and update app_data
             self.dock.ui.app_data.hist_num_bins = self.spinBoxNBins.value()
-            self.dock.ui.app_data.blockSignals(False)
+            # This will automatically trigger bin width update via the property setter
         else:
             # if value is 0, set to default number of bins
             if value == 0:

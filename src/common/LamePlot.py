@@ -598,9 +598,9 @@ def plot_histogram(parent, data, app_data, style_data):
     #print(bin_width)
     
     if (xscale == 'linear') or (xscale == 'scientific'):
-        edges = np.linspace(xmin, xmax, nbins)
+        edges = np.linspace(xmin, xmax, nbins + 1)
     else:
-        edges = np.linspace(10**xmin, 10**xmax, nbins)
+        edges = np.linspace(10**xmin, 10**xmax, nbins + 1)
 
     #print(edges)
 

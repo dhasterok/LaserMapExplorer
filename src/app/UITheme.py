@@ -425,7 +425,9 @@ class ThemeManager(QObject):
         qss_file = STYLE_PATH / f'{theme}.qss'
         if qss_file.exists():
             with open(qss_file, 'r') as f:
-                self.parent.app.setStyleSheet(f.read())
+                stylesheet = f.read()
+                stylesheet = stylesheet.replace("{ICONPATH}", ICONPATH.as_posix())
+                self.parent.app.setStyleSheet(stylesheet)
         else:
             print(f"Stylesheet not found: {qss_file}")
 

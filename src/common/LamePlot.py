@@ -17,7 +17,8 @@ import matplotlib.colors as colors
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 from src.common.CustomMplCanvas import MplCanvas, SimpleMplCanvas
 import src.common.format as fmt
-from src.common.colorfunc import get_hex_color, get_rgb_color
+# Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
+from src.common.ColorManager import convert_color
 from src.common.plot_spider import plot_spider_norm
 from src.common.radar import Radar
 from src.common.scalebar import scalebar
@@ -1747,10 +1748,16 @@ def plot_ternary_map(parent, data, app_data, style_data):
     b = data.processed.loc[:,bfield].values
     c = data.processed.loc[:,cfield].values
 
-    ca = get_rgb_color(get_hex_color(app_data.ternary_color_x))
-    cb = get_rgb_color(get_hex_color(app_data.ternary_color_y))
-    cc = get_rgb_color(get_hex_color(app_data.ternary_color_z))
-    cm = get_rgb_color(get_hex_color(app_data.ternary_color_m))
+    # Convert hex colors to RGB for ternary plotting
+    ca = convert_color(style_data.ternary_color_x, 'hex', 'rgb', norm_out=False) or [255, 0, 0]  # Red fallback
+    cb = convert_color(style_data.ternary_color_y, 'hex', 'rgb', norm_out=False) or [0, 255, 0]  # Green fallback
+    cc = convert_color(style_data.ternary_color_z, 'hex', 'rgb', norm_out=False) or [0, 0, 255]  # Blue fallback
+    
+    # Handle center color - if 'none', use empty list as required by terncolor
+    if style_data.ternary_color_m == 'none':
+        cm = []  # Empty list for no center color
+    else:
+        cm = convert_color(style_data.ternary_color_m, 'hex', 'rgb', norm_out=False) or [128, 128, 128]  # Gray fallback
 
     t = ternary(canvas.axes)
 

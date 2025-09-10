@@ -742,6 +742,43 @@ class CanvasWidget(QWidget):
             canvas.saved_dtext = []
             canvas.draw()
 
+    def closeEvent(self, event):
+        """Properly cleanup matplotlib resources to avoid 'wrapped C/C++ object deleted' errors."""
+        try:
+            # Clean up mpl_toolbar if it exists
+            if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
+                try:
+                    self.mpl_toolbar.close()
+                    self.mpl_toolbar.deleteLater()
+                    self.mpl_toolbar = None
+                except RuntimeError:
+                    pass  # Already deleted
+            
+            # Clean up any MplCanvas objects in layouts
+            for tab in [self.single_view, self.multi_view, self.quick_view]:
+                if hasattr(tab, 'layout') and tab.layout() is not None:
+                    layout = tab.layout()
+                    for i in reversed(range(layout.count())):
+                        item = layout.itemAt(i)
+                        if item and item.widget():
+                            widget = item.widget()
+                            if hasattr(widget, 'closeEvent'):
+                                try:
+                                    widget.closeEvent(event)
+                                except (RuntimeError, AttributeError):
+                                    pass
+            
+            # Clear lasermaps dictionary
+            if hasattr(self, 'lasermaps'):
+                self.lasermaps.clear()
+                
+        except (RuntimeError, AttributeError):
+            # Objects might already be deleted, which is fine
+            pass
+        
+        # Call parent closeEvent
+        super().closeEvent(event)
+
 class SingleViewTab(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)

@@ -1,4 +1,4 @@
-src.app.InfoViewer
+﻿src.app.InfoViewer
 ==================
 
 .. automodule:: src.app.InfoViewer
@@ -25,4 +25,5 @@ src.app.InfoViewer
       InfoDock
       MetadataTab
       PlotInfoTab
+      PropertiesTab
    

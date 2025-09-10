@@ -1403,6 +1403,9 @@ class AppData(QObject):
         >>> self.ndim_list
         ['Ce140', 'Ce142', 'Nd146']
         """
+        if not self.current_data:
+            return
+
         analytes_list = self.current_data.processed.match_attribute('data_type', 'Analyte')
         analytes = [
             col

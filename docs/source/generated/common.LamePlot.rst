@@ -12,6 +12,7 @@
       add_scalebar
       biplot
       cluster_performance_plot
+      create_plot
       get_scatter_data
       hist2dbiplot
       hist2dternplot

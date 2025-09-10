@@ -761,8 +761,17 @@ class StyleData(QObject, StyleTheme):
     @scale_length.setter
     def scale_length(self, length: float):
         if length is None or isinstance(length, float):
-            x_range = self.xlim[1] - self.xlim[0] if self.xlim else None
-            y_range = self.ylim[1] - self.ylim[0] if self.ylim else None
+            x_range = (
+                self.xlim[1] - self.xlim[0]
+                if self.xlim and all(v is not None for v in self.xlim)
+                else None
+            )
+
+            y_range = (
+                self.ylim[1] - self.ylim[0]
+                if self.ylim and all(v is not None for v in self.ylim)
+                else None
+            )
 
             scale_dir = self.style_dict[self.plot_type]['ScaleDir']
 

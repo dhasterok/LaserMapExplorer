@@ -1538,8 +1538,613 @@ const plot_radar = {
     }
 };
 Blockly.common.defineBlocks({ plot_radar: plot_radar });
+/* ================================
+   Clustering & Dimensionality Reduction — custom_blocks.js (updated)
+   ================================ */
 
-////// styles ////////////
+/***** Helpers *****/
+const DICE_SVG = 'data:image/svg+xml;utf8,' +
+  encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="6" y="6" width="52" height="52" rx="10" fill="#eaeaea" stroke="#999"/>
+  <circle cx="20" cy="20" r="4" fill="#666"/><circle cx="44" cy="20" r="4" fill="#666"/>
+  <circle cx="32" cy="32" r="4" fill="#666"/>
+  <circle cx="20" cy="44" r="4" fill="#666"/><circle cx="44" cy="44" r="4" fill="#666"/></svg>`);
+
+/* Small utility to walk statement input and return first block in the chain */
+function _firstInChain(block, inputName) {
+  if (!block) return null;
+  const head = block.getInputTargetBlock(inputName);
+  return head || null;
+}
+
+/* Toggle visibility of a DummyInput by name, if it exists */
+function _setInputVisible(block, inputName, visible) {
+  const inp = block && block.getInput(inputName);
+  if (inp) {
+    inp.setVisible(visible);
+    block.render();
+  }
+}
+
+/* ================================
+   PCA — Basis variance (x: top & bottom)
+   ================================ */
+const plot_basis_variance = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Basis variance')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(210);
+    this.setTooltip('Explained and cumulative variance of PCA.');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Default styling: marker properties, line properties, font
+      const defaultBlocks = ['marker_properties', 'line_properties', 'font'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+    }
+
+    this.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
+        if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+          updateStylingChain(this);
+        }
+      }
+    });
+  }
+};
+Blockly.common.defineBlocks({ plot_basis_variance });
+
+/* ================================
+   PCA — Basis vectors plot (x: top & bottom)
+   ================================ */
+const plot_basis_vectors_plot = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Basis vectors plot')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(210);
+    this.setTooltip('Heatmap/plot of PCA basis vectors.');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Default styling: colormap, font
+      const defaultBlocks = ['colormap', 'font'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+    }
+
+    this.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
+        if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId)) {
+          updateStylingChain(this);
+        }
+      }
+    });
+  }
+};
+Blockly.common.defineBlocks({ plot_basis_vectors_plot });
+
+/* ================================
+   PCA — Basis vectors (styling block) (<: left into styling chain)
+   ================================ */
+const style_basis_vectors = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Basis vectors')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, 'styling');
+    this.setNextStatement(true, 'styling');
+    this.setColour(120);
+    this.setTooltip('Styling for PCA basis vectors overlay.');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Default styling: line properties, transparency
+      const defaultBlocks = ['line_properties', 'transparency'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+    }
+  }
+};
+Blockly.common.defineBlocks({ style_basis_vectors });
+
+/* ================================
+   Seed block (<: left) — with RNG button (uses bridge RNG if available)
+   ================================ */
+const cfg_seed = {
+  init: function () {
+    const seedField = new Blockly.FieldTextInput('');
+    const dice = new Blockly.FieldImage(DICE_SVG, 16, 16, 'randomize', () => {
+      const rng = window.blocklyBridge?.randomClusterSeed;
+      if (typeof rng === 'function') {
+        Promise.resolve(rng()).then((val) => {
+          seedField.setValue(String(val));
+          if (this.workspace && !this.isInFlyout) updateStylingChain(this);
+        }).catch(() => {
+          seedField.setValue(String(Math.floor(Math.random() * 1e9)));
+          if (this.workspace && !this.isInFlyout) updateStylingChain(this);
+        });
+      } else {
+        seedField.setValue(String(Math.floor(Math.random() * 1e9)));
+        if (this.workspace && !this.isInFlyout) updateStylingChain(this);
+      }
+    });
+
+    this.appendDummyInput('ROW')
+      .appendField('Seed')
+      .appendField(dice, 'rng')
+      .appendField(seedField, 'seed');
+
+    seedField.setValidator((nv) => nv); // keep user edits
+    this.setPreviousStatement(true, 'seed');
+    this.setNextStatement(true, 'seed');
+    this.setColour(15);
+    this.setTooltip('Random seed for reproducibility.');
+    this.setHelpUrl('');
+  }
+};
+Blockly.common.defineBlocks({ cfg_seed });
+
+/* ================================
+   Cluster options (<: left; mutator-ready stub)
+   ================================ */
+const cfg_cluster_options = {
+  init: function () {
+    this.appendDummyInput('METHOD')
+      .appendField('Cluster options')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    this.appendDummyInput('EXP')
+      .appendField('Exponent')
+      .appendField(new Blockly.FieldNumber(2.0, 1, 10, 0.1), 'exponent');
+
+    this.appendDummyInput('DIST')
+      .appendField('Distance')
+      .appendField(new Blockly.FieldDropdown([
+        ['euclidean', 'euclidean'],
+        ['manhattan', 'manhattan'],
+        ['cosine', 'cosine']
+      ]), 'distance');
+
+    this.appendDummyInput('PCA')
+      .appendField('PCA')
+      .appendField(new Blockly.FieldCheckbox('FALSE'), 'pca');
+
+    this.setPreviousStatement(true, 'cluster_options');
+    this.setNextStatement(true, 'cluster_options');
+    this.setColour(20);
+    this.setTooltip('Advanced clustering options (ready for mutator extension).');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Optionally, populate distance list from bridge if available
+      const distDD = this.getField('distance');
+      const loader = window.blocklyBridge?.getClusterDistanceOptions;
+      if (typeof loader === 'function') {
+        loader().then((opts) => {
+          const items = (opts || []).map(s => [s, s]);
+          if (items.length) {
+            distDD.menuGenerator_ = items;
+            const cur = distDD.getValue();
+            const vals = new Set(items.map(o => o[1]));
+            if (!vals.has(cur)) distDD.setValue(items[0][1]);
+            distDD.forceRerender?.();
+          }
+        }).catch(console.error);
+      }
+    }
+  }
+};
+Blockly.common.defineBlocks({ cfg_cluster_options });
+
+/* ================================
+   PCA preconditioning (<: left)
+   ================================ */
+const cfg_pca_preconditioning = {
+  init: function () {
+    this.appendDummyInput('NB')
+      .appendField('PCA preconditioning: No. basis')
+      .appendField(new Blockly.FieldNumber(0, 0), 'nBasis');
+
+    this.setPreviousStatement(true, 'pca_preconditioning');
+    this.setNextStatement(true, 'pca_preconditioning');
+    this.setColour(20);
+    this.setTooltip('Number of basis vectors for PCA preconditioning.');
+    this.setHelpUrl('');
+  }
+};
+Blockly.common.defineBlocks({ cfg_pca_preconditioning });
+
+/* ================================
+   Custom field list (<: left) — type+field dynamic
+   ================================ */
+const cfg_custom_field_list = {
+  init: function () {
+    this.appendDummyInput('TYPE')
+      .appendField('Field type')
+      .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldType');
+
+    this.appendDummyInput('FIELD')
+      .appendField('Field')
+      .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
+
+    this.setPreviousStatement(true, 'field_selector');
+    this.setNextStatement(true, 'field_selector');
+    this.setColour(25);
+    this.setTooltip('Select a field type and a field from the dataset.');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Fill type list, then field list
+      const typeDD = this.getField('fieldType');
+      const fieldDD = this.getField('field');
+
+      const updateTypes = (plotType = 'dimension score map') => {
+        // Use bridge; axis 'c' is conventional for color/score usage
+        window.blocklyBridge?.getFieldTypeList?.('c', plotType)
+          .then(types => {
+            const opts = (types || []).map(t => [t, t]);
+            if (!opts.length) return;
+            typeDD.menuGenerator_ = opts;
+            const cur = typeDD.getValue();
+            const vals = new Set(opts.map(o => o[1]));
+            typeDD.setValue(vals.has(cur) ? cur : opts[0][1]);
+            typeDD.forceRerender?.();
+            updateFields(typeDD.getValue());
+          }).catch(console.error);
+      };
+
+      const updateFields = (ftype) => {
+        if (!ftype) return;
+        window.blocklyBridge?.getFieldList?.(ftype)
+          .then(fields => {
+            const opts = (fields || []).map(f => [f, f]);
+            if (!opts.length) return;
+            fieldDD.menuGenerator_ = opts;
+            const cur = fieldDD.getValue();
+            const vals = new Set(opts.map(o => o[1]));
+            fieldDD.setValue(vals.has(cur) ? cur : opts[0][1]);
+            fieldDD.forceRerender?.();
+            updateStylingChain(this);
+          }).catch(console.error);
+      };
+
+      typeDD.setValidator((nv) => { updateFields(nv); updateStylingChain(this); return nv; });
+      fieldDD.setValidator((nv) => { updateStylingChain(this); return nv; });
+
+      updateTypes();
+    }
+  }
+};
+Blockly.common.defineBlocks({ cfg_custom_field_list });
+
+/* ================================
+   Multidimensional — Dimensional reduction (x: top & bottom)
+   ================================ */
+const plot_dimensional_reduction = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Dimensional Reduction')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    this.appendDummyInput('METHOD')
+      .appendField('Method')
+      .appendField(new Blockly.FieldDropdown([
+        ['PCA: Principal component analysis', 'pca']
+      ]), 'method');
+
+    // Connect a custom field list
+    this.appendStatementInput('customFields')
+      .setCheck('field_selector')
+      .appendField('Custom field list');
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(285);
+    this.setTooltip('Dimensionality reduction entry point (method + custom field selection).');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Choose defaults for DR maps: colormap, font
+      const defaultBlocks = ['colormap', 'font'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+    }
+
+    this.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
+        if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId) ||
+            isBlockInChain(this.getInputTargetBlock('customFields'), event.blockId)) {
+          updateStylingChain(this);
+        }
+      }
+    });
+  }
+};
+Blockly.common.defineBlocks({ plot_dimensional_reduction });
+
+/* ================================
+   Multidimensional — Clustering (x: top & bottom) with dynamic defaults
+   ================================ */
+const plot_clustering = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Clustering')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    // Method dropdown is populated dynamically from AppData via bridge
+    this.appendDummyInput('METHOD')
+      .appendField('Method')
+      .appendField(new Blockly.FieldDropdown([['Loading…', '']]), 'method');
+
+    // Chain: Seed > Cluster options > Custom field list
+    this.appendStatementInput('seed')
+      .setCheck('seed')
+      .appendField('Seed');
+
+    this.appendStatementInput('options')
+      .setCheck('cluster_options')
+      .appendField('Cluster options');
+
+    this.appendStatementInput('customFields')
+      .setCheck('field_selector')
+      .appendField('Custom field list');
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(200);
+    this.setTooltip('Clustering entry point (method + seed + options + custom field list).');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Default styling: marker, line width, font (use *_nc if you have “no color” variants)
+      const defaultBlocks = ['marker_properties', 'line_properties', 'font'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+
+      const methodDD = this.getField('method');
+
+      // Load methods dynamically
+      const loadMethods = () => {
+        const lister = window.blocklyBridge?.getClusterMethodList;
+        if (typeof lister !== 'function') return;
+        lister().then((methods) => {
+          const opts = (methods || []).map(m => [m, m]);
+          if (!opts.length) return;
+          methodDD.menuGenerator_ = opts;
+          // choose previously set value or first
+          const cur = methodDD.getValue();
+          const vals = new Set(opts.map(o => o[1]));
+          methodDD.setValue(vals.has(cur) ? cur : opts[0][1]);
+          methodDD.forceRerender?.();
+          applyDefaults(methodDD.getValue());
+        }).catch(console.error);
+      };
+
+      // Apply defaults for selected method into child blocks
+      const applyDefaults = (method) => {
+        const getter = window.blocklyBridge?.getClusterDefaults;
+        const specer = window.blocklyBridge?.getClusterOptionSpec;
+        if (typeof getter !== 'function') return;
+
+        getter(method).then((json) => {
+          const d = typeof json === 'string' ? JSON.parse(json) : (json || {});
+          // Seed
+          const seedBlk = _firstInChain(this, 'seed');
+          if (seedBlk && seedBlk.getField('seed')) {
+            seedBlk.getField('seed').setValue(d.seed != null ? String(d.seed) : '');
+          }
+          // Options
+          const optBlk = _firstInChain(this, 'options');
+          if (optBlk) {
+            if (optBlk.getField('exponent') && d.exponent != null) {
+              optBlk.getField('exponent').setValue(Number(d.exponent));
+            }
+            if (optBlk.getField('distance') && d.distance) {
+              // ensure distance is in dropdown; if not, keep current
+              const dd = optBlk.getField('distance');
+              const items = (dd.menuGenerator_ || []).map(o => o[1]);
+              if (items.includes(d.distance)) dd.setValue(d.distance);
+            }
+            if (optBlk.getField('pca')) {
+              optBlk.getField('pca').setValue(d.precondition ? 'TRUE' : 'FALSE');
+            }
+          }
+          updateStylingChain(this);
+        }).catch(console.error);
+
+        // Toggle visible/hidden fields based on option spec
+        if (typeof specer === 'function') {
+          specer(method).then((json) => {
+            const s = typeof json === 'string' ? JSON.parse(json) : (json || {});
+            const optBlk = _firstInChain(this, 'options');
+            if (optBlk) {
+              _setInputVisible(optBlk, 'EXP', !!s.supports_exponent);
+              _setInputVisible(optBlk, 'DIST', !!s.supports_distance);
+              optBlk.render();
+            }
+          }).catch(console.error);
+        }
+      };
+
+      // Validator: when method changes, re-apply defaults
+      methodDD.setValidator((nv) => {
+        applyDefaults(nv);
+        return nv;
+      });
+
+      // Load data now
+      loadMethods();
+    }
+
+    this.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
+        const inStyling = isBlockInChain(this.getInputTargetBlock('styling'), event.blockId);
+        const inSeed = isBlockInChain(this.getInputTargetBlock('seed'), event.blockId);
+        const inOpt = isBlockInChain(this.getInputTargetBlock('options'), event.blockId);
+        const inFields = isBlockInChain(this.getInputTargetBlock('customFields'), event.blockId);
+        if (inStyling || inSeed || inOpt || inFields) updateStylingChain(this);
+      }
+    });
+  }
+};
+Blockly.common.defineBlocks({ plot_clustering });
+
+/* ================================
+   Cluster performance (x: top & bottom) with dynamic defaults
+   ================================ */
+const plot_cluster_performance = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Cluster performance')
+      .setAlign(Blockly.ALIGN_CENTRE);
+
+    // Method dropdown populated dynamically
+    this.appendDummyInput('METHOD')
+      .appendField('Method')
+      .appendField(new Blockly.FieldDropdown([['Loading…', '']]), 'method');
+
+    this.appendStatementInput('seed')
+      .setCheck('seed')
+      .appendField('Seed');
+
+    this.appendStatementInput('options')
+      .setCheck('cluster_options')
+      .appendField('Cluster options');
+
+    this.appendStatementInput('customFields')
+      .setCheck('field_selector')
+      .appendField('Custom field list');
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(200);
+    this.setTooltip('Plots for choosing optimal number of clusters (elbow, silhouette, etc.).');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Default styling: marker, line width, font
+      const defaultBlocks = ['marker_properties', 'line_properties', 'font'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+
+      const methodDD = this.getField('method');
+
+      const loadMethods = () => {
+        const lister = window.blocklyBridge?.getClusterMethodList;
+        if (typeof lister !== 'function') return;
+        lister().then((methods) => {
+          const opts = (methods || []).map(m => [m, m]);
+          if (!opts.length) return;
+          methodDD.menuGenerator_ = opts;
+          const cur = methodDD.getValue();
+          const vals = new Set(opts.map(o => o[1]));
+          methodDD.setValue(vals.has(cur) ? cur : opts[0][1]);
+          methodDD.forceRerender?.();
+          applyDefaults(methodDD.getValue());
+        }).catch(console.error);
+      };
+
+      const applyDefaults = (method) => {
+        const getter = window.blocklyBridge?.getClusterDefaults;
+        const specer = window.blocklyBridge?.getClusterOptionSpec;
+        if (typeof getter !== 'function') return;
+
+        getter(method).then((json) => {
+          const d = typeof json === 'string' ? JSON.parse(json) : (json || {});
+          // Seed
+          const seedBlk = _firstInChain(this, 'seed');
+          if (seedBlk && seedBlk.getField('seed')) {
+            seedBlk.getField('seed').setValue(d.seed != null ? String(d.seed) : '');
+          }
+          // Options
+          const optBlk = _firstInChain(this, 'options');
+          if (optBlk) {
+            if (optBlk.getField('exponent') && d.exponent != null) {
+              optBlk.getField('exponent').setValue(Number(d.exponent));
+            }
+            if (optBlk.getField('distance') && d.distance) {
+              const dd = optBlk.getField('distance');
+              const items = (dd.menuGenerator_ || []).map(o => o[1]);
+              if (items.includes(d.distance)) dd.setValue(d.distance);
+            }
+            if (optBlk.getField('pca')) {
+              optBlk.getField('pca').setValue(d.precondition ? 'TRUE' : 'FALSE');
+            }
+          }
+          updateStylingChain(this);
+        }).catch(console.error);
+
+        if (typeof specer === 'function') {
+          specer(method).then((json) => {
+            const s = typeof json === 'string' ? JSON.parse(json) : (json || {});
+            const optBlk = _firstInChain(this, 'options');
+            if (optBlk) {
+              _setInputVisible(optBlk, 'EXP', !!s.supports_exponent);
+              _setInputVisible(optBlk, 'DIST', !!s.supports_distance);
+              optBlk.render();
+            }
+          }).catch(console.error);
+        }
+      };
+
+      methodDD.setValidator((nv) => { applyDefaults(nv); return nv; });
+
+      loadMethods();
+    }
+
+    this.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
+        const inStyling = isBlockInChain(this.getInputTargetBlock('styling'), event.blockId);
+        const inSeed = isBlockInChain(this.getInputTargetBlock('seed'), event.blockId);
+        const inOpt = isBlockInChain(this.getInputTargetBlock('options'), event.blockId);
+        const inFields = isBlockInChain(this.getInputTargetBlock('customFields'), event.blockId);
+        if (inStyling || inSeed || inOpt || inFields) updateStylingChain(this);
+      }
+    });
+  }
+};
+Blockly.common.defineBlocks({ plot_cluster_performance });
+/* ================================
+   Dimentionality Reduction Plots
+   ================================ */   
+
+
+/* ================================
+    Styling Blocks
+   ================================ */
 Blockly.Blocks['modify_styles'] = {
     init: function () {
         this.appendDummyInput('axisHeader')

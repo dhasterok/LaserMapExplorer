@@ -380,7 +380,7 @@ pythonGenerator.forBlock['plot_ndim'] = function (block, generator) {
 
   code += `self.app_data._ndim_analyte_set = ${analyteSetKey}\n`;
   code += `if  self.app_data._ndim_analyte_set in self.app_data.ndim_list_dict:\n`;
-  code += `    self.app_data.update_ndim_list(self.app_data.ndim_list_dict[self.app_data._ndim_analyte_set)\n`;
+  code += `    self.app_data.update_ndim_list(self.app_data.ndim_list_dict[self.app_data._ndim_analyte_set])\n`;
 
   // --- Apply Quantiles (new) ---
   code += `# Quantile index used by plot_ndim -> app_data.ndim_quantile_index\n`;
@@ -437,6 +437,161 @@ pythonGenerator.forBlock['plot_radar'] = function (block, generator) {
     code += `        self.canvas_widget.show()\n`;
 
     return code;
+};
+
+/* =========================
+   Python generators for new blocks
+   ========================= */
+
+/* Utility: collapse leading spaces in generated sub-codes (keeps your style) */
+function _dedent(code) {
+  return (code || '').replace(/^ +/gm, '');
+}
+
+/* -------- 1) PCA — Basis variance -------- */
+pythonGenerator.forBlock['plot_basis_variance'] = function (block, generator) {
+  let styling = _dedent(generator.statementToCode(block, 'styling') || '');
+
+  let code = '';
+  code += styling + '\n';
+  code += `self.style_data.plot_type = 'variance'\n`;
+  code += `canvas, self.plot_info = plot_pca(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `if canvas is not None:\n`;
+  code += `    self.ensure_canvas_popup()\n`;
+  code += `    self.add_canvas_to_layout(canvas)\n`;
+  code += `    self.canvas_dialog.show()\n`;
+  return code;
+};
+
+/* -------- 2) PCA — Basis vectors plot -------- */
+pythonGenerator.forBlock['plot_basis_vectors_plot'] = function (block, generator) {
+  let styling = _dedent(generator.statementToCode(block, 'styling') || '');
+
+  let code = '';
+  code += styling + '\n';
+  code += `self.style_data.plot_type = 'basis vectors'\n`;
+  code += `canvas, self.plot_info = plot_pca(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `if canvas is not None:\n`;
+  code += `    self.ensure_canvas_popup()\n`;
+  code += `    self.add_canvas_to_layout(canvas)\n`;
+  code += `    self.canvas_dialog.show()\n`;
+  return code;
+};
+
+/* -------- 3) PCA — Basis vectors (styling container) --------
+   Note: this is a styling-chain block. It only forwards its nested styling code. */
+pythonGenerator.forBlock['style_basis_vectors'] = function (block, generator) {
+  return _dedent(generator.statementToCode(block, 'styling') || '');
+};
+
+/* -------- 4) Seed (config) -------- */
+pythonGenerator.forBlock['cfg_seed'] = function (block, generator) {
+  const seedStr = generator.quote_(block.getFieldValue('seed') || '');
+  let code = '';
+  code += `# Seed (empty => None; else try int)\n`;
+  code += `try:\n`;
+  code += `    _seed_tmp = ${seedStr}\n`;
+  code += `    self.app_data.seed = None if (not _seed_tmp) else int(_seed_tmp)\n`;
+  code += `except Exception:\n`;
+  code += `    self.app_data.seed = None\n`;
+  return code;
+};
+
+/* -------- 5) Cluster options (config; mutator-ready) -------- */
+pythonGenerator.forBlock['cfg_cluster_options'] = function (block, generator) {
+  const exponent = block.getFieldValue('exponent');   // number
+  const distance = block.getFieldValue('distance');   // dropdown
+  const pcaFlag  = (block.getFieldValue('pca') === 'TRUE') ? 'True' : 'False';
+
+  let code = '';
+  code += `self.app_data.exponent = float(${exponent})\n`;
+  code += `self.app_data.distance = "${distance}"\n`;
+  code += `self.app_data.use_pca = ${pcaFlag}\n`;
+  return code;
+};
+
+/* -------- 6) PCA preconditioning (config) -------- */
+pythonGenerator.forBlock['cfg_pca_preconditioning'] = function (block, generator) {
+  const nBasis = block.getFieldValue('nBasis');
+  let code = '';
+  code += `self.app_data.n_basis = int(${nBasis})\n`;
+  return code;
+};
+
+/* -------- 7) Custom field list (config) -------- */
+pythonGenerator.forBlock['cfg_custom_field_list'] = function (block, generator) {
+  const ftype = generator.quote_(block.getFieldValue('fieldType') || '');
+  const field = generator.quote_(block.getFieldValue('field') || '');
+  let code = '';
+  code += `self.app_data.c_field_type = ${ftype}\n`;
+  code += `self.app_data.c_field = ${field}\n`;
+  return code;
+};
+
+/* -------- 8) Multidimensional — Dimensional reduction (hub) --------
+   This block sets the method and applies any custom field selections + styling.
+   Specific plots are produced by the dedicated PCA blocks. */
+pythonGenerator.forBlock['plot_dimensional_reduction'] = function (block, generator) {
+  const method = block.getFieldValue('method'); // e.g., 'pca'
+
+  let custom = _dedent(generator.statementToCode(block, 'customFields') || '');
+  let styling = _dedent(generator.statementToCode(block, 'styling') || '');
+
+  let code = '';
+  code += `self.app_data.dim_red_method = "${method}"\n`;
+  code += custom + '\n';
+  code += styling + '\n';
+  // No direct plotting here; use basis-variance / basis-vectors / etc. blocks.
+  return code;
+};
+
+/* -------- 9) Multidimensional — Clustering (entry) --------
+   Default plot is 'cluster map'. Seed/options/fields/styling chains are executed first. */
+pythonGenerator.forBlock['plot_clustering'] = function (block, generator) {
+  const method = block.getFieldValue('method'); // 'kmeans'|'fcm'|'hierarchical'
+
+  let seed      = _dedent(generator.statementToCode(block, 'seed') || '');
+  let options   = _dedent(generator.statementToCode(block, 'options') || '');
+  let fields    = _dedent(generator.statementToCode(block, 'customFields') || '');
+  let styling   = _dedent(generator.statementToCode(block, 'styling') || '');
+
+  let code = '';
+  code += `self.app_data.cluster_method = "${method}"\n`;
+  code += seed + '\n';
+  code += options + '\n';
+  code += fields + '\n';
+  code += styling + '\n';
+  code += `self.style_data.plot_type = 'cluster map'\n`;
+  code += `canvas, self.plot_info = plot_clusters(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `if canvas is not None:\n`;
+  code += `    self.ensure_canvas_popup()\n`;
+  code += `    self.add_canvas_to_layout(canvas)\n`;
+  code += `    self.canvas_dialog.show()\n`;
+  return code;
+};
+
+/* -------- 10) Cluster performance (entry) -------- */
+pythonGenerator.forBlock['plot_cluster_performance'] = function (block, generator) {
+  const method = block.getFieldValue('method'); // 'kmeans'|'fcm'|'hierarchical'
+
+  let seed      = _dedent(generator.statementToCode(block, 'seed') || '');
+  let options   = _dedent(generator.statementToCode(block, 'options') || '');
+  let fields    = _dedent(generator.statementToCode(block, 'customFields') || '');
+  let styling   = _dedent(generator.statementToCode(block, 'styling') || '');
+
+  let code = '';
+  code += `self.app_data.cluster_method = "${method}"\n`;
+  code += seed + '\n';
+  code += options + '\n';
+  code += fields + '\n';
+  code += styling + '\n';
+  code += `self.style_data.plot_type = 'cluster performance'\n`;
+  code += `canvas, self.plot_info = cluster_performance_plot(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `if canvas is not None:\n`;
+  code += `    self.ensure_canvas_popup()\n`;
+  code += `    self.add_canvas_to_layout(canvas)\n`;
+  code += `    self.canvas_dialog.show()\n`;
+  return code;
 };
 
 

@@ -611,10 +611,10 @@ class SampleObj(QObject):
             if plot_type == 'histogram' and ax == 'y':
                 return scale_options['linear']
 
-        if field_type.lower() in ['cluster'] and field.lower() in ['k-means', 'fuzzy-c means']:
-            return scale_options['discrete']
-        else:
-            return scale_options['standard']
+        if field_type is not None and field is not None:
+            if field_type.lower() in ['cluster'] and field.lower() in ['k-means', 'fuzzy-c means']:
+                return scale_options['discrete']
+        return scale_options['standard']
 
     @property
     def valid_data_types(self):
@@ -1904,7 +1904,7 @@ class SampleObj(QObject):
         
         
         # mask nan values and add to self.mask
-        self.mask = self.mask and nan_mask.values
+        self.mask = self.mask & nan_mask.values
 
         return df, use_analytes
     

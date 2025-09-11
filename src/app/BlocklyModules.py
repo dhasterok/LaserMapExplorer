@@ -1,3 +1,4 @@
+from dataclasses import fields
 import sys, os, re, copy, random, darkdetect
 import numpy as np
 import pandas as pd
@@ -231,13 +232,13 @@ class LameBlockly(QObject):
         if self.app_data.sample_id == '':
             return
 
-        self.analyte_dialog = AnalyteDialog(self)
+        self.analyte_dialog = AnalyteDialog(self.parent, self.app_data.current_data, self.app_data)
         self.analyte_dialog.show()
 
         result = self.analyte_dialog.exec()  # Store the result here
         if result == QDialog.DialogCode.Accepted:
-            self.update_analyte_ratio_selection(analyte_dict= self.analyte_dialog.norm_dict)   
-            
+            self.app_data.update_field_selection(fields= self.analyte_dialog.norm_dict.keys(), norms=self.analyte_dialog.norm_dict.values())
+
         if result == QDialog.DialogCode.Rejected:
             pass
     
@@ -252,13 +253,13 @@ class LameBlockly(QObject):
         if self.app_data.sample_id == '':
             return
 
-        self.field_selection_dialog = FieldDialog(self)
+        self.field_selection_dialog = FieldDialog(self.parent, self.app_data.current_data, self.app_data)
         self.field_selection_dialog.show()
 
         result = self.field_selection_dialog.exec()  # Store the result here
         if result == QDialog.DialogCode.Accepted:
-            self.selected_fields =  self.field_selection_dialog.selected_fields
-            
+            self.selected_fields =  self.field_selection_dialog.selected_field
+            self.app_data.update_field_selection(fields=self.selected_fields)
         if result == QDialog.DialogCode.Rejected:
             pass
 
@@ -405,10 +406,9 @@ class LameBlockly(QObject):
         field_dict ={}
         with open(filepath, 'r') as f:
             for line in f.readlines():
-                field, field_type = line.replace('\n','').split('||')
+                field_type, field = line.replace('\n','').split(',')
                 field_dict[field_type] = field
-
-        print(field_dict)
+            self.app_data.update_field_selection(fields=field_dict.values())
 
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
         sample_id = self.app_data.sample_id

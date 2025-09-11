@@ -42,7 +42,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         An instance of the AnalyteDialog class, which is a QDialog for selecting analytes and ratios.
     """    
     listUpdated = pyqtSignal()
-    def __init__(self, parent):
+    def __init__(self, parent,data, app_data):
         if (parent.__class__.__name__ == 'Main'):
             super().__init__() #initialisng with no parent widget
         else:
@@ -51,12 +51,12 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         self.logger_key = 'Selector'
 
-        sample_id = parent.app_data.sample_id
+        sample_id = app_data.sample_id
 
         if sample_id is None or sample_id == '':
             return
 
-        self.data = parent.data[sample_id].processed
+        self.data = data.processed
 
         self.norm_dict = {}
 
@@ -74,7 +74,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
 
-        self.scale_methods = parent.data[parent.app_data.sample_id].scale_options
+        self.scale_methods = data.scale_options()
         self.scale_methods.append('mixed')
 
         for scale in self.scale_methods:

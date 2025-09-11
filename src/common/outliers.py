@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+from numpy.typing import NDArray
 import scipy.special
 
 def chauvenet_criterion(array, threshold=1):
@@ -102,7 +103,7 @@ def peirce_dev(N, n, m) -> float:
     return x2
 
     
-def quantile_and_difference(array, pl, pu, dpl, dpu, compositional, max_val):
+def quantile_and_difference(array: np.ndarray, pl: float, pu: float, dpl: float, dpu: float, compositional: bool=False, max_val: float|None=None):
     """Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting.
 
     Parameters
@@ -114,13 +115,13 @@ def quantile_and_difference(array, pl, pu, dpl, dpu, compositional, max_val):
     pu : float
         upper percentile bound
     dpl : float
-        _description_
+        lower percentile bound for differences
     dpu : float
-        _description_
-    compositional : bool
-        _description_
-    max_val : float
-        _description_
+        upper percentile bound for differences
+    compositional : bool, optional
+        If True, enforces compositional constraint (data <= max_val), by default False
+    max_val : float, optional
+        Maximum value for compositional data, by default None
 
     Returns
     -------
@@ -173,7 +174,8 @@ def quantile_and_difference(array, pl, pu, dpl, dpu, compositional, max_val):
     clipped_data = 10**clipped_data + v0 - epsilon
 
     # Enforce upper bound (compositional constraint) to ensure data <= max_val
-    clipped_data = np.where(clipped_data > max_val, max_val, clipped_data)
+    if max_val is not None:
+        clipped_data = np.where(clipped_data > max_val, max_val, clipped_data)
 
     # Ensure non-negative values and avoid exact zeros by shifting slightly if needed
     clipped_data = np.maximum(clipped_data, epsilon)

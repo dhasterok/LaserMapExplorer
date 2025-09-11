@@ -160,9 +160,9 @@ axis_settings_dict: Dict[str, PlotSettings] = {
     ),
     "ternary map": PlotSettings(
         axes={
-            "x": AxisControls(True, True, True, None, False, True),
-            "y": AxisControls(True, True, True, None, False, True),
-            "z": AxisControls(True, False, False, None, False, True),
+            "x": AxisControls(True, False, True, None, False, True),
+            "y": AxisControls(True, False, True, None, False, True),
+            "z": AxisControls(True, False, True, None, False, True),
             "c": AxisControls(False, False, False, 3, False, False),
         },
         field_type=['Analyte','Ratio','Calculated','PCA score','Special']

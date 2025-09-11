@@ -11,7 +11,8 @@ from PyQt6.QtGui import ( QIcon )
 from src.common.TableFunctions import TableFcn
 from src.common.CustomWidgets import CustomPage, CustomComboBox, CustomToolButton, CustomTableWidget, ColorButton
 import src.common.csvdict as csvdict
-from src.common.colorfunc import get_hex_color, get_rgb_color
+# Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
+from src.common.ColorManager import convert_color
 from src.common.Logger import log, auto_log_methods
 from src.app.config import ICONPATH
 
@@ -663,10 +664,10 @@ class ScatterUI(CustomPage):
         if ok:
             # update colormap structure
             self.dock.ui.style_data.ternary_colormaps.append({'scheme': name,
-                    'top': get_hex_color(self.colorButtonTCmapXColor.palette().button().color()),
-                    'left': get_hex_color(self.colorButtonTCmapYColor.palette().button().color()),
-                    'right': get_hex_color(self.colorButtonTCmapZColor.palette().button().color()),
-                    'center': get_hex_color(self.colorButtonTCmapMColor.palette().button().color())})
+                    'top': convert_color(self.colorButtonTCmapXColor.palette().button().color(), 'qcolor', 'hex'),
+                    'left': convert_color(self.colorButtonTCmapYColor.palette().button().color(), 'qcolor', 'hex'),
+                    'right': convert_color(self.colorButtonTCmapZColor.palette().button().color(), 'qcolor', 'hex'),
+                    'center': convert_color(self.colorButtonTCmapMColor.palette().button().color(), 'qcolor', 'hex')})
             # update comboBox
             self.comboBoxTernaryColormap.addItem(name)
             self.comboBoxTernaryColormap.setCurrentText(name)

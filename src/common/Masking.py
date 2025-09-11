@@ -21,7 +21,8 @@ from scipy.stats import percentileofscore
 
 from src.app.UITheme import default_font
 from src.app.config import BASEDIR
-from src.common.colorfunc import get_hex_color, get_rgb_color
+# Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
+from src.common.ColorManager import convert_color
 
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.format as fmt
@@ -1009,7 +1010,8 @@ class ClusterTab():
 
         # change color
         self.parent.main_window.button_color_select(self.toolButtonClusterColor)
-        color = get_hex_color(self.toolButtonClusterColor.palette().button().color())
+        color = convert_color(self.toolButtonClusterColor.palette().button().color(), 'qcolor', 'hex')
+        color = color if color is not None else '#000000'
         self.parent.main_window.cluster_dict[self.parent.main_window.cluster_dict['active method']][selected_cluster]['color'] = color
         if self.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
             return
@@ -1177,7 +1179,8 @@ class ClusterTab():
 
         hexcolor = []
         for i in range(self.tableWidgetViewGroups.rowCount()):
-            hexcolor.append(get_hex_color(colors[i]))
+            hex_color = convert_color(colors[i], 'rgb', 'hex', norm_in=True)
+            hexcolor.append(hex_color if hex_color is not None else '#000000')
             self.tableWidgetViewGroups.blockSignals(True)
             self.tableWidgetViewGroups.setItem(i,2,QTableWidgetItem(hexcolor[i]))
             self.tableWidgetViewGroups.blockSignals(False)

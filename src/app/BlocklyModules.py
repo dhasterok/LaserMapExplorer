@@ -42,7 +42,7 @@ from src.common.Browser import Browser
 from src.app.config import BASEDIR, ICONPATH, STYLE_PATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import src.common.format as fmt
-from src.common.colorfunc import get_hex_color, get_rgb_color
+# Removed unused imports: get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerDock

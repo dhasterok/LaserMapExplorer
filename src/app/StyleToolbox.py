@@ -11,10 +11,16 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
-from src.common.colorfunc import get_hex_color, get_rgb_color
+# Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
+from src.common.ColorManager import convert_color, convert_color_list
 from src.app.config import STYLE_PATH
 from src.app.PlotAxisSettings import axis_settings_dict
 from src.common.Logger import auto_log_methods, log
+
+from typing import TYPE_CHECKING, Union
+if TYPE_CHECKING:
+    from .MainWindow import MainWindow
+    from .BlocklyModules import LameBlockly
 
 VALID_MARKERS = {k for k in Line2D.markers if isinstance(k, str) and k.strip()}
 
@@ -488,7 +494,7 @@ class StyleData(QObject, StyleTheme):
     ternaryColormapChanged = pyqtSignal(str)
     ternaryColorChanged = pyqtSignal(str, str)
 
-    def __init__(self, parent):
+    def __init__(self, parent: Union["MainWindow", "LameBlockly"]):
         super().__init__(parent=parent)
         self.logger_key = 'Style'
 
@@ -535,6 +541,16 @@ class StyleData(QObject, StyleTheme):
         self.color_schemes = []
         for cmap in self.ternary_colormaps:
             self.color_schemes.append(cmap['scheme'])
+
+        # Initialize ternary color properties with first colormap
+        self._ternary_colormap = 0
+        first_cmap = self.ternary_colormaps[0] if self.ternary_colormaps else {}
+        self._ternary_color_x = first_cmap.get('top', '#FF0000')
+        self._ternary_color_y = first_cmap.get('left', '#00FF00') 
+        self._ternary_color_z = first_cmap.get('right', '#0000FF')
+        # Handle 'none' center color properly - keep as string for UI display
+        center_color = first_cmap.get('center', '#808080')
+        self._ternary_color_m = center_color if center_color != 'none' else 'none'
 
 
 
@@ -759,7 +775,7 @@ class StyleData(QObject, StyleTheme):
         return self.style_dict[self.plot_type]['ScaleLength']
 
     @scale_length.setter
-    def scale_length(self, length: float):
+    def scale_length(self, length: float|None):
         if length is None or isinstance(length, float):
             x_range = (
                 self.xlim[1] - self.xlim[0]
@@ -1009,10 +1025,10 @@ class StyleData(QObject, StyleTheme):
     
         self._ternary_colormap = new_cmap
 
-        self.ternary_color_x = self.ternary_colormaps[self._ternary_colormap]['x']
-        self.ternary_color_y = self.ternary_colormaps[self._ternary_colormap]['y']
-        self.ternary_color_z = self.ternary_colormaps[self._ternary_colormap]['z']
-        self.ternary_color_m = self.ternary_colormaps[self._ternary_colormap]['m']
+        self.ternary_color_x = self.ternary_colormaps[self._ternary_colormap]['top']
+        self.ternary_color_y = self.ternary_colormaps[self._ternary_colormap]['left']
+        self.ternary_color_z = self.ternary_colormaps[self._ternary_colormap]['right']
+        self.ternary_color_m = self.ternary_colormaps[self._ternary_colormap]['center']
         self.ternaryColormapChanged.emit(new_cmap)
 
     @property
@@ -1022,11 +1038,22 @@ class StyleData(QObject, StyleTheme):
     
     @ternary_color_x.setter
     def ternary_color_x(self, new_color):
-        if new_color == self._ternary_color_x:
+        # Convert color to hex format for consistent storage
+        if hasattr(new_color, 'name'):  # QColor object
+            hex_color = convert_color(new_color, 'qcolor', 'hex')
+        elif isinstance(new_color, str) and new_color.startswith('#'):
+            hex_color = new_color  # Already hex
+        else:
+            # Try to convert as-is, fallback to original if conversion fails
+            hex_color = convert_color(new_color, 'rgb', 'hex', norm_in=False) if isinstance(new_color, (list, tuple)) else new_color
+            if hex_color is None:
+                hex_color = new_color
+        
+        if hex_color == self._ternary_color_x:
             return
     
-        self._ternary_color_x = new_color
-        self.ternaryColorChanged.emit('x', new_color)
+        self._ternary_color_x = hex_color
+        self.ternaryColorChanged.emit('x', hex_color)
 
     @property
     def ternary_color_y(self):
@@ -1035,11 +1062,22 @@ class StyleData(QObject, StyleTheme):
     
     @ternary_color_y.setter
     def ternary_color_y(self, new_color):
-        if new_color == self._ternary_color_y:
+        # Convert color to hex format for consistent storage
+        if hasattr(new_color, 'name'):  # QColor object
+            hex_color = convert_color(new_color, 'qcolor', 'hex')
+        elif isinstance(new_color, str) and new_color.startswith('#'):
+            hex_color = new_color  # Already hex
+        else:
+            # Try to convert as-is, fallback to original if conversion fails
+            hex_color = convert_color(new_color, 'rgb', 'hex', norm_in=False) if isinstance(new_color, (list, tuple)) else new_color
+            if hex_color is None:
+                hex_color = new_color
+        
+        if hex_color == self._ternary_color_y:
             return
     
-        self._ternary_color_y = new_color
-        self.ternaryColorChanged.emit('y', new_color)
+        self._ternary_color_y = hex_color
+        self.ternaryColorChanged.emit('y', hex_color)
 
     @property
     def ternary_color_z(self):
@@ -1048,11 +1086,22 @@ class StyleData(QObject, StyleTheme):
     
     @ternary_color_z.setter
     def ternary_color_z(self, new_color):
-        if new_color == self._ternary_color_z:
+        # Convert color to hex format for consistent storage
+        if hasattr(new_color, 'name'):  # QColor object
+            hex_color = convert_color(new_color, 'qcolor', 'hex')
+        elif isinstance(new_color, str) and new_color.startswith('#'):
+            hex_color = new_color  # Already hex
+        else:
+            # Try to convert as-is, fallback to original if conversion fails
+            hex_color = convert_color(new_color, 'rgb', 'hex', norm_in=False) if isinstance(new_color, (list, tuple)) else new_color
+            if hex_color is None:
+                hex_color = new_color
+        
+        if hex_color == self._ternary_color_z:
             return
     
-        self._ternary_color_z = new_color
-        self.ternaryColorChanged.emit('z', new_color)
+        self._ternary_color_z = hex_color
+        self.ternaryColorChanged.emit('z', hex_color)
 
     @property
     def ternary_color_m(self):
@@ -1061,11 +1110,30 @@ class StyleData(QObject, StyleTheme):
     
     @ternary_color_m.setter
     def ternary_color_m(self, new_color):
-        if new_color == self._ternary_color_m:
+        # Handle special 'none' case for center color
+        if new_color == 'none':
+            if 'none' == self._ternary_color_m:
+                return
+            self._ternary_color_m = 'none'
+            self.ternaryColorChanged.emit('m', 'none')
+            return
+            
+        # Convert color to hex format for consistent storage
+        if hasattr(new_color, 'name'):  # QColor object
+            hex_color = convert_color(new_color, 'qcolor', 'hex')
+        elif isinstance(new_color, str) and new_color.startswith('#'):
+            hex_color = new_color  # Already hex
+        else:
+            # Try to convert as-is, fallback to original if conversion fails
+            hex_color = convert_color(new_color, 'rgb', 'hex', norm_in=False) if isinstance(new_color, (list, tuple)) else new_color
+            if hex_color is None:
+                hex_color = new_color
+        
+        if hex_color == self._ternary_color_m:
             return
     
-        self._ternary_color_m = new_color
-        self.ternaryColorChanged.emit('m', new_color)
+        self._ternary_color_m = hex_color
+        self.ternaryColorChanged.emit('m', hex_color)
 
     def get_axis_label(self, ax: str):
         return getattr(self, f"{ax}label")
@@ -1237,6 +1305,8 @@ class StyleData(QObject, StyleTheme):
             Field plotted on axis, used as column name to ``MainWindow.data.processed`` dataframe.
         """
         data = self.ui.app_data.current_data
+        if not data:
+            return
 
         if field == '' or field is None:
             return
@@ -1354,7 +1424,9 @@ class StyleData(QObject, StyleTheme):
         if N is None:
             N = 256
 
-        color_list = get_rgb_color(self.custom_color_dict[name])
+        color_list = convert_color_list(self.custom_color_dict[name], 'hex', 'rgb', norm_out=True)
+        if not color_list:  # Fallback if no colors could be converted
+            color_list = [(0, 0, 0), (1, 1, 1)]  # Black to white fallback
         cmap = colors.LinearSegmentedColormap.from_list(name, color_list, N=N)
 
         return cmap
@@ -1383,7 +1455,8 @@ class StyleData(QObject, StyleTheme):
 
         hexcolor = []
         for i in range(n):
-            hexcolor.append(get_hex_color(colors[i]))
+            hex_color = convert_color(colors[i], 'rgb', 'hex', norm_in=True)
+            hexcolor.append(hex_color if hex_color is not None else '#000000')
             
         if mask:
             hexcolor.append(self.style_dict['cluster map']['OverlayColor'])
@@ -1413,13 +1486,15 @@ class StyleData(QObject, StyleTheme):
         
         # convert colors from hex to rgb and add to cluster_color list
         for i in range(n):
-            color = get_rgb_color(cluster_dict[i]['color'])
+            rgb_color = convert_color(cluster_dict[i]['color'], 'hex', 'rgb', norm_out=False)
+            color = rgb_color if rgb_color is not None else [0, 0, 0]
             cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
             cluster_label[i] = cluster_dict[i]['name']
 
         # mask
         if 99 in cluster_dict:
-            color = get_rgb_color(cluster_dict[99]['color'])
+            rgb_color = convert_color(cluster_dict[99]['color'], 'hex', 'rgb', norm_out=False)
+            color = rgb_color if rgb_color is not None else [128, 128, 128]
             cluster_color.append(tuple(float(c)/255 for c in color) + (float(alpha)/100,))
             cluster_label.append(cluster_dict[99]['name'])
             cmap = colors.ListedColormap(cluster_color, N=n+1)

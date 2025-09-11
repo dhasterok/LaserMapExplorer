@@ -14,7 +14,7 @@ import src.common.format as fmt
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
-from src.common.colorfunc import get_hex_color, get_rgb_color
+# Removed unused imports: get_hex_color, get_rgb_color
 from src.app.config import BASEDIR, ICONPATH
 from src.common.Logger import auto_log_methods, log
 from typing import TYPE_CHECKING

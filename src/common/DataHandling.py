@@ -1,7 +1,9 @@
 import re, os, copy
 import uuid
 from datetime import datetime
+from typing import Optional, Union, Any, Dict, List
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from src.common.ExtendedDF import AttributeDataFrame
 from scipy.stats import yeojohnson
@@ -163,6 +165,35 @@ class SampleObj(QObject):
     'polygon_mask' : (MaskObj) -- mask created from selected polygons.
     'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
     'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
+
+    Signals
+    -------
+    annotationAdded : (str, dict)
+        Emitted when an annotation is added to a plot.
+    annotationUpdated : (str, str, dict)
+        Emitted when an annotation is updated.
+    annotationRemoved : (str, str)
+        Emitted when an annotation is removed from a plot.
+    annotationVisibilityChanged : (str, str, bool)
+        Emitted when the visibility of an annotation is changed.
+    pixelDimensionChanged : (str, float)
+        Emitted when the pixel dimension (dx or dy) is changed.
+    imageResolutionChanged : (str, int)
+        Emitted when the image resolution (nx or ny) is changed.
+    dataQuantileChanged : (str, float)
+        Emitted when the data quantile (min or max) is changed.
+    dataDiffQuantileChanged : (str, float)
+        Emitted when the data difference quantile (min or max) is changed.
+    applyOutlierAllChanged : (bool)
+        Emitted when the apply outlier to all flag is changed.
+    outlierMethodChanged : (str)
+        Emitted when the outlier method is changed.
+    negativeMethodChanged : (str)
+        Emitted when the negative method is changed.
+    autoscaleStateChanged : (bool)
+        Emitted when the autoscale state is changed.
+    currentFieldUpdated : (str)
+        Emitted when the current field is updated.
     """
     # PyQt signals for annotation management
     annotationAdded = pyqtSignal(str, dict)  # plot_id, annotation_data
@@ -202,6 +233,9 @@ class SampleObj(QObject):
         self._negative_method = negative_method
         self._smoothing_method = smoothing_method
         self._updating = False
+        
+        # Default ref_chem for base class - empty Series, subclasses can override
+        self._ref_chem = pd.Series(dtype=float)
 
         self._default_lower_bound = 0.005
         self._default_upper_bound = 0.995
@@ -227,8 +261,8 @@ class SampleObj(QObject):
         ])
 
         # will be AttributeDataFrame once data is loaded into them
-        self.raw = AttributeDataFrame()
-        self.processed = AttributeDataFrame()
+        self.raw: AttributeDataFrame = AttributeDataFrame()
+        self.processed: AttributeDataFrame = AttributeDataFrame()
 
         self._outlier_method_options = [
             'none',
@@ -253,9 +287,6 @@ class SampleObj(QObject):
         ]
         self._valid_data_types = self._default_data_types
 
-
-        
-
         self.order = 'F'
 
         #self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
@@ -264,7 +295,6 @@ class SampleObj(QObject):
                                        'discrete':['discrete']}
 
         self.order = 'F'
-
 
     # --------------------------------------
     # Define properties and setter functions
@@ -309,6 +339,9 @@ class SampleObj(QObject):
         if not self._updating:
             self._updating = True
 
+            if new_dx == self._dx:
+                return
+
             # Recalculates X for self.raw
             # (does not use self.processed because the x limits will otherwise be incorrect)
             # X = round(self.raw['Xc']/self._dx)
@@ -333,6 +366,9 @@ class SampleObj(QObject):
     def dy(self, new_dy):
         if not self._updating:
             self._updating = True
+            
+            if new_dy == self._dx:
+                return
 
             # Recalculates Y for self.raw
             # (does not use self.processed because the y limits will otherwise be incorrect)
@@ -528,7 +564,15 @@ class SampleObj(QObject):
 
         #crop clipped_analyte_data based on self.crop_mask
         self.raw[self.crop_mask].reset_index(drop=True)
-        self.processed = self.processed[self.crop_mask].reset_index(drop=True)
+        # Ensure we maintain AttributeDataFrame type after cropping
+        cropped_processed = self.processed[self.crop_mask].reset_index(drop=True)
+        if not isinstance(cropped_processed, AttributeDataFrame):
+            # If pandas operation returned regular DataFrame, convert back to AttributeDataFrame
+            new_processed = AttributeDataFrame(cropped_processed)
+            new_processed.column_attributes = self.processed.column_attributes.copy()
+            self.processed = new_processed
+        else:
+            self.processed = cropped_processed
 
         self.x = self.processed['Xc']
         self.y = self.processed['Yc']
@@ -537,8 +581,25 @@ class SampleObj(QObject):
 
         self.prep_data()
 
-    def scale_options(self, plot_type=None, ax=None, field_type: str=None, field: str=None):
-        """list : options for scaling the data."""
+    def scale_options(self, plot_type: str|None=None, ax: str|None=None, field_type: str|None=None, field: str|None=None) -> list:
+        """Options for scaling the data.
+
+        Parameters
+        ----------
+        plot_type : str, optional
+            Type of plot, by default None
+        ax : str, optional
+            Axis being plotted, by default None
+        field_type : str, optional
+            Type of field being plotted, by default None
+        field : str, optional
+            Name of field being plotted, by default None
+
+        Returns
+        -------
+        list :
+            List of valid scaling options for the data.
+        """
         scale_options = {
             'standard':['linear', 'log', 'inv_logit', 'symlog'],
             'linear':['linear'],
@@ -566,6 +627,19 @@ class SampleObj(QObject):
             self._valid_data_types = new_list
         else:
             raise ValueError("List (new_list) is not a subset of self._default_data_types.")
+    
+    @property
+    def ref_chem(self):
+        """pd.Series : Reference chemistry data for normalization. Base class returns empty Series."""
+        return self._ref_chem
+    
+    @ref_chem.setter 
+    def ref_chem(self, value):
+        """Set reference chemistry. Base class stores but doesn't validate."""
+        if value is not None:
+            self._ref_chem = value
+        else:
+            self._ref_chem = pd.Series(dtype=float)
 
     @property
     def current_field(self):
@@ -747,7 +821,6 @@ class SampleObj(QObject):
         """Resets dx and dy to initial values."""        
         self.dx = self._orig_dx
         self.dy = self._orig_dy
-        self.update_aspect_ratio_controls()
 
     def swap_xy(self):
         """Swaps data in a SampleObj."""        
@@ -1163,10 +1236,7 @@ class SampleObj(QObject):
         return label
 
     def cluster_data(self):
-        """Clusters data for use with data preprocessing
-
-        _extended_summary_
-        """
+        """Clusters data for use with data preprocessing."""
         # Step 1: Clustering
         # ------------------
         # Select columns where 'data_type' attribute is 'Analyte'
@@ -1219,7 +1289,7 @@ class SampleObj(QObject):
         #     ax1.set_ylabel('Y')
         #     fig.show()
 
-    def prep_data(self, field=None):
+    def prep_data(self, field: str='all'):
         """Applies adjustments to data data prior to analyses and plotting.
 
         This method applies a workflow to adjust data to limit the number of data that are otherwise
@@ -1233,6 +1303,11 @@ class SampleObj(QObject):
 
         These calculations start from the cropped data, but do not include chemical, polygonal, or cluster filtering.
 
+        Parameters
+        ----------
+        field : str or list of str, optional
+            The field or fields to preprocess.  If 'all', all analyte and ratio fields
+
         Raises
         ------
         AssertionError
@@ -1242,7 +1317,7 @@ class SampleObj(QObject):
         attribute_df = None
         analyte_columns = []
         ratio_columns = []
-        if (field == None) or (field == 'all'):
+        if field == 'all':
             # Select columns where 'data_type' attribute is 'Analyte'
             analyte_columns = self.raw.match_attributes({'data_type': 'Analyte', 'use': True})
             # analyte_columns = self.raw.match_attribute('data_type', 'Analyte')
@@ -1289,12 +1364,17 @@ class SampleObj(QObject):
 
         # Compute ratios not included in raw_data
         # ---------------------------------------
-        if ((field is None) or (field == 'all')) and (attribute_df is not None):
-            ratios = attribute_df.columns[(data_type == 'Ratio').any()]
+        if (field == 'all') and (attribute_df is not None):
+            ratio_columns = self.raw.match_attributes({'data_type': 'Ratio', 'use': True})
+            ratios = attribute_df.columns[(ratio_columns == 'Ratio')]
+
+            if ratios is None:
+                return
 
             ratios_not_in_raw_data = [col for col in ratios if col not in ratio_columns]
 
             for col in ratios_not_in_raw_data:
+                analyte_1, analyte_2 = ratios_not_in_raw_data[col].split(' / ').str
                 columns = columns + col
                 self.compute_ratio(analyte_1, analyte_2)
 
@@ -1345,7 +1425,7 @@ class SampleObj(QObject):
                 transformed_data = self.clip_outliers(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq)
                 self.processed.loc[cluster_mask, col] = transformed_data
 
-                transformed_data = self.quantile_and_difference(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                transformed_data = quantile_and_difference(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
                 self.processed.loc[cluster_mask, col] = transformed_data
 
         
@@ -1368,7 +1448,7 @@ class SampleObj(QObject):
             if self.processed.get_attribute(col, 'data_type') == 'coordinate' and self.processed.get_attribute(col, 'norm') is None:
                 self.processed.set_attribute(col, 'norm', 'linear')
 
-    def k_optimal_clusters(self, data, max_clusters=int(10)):
+    def k_optimal_clusters(self, data: np.ndarray, max_clusters: int=10):
         """
         Predicts the optimal number of clusters.
 
@@ -1448,7 +1528,7 @@ class SampleObj(QObject):
         return optimal_k
 
 
-    def clip_outliers(self, array, outlier_method, pl=None, pu=None, dpl=None, dpu=None):
+    def clip_outliers(self, array: np.ndarray, outlier_method: str, pl: float=None, pu: float=None, dpl: float=None, dpu: float=None):
         """Attempts to remove outliers to by a method selected by the user.
 
         Parameters
@@ -1500,7 +1580,7 @@ class SampleObj(QObject):
 
         return t_array
 
-    def transform_array(self, array, negative_method):
+    def transform_array(self, array: np.ndarray, negative_method: str):
         """
         Negative and zero handling with clustering for noise detection.
 
@@ -1545,7 +1625,7 @@ class SampleObj(QObject):
 
         return t_array
 
-    def update_norm(self, norm=None, field=None):
+    def update_norm(self, norm: str=None, field: str=None):
         """Update the norm of the data.
 
         Parameters
@@ -1561,12 +1641,13 @@ class SampleObj(QObject):
         """ 
         if field is not None: #if normalising single analyte
             self.processed.set_attribute(field,'norm',norm)
+            self.prep_data(field)
         else: #if normalising all analytes in sample
             self.processed.set_attribute(self.processed.match_attribute('data_type','Analyte'),'norm',norm)
+            self.prep_data('all')
 
-        self.prep_data(field)
 
-    def get_map_data(self, field, field_type='Analyte', norm=False, processed=True):
+    def get_map_data(self, field: str, field_type: str='Analyte', norm: bool=False, processed: bool=True):
         """
         Retrieves and processes the mapping data for the given sample and analytes
 
@@ -1583,6 +1664,8 @@ class SampleObj(QObject):
         norm : str
             Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
             data are returned with a linear scale.  By default `False`.
+        processed : bool, optional
+            If `True`, use processed data.  If `False`, use raw data.  By default `True`.
 
         Returns
         -------
@@ -1627,7 +1710,7 @@ class SampleObj(QObject):
                         df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.symlog(df['array']), np.nan)
                 
                 # normalize
-                if 'normalized' in field_type:
+                if not self.ref_chem.empty and 'normalized' in field_type:
                     refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
                     df['array'] = df['array'] / refval
 
@@ -1639,7 +1722,7 @@ class SampleObj(QObject):
                 df['array'] = self.processed[field].values
                 
                 # normalize
-                if 'normalized' in field_type:
+                if not self.ref_chem.empty and 'normalized' in field_type:
                     refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
                     refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
                     df['array'] = df['array'] * (refval_2 / refval_1)
@@ -1702,13 +1785,26 @@ class SampleObj(QObject):
         
         
         # mask nan values and add to self.mask
-        self.mask = self.mask  & nan_mask.values
+        self.mask = self.mask and nan_mask.values
 
         return df, use_analytes
     
     # extracts data for scatter plot
-    def get_vector(self, field_type, field, norm='linear', processed=True):
+    def get_vector(self, field_type: str, field: str, norm: str='linear', processed: bool=True):
         """Creates a dictionary of values for plotting
+
+        Parameters
+        ----------
+        field_type : str
+            Type of field to plot. Types include 'Analyte', 'Ratio', 'PCA', 'Cluster', 'Cluster score',
+            'Special', 'Computed'. By default `'Analyte'`
+        field : str
+            Name of field to plot. By default `None`.
+        norm : str, optional
+            Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
+            data are returned with a linear scale.  By default `'linear'`.
+        processed : bool, optional
+            If `True`, use processed data.  If `False`, use raw data.  By default `True`.
 
         Returns
         -------
@@ -1735,119 +1831,7 @@ class SampleObj(QObject):
 
         return value_dict
 
-    # def outlier_detection(self, lq=0.0005, uq=99.5, d_lq=9.95 , d_uq=99):
-    #     """_summary_
-
-    #     _extended_summary_
-
-    #     Parameters
-    #     ----------
-    #     data : _type_
-    #         _description_
-    #     lq : float, optional
-    #         _description_, by default 0.0005
-    #     uq : float, optional
-    #         _description_, by default 99.5
-    #     d_lq : float, optional
-    #         _description_, by default 9.95
-    #     d_uq : int, optional
-    #         _description_, by default 99
-
-    #     Returns
-    #     -------
-    #     _type_
-    #         _description_
-    #     """        
-    #     # Ensure data is a numpy array
-    #     data = np.array(data)
-
-    #     # Shift values to positive concentrations
-    #     v0 = np.nanmin(data, axis=0) - 0.001
-    #     data_shifted = np.log10(data - v0)
-
-    #     # Calculate required quantiles and differences
-    #     lq_val = np.nanpercentile(data_shifted, lq, axis=0)
-    #     uq_val = np.nanpercentile(data_shifted, uq, axis=0)
-    #     sorted_indices = np.argsort(data_shifted, axis=0)
-    #     sorted_data = np.take_along_axis(data_shifted, sorted_indices, axis=0)
-
-
-    #     diff_sorted_data = np.diff(sorted_data, axis=0)
-    #     # Adding a 0 to the beginning of each column to account for the reduction in size by np.diff
-    #     diff_sorted_data = np.insert(diff_sorted_data, 0, 0, axis=0)
-    #     diff_array_uq_val = np.nanpercentile(diff_sorted_data, d_uq, axis=0)
-    #     diff_array_lq_val = np.nanpercentile(diff_sorted_data, d_lq, axis=0)
-    #     upper_cond = (sorted_data > uq_val) & (diff_sorted_data > diff_array_uq_val)
-
-    #     # Initialize arrays for results
-    #     clipped_data = np.copy(sorted_data)
-
-    #     # Upper bound outlier filter
-    #     for col in range(sorted_data.shape[1]):
-    #         up_indices = np.where(upper_cond[:, col])[0]
-    #         if len(up_indices) > 0:
-    #             uq_outlier_index = up_indices[0]
-    #             clipped_data[uq_outlier_index:, col] = clipped_data[uq_outlier_index-1, col]
-
-    #     lower_cond = (sorted_data < lq_val) & (diff_sorted_data > diff_array_lq_val)
-    #     # Lower bound outlier filter
-    #     for col in range(sorted_data.shape[1]):
-    #         low_indices = np.where(lower_cond[:, col])[0]
-    #         if len(low_indices) > 0:
-    #             lq_outlier_index = low_indices[-1]
-    #             clipped_data[:lq_outlier_index+1, col] = clipped_data[lq_outlier_index+1, col]
-
-    #     clipped_data = np.take_along_axis(clipped_data, np.argsort(sorted_indices, axis=0), axis=0)
-    #     # Unshift the data
-    #     clipped_data = 10**clipped_data + v0
-
-    #     return clipped_data
-
-    # def transform_array(array, negative_method):
-    #     """Negative and zero handling
-
-    #     Parameters
-    #     ----------
-    #     array : numpy.ndarray
-    #         Input data
-    #     negative_method : str
-    #         negative_method obtained from analyte info
-    #     Returns
-    #     -------
-    #     numpy.ndarray
-    #         Transformed data
-    #     """
-    #     match negative_method.lower():
-    #         case 'gradual shift':
-    #             if array.ndim == 2:
-    #                 # Calculate min and max values for each column and adjust their shapes for broadcasting
-    #                 min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
-    #                 max_val = np.nanmax(array, axis=0, keepdims=True)
-
-    #                 # Adjust the shape of min_val and max_val for broadcasting
-    #                 adjusted_min_val = min_val
-    #                 adjusted_max_val = max_val
-
-    #                 # Check if min values are less than or equal 0
-    #                 min_leq_zero = adjusted_min_val <= 0
-
-    #                 # Perform transformation with broadcasting
-    #                 t_array = np.where(
-    #                     min_leq_zero,
-    #                     (adjusted_max_val * (array - adjusted_min_val)) / (adjusted_max_val - adjusted_min_val),
-    #                     array
-    #                 )
-    #             else:
-    #                 # 1D array case, similar to original logic
-    #                 min_val = np.nanmin(array) - 0.0001
-    #                 max_val = np.nanmax(array)
-    #                 if min_val < 0:
-    #                     t_array = (max_val * (array - min_val)) / (max_val - min_val)
-    #                 else:
-    #                     t_array = np.copy(array)
-    #             return t_array
-
-    def auto_scale(self,sample_id, field, update = False):
+    def auto_scale(self, sample_id: str, field: str, update: bool=False):
         """Auto-scales pixel values in map
 
         Executes on ``MainWindow.toolButtonAutoScale`` click.
@@ -1860,7 +1844,11 @@ class SampleObj(QObject):
 
         Parameters
         ----------
-        update : bool
+        sample_id : str
+            Sample identifier
+        field : str
+            Field to change the auto scale, by default None
+        update : bool, optional
             Update auto scale parameters, by default, False
         """
         if '/' in field:
@@ -1868,8 +1856,6 @@ class SampleObj(QObject):
         else:
             analyte_1 = field
             analyte_2 = None
-
-
 
         lb = self.data_min_quantile
         ub = self.data_max_quantile
@@ -2271,6 +2257,35 @@ class SampleObj(QObject):
 
 @auto_log_methods(logger_key='Data')
 class LaserSampleObj(SampleObj):
+    """Class for laser ablation sample data and operations
+
+    Inherits from ``SampleObj``
+    
+    Attributes
+    ----------
+    sample_id : str
+        Sample identifier
+        file_path : str
+        Path to data file
+    outlier_method : str
+        Method for removing outliers
+    negative_method : str
+        Method for handling negative values
+    smoothing_method : str, optional
+        Method for smoothing data, by default None
+    ref_chem : dict, optional
+        Reference chemistry, by default None
+    ui : MainWindow, optional
+        Main window instance, by default None
+    polygon : dict
+        Dictionary of polygon masks
+    profile : dict
+        Dictionary of profiles
+    filter_df : pandas.DataFrame
+        DataFrame of field filters
+    spotdata : AttributeDataFrame
+        DataFrame of spot data
+    """
     def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, ui=None):
         super().__init__(sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
         self.ui = ui
@@ -2290,12 +2305,6 @@ class LaserSampleObj(SampleObj):
 
         self.reset_data()
 
-
-    # --------------------------------------
-    # Define properties and setter functions
-    # --------------------------------------
-    # note properties are based on the cropped X and Y values
-    
     @property
     def ref_chem(self):
         """dict : Reference chemistry"""
@@ -2307,7 +2316,26 @@ class LaserSampleObj(SampleObj):
 
 @auto_log_methods(logger_key='Data')
 class XRFSampleObj(SampleObj):
+    """Class for XRF sample data and operations
+    
+    Inherits from ``SampleObj``
+
+    Attributes
+    ----------
+    sample_id : str
+        Sample identifier
+    file_path : str
+        Path to data file
+    outlier_method : str
+        Method for removing outliers
+    negative_method : str
+        Method for handling negative values
+    smoothing_method : str, optional
+        Method for smoothing data, by default None
+    ui : MainWindow, optional
+        Main window instance, by default None
+    """
     def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
-        super().__init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
+        super().__init__(sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
         self.ui = ui
         self.logger_key = 'Data'

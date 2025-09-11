@@ -606,7 +606,7 @@ class PreprocessingUI(CustomPage):
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.dock.ui.plot_tree.clear_tree_data(tree)
-            data.prep_data()
+            data.prep_data('all')
         else:
             data.negative_method = method
             data.prep_data(self.dock.ui.app_data.c_field)
@@ -724,7 +724,7 @@ class PreprocessingUI(CustomPage):
             # clear existing plot info from tree to ensure saved plots using most recent data
             for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
                 self.dock.ui.plot_tree.clear_tree_data(tree)
-            data.prep_data()
+            data.prep_data('all')
         else:
             data.negative_method = method
 

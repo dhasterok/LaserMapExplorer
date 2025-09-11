@@ -25,4 +25,5 @@
       InfoDock
       MetadataTab
       PlotInfoTab
+      PropertiesTab
    

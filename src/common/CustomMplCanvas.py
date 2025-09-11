@@ -45,6 +45,27 @@ class SimpleMplCanvas(FigureCanvas):
 
         self.ui = parent
 
+    def closeEvent(self, event):
+        """Properly cleanup matplotlib resources for SimpleMplCanvas."""
+        try:
+            # Clear matplotlib objects
+            if hasattr(self, 'axes') and self.axes is not None:
+                self.axes.clear()
+            
+            if hasattr(self, 'fig') and self.fig is not None:
+                self.fig.clear()
+                
+        except (RuntimeError, AttributeError):
+            # Objects might already be deleted, which is fine
+            pass
+        
+        # Call parent closeEvent if it exists
+        try:
+            super().closeEvent(event)
+        except AttributeError:
+            # FigureCanvas might not have closeEvent
+            pass
+
 
 class MplCanvas(FigureCanvas):
     """Matplotlib canvas object for interactive plots
@@ -945,5 +966,48 @@ class MplCanvas(FigureCanvas):
         except KeyError as e:
             print(f"Missing key in canvas annotation: {e}")
             return None
+
+    def closeEvent(self, event):
+        """Properly cleanup matplotlib resources to avoid 'wrapped C/C++ object deleted' errors."""
+        try:
+            # Disconnect any matplotlib event connections
+            if hasattr(self, 'distance_cid_press') and self.distance_cid_press is not None:
+                self.mpl_disconnect(self.distance_cid_press)
+                self.distance_cid_press = None
+                
+            if hasattr(self, 'distance_cid_move') and self.distance_cid_move is not None:
+                self.mpl_disconnect(self.distance_cid_move)
+                self.distance_cid_move = None
+            
+            # Clean up toolbar
+            if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
+                try:
+                    self.mpl_toolbar.close()
+                    self.mpl_toolbar.deleteLater()
+                    self.mpl_toolbar = None
+                except RuntimeError:
+                    pass  # Already deleted
+            
+            # Clear annotations to prevent issues
+            if hasattr(self, 'annotations'):
+                self.annotations.clear()
+            
+            # Clear matplotlib objects
+            if hasattr(self, 'axes') and self.axes is not None:
+                self.axes.clear()
+            
+            if hasattr(self, 'fig') and self.fig is not None:
+                self.fig.clear()
+                
+        except (RuntimeError, AttributeError) as e:
+            # Objects might already be deleted, which is fine
+            pass
+        
+        # Call parent closeEvent if it exists
+        try:
+            super().closeEvent(event)
+        except AttributeError:
+            # FigureCanvas might not have closeEvent
+            pass
 
 

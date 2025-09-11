@@ -20,6 +20,26 @@ except ImportError:
     np = None
     HAS_NUMPY = False
 
+def is_valid_hex_color(hex_str: str):
+    """
+    Validate if a string is a valid hex color in RGB (#RRGGBB) or RGBA (#RRGGBBAA) format.
+
+    Parameters
+    ----------
+    hex_str : str
+        The hex color string.
+
+    Returns
+    -------
+    bool :
+         True if valid, False otherwise.
+    """
+    if hex_str is None:
+        return False
+
+    pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$")
+    return bool(pattern.match(hex_str))
+
 
 class ColorConverter:
     """Unified color conversion system with explicit format specification."""

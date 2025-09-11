@@ -12,6 +12,7 @@ from scipy.signal import convolve2d, wiener, decimate
 from pyqtgraph import ( ImageItem )
 import cv2
 from src.common.Logger import log, auto_log_methods
+from src.common.ColorManager import convert_color
 
 # -------------------------------------
 # Image processing functions
@@ -120,7 +121,8 @@ class ImageProcessing():
         #self.plot.addItem(self.edge_img)
 
         overlay_image = np.zeros(self.edge_array.shape+(4,), dtype=np.uint8)
-        colorlist = self.parent.get_rgb_color(self.parent.style_data.overlay_color)
+        rgb_color = convert_color(self.parent.style_data.overlay_color, 'hex', 'rgb', norm_out=False)
+        colorlist = rgb_color if rgb_color is not None else [255, 255, 255]
         overlay_image[..., 0] = colorlist[0]  # Red channel
         overlay_image[..., 1] = colorlist[1]  # Green channel
         overlay_image[..., 2] = colorlist[2]  # Blue channel

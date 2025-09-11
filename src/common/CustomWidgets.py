@@ -12,8 +12,8 @@ from PyQt6.QtCore import Qt, QRect, QPropertyAnimation, pyqtProperty, pyqtSignal
 import src.common.format as fmt
 import pandas as pd
 
+from src.common.ColorManager import is_valid_hex_color
 from src.common.ColorSelector import select_color
-from src.common.colorfunc import is_valid_hex_color
 from src.app.UITheme import default_font, ThemeManager
 from src.app.config import ICONPATH
 

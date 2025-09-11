@@ -3,8 +3,9 @@ from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
 from PyQt6.QtWidgets import ( 
         QMessageBox, QToolButton, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox, QInputDialog,
-        QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QFormLayout, QListView, QToolBar, QAbstractItemView,
-        QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget
+        QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QListView, QToolBar, QAbstractItemView,
+        QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget, QGridLayout,
+        QSpacerItem,
     )
 from src.common.CustomWidgets import (
     CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
@@ -57,17 +58,19 @@ class MaskObj:
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
 @auto_log_methods(logger_key='Mask')
 class MaskDock(CustomDockWidget, FieldLogicUI):
-    def __init__(self, parent=None, title="Masking Toolbox"):
+    def __init__(self, ui=None, title="Masking Toolbox"):
         self.logger_key = 'Mask'
 
-        if not isinstance(parent, QMainWindow):
+        if not isinstance(ui, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
-        super().__init__(parent)
-        self.main_window = parent
-        self.data ={}
-        if self.main_window.data and self.main_window.app_data.sample_id != '':
-            self.data = self.main_window.data[self.main_window.app_data.sample_id]
+        super().__init__(ui)
+        self.ui = ui
+        # Note: Do not store self.data as property to avoid circular reference
+        # Use self.ui.app_data.current_data in methods that need it
+        
+        # Initialize FieldLogicUI properly - use property to access current data
+        FieldLogicUI.__init__(self, data=None)
 
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -75,7 +78,7 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setWindowTitle(title)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         #self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -89,27 +92,56 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setFloating(False)
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable)
 
-        parent.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         # create a container to hold the dock contents
         container = QWidget()
         container.setObjectName("Mask Dock Container")
         dock_layout = QVBoxLayout(container)
 
+        # create common toolbar
+        self.toolbar = QToolBar()
+        self.toolbar.setIconSize(QSize(24, 24))
+        self.toolbar.setMovable(False)
+        dock_layout.addWidget(self.toolbar)
+
         # create a tab widget
-        self.tabWidgetMask = QTabWidget(container)
-        self.tabWidgetMask.setObjectName("Mask Tab Widget")
+        self.tab_widgets = QTabWidget(container)
+        self.tab_widgets.setObjectName("Mask Tab Widget")
 
         self.filter_tab = FilterTab(self)
         self.polygon_tab = PolygonTab(self)
         self.cluster_tab = ClusterTab(self)
 
-        dock_layout.addWidget(self.tabWidgetMask)
+        dock_layout.addWidget(self.tab_widgets)
         self.setWidget(container)
 
-
+        # Connect tab change signal to update toolbar visibility
+        self.tab_widgets.currentChanged.connect(self.update_toolbar_for_tab)
         self.visibilityChanged.connect(self.update_tab_widget)
-        #self.tabWidgetMask.currentChanged.connect(self.update_tab_widget)
+        
+        # Initialize toolbar for the first tab
+        self.update_toolbar_for_tab(0)
+
+    @property
+    def data(self):
+        """Access current data without storing reference to avoid circular dependency"""
+        if hasattr(self.ui, 'app_data') and self.ui.app_data.current_data:
+            return self.ui.app_data.current_data
+        return None
+
+    def update_toolbar_for_tab(self, index):
+        """Update toolbar to show only actions relevant to the current tab"""
+        # Clear toolbar
+        self.toolbar.clear()
+        
+        # Add actions based on the current tab
+        if index == 0:  # Filter tab
+            self.filter_tab.setup_toolbar_actions(self.toolbar)
+        elif index == 1:  # Polygon tab
+            self.polygon_tab.setup_toolbar_actions(self.toolbar)
+        elif index == 2:  # Cluster tab
+            self.cluster_tab.setup_toolbar_actions(self.toolbar)
 
     def update_tab_widget(self, *args, **kwargs):
         if not self.isVisible():
@@ -117,70 +149,95 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
 
         self.filter_tab.update_filter_values()
 
+    def apply_theme(self, theme):
+        """Apply theme to MaskDock and all its components"""
+        print(f"DEBUG: MaskDock.apply_theme called with theme: {theme}")
+        
+        # Define theme-specific styles for QGroupBox
+        if theme == "dark":
+            groupbox_style = """
+            QGroupBox {
+                border: none;
+                border-radius: 3px;
+                background-color: #282828;
+                font: 10px;
+                margin-top: 15px;
+                color: #ffffff;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left; 
+                padding: 0 3px;
+                color: #ffffff;
+            }
+            """
+        else:  # light theme
+            groupbox_style = """
+            QGroupBox {
+                border: none;
+                border-radius: 3px;
+                background-color: #e0e0e0;
+                font: 10px;
+                margin-top: 15px;
+                color: #000000;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left; 
+                padding: 0 3px;
+                color: #000000;
+            }
+            """
+        
+        # Apply to all QGroupBox widgets in this dock
+        for groupbox in self.findChildren(QGroupBox):
+            print(f"DEBUG: Applying style to QGroupBox: {groupbox.objectName()}")
+            groupbox.setStyleSheet(groupbox_style)
+            # Force style refresh safely
+            if groupbox.style():
+                groupbox.style().unpolish(groupbox)
+                groupbox.style().polish(groupbox)
+            groupbox.update()
+        
+        # Also apply specifically to filter_tools_groupbox if it exists
+        if hasattr(self.filter_tab, 'filter_tools_groupbox'):
+            print("DEBUG: Applying style to filter_tools_groupbox")
+            self.filter_tab.filter_tools_groupbox.setStyleSheet(groupbox_style)
+            # Force style refresh safely
+            if self.filter_tab.filter_tools_groupbox.style():
+                self.filter_tab.filter_tools_groupbox.style().unpolish(self.filter_tab.filter_tools_groupbox)
+                self.filter_tab.filter_tools_groupbox.style().polish(self.filter_tab.filter_tools_groupbox)
+            self.filter_tab.filter_tools_groupbox.update()
+            print(f"Applied {theme} theme to filter_tools_groupbox")
+
 @auto_log_methods(logger_key='Mask')
-class FilterTab():
-    def __init__(self, parent):
-        self.parent = parent
-        self.main_window = parent.main_window
+class FilterTab(QWidget):
+    def __init__(self, dock):
+        super().__init__(dock)
+        self.setObjectName("Filter Tab")
+
+        self.dock = dock
+        self.ui = dock.ui
 
         self.logger_key = 'Mask'
 
         #init table_fcn
         self.table_fcn = TableFcn(self)
 
-        self.filter_tab = QWidget()
-        self.filter_tab.setObjectName("Filter Tab")
+        self.setup_ui()
 
+        self.connect_widgets()
+
+        self.update_filter_values()
+        self.load_filter_tables()
+
+    def setup_ui(self):
         tab_layout = QVBoxLayout()
         tab_layout.setContentsMargins(6, 6, 6, 6)
-        self.filter_tab.setLayout(tab_layout)
+        self.setLayout(tab_layout)
 
-        toolbar = QToolBar()
-        toolbar.setIconSize(QSize(24, 24))
-        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
-
-        self.actionFilterAdd = QAction("Add filter", toolbar)
-        icon_add_filter = QIcon(":/resources/icons/icon-filter-64.svg")
-        self.actionFilterAdd.setIcon(icon_add_filter)
-        self.actionFilterAdd.setToolTip("Add a filter using the properties set below")
-
-        self.actionFilterUp = QAction("Move up", toolbar)
-        icon_up = QIcon(":/resources/icons/icon-up-arrow-64.svg")
-        self.actionFilterUp.setIcon(icon_up)
-        self.actionFilterUp.setToolTip("Move the selected filter line up")
-
-        self.actionFilterDown = QAction("Move down", toolbar)
-        icon_down = QIcon(":/resources/icons/icon-down-arrow-64.svg")
-        self.actionFilterDown.setIcon(icon_down)
-        self.actionFilterDown.setToolTip("Move the selected filter line down")
-
-        # # There is currently a special function for removing rows, convert to table_fcn.delete_row
-        self.actionFilterRemove = QAction("Delete filter", toolbar)
-        icon_delete = QIcon(":/resources/icons/icon-delete-64.svg")
-        self.actionFilterRemove.setIcon(icon_delete)
-        self.actionFilterRemove.setToolTip("Add a filter using the properties set below")
-
-        self.actionFilterSelectAll = QAction("Select all", toolbar)
-        icon_select_all = QIcon(":/resources/icons/icon-select-all-64.svg")
-        self.actionFilterSelectAll.setIcon(icon_select_all)
-        self.actionFilterSelectAll.setToolTip("Select all filter lines")
-
-        self.actionFilterSave = QAction("Save filter", toolbar)
-        icon_save = QIcon(":/resources/icons/icon-save-file-64.svg")
-        self.actionFilterSave.setIcon(icon_save)
-        self.actionFilterSave.setToolTip("Add a filter using the properties set below")
-
-        toolbar.addAction(self.actionFilterAdd)
-        toolbar.addSeparator()
-        toolbar.addAction(self.actionFilterSave)
-        toolbar.addSeparator()
-        toolbar.addAction(self.actionFilterSelectAll)
-        toolbar.addAction(self.actionFilterUp)
-        toolbar.addAction(self.actionFilterDown)
-        toolbar.addAction(self.actionFilterRemove)
-
-
-        tab_layout.addWidget(toolbar)
+        # Create actions for toolbar (will be added to common toolbar)
+        self.create_actions()
 
         horizontal_layout = QHBoxLayout()
         horizontal_layout.setContentsMargins(0,0,0,0)
@@ -188,367 +245,483 @@ class FilterTab():
         tab_layout.addLayout(horizontal_layout)
 
         # create groupbox for filter tools
-        filter_tools_groupbox = QGroupBox()
-        filter_tools_layout = QFormLayout(filter_tools_groupbox)
-        filter_tools_layout.setContentsMargins(3, 0, 3, 0)
-        filter_tools_groupbox.setLayout(filter_tools_layout)
+        self.filter_tools_groupbox = QGroupBox(self)
+        self.filter_tools_groupbox.setTitle("Filter Settings")
+        group_layout = QVBoxLayout(self.filter_tools_groupbox)
+        group_layout.setContentsMargins(3, 3, 3, 3)
+        self.filter_tools_groupbox.setLayout(group_layout)
+
+        filter_layout = QGridLayout(self.filter_tools_groupbox)
+        filter_layout.setContentsMargins(3, 3, 3, 3)
+        group_layout.addLayout(filter_layout)
 
         # preset combobox - use to create presets to include or exclude individual minerals etc.
-        labelFilterPresets = QLabel("Preset", filter_tools_groupbox)
-        self.comboBoxFilterPresets = QComboBox(filter_tools_groupbox)
-        filter_tools_layout.addRow(labelFilterPresets, self.comboBoxFilterPresets)
+        self.combo_filter_presets = QComboBox(self.filter_tools_groupbox)
 
         # field type and field comboboxes
-        self.comboBoxFilterFieldType = CustomComboBox(filter_tools_groupbox)
-        self.comboBoxFilterFieldType.popup_callback = lambda: self.main_window.update_field_type_combobox_options(self.comboBoxFilterFieldType, self.comboBoxFilterField, global_list=True)
+        self.combo_field_type_type = CustomComboBox(self.filter_tools_groupbox)
+        self.combo_field_type_type.popup_callback = lambda: self.dock.update_field_type_combobox(self.combo_field_type_type, addNone=False)
 
-        self.comboBoxFilterField = CustomComboBox(filter_tools_groupbox)
-        self.comboBoxFilterField.popup_callback = lambda: self.main_window.update_field_combobox_options(self.comboBoxFilterField, self.comboBoxFilterFieldType, add_none=False)
-        filter_tools_layout.addRow(self.comboBoxFilterFieldType, self.comboBoxFilterField)
+        self.combo_field = CustomComboBox(self.filter_tools_groupbox)
+        self.combo_field.popup_callback = lambda: self.dock.update_field_combobox(self.combo_field_type_type, self.combo_field)
+
 
         # minimum value for filter
-        labelFMinVal = QLabel("Min value", filter_tools_groupbox)
-        self.lineEditFMin = CustomLineEdit(filter_tools_groupbox)
-        self.lineEditFMin.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.lineEditFMin.precision = 8
-        self.lineEditFMin.toward = 0
-        filter_tools_layout.addRow(labelFMinVal, self.lineEditFMin)
+        self.edit_filter_min = CustomLineEdit(self.filter_tools_groupbox)
+        self.edit_filter_min.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.edit_filter_min.precision = 8
+        self.edit_filter_min.toward = 0
+
 
         # minimum quantile value for filter
-        labelFMinQ = QLabel("Min quantile", filter_tools_groupbox)
-        self.doubleSpinBoxFMinQ = QDoubleSpinBox(filter_tools_groupbox)
-        self.doubleSpinBoxFMinQ.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.doubleSpinBoxFMinQ.setKeyboardTracking(False)
-        self.doubleSpinBoxFMinQ.setMinimum(0.0)
-        self.doubleSpinBoxFMinQ.setMaximum(100.0)
-        filter_tools_layout.addRow(labelFMinQ, self.doubleSpinBoxFMinQ)
+        self.spin_filter_min = QDoubleSpinBox(self.filter_tools_groupbox)
+        self.spin_filter_min.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spin_filter_min.setKeyboardTracking(False)
+        self.spin_filter_min.setMinimum(0.0)
+        self.spin_filter_min.setMaximum(100.0)
 
         # maximum value for filter
-        labelFMaxVal = QLabel("Max value", filter_tools_groupbox)
-        self.lineEditFMax = CustomLineEdit(filter_tools_groupbox)
-        self.lineEditFMax.setMinimumSize(QSize(0, 0))
-        self.lineEditFMax.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.lineEditFMax.precision = 8
-        self.lineEditFMax.toward = 1
-        filter_tools_layout.addRow(labelFMaxVal, self.lineEditFMax)
+        self.edit_filter_max = CustomLineEdit(self.filter_tools_groupbox)
+        self.edit_filter_max.setMinimumSize(QSize(0, 0))
+        self.edit_filter_max.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.edit_filter_max.precision = 8
+        self.edit_filter_max.toward = 1
         
         # maximum quantile value for filter
-        labelFMaxQ = QLabel("Max quantile", filter_tools_groupbox)
-        self.doubleSpinBoxFMaxQ = QDoubleSpinBox(filter_tools_groupbox)
-        self.doubleSpinBoxFMaxQ.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.doubleSpinBoxFMaxQ.setKeyboardTracking(False)
-        self.doubleSpinBoxFMaxQ.setMinimum(0.0)
-        self.doubleSpinBoxFMaxQ.setMaximum(100.0)
-        filter_tools_layout.addRow(labelFMaxQ, self.doubleSpinBoxFMaxQ)
-
+        self.spin_filter_max = QDoubleSpinBox(self.filter_tools_groupbox)
+        self.spin_filter_max.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spin_filter_max.setKeyboardTracking(False)
+        self.spin_filter_max.setMinimum(0.0)
+        self.spin_filter_max.setMaximum(100.0)
 
         # filter operator
-        labelFilterOperator = QLabel("Operator", filter_tools_groupbox)
-        self.comboBoxFilterOperator = QComboBox(filter_tools_groupbox)
-        self.comboBoxFilterOperator.clear()
-        self.comboBoxFilterOperator.addItems(["and","or","not"])
-        filter_tools_layout.addRow(labelFilterOperator, self.comboBoxFilterOperator)
+        self.combo_operator = QComboBox(self.filter_tools_groupbox)
+        self.combo_operator.clear()
+        self.combo_operator.addItems(["and","or","not"])
+
+        filter_layout.addWidget(QLabel("Preset"), 0, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.combo_filter_presets, 0, 1, 1, 5)
+
+        filter_layout.addWidget(QLabel("Field type"), 1, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.combo_field_type_type, 1, 1, 1, 2)
+        filter_layout.addWidget(QLabel("Field"), 1, 3, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.combo_field, 1, 4, 1, 2)
+
+        filter_layout.addWidget(QLabel("Min"), 2, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.edit_filter_min, 2, 1, 1, 1)
+        filter_layout.addWidget(self.spin_filter_min, 2, 2, 1, 1)
+        filter_layout.addWidget(QLabel("Max"), 2, 3, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.edit_filter_max, 2, 4, 1, 1)
+        filter_layout.addWidget(self.spin_filter_max, 2, 5, 1, 1)
+
+        filter_layout.addWidget(QLabel("Operator"), 3, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.combo_operator, 3, 1, 1, 1)
+
+        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        group_layout.addItem(spacer)
 
         # Filter Table
-        self.tableWidgetFilters = CustomTableWidget(self.filter_tab)
+        self.filter_table = CustomTableWidget(self)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tableWidgetFilters.sizePolicy().hasHeightForWidth())
-        self.tableWidgetFilters.setSizePolicy(sizePolicy)
-        self.tableWidgetFilters.setMinimumSize(QSize(400, 0))
-        self.tableWidgetFilters.setMaximumSize(QSize(524287, 524287))
-        self.tableWidgetFilters.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.tableWidgetFilters.setObjectName("tableWidgetFilters")
-        self.tableWidgetFilters.setColumnCount(8)
-        self.tableWidgetFilters.setRowCount(0)
+        sizePolicy.setHeightForWidth(self.filter_table.sizePolicy().hasHeightForWidth())
+        self.filter_table.setSizePolicy(sizePolicy)
+        self.filter_table.setMinimumSize(QSize(400, 0))
+        self.filter_table.setMaximumSize(QSize(524287, 524287))
+        self.filter_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.filter_table.setObjectName("filter_table")
+        self.filter_table.setColumnCount(8)
+        self.filter_table.setRowCount(0)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(0, item)
+        self.filter_table.setHorizontalHeaderItem(0, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(1, item)
+        self.filter_table.setHorizontalHeaderItem(1, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(2, item)
+        self.filter_table.setHorizontalHeaderItem(2, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(3, item)
+        self.filter_table.setHorizontalHeaderItem(3, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(4, item)
+        self.filter_table.setHorizontalHeaderItem(4, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(5, item)
+        self.filter_table.setHorizontalHeaderItem(5, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(6, item)
+        self.filter_table.setHorizontalHeaderItem(6, item)
 
         item = QTableWidgetItem()
         item.setFont(default_font())
-        self.tableWidgetFilters.setHorizontalHeaderItem(7, item)
+        self.filter_table.setHorizontalHeaderItem(7, item)
 
-        self.tableWidgetFilters.horizontalHeader().setDefaultSectionSize(80)
-        header = self.tableWidgetFilters.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(5,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(6,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(7,QHeaderView.ResizeMode.ResizeToContents)
+        self.filter_table.horizontalHeader().setDefaultSectionSize(80)
+        header = self.filter_table.horizontalHeader()
+        if header:
+            header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(2,QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(5,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(6,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(7,QHeaderView.ResizeMode.ResizeToContents)
 
-        self.tableWidgetFilters.setHorizontalHeaderLabels(["Use", "Field Type", "Field", "Scale", "Min", "Max", "Operator", "Persistent"])
+        self.filter_table.setHorizontalHeaderLabels(["Use", "Field Type", "Field", "Scale", "Min", "Max", "Operator", "Persistent"])
 
-        horizontal_layout.addWidget(filter_tools_groupbox)
-        horizontal_layout.addWidget(self.tableWidgetFilters)
+        horizontal_layout.addWidget(self.filter_tools_groupbox)
+        horizontal_layout.addWidget(self.filter_table)
 
         filter_icon = QIcon(":/resources/icons/icon-filter-64.svg")
-        self.parent.tabWidgetMask.addTab(self.filter_tab, filter_icon, "Filters")
+        self.dock.tab_widgets.addTab(self, filter_icon, "Filters")
+        
+        # Initialize combo boxes with current field data
+        self.initialize_combo_boxes()
 
+    def initialize_combo_boxes(self):
+        """Initialize field type and field combo boxes with current data"""
+        # Only initialize if we have data loaded
+        if hasattr(self.ui, 'app_data') and self.ui.app_data.sample_id:
+            # Initialize field type combo box
+            self.dock.update_field_type_combobox(self.combo_field_type_type, addNone=False)
+            # Initialize field combo box  
+            self.dock.update_field_combobox(self.combo_field_type_type, self.combo_field)
+
+    def refresh_field_data(self):
+        """Refresh field combo boxes when data changes"""
+        self.initialize_combo_boxes()
+
+    def create_actions(self):
+        """Create toolbar actions for the filter tab"""
+        self.action_add_filter = QAction("Add filter")
+        icon_add_filter = QIcon(":/resources/icons/icon-filter-64.svg")
+        self.action_add_filter.setIcon(icon_add_filter)
+        self.action_add_filter.setToolTip("Add a filter using the properties set below")
+
+        self.action_move_up = QAction("Move up")
+        icon_up = QIcon(":/resources/icons/icon-up-arrow-64.svg")
+        self.action_move_up.setIcon(icon_up)
+        self.action_move_up.setToolTip("Move the selected filter line up")
+
+        self.action_move_down = QAction("Move down")
+        icon_down = QIcon(":/resources/icons/icon-down-arrow-64.svg")
+        self.action_move_down.setIcon(icon_down)
+        self.action_move_down.setToolTip("Move the selected filter line down")
+
+        self.action_remove_filter = QAction("Delete filter")
+        icon_delete = QIcon(":/resources/icons/icon-delete-64.svg")
+        self.action_remove_filter.setIcon(icon_delete)
+        self.action_remove_filter.setToolTip("Delete selected filters")
+
+        self.action_select_all_filters = QAction("Select all")
+        icon_select_all = QIcon(":/resources/icons/icon-select-all-64.svg")
+        self.action_select_all_filters.setIcon(icon_select_all)
+        self.action_select_all_filters.setToolTip("Select all filter lines")
+
+        self.action_save_filters = QAction("Save filter")
+        icon_save = QIcon(":/resources/icons/icon-save-file-64.svg")
+        self.action_save_filters.setIcon(icon_save)
+        self.action_save_filters.setToolTip("Save current filter table")
+
+    def setup_toolbar_actions(self, toolbar):
+        """Add filter tab actions to the common toolbar"""
+        toolbar.addAction(self.action_add_filter)
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_save_filters)
+        toolbar.addSeparator()
+        toolbar.addAction(self.action_select_all_filters)
+        toolbar.addAction(self.action_move_up)
+        toolbar.addAction(self.action_move_down)
+        toolbar.addAction(self.action_remove_filter)
+
+    def connect_widgets(self):
         # filter tab toolbar connections
-        self.actionFilterAdd.triggered.connect(self.update_filter_table)
-        self.actionFilterAdd.triggered.connect(lambda: self.apply_field_filters_update_plot())
-        self.actionFilterUp.triggered.connect(lambda: self.table_fcn.move_row_up(self.tableWidgetFilters))
-        self.actionFilterUp.triggered.connect(lambda: self.apply_field_filters_update_plot())
-        self.actionFilterDown.triggered.connect(lambda: self.table_fcn.move_row_down(self.tableWidgetFilters))
-        self.actionFilterDown.triggered.connect(lambda: self.apply_field_filters_update_plot())
-        self.actionFilterRemove.triggered.connect(self.remove_selected_rows)
-        self.actionFilterRemove.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetFilters))
-        self.actionFilterRemove.triggered.connect(lambda: self.apply_field_filters_update_plot())
-        self.actionFilterSave.triggered.connect(self.save_filter_table)
-        self.actionFilterSelectAll.triggered.connect(self.tableWidgetFilters.selectAll)
+        self.action_add_filter.triggered.connect(self.update_filter_table)
+        self.action_add_filter.triggered.connect(lambda: self.apply_field_filters_update_plot())
+        self.action_move_up.triggered.connect(lambda: self.table_fcn.move_row_up(self.filter_table))
+        self.action_move_up.triggered.connect(lambda: self.apply_field_filters_update_plot())
+        self.action_move_down.triggered.connect(lambda: self.table_fcn.move_row_down(self.filter_table))
+        self.action_move_down.triggered.connect(lambda: self.apply_field_filters_update_plot())
+        self.action_remove_filter.triggered.connect(self.remove_selected_rows)
+        self.action_remove_filter.triggered.connect(lambda: self.table_fcn.delete_row(self.filter_table))
+        self.action_remove_filter.triggered.connect(lambda: self.apply_field_filters_update_plot())
+        self.action_save_filters.triggered.connect(self.save_filter_table)
+        self.action_select_all_filters.triggered.connect(self.filter_table.selectAll)
 
         # filter widget connections
-        self.comboBoxFilterPresets.activated.connect(self.read_filter_table)
-        self.comboBoxFilterField.currentTextChanged.connect(self.update_filter_values)
-        self.lineEditFMin.editingFinished.connect(self.callback_lineEditFMin)
-        self.doubleSpinBoxFMinQ.valueChanged.connect(self.callback_doubleSpinBoxFMinQ)
-        self.lineEditFMax.editingFinished.connect(self.callback_lineEditFMax)
-        self.doubleSpinBoxFMaxQ.valueChanged.connect(self.callback_doubleSpinBoxFMaxQ)
+        self.combo_filter_presets.activated.connect(self.read_filter_table)
+        self.combo_field.currentTextChanged.connect(self.update_filter_values)
+        self.edit_filter_min.editingFinished.connect(self.callback_edit_filter_min)
+        self.spin_filter_min.valueChanged.connect(self.callback_spin_filter_min)
+        self.edit_filter_max.editingFinished.connect(self.callback_edit_filter_max)
+        self.spin_filter_max.valueChanged.connect(self.callback_spin_filter_max)
 
-        self.update_filter_values()
-        self.load_filter_tables()
 
     def apply_field_filters_update_plot(self):
-        """Updates filters in ``self.parent.data`` for given sample_id
+        """Updates filters in current data and schedules plot update
 
         Updates the plot once filter values have been update
         """
-        self.parent.data.apply_field_filters()
-        self.main_window.schedule_update()
+        current_data = self.ui.app_data.current_data
+        if current_data:
+            current_data.apply_field_filters()
+            self.ui.schedule_update()
 
     def update_filter_values(self, *args, **kwargs):
         """Updates widgets that display the filter bounds for a selected field.
 
-        Updates ``self.lineEditFMin`` and ``self.lineEditFMax`` values for display when the
-        field in ``self.comboBoxFilterField`` is changed.
+        Updates ``self.edit_filter_min`` and ``self.edit_filter_max`` values for display when the
+        field in ``self.combo_field`` is changed.
         """
-        if self.parent.main_window.app_data.sample_id == '':
+        current_data = self.ui.app_data.current_data
+        if not current_data or self.ui.app_data.sample_id == '':
             return
 
-        
-        # field = self.comboBoxFilterField.currentText()
-        # if not field:
-        #     return
-        if not (field := self.comboBoxFilterField.currentText()): return
-
-        data = self.parent.data
-
-        self.lineEditFMin.value = data[field].min()
-        self.callback_lineEditFMin()
-        self.lineEditFMax.value = data[field].max()
-        self.callback_lineEditFMax()
-
-    def callback_lineEditFMin(self):
-        """Updates ``self.doubleSpinBoxFMinQ.value`` when ``self.lineEditFMin.value`` is changed"""        
-        if self.parent.main_window.app_data.sample_id == '':
+        # Check if field is selected
+        if not (field := self.combo_field.currentText()): 
             return
 
-        if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
+        # Get field data using the proper data access pattern
+        try:
+            field_data = current_data.get_map_data(field, self.combo_field_type_type.currentText())
+            if field_data is not None and 'array' in field_data:
+                array = field_data['array'].dropna()
+                self.edit_filter_min.value = array.min()
+                self.callback_edit_filter_min()
+                self.edit_filter_max.value = array.max()
+                self.callback_edit_filter_max()
+        except Exception:
+            # If field data cannot be retrieved, skip update
             return
 
-        data = self.parent.data
+    def callback_edit_filter_min(self):
+        """Updates ``self.spin_filter_min.value`` when ``self.edit_filter_min.value`` is changed"""        
+        current_data = self.ui.app_data.current_data
+        if not current_data or self.ui.app_data.sample_id == '':
+            return
+
+        if (self.combo_field.currentText() == '') or (self.combo_field_type_type.currentText() == ''):
+            return
 
         try:
-            array = data.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-        except:
+            field_data = current_data.get_map_data(self.combo_field.currentText(), self.combo_field_type_type.currentText())
+            if field_data is not None and 'array' in field_data:
+                array = field_data['array'].dropna()
+                self.spin_filter_min.blockSignals(True)
+                self.spin_filter_min.setValue(percentileofscore(array, self.edit_filter_min.value))
+                self.spin_filter_min.blockSignals(False)
+        except Exception:
             return
 
-        self.doubleSpinBoxFMinQ.blockSignals(True)
-        self.doubleSpinBoxFMinQ.setValue(percentileofscore(array, self.lineEditFMin.value))
-        self.doubleSpinBoxFMinQ.blockSignals(False)
-
-    def callback_lineEditFMax(self):
-        """Updates ``MainWindow.doubleSpinBoxFMaxQ.value`` when ``MainWindow.lineEditFMax.value`` is changed"""        
-        if self.parent.main_window.app_data.sample_id == '':
+    def callback_edit_filter_max(self):
+        """Updates ``self.spin_filter_max.value`` when ``self.edit_filter_max.value`` is changed"""        
+        current_data = self.ui.app_data.current_data
+        if not current_data or self.ui.app_data.sample_id == '':
             return
 
-        if (self.comboBoxFilterField.currentText() == '') or (self.comboBoxFilterFieldType.currentText() == ''):
+        if (self.combo_field.currentText() == '') or (self.combo_field_type_type.currentText() == ''):
             return
-
-        data = self.parent.data
 
         try:
-            array = data.get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-        except:
+            field_data = current_data.get_map_data(self.combo_field.currentText(), self.combo_field_type_type.currentText())
+            if field_data is not None and 'array' in field_data:
+                array = field_data['array'].dropna()
+                self.spin_filter_max.blockSignals(True)
+                self.spin_filter_max.setValue(percentileofscore(array, self.edit_filter_max.value))
+                self.spin_filter_max.blockSignals(False)
+        except Exception:
             return
 
-        self.doubleSpinBoxFMaxQ.blockSignals(True)
-        self.doubleSpinBoxFMaxQ.setValue(percentileofscore(array, self.lineEditFMax.value))
-        self.doubleSpinBoxFMaxQ.blockSignals(False)
+    def callback_spin_filter_min(self):
+        """Updates ``self.edit_filter_min.value`` when ``self.spin_filter_min.value`` is changed"""        
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
+            
+        try:
+            field_data = current_data.get_map_data(self.combo_field.currentText(), self.combo_field_type_type.currentText())
+            if field_data is not None and 'array' in field_data:
+                array = field_data['array'].dropna()
+                self.edit_filter_min.value = np.percentile(array, self.spin_filter_min.value())
+        except Exception:
+            return
 
-    def callback_doubleSpinBoxFMinQ(self):
-        """Updates ``MainWindow.lineEditFMin.value`` when ``MainWindow.doubleSpinBoxFMinQ.value`` is changed"""        
-        array = self.parent.main_window.data[self.parent.main_window.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-
-        self.lineEditFMin.value = np.percentile(array, self.doubleSpinBoxFMinQ.value())
-
-    def callback_doubleSpinBoxFMaxQ(self):
-        """Updates ``MainWindow.lineEditFMax.value`` when ``MainWindow.doubleSpinBoxFMaxQ.value`` is changed"""        
-        array = self.parent.main_window.data[self.parent.main_window.sample_id].get_map_data(self.comboBoxFilterField.currentText(), self.comboBoxFilterFieldType.currentText())['array'].dropna()
-
-        self.lineEditFMax.value = np.percentile(array, self.doubleSpinBoxFMaxQ.value())
+    def callback_spin_filter_max(self):
+        """Updates ``self.edit_filter_max.value`` when ``self.spin_filter_max.value`` is changed"""        
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
+            
+        try:
+            field_data = current_data.get_map_data(self.combo_field.currentText(), self.combo_field_type_type.currentText())
+            if field_data is not None and 'array' in field_data:
+                array = field_data['array'].dropna()
+                self.edit_filter_max.value = np.percentile(array, self.spin_filter_max.value())
+        except Exception:
+            return
 
     def update_filter_table(self, reload = False):
-        """Update data for analysis when fiter table is updated.
+        """Update data for analysis when filter table is updated.
 
         Parameters
         ----------
         reload : bool, optional
             Reload ``True`` updates the filter table, by default False
         """
-        # If reload is True, clear the table and repopulate it from 'filter_info'
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
+
+        def on_use_checkbox_state_changed(row, state):
+            """Update the 'use' value in the filter_df for the given row"""
+            if current_data and row < len(current_data.filter_df):
+                current_data.filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
+
+        # If reload is True, clear the table and repopulate it from filter_df
         if reload:
             # Clear the table
-            self.tableWidgetFilters.setRowCount(0)
+            self.filter_table.setRowCount(0)
 
-            # Repopulate the table from 'filter_info'
-            for index, row in self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.iterrows():
-                current_row = self.tableWidgetFilters.rowCount()
-                self.tableWidgetFilters.insertRow(current_row)
+            # Repopulate the table from filter_df
+            for index, row in current_data.filter_df.iterrows():
+                current_row = self.filter_table.rowCount()
+                self.filter_table.insertRow(current_row)
 
                 # Create and set the checkbox for 'use'
                 chkBoxItem_use = QCheckBox()
                 chkBoxItem_use.setCheckState(Qt.CheckState.Checked if row['use'] else Qt.CheckState.Unchecked)
                 chkBoxItem_use.stateChanged.connect(lambda state, row=current_row: on_use_checkbox_state_changed(row, state))
-                self.tableWidgetFilters.setCellWidget(current_row, 0, chkBoxItem_use)
+                self.filter_table.setCellWidget(current_row, 0, chkBoxItem_use)
 
                 # Add other items from the row
-                self.tableWidgetFilters.setItem(current_row, 1, QTableWidgetItem(row['field_type']))
-                self.tableWidgetFilters.setItem(current_row, 2, QTableWidgetItem(row['field']))
-                self.tableWidgetFilters.setItem(current_row, 3, QTableWidgetItem(row['scale']))
-                self.tableWidgetFilters.setItem(current_row, 4, QTableWidgetItem(fmt.dynamic_format(row['min'])))
-                self.tableWidgetFilters.setItem(current_row, 5, QTableWidgetItem(fmt.dynamic_format(row['max'])))
-                self.tableWidgetFilters.setItem(current_row, 6, QTableWidgetItem(row['operator']))
+                self.filter_table.setItem(current_row, 1, QTableWidgetItem(row['field_type']))
+                self.filter_table.setItem(current_row, 2, QTableWidgetItem(row['field']))
+                self.filter_table.setItem(current_row, 3, QTableWidgetItem(row['norm']))  # Use 'norm' instead of 'scale'
+                self.filter_table.setItem(current_row, 4, QTableWidgetItem(fmt.dynamic_format(row['min'])))
+                self.filter_table.setItem(current_row, 5, QTableWidgetItem(fmt.dynamic_format(row['max'])))
+                self.filter_table.setItem(current_row, 6, QTableWidgetItem(row['operator']))
 
-                # Create and set the checkbox for selection (assuming this is a checkbox similar to 'use')
-                chkBoxItem_select = QCheckBox()
-                chkBoxItem_select.setCheckState(Qt.CheckState.Checked if row.get('select', False) else Qt.CheckState.Unchecked)
-                self.tableWidgetFilters.setCellWidget(current_row, 7, chkBoxItem_select)
+                # Create and set the checkbox for persistent
+                chkBoxItem_persistent = QCheckBox()
+                chkBoxItem_persistent.setCheckState(Qt.CheckState.Checked if row.get('persistent', True) else Qt.CheckState.Unchecked)
+                self.filter_table.setCellWidget(current_row, 7, chkBoxItem_persistent)
 
         else:
-            # open tabFilterList
-            self.parent.main_window.tabWidgetMask.setCurrentIndex(self.parent.main_window.mask_tab['filter'])
+            # Add new filter using DataHandling methods
+            field_type = self.combo_field_type_type.currentText()
+            field = self.combo_field.currentText()
+            f_min = self.edit_filter_min.value
+            f_max = self.edit_filter_max.value
+            operator = self.combo_operator.currentText()
+            
+            # Use the DataHandling method to add the filter
+            filter_index = current_data.add_filter(
+                field_type=field_type,
+                field=field,
+                min_val=f_min,
+                max_val=f_max,
+                operator=operator,
+                use=True,
+                persistent=True
+            )
 
-            def on_use_checkbox_state_changed(row, state):
-                # Update the 'use' value in the filter_df for the given row
-                self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
-
-            field_type = self.comboBoxFilterFieldType.currentText()
-            field = self.comboBoxFilterField.currentText()
-            f_min = self.lineEditFMin.value
-            f_max = self.lineEditFMax.value
-            operator = self.comboBoxFilterOperator.currentText()
-            # Add a new row at the end of the table
-            row = self.tableWidgetFilters.rowCount()
-            self.tableWidgetFilters.insertRow(row)
+            # Add a new row to the table
+            row = self.filter_table.rowCount()
+            self.filter_table.insertRow(row)
 
             # Create a QCheckBox for the 'use' column
             chkBoxItem_use = QCheckBox()
             chkBoxItem_use.setCheckState(Qt.CheckState.Checked)
             chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
 
-            chkBoxItem_select = QTableWidgetItem()
-            chkBoxItem_select.setFlags(Qt.ItemFlag.ItemIsUserCheckable |
-                                Qt.ItemFlag.ItemIsEnabled)
+            # Create checkbox for persistent
+            chkBoxItem_persistent = QCheckBox()
+            chkBoxItem_persistent.setCheckState(Qt.CheckState.Checked)
 
-            if 'Analyte' in field_type:
-                chkBoxItem_select.setCheckState(Qt.CheckState.Unchecked)
-                analyte_1 = field
-                analyte_2 = None
-                scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed.get_attribute(field,'norm')
-            elif 'Ratio' in field_type:
-                chkBoxItem_select.setCheckState(Qt.CheckState.Unchecked)
-                analyte_1, analyte_2 = field.split(' / ')
-                scale = self.parent.main_window.data[self.parent.main_window.sample_id].processed.get_attribute(field,'norm')
-            else:
-                scale = 'linear'
+            # Get the norm/scale from the filter_df
+            filter_row = current_data.filter_df.iloc[filter_index]
+            
+            self.filter_table.setCellWidget(row, 0, chkBoxItem_use)
+            self.filter_table.setItem(row, 1, QTableWidgetItem(field_type))
+            self.filter_table.setItem(row, 2, QTableWidgetItem(field))
+            self.filter_table.setItem(row, 3, QTableWidgetItem(filter_row['norm']))
+            self.filter_table.setItem(row, 4, QTableWidgetItem(fmt.dynamic_format(f_min)))
+            self.filter_table.setItem(row, 5, QTableWidgetItem(fmt.dynamic_format(f_max)))
+            self.filter_table.setItem(row, 6, QTableWidgetItem(operator))
+            self.filter_table.setCellWidget(row, 7, chkBoxItem_persistent)
 
-            self.tableWidgetFilters.setCellWidget(row, 0, chkBoxItem_use)
-            self.tableWidgetFilters.setItem(row, 1, QTableWidgetItem(field_type))
-            self.tableWidgetFilters.setItem(row, 2, QTableWidgetItem(field))
-            self.tableWidgetFilters.setItem(row, 3, QTableWidgetItem(scale))
-            self.tableWidgetFilters.setItem(row, 4, QTableWidgetItem(fmt.dynamic_format(f_min)))
-            self.tableWidgetFilters.setItem(row, 5, QTableWidgetItem(fmt.dynamic_format(f_max)))
-            self.tableWidgetFilters.setItem(row, 6, QTableWidgetItem(operator))
-            self.tableWidgetFilters.setItem(row, 7, chkBoxItem_select)
-
-            filter_info = {'use':True, 'field_type': field_type, 'field': field, 'norm':scale ,'min': f_min,'max':f_max, 'operator':operator, 'persistent':True}
-            self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.loc[len(self.parent.main_window.data[self.parent.main_window.sample_id].filter_df)] = filter_info
-
-        self.parent.data.apply_field_filters()
+        # Apply the filters after updating
+        current_data.apply_field_filters()
 
     def remove_selected_rows(self):
         """Remove selected rows from filter table.
 
-        Removes selected rows from ``MainWindow.tableWidgetFilter``.
+        Removes selected rows from filter table and updates DataHandling filter_df.
         """
-        sample_id = self.parent.main_window.sample_id
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
 
-        print(self.tableWidgetFilters.selectedIndexes())
+        print(self.filter_table.selectedIndexes())
 
+        # Collect indices to remove (from filter_df)
+        indices_to_remove = []
+        
         # We loop in reverse to avoid issues when removing rows
-        for row in range(self.tableWidgetFilters.rowCount()-1, -1, -1):
-            chkBoxItem = self.tableWidgetFilters.item(row, 7)
-            field_type = self.tableWidgetFilters.item(row, 1).text()
-            field = self.tableWidgetFilters.item(row, 2).text()
-            if chkBoxItem.checkState() == Qt.CheckState.Checked:
-                self.tableWidgetFilters.removeRow(row)
-                self.parent.main_window.data[sample_id].filter_df.drop(self.parent.main_window.data[sample_id].filter_df[(self.parent.main_window.data[sample_id].filter_df['field'] == field)].index, inplace=True)
+        for row in range(self.filter_table.rowCount()-1, -1, -1):
+            chkBoxItem = self.filter_table.item(row, 7)
+            if chkBoxItem and chkBoxItem.checkState() == Qt.CheckState.Checked:
+                # Store the filter_df index (stored in row 0 as hidden data)
+                filter_index = row  # In our case, table row corresponds to filter_df index
+                indices_to_remove.append(filter_index)
+                # Remove from table
+                self.filter_table.removeRow(row)
 
-        self.parent.data.apply_field_filters()
+        # Remove from DataHandling filter_df using new method
+        for index in indices_to_remove:
+            current_data.remove_filter(index)
+
+        # Apply filters and update plot
+        self.apply_field_filters_update_plot()
 
     def save_filter_table(self):
         """Opens a dialog to save filter table
 
         Executes on ``MainWindow.toolButtonFilterSave`` is clicked.  The filter is added to
-        ``MainWindow.tableWidgetFilters`` and save into a dictionary to a file with a ``.fltr`` extension.
+        ``MainWindow.filter_table`` and save into a dictionary to a file with a ``.fltr`` extension.
         """
-        name, ok = QInputDialog.getText(self.parent.main_window, 'Save filter table', 'Enter filter table name:')
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            QMessageBox.warning(self.ui, 'Error', 'No data loaded.')
+            return
+
+        name, ok = QInputDialog.getText(self.ui, 'Save filter table', 'Enter filter table name:')
         if ok:
             # file name for saving
             filter_file = os.path.join(BASEDIR,f'resources/filters/{name}.fltr')
 
             # save dictionary to file
-            self.parent.main_window.data[self.parent.main_window.sample_id].filter_df.to_csv(filter_file, index=False)
+            current_data.filter_df.to_csv(filter_file, index=False)
 
             # update comboBox
-            self.comboBoxFilterPresets.addItem(name)
-            self.comboBoxFilterPresets.setCurrentText(name)
+            self.combo_filter_presets.addItem(name)
+            self.combo_filter_presets.setCurrentText(name)
 
-            self.parent.main_window.statusBar.showMessage(f'Filters successfully saved as {filter_file}')
+            self.ui.statusBar.showMessage(f'Filters successfully saved as {filter_file}')
         else:
             # throw a warning that name is not saved
-            QMessageBox.warning(self.parent.main_window,'Error','could not save filter table.')
+            QMessageBox.warning(self.ui,'Error','could not save filter table.')
 
             return
 
@@ -556,7 +729,7 @@ class FilterTab():
         """Loads filter names and adds them to the filter presets comboBox
         
         Looks for saved filter tables (*.fltr) in ``resources/filters/`` directory and adds them to
-        ``self.comboBoxFilterPresets``.
+        ``self.combo_filter_presets``.
         """
         # read filenames with *.sty
         file_list = os.listdir(os.path.join(BASEDIR,'resources/filters/'))
@@ -566,12 +739,17 @@ class FilterTab():
         filter_list.insert(0,'')
 
         # update theme comboBox
-        self.comboBoxFilterPresets.clear()
-        self.comboBoxFilterPresets.addItems(filter_list)
-        self.comboBoxFilterPresets.setCurrentIndex(0)
+        self.combo_filter_presets.clear()
+        self.combo_filter_presets.addItems(filter_list)
+        self.combo_filter_presets.setCurrentIndex(0)
 
     def read_filter_table(self):
-        filter_name = self.comboBoxFilterPresets.currentText()
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            QMessageBox.warning(self.ui, 'Error', 'No data loaded.')
+            return
+            
+        filter_name = self.combo_filter_presets.currentText()
 
         # If no filter_name is chosen, return
         if filter_name == '':
@@ -579,95 +757,128 @@ class FilterTab():
 
         # open filter with name filter_name
         filter_file = os.path.join(BASEDIR,f'resources/filters/{filter_name}.fltr')
-        filter_info = pd.read_csv(filter_file)
+        try:
+            filter_info = pd.read_csv(filter_file)
+            
+            # put filter_info into data and table
+            current_data.filter_df = filter_info
 
-        # put filter_info into data and table
-        self.main_window.data[self.main_window.app_data.sample_id].filter_df = filter_info
-
-        self.update_filter_table()
+            self.update_filter_table()
+        except FileNotFoundError:
+            QMessageBox.warning(self.ui, 'Error', f'Filter file {filter_file} not found.')
+        except Exception as e:
+            QMessageBox.warning(self.ui, 'Error', f'Error loading filter: {str(e)}')
 
 @auto_log_methods(logger_key='Mask')
-class PolygonTab():
-    def __init__(self, parent):
-        self.parent = parent
+class PolygonTab(QWidget):
+    def __init__(self, dock):
+        super().__init__(dock)
+        self.setObjectName("Polygon Tab")
+
+        self.dock = dock
+        self.ui = dock.ui
         
         #init table_fcn
         self.table_fcn = TableFcn(self)
+    
+        self.setup_ui()
 
-        self.polygon_tab = QWidget()
-        self.polygon_tab.setObjectName("Polygon Tab")
-
+    def setup_ui(self):
         tab_layout = QVBoxLayout()
         tab_layout.setContentsMargins(6, 6, 6, 6)
-        self.polygon_tab.setLayout(tab_layout)
+        self.setLayout(tab_layout)
 
-        toolbar = QToolBar()
-        toolbar.setIconSize(QSize(24, 24))
-        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+        # Create actions for toolbar (will be added to common toolbar)
+        self.create_actions()
+        
+        self.tableWidgetPolyPoints = CustomTableWidget()
+        self.tableWidgetPolyPoints.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.tableWidgetPolyPoints.setColumnCount(5)
+
+        header = self.tableWidgetPolyPoints.horizontalHeader()
+        if header:
+            header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
+
+        self.tableWidgetPolyPoints.setHorizontalHeaderLabels(["PolyID", "Name", "Link", "In/out", "Analysis"])
+        
+
+        tab_layout.addWidget(self.tableWidgetPolyPoints)
+
+        polygon_icon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
+        self.dock.tab_widgets.addTab(self, polygon_icon, "Polygons")
+
+    def create_actions(self):
+        """Create toolbar actions for the polygon tab"""
         # polygon toggle
-        self.polygon_toggle = ToggleSwitch(toolbar, height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
-        self.polygon_toggle.setChecked(Qt.CheckState.Unchecked)
-        self.actionPolyToggle = QWidgetAction(toolbar)
+        self.polygon_toggle = ToggleSwitch(height=18, bg_left_color="#D8ADAB", bg_right_color="#A8B078")
+        self.polygon_toggle.setChecked(False)
+        self.actionPolyToggle = QWidgetAction(None)
         self.actionPolyToggle.setDefaultWidget(self.polygon_toggle)
         self.polygon_toggle.stateChanged.connect(lambda: self.polygon_state_changed())
 
-        self.actionEdgeDetect = QAction("Toggle edge detection", toolbar)
+        self.actionEdgeDetect = QAction("Toggle edge detection")
         icon_edge_detection = QIcon(":/resources/icons/icon-spotlight-64.svg")
         self.actionEdgeDetect.setCheckable(True)
         self.actionEdgeDetect.setChecked(False)
         self.actionEdgeDetect.setIcon(icon_edge_detection)
-        self.actionEdgeDetect.setToolTip("Add a filter using the properties set below")
+        self.actionEdgeDetect.setToolTip("Toggle edge detection")
         self.actionEdgeDetect.triggered.connect(self.toggle_edge_detection)
 
-        self.comboBoxEdgeDetectMethod = QComboBox(toolbar)
+        self.comboBoxEdgeDetectMethod = QComboBox()
         self.comboBoxEdgeDetectMethod.addItems(["Sobel","Canny","Zero cross"])
-        self.comboBoxEdgeDetectMethod.activated.connect(self.parent.main_window.control_dock.noise_reduction.add_edge_detection)
+        self.comboBoxEdgeDetectMethod.activated.connect(self.ui.control_dock.noise_reduction.add_edge_detection)
 
-        self.actionPolyLoad = QAction("Load Polygon", toolbar)
+        self.actionPolyLoad = QAction("Load Polygon")
         icon_load_file = QIcon(":/resources/icons/icon-open-file-64.svg")
         self.actionPolyLoad.setIcon(icon_load_file)
         self.actionPolyLoad.setToolTip("Load polygons")
 
-        self.actionPolyCreate = QAction("Create Polygon", toolbar)
+        self.actionPolyCreate = QAction("Create Polygon")
         icon_create_polygon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
         self.actionPolyCreate.setIcon(icon_create_polygon)
         self.actionPolyCreate.setToolTip("Create a new polygon")
 
-        self.actionPolyMovePoint = QAction("Move Point", toolbar)
+        self.actionPolyMovePoint = QAction("Move Point")
         icon_move_point = QIcon(":/resources/icons/icon-move-point-64.svg")
         self.actionPolyMovePoint.setIcon(icon_move_point)
         self.actionPolyMovePoint.setToolTip("Move a profile point")
 
-        self.actionPolyAddPoint = QAction("Add Point", toolbar)
+        self.actionPolyAddPoint = QAction("Add Point")
         icon_add_point = QIcon(":/resources/icons/icon-add-point-64.svg")
         self.actionPolyAddPoint.setIcon(icon_add_point)
         self.actionPolyAddPoint.setToolTip("Add a profile point")
 
-        self.actionPolyRemovePoint = QAction("Remove Point", toolbar)
+        self.actionPolyRemovePoint = QAction("Remove Point")
         icon_remove_point = QIcon(":/resources/icons/icon-remove-point-64.svg")
         self.actionPolyRemovePoint.setIcon(icon_remove_point)
         self.actionPolyRemovePoint.setToolTip("Remove a profile point")
 
-        self.actionPolyLink = QAction("Link Polygons", toolbar)
+        self.actionPolyLink = QAction("Link Polygons")
         icon_link = QIcon(":/resources/icons/icon-link-64.svg")
         self.actionPolyLink.setIcon(icon_link)
         self.actionPolyLink.setToolTip("Create a link between polygons")
 
-        self.actionPolyDelink = QAction("Remove Link", toolbar)
+        self.actionPolyDelink = QAction("Remove Link")
         icon_delink = QIcon(":/resources/icons/icon-unlink-64.svg")
         self.actionPolyDelink.setIcon(icon_delink)
         self.actionPolyDelink.setToolTip("Remove link between polygons")
 
-        self.actionPolySave = QAction("Save Polygons", toolbar)
+        self.actionPolySave = QAction("Save Polygons")
         icon_save = QIcon(":/resources/icons/icon-save-file-64.svg")
         self.actionPolySave.setIcon(icon_save)
         self.actionPolySave.setToolTip("Save polygons to a file")
 
-        self.actionPolyDelete = QAction("Delete Polygon", toolbar)
+        self.actionPolyDelete = QAction("Delete Polygon")
         icon_delete = QIcon(":/resources/icons/icon-delete-64.svg")
         self.actionPolyDelete.setIcon(icon_delete)
         self.actionPolyDelete.setToolTip("Delete selected polygons")
 
+    def setup_toolbar_actions(self, toolbar):
+        """Add polygon tab actions to the common toolbar"""
         toolbar.addAction(self.actionPolyToggle)
         toolbar.addAction(self.actionPolyLoad)
         toolbar.addSeparator()
@@ -684,33 +895,12 @@ class PolygonTab():
         toolbar.addSeparator()
         toolbar.addAction(self.actionPolySave)
         toolbar.addAction(self.actionPolyDelete)
-
-        tab_layout.addWidget(toolbar)
-        
-        self.tableWidgetPolyPoints = CustomTableWidget()
-        self.tableWidgetPolyPoints.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.tableWidgetPolyPoints.setColumnCount(5)
-
-        header = self.tableWidgetPolyPoints.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
-
-        self.tableWidgetPolyPoints.setHorizontalHeaderLabels(["PolyID", "Name", "Link", "In/out", "Analysis"])
-        
-
-        tab_layout.addWidget(self.tableWidgetPolyPoints)
-
-        polygon_icon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
-        self.parent.tabWidgetMask.addTab(self.polygon_tab, polygon_icon, "Polygons")
         
         # initialise polygon dictionary for a given sample id in self.parent.data
-        self.polygon_manager = PolygonManager(parent = self, main_window=self.parent.main_window)
-        #self.parent.main_window.data.polygon = self.polygon_manger.polygons
+        self.polygon_manager = PolygonManager(parent = self, main_window=self.ui)
+        #self.ui.data.polygon = self.polygon_manger.polygons
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
-        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.parent.main_window.mpl_canvas))
+        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
         self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
 
@@ -723,17 +913,17 @@ class PolygonTab():
 
 
     def polygon_state_changed(self):
-        self.parent.main_window.polygon_state = self.polygon_toggle.isChecked()
+        self.ui.polygon_state = self.polygon_toggle.isChecked()
         if self.polygon_toggle.isChecked():
-            # self.parent.main_window.update_plot_type_combobox()
-            if (hasattr(self.parent.main_window, "profile_dock")):
-                self.parent.main_window.profile_dock.profile_toggle.setChecked(False)
-                self.parent.main_window.profile_dock.profile_state_changed()
+            # self.ui.update_plot_type_combobox()
+            if (hasattr(self.ui, "profile_dock")):
+                self.ui.profile_dock.profile_toggle.setChecked(False)
+                self.ui.profile_dock.profile_state_changed()
 
         self.toggle_polygon_actions()
 
 
-        self.parent.main_window.schedule_update()
+        self.ui.schedule_update()
         self.toggle_polygon_actions()
 
     def toggle_polygon_actions(self):
@@ -765,7 +955,7 @@ class PolygonTab():
 
     def update_table_widget(self, *args, **kwargs):
         """Update the polygon table (PyQt6 version)."""
-        sample_id = self.parent.main_window.app_data.sample_id
+        sample_id = self.ui.app_data.sample_id
         table = self.tableWidgetPolyPoints
 
         if sample_id in self.polygon_manager.polygons:
@@ -793,7 +983,7 @@ class PolygonTab():
 
     def view_selected_polygon(self):
         """View the selected polygon when a selection is made in the table widget ."""
-        sample_id = self.parent.main_window.app_data.sample_id
+        sample_id = self.ui.app_data.sample_id
 
         if sample_id in self.polygon_manager.polygons:
             # Get selected rows (PyQt6 returns QModelIndex objects)
@@ -836,7 +1026,7 @@ class PolygonTab():
         self.actionPolygonMask.setChecked(True)
 
         # apply polygon mask
-        # Iterate through each polygon in self.polygons[self.main_window.sample_id]
+        # Iterate through each polygon in self.polygons[self.ui.sample_id]
         for row in range(self.tableWidgetPolyPoints.rowCount()):
             #check if checkbox is checked
             checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
@@ -875,70 +1065,92 @@ class PolygonTab():
         Executes on change of ``self.comboBoxEdgeDetectMethod`` when ``self.toolButtonEdgeDetect`` is checked.
         """
         if self.actionEdgeDetect.isChecked() == Qt.CheckState.Checked:
-            self.parent.main_window.app_data.edge_detection_method = self.comboBoxEdgeDetectMethod.currentText()
-            self.parent.main_window.noise_reduction.add_edge_detection()
+            self.ui.app_data.edge_detection_method = self.comboBoxEdgeDetectMethod.currentText()
+            self.ui.noise_reduction.add_edge_detection()
         else:
-            self.parent.main_window.noise_reduction.remove_edge_detection()
+            self.ui.noise_reduction.remove_edge_detection()
 
 
 @auto_log_methods(logger_key='Mask')
-class ClusterTab():
-    def __init__(self, parent):
+class ClusterTab(QWidget):
+    def __init__(self, dock):
+        super().__init__(dock)
+        self.setObjectName("Cluster Tab")
+
         self.logger_key = 'Mask'
 
-        self.parent = parent
+        self.dock = dock
 
-        self.main_window = self.parent.main_window
+        self.ui = self.dock.ui
         #init table_fcn
         self.table_fcn = TableFcn(self)
 
-        self.cluster_tab = QWidget()
-        self.cluster_tab.setObjectName("Cluster Tab")
+        self.setup_ui()
 
+    def setup_ui(self):
         tab_layout = QVBoxLayout()
         tab_layout.setContentsMargins(6, 6, 6, 6)
-        self.cluster_tab.setLayout(tab_layout)
+        self.setLayout(tab_layout)
 
-        toolbar = QToolBar()
-        toolbar.setIconSize(QSize(24, 24))
-        toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out
+        # Create actions for toolbar (will be added to common toolbar)
+        self.create_actions()
 
-        tab_layout.addWidget(toolbar)
+        self.tableWidgetViewGroups = CustomTableWidget()
+        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+        self.tableWidgetViewGroups.setObjectName("tableWidgetViewGroups")
+        self.tableWidgetViewGroups.setColumnCount(3)
+        self.tableWidgetViewGroups.setRowCount(0)
+        
+        header = self.tableWidgetViewGroups.horizontalHeader()
+        if header:
+            header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(["Name", "Link", "Color"])
 
-        labelClusterGroup = QLabel("Cluster", toolbar)
+        tab_layout.addWidget(self.tableWidgetViewGroups)
 
-        self.spinBoxClusterGroup = QDoubleSpinBox(toolbar)
+        cluster_icon = QIcon(":/resources/icons/icon-cluster-64.svg")
+        self.dock.tab_widgets.addTab(self, cluster_icon, "Clusters")
 
-        self.toolButtonClusterColor = QToolButton(toolbar)
+    def create_actions(self):
+        """Create toolbar actions for the cluster tab"""
+        self.labelClusterGroup = QLabel("Cluster")
+
+        self.spinBoxClusterGroup = QDoubleSpinBox()
+
+        self.toolButtonClusterColor = QToolButton()
         self.toolButtonClusterColor.setMaximumSize(QSize(18, 18))
         self.toolButtonClusterColor.setText("")
 
-        self.actionClusterColorReset = QAction("Cluster Color Reset", toolbar)
+        self.actionClusterColorReset = QAction("Cluster Color Reset")
         icon_reset = QIcon(":/resources/icons/icon-reset-64.svg")
         self.actionClusterColorReset.setIcon(icon_reset)
         self.actionClusterColorReset.setToolTip("Reset cluster colors")
 
-        self.actionClusterLink = QAction("Link Polygons", toolbar)
+        self.actionClusterLink = QAction("Link Polygons")
         icon_link = QIcon(":/resources/icons/icon-link-64.svg")
         self.actionClusterLink.setIcon(icon_link)
         self.actionClusterLink.setToolTip("Create a link between clusters")
 
-        self.actionClusterDelink = QAction("Remove Link", toolbar)
+        self.actionClusterDelink = QAction("Remove Link")
         icon_delink = QIcon(":/resources/icons/icon-unlink-64.svg")
         self.actionClusterDelink.setIcon(icon_delink)
         self.actionClusterDelink.setToolTip("Remove link between clusters")
 
-        self.actionGroupMask = QAction("Create Cluster Mask", toolbar)
+        self.actionGroupMask = QAction("Create Cluster Mask")
         icon_dark = QIcon(":/resources/icons/icon-mask-dark-64.svg")
         self.actionGroupMask.setIcon(icon_dark)
         self.actionGroupMask.setToolTip("Create a mask based on the currently selected clusters")
 
-        self.actionGroupMaskInverse = QAction("Create Cluster Mask Inverse", toolbar)
+        self.actionGroupMaskInverse = QAction("Create Cluster Mask Inverse")
         icon_light = QIcon(":/resources/icons/icon-mask-light-64.svg")
         self.actionGroupMaskInverse.setIcon(icon_light)
-        self.actionGroupMaskInverse.setToolTip("Create a mask based on the inverese of currently seletected clusters")
+        self.actionGroupMaskInverse.setToolTip("Create a mask based on the inverse of currently selected clusters")
 
-        toolbar.addWidget(labelClusterGroup)
+    def setup_toolbar_actions(self, toolbar):
+        """Add cluster tab actions to the common toolbar"""
+        toolbar.addWidget(self.labelClusterGroup)
         toolbar.addWidget(self.spinBoxClusterGroup)
         toolbar.addWidget(self.toolButtonClusterColor)
         toolbar.addAction(self.actionClusterColorReset)
@@ -949,36 +1161,19 @@ class ClusterTab():
         toolbar.addAction(self.actionGroupMask)
         toolbar.addAction(self.actionGroupMaskInverse)
 
-        self.tableWidgetViewGroups = CustomTableWidget()
-        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
-        self.tableWidgetViewGroups.setObjectName("tableWidgetViewGroups")
-        self.tableWidgetViewGroups.setColumnCount(3)
-        self.tableWidgetViewGroups.setRowCount(0)
-        
-        header = self.tableWidgetViewGroups.horizontalHeader()
-        header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(["Name", "Link", "Color"])
-
-        tab_layout.addWidget(self.tableWidgetViewGroups)
-
-        cluster_icon = QIcon(":/resources/icons/icon-cluster-64.svg")
-        self.parent.tabWidgetMask.addTab(self.cluster_tab, cluster_icon, "Clusters")
-
         self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
         self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
-        self.actionClusterColorReset.triggered.connect(self.main_window.style_data.set_default_cluster_colors)
+        self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
         self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
         self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
-        self.actionGroupMask.triggered.connect(lambda: self.main_window.apply_cluster_mask(inverse=False))
-        self.actionGroupMaskInverse.triggered.connect(lambda: self.main_window.apply_cluster_mask(inverse=True))
+        self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
+        self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
 
         self.toggle_cluster_actions()
         self.update_table_widget()
 
     def toggle_cluster_actions(self):
-        if self.parent.data:
+        if self.ui.data:
             self.spinBoxClusterGroup.setEnabled(True)
             self.toolButtonClusterColor.setEnabled(True)
             self.actionClusterColorReset.setEnabled(True)
@@ -1009,10 +1204,10 @@ class ClusterTab():
         selected_cluster = int(self.spinBoxClusterGroup.value()-1)
 
         # change color
-        self.parent.main_window.button_color_select(self.toolButtonClusterColor)
+        self.ui.button_color_select(self.toolButtonClusterColor)
         color = convert_color(self.toolButtonClusterColor.palette().button().color(), 'qcolor', 'hex')
         color = color if color is not None else '#000000'
-        self.parent.main_window.cluster_dict[self.parent.main_window.cluster_dict['active method']][selected_cluster]['color'] = color
+        self.ui.cluster_dict[self.ui.cluster_dict['active method']][selected_cluster]['color'] = color
         if self.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
             return
 
@@ -1020,8 +1215,8 @@ class ClusterTab():
         self.tableWidgetViewGroups.setItem(selected_cluster,2,QTableWidgetItem(color))
 
         # update plot
-        if self.parent.main_window.comboBoxColorByField.currentText() == 'cluster':
-            self.parent.main_window.schedule_update()
+        if self.ui.comboBoxColorByField.currentText() == 'cluster':
+            self.ui.schedule_update()
 
     def select_cluster_group_callback(self):
         """Set cluster color button background after change of selected cluster group
@@ -1034,8 +1229,8 @@ class ClusterTab():
 
     def update_table_widget(self):
         
-        app_data = self.main_window.app_data
-        data = self.main_window.data[app_data.sample_id]
+        app_data = self.ui.app_data
+        data = self.ui.data[app_data.sample_id]
         
         # # block signals
         self.tableWidgetViewGroups.blockSignals(True)
@@ -1095,7 +1290,7 @@ class ClusterTab():
             if item.column() > 0:
                 return
             
-            app_data = self.parent.main_window.app_data
+            app_data = self.ui.app_data
             method = app_data.cluster_method
             # Extract the cluster id (assuming it's stored in the table)
             cluster_id = row
@@ -1122,7 +1317,7 @@ class ClusterTab():
 
             # update plot with new cluster name
             # trigger update to plot
-            self.parent.main_window.schedule_update()
+            self.ui.schedule_update()
 
     def update_clusters(self):
         """Executed on update to cluster table.
@@ -1130,7 +1325,7 @@ class ClusterTab():
         Updates ``MainWindow.cluster_dict`` and plot when the selected cluster have changed.
         """        
         if not self.updating_cluster_table_flag:
-            app_data = self.parent.main_window.app_data
+            app_data = self.ui.app_data
             selected_clusters = []
             method = app_data.cluster_method
 
@@ -1148,9 +1343,9 @@ class ClusterTab():
                 app_data.cluster_dict[method]['selected_clusters'] = []
 
             # update plot
-            if (self.parent.main_window.style_data.plot_type not in ['cluster', 'cluster score']) and (app_data.c_field_type == 'cluster'):
+            if (self.ui.style_data.plot_type not in ['cluster', 'cluster score']) and (app_data.c_field_type == 'cluster'):
                 # trigger update to plot
-                self.parent.main_window.schedule_update()
+                self.ui.schedule_update()
 
     
         # cluster styles

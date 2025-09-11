@@ -4,7 +4,7 @@ import traceback
 from PyQt6.QtCore import ( Qt, QUrl, QMetaObject )
 from PyQt6.QtWidgets import (
     QMessageBox,  QToolButton, QDialog, QLabel, QComboBox,
-    QApplication, QMainWindow, QSizePolicy, QTreeView
+    QApplication, QMainWindow, QSizePolicy, QTreeView, QWidget
 ) # type: ignore
 from PyQt6.QtGui import ( QIcon ) 
 from src.common.CustomWidgets import CustomToolButton, CustomComboBox, CustomAction
@@ -304,6 +304,81 @@ class MainWindow(QMainWindow):
 
         self.control_dock.toolbox.set_theme(theme)
         self.style_dock.toolbox.set_theme(theme)
+        
+        # Apply theme to MaskDock if it exists
+        if hasattr(self, 'mask_dock'):
+            # Apply theme directly to MaskDock
+            self.mask_dock.apply_theme(theme)
+            # Force complete style refresh for the MaskDock and its components
+            # This ensures that stylesheets are properly applied after theme changes
+            self._force_widget_style_refresh(self.mask_dock)
+
+    def _force_widget_style_refresh(self, widget):
+        """Force a complete style refresh on a widget and all its children"""        
+        # Apply direct stylesheet to QGroupBox widgets based on current theme
+        current_theme = self.theme_manager.theme
+        
+        # Define theme-specific styles for QGroupBox
+        if current_theme == "dark":
+            groupbox_style = """
+            QGroupBox {
+                border: none;
+                border-radius: 3px;
+                background-color: #282828;
+                font: 10px;
+                margin-top: 15px;
+                color: #ffffff;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left; 
+                padding: 0 3px;
+                color: #ffffff;
+            }
+            """
+        else:  # light theme
+            groupbox_style = """
+            QGroupBox {
+                border: none;
+                border-radius: 3px;
+                background-color: #e0e0e0;
+                font: 10px;
+                margin-top: 15px;
+                color: #000000;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left; 
+                padding: 0 3px;
+                color: #000000;
+            }
+            """
+        
+        # Apply styles to all QGroupBox widgets in MaskDock
+        from PyQt6.QtWidgets import QGroupBox
+        groupboxes = widget.findChildren(QGroupBox)
+        print(f"Found {len(groupboxes)} QGroupBox widgets in MaskDock")
+        for groupbox in groupboxes:
+            print(f"Applying theme to QGroupBox: {groupbox.title()}")
+            groupbox.setStyleSheet(groupbox_style)
+            groupbox.update()
+            groupbox.repaint()  # Force immediate repaint
+        
+        # Standard style refresh for all other widgets
+        style = widget.style()
+        if style:
+            style.unpolish(widget)
+            style.polish(widget)
+        widget.update()
+        
+        # Recursively refresh all child widgets
+        for child_widget in widget.findChildren(QWidget):
+            if not isinstance(child_widget, QGroupBox):  # Skip QGroupBox, already handled above
+                child_style = child_widget.style()
+                if child_style:
+                    child_style.unpolish(child_widget)
+                    child_style.polish(child_widget)
+                child_widget.update()
 
     def init_tabs(self, enable=False):
         """Enables/disables UI for user.
@@ -331,9 +406,9 @@ class MainWindow(QMainWindow):
             if hasattr(self, "special_tools"):
                 self.control_dock.special_tools.setEnabled(False)
             if hasattr(self, "mask_dock"):
-                self.mask_dock.tabWidgetMask.setTabEnabled(0,False)
-                self.mask_dock.tabWidgetMask.setTabEnabled(1,False)
-                self.mask_dock.tabWidgetMask.setTabEnabled(2,False)
+                self.mask_dock.tab_widgets.setTabEnabled(0,False)
+                self.mask_dock.tab_widgets.setTabEnabled(1,False)
+                self.mask_dock.tab_widgets.setTabEnabled(2,False)
             if hasattr(self, "info_dock"):
                 self.info_dock.setEnabled(False)
             if hasattr(self, "calculator"):
@@ -351,9 +426,9 @@ class MainWindow(QMainWindow):
             if hasattr(self,"special_tools"):
                 self.control_dock.special_tools.setEnabled(True)
             if hasattr(self, "mask_dock"):
-                self.mask_dock.tabWidgetMask.setTabEnabled(0,True)
-                self.mask_dock.tabWidgetMask.setTabEnabled(1,True)
-                self.mask_dock.tabWidgetMask.setTabEnabled(2,True)
+                self.mask_dock.tab_widgets.setTabEnabled(0,True)
+                self.mask_dock.tab_widgets.setTabEnabled(1,True)
+                self.mask_dock.tab_widgets.setTabEnabled(2,True)
             if hasattr(self, "info_dock"):
                 self.info_dock.setEnabled(True)
             if hasattr(self, "calculator"):
@@ -393,7 +468,7 @@ class MainWindow(QMainWindow):
                 self.control_dock.toolbox.setCurrentIndex(self.control_dock.tab_dict['spot'])
                 self.control_dock.toolbox.show()
             case 'polygons':
-                self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['polygon'])
+                self.mask_dock.tab_widgets.setCurrentIndex(self.mask_tab['polygon'])
                 self.mask_dock.show()
             case 'scatter':
                 self.control_dock.toolbox.setCurrentIndex(self.control_dock.tab_dict['scatter'])
@@ -405,14 +480,14 @@ class MainWindow(QMainWindow):
                 self.control_dock.toolbox.setCurrentIndex(self.control_dock.tab_dict['dim_red'])
                 self.control_dock.toolbox.show()
             case 'filters':
-                self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['filter'])
-                self.mask_dock.tabWidgetMask.show()
+                self.mask_dock.tab_widgets.setCurrentIndex(self.mask_tab['filter'])
+                self.mask_dock.tab_widgets.show()
             case 'clustering':
                 self.control_dock.toolbox.setCurrentIndex(self.control_dock.tab_dict['cluster'])
                 self.control_dock.toolbox.show()
             case 'clusters':
-                self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab['cluster'])
-                self.mask_dock.tabWidgetMask.show()
+                self.mask_dock.tab_widgets.setCurrentIndex(self.mask_tab['cluster'])
+                self.mask_dock.tab_widgets.show()
             case 'special':
                 self.control_dock.toolbox.setCurrentIndex(self.control_dock.tab_dict['special'])
                 self.control_dock.toolbox.show()
@@ -1034,8 +1109,8 @@ class MainWindow(QMainWindow):
             self.mask_dock = MaskDock(self)
 
             self.mask_tab = {}
-            for tid in range(self.mask_dock.tabWidgetMask.count()):
-                match self.mask_dock.tabWidgetMask.tabText(tid).lower():
+            for tid in range(self.mask_dock.tab_widgets.count()):
+                match self.mask_dock.tab_widgets.tabText(tid).lower():
                     case 'filters':
                         self.mask_tab.update({'filter': tid})
                     case 'polygons':
@@ -1051,13 +1126,16 @@ class MainWindow(QMainWindow):
             if self.mask_dock not in self.help_mapping:
                 self.help_mapping[self.mask_dock] = 'filtering'
 
-            self.mask_dock.filter_tab.callback_lineEditFMin()
-            self.mask_dock.filter_tab.callback_lineEditFMax()
+            self.mask_dock.filter_tab.callback_edit_filter_min()
+            self.mask_dock.filter_tab.callback_edit_filter_max()
 
         self.mask_dock.show()
+        
+        # Apply current theme to the newly created MaskDock
+        self._force_widget_style_refresh(self.mask_dock)
 
         if tab_name is not None:
-            self.mask_dock.tabWidgetMask.setCurrentIndex(self.mask_tab[tab_name])
+            self.mask_dock.tab_widgets.setCurrentIndex(self.mask_tab[tab_name])
 
 
     def open_profile(self, *args, **kwargs):

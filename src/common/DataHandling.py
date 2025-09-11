@@ -1125,16 +1125,135 @@ class SampleObj(QObject):
             self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
             return
 
+        # Initialize mask to all True, then apply filters
+        self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
+
         # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.filter_df.iterrows():
             if filter_row['use']:
                 field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
                 
+                # Create mask for this filter
+                field_mask = ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                
                 operator = filter_row['operator']
                 if operator == 'and':
-                    self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                    self.filter_mask = self.filter_mask & field_mask
                 elif operator == 'or':
-                    self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                    self.filter_mask = self.filter_mask | field_mask
+                elif operator == 'not':
+                    self.filter_mask = self.filter_mask & ~field_mask
+                # Original implementation:
+                # if operator == 'and':
+                #     self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+                # elif operator == 'or':
+                #     self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+
+    def add_filter(self, field_type, field, min_val, max_val, operator='and', use=True, persistent=True):
+        """Add a new filter to the filter_df.
+        
+        Parameters
+        ----------
+        field_type : str
+            Type of field (e.g., 'Analyte', 'Ratio', etc.)
+        field : str
+            Name of the field
+        min_val : float
+            Minimum value for the filter
+        max_val : float
+            Maximum value for the filter
+        operator : str, optional
+            Boolean operator ('and', 'or', 'not'), by default 'and'
+        use : bool, optional
+            Whether to use this filter, by default True
+        persistent : bool, optional
+            Whether to keep filter when sample changes, by default True
+            
+        Returns
+        -------
+        int
+            Index of the added filter
+        """
+        # Get the scale/norm for this field
+        try:
+            norm = self.processed.get_attribute(field, 'norm')
+        except:
+            norm = 'linear'
+            
+        filter_info = {
+            'use': use,
+            'field_type': field_type,
+            'field': field,
+            'norm': norm,
+            'min': min_val,
+            'max': max_val,
+            'operator': operator,
+            'persistent': persistent
+        }
+        
+        # Add to filter_df
+        new_index = len(self.filter_df)
+        self.filter_df.loc[new_index] = filter_info
+        
+        return new_index
+
+    def remove_filter(self, index=None, field=None, field_type=None):
+        """Remove filter(s) from filter_df.
+        
+        Parameters
+        ----------
+        index : int, optional
+            Index of filter to remove
+        field : str, optional
+            Remove filters matching this field name
+        field_type : str, optional
+            Remove filters matching this field type (used with field parameter)
+        """
+        if index is not None:
+            # Remove by index
+            if index in self.filter_df.index:
+                self.filter_df.drop(index, inplace=True)
+                self.filter_df.reset_index(drop=True, inplace=True)
+        elif field is not None:
+            # Remove by field name (and optionally field_type)
+            mask = self.filter_df['field'] == field
+            if field_type is not None:
+                mask = mask & (self.filter_df['field_type'] == field_type)
+            self.filter_df.drop(self.filter_df[mask].index, inplace=True)
+            self.filter_df.reset_index(drop=True, inplace=True)
+
+    def update_filter(self, index, **kwargs):
+        """Update an existing filter.
+        
+        Parameters
+        ----------
+        index : int
+            Index of filter to update
+        **kwargs
+            Filter parameters to update (use, field_type, field, min, max, operator, persistent)
+        """
+        if index in self.filter_df.index:
+            for key, value in kwargs.items():
+                if key in self.filter_df.columns:
+                    self.filter_df.at[index, key] = value
+
+    def clear_filters(self, persistent_only=False):
+        """Clear all or non-persistent filters.
+        
+        Parameters
+        ----------
+        persistent_only : bool, optional
+            If True, only remove non-persistent filters, by default False
+        """
+        if persistent_only:
+            # Remove only non-persistent filters
+            self.filter_df = self.filter_df[self.filter_df['persistent']].copy()
+            self.filter_df.reset_index(drop=True, inplace=True)
+        else:
+            # Clear all filters
+            self.filter_df = pd.DataFrame(columns=[
+                'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'
+            ])
 
     
     def sort_data(self, method):

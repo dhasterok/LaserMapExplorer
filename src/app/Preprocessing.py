@@ -81,7 +81,8 @@ class PreprocessingUI(CustomPage):
 
         widget_resolution_label = QWidget(parent=self.groupBoxCoordinates)
         layout_resolution_label = QHBoxLayout()
-        layout_resolution_label.setContentsMargins(3, 3, 3, 3)
+        layout_resolution_label.setContentsMargins(0, 0, 0, 0)
+        layout_resolution_label.setSpacing(2)
         widget_resolution_label.setLayout(layout_resolution_label)
 
         self.labelSampleResolution = QLabel(parent=self.groupBoxCoordinates)
@@ -103,7 +104,8 @@ class PreprocessingUI(CustomPage):
 
         widget_resolution = QWidget(self.groupBoxCoordinates)
         layout_resolution = QHBoxLayout(widget_resolution)
-        layout_resolution.setContentsMargins(3, 3, 3, 3)
+        layout_resolution.setContentsMargins(0, 0, 0, 0)
+        layout_resolution.setSpacing(3)
         widget_resolution.setLayout(layout_resolution)
 
         self.labelResolutionNx = QLabel(parent=self.groupBoxCoordinates)
@@ -135,7 +137,8 @@ class PreprocessingUI(CustomPage):
 
         widget_dimension_label = QWidget(parent=self.groupBoxCoordinates)
         layout_dimension_label = QHBoxLayout()
-        layout_dimension_label.setContentsMargins(3, 3, 3, 3)
+        layout_dimension_label.setContentsMargins(0, 0, 0, 0)
+        layout_dimension_label.setSpacing(2)
         widget_dimension_label.setLayout(layout_dimension_label)
 
         self.labelPixelResolution = QLabel(parent=self.groupBoxCoordinates)
@@ -156,7 +159,8 @@ class PreprocessingUI(CustomPage):
 
         widget_dimension = QWidget(self.groupBoxCoordinates)
         layout_dimension = QHBoxLayout()
-        layout_dimension.setContentsMargins(3, 3, 3, 3)
+        layout_dimension.setContentsMargins(0, 0, 0, 0)
+        layout_dimension.setSpacing(2)
         widget_dimension.setLayout(layout_dimension)
 
         self.labelDX = QLabel(parent=self.groupBoxCoordinates)

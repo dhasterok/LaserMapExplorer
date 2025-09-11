@@ -735,24 +735,6 @@ class MainWindow(QMainWindow):
         self.app_data.equalize_color_scale = self.control_dock.preprocess.toolButtonScaleEqualize.isChecked()
         if self.style_data.plot_type == "field map":
             self.schedule_update()
- 
-    # toolbar functions
-    def update_ref_chem_combobox_BE(self, ref_val):
-        """Changes reference computing normalized analytes
-
-        Sets all `self.app_data.ref_chem` to a common normalizing reference.
-
-        Parameters
-        ----------
-        ref_val : str
-            Name of reference value from combobox/dropdown
-        """
-        ref_index = self.app_data.ref_list.tolist().index(ref_val)
-
-        if ref_index:
-            self.app_data.current_data.ref_chem = self.app_data.ref_chem
-
-            return ref_index
 
     # -------------------------------------
     # General plot functions
@@ -1290,14 +1272,12 @@ class MainWindow(QMainWindow):
         if self.app_data.sample_id == '':
             return
 
-        self.analyte_dialog = AnalyteDialog(self)
+        self.analyte_dialog = AnalyteDialog(self, self.app_data.current_data, self.app_data)
         self.analyte_dialog.show()
 
         result = self.analyte_dialog.exec()  # Store the result here
         if result == QDialog.DialogCode.Accepted:
             self.update_analyte_ratio_selection(analyte_dict=self.analyte_dialog.norm_dict)   
-            if hasattr(self, 'workflow'):
-                self.workflow.refresh_analyte_saved_lists_dropdown() #refresh saved analyte dropdown in blockly 
         if result == QDialog.DialogCode.Rejected:
             pass
 
@@ -1315,19 +1295,7 @@ class MainWindow(QMainWindow):
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        for analyte in self.app_data.current_data.processed.match_attribute('data_type','Analyte'):
-            if analyte in analyte_dict:
-                self.app_data.current_data.processed.set_attribute(analyte, 'use', True)
-            else:
-                self.app_data.current_data.processed.set_attribute(analyte, 'use', False)
-
-        for analyte, norm in analyte_dict.items():
-            if '/' in analyte:
-                if analyte not in self.app_data.current_data.processed.columns:
-                    analyte_1, analyte_2 = analyte.split(' / ') 
-                    self.app_data.current_data.compute_ratio(analyte_1, analyte_2)
-
-            self.app_data.current_data.processed.set_attribute(analyte,'norm',norm)
+        self.app_data.update_field_selection(fields=analyte_dict.keys(), norm=analyte_dict.values())
 
         self.plot_tree.update_tree(norm_update=True)
 

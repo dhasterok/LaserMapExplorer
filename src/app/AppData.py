@@ -216,8 +216,8 @@ class AppData(QObject):
     corrSquaredChanged = pyqtSignal(bool)
 
     dimRedMethodChanged = pyqtSignal(str)
-    dimRedValueChanged = pyqtSignal(int)
-    dimRedMaxValueChanged = pyqtSignal(int)
+    dimRedValueChanged = pyqtSignal(str,int)
+    dimRedMaxValueChanged = pyqtSignal(str,int)
 
     clusterMethodChanged = pyqtSignal(str)
     maxClustersChanged = pyqtSignal(int)
@@ -1310,6 +1310,49 @@ class AppData(QObject):
         
         return new_list
 
+    def update_field_selection(self, fields=None, norms=None):
+        """Updates fields in mainwindow and its corresponding scale used for each field.
+
+        Updates fields and its corresponding scale used for each field based
+        on selection made by user in AnalyteSelection window or if user chooses analyte
+        list in Blockly.
+
+        Parameters
+        ----------
+        fields : list of str
+            List of field or ratio names.
+        norms : list of str
+            List of normalization scales ('linear', 'log', 'logit'), one per field.
+        """
+        if not fields:
+            return
+
+        norms = norms or []  # ensure it's a list, may be empty
+        all_fields = self.current_data.processed.columns
+
+        # Reset all selected fields to not used
+        for field in fields:
+            if field in all_fields:
+                self.current_data.processed.set_attribute(field, 'use', False)
+
+        # If norms provided and length matches fields
+        if norms and len(norms) == len(fields):
+            for field, norm in zip(fields, norms):
+                # Compute ratio if not already present
+                if field not in self.current_data.processed.columns and '/' in field:
+                    field_1, field_2 = field.split(' / ')
+                    self.current_data.compute_ratio(field_1, field_2)
+
+                # Mark as used and set scale
+                if field in self.current_data.processed.columns:
+                    self.current_data.processed.set_attribute(field, 'use', True)
+                    self.current_data.processed.set_attribute(field, 'scale', norm)
+        else:
+            # No norms or mismatch → just mark as used with default scale
+            for field in fields:
+                if field in self.current_data.processed.columns:
+                    self.current_data.processed.set_attribute(field, 'use', True)
+
     def update_hist_bin_width(self):
         """Updates the bin width for histograms
 
@@ -1357,7 +1400,7 @@ class AppData(QObject):
     def update_ref_chem_index(self, ref_val):
         """Changes reference computing normalized analytes
 
-        Sets all `self.app_data.ref_chem` to a common normalizing reference.
+        Sets all `self.ref_chem` to a common normalizing reference.
 
         Parameters
         ----------
@@ -1446,7 +1489,7 @@ class AppData(QObject):
         """        
         r = random.randint(0,1000000000)
         self.cluster_seed = r
-        
+        return r
 
     def cluster_group_changed(self, data, style_data):
         """

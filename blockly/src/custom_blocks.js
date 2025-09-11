@@ -1336,7 +1336,7 @@ const plot_ternary_map = {
         this.setTooltip('Ternary map.');
         this.setHelpUrl('');
         this.setColour(285);
-
+        this.plotType = 'ternary map';
         if (!this.isInFlyout) {
             const defaultBlocks = ['x_axis', 'y_axis', 'font', 'colormap'];
             addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
@@ -1350,6 +1350,9 @@ const plot_ternary_map = {
                 });
                 const fieldDropdown = this.getField(`field${axis}`);
                 fieldDropdown.setValidator((newValue) => {
+                    this.argDict =  getTernaryArgDict(this)
+                    //update new field value in dict 
+                    this.argDict[`${axis.toLowerCase()}_field`]=newValue
                     updateStylingChain(this);
                     return newValue;
                 });
@@ -1367,6 +1370,18 @@ const plot_ternary_map = {
                 }
             }
         });
+        // Helper function to gather current settings into an argDict
+        function getTernaryArgDict(block) {
+            return {
+                'plot_type': block.plotType,
+                'x_field': block.getFieldValue('fieldX'),
+                'x_field_type': block.getFieldValue('fieldTypeX'),
+                'y_field': block.getFieldValue('fieldY'),
+                'y_field_type': block.getFieldValue('fieldTypeY'),
+                'z_field': block.getFieldValue('fieldZ'),
+                'z_field_type': block.getFieldValue('fieldTypeZ'),
+            };
+        }
     }
 };
 Blockly.common.defineBlocks({ plot_ternary_map: plot_ternary_map });
@@ -1402,7 +1417,9 @@ const plot_ndim = {
     block.setColour(285);
 
     block.plotType = 'TEC';
-
+    this.argDict = {
+                    plot_type: this.plotType,
+                }
     if (!block.workspace || block.workspace.isFlyout) return;
 
     // Defaults for TEC
@@ -1502,7 +1519,9 @@ const plot_radar = {
         this.setColour(285);
 
         this.plotType = 'Radar';
-
+        this.argDict = {
+                    plot_type: this.plotType,
+                }
         if (!this.isInFlyout) {
             // Defaults for Radar
             const defaultBlocks = ['font', 'line_properties', 'transparency', 'colormap'];
@@ -1573,7 +1592,7 @@ const plot_basis_variance = {
   init: function () {
     this.appendDummyInput('HEADER')
       .appendField('Basis variance')
-      .setAlign(Blockly.ALIGN_CENTRE);
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
     this.appendStatementInput('styling')
       .setCheck('styling')
@@ -1584,7 +1603,10 @@ const plot_basis_variance = {
     this.setColour(210);
     this.setTooltip('Explained and cumulative variance of PCA.');
     this.setHelpUrl('');
-
+    this.plotType = 'variance';
+    this.argDict = {
+                    plot_type: this.plotType 
+                }
     if (!this.isInFlyout) {
       // Default styling: marker properties, line properties, font
       const defaultBlocks = ['marker_properties', 'line_properties', 'font'];
@@ -1610,7 +1632,7 @@ const plot_basis_vectors_plot = {
   init: function () {
     this.appendDummyInput('HEADER')
       .appendField('Basis vectors plot')
-      .setAlign(Blockly.ALIGN_CENTRE);
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
     this.appendStatementInput('styling')
       .setCheck('styling')
@@ -1621,7 +1643,10 @@ const plot_basis_vectors_plot = {
     this.setColour(210);
     this.setTooltip('Heatmap/plot of PCA basis vectors.');
     this.setHelpUrl('');
-
+    this.plotType = 'basis vectors';
+    this.argDict = {
+                    plot_type: this.plotType  
+                }
     if (!this.isInFlyout) {
       // Default styling: colormap, font
       const defaultBlocks = ['colormap', 'font'];
@@ -1647,7 +1672,7 @@ const style_basis_vectors = {
   init: function () {
     this.appendDummyInput('HEADER')
       .appendField('Basis vectors')
-      .setAlign(Blockly.ALIGN_CENTRE);
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
     this.appendStatementInput('styling')
       .setCheck('styling')
@@ -1658,7 +1683,11 @@ const style_basis_vectors = {
     this.setColour(120);
     this.setTooltip('Styling for PCA basis vectors overlay.');
     this.setHelpUrl('');
-
+    
+    this.plotType = 'basis vectors';
+    this.argDict = {
+                    plot_type: this.plotType     
+                }
     if (!this.isInFlyout) {
       // Default styling: line properties, transparency
       const defaultBlocks = ['line_properties', 'transparency'];
@@ -1684,9 +1713,6 @@ const cfg_seed = {
           seedField.setValue(String(Math.floor(Math.random() * 1e9)));
           if (this.workspace && !this.isInFlyout) updateStylingChain(this);
         });
-      } else {
-        seedField.setValue(String(Math.floor(Math.random() * 1e9)));
-        if (this.workspace && !this.isInFlyout) updateStylingChain(this);
       }
     });
 
@@ -1695,7 +1721,7 @@ const cfg_seed = {
       .appendField(dice, 'rng')
       .appendField(seedField, 'seed');
 
-    seedField.setValidator((nv) => nv); // keep user edits
+    seedField.setValidator((nv) => nv);
     this.setPreviousStatement(true, 'seed');
     this.setNextStatement(true, 'seed');
     this.setColour(15);
@@ -1712,7 +1738,7 @@ const cfg_cluster_options = {
   init: function () {
     this.appendDummyInput('METHOD')
       .appendField('Cluster options')
-      .setAlign(Blockly.ALIGN_CENTRE);
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
     this.appendDummyInput('EXP')
       .appendField('Exponent')
@@ -1775,117 +1801,7 @@ const cfg_pca_preconditioning = {
 };
 Blockly.common.defineBlocks({ cfg_pca_preconditioning });
 
-/* ================================
-   Custom field list (<: left) — type+field dynamic
-   ================================ */
-const cfg_custom_field_list = {
-  init: function () {
-    this.appendDummyInput('TYPE')
-      .appendField('Field type')
-      .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'fieldType');
 
-    this.appendDummyInput('FIELD')
-      .appendField('Field')
-      .appendField(new Blockly.FieldDropdown([['Select...', '']]), 'field');
-
-    this.setPreviousStatement(true, 'field_selector');
-    this.setNextStatement(true, 'field_selector');
-    this.setColour(25);
-    this.setTooltip('Select a field type and a field from the dataset.');
-    this.setHelpUrl('');
-
-    if (!this.isInFlyout) {
-      // Fill type list, then field list
-      const typeDD = this.getField('fieldType');
-      const fieldDD = this.getField('field');
-
-      const updateTypes = (plotType = 'dimension score map') => {
-        // Use bridge; axis 'c' is conventional for color/score usage
-        window.blocklyBridge?.getFieldTypeList?.('c', plotType)
-          .then(types => {
-            const opts = (types || []).map(t => [t, t]);
-            if (!opts.length) return;
-            typeDD.menuGenerator_ = opts;
-            const cur = typeDD.getValue();
-            const vals = new Set(opts.map(o => o[1]));
-            typeDD.setValue(vals.has(cur) ? cur : opts[0][1]);
-            typeDD.forceRerender?.();
-            updateFields(typeDD.getValue());
-          }).catch(console.error);
-      };
-
-      const updateFields = (ftype) => {
-        if (!ftype) return;
-        window.blocklyBridge?.getFieldList?.(ftype)
-          .then(fields => {
-            const opts = (fields || []).map(f => [f, f]);
-            if (!opts.length) return;
-            fieldDD.menuGenerator_ = opts;
-            const cur = fieldDD.getValue();
-            const vals = new Set(opts.map(o => o[1]));
-            fieldDD.setValue(vals.has(cur) ? cur : opts[0][1]);
-            fieldDD.forceRerender?.();
-            updateStylingChain(this);
-          }).catch(console.error);
-      };
-
-      typeDD.setValidator((nv) => { updateFields(nv); updateStylingChain(this); return nv; });
-      fieldDD.setValidator((nv) => { updateStylingChain(this); return nv; });
-
-      updateTypes();
-    }
-  }
-};
-Blockly.common.defineBlocks({ cfg_custom_field_list });
-
-/* ================================
-   Multidimensional — Dimensional reduction (x: top & bottom)
-   ================================ */
-const plot_dimensional_reduction = {
-  init: function () {
-    this.appendDummyInput('HEADER')
-      .appendField('Dimensional Reduction')
-      .setAlign(Blockly.ALIGN_CENTRE);
-
-    this.appendDummyInput('METHOD')
-      .appendField('Method')
-      .appendField(new Blockly.FieldDropdown([
-        ['PCA: Principal component analysis', 'pca']
-      ]), 'method');
-
-    // Connect a custom field list
-    this.appendStatementInput('customFields')
-      .setCheck('field_selector')
-      .appendField('Custom field list');
-
-    this.appendStatementInput('styling')
-      .setCheck('styling')
-      .appendField('Styling');
-
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(285);
-    this.setTooltip('Dimensionality reduction entry point (method + custom field selection).');
-    this.setHelpUrl('');
-
-    if (!this.isInFlyout) {
-      // Choose defaults for DR maps: colormap, font
-      const defaultBlocks = ['colormap', 'font'];
-      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
-    }
-
-    this.setOnChange(function (event) {
-      if (!this.workspace || this.isInFlyout) return;
-      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
-        if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId) ||
-            isBlockInChain(this.getInputTargetBlock('customFields'), event.blockId)) {
-          updateStylingChain(this);
-        }
-      }
-    });
-  }
-};
-Blockly.common.defineBlocks({ plot_dimensional_reduction });
 
 /* ================================
    Multidimensional — Clustering (x: top & bottom) with dynamic defaults
@@ -1894,7 +1810,7 @@ const plot_clustering = {
   init: function () {
     this.appendDummyInput('HEADER')
       .appendField('Clustering')
-      .setAlign(Blockly.ALIGN_CENTRE);
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
     // Method dropdown is populated dynamically from AppData via bridge
     this.appendDummyInput('METHOD')
@@ -1910,10 +1826,6 @@ const plot_clustering = {
       .setCheck('cluster_options')
       .appendField('Cluster options');
 
-    this.appendStatementInput('customFields')
-      .setCheck('field_selector')
-      .appendField('Custom field list');
-
     this.appendStatementInput('styling')
       .setCheck('styling')
       .appendField('Styling');
@@ -1923,7 +1835,10 @@ const plot_clustering = {
     this.setColour(200);
     this.setTooltip('Clustering entry point (method + seed + options + custom field list).');
     this.setHelpUrl('');
-
+    this.plotType = 'cluster map'
+    this.argDict = {
+                    plot_type: this.plotType    
+                }
     if (!this.isInFlyout) {
       // Default styling: marker, line width, font (use *_nc if you have “no color” variants)
       const defaultBlocks = ['marker_properties', 'line_properties', 'font'];
@@ -2010,8 +1925,7 @@ const plot_clustering = {
         const inStyling = isBlockInChain(this.getInputTargetBlock('styling'), event.blockId);
         const inSeed = isBlockInChain(this.getInputTargetBlock('seed'), event.blockId);
         const inOpt = isBlockInChain(this.getInputTargetBlock('options'), event.blockId);
-        const inFields = isBlockInChain(this.getInputTargetBlock('customFields'), event.blockId);
-        if (inStyling || inSeed || inOpt || inFields) updateStylingChain(this);
+        if (inStyling || inSeed || inOpt) updateStylingChain(this);
       }
     });
   }
@@ -2021,16 +1935,24 @@ Blockly.common.defineBlocks({ plot_clustering });
 /* ================================
    Cluster performance (x: top & bottom) with dynamic defaults
    ================================ */
+/* ================================
+   Cluster performance (x: top & bottom) with dynamic defaults + Max Clusters
+   ================================ */
 const plot_cluster_performance = {
   init: function () {
     this.appendDummyInput('HEADER')
       .appendField('Cluster performance')
-      .setAlign(Blockly.ALIGN_CENTRE);
+      .setAlign(Blockly.inputs.Align.CENTRE);
 
     // Method dropdown populated dynamically
     this.appendDummyInput('METHOD')
       .appendField('Method')
       .appendField(new Blockly.FieldDropdown([['Loading…', '']]), 'method');
+
+    // Max clusters (defaults to AppData.max_clusters via bridge)
+    this.appendDummyInput('MAXK')
+      .appendField('Max clusters')
+      .appendField(new Blockly.FieldNumber(10, 2, 1000, 1), 'maxClusters');
 
     this.appendStatementInput('seed')
       .setCheck('seed')
@@ -2039,10 +1961,6 @@ const plot_cluster_performance = {
     this.appendStatementInput('options')
       .setCheck('cluster_options')
       .appendField('Cluster options');
-
-    this.appendStatementInput('customFields')
-      .setCheck('field_selector')
-      .appendField('Custom field list');
 
     this.appendStatementInput('styling')
       .setCheck('styling')
@@ -2053,13 +1971,17 @@ const plot_cluster_performance = {
     this.setColour(200);
     this.setTooltip('Plots for choosing optimal number of clusters (elbow, silhouette, etc.).');
     this.setHelpUrl('');
-
+    this.plotType = 'cluster performance'
+    this.argDict = {
+                    plot_type: this.plotType
+                }
     if (!this.isInFlyout) {
       // Default styling: marker, line width, font
       const defaultBlocks = ['marker_properties', 'line_properties', 'font'];
       addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
 
       const methodDD = this.getField('method');
+      const maxKField = this.getField('maxClusters');
 
       const loadMethods = () => {
         const lister = window.blocklyBridge?.getClusterMethodList;
@@ -2103,6 +2025,10 @@ const plot_cluster_performance = {
               optBlk.getField('pca').setValue(d.precondition ? 'TRUE' : 'FALSE');
             }
           }
+          // Max clusters default
+          if (maxKField && Number.isFinite(Number(d.max_clusters))) {
+            maxKField.setValue(Number(d.max_clusters));
+          }
           updateStylingChain(this);
         }).catch(console.error);
 
@@ -2120,6 +2046,9 @@ const plot_cluster_performance = {
       };
 
       methodDD.setValidator((nv) => { applyDefaults(nv); return nv; });
+      if (maxKField) {
+        maxKField.setValidator((nv) => { updateStylingChain(this); return nv; });
+      }
 
       loadMethods();
     }
@@ -2130,16 +2059,61 @@ const plot_cluster_performance = {
         const inStyling = isBlockInChain(this.getInputTargetBlock('styling'), event.blockId);
         const inSeed = isBlockInChain(this.getInputTargetBlock('seed'), event.blockId);
         const inOpt = isBlockInChain(this.getInputTargetBlock('options'), event.blockId);
-        const inFields = isBlockInChain(this.getInputTargetBlock('customFields'), event.blockId);
-        if (inStyling || inSeed || inOpt || inFields) updateStylingChain(this);
+        if (inStyling || inSeed || inOpt) updateStylingChain(this);
       }
     });
   }
 };
 Blockly.common.defineBlocks({ plot_cluster_performance });
+
 /* ================================
    Dimentionality Reduction Plots
    ================================ */   
+/* ================================
+   Multidimensional — Dimensional reduction (x: top & bottom)
+   ================================ */
+const dimensional_reduction = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Dimensional Reduction')
+      .setAlign(Blockly.inputs.Align.CENTRE);
+
+    this.appendDummyInput('METHOD')
+      .appendField('Method')
+      .appendField(new Blockly.FieldDropdown([
+        ['PCA: Principal component analysis', 'PCA: Principal component analysis']
+      ]), 'method');
+
+    this.appendStatementInput('styling')
+      .setCheck('styling')
+      .appendField('Styling');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(285);
+    this.setTooltip('Dimensionality reduction entry point (method + custom field selection).');
+    this.setHelpUrl('');
+    this.plotType = 'basis vectors';
+    this.argDict = {
+                    plot_type: this.plotType   
+                }
+    if (!this.isInFlyout) {
+      // Choose defaults for DR maps: colormap, font
+      const defaultBlocks = ['colormap', 'font'];
+      addDefaultStylingBlocks(this, this.workspace, defaultBlocks);
+    }
+
+    this.setOnChange(function (event) {
+      if (!this.workspace || this.isInFlyout) return;
+      if ([Blockly.Events.BLOCK_CREATE, Blockly.Events.BLOCK_MOVE, Blockly.Events.BLOCK_DELETE].includes(event.type)) {
+        if (isBlockInChain(this.getInputTargetBlock('styling'), event.blockId) ) {
+          updateStylingChain(this);
+        }
+      }
+    });
+  }
+};
+Blockly.common.defineBlocks({ dimensional_reduction });
 
 
 /* ================================

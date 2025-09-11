@@ -24,27 +24,27 @@ class FieldDialog(QDialog):
         The parent widget, typically the main application window.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, data, app_data):
         if parent.__class__.__name__ == 'Main':
             super().__init__()  # detached
         else:
             super().__init__(parent)
 
         # Only initialize if parent has valid sample_id
-        if not getattr(parent, "sample_id", None):
+        if not getattr(app_data, "sample_id", None):
             return
 
         self.parent = parent
         self.setup_ui()
 
         # Default directory for load/save
-        self.default_dir = (parent.RESOURCE_PATH / "field_list"
+        self.default_dir = (parent.RESOURCE_PATH / "fields_list"
                             if hasattr(parent, "RESOURCE_PATH")
                             else Path.cwd())
 
         # Initialize state from attribute dictionary
         self.field_state = self.init_field_lists(
-            parent.app_data.current_data.column_attributes
+            data.processed.column_attributes
         )
         self.selected_state = {ftype: [] for ftype in self.field_state}
 
@@ -295,10 +295,9 @@ class FieldDialog(QDialog):
             QMessageBox.warning(self, "Warning", "No fields to save.")
             return
 
-        options = QFileDialog.Options()
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Save Field List", str(self.default_dir),
-            "Text Files (*.txt);;All Files (*)", options=options
+            "Text Files (*.txt);;All Files (*)", options=QFileDialog.Option(0)
         )
         if not file_path:
             return
@@ -312,9 +311,7 @@ class FieldDialog(QDialog):
         self.filename = file_path.name
         self.unsaved_changes = False
         self.update_window_title()
-        self.raise_()
-        self.activateWindow()
-        self.show()
+
 
     # --------------------------------------------------------------------------
     # Done / Cancel

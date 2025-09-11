@@ -455,7 +455,7 @@ pythonGenerator.forBlock['plot_basis_variance'] = function (block, generator) {
   let code = '';
   code += styling + '\n';
   code += `self.style_data.plot_type = 'variance'\n`;
-  code += `canvas, self.plot_info = plot_pca(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
   code += `if canvas is not None:\n`;
   code += `    self.ensure_canvas_popup()\n`;
   code += `    self.add_canvas_to_layout(canvas)\n`;
@@ -470,7 +470,7 @@ pythonGenerator.forBlock['plot_basis_vectors_plot'] = function (block, generator
   let code = '';
   code += styling + '\n';
   code += `self.style_data.plot_type = 'basis vectors'\n`;
-  code += `canvas, self.plot_info = plot_pca(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
   code += `if canvas is not None:\n`;
   code += `    self.ensure_canvas_popup()\n`;
   code += `    self.add_canvas_to_layout(canvas)\n`;
@@ -531,15 +531,14 @@ pythonGenerator.forBlock['cfg_custom_field_list'] = function (block, generator) 
 /* -------- 8) Multidimensional — Dimensional reduction (hub) --------
    This block sets the method and applies any custom field selections + styling.
    Specific plots are produced by the dedicated PCA blocks. */
-pythonGenerator.forBlock['plot_dimensional_reduction'] = function (block, generator) {
+pythonGenerator.forBlock['dimensional_reduction'] = function (block, generator) {
   const method = block.getFieldValue('method'); // e.g., 'pca'
 
-  let custom = _dedent(generator.statementToCode(block, 'customFields') || '');
   let styling = _dedent(generator.statementToCode(block, 'styling') || '');
 
   let code = '';
   code += `self.app_data.dim_red_method = "${method}"\n`;
-  code += custom + '\n';
+  code += `self.dimensional_reduction.compute_dim_red( data=self.data[self.app_data.sample_id], app_data=self.app_data)\n`;
   code += styling + '\n';
   // No direct plotting here; use basis-variance / basis-vectors / etc. blocks.
   return code;
@@ -552,17 +551,17 @@ pythonGenerator.forBlock['plot_clustering'] = function (block, generator) {
 
   let seed      = _dedent(generator.statementToCode(block, 'seed') || '');
   let options   = _dedent(generator.statementToCode(block, 'options') || '');
-  let fields    = _dedent(generator.statementToCode(block, 'customFields') || '');
   let styling   = _dedent(generator.statementToCode(block, 'styling') || '');
 
   let code = '';
   code += `self.app_data.cluster_method = "${method}"\n`;
   code += seed + '\n';
   code += options + '\n';
-  code += fields + '\n';
   code += styling + '\n';
   code += `self.style_data.plot_type = 'cluster map'\n`;
-  code += `canvas, self.plot_info = plot_clusters(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
+  code += `self.clustering.compute_clusters( data=self.data[self.app_data.sample_id], app_data=self.app_data, max_clusters=None)\n`;
+  code += `self.app_data.cluster_group_changed(self.data[self.app_data.sample_id], self.style_data)\n`;
+  code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
   code += `if canvas is not None:\n`;
   code += `    self.ensure_canvas_popup()\n`;
   code += `    self.add_canvas_to_layout(canvas)\n`;
@@ -572,20 +571,23 @@ pythonGenerator.forBlock['plot_clustering'] = function (block, generator) {
 
 /* -------- 10) Cluster performance (entry) -------- */
 pythonGenerator.forBlock['plot_cluster_performance'] = function (block, generator) {
-  const method = block.getFieldValue('method'); // 'kmeans'|'fcm'|'hierarchical'
+  const method = block.getFieldValue('method'); // e.g., 'k-means', 'fuzzy c-means', etc.
+  const maxKVal = Number(block.getFieldValue('maxClusters'));
 
-  let seed      = _dedent(generator.statementToCode(block, 'seed') || '');
-  let options   = _dedent(generator.statementToCode(block, 'options') || '');
-  let fields    = _dedent(generator.statementToCode(block, 'customFields') || '');
-  let styling   = _dedent(generator.statementToCode(block, 'styling') || '');
+  let seed    = _dedent(generator.statementToCode(block, 'seed') || '');
+  let options = _dedent(generator.statementToCode(block, 'options') || '');
+  let styling = _dedent(generator.statementToCode(block, 'styling') || '');
 
   let code = '';
-  code += `self.app_data.cluster_method = "${method}"\n`;
+  code += `self.app_data.cluster_method = ${JSON.stringify(method)}\n`;
+  if (Number.isFinite(maxKVal)) {
+    code += `self.app_data.max_clusters = int(${maxKVal})\n`;
+  }
   code += seed + '\n';
   code += options + '\n';
-  code += fields + '\n';
   code += styling + '\n';
   code += `self.style_data.plot_type = 'cluster performance'\n`;
+  code += `self.clustering.compute_clusters(data=self.data[self.app_data.sample_id], app_data=self.app_data, max_clusters=self.app_data.max_clusters)\n`;
   code += `canvas, self.plot_info = cluster_performance_plot(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
   code += `if canvas is not None:\n`;
   code += `    self.ensure_canvas_popup()\n`;
@@ -593,7 +595,6 @@ pythonGenerator.forBlock['plot_cluster_performance'] = function (block, generato
   code += `    self.canvas_dialog.show()\n`;
   return code;
 };
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Export table block

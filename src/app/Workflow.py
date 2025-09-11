@@ -424,16 +424,16 @@ class BlocklyBridge(QObject):
 
 
     @pyqtSlot(result=int)
-    def randomClusterSeed(self):
-        """
-        Generate a random integer seed for clustering.
+    def randomClusterSeed(self) -> int:
+        """Generate and return a random cluster seed from AppData.
 
         Returns
         -------
         int
-            Random seed in [0, 2**31 - 1].
+            Random integer seed (0–1e9).
         """
-        return random.randint(0, 2**31 - 1)
+        self.lame_blockly.app_data.generate_random_seed()
+        return self.lame_blockly.app_data.cluster_seed
 
 
     # -------- Dimensional reduction defaults (optional helper) --------

@@ -95,7 +95,7 @@ def create_plot(parent, data, app_data, style_data):
 
             case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
                 # Check if PCA needs to be computed - this is data-related, not UI-related
-                if app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
+                if app_data.update_pca_flag or not data.processed.match_attribute('data_type','PCA score'):
                     # Note: PCA computation should be done by caller before calling create_plot
                     return None, None
                 canvas, plot_info = plot_pca(parent, data, app_data, style_data)
@@ -2367,7 +2367,7 @@ def plot_pca_components(pca_results,data, app_data, style_data,canvas):
     y = pca_results.components_[:,pc_y]
 
     # mulitiplier for scale
-    m = style_data.line_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
+    m = style_data.length_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
 
     # arrows
     canvas.axes.quiver(np.zeros(nfields), np.zeros(nfields), m*x, m*y, color=style_data.line_color,
@@ -2563,8 +2563,24 @@ def cluster_performance_plot(parent, data, app_data, style_data):
 
     plot_type = style_data.plot_type
     plot_name = f"{plot_type}_{method}"
-    plot_data = {'inertia': inertia, '2nd derivative': second_derivative}
-    canvas.data = pd.DataFrame(plot_data)
+    
+    # store data in dataframe
+    K = len(inertia)
+    k = np.arange(1, K + 1, dtype=int)
+
+    # Pad 2nd derivative to length K with NaNs at the ends (center-aligned)
+    second_full = np.full(K, np.nan, dtype=float)
+    if K >= 3:
+        second_full[1:-1] = np.diff(np.diff(inertia))
+
+    # Build DataFrame
+    perf_df = pd.DataFrame({
+        'k': k,
+        'inertia': np.asarray(inertia, dtype=float),
+        'silhouette': np.asarray(silhouette_scores, dtype=float),
+        'second_derivative': second_full
+    })
+    canvas.data = pd.DataFrame(perf_df)
     canvas.plot_name = plot_name
     
     plot_info = {
@@ -2579,7 +2595,7 @@ def cluster_performance_plot(parent, data, app_data, style_data):
         'cluster_groups': app_data.cluster_dict[method],
         'view': [True,False],
         'position': [],
-        'data': plot_data
+        'data': perf_df
         }
 
     return canvas, plot_info

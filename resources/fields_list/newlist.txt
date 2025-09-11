@@ -1,0 +1,6 @@
+Analyte,Zr91
+Analyte,Er166
+Analyte,Ca43
+Analyte,Gd157
+Analyte,Mg24
+Cluster,k-means

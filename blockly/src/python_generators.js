@@ -6,6 +6,12 @@ import {pythonGenerator, Order} from 'blockly/python';
 import { sample_ids } from './globals';
 import {getCategorizedStyleDictCode} from './helper_functions'
 
+pythonGenerator.forBlock['display_figure'] = function (block, generator) {
+  const show = block.getFieldValue('SHOW') === 'TRUE' ? 'True' : 'False';
+  let code  = `# display_figure block\n`;
+  code     += `self.display_figures = ${show}\n`;
+  return code;
+};
 
 // Python Generator: Load Directory
 pythonGenerator.forBlock['load_directory'] = function(block, generator) {
@@ -52,36 +58,22 @@ pythonGenerator.forBlock['select_analytes'] = function(block,generator) {
         var quotedListName = generator.quote_(savedListName);
         code = 'self.update_analyte_selection_from_file(' + quotedListName + ')\n';
     }
-    code += 'self.update_blockly_field_types(self)'
+    code += 'self.refresh_all_field_type_dropdowns()\n';
     return code;
 };
   
 pythonGenerator.forBlock['select_field_from_type'] = function(block, generator) {
-  // 1) Retrieve the user-chosen values
   const fieldTypeValue = block.getFieldValue('fieldType') || '';
   const fieldValue     = block.getFieldValue('field') || '';
 
-  // 2) Build some Python statements
-  //    For example, maybe we call a Python method 'select_field'
-  //    with the chosen fieldType and field. Adjust as needed:
-  let code = '';
-
-  // If user left it at default ('' or 'Select...'), skip
-  if (fieldValue !== '' && fieldValue !== 'Select...') {
-    const quotedFieldType = generator.quote_(fieldTypeValue);
-    const quotedField     = generator.quote_(fieldValue);
-
-    code += `# select_field_from_type block\n`;
-    code += `self.select_field_from_type(${quotedFieldType}, ${quotedField})\n`;
-  } else {
-    code += `# select_field_from_type block: no field selected\n`;
+  if (!fieldValue || fieldValue === 'Select...') {
+    return ''; // no code if nothing chosen
   }
 
-  // 3) Return statement code
-  return code;
-}; 
-
-
+  const quotedField = generator.quote_(fieldValue);
+  // Optionally: norm info (you could attach via another dropdown later)
+  return quotedField + ",\n";
+};
 
 // Python code generator for the select_analytes block
 pythonGenerator.forBlock['select_ref_val'] = function(block) {
@@ -139,19 +131,20 @@ pythonGenerator.forBlock['neg_handling_method'] = function(block) {
 };
 
 pythonGenerator.forBlock['select_fields_list'] = function(block,generator) {
-    var fieldSelectorDropdownValue = block.getFieldValue('fieldSelectorDropdown');
-    var code = '';
-    
-    if (fieldSelectorDropdownValue === 'Current selection') {
-        code = '';
-    } else if (fieldSelectorDropdownValue === 'Field selector') {
-        code = 'self.open_field_selector_dialog()\n';
-    } else if (fieldSelectorDropdownValue === 'Saved lists') {
-        var savedListName = block.getFieldValue('fieldSavedListsDropdown');
-        var quotedListName = generator.quote_(savedListName);
-        code = 'self.update_field_list_from_file(' + quotedListName + ')\n';
-    }
-    return code;
+  const selector = block.getFieldValue('fieldSelectorDropdown');
+  if (selector === 'Current selection') {
+    return '';  // nothing new
+  }
+  if (selector === 'Field selector') {
+    return '# field selector dialog (handled separately)\n';
+  }
+  if (selector === 'Saved lists') {
+    const savedListName = block.getFieldValue('fieldSavedListsDropdown');
+    const quoted = generator.quote_(savedListName);
+    // Emit a call that expands into fields in Python
+    return `*self.load_fields_from_saved_list(${quoted}),\n`;
+  }
+  return '';
 };
 
 
@@ -210,17 +203,7 @@ pythonGenerator.forBlock['plot_map'] = function(block, generator) {
     // 5) Plot
 
     code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-    // 6) Show plot in popup or layout    
-    const showMap = block.getFieldValue('SHOW_MAP') === 'TRUE';
-    if (showMap) {
-        code += `self.ensure_canvas_popup()\n`;
-        code += `self.mpl_canvas = canvas\n`;
-        code += `self.canvas_widget.add_canvas_to_window(self.plot_info)\n`;
-        code += `self.canvas_dialog.show()\n`;
-    }
-    else {
-        code += `self.add_canvas_to_layout(canvas)\n`;
-    }
+    code += `self.set_display_policy(canvas)\n`;
     return code;
 };
 
@@ -248,9 +231,7 @@ pythonGenerator.forBlock['plot_correlation'] = function(block, generator) {
     code +=`self.app_data.corr_squared =${r_2}\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-         code += `self.ensure_canvas_popup()\n`;
-        code += `self.add_canvas_to_layout(canvas)\n`;
-        code += `self.canvas_dialog.show()\n`;
+    code += `self.set_display_policy(canvas)\n`;
     return code;
 };
 
@@ -287,9 +268,7 @@ pythonGenerator.forBlock['plot_histogram'] = function(block, generator) {
     // Plot command
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-         code += `self.ensure_canvas_popup()\n`;
-        code += `self.add_canvas_to_layout(canvas)\n`;
-        code += `self.canvas_dialog.show()\n`;
+    code += `self.set_display_policy(canvas)\n`;
 
     return code;
 };
@@ -314,9 +293,7 @@ pythonGenerator.forBlock['plot_biplot'] = function(block, generator) {
     `self.app_data.y_field_type =${fyType}\n`;
     code += 'self.style_data.set_style_attributes(self.data[self.app_data.sample_id], self.app_data)\n';
     code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-    code += `self.ensure_canvas_popup()\n`;
-    code += `self.add_canvas_to_layout(canvas)\n`;
-    code += `self.canvas_dialog.show()\n`;
+    code += `self.set_display_policy(canvas)\n`;
     return code;
 };
 
@@ -334,9 +311,7 @@ pythonGenerator.forBlock['plot_ternary'] = function(block, generator) {
     let code = subBlocksCode + '\n';
     code += `self.style_data.plot_type = ${plotType}\n`;
     code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-    code += `self.ensure_canvas_popup()\n`;
-    code += `self.add_canvas_to_layout(canvas)\n`;
-    code += `self.canvas_dialog.show()\n`;
+    code += `self.set_display_policy(canvas)\n`;
     return code;
 };
 
@@ -353,9 +328,7 @@ pythonGenerator.forBlock['plot_ternary_map'] = function(block, generator) {
     let code = subBlocksCode + '\n';
     code += `self.style_data.plot_type = 'ternary_map'\n`;
     code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-    code += `self.ensure_canvas_popup()\n`;
-    code += `self.add_canvas_to_layout(canvas)\n`;
-    code += `self.canvas_dialog.show()\n`;
+    code += `self.set_display_policy(canvas)\n`;
     return code;
 };
 
@@ -397,10 +370,7 @@ pythonGenerator.forBlock['plot_ndim'] = function (block, generator) {
   code += `    self.status_manager.show_message("Reference value is required above for Compatibility diagram (TEC).")\n`;
   code += `else:\n`;
   code += `    canvas, self.plot_info = create_plot(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
-  code += `    if canvas is not None:\n`;
-  code += `        self.ensure_canvas_popup()\n`;
-  code += `        self.add_canvas_to_layout(canvas)\n`;
-  code += `        self.canvas_dialog.show()\n`;
+  code += `    self.set_display_policy(canvas)\n`;
 
   return code;
 };
@@ -432,9 +402,7 @@ pythonGenerator.forBlock['plot_radar'] = function (block, generator) {
     code += `    print("Reference value is required above for Radar plot.")\n`;
     code += `else:\n`;
     code += `    canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
-    code += `    if canvas is not None:\n`;
-    code += `        self.add_plotwidget_to_plot_viewer(self.plot_info)\n`;
-    code += `        self.canvas_widget.show()\n`;
+    code += `    self.set_display_policy(canvas)\n`;
 
     return code;
 };
@@ -457,9 +425,7 @@ pythonGenerator.forBlock['plot_basis_variance'] = function (block, generator) {
   code += `self.style_data.plot_type = 'variance'\n`;
   code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
   code += `if canvas is not None:\n`;
-  code += `    self.ensure_canvas_popup()\n`;
-  code += `    self.add_canvas_to_layout(canvas)\n`;
-  code += `    self.canvas_dialog.show()\n`;
+  code += `    self.set_display_policy(canvas)\n`;
   return code;
 };
 
@@ -472,9 +438,7 @@ pythonGenerator.forBlock['plot_basis_vectors_plot'] = function (block, generator
   code += `self.style_data.plot_type = 'basis vectors'\n`;
   code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
   code += `if canvas is not None:\n`;
-  code += `    self.ensure_canvas_popup()\n`;
-  code += `    self.add_canvas_to_layout(canvas)\n`;
-  code += `    self.canvas_dialog.show()\n`;
+  code += `    self.set_display_policy(canvas)\n`;
   return code;
 };
 
@@ -489,24 +453,34 @@ pythonGenerator.forBlock['cfg_seed'] = function (block, generator) {
   const seedStr = generator.quote_(block.getFieldValue('seed') || '');
   let code = '';
   code += `# Seed (empty => None; else try int)\n`;
-  code += `try:\n`;
-  code += `    _seed_tmp = ${seedStr}\n`;
-  code += `    self.app_data.seed = None if (not _seed_tmp) else int(_seed_tmp)\n`;
-  code += `except Exception:\n`;
-  code += `    self.app_data.seed = None\n`;
+  code += `_seed_tmp = ${seedStr}\n`;
+  code += `self.app_data.seed = None if (not _seed_tmp) else int(_seed_tmp)\n`;
+
   return code;
 };
 
 /* -------- 5) Cluster options (config; mutator-ready) -------- */
 pythonGenerator.forBlock['cfg_cluster_options'] = function (block, generator) {
-  const exponent = block.getFieldValue('exponent');   // number
-  const distance = block.getFieldValue('distance');   // dropdown
+  const exponent = block.getFieldValue('exponent');
+  const distance = block.getFieldValue('distance');
   const pcaFlag  = (block.getFieldValue('pca') === 'TRUE') ? 'True' : 'False';
 
+  // Collect custom field chain
+  let fieldsCode = generator.statementToCode(block, 'customFields') || '';
+  fieldsCode = fieldsCode.trim();
+
   let code = '';
-  code += `self.app_data.exponent = float(${exponent})\n`;
-  code += `self.app_data.distance = "${distance}"\n`;
-  code += `self.app_data.use_pca = ${pcaFlag}\n`;
+  code += `self.app_data.cluster_exponent = float(${exponent})\n`;
+  code += `self.app_data.cluster_distance = "${distance}"\n`;
+  code += `self.app_data.dim_red_precondition = ${pcaFlag}\n`;
+
+  if (fieldsCode) {
+    code += `fields = [\n${fieldsCode}\n]\n`;
+    code += `self.app_data.update_field_selection(fields=fields)\n`;
+  } else {
+    code += `self.app_data.update_field_selection(fields=[])\n`;
+  }
+
   return code;
 };
 
@@ -539,6 +513,7 @@ pythonGenerator.forBlock['dimensional_reduction'] = function (block, generator) 
   let code = '';
   code += `self.app_data.dim_red_method = "${method}"\n`;
   code += `self.dimensional_reduction.compute_dim_red( data=self.data[self.app_data.sample_id], app_data=self.app_data)\n`;
+  code += `self.refresh_all_field_type_dropdowns()\n`;
   code += styling + '\n';
   // No direct plotting here; use basis-variance / basis-vectors / etc. blocks.
   return code;
@@ -561,11 +536,10 @@ pythonGenerator.forBlock['plot_clustering'] = function (block, generator) {
   code += `self.style_data.plot_type = 'cluster map'\n`;
   code += `self.clustering.compute_clusters( data=self.data[self.app_data.sample_id], app_data=self.app_data, max_clusters=None)\n`;
   code += `self.app_data.cluster_group_changed(self.data[self.app_data.sample_id], self.style_data)\n`;
+  code += `self.refresh_all_field_type_dropdowns()\n`;
   code += `canvas, self.plot_info = create_plot(parent =self, data = self.data[self.app_data.sample_id], app_data =self.app_data,style_data =self.style_data)\n`;
   code += `if canvas is not None:\n`;
-  code += `    self.ensure_canvas_popup()\n`;
-  code += `    self.add_canvas_to_layout(canvas)\n`;
-  code += `    self.canvas_dialog.show()\n`;
+  code += `    self.set_display_policy(canvas)\n`;
   return code;
 };
 
@@ -590,9 +564,7 @@ pythonGenerator.forBlock['plot_cluster_performance'] = function (block, generato
   code += `self.clustering.compute_clusters(data=self.data[self.app_data.sample_id], app_data=self.app_data, max_clusters=self.app_data.max_clusters)\n`;
   code += `canvas, self.plot_info = cluster_performance_plot(parent=self, data=self.data[self.app_data.sample_id], app_data=self.app_data, style_data=self.style_data)\n`;
   code += `if canvas is not None:\n`;
-  code += `    self.ensure_canvas_popup()\n`;
-  code += `    self.add_canvas_to_layout(canvas)\n`;
-  code += `    self.canvas_dialog.show()\n`;
+  code += `    self.set_display_policy(canvas)\n`;
   return code;
 };
 
@@ -620,51 +592,6 @@ pythonGenerator.forBlock['export_table'] = function(block, generator) {
   }
   
   
-};
-
-pythonGenerator.forBlock['export_figure'] = function(block, generator) {
-    const filetype = block.getFieldValue('FILE_TYPE');
-    const filename = block.getFieldValue('FILE_NAME');
-    let code = '';
-    if (filename === "path/filename"){
-        code = `self.io.save_plot(canvas, save_figure_flag=True, save_data_flag=False, parent = self.parent)\n`;
-    }
-    else{
-        // Assuming `self.figure` or `canvas.figure` holds the figure object
-        code = `_settings = {
-        'directory': ${filename},
-        'basename': canvas.basename,
-        'fig_type': '${filetype}',
-        'data_type': 'csv',  # not used here; required by API shape
-        }\n`;
-        code +=`self.io.save_plot(canvas=self.canvas_widget.current_canvas, save_figure_flag=True, save_data_flag=False, parent=self.parent, settings=_settings)
-        \n`;
-        }
-        
-    return code;
-};
-
-pythonGenerator.forBlock['export_data'] = function(block, generator) {
-    const filetype = block.getFieldValue('FILE_TYPE');
-    const filename = block.getFieldValue('FILE_NAME');
-    let code = '';
-    if (filename === "path/filename"){
-        code = `self.io.save_plot(canvas, save_figure_flag=False, save_data_flag=True, parent=self.parent)\n`;
-    }
-    else{
-        // Assuming `self.figure` or `canvas.figure` holds the figure object
-    code = `_settings = {
-    'directory': ${filename},
-    'basename': canvas.plot_name,
-    'fig_type': '${filetype}',
-    'data_type': 'csv',  # not used here; required by API shape
-    }\n`;
-    
-    code += `self.io.save_plot(canvas=self.canvas_widget.current_canvas, save_figure_flag=True, save_data_flag=False, parent=self.parent, settings=_settings)
-    \n`;
-    }
-    
-    return code;
 };
 
 // generators_save_plot.js

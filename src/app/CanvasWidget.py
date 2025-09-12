@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
     QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy, QToolButton,
     QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox,
-    QButtonGroup, QDialogButtonBox, QMenu
+    QButtonGroup, QDialogButtonBox, QMenu, QPushButton
 )
 from PyQt6.QtGui import QFont, QIcon, QCursor
 from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
@@ -778,6 +778,52 @@ class CanvasWidget(QWidget):
         
         # Call parent closeEvent
         super().closeEvent(event)
+
+    def install_control_buttons(self, dialog):
+        """
+        Add Continue / Stop / Skip Save buttons into the dialog (bottom row).
+        Safe to call multiple times; it reuses existing buttons if present.
+        """
+        if getattr(self, '_controls_installed', False):
+            return
+
+        lay = dialog.layout()
+        if lay is None:
+            lay = QVBoxLayout(dialog)
+            dialog.setLayout(lay)
+
+        row = QHBoxLayout()
+        self._btnContinue = QPushButton("Continue")
+        self._btnStop     = QPushButton("Stop")
+        self._btnSkip     = QPushButton("Skip save")
+
+        row.addItem(QSpacerItem(10, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        row.addWidget(self._btnSkip)
+        row.addWidget(self._btnStop)
+        row.addWidget(self._btnContinue)
+
+        lay.addLayout(row)
+
+        def _make_handler(tag):
+            def _inner():
+                setattr(dialog, "_canvas_action", tag)
+                dialog.accept()   # close modal loop
+            return _inner
+
+        self._btnContinue.clicked.connect(_make_handler('continue'))
+        self._btnStop.clicked.connect(_make_handler('stop'))
+        self._btnSkip.clicked.connect(_make_handler('skip'))
+
+        self._controls_installed = True
+
+    def show_controls_and_exec(self, dialog):
+        """
+        Install controls and run dialog.exec(). Returns: 'continue' | 'stop' | 'skip'.
+        """
+        self.install_control_buttons(dialog)
+        setattr(dialog, "_canvas_action", 'continue')  # default if closed
+        dialog.exec()
+        return getattr(dialog, "_canvas_action", 'continue')
 
 class SingleViewTab(QWidget):
     def __init__(self, parent):

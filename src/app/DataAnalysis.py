@@ -458,8 +458,9 @@ class ClusterPage(CustomPage, Clustering):
         if new_seed is None:
             self.dock.ui.app_data.cluster_seed = self.lineEditSeed.value
         else:
-            if new_seed == int(self.lineEditSeed.text()):
-                return
+            if self.lineEditSeed.text() != '':
+                if new_seed == int(self.lineEditSeed.text()):
+                    return
 
             self.lineEditSeed.blockSignals(True)
             self.lineEditSeed.setText(str(new_seed))

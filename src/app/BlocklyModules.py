@@ -5,8 +5,9 @@ import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
+from PyQt6 import sip
 from PyQt6.QtWidgets import QWidget, QDialog, QVBoxLayout
-from PyQt6.QtCore import QObject
+from PyQt6.QtCore import QObject, Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.gridspec as gs
 from matplotlib.path import Path
@@ -119,6 +120,7 @@ class LameBlockly(QObject):
         layout.addWidget(self.canvas_widget)
 
         popup.setLayout(layout)
+        self.display_figures = True  # show popup with controls & pause; False = embed and continue
         #popup.exec_()
         # # Initialise plotviewer form
         # self.plot_viewer = PlotViewer(self)
@@ -164,18 +166,21 @@ class LameBlockly(QObject):
 
     def ensure_canvas_popup(self):
         """
-        Ensures there is a visible popup window hosting a CanvasWidget.
-        Reuses the dialog if already open; otherwise creates a new one.
+        Ensure self.canvas_dialog exists and is valid.
+        If it was deleted, recreate it.
         """
         dlg_exists = hasattr(self, "canvas_dialog") and self.canvas_dialog is not None
-        if not dlg_exists or not self.canvas_dialog.isVisible():
-            self.canvas_dialog = CanvasDialog(ui=self, parent=self.parent)
+        if dlg_exists and sip.isdeleted(self.canvas_dialog):
+            dlg_exists = False  # underlying C++ deleted
+
+        if not dlg_exists:
+            self.canvas_dialog = CanvasDialog(ui = self, parent=self.parent)
             self.canvas_widget = self.canvas_dialog.get_canvas()
-            self.canvas_dialog.show()
-        else:
-            # Bring to front if already open
-            self.canvas_dialog.raise_()
-            self.canvas_dialog.activateWindow()
+            # Prevent Qt from auto-deleting when closed
+            self.canvas_dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+        
+        self.canvas_dialog.raise_()
+        self.canvas_dialog.activateWindow()
 
 
     def change_sample(self, index, save_analysis= True):
@@ -263,32 +268,6 @@ class LameBlockly(QObject):
         if result == QDialog.DialogCode.Rejected:
             pass
 
-    def update_analyte_ratio_selection(self,analyte_dict):
-        """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
-
-        Updates analytes/ratios and its corresponding scale used for each field based on selection made by user in Analyteselection window or if user choses analyte list in blockly
-        
-        Parameters
-            ----------
-            analyte_dict: dict
-                key: Analyte/Ratio name
-                value: scale used (linear/log/logit)
-        """
-        #update self.data['norm'] with selection
-        for analyte in self.data[self.app_data.sample_id].processed.match_attribute('data_type','Analyte'):
-            if analyte in analyte_dict:
-                self.data[self.app_data.sample_id].processed.set_attribute(analyte, 'use', True)
-            else:
-                self.data[self.app_data.sample_id].processed.set_attribute(analyte, 'use', False)
-
-        for analyte, norm in analyte_dict.items():
-            if '/' in analyte:
-                if analyte not in self.data[self.app_data.sample_id].processed.columns:
-                    analyte_1, analyte_2 = analyte.split(' / ') 
-                    self.data[self.app_data.sample_id].compute_ratio(analyte_1, analyte_2)
-
-            self.data[self.app_data.sample_id].processed.set_attribute(analyte,'norm',norm)
-
 
 
     # -------------------------------------
@@ -319,76 +298,9 @@ class LameBlockly(QObject):
         return  range
 
 
-
-    def histogram_update_n_bins(self,field,field_type):
-        """Updates the number of bins
-
-        Generally called when the bin width is changed by the user.  Updates the plot.
-        """
-        if not self.update_bins:
-            return
-        #print('update_n_bins')
-        self.update_bins = False
-
-        # get currently selected data
-        map_df = self.data[self.app_data.sample_id].get_map_data(field, field_type)
-
-        # update n bins
-        self.spinBoxBinWidth.setValue( int((np.nanmax(map_df['array']) - np.nanmin(map_df['array'])) / self.spinBoxBinWidth.value()) )
-        self.update_bins = True
-
-        # update histogram
-        if self.plot_type == 'histogram':
-            # trigger update to plot
-            self.schedule_update()
-
-
     # -------------------------------
     # Blockly functions
     # -------------------------------
-    # gets the set of fields types
-    def update_blockly_field_types(self,workflow = None):
-        """Gets the fields types available and invokes workflow function
-          which updates field type dropdown in blockly workflow
-
-        Set names are consistent with QComboBox.
-        """
-        
-        data_type_dict = self.data[self.app_data.sample_id].processed.get_attribute_dict('data_type')
-        # add check for ratios
-        if 'ratio' in data_type_dict:
-            self.field_type_list.append('Ratio')
-            self.field_type_list.append('Ratio (normalized)')
-
-        if 'pca score' in data_type_dict:
-            self.field_type_list.append('PCA score')
-
-        if 'cluster' in data_type_dict:
-            self.field_type_list.append('Cluster')
-
-        if 'cluster score' in data_type_dict:
-            self.field_type_list.append('Cluster score')
-
-        if hasattr(self,'field_selection_dialog'):
-            self.field_selection_dialog.update_field_type_list() 
-        
-        if workflow:
-            workflow.update_field_type_list(self.field_type_list) #invoke workflow function to update blockly 'fieldType' dropdowns
-
-    def update_blockly_analyte_dropdown(self,filename, unsaved_changes):
-        """update analyte/ratio lists dropdown with the selected analytes/ratios
-  
-        Parameters
-            ----------
-            filename: str
-                filename returned from analyte selection window
-            saved: bool
-                if the user saved was saved by user
-        """
-
-        
-            
-        self.workflow.refresh_analyte_dropdown(analyte_list_names)
 
     def update_analyte_selection_from_file(self,filename):
         filepath = os.path.join(BASEDIR, 'resources/analytes_list', filename+'.txt')
@@ -398,17 +310,20 @@ class LameBlockly(QObject):
                 field, norm = line.replace('\n','').split(',')
                 analyte_dict[field] = norm
 
-        self.update_analyte_ratio_selection(analyte_dict)
+        self.app_data.update_field_selection(fields=analyte_dict.keys(), norms=analyte_dict.values())
 
 
-    def update_field_list_from_file(self,filename):
-        filepath = os.path.join(BASEDIR, 'resources/fields_list', filename+'.txt')
-        field_dict ={}
+    def load_fields_from_saved_list(self, list_name: str):
+        """Return a list of fields given a saved list name (used by Blockly)."""
+        filepath = os.path.join(BASEDIR, 'resources/fields_list', f"{list_name}.txt")
+        fields = []
         with open(filepath, 'r') as f:
-            for line in f.readlines():
-                field_type, field = line.replace('\n','').split(',')
-                field_dict[field_type] = field
-            self.app_data.update_field_selection(fields=field_dict.values())
+            for line in f:
+                parts = line.strip().split(',')
+                if len(parts) == 2:
+                    _, field = parts
+                    fields.append(field)
+        return fields
 
     def update_bounds(self,ub=None,lb=None,d_ub=None,d_lb=None):
         sample_id = self.app_data.sample_id
@@ -424,43 +339,6 @@ class LameBlockly(QObject):
             self.data[sample_id].set_attribute(columns, 'diff_lower_bound', d_lb)
 
         # update data with new auto-scale/negative handling
-
-    # gets the set of fields
-    def get_field_list(self, set_name='Analyte'):
-        """Gets the fields associated with a defined set
-
-        Set names are consistent with QComboBox.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            name of set list, options include ``Analyte``, ``Analyte (normalized)``, ``Ratio``, ``Calcualated Field``,
-            ``PCA Score``, ``Cluster``, ``Cluster Score``, ``Special``, Defaults to ``Analyte``
-
-        Returns
-        -------
-        list
-            Set_fields, a list of fields within the input set
-        """
-        if self.app_data.sample_id == '':
-            return ['']
-
-        data = self.data[self.app_data.sample_id].processed
-
-        match set_name:
-            case 'Analyte' | 'Analyte (normalized)':
-                set_fields = data.match_attributes({'data_type': 'Analyte', 'use': True})
-            case 'Ratio' | 'Ratio (normalized)':
-                set_fields = data.match_attributes({'data_type': 'Ratio', 'use': True})
-            case 'None':
-                return []
-            case _:
-                #populate field name with column names of corresponding dataframe remove 'X', 'Y' is it exists
-                #set_fields = [col for col in self.data[self.app_data.sample_id]['computed_data'][set_name].columns.tolist() if col not in ['X', 'Y']]
-                set_fields = data.match_attribute('data_type', set_name.lower())
-
-        return set_fields
-
 
     def update_axis_limits(self,style_dict, field =None):
         # Check if user changed XLim, YLim, ZLim, or CLim
@@ -500,7 +378,7 @@ class LameBlockly(QObject):
             List of saved analyte list names.
         """
         path =''
-        if type =='Analyte':
+        if type =='analyte':
             path = 'resources/analytes_list'
         elif type =='field':
              path = 'resources/fields_list'
@@ -551,19 +429,55 @@ class LameBlockly(QObject):
                 f"updateStylingChain(workspace.getBlockById('{self.block_id}'))"
             )
 
+    def refresh_all_field_type_dropdowns(self):
+        """
+        Calls the JavaScript function to refresh all field type dropdowns in Blockly workspace.
+        """
+
+        self.blockly.runJavaScript(f"refreshAllFieldTypeDropdowns(Blockly.getMainWorkspace())")
+
     def add_canvas_to_layout(self, canvas):
         """
         Adds the given canvas to the layout of the canvas widget.
         """
-        if self.canvas_widget:
-            # For non-field map cases, add canvas to layout
-            if 'canvas' in locals() and canvas:
-                layout = self.canvas_widget.single_view.layout()
-                if layout is not None:
-                    self.canvas_widget.clear_layout(layout)
-                    layout.addWidget(canvas)
-                else:
-                    print("Warning: single_view.layout() is None")
+        if not self.canvas_widget or not hasattr(self.canvas_widget, "single_view"):
+            print("Warning: canvas_widget or single_view not available")
+            return
 
-                # Store reference after successful addition
-                self.mpl_canvas = canvas
+        if sip.isdeleted(self.canvas_widget.single_view):
+            print("Warning: single_view was deleted, recreating...")
+            self.canvas_widget.create_single_view()  # <-- you'll need to re-instantiate
+            return
+
+        if canvas:
+            layout = self.canvas_widget.single_view.layout()
+            if layout is not None:
+                self.canvas_widget.clear_layout(layout)
+                layout.addWidget(canvas)
+            else:
+                print("Warning: single_view.layout() is None")
+            self.mpl_canvas = canvas
+
+
+    def set_display_policy(self, canvas):
+        """
+        Sets the display policy for the canvas based on user preference.
+        If display_figures is True, it shows a popup dialog with controls.
+        Otherwise, it embeds the canvas directly into the layout.
+        """
+        if getattr(self, 'display_figures', True):
+            # Popup dialog with controls; block until user picks an action
+            self.ensure_canvas_popup()
+            self.mpl_canvas = canvas
+            self.canvas_widget.add_canvas_to_window(self.plot_info)
+            self.canvas_dialog.show()
+            user_action = self.canvas_widget.show_controls_and_exec(self.canvas_dialog)
+            if user_action == 'stop':
+                raise RuntimeError("Workflow stopped by user.")
+            elif user_action == 'skip':
+                # downstream save handlers should respect this flag
+                if isinstance(self.plot_info, dict):
+                    self.plot_info['skip_save'] = True
+        else:
+            # No popup; just embed and continue
+            self.add_canvas_to_layout(canvas)

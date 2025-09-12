@@ -196,9 +196,12 @@ export function updateFieldTypeDropdown(block, plotType, axisNum='c', fieldTypeN
         const options = response.map(option => [option, option]);
         const fieldTypeDropdown = block.getField(fieldTypeName);
         if (fieldTypeDropdown) {
+            // try to restore previous selection from block argDict or app_data
+            const prevValue = block.argDict?.[`${axisNum}_field_type`] || fieldTypeDropdown.getValue();
             if (options.length > 0) {
                 fieldTypeDropdown.menuGenerator_ = options;
-                fieldTypeDropdown.setValue(options[0][1]);
+                const validValues = new Set(options.map(o => o[1]));
+                fieldTypeDropdown.setValue(validValues.has(prevValue) ? prevValue : options[0][1]);
             } else {
                 fieldTypeDropdown.menuGenerator_ = [['Select...', '']];
                 fieldTypeDropdown.setValue('');
@@ -214,29 +217,90 @@ export function updateFieldTypeDropdown(block, plotType, axisNum='c', fieldTypeN
 
 /**
  * Updates the Field dropdown for a given fieldType (which must be set!).
+ * Will try to restore the previous selection if it's still valid.
+ *
  * @param {Blockly.Block} block 
- * @param {string} fieldTypeValue 
- * @param {string} fieldName  // e.g., 'field'
+ * @param {string} fieldTypeValue - e.g., 'Analyte'
+ * @param {string} fieldName      - name of the dropdown field, e.g., 'field'
  */
 export function updateFieldDropdown(block, fieldTypeValue, fieldName) {
     const typeValue = fieldTypeValue || block.getFieldValue('fieldType');
+    if (!typeValue) return;
+
     window.blocklyBridge.getFieldList(typeValue).then((response) => {
-        const options = response.map(option => [option, option]);
-        const fieldDropdown = block.getField(fieldName);
-        if (fieldDropdown) {
-            if (options.length > 0) {
-                fieldDropdown.menuGenerator_ = options;
-                fieldDropdown.setValue(options[0][1]);
-            } else {
-                fieldDropdown.menuGenerator_ = [['Select...', '']];
-                fieldDropdown.setValue('');
-            }
-            fieldDropdown.forceRerender();
+        const options = (response || []).map(option => [option, option]);
+        const dd = block.getField(fieldName);
+        if (!dd) return;
+
+        dd.menuGenerator_ = options.length > 0 ? options : [['Select...', '']];
+        const validValues = new Set(options.map(o => o[1]));
+
+        // Try to restore from argDict or current dropdown value
+        const savedValue =
+            block.argDict?.[`${fieldName}`] ||  // prefer argDict
+            dd.getValue();                      // fallback to current value
+
+        if (savedValue && validValues.has(savedValue)) {
+            dd.setValue(savedValue);
+        } else if (options.length > 0) {
+            dd.setValue(options[0][1]);
+        } else {
+            dd.setValue('');
         }
+
+        dd.forceRerender?.();
     }).catch(error => {
         console.error('Error fetching field list:', error);
     });
 }
+
+
+/**
+ * Update all fieldType dropdowns in the given workspace.
+ *
+ * This should be called after clustering or dimensional reduction,
+ * to refresh fieldType choices for all relevant blocks.
+ *
+ * @param {Blockly.Workspace} workspace - The Blockly workspace.
+ */
+export function refreshAllFieldTypeDropdowns(workspace) {
+    if (!workspace) return;
+
+    const blocks = workspace.getAllBlocks(false); // false = include children
+    blocks.forEach(block => {
+        // Collect possible fieldType names (plot_map, plot_histogram, plot_biplot, ternary, etc.)
+        const fieldTypeNames = [
+            'fieldType',
+            'fieldTypeX',
+            'fieldTypeY',
+            'fieldTypeZ'
+        ];
+
+        fieldTypeNames.forEach(ftName => {
+            const fieldTypeDropdown = block.getField(ftName);
+            if (fieldTypeDropdown) {
+                // Figure out axis mapping from name
+                let axis = 'c'; // default
+                if (ftName.endsWith('X')) axis = 'x';
+                if (ftName.endsWith('Y')) axis = 'y';
+                if (ftName.endsWith('Z')) axis = 'z';
+
+                // Each block defines its own plotType
+                const plotType = block.plotType || 'field map';
+
+                updateFieldTypeDropdown(
+                    block,
+                    plotType,
+                    axis,
+                    ftName,
+                    ftName.replace('fieldType', 'field') // guess field name key
+                );
+            }
+        });
+    });
+}
+
+window.refreshAllFieldTypeDropdowns = refreshAllFieldTypeDropdowns;
 
 function getPlotParent(block) {
   /** Returns the plot-producing parent block, or null. */

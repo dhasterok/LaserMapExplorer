@@ -138,7 +138,6 @@ class BlocklyBridge(QObject):
         list
             List of field names.
         """
-        print('get_field_list')
         return self.lame_blockly.app_data.get_field_list(field_type)
     
     @pyqtSlot(str,str, result=list)
@@ -157,7 +156,6 @@ class BlocklyBridge(QObject):
         list
             Supported field types for the given axis/plot combination.
         """
-        print('get_field_list')
         self.lame_blockly.style_data.plot_type = plot_type
         return self.lame_blockly.app_data.get_field_type_list(ax, self.lame_blockly.style_data)
 

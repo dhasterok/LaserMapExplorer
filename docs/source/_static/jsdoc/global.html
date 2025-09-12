@@ -317,7 +317,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line334">line 334</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line398">line 398</a>
     </li></ul></dd>
     
 
@@ -455,7 +455,7 @@ in a linear chain (via next/previous statements).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line359">line 359</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line423">line 423</a>
     </li></ul></dd>
     
 
@@ -638,7 +638,7 @@ the chain of blocks connected under a statement input.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line391">line 391</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line455">line 455</a>
     </li></ul></dd>
     
 
@@ -868,6 +868,146 @@ the chain of blocks connected under a statement input.
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="refreshAllFieldTypeDropdowns"><span class="type-signature"></span>refreshAllFieldTypeDropdowns<span class="signature">(workspace)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update all fieldType dropdowns in the given workspace.
+
+This should be called after clustering or dimensional reduction,
+to refresh fieldType choices for all relevant blocks.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>workspace</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Workspace</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Blockly workspace.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line266">line 266</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1158,7 +1298,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line256">line 256</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line320">line 320</a>
     </li></ul></dd>
     
 
@@ -1314,7 +1454,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line439">line 439</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line503">line 503</a>
     </li></ul></dd>
     
 
@@ -1470,7 +1610,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line646">line 646</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line710">line 710</a>
     </li></ul></dd>
     
 
@@ -1515,6 +1655,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
 
 <div class="description">
     Updates the Field dropdown for a given fieldType (which must be set!).
+Will try to restore the previous selection if it's still valid.
 </div>
 
 
@@ -1589,7 +1730,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
 
             
 
-            <td class="description last"></td>
+            <td class="description last">e.g., 'Analyte'</td>
         </tr>
 
     
@@ -1612,7 +1753,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
 
             
 
-            <td class="description last">// e.g., 'field'</td>
+            <td class="description last">name of the dropdown field, e.g., 'field'</td>
         </tr>
 
     
@@ -1653,7 +1794,7 @@ if it returns a Promise, resolve it; otherwise fall back to ".". Also triggers a
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line221">line 221</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line226">line 226</a>
     </li></ul></dd>
     
 
@@ -2153,7 +2294,7 @@ Also triggers update of the Field dropdown.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line406">line 406</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line470">line 470</a>
     </li></ul></dd>
     
 
@@ -2313,7 +2454,7 @@ Also triggers update of the Field dropdown.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line463">line 463</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line527">line 527</a>
     </li></ul></dd>
     
 
@@ -2451,7 +2592,7 @@ based on the block's current field values (directory, basename, toggles, types).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line292">line 292</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line356">line 356</a>
     </li></ul></dd>
     
 
@@ -2771,7 +2912,7 @@ based on the block's current field values (directory, basename, toggles, types).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line482">line 482</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line546">line 546</a>
     </li></ul></dd>
     
 
@@ -2927,7 +3068,7 @@ based on the block's current field values (directory, basename, toggles, types).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line571">line 571</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line635">line 635</a>
     </li></ul></dd>
     
 
@@ -3083,7 +3224,7 @@ based on the block's current field values (directory, basename, toggles, types).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line596">line 596</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line660">line 660</a>
     </li></ul></dd>
     
 
@@ -3239,7 +3380,7 @@ based on the block's current field values (directory, basename, toggles, types).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line621">line 621</a>
+        <a href="helper_functions.js.html">helper_functions.js</a>, <a href="helper_functions.js.html#line685">line 685</a>
     </li></ul></dd>
     
 
@@ -3285,13 +3426,13 @@ based on the block's current field values (directory, basename, toggles, types).
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#refreshAllFieldTypeDropdowns">refreshAllFieldTypeDropdowns</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Sep 12 2025 03:34:23 GMT+0930 (Australian Central Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Sep 12 2025 21:36:18 GMT+0930 (Australian Central Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

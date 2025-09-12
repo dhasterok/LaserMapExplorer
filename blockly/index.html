@@ -8,16 +8,18 @@
 <body>
     <div id="blocklyDiv" style="height: 1024px; width: 100%;"></div>
     <xml id="toolbox" style="display: none">
-        <!-- Variables -->
-        <!-- Custom Blocks -->
+        <!-- Global Settings -->
+        <category name="Global Settings" colour="360">
+            <block type="display_figure"></block>
+        </category>
+
+        <!-- File I/O -->
         <category name="File I/O" colour="60">
             <block type="load_directory"></block>
             <block type="load_sample"></block>
             <block type="loop_over_samples"></block> 
             <block type="loop_over_fields"></block> 
             <block type="export_table"></block>
-            <block type="export_figure"></block>    
-            <block type="export_data"></block>
             <block type="save_plot"></block>
         </category>
         <!-- Analysis -->
@@ -35,11 +37,7 @@
         </category>
         <!-- Analysis -->
         <category name="Analysis" colour="160">
-            <block type="scatter_and_heatmaps"></block>
             <block type="profiling"></block>
-            <block type="clustering"></block>
-            <block type="scatter_plot_settings"></block>
-            <block type="heatmap_settings"></block>
         </category>
         <!-- Plot Category -->
         <category name="Plot" colour="285">
@@ -47,14 +45,15 @@
             <block type="plot_correlation"></block>
             <block type="plot_histogram"></block> 
             <block type="histogram_options"></block> 
+            <sep gap="8"></sep>
             <block type="plot_biplot"></block> 
             <block type="plot_ternary"></block> 
             <block type="plot_ternary_map"></block> 
             <block type="plot_ndim"></block>
             <block type="plot_radar"></block>
+            <sep gap="8"></sep>
             <block type="plot_basis_variance"></block>
             <block type="plot_basis_vectors_plot"></block>
-            <block type="style_basis_vectors"></block>
         </category>
         <category name="Multidimensional" colour="210">
             <block type="dimensional_reduction"></block>

@@ -1126,7 +1126,7 @@ class AppData(QObject):
         self._cluster_seed = new_value
         # update cluster dict with new seed
         self.cluster_dict[self._cluster_method]['seed'] = self._cluster_seed
-        self.clusterSeedChanged.emit("cluster_seed", new_value)
+        self.clusterSeedChanged.emit( new_value)
 
     @property
     def cluster_exponent(self):
@@ -1331,9 +1331,8 @@ class AppData(QObject):
         all_fields = self.current_data.processed.columns
 
         # Reset all selected fields to not used
-        for field in fields:
-            if field in all_fields:
-                self.current_data.processed.set_attribute(field, 'use', False)
+        for field in all_fields:
+            self.current_data.processed.set_attribute(field, 'use', False)
 
         # If norms provided and length matches fields
         if norms and len(norms) == len(fields):

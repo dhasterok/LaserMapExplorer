@@ -2037,11 +2037,11 @@ def plot_score_map(parent,data, app_data, style_data):
         The data series corresponding to the selected field for the score map.
     """
     canvas = MplCanvas(parent=parent)
-
     plot_type = style_data.plot_type
-
+    field_type = app_data.c_field_type
+    #field = app_data.c_field
     # data frame for plotting
-    match plot_type:
+    match field_type:
         case 'PCA score':
             #idx = int(self.comboBoxColorField.currentIndex()) + 1
             #field = f'PC{idx}'
@@ -2049,10 +2049,10 @@ def plot_score_map(parent,data, app_data, style_data):
         case 'cluster score':
             #idx = int(self.comboBoxColorField.currentIndex())
             #field = f'{idx}'
-            field = app_data.field
+            field = app_data.c_field
         case _:
             print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
-            return canvas
+            return canvas, None
 
     reshaped_array = np.reshape(data.processed[field].values, data.array_size, order=data.order)
 
@@ -2062,7 +2062,7 @@ def plot_score_map(parent,data, app_data, style_data):
         # Add a colorbar
     add_colorbar(style_data, canvas, cax, field)
 
-    canvas.axes.set_title(f'{plot_type}')
+    canvas.axes.set_title(f'{plot_type}_{field}', fontsize=style_data.font_size+2)
     canvas.axes.tick_params(direction=None,
         labelbottom=False, labeltop=False, labelright=False, labelleft=False,
         bottom=False, top=False, left=False, right=False)
@@ -2153,7 +2153,7 @@ def plot_pca(parent, data, app_data, style_data):
             return
 
     update_figure_font(canvas, style_data.font)
-    canvas.data = plot_data
+    canvas.data = pd.DataFrame(plot_data)
     canvas.plot_name = plot_name
     
     plot_info = {
@@ -2168,7 +2168,7 @@ def plot_pca(parent, data, app_data, style_data):
         'cluster_groups': [],
         'view': [True,False],
         'position': [],
-        'data': plot_data
+        'data': canvas.data
     }
     return canvas, plot_info
     #update_canvas(canvas)
@@ -2268,7 +2268,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, style_data):
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = data.processed.match_attribute('data_type','analyte')
+    analytes = data.processed.match_attribute('data_type','Analyte')
 
     components = pca_results.components_
     # Number of components and variables
@@ -2356,12 +2356,12 @@ def plot_pca_components(pca_results,data, app_data, style_data,canvas):
         return
 
     # field labels
-    analytes = data.processed.match_attribute('data_type','analyte')
+    analytes = data.processed.match_attribute('data_type','Analyte')
     nfields = len(analytes)
 
     # components
-    pc_x = int(app_data.dim_red_x)-1
-    pc_y = int(app_data.dim_red_y)-1
+    pc_x = int(app_data.dim_red_x)
+    pc_y = int(app_data.dim_red_y)
 
     x = pca_results.components_[:,pc_x]
     y = pca_results.components_[:,pc_y]

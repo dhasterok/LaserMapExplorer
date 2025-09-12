@@ -536,7 +536,8 @@ QGroupBox {
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left; 
-    padding 0 3px;
+    padding: 0 3px;
+    color: #ffffff;
 }
 QGroupBox::flat {
     background-color: transparent;

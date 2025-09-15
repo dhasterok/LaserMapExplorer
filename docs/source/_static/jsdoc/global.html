@@ -98,6 +98,373 @@
 
         
             
+<h4 class="name" id="cfg_cluster_options"><span class="type-signature">(constant) </span>cfg_cluster_options<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: cfg_cluster_options
+   :category: Multidimensional
+   :color: 20
+
+Advanced clustering options and optional custom field list.
+*Fields**
+- **exponent** (Number)
+- **distance** (Dropdown; bridge can override options)
+- **pca** (Checkbox)
+*Inputs**
+- **customFields** (Statement: ``custom_field``)
+*Connections**
+- Previous: ``cluster_options``
+- Next: ``cluster_options``
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line2482">line 2482</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="cfg_pca_preconditioning"><span class="type-signature">(constant) </span>cfg_pca_preconditioning<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: cfg_pca_preconditioning
+   :category: Multidimensional
+   :color: 20
+
+Set number of PCA basis vectors used for preconditioning.
+*Fields**
+- **nBasis** (Number)
+*Connections**
+- Previous: ``pca_preconditioning``
+- Next: ``pca_preconditioning``
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line2553">line 2553</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="cfg_seed"><span class="type-signature">(constant) </span>cfg_seed<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: cfg_seed
+   :category: Multidimensional
+   :color: 15
+
+Provide a random seed for clustering (with dice button).
+*Fields**
+- **seed** (TextInput): Seed integer.
+- **rng** (ImageButton): Generates a new seed via bridge (fallback to Math.random).
+*Connections**
+- Previous: ``seed``
+- Next: ``seed``
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line2423">line 2423</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="change_pixel_dimensions"><span class="type-signature">(constant) </span>change_pixel_dimensions<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: change_pixel_dimensions
+   :category: Samples and fields
+   :color: 180
+
+Set spatial pixel dimensions (dx, dy) from current dataset defaults.
+*Fields**
+- **dx** (Number)
+- **dy** (Number)
+*Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Calls ``getCurrentDimensions()`` via bridge, rounds to 4 decimals, writes fields.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line673">line 673</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="dimensional_reduction"><span class="type-signature">(constant) </span>dimensional_reduction<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: dimensional_reduction
+   :category: Multidimensional
+   :color: 285
+
+Run dimensionality reduction (currently PCA).
+*Fields**
+- **method** (Dropdown): 'PCA: Principal component analysis'
+*Inputs**
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line2361">line 2361</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="display_figure"><span class="type-signature">(constant) </span>display_figure<span class="type-signature"></span></h4>
 
 
@@ -295,6 +662,1417 @@ Load a single sample from a directory or file path.
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line125">line 125</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="loop_over_fields"><span class="type-signature">(constant) </span>loop_over_fields<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: loop_over_fields
+   :category: File I/O
+   :color: 60
+
+Iterate over fields for the selected field type.
+*Fields**
+- **fieldType** (Dropdown): Field type selector (populated from ``fieldTypeList``).
+*Inputs**
+- **DO** (Statement): Body to execute per field.
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line336">line 336</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="loop_over_samples"><span class="type-signature">(constant) </span>loop_over_samples<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: loop_over_samples
+   :category: File I/O
+   :color: 180
+
+Iterate over the current set of sample IDs.
+*Fields**
+- **SAMPLE_IDS** (Variable dropdown): Variable referencing an array of sample IDs.
+*Inputs**
+- **DO** (Statement): Body to execute per sample.
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line296">line 296</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="neg_handling_method"><span class="type-signature">(constant) </span>neg_handling_method<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: neg_handling_method
+   :category: Samples and fields
+   :color: 180
+
+Select strategy for negative values.
+*Fields**
+- **negMethodDropdown** (Dropdown): 'ignore negatives' | 'minimum positive' | etc.
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line865">line 865</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_biplot"><span class="type-signature">(constant) </span>plot_biplot<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_biplot
+   :category: Plot
+   :color: 285
+
+Biplot (scatter or heatmap) with independent X/Y field types.
+*Fields**
+- **fieldTypeX**, **fieldX**, **fieldTypeY**, **fieldY** (Dropdowns, dynamic)
+- **SHOW_HEATMAP** (Checkbox) toggles plot type.
+*Inputs**
+- **styling** (Statement: 'styling')
+- **extras** (Statement: 'Regression'|'PCA')
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1369">line 1369</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_cluster_performance"><span class="type-signature">(constant) </span>plot_cluster_performance<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_cluster_performance
+   :category: Multidimensional
+   :color: 200
+
+Plot metrics for choosing optimal K (elbow, silhouette, etc.).
+*Fields**
+- **method** (Dropdown; dynamic)
+- **maxClusters** (Number; default from bridge/app)
+*Inputs**
+- **seed** (Statement: ``seed``)
+- **options** (Statement: ``cluster_options``)
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line2213">line 2213</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_clustering"><span class="type-signature">(constant) </span>plot_clustering<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_clustering
+   :category: Multidimensional
+   :color: 200
+
+Run clustering and plot cluster map.
+*Fields**
+- **method** (Dropdown; populated via bridge methods list)
+*Inputs**
+- **seed** (Statement: ``seed``)
+- **options** (Statement: ``cluster_options``)
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Applies defaults from bridge (seed/exponent/distance/preconditioning).
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line2064">line 2064</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_correlation"><span class="type-signature">(constant) </span>plot_correlation<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_correlation
+   :category: Plot
+   :color: 285
+
+Compute and plot correlation between two variables.
+*Fields**
+- **method** (Dropdown: Pearson|Spearman|Kendall)
+- **rSquared** (Checkbox): Display R² label.
+*Inputs**
+- **exportTable** (Value: ``export_table``) Optional table export selection.
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1085">line 1085</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_histogram"><span class="type-signature">(constant) </span>plot_histogram<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_histogram
+   :category: Plot
+   :color: 285
+
+Histogram (PDF/CDF/log scaling) for a field.
+*Fields**
+- **histType** (Dropdown: PDF|CDF|log-scaling)
+- **fieldType**, **field** (Dropdowns, dynamic)
+*Inputs**
+- **histogramOptions** (Statement)
+- **styling** (Statement: 'styling' chain)
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1130">line 1130</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_map"><span class="type-signature">(constant) </span>plot_map<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_map
+   :category: Plot
+   :color: 285
+
+Render a 2D field map with optional polygons and styling chain.
+*Fields**
+- **fieldType** (Dropdown, dynamic)
+- **field** (Dropdown, dynamic)
+*Inputs**
+- **styling** (Statement: 'styling' chain)
+- **Polygons** (Statement: 'Polygons' chain)
+*Connections**
+- Previous: Statement
+- Next: ``PLOT_OUTPUT``
+
+Side effects
+------------
+Synchronizes style args via ``updateStylingChain`` when dropdowns or styling chain change.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line986">line 986</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_ndim"><span class="type-signature">(constant) </span>plot_ndim<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_ndim
+   :category: Plot
+   :color: 285
+
+Compatibility (TEC/spider) diagram.
+*Fields**
+- **ndimAnalyteSet** (Dropdown)
+- **ndimQuantiles** (Dropdown)
+*Inputs**
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Populates options via bridge: ``getNDimAnalyteSets`` and ``getNDimQuantiles``.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1708">line 1708</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_radar"><span class="type-signature">(constant) </span>plot_radar<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_radar
+   :category: Plot
+   :color: 285
+
+Radar plot for a chosen N-dim list.
+*Fields**
+- **ndimList** (Dropdown)
+*Inputs**
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1833">line 1833</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_ternary"><span class="type-signature">(constant) </span>plot_ternary<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_ternary
+   :category: Plot
+   :color: 285
+
+Ternary scatter/heatmap with X/Y/Z field types.
+*Fields**
+- **fieldTypeX|Y|Z**, **fieldX|Y|Z** (Dropdowns, dynamic)
+- **SHOW_HEATMAP** (Checkbox)
+*Inputs**
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1490">line 1490</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="plot_ternary_map"><span class="type-signature">(constant) </span>plot_ternary_map<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: plot_ternary_map
+   :category: Plot
+   :color: 285
+
+Ternary map with X/Y/Z field types and styling.
+*Fields**
+- **fieldTypeX|Y|Z**, **fieldX|Y|Z**
+*Inputs**
+- **styling** (Statement: 'styling')
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line1607">line 1607</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="profiling"><span class="type-signature">(constant) </span>profiling<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: profiling
+   :category: Analysis
+   :color: 160
+
+Extract and visualize profiles across the map.
+*Fields**
+- **PROFILE_NAME** (Text)
+- **SORT_AXIS** (Dropdown: X|Y)
+- **RADIUS**, **THRESHOLD**, **INT_DISTANCE** (Numbers)
+- **POINT_ERROR** (Dropdown: median|mean)
+- **INTERPOLATE** (Checkbox)
+- **NUM_SUBPLOTS** (Number)
+*Inputs**
+- **FIELDS** (Value: Array)
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line3201">line 3201</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="select_outlier_method"><span class="type-signature">(constant) </span>select_outlier_method<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: select_outlier_method
+   :category: Samples and fields
+   :color: 180
+
+Choose an outlier handling method and optional bounds.
+*Fields**
+- **outlierMethodDropdown** (Dropdown): presets (none, quantile, Chauvenet, etc.).
+- **QB** (Dummy, hidden by default): Quantile lower/upper bounds.
+- **DB** (Dummy, hidden by default): Difference bounds.
+*Connections**
+- Previous: Statement
+- Next: Statement
+
+Behavior
+--------
+Field visibility auto-toggles based on the chosen method.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line783">line 783</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="select_ref_val"><span class="type-signature">(constant) </span>select_ref_val<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: select_ref_val
+   :category: Samples and fields
+   :color: 180
+
+Pick a reference composition/value list for normalization or TEC plots.
+*Fields**
+- **refValueDropdown** (Dropdown): Populated dynamically via bridge (e.g., reference sets).
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line616">line 616</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="select_samples"><span class="type-signature">(constant) </span>select_samples<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: select_samples
+   :category: File I/O
+   :color: 160
+
+Select a single sample ID from the currently available list.  
+Sample IDs are dynamically populated from the application state.
+*Fields**
+- **SAMPLE_IDS** (Dropdown): Dropdown of available sample IDs.
+*Inputs**
+- None
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line260">line 260</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="swap_pixel_dimensions"><span class="type-signature">(constant) </span>swap_pixel_dimensions<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: swap_pixel_dimensions
+   :category: Samples and fields
+   :color: 180
+
+Swap the stored pixel dimensions dx ↔ dy.
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line724">line 724</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="swap_x_y"><span class="type-signature">(constant) </span>swap_x_y<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    .. block:: swap_x_y
+   :category: Samples and fields
+   :color: 180
+
+Swap the coordinate axes x ↔ y.
+*Connections**
+- Previous: Statement
+- Next: Statement
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="custom_blocks.js.html">custom_blocks.js</a>, <a href="custom_blocks.js.html#line749">line 749</a>
     </li></ul></dd>
     
 
@@ -3640,13 +5418,13 @@ based on the block's current field values (directory, basename, toggles, types).
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#display_figure">display_figure</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#load_directory">load_directory</a></li><li><a href="global.html#load_sample">load_sample</a></li><li><a href="global.html#refreshAllFieldTypeDropdowns">refreshAllFieldTypeDropdowns</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#cfg_cluster_options">cfg_cluster_options</a></li><li><a href="global.html#cfg_pca_preconditioning">cfg_pca_preconditioning</a></li><li><a href="global.html#cfg_seed">cfg_seed</a></li><li><a href="global.html#change_pixel_dimensions">change_pixel_dimensions</a></li><li><a href="global.html#dimensional_reduction">dimensional_reduction</a></li><li><a href="global.html#display_figure">display_figure</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#load_directory">load_directory</a></li><li><a href="global.html#load_sample">load_sample</a></li><li><a href="global.html#loop_over_fields">loop_over_fields</a></li><li><a href="global.html#loop_over_samples">loop_over_samples</a></li><li><a href="global.html#neg_handling_method">neg_handling_method</a></li><li><a href="global.html#plot_biplot">plot_biplot</a></li><li><a href="global.html#plot_cluster_performance">plot_cluster_performance</a></li><li><a href="global.html#plot_clustering">plot_clustering</a></li><li><a href="global.html#plot_correlation">plot_correlation</a></li><li><a href="global.html#plot_histogram">plot_histogram</a></li><li><a href="global.html#plot_map">plot_map</a></li><li><a href="global.html#plot_ndim">plot_ndim</a></li><li><a href="global.html#plot_radar">plot_radar</a></li><li><a href="global.html#plot_ternary">plot_ternary</a></li><li><a href="global.html#plot_ternary_map">plot_ternary_map</a></li><li><a href="global.html#profiling">profiling</a></li><li><a href="global.html#refreshAllFieldTypeDropdowns">refreshAllFieldTypeDropdowns</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#select_outlier_method">select_outlier_method</a></li><li><a href="global.html#select_ref_val">select_ref_val</a></li><li><a href="global.html#select_samples">select_samples</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#swap_pixel_dimensions">swap_pixel_dimensions</a></li><li><a href="global.html#swap_x_y">swap_x_y</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Sep 15 2025 15:20:55 GMT+0930 (Australian Central Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Sep 16 2025 07:19:31 GMT+0930 (Australian Central Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

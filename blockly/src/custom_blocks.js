@@ -137,10 +137,126 @@ const load_sample = {
 };
 Blockly.Blocks['load_sample'] = load_sample;
 
+// Block: Save Plot
+/**
+.. block:: save_plot
+   :category: File I/O
+   :color: 230
+
+Save the current canvas figure and/or associated data to disk.  
+Supports changing the save directory, setting a file basename, and
+choosing both figure and data output formats. Live previews of the
+resulting save paths are displayed inside the block.
+
+**Fields**
+- **DIRECTORY** (Text): Path to the save directory.
+- **CHANGE_DIR** (Dropdown): Action to change directory.
+- **BASENAME** (Text): Base filename (without extension).
+- **SAVE_FIGURE** (Checkbox): Whether to save a figure.
+- **FIG_TYPE** (Dropdown): File type for figure (png, jpg, svg, pdf).
+- **SAVE_DATA** (Checkbox): Whether to save data.
+- **DATA_TYPE** (Dropdown): File type for data (csv, xlsx, parquet).
+- **FIG_PREVIEW** (Label): Preview of figure save path.
+- **DATA_PREVIEW** (Label): Preview of data save path.
+
+**Inputs**
+- None
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
+Blockly.Blocks['save_plot'] = {
+  init: function() {
+    this.appendDummyInput().appendField("save plot");
+
+     // Minimal change-dir dropdown used as a button
+    const changeDir = new Blockly.FieldDropdown([["current path","IDLE"], ["change…","CHANGE"]], (v) => {
+      if (v !== "CHANGE") return v;           // only act on explicit select
+      const f = this.getField('DIRECTORY');
+      const cur = (f ? f.getValue() : "") || "";
+      const r = window.blocklyBridge.selectDirectory(cur);
+      (r && typeof r.then === 'function') ? r.then(p => { if (p) f.setValue(p); updateSavePlotPreview(this); this.getField('CHANGE_DIR')?.setValue('IDLE'); })
+                                    : (r && f.setValue(r));
+      this.getField('CHANGE_DIR')?.setValue('IDLE');  // reset to neutral
+      updateSavePlotPreview(this);
+      return 'IDLE';
+    });
+    
+    this.appendDummyInput()
+        .appendField("directory")
+        .appendField(new Blockly.FieldTextInput("path/to/folder"), "DIRECTORY")
+        .appendField(changeDir, "CHANGE_DIR");
+    changeDir.setValue('IDLE');  // neutral default
+
+    this.appendDummyInput()
+        .appendField("basename")
+        .appendField(new Blockly.FieldTextInput(""), "BASENAME");
+
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "SAVE_FIGURE")
+        .appendField("save figure as")
+        .appendField(new Blockly.FieldDropdown([
+          ["png","png"], ["jpg","jpg"], ["svg","svg"], ["pdf","pdf"]
+        ]), "FIG_TYPE");
+
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "SAVE_DATA")
+        .appendField("save data as")
+        .appendField(new Blockly.FieldDropdown([
+          ["csv","csv"], ["xlsx","xlsx"], ["parquet","parquet"]
+        ]), "DATA_TYPE");
+
+    // Live preview labels (use Serializable so we can update text)
+    this.appendDummyInput()
+        .appendField("figure path:")
+        .appendField(new Blockly.FieldLabelSerializable("—"), "FIG_PREVIEW");
+
+    this.appendDummyInput()
+        .appendField("data path:")
+        .appendField(new Blockly.FieldLabelSerializable("—"), "DATA_PREVIEW");
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+    this.setTooltip("Save current canvas figure and/or data to disk.");
+    this.setHelpUrl("");
+
+    // Fetch default dir once the block is created
+    setDefaultSaveDir(this);
+
+    // Live updates when any relevant field changes
+    const block = this;
+    this.setOnChange(function(e) {
+      // Only recompute on field changes to our block
+      if (!e || e.blockId !== block.id) return;
+      updateSavePlotPreview(block);
+    });
+  }
+};
+
+
+
 //// Samples and Fields /////
+// Block: Select Sample ID
+/**
+.. block:: select_samples
+   :category: File I/O
+   :color: 160
 
+Select a single sample ID from the currently available list.  
+Sample IDs are dynamically populated from the application state.
 
+**Fields**
+- **SAMPLE_IDS** (Dropdown): Dropdown of available sample IDs.
 
+**Inputs**
+- None
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const select_samples = {
     init: function() {
         this.appendDummyInput().appendField('Select sample ID').appendField(new Blockly.FieldDropdown(this.getOptions), 'SAMPLE_IDS');
@@ -160,6 +276,23 @@ const select_samples = {
 Blockly.Blocks['select_samples'] = select_samples;
 
  // Block: loop over Sample IDs
+/**
+.. block:: loop_over_samples
+   :category: File I/O
+   :color: 180
+
+Iterate over the current set of sample IDs.
+
+**Fields**
+- **SAMPLE_IDS** (Variable dropdown): Variable referencing an array of sample IDs.
+
+**Inputs**
+- **DO** (Statement): Body to execute per sample.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
  const loop_over_samples = {
     init: function() {
         this.appendDummyInput('NAME')
@@ -182,6 +315,24 @@ Blockly.Blocks['select_samples'] = select_samples;
 Blockly.common.defineBlocks({ loop_over_samples: loop_over_samples });
 
 // Block: loop over fields
+/**
+.. block:: loop_over_fields
+   :category: File I/O
+   :color: 60
+
+Iterate over fields for the selected field type.
+
+**Fields**
+- **fieldType** (Dropdown): Field type selector (populated from ``fieldTypeList``).
+
+**Inputs**
+- **DO** (Statement): Body to execute per field.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
+
 const loop_over_fields = {
     init: function() {
         this.appendDummyInput('NAME')
@@ -207,7 +358,26 @@ const loop_over_fields = {
 
 Blockly.common.defineBlocks({ loop_over_fields: loop_over_fields });
 
+/**
+.. block:: select_analytes
+   :category: Samples and fields
+   :color: 180
 
+Choose analytes/ratios via dialog, current selection, or saved lists.
+
+**Fields**
+- **analyteSelectorDropdown** (Dropdown): 'Analyte selector' | 'Current selection' | 'Saved lists'.
+- **analyteSavedListsDropdown** (Dropdown, hidden by default): Populated on demand.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Delegates to ``listSelectorChanged(.., 'analyte')`` which calls into the bridge
+to open dialogs and/or update saved lists.
+*/
 Blockly.common.defineBlocks({ 
     select_analytes: {
         init: function() {
@@ -246,6 +416,27 @@ Blockly.common.defineBlocks({
         }
     }
 });
+
+/**
+.. block:: select_field_from_type
+   :category: Samples and fields
+   :color: 180
+
+Select one (or all/none) fields from a specific field type.
+
+**Fields**
+- **fieldType** (Dropdown): Populated dynamically via ``updateFieldTypeDropdown``.
+- **field** (Dropdown): Populated dynamically via ``updateFieldDropdown``; supports
+  special values **__ALL__** and **__NONE__**.
+
+**Connections**
+- Previous: ``custom_field``
+- Next: ``custom_field``
+
+Notes
+-----
+Intended for chaining into custom field selection (e.g., clustering options).
+*/
 Blockly.common.defineBlocks({
   select_field_from_type: {
     init: function () {
@@ -303,7 +494,25 @@ Blockly.common.defineBlocks({
   }
 });
 
+/**
+.. block:: select_fields_list
+   :category: Samples and fields
+   :color: 180
 
+Use field selector dialog, current selection, or saved lists to define a set of fields.
+
+**Fields**
+- **fieldSelectorDropdown** (Dropdown): 'Field selector' | 'Current selection' | 'Saved lists'.
+- **fieldSavedListsDropdown** (Dropdown, hidden by default): List names from disk.
+
+**Connections**
+- Previous: ``custom_field``
+- Next: ``custom_field``
+
+Side effects
+------------
+Delegates to ``listSelectorChanged(.., 'field')`` and related bridge helpers.
+*/
 Blockly.common.defineBlocks({
     select_fields_list: {
         init: function() {
@@ -344,6 +553,26 @@ Blockly.common.defineBlocks({
     }
 });
 
+/**
+.. block:: export_table
+   :category: File I/O
+   :color: 60
+
+Export a table of selected fields.
+
+**Inputs**
+- **fields** (Statement): Chain limited to ``select_fields_list`` and/or
+  ``select_field_from_type``.
+
+**Connections**
+- Output: ``export_table`` (for use by analysis/plot generators)
+
+Notes
+-----
+This block only represents the *selection*; actual export is performed
+in the corresponding Python generator function.
+*/
+
 Blockly.common.defineBlocks({
   export_table: {
     init: function() {
@@ -367,8 +596,23 @@ Blockly.common.defineBlocks({
 });
 
 
- // Define the select_analytes block
+
 // Define the select_ref_val block
+/**
+.. block:: select_ref_val
+   :category: Samples and fields
+   :color: 180
+
+Pick a reference composition/value list for normalization or TEC plots.
+
+**Fields**
+- **refValueDropdown** (Dropdown): Populated dynamically via bridge (e.g., reference sets).
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
+
 const select_ref_val = {
   init: function () {
     const block = this;
@@ -407,6 +651,25 @@ Blockly.common.defineBlocks({ select_ref_val });
 
 
 // Define the change_pixel_dimensions block
+/**
+.. block:: change_pixel_dimensions
+   :category: Samples and fields
+   :color: 180
+
+Set spatial pixel dimensions (dx, dy) from current dataset defaults.
+
+**Fields**
+- **dx** (Number)
+- **dy** (Number)
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Calls ``getCurrentDimensions()`` via bridge, rounds to 4 decimals, writes fields.
+*/
 const change_pixel_dimensions= {
     init: function() {
         this.appendDummyInput()
@@ -447,6 +710,17 @@ const change_pixel_dimensions= {
 
 Blockly.common.defineBlocks({change_pixel_dimensions: change_pixel_dimensions});
 
+/**
+.. block:: swap_pixel_dimensions
+   :category: Samples and fields
+   :color: 180
+
+Swap the stored pixel dimensions dx ↔ dy.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const swap_pixel_dimensions= {
     init: function() {
       this.appendDummyInput()
@@ -461,6 +735,17 @@ const swap_pixel_dimensions= {
 
 Blockly.common.defineBlocks({swap_pixel_dimensions: swap_pixel_dimensions});
 
+/**
+.. block:: swap_x_y
+   :category: Samples and fields
+   :color: 180
+
+Swap the coordinate axes x ↔ y.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const swap_x_y= {
     init: function() {
       this.appendDummyInput()
@@ -475,6 +760,26 @@ const swap_x_y= {
 
 Blockly.common.defineBlocks({swap_x_y: swap_x_y});
 
+/**
+.. block:: select_outlier_method
+   :category: Samples and fields
+   :color: 180
+
+Choose an outlier handling method and optional bounds.
+
+**Fields**
+- **outlierMethodDropdown** (Dropdown): presets (none, quantile, Chauvenet, etc.).
+- **QB** (Dummy, hidden by default): Quantile lower/upper bounds.
+- **DB** (Dummy, hidden by default): Difference bounds.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+
+Behavior
+--------
+Field visibility auto-toggles based on the chosen method.
+*/
 const select_outlier_method = {
     init: function() {
         this.appendDummyInput('NAME')
@@ -543,6 +848,20 @@ const select_outlier_method = {
 
 Blockly.common.defineBlocks({ select_outlier_method: select_outlier_method });
 
+/**
+.. block:: neg_handling_method
+   :category: Samples and fields
+   :color: 180
+
+Select strategy for negative values.
+
+**Fields**
+- **negMethodDropdown** (Dropdown): 'ignore negatives' | 'minimum positive' | etc.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const neg_handling_method = {
     init: function() {
         this.appendDummyInput('NAME')
@@ -641,104 +960,29 @@ const field_select = {
 // Register the block with Blockly
 Blockly.common.defineBlocks({ field_select: field_select });
 
+/**
+.. block:: plot_map
+   :category: Plot
+   :color: 285
 
-const properties = {
-    init: function() {
-        // Header
-        this.appendDummyInput('header')
-            .appendField('Properties')
-            .setAlign(Blockly.inputs.Align.CENTRE);
+Render a 2D field map with optional polygons and styling chain.
 
-        // Reference value selection
-        this.appendDummyInput('refValue')
-            .appendField('Ref. value')
-            .appendField(new Blockly.FieldDropdown([
-                ['bulk silicate Earth [MS95] McD', 'bulk_silicate_earth'],
-                ['option 2', 'option_2']
-            ]), 'refValueDropdown');
+**Fields**
+- **fieldType** (Dropdown, dynamic)
+- **field** (Dropdown, dynamic)
 
-        // Data scaling selection
-        this.appendDummyInput('dataScaling')
-            .appendField('Data scaling')
-            .appendField(new Blockly.FieldDropdown([
-                ['linear', 'linear'],
-                ['logarithmic', 'logarithmic']
-            ]), 'dataScalingDropdown');
+**Inputs**
+- **styling** (Statement: 'styling' chain)
+- **Polygons** (Statement: 'Polygons' chain)
 
-        // Correlation method selection
-        this.appendDummyInput('corrMethod')
-            .appendField('Corr. Method')
-            .appendField(new Blockly.FieldDropdown([
-                ['none', 'none'],
-                ['method 1', 'method_1']
-            ]), 'corrMethodDropdown')
-            .appendField(new Blockly.FieldCheckbox('FALSE'), 'corrMethodCheckbox')
-            .appendField('C²');
+**Connections**
+- Previous: Statement
+- Next: ``PLOT_OUTPUT``
 
-        // Resolution inputs
-        this.appendDummyInput('resolution')
-            .appendField('Resolution')
-            .appendField(new Blockly.FieldNumber(738, 1), 'Nx')
-            .appendField('Nx')
-            .appendField(new Blockly.FieldNumber(106, 1), 'Ny')
-            .appendField('Ny');
-
-        // Dimensions inputs
-        this.appendDummyInput('dimensions')
-            .appendField('Dimensions')
-            .appendField(new Blockly.FieldNumber(0.9986), 'dx')
-            .appendField('dx')
-            .appendField(new Blockly.FieldNumber(0.9906), 'dy')
-            .appendField('dy');
-
-        // Autoscale settings
-        this.appendDummyInput('autoscaleHeader')
-            .appendField('Autoscale')
-            .setAlign(Blockly.inputs.Align.CENTRE);
-
-        // Show with colormap checkbox
-        this.appendDummyInput('showColormap')
-            .appendField(new Blockly.FieldCheckbox('TRUE'), 'showColormap')
-            .appendField('Show with colormap');
-
-        // Quantile bounds
-        this.appendDummyInput('quantileBounds')
-            .appendField('Quantile bounds')
-            .appendField(new Blockly.FieldNumber(0.05), 'quantileLower')
-            .appendField('to')
-            .appendField(new Blockly.FieldNumber(99.5), 'quantileUpper');
-
-        // Difference bound
-        this.appendDummyInput('differenceBound')
-            .appendField('Difference bound')
-            .appendField(new Blockly.FieldNumber(0.05), 'diffBoundLower')
-            .appendField('to')
-            .appendField(new Blockly.FieldNumber(99), 'diffBoundUpper');
-
-        // Negative handling dropdown
-        this.appendDummyInput('negativeHandling')
-            .appendField('Negative handling')
-            .appendField(new Blockly.FieldDropdown([
-                ['Ignore negatives', 'ignore_negatives'],
-                ['Treat as zero', 'treat_as_zero']
-            ]), 'negativeHandlingDropdown');
-
-        // Apply to all analytes checkbox
-        this.appendDummyInput('applyAll')
-            .appendField(new Blockly.FieldCheckbox('FALSE'), 'applyAll')
-            .appendField('Apply to all analytes');
-
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setTooltip('Configure samples and fields settings.');
-        this.setHelpUrl('');
-        this.setColour(160);
-    }
-};
-
-Blockly.common.defineBlocks({ properties: properties });
-
+Side effects
+------------
+Synchronizes style args via ``updateStylingChain`` when dropdowns or styling chain change.
+*/
 const plot_map = {
     init: function () {
         this.appendDummyInput('header')
@@ -820,6 +1064,24 @@ const plot_map = {
 };
 Blockly.common.defineBlocks({ plot_map: plot_map });
 
+/**
+.. block:: plot_correlation
+   :category: Plot
+   :color: 285
+
+Compute and plot correlation between two variables.
+
+**Fields**
+- **method** (Dropdown: Pearson|Spearman|Kendall)
+- **rSquared** (Checkbox): Display R² label.
+
+**Inputs**
+- **exportTable** (Value: ``export_table``) Optional table export selection.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const plot_correlation = {
     init: function() {
         this.appendDummyInput('VARIABLE1')
@@ -846,7 +1108,25 @@ const plot_correlation = {
 };
 Blockly.Blocks['plot_correlation'] = plot_correlation;
 
+/**
+.. block:: plot_histogram
+   :category: Plot
+   :color: 285
 
+Histogram (PDF/CDF/log scaling) for a field.
+
+**Fields**
+- **histType** (Dropdown: PDF|CDF|log-scaling)
+- **fieldType**, **field** (Dropdowns, dynamic)
+
+**Inputs**
+- **histogramOptions** (Statement)
+- **styling** (Statement: 'styling' chain)
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const plot_histogram = {
     init: function () {
         this.appendDummyInput('header')
@@ -970,6 +1250,122 @@ const plot_histogram = {
 };
 Blockly.common.defineBlocks({ plot_histogram: plot_histogram });
 
+///// histogram options ////////
+/**
+.. block:: histogram_options
+   :category: Plot
+   :color: 285
+
+Set histogram binning via width or number of bins; auto-coupled.
+
+**Fields**
+- **binWidth** (Number)
+- **nBins** (Number)
+
+**Connections**
+- Previous: ``histogramOptions``
+- Next: ``histogramOptions``
+
+Notes
+-----
+When one field changes, the other is recomputed using the cached total
+range provided by the Python side.
+*/
+Blockly.Blocks['histogram_options'] = {
+    init: function () {
+      // 1) Fields
+      this.appendDummyInput()
+        .appendField('Bin Width')
+        .appendField(
+          new Blockly.FieldNumber(1, 0, Infinity, 1),
+          "binWidth"
+        );
+      this.appendDummyInput()
+        .appendField('Num. bins')
+        .appendField(
+          new Blockly.FieldNumber(10, 1, 500, 1),
+          "nBins"
+        );
+  
+      // 2) Statement-chaining
+      this.setPreviousStatement(true, 'histogramOptions');
+      this.setNextStatement(true, 'histogramOptions');
+  
+      this.setTooltip('Specify bin width / num. bins for the histogram.');
+      this.setHelpUrl('');
+      this.setColour(285);
+  
+      // 3) We store a property for the histogram range
+      //    If updateHistogramOptions fetches [min,max], we can store it here
+      //    so that onChange can do the math.
+      this.histRange = 1; // default, will be overwritten
+  
+      // 4) Track old values so we see which field changed
+      this.oldBinWidth = this.getFieldValue('binWidth');
+      this.oldNBins    = this.getFieldValue('nBins');
+  
+      // 5) OnChange
+      this.setOnChange(function(event) {
+        // If not on workspace or is in flyout, ignore
+        if (!this.workspace || this.isInFlyout) return;
+  
+        // We only care about changes to *this* block's fields
+        if (event.type === Blockly.Events.CHANGE && event.blockId === this.id && event.element === 'field') {
+          // Which field was changed?
+          const fieldName = event.name; // e.g. "binWidth" or "nBins"
+          const newValue = this.getFieldValue(fieldName);
+  
+          const totalRange = this.histRange;
+          if (totalRange <= 0) {
+            console.warn("Histogram range is invalid or zero in size:", this.histRange);
+            return;
+          }
+  
+          if (fieldName === 'binWidth') {
+            // user typed a new binWidth => recalc nBins
+            // nBins = totalRange / binWidth
+            const binWidthNum = parseFloat(newValue);
+            if (binWidthNum > 0) {
+              const computedNBins = Math.round(totalRange / binWidthNum);
+              this.setFieldValue(computedNBins, 'nBins');
+            }
+          } else if (fieldName === 'nBins') {
+            // user typed a new nBins => recalc binWidth
+            const nBinsNum = parseFloat(newValue);
+            if (nBinsNum > 0) {
+              const computedBinWidth = totalRange / nBinsNum;
+              // optionally round to some decimal
+              this.setFieldValue(String(computedBinWidth), 'binWidth');
+            }
+          }
+  
+          // Finally, update old values
+          this.oldBinWidth = this.getFieldValue('binWidth');
+          this.oldNBins    = this.getFieldValue('nBins');
+        }
+      });
+    }
+  };
+
+/**
+.. block:: plot_biplot
+   :category: Plot
+   :color: 285
+
+Biplot (scatter or heatmap) with independent X/Y field types.
+
+**Fields**
+- **fieldTypeX**, **fieldX**, **fieldTypeY**, **fieldY** (Dropdowns, dynamic)
+- **SHOW_HEATMAP** (Checkbox) toggles plot type.
+
+**Inputs**
+- **styling** (Statement: 'styling')
+- **extras** (Statement: 'Regression'|'PCA')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const plot_biplot = {
     init: function () {
         this.appendDummyInput('header')
@@ -1073,7 +1469,24 @@ const plot_biplot = {
 };
 Blockly.common.defineBlocks({ plot_biplot: plot_biplot });
 
+/**
+.. block:: plot_ternary
+   :category: Plot
+   :color: 285
 
+Ternary scatter/heatmap with X/Y/Z field types.
+
+**Fields**
+- **fieldTypeX|Y|Z**, **fieldX|Y|Z** (Dropdowns, dynamic)
+- **SHOW_HEATMAP** (Checkbox)
+
+**Inputs**
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const plot_ternary = {
     init: function () {
         this.appendDummyInput('header')
@@ -1174,7 +1587,23 @@ const plot_ternary = {
 };
 Blockly.common.defineBlocks({ plot_ternary: plot_ternary });
 
+/**
+.. block:: plot_ternary_map
+   :category: Plot
+   :color: 285
 
+Ternary map with X/Y/Z field types and styling.
+
+**Fields**
+- **fieldTypeX|Y|Z**, **fieldX|Y|Z**
+
+**Inputs**
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const plot_ternary_map = {
     init: function () {
         this.appendDummyInput('header')
@@ -1254,6 +1683,28 @@ Blockly.common.defineBlocks({ plot_ternary_map: plot_ternary_map });
 /* ================================
    Compatibility Diagram (TEC)
    ================================ */
+   /**
+.. block:: plot_ndim
+   :category: Plot
+   :color: 285
+
+Compatibility (TEC/spider) diagram.
+
+**Fields**
+- **ndimAnalyteSet** (Dropdown)
+- **ndimQuantiles** (Dropdown)
+
+**Inputs**
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Populates options via bridge: ``getNDimAnalyteSets`` and ``getNDimQuantiles``.
+*/
 const plot_ndim = {
   init: function () {
     const block = this;
@@ -1361,6 +1812,24 @@ Blockly.common.defineBlocks({ plot_ndim });
 /* ================================
    Radar Plot
    ================================ */
+/**
+.. block:: plot_radar
+   :category: Plot
+   :color: 285
+
+Radar plot for a chosen N-dim list.
+
+**Fields**
+- **ndimList** (Dropdown)
+
+**Inputs**
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
+
 const plot_radar = {
     init: function () {
         this.appendDummyInput('header')
@@ -1562,126 +2031,36 @@ const style_basis_vectors = {
 };
 Blockly.common.defineBlocks({ style_basis_vectors });
 
-/* ================================
-   Seed block (<: left) — with RNG button (uses bridge RNG if available)
-   ================================ */
-const cfg_seed = {
-  init: function () {
-    const block = this;  // capture block reference
-    const seedField = new Blockly.FieldTextInput('');
 
-    const dice = new Blockly.FieldImage(DICE_SVG, 16, 16, 'randomize', () => {
-      const rng = window.blocklyBridge?.randomClusterSeed;
-      const applySeed = (val) => {
-        seedField.setValue(String(val));
-        // force the field to visually refresh
-        seedField.forceRerender?.();
-      };
-
-      if (typeof rng === 'function') {
-        Promise.resolve(rng()).then(applySeed).catch(() => {
-          applySeed(Math.floor(Math.random() * 1e9));
-        });
-      } else {
-        applySeed(Math.floor(Math.random() * 1e9));
-      }
-    });
-
-    block.appendDummyInput('ROW')
-      .appendField('Seed')
-      .appendField(dice, 'rng')
-      .appendField(seedField, 'seed');
-
-    seedField.setValidator((nv) => nv);
-    block.setPreviousStatement(true, 'seed');
-    block.setNextStatement(true, 'seed');
-    block.setColour(15);
-    block.setTooltip('Random seed for reproducibility.');
-    block.setHelpUrl('');
-  }
-};
-Blockly.common.defineBlocks({ cfg_seed });
-
-/* ================================
-   Cluster options (<: left; mutator-ready stub)
-   ================================ */
-const cfg_cluster_options = {
-  init: function () {
-    this.appendDummyInput('METHOD')
-      .appendField('Cluster options')
-      .setAlign(Blockly.inputs.Align.CENTRE);
-
-    this.appendDummyInput('EXP')
-      .appendField('Exponent')
-      .appendField(new Blockly.FieldNumber(2.0, 1, 10, 0.1), 'exponent');
-
-    this.appendDummyInput('DIST')
-      .appendField('Distance')
-      .appendField(new Blockly.FieldDropdown([
-        ['euclidean', 'euclidean'],
-        ['manhattan', 'manhattan'],
-        ['cosine', 'cosine']
-      ]), 'distance');
-
-    // New: Custom field list input
-    this.appendStatementInput('customFields')
-      .setCheck('custom_field')
-      .appendField('Custom field list');
-
-    this.appendDummyInput('PCA')
-      .appendField('PCA')
-      .appendField(new Blockly.FieldCheckbox('FALSE'), 'pca');
-
-    this.setPreviousStatement(true, 'cluster_options');
-    this.setNextStatement(true, 'cluster_options');
-    this.setColour(20);
-    this.setTooltip('Advanced clustering options (ready for mutator extension).');
-    this.setHelpUrl('');
-
-    if (!this.isInFlyout) {
-      // Optionally, populate distance list from bridge if available
-      const distDD = this.getField('distance');
-      const loader = window.blocklyBridge?.getClusterDistanceOptions;
-      if (typeof loader === 'function') {
-        loader().then((opts) => {
-          const items = (opts || []).map(s => [s, s]);
-          if (items.length) {
-            distDD.menuGenerator_ = items;
-            const cur = distDD.getValue();
-            const vals = new Set(items.map(o => o[1]));
-            if (!vals.has(cur)) distDD.setValue(items[0][1]);
-            distDD.forceRerender?.();
-          }
-        }).catch(console.error);
-      }
-    }
-  }
-};
-Blockly.common.defineBlocks({ cfg_cluster_options });
-
-/* ================================
-   PCA preconditioning (<: left)
-   ================================ */
-const cfg_pca_preconditioning = {
-  init: function () {
-    this.appendDummyInput('NB')
-      .appendField('PCA preconditioning: No. basis')
-      .appendField(new Blockly.FieldNumber(0, 0), 'nBasis');
-
-    this.setPreviousStatement(true, 'pca_preconditioning');
-    this.setNextStatement(true, 'pca_preconditioning');
-    this.setColour(20);
-    this.setTooltip('Number of basis vectors for PCA preconditioning.');
-    this.setHelpUrl('');
-  }
-};
-Blockly.common.defineBlocks({ cfg_pca_preconditioning });
 
 
 
 /* ================================
    Multidimensional — Clustering (x: top & bottom) with dynamic defaults
    ================================ */
+   /**
+.. block:: plot_clustering
+   :category: Multidimensional
+   :color: 200
+
+Run clustering and plot cluster map.
+
+**Fields**
+- **method** (Dropdown; populated via bridge methods list)
+
+**Inputs**
+- **seed** (Statement: ``seed``)
+- **options** (Statement: ``cluster_options``)
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+
+Side effects
+------------
+Applies defaults from bridge (seed/exponent/distance/preconditioning).
+*/
 const plot_clustering = {
   init: function () {
     this.appendDummyInput('HEADER')
@@ -1811,6 +2190,26 @@ Blockly.common.defineBlocks({ plot_clustering });
 /* ================================
    Cluster performance (x: top & bottom) with dynamic defaults + Max Clusters
    ================================ */
+   /**
+.. block:: plot_cluster_performance
+   :category: Multidimensional
+   :color: 200
+
+Plot metrics for choosing optimal K (elbow, silhouette, etc.).
+
+**Fields**
+- **method** (Dropdown; dynamic)
+- **maxClusters** (Number; default from bridge/app)
+
+**Inputs**
+- **seed** (Statement: ``seed``)
+- **options** (Statement: ``cluster_options``)
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const plot_cluster_performance = {
   init: function () {
     this.appendDummyInput('HEADER')
@@ -1942,6 +2341,23 @@ Blockly.common.defineBlocks({ plot_cluster_performance });
 /* ================================
    Multidimensional — Dimensional reduction (x: top & bottom)
    ================================ */
+   /**
+.. block:: dimensional_reduction
+   :category: Multidimensional
+   :color: 285
+
+Run dimensionality reduction (currently PCA).
+
+**Fields**
+- **method** (Dropdown): 'PCA: Principal component analysis'
+
+**Inputs**
+- **styling** (Statement: 'styling')
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const dimensional_reduction = {
   init: function () {
     this.appendDummyInput('HEADER')
@@ -1985,10 +2401,188 @@ const dimensional_reduction = {
 };
 Blockly.common.defineBlocks({ dimensional_reduction });
 
+/* ================================
+   Seed block (<: left) — with RNG button (uses bridge RNG if available)
+   ================================ */
+   /**
+.. block:: cfg_seed
+   :category: Multidimensional
+   :color: 15
+
+Provide a random seed for clustering (with dice button).
+
+**Fields**
+- **seed** (TextInput): Seed integer.
+- **rng** (ImageButton): Generates a new seed via bridge (fallback to Math.random).
+
+**Connections**
+- Previous: ``seed``
+- Next: ``seed``
+*/
+
+const cfg_seed = {
+  init: function () {
+    const block = this;  // capture block reference
+    const seedField = new Blockly.FieldTextInput('');
+
+    const dice = new Blockly.FieldImage(DICE_SVG, 16, 16, 'randomize', () => {
+      const rng = window.blocklyBridge?.randomClusterSeed;
+      const applySeed = (val) => {
+        seedField.setValue(String(val));
+        // force the field to visually refresh
+        seedField.forceRerender?.();
+      };
+
+      if (typeof rng === 'function') {
+        Promise.resolve(rng()).then(applySeed).catch(() => {
+          applySeed(Math.floor(Math.random() * 1e9));
+        });
+      } else {
+        applySeed(Math.floor(Math.random() * 1e9));
+      }
+    });
+
+    block.appendDummyInput('ROW')
+      .appendField('Seed')
+      .appendField(dice, 'rng')
+      .appendField(seedField, 'seed');
+
+    seedField.setValidator((nv) => nv);
+    block.setPreviousStatement(true, 'seed');
+    block.setNextStatement(true, 'seed');
+    block.setColour(15);
+    block.setTooltip('Random seed for reproducibility.');
+    block.setHelpUrl('');
+  }
+};
+Blockly.common.defineBlocks({ cfg_seed });
+
+/* ================================
+   Cluster options (<: left; mutator-ready stub)
+   ================================ */
+   /**
+.. block:: cfg_cluster_options
+   :category: Multidimensional
+   :color: 20
+
+Advanced clustering options and optional custom field list.
+
+**Fields**
+- **exponent** (Number)
+- **distance** (Dropdown; bridge can override options)
+- **pca** (Checkbox)
+
+**Inputs**
+- **customFields** (Statement: ``custom_field``)
+
+**Connections**
+- Previous: ``cluster_options``
+- Next: ``cluster_options``
+*/
+const cfg_cluster_options = {
+  init: function () {
+    this.appendDummyInput('METHOD')
+      .appendField('Cluster options')
+      .setAlign(Blockly.inputs.Align.CENTRE);
+
+    this.appendDummyInput('EXP')
+      .appendField('Exponent')
+      .appendField(new Blockly.FieldNumber(2.0, 1, 10, 0.1), 'exponent');
+
+    this.appendDummyInput('DIST')
+      .appendField('Distance')
+      .appendField(new Blockly.FieldDropdown([
+        ['euclidean', 'euclidean'],
+        ['manhattan', 'manhattan'],
+        ['cosine', 'cosine']
+      ]), 'distance');
+
+    // New: Custom field list input
+    this.appendStatementInput('customFields')
+      .setCheck('custom_field')
+      .appendField('Custom field list');
+
+    this.appendDummyInput('PCA')
+      .appendField('PCA')
+      .appendField(new Blockly.FieldCheckbox('FALSE'), 'pca');
+
+    this.setPreviousStatement(true, 'cluster_options');
+    this.setNextStatement(true, 'cluster_options');
+    this.setColour(20);
+    this.setTooltip('Advanced clustering options (ready for mutator extension).');
+    this.setHelpUrl('');
+
+    if (!this.isInFlyout) {
+      // Optionally, populate distance list from bridge if available
+      const distDD = this.getField('distance');
+      const loader = window.blocklyBridge?.getClusterDistanceOptions;
+      if (typeof loader === 'function') {
+        loader().then((opts) => {
+          const items = (opts || []).map(s => [s, s]);
+          if (items.length) {
+            distDD.menuGenerator_ = items;
+            const cur = distDD.getValue();
+            const vals = new Set(items.map(o => o[1]));
+            if (!vals.has(cur)) distDD.setValue(items[0][1]);
+            distDD.forceRerender?.();
+          }
+        }).catch(console.error);
+      }
+    }
+  }
+};
+Blockly.common.defineBlocks({ cfg_cluster_options });
+
+/* ================================
+   PCA preconditioning (<: left)
+   ================================ */
+   /**
+.. block:: cfg_pca_preconditioning
+   :category: Multidimensional
+   :color: 20
+
+Set number of PCA basis vectors used for preconditioning.
+
+**Fields**
+- **nBasis** (Number)
+
+**Connections**
+- Previous: ``pca_preconditioning``
+- Next: ``pca_preconditioning``
+*/
+const cfg_pca_preconditioning = {
+  init: function () {
+    this.appendDummyInput('NB')
+      .appendField('PCA preconditioning: No. basis')
+      .appendField(new Blockly.FieldNumber(0, 0), 'nBasis');
+
+    this.setPreviousStatement(true, 'pca_preconditioning');
+    this.setNextStatement(true, 'pca_preconditioning');
+    this.setColour(20);
+    this.setTooltip('Number of basis vectors for PCA preconditioning.');
+    this.setHelpUrl('');
+  }
+};
+Blockly.common.defineBlocks({ cfg_pca_preconditioning });
+
 
 /* ================================
     Styling Blocks
    ================================ */
+   /**
+.. block:: modify_styles
+   :category: Style
+   :color: 300
+
+Container for style items used by plots.
+
+**Inputs**
+- **STACK** (Statement: 'styling_item')
+
+**Connections**
+- None (standalone container; used inside plot styling chains)
+*/
+
 Blockly.Blocks['modify_styles'] = {
     init: function () {
         this.appendDummyInput('axisHeader')
@@ -2002,6 +2596,22 @@ Blockly.Blocks['modify_styles'] = {
     }
 };
 
+/**
+.. block:: x_axis
+   :category: Style
+   :color: 300
+
+Set X-axis label, limits and scale.
+
+**Fields**
+- **xLabel** (Text)
+- **xLimMin**, **xLimMax** (Text)
+- **xScaleDropdown** (Dropdown: linear|log|logit|symlog)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['x_axis'] = {
     init: function () {
         this.appendDummyInput('axisHeader')
@@ -2030,6 +2640,20 @@ Blockly.Blocks['x_axis'] = {
     },
 };
 
+/**
+.. block:: y_axis
+   :category: Style
+   :color: 300
+
+Set Y-axis label, limits and scale.
+
+**Fields**
+- **yLabel**, **yLimMin**, **yLimMax**, **yScaleDropdown**
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['y_axis'] = {
     init: function () {
         this.appendDummyInput('axisHeader')
@@ -2058,6 +2682,20 @@ Blockly.Blocks['y_axis'] = {
     },
 };
 
+/**
+.. block:: z_axis
+   :category: Style
+   :color: 300
+
+Set Z-axis label, limits and scale.
+
+**Fields**
+- **zLabel**, **zLimMin**, **zLimMax**, **zScaleDropdown**
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['z_axis'] = {
     init: function () {
         this.appendDummyInput('axisHeader')
@@ -2086,6 +2724,20 @@ Blockly.Blocks['z_axis'] = {
     },
 };
 
+/**
+.. block:: c_axis
+   :category: Style
+   :color: 300
+
+Set colorbar label, limits and scale.
+
+**Fields**
+- **cLabel**, **cLimMin**, **cLimMax**, **cScaleDropdown**
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['c_axis'] = {
     init: function () {
         this.appendDummyInput('axisHeader')
@@ -2114,6 +2766,21 @@ Blockly.Blocks['c_axis'] = {
     },
 };
 
+/**
+.. block:: font
+   :category: Style
+   :color: 300
+
+Set font and font size for plot text.
+
+**Fields**
+- **font** (Dropdown)
+- **fontSize** (Number)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['font'] = {
     init: function () {
         this.appendDummyInput('font')
@@ -2132,7 +2799,20 @@ Blockly.Blocks['font'] = {
     },
 };
 
+/**
+.. block:: tick_direction
+   :category: Style
+   :color: 300
 
+Set tick direction.
+
+**Fields**
+- **tickDirectionDropdown** (Dropdown: out|in|inout|none)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['tick_direction'] = {
     init: function () {
         this.appendDummyInput('tickDirectionHeader')
@@ -2151,6 +2831,20 @@ Blockly.Blocks['tick_direction'] = {
     },
 };
 
+/**
+.. block:: aspect_ratio
+   :category: Style
+   :color: 300
+
+Set aspect ratio string (e.g., 'equal', '1.0', '2:1').
+
+**Fields**
+- **aspectRatio** (Text)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['aspect_ratio'] = {
     init: function () {
         this.appendDummyInput('aspectRatioHeader')
@@ -2164,7 +2858,22 @@ Blockly.Blocks['aspect_ratio'] = {
     },
 };
 
+/**
+.. block:: add_scale
+   :category: Style
+   :color: 220
 
+Add a map scale overlay.
+
+**Fields**
+- **scaleColor** (Colour)
+- **scaleUnits** (Text), **scaleLength** (Text)
+- **scaleDirection** (Dropdown: Horizontal|Vertical)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['add_scale'] = {
     init: function () {
         this.appendDummyInput('scaleHeader')
@@ -2193,6 +2902,22 @@ Blockly.Blocks['add_scale'] = {
     },
 };
 
+/**
+.. block:: marker_properties
+   :category: Style
+   :color: 230
+
+Configure marker symbol, size and color.
+
+**Fields**
+- **markerSymbol** (Dropdown)
+- **markerSize** (Number)
+- **markerColor** (Colour)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['marker_properties'] = {
     init: function () {
         this.appendDummyInput('markerHeader')
@@ -2221,6 +2946,20 @@ Blockly.Blocks['marker_properties'] = {
     },
 };
 
+/**
+.. block:: transparency
+   :category: Style
+   :color: 255
+
+Set overall transparency (0–100).
+
+**Fields**
+- **transparency** (Number)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['transparency'] = {
     init: function () {
         this.appendDummyInput('transparency')
@@ -2234,7 +2973,21 @@ Blockly.Blocks['transparency'] = {
     },
 };
 
+/**
+.. block:: line_properties
+   :category: Style
+   :color: 230
 
+Configure line width and color.
+
+**Fields**
+- **lineWidth** (Number)
+- **lineColor** (Colour)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['line_properties'] = {
     init: function () {
         this.appendDummyInput('lineHeader')
@@ -2254,6 +3007,19 @@ Blockly.Blocks['line_properties'] = {
     },
 };
 
+/**
+.. block:: color_select
+   :category: Style
+   :color: 240
+
+Small value block that outputs a color.
+
+**Fields**
+- **colorPicker** (Colour)
+
+**Connections**
+- Output: any
+*/
 Blockly.Blocks['color_select'] = {
     init: function () {
         this.appendDummyInput('colorHeader')
@@ -2266,6 +3032,20 @@ Blockly.Blocks['color_select'] = {
     },
 };
 
+/**
+.. block:: color_field
+   :category: Style
+   :color: 245
+
+Select a field used for coloring.
+
+**Fields**
+- **fieldType**, **field** (Dropdowns)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['color_field'] = {
     init: function () {
         this.appendDummyInput('colorFieldHeader')
@@ -2291,6 +3071,22 @@ Blockly.Blocks['color_field'] = {
     },
 };
 
+/**
+.. block:: colormap
+   :category: Style
+   :color: 250
+
+Colormap selection, reverse and orientation.
+
+**Fields**
+- **colormap** (Dropdown)
+- **reverse** (Checkbox)
+- **direction** (Dropdown: Horizontal|Vertical)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['colormap'] = {
     init: function () {
         this.appendDummyInput('colormapHeader')
@@ -2320,6 +3116,20 @@ Blockly.Blocks['colormap'] = {
     },
 };
 
+/**
+.. block:: show_mass
+   :category: Style
+   :color: 255
+
+Toggle display of mass curves/overlays (if supported by plot).
+
+**Fields**
+- **showMass** (Checkbox)
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['show_mass'] = {
     init: function () {
         this.appendDummyInput('massHeader')
@@ -2333,6 +3143,20 @@ Blockly.Blocks['show_mass'] = {
     },
 };
 
+/**
+.. block:: color_by_cluster
+   :category: Style
+   :color: 255
+
+Color plots by cluster assignment.
+
+**Fields**
+- **clusterType** (Dropdown): Selector for cluster field.
+
+**Connections**
+- Previous: 'styling'
+- Next: 'styling'
+*/
 Blockly.Blocks['color_by_cluster'] = {
     init: function () {
         this.appendDummyInput('clusterHeader')
@@ -2352,603 +3176,28 @@ Blockly.Blocks['color_by_cluster'] = {
 
 
 
+/**
+.. block:: profiling
+   :category: Analysis
+   :color: 160
 
+Extract and visualize profiles across the map.
 
-///// histogram options ////////
+**Fields**
+- **PROFILE_NAME** (Text)
+- **SORT_AXIS** (Dropdown: X|Y)
+- **RADIUS**, **THRESHOLD**, **INT_DISTANCE** (Numbers)
+- **POINT_ERROR** (Dropdown: median|mean)
+- **INTERPOLATE** (Checkbox)
+- **NUM_SUBPLOTS** (Number)
 
-Blockly.Blocks['histogram_options'] = {
-    init: function () {
-      // 1) Fields
-      this.appendDummyInput()
-        .appendField('Bin Width')
-        .appendField(
-          new Blockly.FieldNumber(1, 0, Infinity, 1),
-          "binWidth"
-        );
-      this.appendDummyInput()
-        .appendField('Num. bins')
-        .appendField(
-          new Blockly.FieldNumber(10, 1, 500, 1),
-          "nBins"
-        );
-  
-      // 2) Statement-chaining
-      this.setPreviousStatement(true, 'histogramOptions');
-      this.setNextStatement(true, 'histogramOptions');
-  
-      this.setTooltip('Specify bin width / num. bins for the histogram.');
-      this.setHelpUrl('');
-      this.setColour(285);
-  
-      // 3) We store a property for the histogram range
-      //    If updateHistogramOptions fetches [min,max], we can store it here
-      //    so that onChange can do the math.
-      this.histRange = 1; // default, will be overwritten
-  
-      // 4) Track old values so we see which field changed
-      this.oldBinWidth = this.getFieldValue('binWidth');
-      this.oldNBins    = this.getFieldValue('nBins');
-  
-      // 5) OnChange
-      this.setOnChange(function(event) {
-        // If not on workspace or is in flyout, ignore
-        if (!this.workspace || this.isInFlyout) return;
-  
-        // We only care about changes to *this* block's fields
-        if (event.type === Blockly.Events.CHANGE && event.blockId === this.id && event.element === 'field') {
-          // Which field was changed?
-          const fieldName = event.name; // e.g. "binWidth" or "nBins"
-          const newValue = this.getFieldValue(fieldName);
-  
-          const totalRange = this.histRange;
-          if (totalRange <= 0) {
-            console.warn("Histogram range is invalid or zero in size:", this.histRange);
-            return;
-          }
-  
-          if (fieldName === 'binWidth') {
-            // user typed a new binWidth => recalc nBins
-            // nBins = totalRange / binWidth
-            const binWidthNum = parseFloat(newValue);
-            if (binWidthNum > 0) {
-              const computedNBins = Math.round(totalRange / binWidthNum);
-              this.setFieldValue(computedNBins, 'nBins');
-            }
-          } else if (fieldName === 'nBins') {
-            // user typed a new nBins => recalc binWidth
-            const nBinsNum = parseFloat(newValue);
-            if (nBinsNum > 0) {
-              const computedBinWidth = totalRange / nBinsNum;
-              // optionally round to some decimal
-              this.setFieldValue(String(computedBinWidth), 'binWidth');
-            }
-          }
-  
-          // Finally, update old values
-          this.oldBinWidth = this.getFieldValue('binWidth');
-          this.oldNBins    = this.getFieldValue('nBins');
-        }
-      });
-    }
-  };
-  
+**Inputs**
+- **FIELDS** (Value: Array)
 
-
-const styles = {
-    init: function() {
-        this.appendDummyInput('stylesHeader')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Styles');
-        this.appendDummyInput('themeHeader')
-        .appendField('Theme')
-        .appendField(new Blockly.FieldDropdown([
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'NAME');
-        this.appendValueInput('axisAndLabels')
-        .appendField('Axis and Labels');
-        this.appendValueInput('annotAndScale')
-        .appendField('Annotations and Scale');
-        this.appendValueInput('markersAndLines')
-        .appendField('Markers and Lines');
-        this.appendValueInput('coloring')
-        .appendField('Coloring');
-        this.appendValueInput('clusters')
-        .appendField('Clusters');
-        this.setInputsInline(true)
-        this.setOutput(true, null);
-        this.setTooltip('');
-        this.setHelpUrl('');
-        this.setColour(285);
-    },
-    onchange: function(event) {
-        // Check if the event is a BLOCK_MOVE event and involves this block as the parent
-        if (event.type === Blockly.Events.BLOCK_MOVE && event.newParentId === this.id) {
-            // Only proceed if a new block is added to the 'styles' block
-            const plotBlock = this.getSurroundParent();
-            if (plotBlock && plotBlock.type === 'plot') {
-                plotBlock.updateConnectedStyleBlocks();
-            }
-        }
-    }
-};
-Blockly.common.defineBlocks({ styles: styles });
-
-// Style Blocks
-const axis_and_labels = {
-    init: function() {
-        this.appendDummyInput('axisHeader')
-        .setAlign(Blockly.inputs.Align.CENTRE)
-        .appendField('Axis and Labels');
-        this.appendDummyInput('xLabelHeader')
-        .appendField('X Label')
-        .appendField(new Blockly.FieldTextInput(''), 'xLabel');
-        this.appendDummyInput('xLimitsHeader')
-        .appendField('X Limits')
-        .appendField(new Blockly.FieldTextInput(''), 'xLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'xLimMax');
-        this.appendDummyInput('xScaleHeader')
-        .appendField('X Scale')
-        .appendField(new Blockly.FieldDropdown([
-            ['Linear', 'linear'],
-            ['Log', 'log'],
-            ['Logit', 'logit'],
-            ['Symlog', 'symlog'],
-            ]), 'xScaleDropdown');
-        this.appendDummyInput('yLabelHeader')
-        .appendField('Y Label')
-        .appendField(new Blockly.FieldTextInput(''), 'yLabel');
-        this.appendDummyInput('yLimitsHeader')
-        .appendField('Y Limits')
-        .appendField(new Blockly.FieldTextInput(''), 'yLimMin')
-        .appendField(new Blockly.FieldTextInput(''), 'yLimMax');
-        this.appendDummyInput('yScaleHeader')
-        .appendField('Y Scale')
-        .appendField(new Blockly.FieldDropdown([
-            ['Linear', 'linear'],
-            ['Log', 'log'],
-            ['Logit', 'logit'],
-            ['Symlog', 'symlog'],
-            ]), 'yScaleDropdown');
-        this.appendDummyInput('zLabelHeader')
-        .appendField('Z Label')
-        .appendField(new Blockly.FieldTextInput(''), 'zLabel');
-        this.appendDummyInput('axisRatioHeader')
-        .appendField('Aspect Ratio')
-        .appendField(new Blockly.FieldTextInput(''), 'aspectRatio');
-        this.appendDummyInput('tickDirectionHeader')
-        .appendField('Tick Direction')
-        .appendField(new Blockly.FieldDropdown([
-            ['out', 'out'],
-            ['in', 'in'],
-            ['inout', 'inout'],
-            ['none', 'none']
-            ]), 'tickDirectionDropdown');
-        this.setInputsInline(false)
-        this.setOutput(true, null);
-        this.setTooltip('Adjust axis and labels of a plot');
-        this.setHelpUrl('');
-        this.setColour(285);
-    }
-};
-Blockly.common.defineBlocks({axis_and_labels: axis_and_labels});
-                        
-
-const annot_and_scale = {
-    init: function() {
-        this.appendDummyInput('scaleDirection')
-        .appendField('Scale direction')
-        .appendField(new Blockly.FieldDropdown([
-            ['none', 'none'],
-            ['horizontal', 'horizontal']
-            ]), 'scaleDirection');
-        this.appendDummyInput('scaleLocation')
-        .appendField('Scale location')
-        .appendField(new Blockly.FieldDropdown([
-            ['northeast', 'northeast'],
-            ['northwest', 'northwest'],
-            ['southwest', 'southwest'],
-            ['southeast', 'southeast']
-            ]), 'scaleLocation');
-        this.appendDummyInput('scaleLength')
-        .appendField('scale Length')
-        .appendField(new Blockly.FieldTextInput(''), 'scaleLength');
-        this.appendDummyInput('overlayColor')
-        .appendField('Overlay color')
-        .appendField(new FieldColour('#ff0000'), 'overlayColor');
-        this.appendDummyInput('font')
-        .appendField('Font')
-        .appendField(new Blockly.FieldDropdown([
-            ['none', 'none'],
-            ['horizontal', 'horizontal']
-            ]), 'font');
-        this.appendDummyInput('fontSize')
-        .appendField('Font size')
-        .appendField(new Blockly.FieldNumber(11, 4, 100), 'fontSize');
-        this.appendDummyInput('showMass')
-        .appendField('Show mass')
-        .appendField(new Blockly.FieldCheckbox('FALSE'), 'showMass');
-        this.setOutput(true, null);
-        this.setTooltip('');
-        this.setHelpUrl('');
-        this.setColour(285);
-    }
-};
-Blockly.common.defineBlocks({annot_and_scale: annot_and_scale});
-
-const marks_and_lines = {
-    init: function() {
-        this.appendDummyInput('symbol')
-        .appendField('Symbol')
-        .appendField(new Blockly.FieldDropdown([
-            ['circle', 'circle'],
-            ['square', 'square'],
-            ['diamond', 'diamond'],
-            ['triangle (up)', 'triangleUp'],
-            ['triangle (down)', 'triangleDown'],
-            ['hexagon', 'hexagon'],
-            ['pentagon', 'pentagon'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME'],
-            ['option', 'OPTIONNAME']
-            ]), 'symbol');
-        this.appendDummyInput('size')
-        .appendField('Size')
-        .appendField(new Blockly.FieldNumber(6, 1, 50), 'size');
-        this.appendDummyInput('symbolColorHeader')
-        .appendField('Symbol Color')
-        .appendField(new FieldColour('#ff0000'), 'symbolColor');
-        this.appendDummyInput('transparency')
-        .appendField('Transparency')
-        .appendField(new Blockly.FieldNumber(100, 0, 100), 'transparency');
-        this.appendDummyInput('lineWidth')
-        .appendField('Line Width')
-        .appendField(new Blockly.FieldDropdown([
-            ['0', '0'],
-            ['0.1', '0.1'],
-            ['0.25', '0.25'],
-            ['0.5', '0.5'],
-            ['0.75', '0.75'],
-            ['1', '1'],
-            ['1.5', '1.5'],
-            ['2', '2'],
-            ['2.5', '2.5'],
-            ['3', '3'],
-            ['4', '4'],
-            ['5', '5'],
-            ['6', '6']
-            ]), 'lineWidth');
-        this.appendDummyInput('lineColor')
-        .appendField('Line Color')
-        .appendField(new FieldColour('#ff0000'), 'lineColor');
-        this.appendDummyInput('lengthMultiplier')
-        .appendField('Length multiplier')
-        .appendField(new Blockly.FieldTextInput('1'), 'lengthMultiplier');
-        this.setOutput(true, null);
-        this.setTooltip('');
-        this.setHelpUrl('');
-        this.setColour(225);
-    }
-};
-Blockly.common.defineBlocks({marks_and_lines: marks_and_lines});
-            
-// const coloring = {
-//     init: function() {
-//         this.appendDummyInput('Coloring')
-//         .setAlign(Blockly.inputs.Align.CENTRE)
-//         .appendField('Coloring');
-//         this.appendDummyInput('colorByField')
-//         .appendField('Color by Field')
-//         .appendField(new Blockly.FieldDropdown([
-//             ['option', 'OPTIONNAME'],
-//             ['option', 'OPTIONNAME'],
-//             ['option', 'OPTIONNAME']
-//             ]), 'colorByField');
-//         this.appendDummyInput('field')
-//         .appendField('Field')
-//         .appendField(new Blockly.FieldDropdown([
-//             ['option', 'OPTIONNAME'],
-//             ['option', 'OPTIONNAME'],
-//             ['option', 'OPTIONNAME']
-//             ]), 'field');
-//         this.appendDummyInput('resolution')
-//         .appendField('Resolution')
-//         .appendField(new Blockly.FieldNumber(10, 0), 'resolution');
-//         this.appendDummyInput('colormap')
-//         .appendField('Colormap')
-//         .appendField(new Blockly.FieldDropdown([
-//             ['option', 'OPTIONNAME'],
-//             ['option', 'OPTIONNAME'],
-//             ['option', 'OPTIONNAME']
-//             ]), 'colormap');
-//         this.appendDummyInput('reverse')
-//         .appendField('Reverse')
-//         .appendField(new Blockly.FieldCheckbox('FALSE'), 'reverse');
-//         this.appendDummyInput('scale')
-//         .appendField('Scale')
-//         .appendField(new Blockly.FieldDropdown([
-//             ['linear', 'linear'],
-//             ['log', 'log'],
-//             ]), 'cScale');
-//         this.appendDummyInput('cLim')
-//         .appendField('Clim')
-//         .appendField(new Blockly.FieldTextInput(''), 'cLimMin')
-//         .appendField(new Blockly.FieldTextInput(''), 'cLimMax');
-//         this.appendDummyInput('cBarLabel')
-//         .appendField('Cbar label')
-//         .appendField(new Blockly.FieldTextInput(''), 'cBarLabel');
-//         this.appendDummyInput('cBarDirection')
-//         .appendField('Cbar direction')
-//         .appendField(new Blockly.FieldDropdown([
-//             ['none', 'none'],
-//             ['Horizontal', 'horizontal'],
-//             ['Vertical', 'vertical']
-//             ]), 'cBarDirection');
-//         this.setOutput(true, null);
-//         this.setTooltip('');
-//         this.setHelpUrl('');
-//         this.setColour(225);
-//     }
-// };
-// Blockly.common.defineBlocks({coloring: coloring});
-
-
-/* alternatives */
-
-const properties_v1 = {
-    init: function() {
-        // Reference Value Section
-        this.appendDummyInput('refValueSection')
-            .appendField('Reference Value')
-            .appendField(new Blockly.FieldDropdown([
-                ['Bulk Silicate Earth [MS95] McD', 'bulk_silicate_earth'],
-                ['Option 2', 'option_2']
-            ]), 'refValueDropdown');
-
-        // Data Scaling Section
-        this.appendDummyInput('dataScalingSection')
-            .appendField('Data Scaling')
-            .appendField(new Blockly.FieldDropdown([
-                ['Linear', 'linear'],
-                ['Logarithmic', 'logarithmic']
-            ]), 'dataScalingDropdown');
-
-        // Other sections grouped similarly...
-        
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setTooltip('Configure sample properties with grouped sections.');
-        this.setHelpUrl('');
-        this.setColour(160);
-    }
-};
-Blockly.Blocks['properties_v1'] = properties_v1;
-
-const data_scaling = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField('Data Scaling')
-            .appendField(new Blockly.FieldDropdown([
-                ['Linear', 'linear'],
-                ['Logarithmic', 'logarithmic']
-            ]), 'SCALING');
-        this.setOutput(true, 'DataScaling');
-        this.setColour(160);
-        this.setTooltip('Selects data scaling method');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['data_scaling'] = data_scaling;
-
-const autoscale_settings = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField('Autoscale Settings');
-        // Add fields related to autoscaling
-        this.setOutput(true, 'AutoscaleSettings');
-        this.setColour(160);
-        this.setTooltip('Configure autoscale settings');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['autoscale_settings'] = autoscale_settings;
-
-const specify_plot_type = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField('Plot Type')
-            .appendField(new Blockly.FieldDropdown([
-                ['Field Map', 'field_map'],
-                ['Histogram', 'histogram'],
-                // ... other plot types
-            ]), 'PLOT_TYPE');
-        this.setOutput(true, 'PlotType');
-        this.setColour(285);
-        this.setTooltip('Specifies the plot type');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['specify_plot_type'] = specify_plot_type;
-
-
-const plot_configuration = {
-    init: function() {
-        this.appendValueInput('PLOT_TYPE')
-            .setCheck('PlotType')
-            .appendField('Plot');
-        this.appendValueInput('STYLE')
-            .setCheck('Style')
-            .appendField('With Style');
-        this.appendValueInput('SAVE')
-            .setCheck('SaveOptions')
-            .appendField('And Save Options');
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(285);
-        this.setTooltip('Configures and renders the plot with specified settings.');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['plot_configuration'] = plot_configuration;
-
-
-const x_axis_settings = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField('X Axis Settings');
-        this.appendDummyInput()
-            .appendField('Label')
-            .appendField(new Blockly.FieldTextInput('X-Axis'), 'X_LABEL');
-        this.appendDummyInput()
-            .appendField('Scale')
-            .appendField(new Blockly.FieldDropdown([
-                ['Linear', 'linear'],
-                ['Log', 'log']
-            ]), 'X_SCALE');
-        this.appendDummyInput()
-            .appendField('Limits')
-            .appendField('Min')
-            .appendField(new Blockly.FieldNumber(0), 'X_MIN')
-            .appendField('Max')
-            .appendField(new Blockly.FieldNumber(100), 'X_MAX');
-        this.setOutput(true, 'XAxisSettings');
-        this.setColour(285);
-        this.setTooltip('Settings for X axis');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['x_axis_settings'] = x_axis_settings;
-
-
-const y_axis_settings = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField('Y Axis Settings');
-        this.appendDummyInput()
-            .appendField('Label')
-            .appendField(new Blockly.FieldTextInput('Y-Axis'), 'Y_LABEL');
-        this.appendDummyInput()
-            .appendField('Scale')
-            .appendField(new Blockly.FieldDropdown([
-                ['Linear', 'linear'],
-                ['Log', 'log']
-            ]), 'Y_SCALE');
-        this.appendDummyInput()
-            .appendField('Limits')
-            .appendField('Min')
-            .appendField(new Blockly.FieldNumber(0), 'Y_MIN')
-            .appendField('Max')
-            .appendField(new Blockly.FieldNumber(100), 'Y_MAX');
-        this.setOutput(true, 'YAxisSettings');
-        this.setColour(285);
-        this.setTooltip('Settings for Y axis');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['y_axis_settings'] = y_axis_settings;
-
-const data_filtering = {
-    init: function() {
-        this.appendValueInput('FIELD')
-            .setCheck('String')
-            .appendField('Filter Data where');
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([
-                ['>', '>'],
-                ['<', '<'],
-                ['=', '='],
-                ['≠', '!='],
-                ['≥', '>='],
-                ['≤', '<=']
-            ]), 'OPERATOR');
-        this.appendValueInput('VALUE')
-            .setCheck('Number')
-            .appendField('Value');
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(300);
-        this.setTooltip('Filters data based on the specified condition.');
-        this.setHelpUrl('');
-    }
-};
-Blockly.Blocks['data_filtering'] = data_filtering;
-
-Blockly.Blocks['save_plot'] = {
-  init: function() {
-    this.appendDummyInput().appendField("save plot");
-
-     // Minimal change-dir dropdown used as a button
-    const changeDir = new Blockly.FieldDropdown([["current path","IDLE"], ["change…","CHANGE"]], (v) => {
-      if (v !== "CHANGE") return v;           // only act on explicit select
-      const f = this.getField('DIRECTORY');
-      const cur = (f ? f.getValue() : "") || "";
-      const r = window.blocklyBridge.selectDirectory(cur);
-      (r && typeof r.then === 'function') ? r.then(p => { if (p) f.setValue(p); updateSavePlotPreview(this); this.getField('CHANGE_DIR')?.setValue('IDLE'); })
-                                    : (r && f.setValue(r));
-      this.getField('CHANGE_DIR')?.setValue('IDLE');  // reset to neutral
-      updateSavePlotPreview(this);
-      return 'IDLE';
-    });
-    
-    this.appendDummyInput()
-        .appendField("directory")
-        .appendField(new Blockly.FieldTextInput("path/to/folder"), "DIRECTORY")
-        .appendField(changeDir, "CHANGE_DIR");
-    changeDir.setValue('IDLE');  // neutral default
-
-    this.appendDummyInput()
-        .appendField("basename")
-        .appendField(new Blockly.FieldTextInput(""), "BASENAME");
-
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "SAVE_FIGURE")
-        .appendField("save figure as")
-        .appendField(new Blockly.FieldDropdown([
-          ["png","png"], ["jpg","jpg"], ["svg","svg"], ["pdf","pdf"]
-        ]), "FIG_TYPE");
-
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "SAVE_DATA")
-        .appendField("save data as")
-        .appendField(new Blockly.FieldDropdown([
-          ["csv","csv"], ["xlsx","xlsx"], ["parquet","parquet"]
-        ]), "DATA_TYPE");
-
-    // Live preview labels (use Serializable so we can update text)
-    this.appendDummyInput()
-        .appendField("figure path:")
-        .appendField(new Blockly.FieldLabelSerializable("—"), "FIG_PREVIEW");
-
-    this.appendDummyInput()
-        .appendField("data path:")
-        .appendField(new Blockly.FieldLabelSerializable("—"), "DATA_PREVIEW");
-
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(230);
-    this.setTooltip("Save current canvas figure and/or data to disk.");
-    this.setHelpUrl("");
-
-    // Fetch default dir once the block is created
-    setDefaultSaveDir(this);
-
-    // Live updates when any relevant field changes
-    const block = this;
-    this.setOnChange(function(e) {
-      // Only recompute on field changes to our block
-      if (!e || e.blockId !== block.id) return;
-      updateSavePlotPreview(block);
-    });
-  }
-};
-
-
-
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
 const profiling = {
     init: function() {
         this.appendDummyInput()
@@ -3061,15 +3310,4 @@ Blockly.Blocks['profiling'] = profiling;
   ['colormap',                    { category:'STYLE', role:'STYLING',  tooltip:'Colormap + reverse + orientation.' }],
   ['show_mass',                   { category:'STYLE', role:'STYLING',  tooltip:'Toggle mass overlays.' }],
   ['color_by_cluster',            { category:'STYLE', role:'STYLING',  tooltip:'Color by cluster assignment.' }],
-
-  // (Optional legacy/aux blocks if present in your build)
-  ['properties',                  { category:'SAMPLES', role:'AUX',    tooltip:'Sample and display properties.' }],
-  ['properties_v1',               { category:'SAMPLES', role:'AUX',    tooltip:'Grouped sample properties.' }],
-  ['data_scaling',                { category:'SAMPLES', role:'AUX',    tooltip:'Select data scaling method.' }],
-  ['autoscale_settings',          { category:'SAMPLES', role:'AUX',    tooltip:'Configure autoscale.' }],
-  ['specify_plot_type',           { category:'PLOT',    role:'AUX',    tooltip:'Specify plot type for a pipeline block.' }],
-  ['plot_configuration',          { category:'PLOT',    role:'AUX',    tooltip:'Combine plot + style + save.' }],
-  ['x_axis_settings',             { category:'STYLE',   role:'STYLING',tooltip:'X axis settings (output).' }],
-  ['y_axis_settings',             { category:'STYLE',   role:'STYLING',tooltip:'Y axis settings (output).' }],
-  ['data_filtering',              { category:'ANALYSIS',role:'AUX',    tooltip:'Filter data by condition.' }],
 ].forEach(([type, opts]) => decorateBlock(type, opts));

@@ -532,7 +532,7 @@ class Workflow(CustomDockWidget):
         # attach the Python syntax highlighter
         self.highlighter = PythonHighlighter(self.output_text_edit.document())
         
-                #### toolbar setup ####
+        #### toolbar setup ####
         toolbar = QToolBar("Blockly Toolbar", self)
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)  # Optional: Prevent toolbar from being dragged out

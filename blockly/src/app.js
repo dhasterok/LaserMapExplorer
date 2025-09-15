@@ -8,7 +8,7 @@ import {pythonGenerator} from 'blockly/python';
 import { sample_ids, setBaseDir } from './globals';
 import './custom_blocks';  // Import custom blocks
 import './python_generators';  // Import python generators
-import './helper_functions';  // Import helper functions
+import {lockdownBlocks, } from './helper_functions';  // Import helper functions
 
 Blockly.setLocale(En);  // Set the locale to English
 
@@ -38,7 +38,7 @@ const workspace = Blockly.inject('blocklyDiv', {
     sounds: true,
     rtl: false,
 });
-
+lockdownBlocks(workspace);  // disables everything except load_sample & load_directory
 // Add a change listener to finalize connections dynamically when blocks are removed or rearranged
 workspace.addChangeListener(BlockDynamicConnection.finalizeConnections);
 
@@ -141,3 +141,5 @@ function resizeBlocklyWorkspace() {
 }
 
 resizeBlocklyWorkspace();
+
+

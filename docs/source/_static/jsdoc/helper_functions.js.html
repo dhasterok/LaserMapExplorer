@@ -32,19 +32,142 @@
 import * as Blockly from 'blockly/core';
 import * as BlockDynamicConnection from '@blockly/block-dynamic-connection';
 import { sample_ids,fieldTypeList, updateSampleIds, spot_data } from './globals';
-import {enableSampleIDsBlockFunction} from './custom_blocks'
 
+/* ---------- Category/role color + tooltip decorator ---------- */
 
+const CAT_HUE = Object.freeze({
+  GLOBAL: 360,           // Global Settings
+  FILE_IO: 60,           // File I/O
+  SAMPLES: 180,          // Samples &amp; fields
+  ANALYSIS: 160,         // Analysis
+  PLOT: 285,             // Plot
+  MULTI: 200,            // Multidimensional
+  STYLE: 300             // Style
+});
+
+// Subtle hue tweaks per "functionality role"
+const ROLE_SHIFT = Object.freeze({
+  ENTRY:   0,    // main/entry blocks
+  OPTIONS: -10,  // option/config blocks
+  STYLING: +15,  // styling chain blocks
+  AUX:     +30,  // helpers
+  DATA:    -20   // io/data blocks
+});
+// Category hues (base colors)
+// Convert HSL to hex so we can feed setColour a hex for a consistent look
+function hslToHex(h, s = 60, l = 50) {
+  // h: 0..360, s/l: 0..100
+  const _s = s/100, _l = l/100;
+  const c = (1 - Math.abs(2*_l - 1)) * _s;
+  const hh = (h % 360) / 60;
+  const x = c * (1 - Math.abs((hh % 2) - 1));
+  let r=0,g=0,b=0;
+  if (0 &lt;= hh &amp;&amp; hh &lt; 1) [r,g,b] = [c,x,0];
+  else if (1 &lt;= hh &amp;&amp; hh &lt; 2) [r,g,b] = [x,c,0];
+  else if (2 &lt;= hh &amp;&amp; hh &lt; 3) [r,g,b] = [0,c,x];
+  else if (3 &lt;= hh &amp;&amp; hh &lt; 4) [r,g,b] = [0,x,c];
+  else if (4 &lt;= hh &amp;&amp; hh &lt; 5) [r,g,b] = [x,0,c];
+  else if (5 &lt;= hh &amp;&amp; hh &lt; 6) [r,g,b] = [c,0,x];
+  const m = _l - c/2;
+  const R = Math.round((r+m)*255);
+  const G = Math.round((g+m)*255);
+  const B = Math.round((b+m)*255);
+  const toHex = v => v.toString(16).padStart(2,'0');
+  return `#${toHex(R)}${toHex(G)}${toHex(B)}`;
+}
+
+export function decorateBlock(type, { category, role = 'ENTRY', tooltip = '' } = {}) {
+  const def = Blockly.Blocks[type];
+  if (!def || typeof def.init !== 'function') return;
+
+  const originalInit = def.init;
+  def.init = function() {
+    originalInit.call(this);
+
+    // Color
+    const baseHue  = CAT_HUE[category] ?? null;
+    const hueShift = ROLE_SHIFT[role] ?? 0;
+    if (typeof baseHue === 'number') {
+      const finalHue = (baseHue + hueShift + 360) % 360;
+      const hex = hslToHex(finalHue, 62, 54); // pleasant saturation/light
+      this.setColour(hex);
+      this.$$category = category;
+      this.$$role = role;
+    }
+
+    // Tooltip (only if empty/undefined)
+    const currentTip =
+      (typeof this.getTooltip === 'function' ? this.getTooltip() : null) ||
+      this.tooltip_ || this.tooltip;
+    if (!currentTip || String(currentTip).trim() === '') {
+      const fallback = tooltip || `Block: ${type.replace(/_/g, ' ')}`;
+      this.setTooltip(fallback);
+    }
+  };
+}
+
+/* ---------- Sample ID guard for certain blocks ---------- */
+
+// Put this near your Blockly setup
+const WHITELIST = new Set(['load_sample', 'load_directory']);
+const DISABLED_REASON = 'Load sample to enable block';
+export function lockdownBlocks(workspace) {
+  // 1) Grey out disallowed blocks in the toolbox
+  const tbx = document.getElementById('toolbox');
+  if (tbx) {
+    const clone = tbx.cloneNode(true);
+    clone.querySelectorAll('block').forEach(node => {
+      const type = node.getAttribute('type') || '';
+      if (!WHITELIST.has(type)) {
+        node.setAttribute('disabled', 'true');
+        node.setAttribute('disabledReason', DISABLED_REASON);
+      }
+    });
+    workspace.updateToolbox(clone);
+  }
+
+  // 2) Disable any existing blocks already on the workspace
+  workspace.getAllBlocks(false).forEach(b => {
+    if (!WHITELIST.has(b.type)) b.setEnabled(false);
+  });
+
+  // 3) Auto-disable any blocks created later (dragged from toolbox or via code)
+  workspace.addChangeListener(function(e) {
+    if (e.type !== Blockly.Events.BLOCK_CREATE) return;
+    (e.ids || []).forEach(id => {
+      const b = workspace.getBlockById(id);
+      if (b &amp;&amp; !WHITELIST.has(b.type)) b.setDisabledReason?.('Load sample to enable block');
+    });
+  });
+}
+
+function enableAllBlocks(workspace) {
+  // 1) Enable blocks in the toolbox
+  const tbx = document.getElementById('toolbox');
+  if (tbx) {
+    const clone = tbx.cloneNode(true);
+    clone.querySelectorAll('block').forEach(node => {
+      node.removeAttribute('disabled');
+      node.removeAttribute('disabledReason');
+    });
+    workspace.updateToolbox(clone);
+  }
+
+  // 2) Enable blocks already in the workspace
+  workspace.getAllBlocks(false).forEach(b => {
+    b.setDisabledReason?.('');
+  });
+}
+window.enableAllBlocks = enableAllBlocks;
 // ========== Exposing update functions for Python-side call ==========
-
-
 
 // Function: Update Sample Dropdown with IDs
 function updateSampleDropdown(sampleIds) {
     // Step 1: Store sample IDs in the global variableaxis_and_labels
     updateSampleIds(sampleIds);
     // Step 2: Enable dependent blocks now that sample_ids is populated
-    enableSampleIDsBlockFunction();
+    const workspace = Blockly.getMainWorkspace();
+    enableAllBlocks(workspace)
     // Step 3: Update the dropdown options in the 'select_samples' block
     const dropdownOptions = sampleIds.map(id => [id, id]);  // Convert sample IDs to dropdown format
 
@@ -1505,13 +1628,13 @@ function updateMarksAndLinesBlock(block, style) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#refreshAllFieldTypeDropdowns">refreshAllFieldTypeDropdowns</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#display_figure">display_figure</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#load_directory">load_directory</a></li><li><a href="global.html#load_sample">load_sample</a></li><li><a href="global.html#refreshAllFieldTypeDropdowns">refreshAllFieldTypeDropdowns</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Fri Sep 12 2025 21:36:18 GMT+0930 (Australian Central Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Sep 15 2025 15:20:55 GMT+0930 (Australian Central Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

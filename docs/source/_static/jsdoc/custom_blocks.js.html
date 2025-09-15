@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: custom_blocks.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: custom_blocks.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
 .. module:: custom_blocks
    :synopsis: Blockly blocks for LaserMapExplorer workflow UI.
 
@@ -46,7 +74,7 @@ Block Input Names: Snake case (set_plot_type).
 
 //// Global Settings //// 
 
-// ---- Display figures (x : top & bottom) ----
+// ---- Display figures (x : top &amp; bottom) ----
 /**
 .. block:: display_figure
    :category: Global Settings
@@ -394,7 +422,7 @@ const select_ref_val = {
     window.blocklyBridge?.getRefValueList?.().then((response) => {
       const options = response.map(opt => [opt, opt]);
       const dropdown = block.getField('refValueDropdown');
-      if (dropdown && options.length) {
+      if (dropdown &amp;&amp; options.length) {
         dropdown.menuGenerator_ = options; // update
         dropdown.setValue(options[0][1]);  // default
         dropdown.forceRerender?.();        // refresh
@@ -1320,7 +1348,7 @@ const plot_ndim = {
         .then((keys) => {
           const opts = (keys || []).map(k => [k, k]);
           const dd = b.getField(fieldName);
-          if (dd && opts.length) {
+          if (dd &amp;&amp; opts.length) {
             dd.menuGenerator_ = opts;           // simple, compatible with your codebase
             const keep = dd.getValue();
             const values = new Set(opts.map(o => o[1]));
@@ -1342,7 +1370,7 @@ const plot_ndim = {
             return [label, value];
           });
           const dd = b.getField(fieldName);
-          if (dd && opts.length) {
+          if (dd &amp;&amp; opts.length) {
             dd.menuGenerator_ = opts;
             const keep = dd.getValue();
             const values = new Set(opts.map(o => o[1]));
@@ -1423,16 +1451,16 @@ const plot_radar = {
 };
 Blockly.common.defineBlocks({ plot_radar: plot_radar });
 /* ================================
-   Clustering & Dimensionality Reduction — custom_blocks.js (updated)
+   Clustering &amp; Dimensionality Reduction — custom_blocks.js (updated)
    ================================ */
 
 /***** Helpers *****/
 const DICE_SVG = 'data:image/svg+xml;utf8,' +
-  encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="6" y="6" width="52" height="52" rx="10" fill="#eaeaea" stroke="#999"/>
-  <circle cx="20" cy="20" r="4" fill="#666"/><circle cx="44" cy="20" r="4" fill="#666"/>
-  <circle cx="32" cy="32" r="4" fill="#666"/>
-  <circle cx="20" cy="44" r="4" fill="#666"/><circle cx="44" cy="44" r="4" fill="#666"/></svg>`);
+  encodeURIComponent(`&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  &lt;rect x="6" y="6" width="52" height="52" rx="10" fill="#eaeaea" stroke="#999"/>
+  &lt;circle cx="20" cy="20" r="4" fill="#666"/>&lt;circle cx="44" cy="20" r="4" fill="#666"/>
+  &lt;circle cx="32" cy="32" r="4" fill="#666"/>
+  &lt;circle cx="20" cy="44" r="4" fill="#666"/>&lt;circle cx="44" cy="44" r="4" fill="#666"/>&lt;/svg>`);
 
 /* Small utility to walk statement input and return first block in the chain */
 function _firstInChain(block, inputName) {
@@ -1443,7 +1471,7 @@ function _firstInChain(block, inputName) {
 
 /* Toggle visibility of a DummyInput by name, if it exists */
 function _setInputVisible(block, inputName, visible) {
-  const inp = block && block.getInput(inputName);
+  const inp = block &amp;&amp; block.getInput(inputName);
   if (inp) {
     inp.setVisible(visible);
     block.render();
@@ -1451,7 +1479,7 @@ function _setInputVisible(block, inputName, visible) {
 }
 
 /* ================================
-   PCA — Basis variance (x: top & bottom)
+   PCA — Basis variance (x: top &amp; bottom)
    ================================ */
 const plot_basis_variance = {
   init: function () {
@@ -1491,7 +1519,7 @@ const plot_basis_variance = {
 Blockly.common.defineBlocks({ plot_basis_variance });
 
 /* ================================
-   PCA — Basis vectors plot (x: top & bottom)
+   PCA — Basis vectors plot (x: top &amp; bottom)
    ================================ */
 const plot_basis_vectors_plot = {
   init: function () {
@@ -1531,7 +1559,7 @@ const plot_basis_vectors_plot = {
 Blockly.common.defineBlocks({ plot_basis_vectors_plot });
 
 /* ================================
-   PCA — Basis vectors (styling block) (<: left into styling chain)
+   PCA — Basis vectors (styling block) (&lt;: left into styling chain)
    ================================ */
 const style_basis_vectors = {
   init: function () {
@@ -1563,7 +1591,7 @@ const style_basis_vectors = {
 Blockly.common.defineBlocks({ style_basis_vectors });
 
 /* ================================
-   Seed block (<: left) — with RNG button (uses bridge RNG if available)
+   Seed block (&lt;: left) — with RNG button (uses bridge RNG if available)
    ================================ */
 const cfg_seed = {
   init: function () {
@@ -1603,7 +1631,7 @@ const cfg_seed = {
 Blockly.common.defineBlocks({ cfg_seed });
 
 /* ================================
-   Cluster options (<: left; mutator-ready stub)
+   Cluster options (&lt;: left; mutator-ready stub)
    ================================ */
 const cfg_cluster_options = {
   init: function () {
@@ -1660,7 +1688,7 @@ const cfg_cluster_options = {
 Blockly.common.defineBlocks({ cfg_cluster_options });
 
 /* ================================
-   PCA preconditioning (<: left)
+   PCA preconditioning (&lt;: left)
    ================================ */
 const cfg_pca_preconditioning = {
   init: function () {
@@ -1680,7 +1708,7 @@ Blockly.common.defineBlocks({ cfg_pca_preconditioning });
 
 
 /* ================================
-   Multidimensional — Clustering (x: top & bottom) with dynamic defaults
+   Multidimensional — Clustering (x: top &amp; bottom) with dynamic defaults
    ================================ */
 const plot_clustering = {
   init: function () {
@@ -1749,16 +1777,16 @@ const plot_clustering = {
           const d = typeof json === 'string' ? JSON.parse(json) : (json || {});
           // Seed
           const seedBlk = _firstInChain(this, 'seed');
-          if (seedBlk && seedBlk.getField('seed')) {
+          if (seedBlk &amp;&amp; seedBlk.getField('seed')) {
             seedBlk.getField('seed').setValue(d.seed != null ? String(d.seed) : '');
           }
           // Options
           const optBlk = _firstInChain(this, 'options');
           if (optBlk) {
-            if (optBlk.getField('exponent') && d.exponent != null) {
+            if (optBlk.getField('exponent') &amp;&amp; d.exponent != null) {
               optBlk.getField('exponent').setValue(Number(d.exponent));
             }
-            if (optBlk.getField('distance') && d.distance) {
+            if (optBlk.getField('distance') &amp;&amp; d.distance) {
               // ensure distance is in dropdown; if not, keep current
               const dd = optBlk.getField('distance');
               const items = (dd.menuGenerator_ || []).map(o => o[1]);
@@ -1809,7 +1837,7 @@ const plot_clustering = {
 Blockly.common.defineBlocks({ plot_clustering });
 
 /* ================================
-   Cluster performance (x: top & bottom) with dynamic defaults + Max Clusters
+   Cluster performance (x: top &amp; bottom) with dynamic defaults + Max Clusters
    ================================ */
 const plot_cluster_performance = {
   init: function () {
@@ -1880,16 +1908,16 @@ const plot_cluster_performance = {
           const d = typeof json === 'string' ? JSON.parse(json) : (json || {});
           // Seed
           const seedBlk = _firstInChain(this, 'seed');
-          if (seedBlk && seedBlk.getField('seed')) {
+          if (seedBlk &amp;&amp; seedBlk.getField('seed')) {
             seedBlk.getField('seed').setValue(d.seed != null ? String(d.seed) : '');
           }
           // Options
           const optBlk = _firstInChain(this, 'options');
           if (optBlk) {
-            if (optBlk.getField('exponent') && d.exponent != null) {
+            if (optBlk.getField('exponent') &amp;&amp; d.exponent != null) {
               optBlk.getField('exponent').setValue(Number(d.exponent));
             }
-            if (optBlk.getField('distance') && d.distance) {
+            if (optBlk.getField('distance') &amp;&amp; d.distance) {
               const dd = optBlk.getField('distance');
               const items = (dd.menuGenerator_ || []).map(o => o[1]);
               if (items.includes(d.distance)) dd.setValue(d.distance);
@@ -1899,7 +1927,7 @@ const plot_cluster_performance = {
             }
           }
           // Max clusters default
-          if (maxKField && Number.isFinite(Number(d.max_clusters))) {
+          if (maxKField &amp;&amp; Number.isFinite(Number(d.max_clusters))) {
             maxKField.setValue(Number(d.max_clusters));
           }
           updateStylingChain(this);
@@ -1940,7 +1968,7 @@ const plot_cluster_performance = {
 Blockly.common.defineBlocks({ plot_cluster_performance });
 
 /* ================================
-   Multidimensional — Dimensional reduction (x: top & bottom)
+   Multidimensional — Dimensional reduction (x: top &amp; bottom)
    ================================ */
 const dimensional_reduction = {
   init: function () {
@@ -2395,13 +2423,13 @@ Blockly.Blocks['histogram_options'] = {
         if (!this.workspace || this.isInFlyout) return;
   
         // We only care about changes to *this* block's fields
-        if (event.type === Blockly.Events.CHANGE && event.blockId === this.id && event.element === 'field') {
+        if (event.type === Blockly.Events.CHANGE &amp;&amp; event.blockId === this.id &amp;&amp; event.element === 'field') {
           // Which field was changed?
           const fieldName = event.name; // e.g. "binWidth" or "nBins"
           const newValue = this.getFieldValue(fieldName);
   
           const totalRange = this.histRange;
-          if (totalRange <= 0) {
+          if (totalRange &lt;= 0) {
             console.warn("Histogram range is invalid or zero in size:", this.histRange);
             return;
           }
@@ -2464,10 +2492,10 @@ const styles = {
     },
     onchange: function(event) {
         // Check if the event is a BLOCK_MOVE event and involves this block as the parent
-        if (event.type === Blockly.Events.BLOCK_MOVE && event.newParentId === this.id) {
+        if (event.type === Blockly.Events.BLOCK_MOVE &amp;&amp; event.newParentId === this.id) {
             // Only proceed if a new block is added to the 'styles' block
             const plotBlock = this.getSurroundParent();
-            if (plotBlock && plotBlock.type === 'plot') {
+            if (plotBlock &amp;&amp; plotBlock.type === 'plot') {
                 plotBlock.updateConnectedStyleBlocks();
             }
         }
@@ -2860,11 +2888,11 @@ const data_filtering = {
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown([
                 ['>', '>'],
-                ['<', '<'],
+                ['&lt;', '&lt;'],
                 ['=', '='],
                 ['≠', '!='],
                 ['≥', '>='],
-                ['≤', '<=']
+                ['≤', '&lt;=']
             ]), 'OPERATOR');
         this.appendValueInput('VALUE')
             .setCheck('Number')
@@ -2888,8 +2916,8 @@ Blockly.Blocks['save_plot'] = {
       const f = this.getField('DIRECTORY');
       const cur = (f ? f.getValue() : "") || "";
       const r = window.blocklyBridge.selectDirectory(cur);
-      (r && typeof r.then === 'function') ? r.then(p => { if (p) f.setValue(p); updateSavePlotPreview(this); this.getField('CHANGE_DIR')?.setValue('IDLE'); })
-                                    : (r && f.setValue(r));
+      (r &amp;&amp; typeof r.then === 'function') ? r.then(p => { if (p) f.setValue(p); updateSavePlotPreview(this); this.getField('CHANGE_DIR')?.setValue('IDLE'); })
+                                    : (r &amp;&amp; f.setValue(r));
       this.getField('CHANGE_DIR')?.setValue('IDLE');  // reset to neutral
       updateSavePlotPreview(this);
       return 'IDLE';
@@ -3009,7 +3037,7 @@ Blockly.Blocks['profiling'] = profiling;
   ['export_table',                { category:'FILE_IO', role:'DATA',   tooltip:'Select fields to export as a table.' }],
   ['save_plot',                   { category:'FILE_IO', role:'DATA',   tooltip:'Save current figure/data to disk.' }],
 
-  // Samples & fields
+  // Samples &amp; fields
   ['select_samples',              { category:'SAMPLES', role:'ENTRY',  tooltip:'Select a sample ID.' }],
   ['select_analytes',             { category:'SAMPLES', role:'ENTRY',  tooltip:'Choose analytes/ratios via dialog or list.' }],
   ['select_field_from_type',      { category:'SAMPLES', role:'ENTRY',  tooltip:'Pick one/all/none from a field type.' }],
@@ -3022,7 +3050,7 @@ Blockly.Blocks['profiling'] = profiling;
   ['neg_handling_method',         { category:'SAMPLES', role:'OPTIONS',tooltip:'Negative value handling strategy.' }],
 
   // Analysis
-  {},
+  ['profiling',                   { category:'ANALYSIS', role:'ENTRY', tooltip:'Extract and plot profiles across the map.' }],
 
   // Plot
   ['plot_map',                    { category:'PLOT', role:'ENTRY',     tooltip:'Render a 2D field map.' }],
@@ -3034,7 +3062,7 @@ Blockly.Blocks['profiling'] = profiling;
   ['plot_ternary_map',            { category:'PLOT', role:'ENTRY',     tooltip:'Ternary map (X/Y/Z fields).' }],
   ['plot_ndim',                   { category:'PLOT', role:'ENTRY',     tooltip:'Compatibility (TEC) diagram.' }],
   ['plot_radar',                  { category:'PLOT', role:'ENTRY',     tooltip:'Radar plot for an N-dim list.' }],
-  ['profiling',                   { category:'PLOT', role:'ENTRY',     tooltip:'Extract and plot profiles across the map.' }],
+
   // Multidimensional
   ['cfg_seed',                    { category:'MULTI', role:'OPTIONS',  tooltip:'Random seed for clustering.' }],
   ['cfg_cluster_options',         { category:'MULTI', role:'OPTIONS',  tooltip:'Exponent, distance, PCA, and custom fields.' }],
@@ -3073,3 +3101,26 @@ Blockly.Blocks['profiling'] = profiling;
   ['y_axis_settings',             { category:'STYLE',   role:'STYLING',tooltip:'Y axis settings (output).' }],
   ['data_filtering',              { category:'ANALYSIS',role:'AUX',    tooltip:'Filter data by condition.' }],
 ].forEach(([type, opts]) => decorateBlock(type, opts));
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addDefaultStylingBlocks">addDefaultStylingBlocks</a></li><li><a href="global.html#display_figure">display_figure</a></li><li><a href="global.html#getConnectedBlocks">getConnectedBlocks</a></li><li><a href="global.html#isBlockInChain">isBlockInChain</a></li><li><a href="global.html#listSelectorChanged">listSelectorChanged</a></li><li><a href="global.html#load_directory">load_directory</a></li><li><a href="global.html#load_sample">load_sample</a></li><li><a href="global.html#refreshAllFieldTypeDropdowns">refreshAllFieldTypeDropdowns</a></li><li><a href="global.html#refreshCustomFieldListsDropdown">refreshCustomFieldListsDropdown</a></li><li><a href="global.html#resizeBlocklyWorkspace">resizeBlocklyWorkspace</a></li><li><a href="global.html#setDefaultSaveDir">setDefaultSaveDir</a></li><li><a href="global.html#updateBinWidthAndNBins">updateBinWidthAndNBins</a></li><li><a href="global.html#updateCAxisBlock">updateCAxisBlock</a></li><li><a href="global.html#updateFieldDropdown">updateFieldDropdown</a></li><li><a href="global.html#updateFieldTypeDropdown">updateFieldTypeDropdown</a></li><li><a href="global.html#updateFieldTypeList">updateFieldTypeList</a></li><li><a href="global.html#updateHistogramOptions">updateHistogramOptions</a></li><li><a href="global.html#updateNDimListDropdown">updateNDimListDropdown</a></li><li><a href="global.html#updateSavePlotPreview">updateSavePlotPreview</a></li><li><a href="global.html#updateSavedListsDropdown">updateSavedListsDropdown</a></li><li><a href="global.html#updateStylingChain">updateStylingChain</a></li><li><a href="global.html#updateXAxisBlock">updateXAxisBlock</a></li><li><a href="global.html#updateYAxisBlock">updateYAxisBlock</a></li><li><a href="global.html#updateZAxisBlock">updateZAxisBlock</a></li><li><a href="global.html#workspace">workspace</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Sep 15 2025 15:20:55 GMT+0930 (Australian Central Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

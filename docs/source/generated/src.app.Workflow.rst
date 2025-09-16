@@ -1,4 +1,4 @@
-src.app.Workflow
+﻿src.app.Workflow
 ================
 
 .. automodule:: src.app.Workflow
@@ -9,5 +9,8 @@ src.app.Workflow
    .. autosummary::
    
       BlocklyBridge
+      CodeEditor
+      LineNumberArea
+      PythonHighlighter
       Workflow
    

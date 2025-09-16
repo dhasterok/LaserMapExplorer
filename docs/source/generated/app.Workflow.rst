@@ -9,5 +9,8 @@
    .. autosummary::
    
       BlocklyBridge
+      CodeEditor
+      LineNumberArea
+      PythonHighlighter
       Workflow
    

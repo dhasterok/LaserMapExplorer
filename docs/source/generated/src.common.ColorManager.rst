@@ -10,6 +10,7 @@ src.common.ColorManager
    
       convert_color
       convert_color_list
+      is_valid_hex_color
    
    .. rubric:: Classes
 

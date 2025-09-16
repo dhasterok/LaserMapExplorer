@@ -35,7 +35,6 @@
    SortAnalytes
    Status
    TableFunctions
-   colorfunc
    csvdict
    format
    gausscensor

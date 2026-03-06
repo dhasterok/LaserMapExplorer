@@ -61,12 +61,18 @@ class PlotRegistry(QObject):
         plot_id = self._generate_plot_id(plot_metadata)
         plot_metadata['plot_id'] = plot_id
         plot_metadata['registered_at'] = datetime.now()
-        
+
         self.plots[plot_id] = plot_metadata.copy()
-        
+
+        # Cache the figure
+        figure = plot_metadata.get('figure')
+        if figure is not None and isinstance(figure, MplCanvas):
+            if plot_id not in self.canvas_cache:
+                self._cache_canvas(plot_id, figure)
+
         log(f"Registered plot: {plot_id}", "INFO")
         self.plotRegistered.emit(plot_id)
-        
+
         return plot_id
     
     def get_plot_metadata(self, plot_id: str) -> Optional[Dict[str, Any]]:

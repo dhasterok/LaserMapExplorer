@@ -792,8 +792,8 @@ def plot_histogram(parent, data, app_data, style_data):
         canvas.axes.set_xscale('log',base=10)
         canvas.axes.set_yscale('log',base=10)
 
-        canvas.axes.set_xlabel(r"$\log_{10}($" + f"{app_data.c_field}" + r"$)$", fontdict=font)
-        canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{app_data.c_field}" + r"$)$", fontdict=font)
+        canvas.axes.set_xlabel(r"$\log_{10}($" + f"{app_data.x_field}" + r"$)$", fontdict=font)
+        canvas.axes.set_ylabel(r"$\log_{10}(N > \log_{10}$" + f"{app_data.x_field}" + r"$)$", fontdict=font)
 
     canvas.axes.tick_params(labelsize=style_data.font_size,direction=style_data.tick_dir)
     canvas.axes.set_box_aspect(style_data.aspect_ratio)
@@ -801,22 +801,26 @@ def plot_histogram(parent, data, app_data, style_data):
     update_figure_font(canvas, style_data.font)
 
     canvas.fig.tight_layout()
-    plot_name = app_data.c_field_type+'_'+app_data.c_field
+
+    # Use x-axis fields for histogram (the actual data axis), changed from c-axis
+    hist_field_type = app_data.x_field_type
+    hist_field = app_data.x_field
+    plot_name = hist_field_type + '_' + hist_field
     canvas.plot_name = plot_name
-    
+
     plot_info = {
         'tree': 'Histogram',
         'sample_id': app_data.sample_id,
         'plot_name': plot_name,
-        'field_type': app_data.c_field_type,
-        'field': app_data.c_field,
+        'field_type': hist_field_type,
+        'field': hist_field,
         'plot_type': style_data.plot_type,
         'type': app_data.hist_plot_style,
         'nbins': nbins,
         'figure': canvas,
         'style': style_data.style_dict[style_data.plot_type],
         'cluster_groups': clusters,
-        'view': [True,False],
+        'view': [True, False],
         'position': [],
         'data': canvas.data
     }

@@ -82,6 +82,7 @@ test
 blockly/node_modules
 node_modules
 saved
+.vscode
 # Binaries
 # --------
 *.dll

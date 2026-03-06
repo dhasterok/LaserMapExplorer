@@ -1359,15 +1359,22 @@ class AppData(QObject):
         It retrieves the data for the selected field and type, calculates the range of values,
         and sets the bin width based on the number of histogram bins.
         """
-        if (self.c_field_type == '') or (self.c_field == ''):
+        if self.c_field_type in ['', 'none', 'None', None] or self.c_field in ['', 'none', 'None', None]:
             return
 
-        # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self.c_field, self.c_field_type)
+        if self._hist_num_bins <= 0:
+            return
 
-        # update bin width
-        data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
-        self.hist_bin_width = data_range / self._hist_num_bins
+        try:
+            # get currently selected data
+            map_df = self.data[self.sample_id].get_map_data(self.c_field, self.c_field_type)
+
+            # update bin width
+            data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
+            self.hist_bin_width = data_range / self._hist_num_bins
+        except (KeyError, TypeError) as e:
+            # Field may not exist yet
+            return
 
     def update_hist_num_bins(self):
         """Updates the number of bins for histograms
@@ -1376,15 +1383,18 @@ class AppData(QObject):
         field and type.  It retrieves the data for the selected field and type, calculates the
         range of values, and sets the number of bins based on the bin width.
         """
-        if (self.c_field_type == '') or (self.c_field == ''):
+        if self.c_field_type in ['', 'none', 'None', None] or self.c_field in ['', 'none', 'None', None]:
             return
 
-        # get currently selected data
-        map_df = self.data[self.sample_id].get_map_data(self.c_field, self.c_field_type)
+        try:
+            # get currently selected data
+            map_df = self.data[self.sample_id].get_map_data(self.c_field, self.c_field_type)
 
-        # update n bins
-        data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
-        self.hist_num_bins = max(1, round(data_range / self.hist_bin_width))
+            # update n bins
+            data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
+            self.hist_num_bins = max(1, round(data_range / self.hist_bin_width))
+        except (KeyError, TypeError) as e:
+            return
 
     def histogram_reset_bins(self):
         """Resets number of histogram bins to the default."""

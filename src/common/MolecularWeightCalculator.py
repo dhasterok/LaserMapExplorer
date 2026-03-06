@@ -3,7 +3,7 @@
 """
 Created on Thu Nov 30 15:55:16 2023
 
-@author: a1904121
+@author: Shavin Kaluthantri
 """
 
 class MolecularWeightCalculator:

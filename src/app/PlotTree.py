@@ -309,15 +309,136 @@ class PlotTree(CustomDockWidget):
         
         return plot_info, True
 
-    def tree_double_click(self,tree_index):
-        """Double-click on plot selector
-        
-        When the user double-clicks on the ``Plot Selector``, the stored plot is placed on the current canvas.
+    def _get_primary_axis(self, plot_type):
+        """Return the app_data axis ('x' or 'c') that plot_info['field']/['field_type'] map to.
 
         Parameters
         ----------
-        val : PyQt5.QtCore.QModelIndex
-            Item selected in ``Plot Selector``
+        plot_type : str
+            The plot type string (e.g. 'field map', 'histogram').
+
+        Returns
+        -------
+        str
+            'x' for histogram-style plots, 'c' for all map-style plots.
+        """
+        if plot_type in ['histogram']:
+            return 'x'
+        return 'c'
+
+    def _sync_ui_to_plot(self, plot_type, field_type, field):
+        """Synchronize all UI controls to match a selected plot.
+
+        Switches the control dock toolbox tab, updates the plot-type combobox,
+        style data, and field comboboxes to reflect the selected plot — all
+        without triggering the signal chain that would schedule a redundant
+        re-render.
+
+        Parameters
+        ----------
+        plot_type : str
+            The plot type (e.g. 'field map', 'histogram').
+        field_type : str
+            The field type of the primary axis (e.g. 'Analyte').
+        field : str
+            The field of the primary axis (e.g. 'Ca43').
+        style : dict, optional
+            Style dict to restore into style_data.style_dict. Defaults to None.
+        """
+        control_dock = self.ui.control_dock
+
+        # Disable plot_flag for the entire sync so that any widget changes below
+        # (e.g. X/Y/Z comboboxes that toggle_signals does NOT block) cannot
+        # fire schedule_update and trigger an unwanted re-render mid-setup.
+        old_plot_flag = self.ui.plot_flag
+        self.ui.plot_flag = False
+
+        try:
+            # 1. Find the correct toolbox tab for this plot type
+            target_tab = None
+            for tab_id, settings in control_dock.field_control_settings.items():
+                if tab_id == -1:
+                    continue
+                if plot_type in settings.plot_list:
+                    target_tab = tab_id
+                    break
+            if target_tab is None:
+                target_tab = control_dock.tab_dict.get('sample')
+
+            # Block all style_data signals so that intermediate plot_type writes
+            # don't fire update_plot_type before we've finished setting all state.
+            self.ui.style_data.blockSignals(True)
+
+            # 2. Switch toolbox tab without triggering toolbox_changed
+            control_dock.toolbox.blockSignals(True)
+            control_dock.toolbox.setCurrentIndex(target_tab)
+            control_dock.toolbox.blockSignals(False)
+
+            # 3. Repopulate comboBoxPlotType for this tab, then select the correct type.
+            control_dock.update_plot_type_combobox_options()
+            control_dock.comboBoxPlotType.blockSignals(True)
+            control_dock.comboBoxPlotType.setCurrentText(plot_type)
+            control_dock.comboBoxPlotType.blockSignals(False)
+
+            # 4. Update style data to the correct plot type.
+            #    NOTE: plot_info['style'] is a reference to style_dict, not a snapshot,
+            #    so restoring it here is a no-op for same-type plots. Field values are
+            #    written explicitly in step 5 to handle that case.
+            self.ui.style_data.plot_type = plot_type
+
+            # Re-enable style_data signals now that plot_type is correct
+            self.ui.style_data.blockSignals(False)
+
+            # 5. Write field_type/field directly into style_dict.
+            #    • Bypasses property-setter side-effects (auto-reset via field_dict,
+            #      which fails for tree names like 'Analyte (normalized)').
+            #    • For multi-axis plots (scatter, heatmap, ternary) plot_info stores
+            #      field_type/field as [x, y, z, c] lists — always write ALL axes,
+            #      including empty ones, so residual values from a previously shown
+            #      plot of the same type (e.g. 3-element → 2-element scatter) are
+            #      cleared and don't cause a spurious re-render.
+            style_entry = self.ui.style_data.style_dict.get(plot_type)
+            if style_entry is not None:
+                axes_upper = ['X', 'Y', 'Z', 'C']
+                if isinstance(field_type, list) and isinstance(field, list):
+                    for i, ax_upper in enumerate(axes_upper):
+                        ft = field_type[i] if i < len(field_type) else ''
+                        fv = field[i] if i < len(field) else ''
+                        style_entry[f'{ax_upper}FieldType'] = ft if ft is not None else ''
+                        style_entry[f'{ax_upper}Field'] = fv if fv is not None else ''
+                else:
+                    ax_upper = self._get_primary_axis(plot_type).upper()
+                    style_entry[f'{ax_upper}FieldType'] = field_type
+                    style_entry[f'{ax_upper}Field'] = field
+
+            # 6. Update which axis rows are visible/enabled in the control dock
+            control_dock.init_field_widgets(self.ui.style_data.axis_settings, plot_type)
+
+            # 7. Initialize axis limits/labels using the primary (first non-empty) field
+            primary_field_type = (field_type[0] if isinstance(field_type, list) else field_type) or ''
+            primary_field = (field[0] if isinstance(field, list) else field) or ''
+            if primary_field_type and primary_field:
+                self.ui.style_data.initialize_axis_values(primary_field_type, primary_field)
+
+            # 8. Sync all style dock widgets
+            if hasattr(self.ui, 'style_dock'):
+                self.ui.style_dock.set_style_widgets()
+
+        finally:
+            # Always restore plot_flag so the application remains responsive
+            self.ui.plot_flag = old_plot_flag
+
+    def tree_double_click(self, tree_index):
+        """Double-click on plot selector.
+
+        When the user double-clicks on the ``Plot Selector``, the stored plot
+        is placed on the current canvas and the full UI (toolbox tab, plot-type
+        combobox, field comboboxes, style dock) is updated to match.
+
+        Parameters
+        ----------
+        tree_index : QModelIndex
+            Item selected in the ``Plot Selector``.
         """
         if not self.plot_registry:
             log("Plot registry not available", "WARNING")
@@ -325,79 +446,46 @@ class PlotTree(CustomDockWidget):
 
         # Get tree key from clicked item
         tree_key = tree_index.data(Qt.ItemDataRole.UserRole)
-        
+
         # Get plot info from registry using tree key (if it exists)
         if tree_key:
             self.plot_info = self.plot_registry.get_plot_by_tree_key(tree_key)
         else:
             # No tree_key means this is a persistent leaf item for quick map creation
             self.plot_info = None
-        
-        flag = self.plot_info is not None
 
         tree = tree_index.parent().parent().data()
-        branch = tree_index.parent().data()
         leaf = tree_index.data()
 
         # Set main UI plot_info for compatibility with other components
         self.ui.plot_info = self.plot_info
-        
+
         if tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)', 'Calculated']:
             if self.plot_info:
-                # Existing plot: regenerate from registry data
-                log("plot_info exists, regenerating from registry", "NOTE")
-                
-                # Initialize axis values with the plot's field data
-                field_type = self.plot_info.get('field_type', tree)
-                field = self.plot_info.get('field', leaf)
-                self.ui.style_data.initialize_axis_values(field_type, field)
-                self.ui.style_data.set_style_widgets()
-                
-                # Add to canvas using registry
+                # Existing plot: restore full UI state then show cached canvas
+                log("plot_info exists, showing from registry", "NOTE")
+                self._sync_ui_to_plot(
+                    self.plot_info.get('plot_type', 'field map'),
+                    self.plot_info.get('field_type', tree),
+                    self.plot_info.get('field', leaf),
+                )
                 self.ui.add_canvas_to_window(self.plot_info)
-                
-                # Update UI fields to match the plot
-                self.ui.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'], field_type, field)
-                self.ui.update_spinboxes(field=field, field_type=field_type)
             else:
-                # Persistent leaf item: create new field map plot
+                # Persistent leaf item: sync UI for a new field map, then render
                 log("Creating new field map plot for persistent item", "NOTE")
-
-                # Set correct toolbox tab
-                if self.ui.control_dock.toolbox.currentIndex() not in [self.ui.control_dock.tab_dict['sample'], self.ui.control_dock.tab_dict['process']]:
-                    self.ui.control_dock.toolbox.setCurrentIndex(self.ui.control_dock.tab_dict['sample'])
-
-                # First update UI fields to set correct field/field_type in widgets
-                # This must happen BEFORE setting style data
-                self.ui.update_fields(branch, 'field map', tree, leaf, plot=False)
-                
-                # Now initialize style data for the specific field AFTER widgets are set
-                self.ui.style_data.initialize_axis_values(tree, leaf)
-                self.ui.style_data.plot_type = 'field map'
-                self.ui.style_data.set_style_widgets()
-
-                # Update spinboxes to match the field
-                self.ui.update_spinboxes(field=leaf, field_type=tree)
-                
-                # Finally create the plot - this should use the correct field now
-                # Since widgets are already set, we can trigger plot creation
-                if hasattr(self.ui, 'plot_map_mpl'):
-                    self.ui.plot_map_mpl()
-                elif hasattr(self.ui, 'update_SV'):
+                self._sync_ui_to_plot('field map', tree, leaf)
+                if hasattr(self.ui, 'update_SV'):
                     self.ui.update_SV()
 
         elif tree in ['Histogram', 'Correlation', 'Geochemistry', 'Multidimensional Analysis']:
-
             if self.plot_info:
+                # Restore full UI state then show cached canvas
+                self._sync_ui_to_plot(
+                    self.plot_info.get('plot_type', ''),
+                    self.plot_info.get('field_type', ''),
+                    self.plot_info.get('field', ''),
+                )
                 self.ui.add_canvas_to_window(self.plot_info)
-                # Handle style updates safely
-                plot_type = self.plot_info.get('plot_type')
-                style = self.plot_info.get('style')
-                if plot_type and style:
-                    self.ui.style_data.style_dict[plot_type] = style
-                    self.ui.style_data.plot_type = plot_type
-                # updates comboBoxColorByField and comboBoxColorField comboboxes 
-                #self.ui.update_fields(self.plot_info['sample_id'], self.plot_info['plot_type'],self.plot_info['field_type'], self.plot_info['field'])
 
         else:
             raise ValueError(f"Unknown tree type {tree}.")

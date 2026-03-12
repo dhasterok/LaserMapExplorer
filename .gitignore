@@ -72,7 +72,6 @@ env*
 *.pyc
 
 # Directories
-# -----------
 illustrator
 dist
 _build
@@ -83,7 +82,11 @@ blockly/node_modules
 node_modules
 saved
 .vscode
+.idea/*
+
 # Binaries
-# --------
 *.dll
 *.exe
+
+# Claude Code config
+CLAUDE.md

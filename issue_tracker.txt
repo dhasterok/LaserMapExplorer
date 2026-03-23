@@ -1,0 +1,19 @@
+n-dimensional plots
+  quantiles combobox is not showing options
+  plot is produced with update plot toolbar action, but should update automatically?
+  data looks spikier than I would expect (check later)
+
+  should be able to select field and plot individual clusters (all or selected clusters), i.e., each cluster should show up as different lines on the same plot
+
+histogram
+  when data are clustered, should be able to plot histograms for individual clusters or all clusters on the same plot.
+
+Need to get the Tools > Filtering dock working again.
+    Filtering allows selection of subsets of the data for plotting and/or analysis
+    Fitering is done in potentially 3 ways
+        - by using element/ratio or other calculated fields as ranges
+        - by selecting specific clusters
+        - by drawing polygons to include/exclude data
+
+
+

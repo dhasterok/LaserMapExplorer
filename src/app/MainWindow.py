@@ -47,6 +47,7 @@ from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
 from src.app.PlotRegistry import PlotRegistry
+from src.common.CustomMplCanvas import MplCanvas
 
 import faulthandler
 faulthandler.enable()
@@ -1031,10 +1032,10 @@ class MainWindow(QMainWindow):
 
     def add_canvas_to_window(self, plot_info, position=None):
         """Add plot to canvas using the registry system.
-        
+
         This method serves as a bridge between the old plot_info approach
         and the new registry-based canvas management.
-        
+
         Parameters
         ----------
         plot_info : dict
@@ -1049,12 +1050,20 @@ class MainWindow(QMainWindow):
         # Get or create canvas using registry
         plot_id = plot_info.get('plot_id')
         if plot_id:
-            # Canvas from registry
-            canvas = self.plot_registry.get_or_create_canvas(plot_id)
-            if canvas:
-                # Update plot_info with canvas reference for backward compatibility
-                plot_info['figure'] = canvas
-        
+            # Check if plot_info already has a valid rendered figure
+            existing_figure = plot_info.get('figure')
+            if existing_figure is not None and isinstance(existing_figure, MplCanvas):
+                # Already has a rendered canvas - cache it for future use but DON'T replace it
+                if plot_id not in self.plot_registry.canvas_cache:
+                    self.plot_registry._cache_canvas(plot_id, existing_figure)
+            else:
+                # No rendered figure - try to get from cache
+                canvas = self.plot_registry.canvas_cache.get(plot_id)
+                if canvas:
+                    plot_info['figure'] = canvas
+                # If not in cache either, we can't display anything meaningful
+                # Don't call _create_canvas because it only makes a blank canvas
+
         # Use existing CanvasWidget logic
         self.canvas_widget.add_canvas_to_window(plot_info, position)
 

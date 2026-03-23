@@ -364,11 +364,25 @@ class CanvasWidget(QWidget):
 
         # Now process each widget
         for widget, item in widgets_to_remove:
-            # Check if widget is referenced in PlotTree
+            # Check if widget is referenced in PlotRegistry or PlotTree
             keep_widget = False
-            if plot_tree is not None:
-                # Try to find a plot_info referencing this widget
-                # Search all trees and branches for a matching figure
+
+            # Check PlotRegistry canvas cache first (fast path)
+            plot_registry = getattr(top_parent, 'plot_registry', None) if top_parent else None
+            if plot_registry is not None:
+                for cached_canvas in plot_registry.canvas_cache.values():
+                    if cached_canvas is widget:
+                        keep_widget = True
+                        break
+                # Also check plot metadata figures
+                if not keep_widget:
+                    for plot_data in plot_registry.plots.values():
+                        if isinstance(plot_data, dict) and plot_data.get('figure') is widget:
+                            keep_widget = True
+                            break
+
+            # Fallback: check tree items the old way
+            if not keep_widget and plot_tree is not None:
                 for tree_name, tree_items in plot_tree.tree.items():
                     for branch_idx in range(tree_items.rowCount()):
                         branch_item = tree_items.child(branch_idx)
@@ -606,7 +620,8 @@ class CanvasWidget(QWidget):
         # put plot_info back into table
         #print(plot_info)
         if hasattr(self.ui, "plot_tree"):
-            self.ui.plot_tree.add_tree_item(plot_info)
+            if not plot_info.get('plot_id'):
+                self.ui.plot_tree.add_tree_item(plot_info)
 
     def save_current_plot_to_tree(self):
         """Save the current plot displayed on canvas to the plot tree and registry."""
@@ -669,9 +684,9 @@ class CanvasWidget(QWidget):
                     return False
             
             # Register plot in registry if registry is available
-            if hasattr(self.ui, 'plot_registry') and self.ui.plot_registry:
-                plot_id = self.ui.plot_registry.register_plot(current_plot_info)
-                log(f"Registered plot in registry: {plot_id}", "INFO")
+            # if hasattr(self.ui, 'plot_registry') and self.ui.plot_registry:
+            #     plot_id = self.ui.plot_registry.register_plot(current_plot_info)
+            #     log(f"Registered plot in registry: {plot_id}", "INFO")
             
             # Add to plot tree
             if hasattr(self.ui, 'plot_tree') and self.ui.plot_tree:

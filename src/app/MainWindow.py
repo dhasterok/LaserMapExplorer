@@ -97,6 +97,8 @@ class MainWindow(QMainWindow):
                 'Profile': True,
                 'Selector': True,
                 'Browser': True,
+                'Registry': True,
+                'Notes': True,
                 'Error' : True,
                 'Warning' : True,
             }
@@ -1112,7 +1114,7 @@ class MainWindow(QMainWindow):
             self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.mask_dock)
             self.mask_dock.setFloating(False)
 
-            self.statusbar.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.toolButtonBottomDock))
+            self.statusbar.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.statusbar.toolButtonBottomDock))
 
             if self.mask_dock not in self.help_mapping:
                 self.help_mapping[self.mask_dock] = 'filtering'
@@ -1314,8 +1316,6 @@ class MainWindow(QMainWindow):
         if not hasattr(self, 'logger_dock'):
             logfile = BASEDIR / 'resources' / 'log' / 'lame.log'
             self.logger_dock = LoggerDock(logfile, self)
-            for key in self.logger_options:
-                self.logger_options[key] = True
 
             if self.logger_dock not in self.help_mapping:
                 self.help_mapping[self.logger_dock] = 'logging_tool'

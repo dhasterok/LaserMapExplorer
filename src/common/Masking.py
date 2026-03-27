@@ -66,11 +66,6 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
 
         super().__init__(ui)
         self.ui = ui
-        # Note: Do not store self.data as property to avoid circular reference
-        # Use self.ui.app_data.current_data in methods that need it
-        
-        # Initialize FieldLogicUI properly - use property to access current data
-        FieldLogicUI.__init__(self, data=None)
 
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -124,11 +119,21 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.update_toolbar_for_tab(0)
 
     @property
+    def app_data(self):
+        """Delegate to ui.app_data so FieldLogicUI methods work correctly"""
+        return self.ui.app_data
+
+    @property
     def data(self):
         """Access current data without storing reference to avoid circular dependency"""
         if hasattr(self.ui, 'app_data') and self.ui.app_data.current_data:
             return self.ui.app_data.current_data
         return None
+
+    @data.setter
+    def data(self, value):
+        """Ignored — data is always derived from self.ui.app_data.current_data"""
+        pass
 
     def update_toolbar_for_tab(self, index):
         """Update toolbar to show only actions relevant to the current tab"""
@@ -251,7 +256,7 @@ class FilterTab(QWidget):
         group_layout.setContentsMargins(3, 3, 3, 3)
         self.filter_tools_groupbox.setLayout(group_layout)
 
-        filter_layout = QGridLayout(self.filter_tools_groupbox)
+        filter_layout = QGridLayout()
         filter_layout.setContentsMargins(3, 3, 3, 3)
         group_layout.addLayout(filter_layout)
 
@@ -460,7 +465,7 @@ class FilterTab(QWidget):
         self.action_select_all_filters.triggered.connect(self.filter_table.selectAll)
 
         # filter widget connections
-        self.combo_filter_presets.activated.connect(self.read_filter_table)
+        self.combo_filter_presets.activated.connect(lambda _: self.read_filter_table())
         self.combo_field.currentTextChanged.connect(self.update_filter_values)
         self.edit_filter_min.editingFinished.connect(self.callback_edit_filter_min)
         self.spin_filter_min.valueChanged.connect(self.callback_spin_filter_min)
@@ -673,20 +678,16 @@ class FilterTab(QWidget):
         if not current_data:
             return
 
-        print(self.filter_table.selectedIndexes())
+        # Collect selected row indices in reverse order to avoid shifting issues
+        selected_rows = sorted(
+            {idx.row() for idx in self.filter_table.selectionModel().selectedRows()},
+            reverse=True
+        )
 
-        # Collect indices to remove (from filter_df)
         indices_to_remove = []
-        
-        # We loop in reverse to avoid issues when removing rows
-        for row in range(self.filter_table.rowCount()-1, -1, -1):
-            chkBoxItem = self.filter_table.item(row, 7)
-            if chkBoxItem and chkBoxItem.checkState() == Qt.CheckState.Checked:
-                # Store the filter_df index (stored in row 0 as hidden data)
-                filter_index = row  # In our case, table row corresponds to filter_df index
-                indices_to_remove.append(filter_index)
-                # Remove from table
-                self.filter_table.removeRow(row)
+        for row in selected_rows:
+            indices_to_remove.append(row)
+            self.filter_table.removeRow(row)
 
         # Remove from DataHandling filter_df using new method
         for index in indices_to_remove:

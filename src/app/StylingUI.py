@@ -1785,8 +1785,15 @@ class StylingDock(CustomDockWidget):
             field_type = getattr(self.ui.control_dock, f"comboBoxFieldType{ax.upper()}")
             field = getattr(self.ui.control_dock, f"comboBoxField{ax.upper()}")
 
+            if ax == 'c':
+                log(f"set_style_widgets ax=c: app_data.c_field={self.ui.app_data.c_field!r} app_data.c_field_type={self.ui.app_data.c_field_type!r}", prefix="Style")
+                log(f"set_style_widgets ax=c: comboC={field.currentText()!r} comboTypeC={field_type.currentText()!r} spinbox={self.ui.control_dock.spinBoxFieldC.value()!r}", prefix="Style")
+
             field_type.setCurrentText(getattr(self.ui.app_data, f"{ax}_field_type"))
             field.setCurrentText(getattr(self.ui.app_data, f"{ax}_field"))
+
+            if ax == 'c':
+                log(f"set_style_widgets ax=c after setCurrentText: comboC={field.currentText()!r}", prefix="Style")
 
             # color properties
             self.ui.control_dock.update_field_type_combobox_options(
@@ -1805,15 +1812,26 @@ class StylingDock(CustomDockWidget):
                 field.clear()
             else:
                 self.ui.control_dock.update_field_combobox_options(field, field_type)
-                self.ui.control_dock.spinBoxFieldC.setMinimum(0)
-                self.ui.control_dock.spinBoxFieldC.setMaximum(field.count() - 1)
+                if ax == 'c':
+                    spinbox = self.ui.control_dock.spinBoxFieldC
+                    log(f"set_style_widgets ax=c after update_field_combobox_options: comboC={field.currentText()!r} spinbox={spinbox.value()!r}", prefix="Style")
+                    spinbox.blockSignals(True)
+                    spinbox.setMinimum(0)
+                    spinbox.setMaximum(field.count() - 1)
+                    spinbox.setValue(max(0, field.currentIndex()))
+                    spinbox.blockSignals(False)
+                    log(f"set_style_widgets ax=c after setMaximum({field.count()-1}): spinbox={spinbox.value()!r}", prefix="Style")
 
+            if ax == 'c':
+                log(f"set_style_widgets ax=c before final setCurrentText: app_data.c_field={self.ui.app_data.c_field!r} comboC={field.currentText()!r}", prefix="Style")
             if getattr(self.ui.app_data, f"{ax}_field") in field.allItems():
-                field.setCurrentText(self.ui.app_data.c_field)
+                field.setCurrentText(getattr(self.ui.app_data, f"{ax}_field"))
                 #self.ui.c_field_spinbox_changed()
             else:
                 #self.ui.style_data.c_field = self.ui.control_dock.comboBoxFieldC.currentText()
                 pass
+            if ax == 'c':
+                log(f"set_style_widgets ax=c after final setCurrentText: comboC={field.currentText()!r} app_data.c_field={self.ui.app_data.c_field!r}", prefix="Style")
 
         # for map plots
         if style.plot_type.lower() in style.map_plot_types:

@@ -53,6 +53,7 @@ class ControlSettings:
     axes: Dict[str, AxisSettings] = field(default_factory=dict)
 
 
+@auto_log_methods(logger_key='UI')
 class ControlDock(CustomDockWidget):
     def __init__(self, ui: "MainWindow"):
         super().__init__(parent=ui)

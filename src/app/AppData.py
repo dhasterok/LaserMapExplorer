@@ -6,7 +6,7 @@ import pandas as pd
 import src.common.csvdict as csvdict
 from PyQt6.QtCore import QObject, pyqtSignal
 from src.app.config import APPDATA_PATH, STYLE_PATH
-from src.common.Logger import auto_log_methods
+from src.common.Logger import auto_log_methods, log
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
@@ -848,7 +848,9 @@ class AppData(QObject):
     @c_field_type.setter
     def c_field_type(self, new_field_type):
         current_field_type = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CFieldType']
+        log(f"c_field_type.setter: plot_type={self.ui.style_data.plot_type!r} current={current_field_type!r} new={new_field_type!r}", prefix="Data")
         if new_field_type == current_field_type:
+            log("c_field_type.setter: early return (same)", prefix="Data")
             return
 
         # update c_field_type
@@ -858,9 +860,12 @@ class AppData(QObject):
 
         # update c_field
         if new_field_type in ['', 'none', 'None']:
+            log("c_field_type.setter: resetting c_field to '' (none type)", prefix="Data")
             self.c_field = ''
         else:
-            self.c_field = self.field_dict[new_field_type][0]
+            first_field = self.field_dict[new_field_type][0]
+            log(f"c_field_type.setter: side-effect sets c_field={first_field!r} (first of {new_field_type})", prefix="Data")
+            self.c_field = first_field
 
 
     @property
@@ -913,6 +918,7 @@ class AppData(QObject):
     @c_field.setter
     def c_field(self, new_field):
         current_field = self.ui.style_data.style_dict[self.ui.style_data.plot_type]['CField']
+        log(f"c_field.setter: plot_type={self.ui.style_data.plot_type!r} current={current_field!r} new={new_field!r}", prefix="Data")
         if new_field == current_field:
             return
 

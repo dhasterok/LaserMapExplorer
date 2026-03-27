@@ -274,7 +274,6 @@ def auto_log_methods(logger_key: str, **log_options):
         
     """    
     def decorator(cls):
-        print(f"[DEBUG] Wrapping methods for: {cls.__name__}")
         for attr_name in dir(cls):
             if attr_name.startswith("__"):
                 continue
@@ -284,10 +283,8 @@ def auto_log_methods(logger_key: str, **log_options):
                 continue  # Skip non-function attributes
 
             if getattr(attr, "_no_log", False):
-                print(f"  - Skipping method (no_log): {attr_name}")
                 continue
 
-            print(f"  - Wrapping method: {attr_name}")
             wrapped = log_call(logger_key=logger_key, **log_options)(attr)
             setattr(cls, attr_name, wrapped)
         return cls
@@ -635,11 +632,11 @@ class LoggerDock(CustomDockWidget):
             try:
                 with open(self.log_file, "w") as log_file:
                     log_file.write(log_contents)
-                print(f"Log exported to: {self.log_file}")
+                log(f"Log exported to: {self.log_file}", prefix="Warning")
             except Exception as e:
-                print(f"Failed to export log: {e}")
+                log(f"Failed to export log: {e}", prefix="Error")
         else:
-            print("No log contents to export.")
+            log("No log contents to export.", prefix="Warning")
 
     def set_logger_options(self):
         """ Opens a dialog to edit logger options."""

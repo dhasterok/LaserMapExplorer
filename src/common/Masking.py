@@ -28,7 +28,7 @@ from src.common.ColorManager import convert_color
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.common.format as fmt
 from src.common.PolygonMatplotlib import PolygonManager
-from src.common.Logger import LoggerConfig, auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 # Mask object
 # -------------------------------
@@ -304,8 +304,13 @@ class FilterTab(QWidget):
         self.combo_operator.clear()
         self.combo_operator.addItems(["and","or","not"])
 
+        self.button_load_preset = QToolButton(self.filter_tools_groupbox)
+        self.button_load_preset.setText("Load")
+        self.button_load_preset.setToolTip("Load selected preset into filter table")
+
         filter_layout.addWidget(QLabel("Preset"), 0, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
-        filter_layout.addWidget(self.combo_filter_presets, 0, 1, 1, 5)
+        filter_layout.addWidget(self.combo_filter_presets, 0, 1, 1, 4)
+        filter_layout.addWidget(self.button_load_preset, 0, 5, 1, 1)
 
         filter_layout.addWidget(QLabel("Field type"), 1, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
         filter_layout.addWidget(self.combo_field_type_type, 1, 1, 1, 2)
@@ -375,7 +380,8 @@ class FilterTab(QWidget):
         header = self.filter_table.horizontalHeader()
         if header:
             header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1,QHeaderView.ResizeMode.Interactive)
+            header.resizeSection(1, 90)
             header.setSectionResizeMode(2,QHeaderView.ResizeMode.Stretch)
             header.setSectionResizeMode(3,QHeaderView.ResizeMode.ResizeToContents)
             header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
@@ -384,6 +390,7 @@ class FilterTab(QWidget):
             header.setSectionResizeMode(7,QHeaderView.ResizeMode.ResizeToContents)
 
         self.filter_table.setHorizontalHeaderLabels(["Use", "Field Type", "Field", "Scale", "Min", "Max", "Operator", "Persistent"])
+        self.filter_table.setColumnHidden(3, True)  # Hide "Scale" — always "linear", saves horizontal space
 
         horizontal_layout.addWidget(self.filter_tools_groupbox)
         horizontal_layout.addWidget(self.filter_table)
@@ -452,26 +459,23 @@ class FilterTab(QWidget):
 
     def connect_widgets(self):
         # filter tab toolbar connections
-        self.action_add_filter.triggered.connect(self.update_filter_table)
+        self.action_add_filter.triggered.connect(lambda: self.update_filter_table())
         self.action_add_filter.triggered.connect(lambda: self.apply_field_filters_update_plot())
         self.action_move_up.triggered.connect(lambda: self.table_fcn.move_row_up(self.filter_table))
         self.action_move_up.triggered.connect(lambda: self.apply_field_filters_update_plot())
         self.action_move_down.triggered.connect(lambda: self.table_fcn.move_row_down(self.filter_table))
         self.action_move_down.triggered.connect(lambda: self.apply_field_filters_update_plot())
-        self.action_remove_filter.triggered.connect(self.remove_selected_rows)
-        self.action_remove_filter.triggered.connect(lambda: self.table_fcn.delete_row(self.filter_table))
-        self.action_remove_filter.triggered.connect(lambda: self.apply_field_filters_update_plot())
+        self.action_remove_filter.triggered.connect(lambda: self.remove_selected_rows())
         self.action_save_filters.triggered.connect(self.save_filter_table)
         self.action_select_all_filters.triggered.connect(self.filter_table.selectAll)
 
         # filter widget connections
-        self.combo_filter_presets.activated.connect(lambda _: self.read_filter_table())
+        self.button_load_preset.clicked.connect(self.read_filter_table)
         self.combo_field.currentTextChanged.connect(self.update_filter_values)
         self.edit_filter_min.editingFinished.connect(self.callback_edit_filter_min)
         self.spin_filter_min.valueChanged.connect(self.callback_spin_filter_min)
         self.edit_filter_max.editingFinished.connect(self.callback_edit_filter_max)
         self.spin_filter_max.valueChanged.connect(self.callback_spin_filter_max)
-
 
     def apply_field_filters_update_plot(self):
         """Updates filters in current data and schedules plot update
@@ -481,6 +485,7 @@ class FilterTab(QWidget):
         current_data = self.ui.app_data.current_data
         if current_data:
             current_data.apply_field_filters()
+            log(f"apply_field_filters_update_plot: plot_flag={self.ui.plot_flag}, calling schedule_update", prefix='Mask')
             self.ui.schedule_update()
 
     def update_filter_values(self, *args, **kwargs):
@@ -576,7 +581,7 @@ class FilterTab(QWidget):
         except Exception:
             return
 
-    def update_filter_table(self, reload = False):
+    def update_filter_table(self, reload = False, apply = True):
         """Update data for analysis when filter table is updated.
 
         Parameters
@@ -589,12 +594,18 @@ class FilterTab(QWidget):
             return
 
         def on_use_checkbox_state_changed(row, state):
-            """Update the 'use' value in the filter_df for the given row"""
+            """Update the 'use' value in the filter_df for the given row and refresh the plot"""
             if current_data and row < len(current_data.filter_df):
-                current_data.filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
+                current_data.filter_df.at[row, 'use'] = bool(state)
+                self.apply_field_filters_update_plot()
 
         # If reload is True, clear the table and repopulate it from filter_df
         if reload:
+            # Disconnect stateChanged signals before clearing to prevent spurious apply calls
+            for r in range(self.filter_table.rowCount()):
+                widget = self.filter_table.cellWidget(r, 0)
+                if widget:
+                    widget.blockSignals(True)
             # Clear the table
             self.filter_table.setRowCount(0)
 
@@ -667,7 +678,8 @@ class FilterTab(QWidget):
             self.filter_table.setCellWidget(row, 7, chkBoxItem_persistent)
 
         # Apply the filters after updating
-        current_data.apply_field_filters()
+        if apply:
+            current_data.apply_field_filters()
 
     def remove_selected_rows(self):
         """Remove selected rows from filter table.
@@ -760,11 +772,16 @@ class FilterTab(QWidget):
         filter_file = os.path.join(BASEDIR,f'resources/filters/{filter_name}.fltr')
         try:
             filter_info = pd.read_csv(filter_file)
-            
-            # put filter_info into data and table
-            current_data.filter_df = filter_info
 
-            self.update_filter_table()
+            # Normalize bool columns that CSV reads as strings
+            for col in ('use', 'persistent'):
+                if col in filter_info.columns:
+                    filter_info[col] = filter_info[col].astype(str).str.strip().str.lower() == 'true'
+
+            # append preset filters to existing filters
+            current_data.filter_df = pd.concat([current_data.filter_df, filter_info], ignore_index=True)
+
+            self.update_filter_table(reload=True, apply=False)
         except FileNotFoundError:
             QMessageBox.warning(self.ui, 'Error', f'Filter file {filter_file} not found.')
         except Exception as e:

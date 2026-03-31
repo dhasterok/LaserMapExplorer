@@ -18,7 +18,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
 from src.common.format import symlog, inv_logit
-from src.common.Logger import LoggerConfig, auto_log_methods
+from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 
 @auto_log_methods(logger_key='Data')
@@ -1123,6 +1123,8 @@ class SampleObj(QObject):
         # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
         if self.filter_df.empty:
             self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
+            self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask
+            log(f"apply_field_filters: filter_df empty, mask reset to all True ({len(self.mask)} points)", prefix='Mask')
             return
 
         # Initialize mask to all True, then apply filters
@@ -1130,12 +1132,19 @@ class SampleObj(QObject):
 
         # by creating a mask based on min and max of the corresponding filter analytes
         for index, filter_row in self.filter_df.iterrows():
-            if filter_row['use']:
-                field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
-                
+            use_val = filter_row['use']
+            if isinstance(use_val, str):
+                use_val = use_val.strip().lower() == 'true'
+            if use_val:
+                try:
+                    field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+                except KeyError:
+                    # Field doesn't exist in the current sample — skip this filter
+                    continue
+
                 # Create mask for this filter
                 field_mask = ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
-                
+
                 operator = filter_row['operator']
                 if operator == 'and':
                     self.filter_mask = self.filter_mask & field_mask
@@ -1143,11 +1152,10 @@ class SampleObj(QObject):
                     self.filter_mask = self.filter_mask | field_mask
                 elif operator == 'not':
                     self.filter_mask = self.filter_mask & ~field_mask
-                # Original implementation:
-                # if operator == 'and':
-                #     self.filter_mask = self.filter_mask & ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
-                # elif operator == 'or':
-                #     self.filter_mask = self.filter_mask | ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+
+        # Recompute the combined mask so the plot sees the updated filter
+        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask
+        log(f"apply_field_filters: filter_mask={self.filter_mask.sum()}/{len(self.filter_mask)} True, mask={self.mask.sum()}/{len(self.mask)} True", prefix='Mask')
 
     def add_filter(self, field_type, field, min_val, max_val, operator='and', use=True, persistent=True):
         """Add a new filter to the filter_df.

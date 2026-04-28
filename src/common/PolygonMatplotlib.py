@@ -298,13 +298,13 @@ class PolygonManager:
             polygon = self.polygons[sample_id][p_id]
 
             # Clear any previous selection in the table
-            self.main_window.tableWidgetPolyPoints.clearSelection()
+            self.parent.tableWidgetPolyPoints.clearSelection()
 
             # Find and select the corresponding row in the table
-            for row in range(self.main_window.tableWidgetPolyPoints.rowCount()):
-                item = self.main_window.tableWidgetPolyPoints.item(row, 0)  # Assuming ID in col 0
+            for row in range(self.parent.tableWidgetPolyPoints.rowCount()):
+                item = self.parent.tableWidgetPolyPoints.item(row, 0)  # Assuming ID in col 0
                 if item and int(item.text()) == p_id:
-                    self.main_window.tableWidgetPolyPoints.selectRow(row)
+                    self.parent.tableWidgetPolyPoints.selectRow(row)
                     break
 
             # Remove the patch from axes if it exists (to avoid double-drawing)

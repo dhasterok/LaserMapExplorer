@@ -627,7 +627,7 @@ class ControlDock(CustomDockWidget):
                 self.ui.lame_action.SwapAxes.setEnabled(False)
                 if self.correlation.comboBoxCorrelationMethod.currentText() == 'none':
                     self.correlation.comboBoxCorrelationMethod.setCurrentText('Pearson')
-            case 'cluster performance' | 'cluster map' | 'cluster score ':
+            case 'cluster performance' | 'cluster map' | 'cluster score map':
                 self.clustering.toggle_cluster_widgets()
             case _:
                 self.ui.lame_action.SwapAxes.setEnabled(False)
@@ -1166,13 +1166,15 @@ class ControlDock(CustomDockWidget):
                         return self.comboBoxFieldY.currentText()
                     case 'z':
                         return self.comboBoxFieldZ.currentText()
-            case 'PCA scatter' | 'PCA heatmap':
+            case 'dimension scatter' | 'dimension heatmap':
                 match ax:
                     case 'x':
-                        return f'PC{self.dimreduction.spinBoxPCX.value()}'
+                        return self.comboBoxFieldX.currentText()
                     case 'y':
-                        return f'PC{self.dimreduction.spinBoxPCY.value()}'
-            case 'field map' | 'ternary map' | 'PCA score' | 'cluster map' | 'cluster score':
+                        return self.comboBoxFieldY.currentText()
+                    case 'z':
+                        return self.comboBoxFieldZ.currentText()
+            case 'field map' | 'gradient map' | 'ternary map' | 'cluster map' | 'cluster score map' | 'dimension score map':
                 return ax.upper()
 
 class FieldLogicUI():
@@ -1226,7 +1228,7 @@ class FieldLogicUI():
                     field_list = ['Cluster']
                 else:
                     field_list = []
-            case 'cluster score':
+            case 'cluster score map':
                 if 'Cluster score' in data_type_dict:
                     field_list = ['Cluster score']
                 else:
@@ -1238,7 +1240,7 @@ class FieldLogicUI():
                     field_list = ['Cluster score']
             case 'cluster performance':
                 field_list = []
-            case 'pca score':
+            case 'dimension score map':
                 if 'PCA score' in data_type_dict:
                     field_list = ['PCA score']
                 else:
@@ -1253,7 +1255,7 @@ class FieldLogicUI():
                     field_list.append('Ratio')
                     field_list.append('Ratio (normalized)')
 
-                if 'pca score' in data_type_dict:
+                if 'PCA score' in data_type_dict:
                     field_list.append('PCA score')
 
                 if 'Cluster' in data_type_dict:

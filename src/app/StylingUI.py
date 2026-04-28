@@ -1610,7 +1610,7 @@ class StylingDock(CustomDockWidget):
                 else:
                     self.caxes.comboBoxCbarDirection.setEnabled(True)
 
-            case 'scatter' | 'PCA scatter':
+            case 'scatter' | 'dimension scatter':
                 # Always enable X/Y labels
                 self.axis_widget_dict['x']['axis_label'].setEnabled(True)
                 self.axis_widget_dict['y']['axis_label'].setEnabled(True)
@@ -1630,8 +1630,8 @@ class StylingDock(CustomDockWidget):
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
                     self._toggle_lines()
 
-                # PCA-specific
-                if plot_type == 'pca scatter':
+                # dimension scatter-specific
+                if plot_type == 'dimension scatter':
                     self._toggle_lines(multiplier=True)
 
                 # Color properties (conditional)
@@ -1640,7 +1640,7 @@ class StylingDock(CustomDockWidget):
                 elif self.ui.control_dock.comboBoxFieldTypeC.currentText() == 'cluster':
                     self._toggle_colormap()
 
-            case 'heatmap' | 'PCA heatmap':
+            case 'heatmap' | 'dimension heatmap':
                 # Always enable X/Y labels
                 self.axis_widget_dict['x']['axis_label'].setEnabled(True)
                 self.axis_widget_dict['y']['axis_label'].setEnabled(True)
@@ -1651,8 +1651,8 @@ class StylingDock(CustomDockWidget):
                 if self.ui.control_dock.comboBoxFieldZ.currentText() == '':
                     self._toggle_lines()
 
-                # PCA-specific
-                if plot_type == 'pca heatmap':
+                # dimension heatmap-specific
+                if plot_type == 'dimension heatmap':
                     self._toggle_lines(multiplier=True)
 
                 self._toggle_colormap()
@@ -1685,13 +1685,13 @@ class StylingDock(CustomDockWidget):
                 self._toggle_markers(transparency=False, color=True)
                 self._toggle_lines()
 
-            case 'pca score' | 'cluster score' | 'cluster map':
+            case 'cluster score map' | 'dimension score map' | 'cluster map':
                 self._toggle_scalebar()
                 self._toggle_common(show_mass=False)
                 self._toggle_lines()
-                
+
                 # Conditional colormap (not for clusters)
-                if plot_type != 'clusters':
+                if plot_type != 'cluster map':
                     self._toggle_colormap()
             case 'profile':
                 self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
@@ -2131,7 +2131,7 @@ class StylingDock(CustomDockWidget):
             self.set_color_axis_widgets()
         else:
             match self.ui.control_dock.comboBoxPlotType.currentText().lower():
-                case 'field map' | 'cluster map' | 'cluster score map' | 'pca score':
+                case 'field map' | 'gradient map' | 'cluster map' | 'cluster score map' | 'dimension score map':
                     field = ax.upper()
                     data.processed.prep_data(field)
                     self.set_axis_widgets(ax, field)
@@ -2161,12 +2161,17 @@ class StylingDock(CustomDockWidget):
                     data.processed.prep_data(field)
                     self.set_axis_widgets(ax, field)
 
-                case 'PCA scatter' | 'PCA heatmap':
+                case 'dimension scatter' | 'dimension heatmap':
                     field_type = 'PCA score'
-                    if ax == 'x':
-                        field = self.ui.spinBoxPCX.currentText()
-                    else:
-                        field = self.ui.spinBoxPCY.currentText()
+                    match ax:
+                        case 'x':
+                            field = self.ui.control_dock.comboBoxFieldX.currentText()
+                        case 'y':
+                            field = self.ui.control_dock.comboBoxFieldY.currentText()
+                        case 'z':
+                            field = self.ui.control_dock.comboBoxFieldZ.currentText()
+                    if not field:
+                        return
                     data.processed.prep_data(field)
                     self.set_axis_widgets(ax, field)
 

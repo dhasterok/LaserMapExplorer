@@ -1011,6 +1011,44 @@ class MainWindow(QMainWindow):
             self.plot_flag = old_plot_flag
 
 
+    def apply_cluster_mask(self, inverse=False):
+        """Creates a mask from the clusters currently selected in the Cluster tab.
+
+        Parameters
+        ----------
+        inverse : bool, optional
+            When False (Group Mask), keeps selected clusters; when True (Group Mask Inverse),
+            keeps all clusters *except* the selected ones. By default False.
+        """
+        sample_id = self.app_data.sample_id
+        if not sample_id or sample_id not in self.data:
+            return
+
+        method = self.app_data.cluster_method
+        selected_clusters = list(self.app_data.cluster_dict[method].get('selected_clusters', []))
+
+        if not selected_clusters:
+            return
+
+        cluster_group = self.data[sample_id].processed.loc[:, method]
+
+        if inverse:
+            all_clusters = cluster_group.dropna().unique().tolist()
+            selected_clusters = [c for c in all_clusters if c not in selected_clusters]
+
+        ind = np.isin(cluster_group, selected_clusters)
+        self.data[sample_id].cluster_mask = ind
+
+        # recompute combined mask
+        d = self.data[sample_id]
+        d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask
+
+        self.lame_action.ClearFilters.setEnabled(True)
+        self.lame_action.ClusterMask.setEnabled(True)
+        self.lame_action.ClusterMask.setChecked(True)
+
+        self.schedule_update()
+
     # -------------------------------------
     # Dialogs and Windows
     # -------------------------------------

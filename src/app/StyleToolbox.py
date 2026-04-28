@@ -398,7 +398,7 @@ class StyleData(QObject, StyleTheme):
     ternary_color_x, ternary_color_y, ternary_color_z, ternary_color_m : str
         Colors for ternary diagram vertices and centroid.
     map_plot_types : list
-        A list of plots that result in a map, i.e., ['field map', 'ternary map', 'PCA score', 'cluster map', 'cluster score'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
+        A list of plots that result in a map, i.e., ['field map', 'gradient map', 'ternary map', 'cluster map', 'cluster score map', 'dimension score map'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
     marker_dict : dict
         Dictionary of marker names used to translate ``comboBoxMarker`` to a subset of matplotlib makers symbol, though not all matplotlib markers
         are used.
@@ -505,10 +505,11 @@ class StyleData(QObject, StyleTheme):
         self.style_dict = {}
         self.map_plot_types = [
             'field map',
+            'gradient map',
             'ternary map',
-            'PCA score',
             'cluster map',
-            'cluster score'
+            'cluster score map',
+            'dimension score map',
         ]
 
         self._marker_dict = {

@@ -839,7 +839,7 @@ class MainToolbar(QToolBar):
 
             # If the user clicks discard, then no need to save, just change the sample
             if response == QMessageBox.StandardButton.Save:
-                self.io.save_project()
+                self.ui.io.save_project()
             elif response == QMessageBox.StandardButton.Cancel:
                 # change the sample ID back to the current sample
                 self.comboBoxSampleId.setCurrentText(self.ui.app_data.sample_id)
@@ -849,4 +849,4 @@ class MainToolbar(QToolBar):
         # update the current sample ID
         self.ui.app_data.sample_id = self.comboBoxSampleId.currentText()
         # initiate the sample change
-        self.change_sample()
+        self.ui.change_sample()

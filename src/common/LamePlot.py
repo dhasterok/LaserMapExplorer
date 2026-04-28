@@ -203,16 +203,16 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
 
     cax.set_clim(clim[0], clim[1])
 
-    # use mask to create an alpha layer
+    # use mask to create an alpha layer — grey RGBA overlay on masked pixels
     mask = data.mask.astype(float)
     reshaped_mask = np.reshape(mask, array_size, order=data.order)
+    masked_count = int((reshaped_mask == 0).sum())
+    log(f"plot_map_mpl: masking {masked_count}/{mask.size} pixels ({100*masked_count/mask.size:.2f}%)", prefix='Mask')
 
-    alphas = colors.Normalize(0, 1, clip=False)(reshaped_mask)
-    alphas = np.clip(alphas, .4, 1)
-
-    alpha_mask = np.where(reshaped_mask == 0, 0.5, 0)  
-    # white plot screen when uncommented.
-    # canvas.axes.imshow(np.ones_like(alpha_mask), aspect=aspect_ratio, interpolation='none', cmap='Greys', alpha=alpha_mask)
+    overlay = np.zeros((*reshaped_mask.shape, 4), dtype=float)
+    overlay[..., :3] = 0.5  # grey
+    overlay[..., 3] = np.where(reshaped_mask == 0, 0.5, 0)  # 50% alpha where masked, transparent elsewhere
+    canvas.axes.imshow(overlay, aspect=aspect_ratio, interpolation='none')
 
     canvas.axes.tick_params(direction=None,
         labelbottom=False, labeltop=False, labelright=False, labelleft=False,
@@ -627,6 +627,10 @@ def plot_histogram(parent, data, app_data, style_data):
         cluster_color, cluster_label, _ = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
         cluster_group = data.processed.loc[:,method]
         clusters = app_data.cluster_dict[method]['selected_clusters']
+
+        # fall back to all clusters when none are explicitly selected
+        if not clusters:
+            clusters = sorted(cluster_group.dropna().unique().astype(int).tolist())
 
         hist_dfs = []
         # Plot histogram for all clusters
@@ -1166,11 +1170,13 @@ def get_scatter_data(data, app_data, style_data, processed=True):
                 scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=style_data.xscale)
             else:
                 scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=style_data.xscale, processed=False)
-        case 'pca scatter' | 'pca heatmap':
-            scatter_dict['x'] = data.get_vector('pca score', f'PC{app_data.dim_red_x}', norm=style_data.xscale)
-            scatter_dict['y'] = data.get_vector('pca score', f'PC{app_data.dim_red_y}', norm=style_data.yscale)
+        case 'dimension scatter' | 'dimension heatmap':
+            scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=style_data.xscale)
+            scatter_dict['y'] = data.get_vector(app_data.y_field_type, app_data.y_field, norm=style_data.yscale)
+            if app_data.z_field_type and app_data.z_field and app_data.z_field.lower() not in ['', 'none']:
+                scatter_dict['z'] = data.get_vector(app_data.z_field_type, app_data.z_field, norm=style_data.zscale)
             if app_data.c_field_type and app_data.c_field and app_data.c_field.lower() not in ['', 'none']:
-                scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field)
+                scatter_dict['c'] = data.get_vector(app_data.c_field_type, app_data.c_field, norm=style_data.cscale)
         case _:
             scatter_dict['x'] = data.get_vector(app_data.x_field_type, app_data.x_field, norm=style_data.xscale)
             scatter_dict['y'] = data.get_vector(app_data.y_field_type, app_data.y_field, norm=style_data.yscale)
@@ -2050,7 +2056,7 @@ def plot_score_map(parent,data, app_data, style_data):
             #idx = int(self.comboBoxColorField.currentIndex()) + 1
             #field = f'PC{idx}'
             field = app_data.c_field
-        case 'cluster score':
+        case 'Cluster score':
             #idx = int(self.comboBoxColorField.currentIndex())
             #field = f'{idx}'
             field = app_data.c_field
@@ -2427,7 +2433,7 @@ def plot_clusters(parent, data, app_data, style_data):
         case 'cluster map':
             plot_name = f"{plot_type}_{method}_map"
             canvas, plot_data = plot_cluster_map(parent, data, app_data, style_data)
-        case 'cluster score':
+        case 'cluster score map':
             plot_name = f"{plot_type}_{method}_{app_data.c_field}_score_map"
             canvas, plot_data = plot_score_map(parent, data, app_data, style_data)
         case _:

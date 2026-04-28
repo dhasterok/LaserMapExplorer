@@ -225,7 +225,7 @@ class PlotTree(CustomDockWidget):
         if not calculated_branch:
             sample_branch = treeView.add_branch(self.tree['Calculated'], sample_id)
         else:
-            return
+            sample_branch = calculated_branch
 
         leaf = treeView.find_leaf(sample_branch, new_field)
         if not leaf:

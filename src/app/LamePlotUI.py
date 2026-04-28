@@ -912,6 +912,8 @@ class NDimUI(CustomPage):
 
     def connect_widgets(self):
         """Connects n-dimensional widgets to methods."""
+        quantile_labels = ["median", "quartiles", "quartiles + median", "5th–95th percentiles"]
+        self.comboBoxNDimQuantiles.addItems(quantile_labels)
         self.comboBoxNDimQuantiles.setCurrentIndex(self.dock.ui.app_data.ndim_quantile_index)
         self.comboBoxNDimQuantiles.activated.connect(lambda _: self.update_ndim_quantile_index())
         

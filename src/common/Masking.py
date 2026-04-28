@@ -782,6 +782,7 @@ class FilterTab(QWidget):
             current_data.filter_df = pd.concat([current_data.filter_df, filter_info], ignore_index=True)
 
             self.update_filter_table(reload=True, apply=False)
+            self.apply_field_filters_update_plot()
         except FileNotFoundError:
             QMessageBox.warning(self.ui, 'Error', f'Filter file {filter_file} not found.')
         except Exception as e:
@@ -993,7 +994,7 @@ class PolygonTab(QWidget):
                 checkBox.setChecked(True)
                 # Correct slot signature for PyQt6 (int state)
                 def make_cb_callback(p_id_inner):
-                    return lambda state: self.apply_polygon_mask(update_plot=True, p_id=p_id_inner)
+                    return lambda state: self.apply_polygon_mask(update_plot=True)
                 checkBox.stateChanged.connect(make_cb_callback(p_id))
                 table.setCellWidget(row_position, 4, checkBox)
 
@@ -1031,51 +1032,48 @@ class PolygonTab(QWidget):
         Parameters
         ----------
         update_plot : bool, optional
-            If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
-        """        
-        sample_id = self.app_data.sample_id
+            If true, triggers a plot update via ``MainWindow.schedule_update``, by default True
+        """
+        sample_id = self.ui.app_data.sample_id
 
         # create array of all true
-        self.data[sample_id].polygon_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+        self.ui.data[sample_id].polygon_mask = np.ones_like(self.ui.data[sample_id].mask, dtype=bool)
 
-        # remove all masks
-        self.actionClearFilters.setEnabled(True)
-        self.actionPolygonMask.setEnabled(True)
-        self.actionPolygonMask.setChecked(True)
+        # update toolbar actions
+        self.ui.lame_action.ClearFilters.setEnabled(True)
+        self.ui.lame_action.PolygonMask.setEnabled(True)
+        self.ui.lame_action.PolygonMask.setChecked(True)
 
-        # apply polygon mask
-        # Iterate through each polygon in self.polygons[self.ui.sample_id]
+        # apply polygon mask — iterate each row in the polygon table
         for row in range(self.tableWidgetPolyPoints.rowCount()):
-            #check if checkbox is checked
             checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
 
             if checkBox.isChecked():
-                pid = int(self.tableWidgetPolyPoints.item(row,0).text())
+                pid = int(self.tableWidgetPolyPoints.item(row, 0).text())
 
-                polygon_points = self.polygon.polygons[sample_id][pid].points
-                polygon_points = [(x,y) for x,y,_ in polygon_points]
+                polygon_points = self.polygon_manager.polygons[sample_id][pid].verts
+                polygon_points = [(x, y) for x, y in polygon_points]
 
-                # Convert the list of (x, y) tuples to a list of points acceptable by Path
                 path = Path(polygon_points)
 
-                # Create a grid of points covering the entire array
-                # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
-
-                points = pd.concat([self.data[sample_id].processed['X'], self.data[sample_id].processed['Y']] , axis=1).values
-                # Use the path to determine which points are inside the polygon
+                points = pd.concat(
+                    [self.ui.data[sample_id].processed['X'], self.ui.data[sample_id].processed['Y']],
+                    axis=1
+                ).values
                 inside_polygon = path.contains_points(points)
 
-                # Reshape the result back to the shape of self.array
-                inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.app_data.sample_id].array_size, order =  'C')
+                inside_polygon_mask = np.array(inside_polygon).reshape(
+                    self.ui.data[sample_id].array_size, order='C'
+                )
                 inside_polygon = inside_polygon_mask.flatten('F')
-                # Update the polygon mask - include points that are inside this polygon
-                self.data[sample_id].polygon_mask &= inside_polygon
+                self.ui.data[sample_id].polygon_mask &= inside_polygon
 
-                #clear existing polygon lines
-                #self.polygon.clear_lines()
+        # recompute combined mask
+        d = self.ui.data[sample_id]
+        d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask
 
         if update_plot:
-            self.apply_filters(fullmap=False)
+            self.ui.schedule_update()
 
     def toggle_edge_detection(self):
         """Toggles edge detection to the current laser map plot.
@@ -1322,13 +1320,13 @@ class ClusterTab(QWidget):
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
-            # Update self.parent.data.processed with the new name
-            if method in self.parent.data[app_data.sample_id].processed.columns:
+            # Update processed data with the new name
+            if method in self.ui.data[app_data.sample_id].processed.columns:
                 # Find the rows where the value matches cluster_id
-                rows_to_update = self.parent.data[app_data.sample_id].processed.loc[:,method] == cluster_id
+                rows_to_update = self.ui.data[app_data.sample_id].processed.loc[:, method] == cluster_id
 
                 # Update these rows with the new name
-                self.parent.data[app_data.sample_id].processed.loc[rows_to_update, method] = new_name
+                self.ui.data[app_data.sample_id].processed.loc[rows_to_update, method] = new_name
 
             # update current_group to reflect the new cluster name
             app_data.cluster_dict[method][cluster_id]['name'] = new_name
@@ -1361,7 +1359,7 @@ class ClusterTab(QWidget):
                 app_data.cluster_dict[method]['selected_clusters'] = []
 
             # update plot
-            if (self.ui.style_data.plot_type not in ['cluster', 'cluster score']) and (app_data.c_field_type == 'cluster'):
+            if (self.ui.style_data.plot_type not in ['cluster map', 'cluster score map']) and (app_data.c_field_type == 'cluster'):
                 # trigger update to plot
                 self.ui.schedule_update()
 

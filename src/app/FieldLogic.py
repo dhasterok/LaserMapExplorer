@@ -608,7 +608,8 @@ class ControlDock(CustomDockWidget):
         if new_plot_type:
             if new_plot_type != self.comboBoxPlotType.currentText():
                 self.comboBoxPlotType.setCurrentText(new_plot_type)
-                self.ui.plot_types[self.toolbox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
+                if hasattr(self.ui, 'plot_types'):
+                    self.ui.plot_types[self.toolbox.currentIndex()][0] = self.comboBoxPlotType.currentIndex()
 
         else:
             self.ui.style_data.plotTypeChanged.blockSignals(True)

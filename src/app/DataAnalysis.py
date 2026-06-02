@@ -557,15 +557,16 @@ class ClusterPage(CustomPage, Clustering):
         data = self.dock.ui.app_data.current_data
         method = self.dock.ui.app_data.cluster_method
         if self.dock.ui.app_data.update_cluster_flag or \
-                data.processed[method].empty or \
-                (method not in list(data.processed.columns)):
+                (method not in data.processed.columns) or \
+                data.processed[method].empty:
             # compute clusters
             self.dock.ui.statusbar.showMessage('Computing clusters')
             self.compute_clusters(data, self.dock.ui.app_data, max_clusters = None)
+            self.dock.ui.app_data.update_cluster_flag = False
             # update cluster colors
             self.dock.ui.app_data.cluster_group_changed(data, self.dock.ui.style_data)
             # enable cluster tab actions and update group table
-            if hasattr(self, 'mask_dock'):
+            if hasattr(self.dock.ui, 'mask_dock'):
                 self.dock.ui.mask_dock.cluster_tab.toggle_cluster_actions()
                 self.dock.ui.mask_dock.cluster_tab.update_table_widget()
 

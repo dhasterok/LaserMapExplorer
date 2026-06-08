@@ -330,14 +330,17 @@ class PolygonManager:
             polygon = self.polygons[sample_id][p_id]
 
             # Clear any previous selection in the table
-            self.parent.tableWidgetPolyPoints.clearSelection()
-
-            # Find and select the corresponding row in the table
-            for row in range(self.parent.tableWidgetPolyPoints.rowCount()):
-                item = self.parent.tableWidgetPolyPoints.item(row, 0)  # Assuming ID in col 0
+            table = self.parent.tableWidgetPolyPoints
+            table.blockSignals(True)
+            table.selectionModel().blockSignals(True)
+            table.clearSelection()
+            for row in range(table.rowCount()):
+                item = table.item(row, 0)
                 if item and int(item.text()) == p_id:
-                    self.parent.tableWidgetPolyPoints.selectRow(row)
+                    table.selectRow(row)
                     break
+            table.selectionModel().blockSignals(False)
+            table.blockSignals(False)
 
             # Remove the patch from axes if it exists (to avoid double-drawing)
             if getattr(polygon, 'patch', None) is not None:
@@ -402,7 +405,8 @@ class PolygonManager:
                     for marker in polygon.vertex_markers:
                         marker.remove()
                     polygon.vertex_markers = []
-        self.canvas.draw_idle()
+        if hasattr(self, 'canvas'):
+            self.canvas.draw_idle()
         self.parent.update_table_widget()  # Update the table in the main window
     
     def disconnect(self):

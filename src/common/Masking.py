@@ -1112,17 +1112,18 @@ class ClusterTab(QWidget):
         self.create_actions()
 
         self.tableWidgetViewGroups = CustomTableWidget()
-        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.tableWidgetViewGroups.setObjectName("tableWidgetViewGroups")
-        self.tableWidgetViewGroups.setColumnCount(3)
+        self.tableWidgetViewGroups.setColumnCount(4)
         self.tableWidgetViewGroups.setRowCount(0)
-        
+
         header = self.tableWidgetViewGroups.horizontalHeader()
         if header:
-            header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
-            header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(["Name", "Link", "Color"])
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(["", "Name", "Link", "Color"])
 
         tab_layout.addWidget(self.tableWidgetViewGroups)
 
@@ -1182,7 +1183,6 @@ class ClusterTab(QWidget):
             self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
             self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
             self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
-            self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
             self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
             self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
             self._cluster_signals_connected = True
@@ -1256,19 +1256,16 @@ class ClusterTab(QWidget):
 
         # Clear the list widget
         self.tableWidgetViewGroups.clearContents()
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['', 'Name', 'Link', 'Color'])
         method = app_data.cluster_method
         if method in data.processed.columns:
             if not data.processed[method].empty:
                 clusters = data.processed[method].dropna().unique()
                 clusters.sort()
-                # set number of rows in tableWidgetViewGroups
-                # set default colors for clusters and update associated widgets
                 self.spinBoxClusterGroup.setMinimum(1)
                 if 99 in clusters:
                     self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
                     self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
-
                 else:
                     self.tableWidgetViewGroups.setRowCount(len(clusters))
                     self.spinBoxClusterGroup.setMaximum(len(clusters))
@@ -1276,23 +1273,25 @@ class ClusterTab(QWidget):
                 for c in clusters:
                     if c == 99:
                         break
-                    cluster_name =  app_data.cluster_dict[method][c]['name']
+                    cluster_name = app_data.cluster_dict[method][c]['name']
                     hexcolor = app_data.cluster_dict[method][c]['color']
-                    
-                    
-                    # Initialize the flag
+
                     self.updating_cluster_table_flag = True
                     c = int(c)
-                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
-                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
-                    self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
 
+                    # checkbox in col 0
+                    def make_cb(cluster_id):
+                        cb = QCheckBox()
+                        cb.setChecked(False)
+                        cb.stateChanged.connect(lambda state, cid=cluster_id: self.update_clusters())
+                        return cb
+                    self.tableWidgetViewGroups.setCellWidget(c, 0, make_cb(c))
+                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(c, 2, QTableWidgetItem(''))
+                    self.tableWidgetViewGroups.setItem(c, 3, QTableWidgetItem(hexcolor))
 
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
-
-        # Start with no clusters selected so users click to include specific ones
-        self.tableWidgetViewGroups.clearSelection()
 
         #print(app_data.cluster_dict)
         self.tableWidgetViewGroups.blockSignals(False)
@@ -1306,18 +1305,16 @@ class ClusterTab(QWidget):
             new_name = item.text()
 
             row = item.row()
-            if item.column() > 0:
+            if item.column() != 1:  # name is now col 1
                 return
-            
+
             app_data = self.ui.app_data
             method = app_data.cluster_method
-            # Extract the cluster id (assuming it's stored in the table)
             cluster_id = row
 
             old_name = app_data.cluster_dict[method][cluster_id]['name']
-            # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
-                if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
+                if i != row and self.tableWidgetViewGroups.item(i, 1) and self.tableWidgetViewGroups.item(i, 1).text() == new_name:
                     # Duplicate name found, revert to the original name and show a warning
                     item.setText(old_name)
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")

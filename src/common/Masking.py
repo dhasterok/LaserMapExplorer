@@ -1003,9 +1003,9 @@ class PolygonTab(QWidget):
                 checkBox.stateChanged.connect(make_cb_callback(p_id))
                 table.setCellWidget(row_position, 4, checkBox)
 
-        self.apply_polygon_mask(update_plot=False)
+        self.apply_polygon_mask(update_plot=True)
 
-    def view_selected_polygon(self):
+    def view_selected_polygon(self, *args):
         """View the selected polygon when a selection is made in the table widget ."""
         sample_id = self.ui.app_data.sample_id
 
@@ -1061,10 +1061,25 @@ class PolygonTab(QWidget):
 
                 path = Path(polygon_points)
 
-                points = pd.concat(
-                    [self.ui.data[sample_id].processed['Xc'], self.ui.data[sample_id].processed['Yc']],
-                    axis=1
-                ).values
+                # Polygon vertices are in imshow pixel-index space (col, row).
+                # The image is produced by np.reshape(values, array_size, order=data.order).
+                # For order='F': data[k] → matrix[k % nrows, k // nrows]
+                #   → image position (col = k // nrows, row = k % nrows)
+                # For order='C': data[k] → matrix[k // ncols, k % ncols]
+                #   → image position (col = k % ncols, row = k // ncols)
+                # Using this mapping makes containment match what the user drew.
+                sample = self.ui.data[sample_id]
+                nrows, ncols = sample.array_size
+                order = sample.order
+                n = len(sample.processed)
+                k = np.arange(n, dtype=float)
+                if order == 'F':
+                    image_col = k // nrows
+                    image_row = k % nrows
+                else:
+                    image_col = k % ncols
+                    image_row = k // ncols
+                points = np.column_stack([image_col, image_row])
                 inside_polygon = path.contains_points(points)
                 self.ui.data[sample_id].polygon_mask &= inside_polygon
 

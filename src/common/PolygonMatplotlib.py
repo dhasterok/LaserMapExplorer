@@ -21,7 +21,7 @@ class InteractivePolygon:
         for x, y in self.verts:
             marker = self.ax.scatter([x], [y], c='red' if self.is_selected else 'blue', s=50, zorder=4)
             self.marker_objs.append(marker)
-        self.poly.figure.canvas.draw_idle()
+        self.ax.figure.canvas.draw_idle()
 
     def _remove_markers(self):
         for marker in self.marker_objs:
@@ -62,7 +62,7 @@ class InteractivePolygon:
     def remove(self):
         self.poly.remove()
         self._remove_markers()
-        self.poly.figure.canvas.draw_idle()
+        self.ax.figure.canvas.draw_idle()
 
 class SerializablePolygon:
     def __init__(self, p_id, verts, color='b', alpha=0.3):

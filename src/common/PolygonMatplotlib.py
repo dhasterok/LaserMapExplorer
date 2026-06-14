@@ -153,8 +153,8 @@ class PolygonManager:
 
     def finish_polygon(self):
         if len(self.current_verts) >= 3:
-            pid = self.increment_pid()
-            verts = [tuple(v) for v in self.current_verts]
+            pid = self.p_id  # already incremented by Create Polygon button click
+            verts: list[tuple[float, float]] = [(float(v[0]), float(v[1])) for v in self.current_verts]
             color = 'b'
             alpha = 0.3
             # Add to data structure
@@ -164,11 +164,13 @@ class PolygonManager:
             polygon_obj = SerializablePolygon(pid, verts, color, alpha)
             self.polygons[sample_id][pid] = polygon_obj
             # Draw on plot
-            poly_patch = MplPolygon(verts, closed=True, edgecolor=color, fill=True, alpha=alpha)
+            poly_patch = MplPolygon(verts, closed=True, edgecolor=color, fill=True, alpha=alpha)  # type: ignore[arg-type]
+            polygon_obj.patch = poly_patch
             self.ax.add_patch(poly_patch)
             self.canvas.draw_idle()
             self._remove_temp()
         self._drawing = False
+        self.disconnect()  # stop canvas events until next Create Polygon click
         self.parent.update_table_widget()  # Update the table in the main window
 
     # --- Saving and Loading ---

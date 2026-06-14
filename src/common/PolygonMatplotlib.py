@@ -1,4 +1,6 @@
 # Polygon.py (Matplotlib Version)
+from __future__ import annotations
+from typing import Optional
 import numpy as np
 from matplotlib.patches import Polygon as MplPolygon
 from matplotlib.lines import Line2D
@@ -70,8 +72,26 @@ class SerializablePolygon:
         self.verts = verts  # list of (x, y) tuples
         self.color = color
         self.alpha = alpha
-        self.patch = None      # Matplotlib Polygon patch (set when drawn)
+        self.patch: Optional[MplPolygon] = None  # Matplotlib Polygon patch (set when drawn)
         self.vertex_markers = []  # Optionally store scatter objects
+        self.is_selected = False
+
+    def select(self):
+        self.is_selected = True
+        if self.patch is not None:
+            self.patch.set_edgecolor('orange')
+            self.patch.set_linewidth(2)
+
+    def deselect(self):
+        self.is_selected = False
+        if self.patch is not None:
+            self.patch.set_edgecolor(self.color)
+            self.patch.set_linewidth(1)
+
+    def move_vertex(self, idx: int, new_xy: list[float]) -> None:
+        self.verts[idx] = (float(new_xy[0]), float(new_xy[1]))
+        if self.patch is not None:
+            self.patch.set_xy(self.verts)
 
 @auto_log_methods(logger_key='Polygon')
 class PolygonManager:

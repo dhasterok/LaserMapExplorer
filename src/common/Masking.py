@@ -828,6 +828,8 @@ class PolygonTab(QWidget):
 
         tab_layout.addWidget(self.tableWidgetPolyPoints)
 
+        self.polygon_manager = PolygonManager(parent=self, main_window=self.ui)
+
         polygon_icon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
         self.dock.tab_widgets.addTab(self, polygon_icon, "Polygons")
 
@@ -916,13 +918,10 @@ class PolygonTab(QWidget):
         toolbar.addAction(self.actionPolySave)
         toolbar.addAction(self.actionPolyDelete)
         
-        # initialise polygon dictionary for a given sample id in self.parent.data
-        self.polygon_manager = PolygonManager(parent = self, main_window=self.ui)
-        #self.ui.data.polygon = self.polygon_manger.polygons
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
         self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
         self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
+        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
 
         #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
         #self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
@@ -1021,7 +1020,7 @@ class PolygonTab(QWidget):
                         # Clear all current polygons from the plot
                         self.polygon_manager.clear_plot()
                         # Plot the selected polygon on self.ax
-                        self.polygon_manager.plot_existing_polygon(polygon_id)
+                        self.polygon_manager.plot_existing_polygon(self.ui.mpl_canvas, polygon_id)
 
     # Polygon mask functions
     # -------------------------------

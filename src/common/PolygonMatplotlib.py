@@ -114,6 +114,10 @@ class PolygonManager:
         self.dragging_poly = False
         self.last_event_xy = None
 
+        self.cid_click = None
+        self.cid_release = None
+        self.cid_move = None
+        self.cid_key = None
 
     def enable_connections(self): # Connections
         self.cid_click = self.canvas.mpl_connect('button_press_event', self.onclick)
@@ -374,7 +378,10 @@ class PolygonManager:
         self.parent.update_table_widget()  # Update the table in the main window
     
     def disconnect(self):
+        if not hasattr(self, 'canvas') or self.cid_click is None:
+            return
         self.canvas.mpl_disconnect(self.cid_click)
         self.canvas.mpl_disconnect(self.cid_release)
         self.canvas.mpl_disconnect(self.cid_move)
         self.canvas.mpl_disconnect(self.cid_key)
+        self.cid_click = self.cid_release = self.cid_move = self.cid_key = None

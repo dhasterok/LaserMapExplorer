@@ -918,10 +918,12 @@ class PolygonTab(QWidget):
         toolbar.addAction(self.actionPolySave)
         toolbar.addAction(self.actionPolyDelete)
         
-        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
-        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
-        self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
+        if not getattr(self, '_polygon_signals_connected', False):
+            self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
+            self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
+            self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
+            self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
+            self._polygon_signals_connected = True
 
         #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
         #self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
@@ -1172,13 +1174,15 @@ class ClusterTab(QWidget):
         toolbar.addAction(self.actionGroupMask)
         toolbar.addAction(self.actionGroupMaskInverse)
 
-        self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
-        self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
-        self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
-        self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
-        self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
-        self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
-        self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
+        if not getattr(self, '_cluster_signals_connected', False):
+            self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
+            self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
+            self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
+            self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
+            self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
+            self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
+            self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
+            self._cluster_signals_connected = True
 
         self.toggle_cluster_actions()
         self.update_table_widget()
@@ -1279,12 +1283,12 @@ class ClusterTab(QWidget):
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
-                    # colors in table are set by style_data.set_default_cluster_colors()
-                    self.tableWidgetViewGroups.selectRow(c)
-                    
 
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
+
+        # Start with no clusters selected so users click to include specific ones
+        self.tableWidgetViewGroups.clearSelection()
 
         #print(app_data.cluster_dict)
         self.tableWidgetViewGroups.blockSignals(False)

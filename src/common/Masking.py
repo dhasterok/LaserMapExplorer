@@ -1,4 +1,8 @@
+from __future__ import annotations
 import os
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.app.MainWindow import MainWindow
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
 from PyQt6.QtWidgets import ( 
@@ -59,14 +63,14 @@ class MaskObj:
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
 @auto_log_methods(logger_key='Mask')
 class MaskDock(CustomDockWidget, FieldLogicUI):
-    def __init__(self, ui=None, title="Masking Toolbox"):
+    def __init__(self, ui: MainWindow | None = None, title: str = "Masking Toolbox"):
         self.logger_key = 'Mask'
 
         if not isinstance(ui, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(ui)
-        self.ui = ui
+        self.ui: MainWindow | None = ui
 
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -74,7 +78,8 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setWindowTitle(title)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        if self.ui is not None:
+            self.ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         #self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -87,8 +92,6 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setMaximumSize(QSize(524287, 524287))
         self.setFloating(False)
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable)
-
-        ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         # create a container to hold the dock contents
         container = QWidget()
@@ -1283,6 +1286,7 @@ class ClusterTab(QWidget):
                     self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
                     self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
                     self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
+
 
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')

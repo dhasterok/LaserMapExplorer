@@ -16,6 +16,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
+from matplotlib.path import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import percentileofscore
@@ -1057,15 +1058,10 @@ class PolygonTab(QWidget):
                 path = Path(polygon_points)
 
                 points = pd.concat(
-                    [self.ui.data[sample_id].processed['X'], self.ui.data[sample_id].processed['Y']],
+                    [self.ui.data[sample_id].processed['Xc'], self.ui.data[sample_id].processed['Yc']],
                     axis=1
                 ).values
                 inside_polygon = path.contains_points(points)
-
-                inside_polygon_mask = np.array(inside_polygon).reshape(
-                    self.ui.data[sample_id].array_size, order='C'
-                )
-                inside_polygon = inside_polygon_mask.flatten('F')
                 self.ui.data[sample_id].polygon_mask &= inside_polygon
 
         # recompute combined mask

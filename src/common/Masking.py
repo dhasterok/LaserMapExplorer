@@ -1350,7 +1350,7 @@ class ClusterTab(QWidget):
             # trigger update to plot
             self.ui.schedule_update()
 
-    def update_clusters(self):
+    def update_clusters(self, *args):
         """Executed on update to cluster table.
 
         Updates ``MainWindow.cluster_dict`` and plot when the selected cluster have changed.
@@ -1360,9 +1360,11 @@ class ClusterTab(QWidget):
             selected_clusters = []
             method = app_data.cluster_method
 
-            # get the selected clusters
-            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
-                selected_clusters.append(idx.row())
+            # get checked clusters from checkboxes in col 0
+            for row in range(self.tableWidgetViewGroups.rowCount()):
+                cb = self.tableWidgetViewGroups.cellWidget(row, 0)
+                if cb is not None and cb.isChecked():
+                    selected_clusters.append(row)
             selected_clusters.sort()
 
             # update selected cluster list in cluster_dict
@@ -1373,10 +1375,8 @@ class ClusterTab(QWidget):
             else:
                 app_data.cluster_dict[method]['selected_clusters'] = []
 
-            # update plot
-            if (self.ui.style_data.plot_type not in ['cluster map', 'cluster score map']) and (app_data.c_field_type == 'cluster'):
-                # trigger update to plot
-                self.ui.schedule_update()
+            # apply cluster mask and update plot
+            self.ui.apply_cluster_mask()
 
     
         # cluster styles

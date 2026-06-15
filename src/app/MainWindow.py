@@ -853,7 +853,7 @@ class MainWindow(QMainWindow):
             case 'dimension scatter', 'dimension heatmap':
                 axes = ['x','y']
             case 'cluster map':
-                axes = ['c']
+                return True
             case 'cluster score map':
                 axes = ['c']
             case 'profile':
@@ -1030,6 +1030,12 @@ class MainWindow(QMainWindow):
         selected_clusters = list(self.app_data.cluster_dict[method].get('selected_clusters', []))
 
         if not selected_clusters:
+            # No clusters selected → cluster filter is off; let everything through.
+            d = self.data[sample_id]
+            d.cluster_mask = np.ones(len(d.mask), dtype=bool)
+            d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask
+            self.lame_action.ClusterMask.setChecked(False)
+            self.schedule_update()
             return
 
         cluster_group = self.data[sample_id].processed.loc[:, method]

@@ -2437,7 +2437,6 @@ def plot_clusters(parent, data, app_data, style_data):
             plot_name = f"{plot_type}_{method}_{app_data.c_field}_score_map"
             canvas, plot_data = plot_score_map(parent, data, app_data, style_data)
         case _:
-            print(f'Unknown clustering plot type: {plot_type}')
             return
 
     update_figure_font(canvas, style_data.font)
@@ -2646,21 +2645,24 @@ def plot_cluster_map(parent, data, app_data, style_data):
     method = app_data.cluster_method
 
     # data frame for plotting
-    #groups = data[plot_type][method].values
-    groups = data.processed[method].values
+    groups = data.processed[method].values.astype(float)
+    # mask-out points that are excluded by the combined mask (cluster, polygon, filter, crop)
+    groups[~data.mask] = np.nan
 
     reshaped_array = np.reshape(groups, data.array_size, order=data.order)
 
-    n_clusters = len(np.unique(groups))
+    # count unique non-NaN clusters for the colormap
+    n_clusters = len(np.unique(groups[~np.isnan(groups)]))
 
     cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method], alpha=style_data.marker_alpha)
 
-    #boundaries = np.arange(-0.5, n_clusters, 1)
-    #norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+    overlay = style_data.style_dict.get('cluster map', {}).get('OverlayColor', '#888888')
+    cmap = cmap.copy()
+    cmap.set_bad(overlay)
+
     norm = style_data.color_norm(n_clusters)
 
-    #cax = canvas.axes.imshow(self.array.astype('float'), cmap=style_data.cmap, norm=norm, aspect = data.aspect_ratio)
-    cax = canvas.axes.imshow(reshaped_array.astype('float'), cmap=cmap, norm=norm, aspect=data.aspect_ratio)
+    cax = canvas.axes.imshow(reshaped_array, cmap=cmap, norm=norm, aspect=data.aspect_ratio)
     #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
     add_colorbar(style_data, canvas, cax, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)

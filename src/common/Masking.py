@@ -1,4 +1,8 @@
+from __future__ import annotations
 import os
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.app.MainWindow import MainWindow
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
 from PyQt6.QtWidgets import ( 
@@ -16,6 +20,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
+from matplotlib.path import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import percentileofscore
@@ -58,14 +63,14 @@ class MaskObj:
 # remove lines from approx 1980 to 2609 in MainWindow.py (Masking Toolbox dockWidgetMaskToolbox) when complete
 @auto_log_methods(logger_key='Mask')
 class MaskDock(CustomDockWidget, FieldLogicUI):
-    def __init__(self, ui=None, title="Masking Toolbox"):
+    def __init__(self, ui: MainWindow | None = None, title: str = "Masking Toolbox"):
         self.logger_key = 'Mask'
 
         if not isinstance(ui, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
 
         super().__init__(ui)
-        self.ui = ui
+        self.ui: MainWindow | None = ui
 
         self.setObjectName("Mask Dock")
         self.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -73,7 +78,8 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setWindowTitle(title)
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        if self.ui is not None:
+            self.ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         #self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)
 
@@ -86,8 +92,6 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setMaximumSize(QSize(524287, 524287))
         self.setFloating(False)
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable)
-
-        ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
 
         # create a container to hold the dock contents
         container = QWidget()
@@ -827,6 +831,8 @@ class PolygonTab(QWidget):
 
         tab_layout.addWidget(self.tableWidgetPolyPoints)
 
+        self.polygon_manager = PolygonManager(parent=self, main_window=self.ui)
+
         polygon_icon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
         self.dock.tab_widgets.addTab(self, polygon_icon, "Polygons")
 
@@ -915,13 +921,12 @@ class PolygonTab(QWidget):
         toolbar.addAction(self.actionPolySave)
         toolbar.addAction(self.actionPolyDelete)
         
-        # initialise polygon dictionary for a given sample id in self.parent.data
-        self.polygon_manager = PolygonManager(parent = self, main_window=self.ui)
-        #self.ui.data.polygon = self.polygon_manger.polygons
-        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
-        self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
-        self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
-        self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(lambda: self.view_selected_polygon)
+        if not getattr(self, '_polygon_signals_connected', False):
+            self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
+            self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
+            self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
+            self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
+            self._polygon_signals_connected = True
 
         #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
         #self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
@@ -998,9 +1003,9 @@ class PolygonTab(QWidget):
                 checkBox.stateChanged.connect(make_cb_callback(p_id))
                 table.setCellWidget(row_position, 4, checkBox)
 
-        self.apply_polygon_mask(update_plot=False)
+        self.apply_polygon_mask(update_plot=True)
 
-    def view_selected_polygon(self):
+    def view_selected_polygon(self, *args):
         """View the selected polygon when a selection is made in the table widget ."""
         sample_id = self.ui.app_data.sample_id
 
@@ -1020,7 +1025,7 @@ class PolygonTab(QWidget):
                         # Clear all current polygons from the plot
                         self.polygon_manager.clear_plot()
                         # Plot the selected polygon on self.ax
-                        self.polygon_manager.plot_existing_polygon(polygon_id)
+                        self.polygon_manager.plot_existing_polygon(self.ui.mpl_canvas, polygon_id)
 
     # Polygon mask functions
     # -------------------------------
@@ -1056,16 +1061,26 @@ class PolygonTab(QWidget):
 
                 path = Path(polygon_points)
 
-                points = pd.concat(
-                    [self.ui.data[sample_id].processed['X'], self.ui.data[sample_id].processed['Y']],
-                    axis=1
-                ).values
+                # Polygon vertices are in imshow pixel-index space (col, row).
+                # The image is produced by np.reshape(values, array_size, order=data.order).
+                # For order='F': data[k] → matrix[k % nrows, k // nrows]
+                #   → image position (col = k // nrows, row = k % nrows)
+                # For order='C': data[k] → matrix[k // ncols, k % ncols]
+                #   → image position (col = k % ncols, row = k // ncols)
+                # Using this mapping makes containment match what the user drew.
+                sample = self.ui.data[sample_id]
+                nrows, ncols = sample.array_size
+                order = sample.order
+                n = len(sample.processed)
+                k = np.arange(n, dtype=float)
+                if order == 'F':
+                    image_col = k // nrows
+                    image_row = k % nrows
+                else:
+                    image_col = k % ncols
+                    image_row = k // ncols
+                points = np.column_stack([image_col, image_row])
                 inside_polygon = path.contains_points(points)
-
-                inside_polygon_mask = np.array(inside_polygon).reshape(
-                    self.ui.data[sample_id].array_size, order='C'
-                )
-                inside_polygon = inside_polygon_mask.flatten('F')
                 self.ui.data[sample_id].polygon_mask &= inside_polygon
 
         # recompute combined mask
@@ -1112,17 +1127,18 @@ class ClusterTab(QWidget):
         self.create_actions()
 
         self.tableWidgetViewGroups = CustomTableWidget()
-        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+        self.tableWidgetViewGroups.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.tableWidgetViewGroups.setObjectName("tableWidgetViewGroups")
-        self.tableWidgetViewGroups.setColumnCount(3)
+        self.tableWidgetViewGroups.setColumnCount(4)
         self.tableWidgetViewGroups.setRowCount(0)
-        
+
         header = self.tableWidgetViewGroups.horizontalHeader()
         if header:
-            header.setSectionResizeMode(0,QHeaderView.ResizeMode.Stretch)
-            header.setSectionResizeMode(1,QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(2,QHeaderView.ResizeMode.ResizeToContents)
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(["Name", "Link", "Color"])
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(["", "Name", "Link", "Color"])
 
         tab_layout.addWidget(self.tableWidgetViewGroups)
 
@@ -1177,13 +1193,14 @@ class ClusterTab(QWidget):
         toolbar.addAction(self.actionGroupMask)
         toolbar.addAction(self.actionGroupMaskInverse)
 
-        self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
-        self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
-        self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
-        self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
-        self.tableWidgetViewGroups.selectionModel().selectionChanged.connect(self.update_clusters)
-        self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
-        self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
+        if not getattr(self, '_cluster_signals_connected', False):
+            self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
+            self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
+            self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
+            self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
+            self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
+            self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
+            self._cluster_signals_connected = True
 
         self.toggle_cluster_actions()
         self.update_table_widget()
@@ -1254,19 +1271,16 @@ class ClusterTab(QWidget):
 
         # Clear the list widget
         self.tableWidgetViewGroups.clearContents()
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
+        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['', 'Name', 'Link', 'Color'])
         method = app_data.cluster_method
         if method in data.processed.columns:
             if not data.processed[method].empty:
                 clusters = data.processed[method].dropna().unique()
                 clusters.sort()
-                # set number of rows in tableWidgetViewGroups
-                # set default colors for clusters and update associated widgets
                 self.spinBoxClusterGroup.setMinimum(1)
                 if 99 in clusters:
                     self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
                     self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
-
                 else:
                     self.tableWidgetViewGroups.setRowCount(len(clusters))
                     self.spinBoxClusterGroup.setMaximum(len(clusters))
@@ -1274,19 +1288,22 @@ class ClusterTab(QWidget):
                 for c in clusters:
                     if c == 99:
                         break
-                    cluster_name =  app_data.cluster_dict[method][c]['name']
+                    cluster_name = app_data.cluster_dict[method][c]['name']
                     hexcolor = app_data.cluster_dict[method][c]['color']
-                    
-                    
-                    # Initialize the flag
+
                     self.updating_cluster_table_flag = True
                     c = int(c)
-                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
-                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
-                    self.tableWidgetViewGroups.setItem(c, 2,QTableWidgetItem(hexcolor))
-                    # colors in table are set by style_data.set_default_cluster_colors()
-                    self.tableWidgetViewGroups.selectRow(c)
-                    
+
+                    # checkbox in col 0
+                    def make_cb(cluster_id):
+                        cb = QCheckBox()
+                        cb.setChecked(False)
+                        cb.stateChanged.connect(lambda state, cid=cluster_id: self.update_clusters())
+                        return cb
+                    self.tableWidgetViewGroups.setCellWidget(c, 0, make_cb(c))
+                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(cluster_name))
+                    self.tableWidgetViewGroups.setItem(c, 2, QTableWidgetItem(''))
+                    self.tableWidgetViewGroups.setItem(c, 3, QTableWidgetItem(hexcolor))
 
         else:
             print(f'(group_changed) Cluster method, ({method}) is not defined')
@@ -1303,18 +1320,16 @@ class ClusterTab(QWidget):
             new_name = item.text()
 
             row = item.row()
-            if item.column() > 0:
+            if item.column() != 1:  # name is now col 1
                 return
-            
+
             app_data = self.ui.app_data
             method = app_data.cluster_method
-            # Extract the cluster id (assuming it's stored in the table)
             cluster_id = row
 
             old_name = app_data.cluster_dict[method][cluster_id]['name']
-            # Check for duplicate names
             for i in range(self.tableWidgetViewGroups.rowCount()):
-                if i != row and self.tableWidgetViewGroups.item(i, 0).text() == new_name:
+                if i != row and self.tableWidgetViewGroups.item(i, 1) and self.tableWidgetViewGroups.item(i, 1).text() == new_name:
                     # Duplicate name found, revert to the original name and show a warning
                     item.setText(old_name)
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
@@ -1335,7 +1350,7 @@ class ClusterTab(QWidget):
             # trigger update to plot
             self.ui.schedule_update()
 
-    def update_clusters(self):
+    def update_clusters(self, *args):
         """Executed on update to cluster table.
 
         Updates ``MainWindow.cluster_dict`` and plot when the selected cluster have changed.
@@ -1345,9 +1360,11 @@ class ClusterTab(QWidget):
             selected_clusters = []
             method = app_data.cluster_method
 
-            # get the selected clusters
-            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
-                selected_clusters.append(idx.row())
+            # get checked clusters from checkboxes in col 0
+            for row in range(self.tableWidgetViewGroups.rowCount()):
+                cb = self.tableWidgetViewGroups.cellWidget(row, 0)
+                if cb is not None and cb.isChecked():
+                    selected_clusters.append(row)
             selected_clusters.sort()
 
             # update selected cluster list in cluster_dict
@@ -1358,10 +1375,8 @@ class ClusterTab(QWidget):
             else:
                 app_data.cluster_dict[method]['selected_clusters'] = []
 
-            # update plot
-            if (self.ui.style_data.plot_type not in ['cluster map', 'cluster score map']) and (app_data.c_field_type == 'cluster'):
-                # trigger update to plot
-                self.ui.schedule_update()
+            # apply cluster mask and update plot
+            self.ui.apply_cluster_mask()
 
     
         # cluster styles

@@ -429,17 +429,9 @@ class CanvasWidget(QWidget):
                     if hasattr(widget, 'observers'):
                         widget.observers.clear()
                     
-                    # Set parent to None and delete immediately
+                    # Set parent to None and schedule deletion
                     widget.setParent(None)
-                    widget.close()
-                    #del widget  # Immediate deletion instead of deleteLater()
-                    widget.blockSignals(True)
-                    try:
-                        widget.disconnect()
-                    except Exception:
-                        pass
                     widget.deleteLater()
-                    # gc.collect()
                     
                 except Exception as e:
                     print(f"Error during widget cleanup: {e}")

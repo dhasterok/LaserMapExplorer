@@ -1445,11 +1445,12 @@ class StyleData(QObject, StyleTheme):
             str : hexcolor
         """
 
-        #print('set_default_cluster_colors')
-        # cluster_tab = self.parent.mask_dock.cluster_tab
-
-        # cluster colormap
-        cmap = self.get_colormap(N=n)
+        # cluster colormap — always use 'cluster map' colormap, not the current plot_type
+        cmap_name = self.style_dict.get('cluster map', {}).get('Colormap', 'tab10')
+        if cmap_name in self.mpl_colormaps:
+            cmap = plt.get_cmap(cmap_name, n)
+        else:
+            cmap = self.create_custom_colormap(cmap_name, n)
 
         # set color for each cluster and place color in table
         colors = [cmap(i) for i in range(cmap.N)]

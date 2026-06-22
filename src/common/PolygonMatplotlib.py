@@ -1,4 +1,6 @@
 # Polygon.py (Matplotlib Version)
+from __future__ import annotations
+from typing import Optional
 import numpy as np
 from matplotlib.patches import Polygon as MplPolygon
 from matplotlib.lines import Line2D
@@ -21,7 +23,7 @@ class InteractivePolygon:
         for x, y in self.verts:
             marker = self.ax.scatter([x], [y], c='red' if self.is_selected else 'blue', s=50, zorder=4)
             self.marker_objs.append(marker)
-        self.poly.figure.canvas.draw_idle()
+        self.ax.figure.canvas.draw_idle()
 
     def _remove_markers(self):
         for marker in self.marker_objs:
@@ -62,7 +64,7 @@ class InteractivePolygon:
     def remove(self):
         self.poly.remove()
         self._remove_markers()
-        self.poly.figure.canvas.draw_idle()
+        self.ax.figure.canvas.draw_idle()
 
 class SerializablePolygon:
     def __init__(self, p_id, verts, color='b', alpha=0.3):
@@ -70,8 +72,26 @@ class SerializablePolygon:
         self.verts = verts  # list of (x, y) tuples
         self.color = color
         self.alpha = alpha
-        self.patch = None      # Matplotlib Polygon patch (set when drawn)
+        self.patch: Optional[MplPolygon] = None  # Matplotlib Polygon patch (set when drawn)
         self.vertex_markers = []  # Optionally store scatter objects
+        self.is_selected = False
+
+    def select(self):
+        self.is_selected = True
+        if self.patch is not None:
+            self.patch.set_edgecolor('orange')
+            self.patch.set_linewidth(2)
+
+    def deselect(self):
+        self.is_selected = False
+        if self.patch is not None:
+            self.patch.set_edgecolor(self.color)
+            self.patch.set_linewidth(1)
+
+    def move_vertex(self, idx: int, new_xy: list[float]) -> None:
+        self.verts[idx] = (float(new_xy[0]), float(new_xy[1]))
+        if self.patch is not None:
+            self.patch.set_xy(self.verts)
 
 @auto_log_methods(logger_key='Polygon')
 class PolygonManager:
@@ -93,6 +113,11 @@ class PolygonManager:
         self.dragged_idx = None
         self.dragging_poly = False
         self.last_event_xy = None
+
+        self.cid_click = None
+        self.cid_release = None
+        self.cid_move = None
+        self.cid_key = None
 
 
     def enable_connections(self): # Connections
@@ -129,8 +154,8 @@ class PolygonManager:
 
     def finish_polygon(self):
         if len(self.current_verts) >= 3:
-            pid = self.increment_pid()
-            verts = [tuple(v) for v in self.current_verts]
+            pid = self.p_id  # already incremented by Create Polygon button click
+            verts: list[tuple[float, float]] = [(float(v[0]), float(v[1])) for v in self.current_verts]
             color = 'b'
             alpha = 0.3
             # Add to data structure
@@ -140,11 +165,13 @@ class PolygonManager:
             polygon_obj = SerializablePolygon(pid, verts, color, alpha)
             self.polygons[sample_id][pid] = polygon_obj
             # Draw on plot
-            poly_patch = MplPolygon(verts, closed=True, edgecolor=color, fill=True, alpha=alpha)
+            poly_patch = MplPolygon(verts, closed=True, edgecolor=color, fill=True, alpha=alpha)  # type: ignore[arg-type]
+            polygon_obj.patch = poly_patch
             self.ax.add_patch(poly_patch)
             self.canvas.draw_idle()
             self._remove_temp()
         self._drawing = False
+        self.disconnect()  # stop canvas events until next Create Polygon click
         self.parent.update_table_widget()  # Update the table in the main window
 
     # --- Saving and Loading ---
@@ -167,7 +194,7 @@ class PolygonManager:
                     polygon = pickle.load(file)
                     self.polygons[sample_id][polygon.p_id] = polygon
                     # Draw on axes
-                    poly_patch = MplPolygon(polygon.verts, closed=True, edgecolor=polygon.color,
+                    poly_patch = MplPolygon(polygon.verts, closed=True, edgecolor=polygon.color,  # type: ignore[arg-type]
                                             fill=True, alpha=polygon.alpha)
                     self.ax.add_patch(poly_patch)
         self.canvas.draw_idle()
@@ -196,8 +223,10 @@ class PolygonManager:
                 self.finish_polygon()
         else:
             # --- Polygon Editing Mode ---
+            sample_id = self.main_window.app_data.sample_id
+            current_polys = list(self.polygons.get(sample_id, {}).values())
             hit_something = False
-            for poly in self.polygons:
+            for poly in current_polys:
                 if poly.is_selected:
                     for i, (vx, vy) in enumerate(poly.verts):
                         if np.hypot(event.xdata - vx, event.ydata - vy) < 0.05:
@@ -206,16 +235,15 @@ class PolygonManager:
                             self.selected_poly = poly
                             hit_something = True
                             return
-                    if poly.poly.contains_point([event.x, event.y]):
+                    if poly.patch is not None and poly.patch.contains_point([event.x, event.y]):
                         self.dragging_poly = True
                         self.last_event_xy = (event.xdata, event.ydata)
                         self.selected_poly = poly
                         hit_something = True
                         return
             if not hit_something:
-                for poly in self.polygons:
-                    cont = poly.poly.contains_point([event.x, event.y])
-                    if cont:
+                for poly in current_polys:
+                    if poly.patch is not None and poly.patch.contains_point([event.x, event.y]):
                         self.deselect_all()
                         poly.select()
                         self.selected_poly = poly
@@ -239,10 +267,10 @@ class PolygonManager:
         elif self.dragging_poly and self.selected_poly and self.last_event_xy:
             dx = event.xdata - self.last_event_xy[0]
             dy = event.ydata - self.last_event_xy[1]
-            new_verts = [[x+dx, y+dy] for x, y in self.selected_poly.verts]
+            new_verts = [(x+dx, y+dy) for x, y in self.selected_poly.verts]
             self.selected_poly.verts = new_verts
-            self.selected_poly.poly.set_xy(new_verts)
-            self.selected_poly._draw_vertices()
+            if self.selected_poly.patch is not None:
+                self.selected_poly.patch.set_xy(new_verts)
             self.last_event_xy = (event.xdata, event.ydata)
 
 
@@ -256,8 +284,11 @@ class PolygonManager:
                 self._drawing = False
         elif self.selected_poly:
             if event.key in ['delete', 'backspace']:
-                self.selected_poly.remove()
-                self.polygons.remove(self.selected_poly)
+                if self.selected_poly.patch is not None:
+                    self.selected_poly.patch.remove()
+                sample_id = self.main_window.app_data.sample_id
+                if sample_id in self.polygons:
+                    self.polygons[sample_id].pop(self.selected_poly.p_id, None)
                 self.selected_poly = None
                 self.canvas.draw_idle()
 
@@ -277,7 +308,8 @@ class PolygonManager:
         self.canvas.draw_idle()
 
     def deselect_all(self):
-        for poly in self.polygons:
+        sample_id = self.main_window.app_data.sample_id
+        for poly in self.polygons.get(sample_id, {}).values():
             poly.deselect()
         self.selected_poly = None
 
@@ -298,14 +330,17 @@ class PolygonManager:
             polygon = self.polygons[sample_id][p_id]
 
             # Clear any previous selection in the table
-            self.parent.tableWidgetPolyPoints.clearSelection()
-
-            # Find and select the corresponding row in the table
-            for row in range(self.parent.tableWidgetPolyPoints.rowCount()):
-                item = self.parent.tableWidgetPolyPoints.item(row, 0)  # Assuming ID in col 0
+            table = self.parent.tableWidgetPolyPoints
+            table.blockSignals(True)
+            table.selectionModel().blockSignals(True)
+            table.clearSelection()
+            for row in range(table.rowCount()):
+                item = table.item(row, 0)
                 if item and int(item.text()) == p_id:
-                    self.parent.tableWidgetPolyPoints.selectRow(row)
+                    table.selectRow(row)
                     break
+            table.selectionModel().blockSignals(False)
+            table.blockSignals(False)
 
             # Remove the patch from axes if it exists (to avoid double-drawing)
             if getattr(polygon, 'patch', None) is not None:
@@ -317,7 +352,7 @@ class PolygonManager:
 
             # Draw the polygon patch on the axes
             from matplotlib.patches import Polygon as MplPolygon
-            polygon.patch = MplPolygon(polygon.verts, closed=True,
+            polygon.patch = MplPolygon(polygon.verts, closed=True,  # type: ignore[arg-type]
                                     edgecolor=polygon.color,
                                     fill=True, alpha=polygon.alpha)
             self.ax.add_patch(polygon.patch)
@@ -339,9 +374,29 @@ class PolygonManager:
             self.canvas.draw_idle()
 
 
+    def clear_plot(self):
+        """Remove all polygon patches and vertex markers from the canvas for the current sample."""
+        sample_id = self.main_window.app_data.sample_id
+        if sample_id in self.polygons:
+            for polygon in self.polygons[sample_id].values():
+                if getattr(polygon, 'patch', None) is not None:
+                    try:
+                        polygon.patch.remove()
+                    except Exception:
+                        pass
+                    polygon.patch = None
+                for marker in getattr(polygon, 'vertex_markers', []):
+                    try:
+                        marker.remove()
+                    except Exception:
+                        pass
+                polygon.vertex_markers = []
+        if hasattr(self, 'canvas'):
+            self.canvas.draw_idle()
+
     def clear_polygons(self):
         """Clear all existing polygons from the plot."""
-        for sample_id, polygons in self.polygons.items():
+        for polygons in self.polygons.values():
             for polygon in polygons.values():
                 if getattr(polygon, 'patch', None) is not None:
                     polygon.patch.remove()
@@ -350,11 +405,15 @@ class PolygonManager:
                     for marker in polygon.vertex_markers:
                         marker.remove()
                     polygon.vertex_markers = []
-        self.canvas.draw_idle()
+        if hasattr(self, 'canvas'):
+            self.canvas.draw_idle()
         self.parent.update_table_widget()  # Update the table in the main window
     
     def disconnect(self):
+        if not hasattr(self, 'canvas') or self.cid_click is None:
+            return
         self.canvas.mpl_disconnect(self.cid_click)
         self.canvas.mpl_disconnect(self.cid_release)
         self.canvas.mpl_disconnect(self.cid_move)
         self.canvas.mpl_disconnect(self.cid_key)
+        self.cid_click = self.cid_release = self.cid_move = self.cid_key = None

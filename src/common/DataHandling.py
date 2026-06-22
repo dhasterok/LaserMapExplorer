@@ -709,6 +709,10 @@ class SampleObj(QObject):
         sample_df = pd.read_csv(self.file_path, engine='c')
         sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
 
+        # Older .lame files use 'X'/'Y'; current schema uses 'Xc'/'Yc' — normalise on load
+        if 'Xc' not in sample_df.columns and 'X' in sample_df.columns:
+            sample_df = sample_df.rename(columns={'X': 'Xc', 'Y': 'Yc'})
+
         # determine column data types
         # initialize all as 'Analyte'
         data_type = ['Analyte']*sample_df.shape[1]

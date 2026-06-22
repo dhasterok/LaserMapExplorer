@@ -439,7 +439,7 @@ class MainWindow(QMainWindow):
             self.style_dock.toolbox.setEnabled(True)
 
 
-    def quit(self):
+    def quit(self, *args):
         """Shutdown function
 
         Saves necessary files and then executes close() function.
@@ -695,16 +695,16 @@ class MainWindow(QMainWindow):
 
         if hasattr(self, "mask_dock"):
             #reset filter table, keeping any persistent filters
-            persistent = self.mask_dock.filter_tab.tableWidgetFilters.column_to_list("persistent")
+            persistent = self.mask_dock.filter_tab.filter_table.column_to_list("Persistent")
             if all(persistent):
                 pass
             elif any(persistent):
                 for row in range(len(persistent)-1,-1,-1):
                     if not persistent[row]:
-                        self.mask_dock.filter_tab.tableWidgetFilters.removeRow(row)
+                        self.mask_dock.filter_tab.filter_table.removeRow(row)
             else:
-                self.mask_dock.filter_tab.tableWidgetFilters.clearContents()
-                self.mask_dock.filter_tab.tableWidgetFilters.setRowCount(0)
+                self.mask_dock.filter_tab.filter_table.clearContents()
+                self.mask_dock.filter_tab.filter_table.setRowCount(0)
 
             ##### Add back in the persistent filters
 
@@ -794,12 +794,14 @@ class MainWindow(QMainWindow):
             self.control_dock.preprocess.lineEditDifferenceUpperQuantile.setEnabled(False)
 
     def update_mask_dock(self):
-        # Update filter UI 
+        # Update filter UI
         if hasattr(self, "mask_dock"):
-            field = self.mask_dock.filter_tab.comboBoxFilterField.currentText()
+            field = self.mask_dock.filter_tab.combo_field.currentText()
+            if not field or field not in self.app_data.current_data.processed.columns:
+                return
 
-            self.mask_dock.filter_tab.lineEditFMin.value = self.app_data.current_data.processed[field].min()
-            self.mask_dock.filter_tab.lineEditFMax.value = self.app_data.current_data.processed[field].max()
+            self.mask_dock.filter_tab.edit_filter_min.value = self.app_data.current_data.processed[field].min()
+            self.mask_dock.filter_tab.edit_filter_max.value = self.app_data.current_data.processed[field].max()
 
 
     def update_selected_clusters_spinbox(self, new_selected_clusters):
@@ -851,7 +853,7 @@ class MainWindow(QMainWindow):
             case 'dimension scatter', 'dimension heatmap':
                 axes = ['x','y']
             case 'cluster map':
-                axes = ['c']
+                return True
             case 'cluster score map':
                 axes = ['c']
             case 'profile':
@@ -1028,6 +1030,12 @@ class MainWindow(QMainWindow):
         selected_clusters = list(self.app_data.cluster_dict[method].get('selected_clusters', []))
 
         if not selected_clusters:
+            # No clusters selected → cluster filter is off; let everything through.
+            d = self.data[sample_id]
+            d.cluster_mask = np.ones(len(d.mask), dtype=bool)
+            d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask
+            self.lame_action.ClusterMask.setChecked(False)
+            self.schedule_update()
             return
 
         cluster_group = self.data[sample_id].processed.loc[:, method]

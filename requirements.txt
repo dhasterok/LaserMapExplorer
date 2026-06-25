@@ -1,0 +1,37 @@
+# LaserMapExplorer dependencies
+# Install with: pip install -r requirements.txt
+#
+# Sibling packages (install these editable from their local repos):
+-e ../lame-core
+
+# Qt
+PyQt6
+PyQt6-WebEngine
+
+# Numerical / data
+numpy
+pandas
+scipy
+numexpr
+openpyxl
+
+# Machine learning
+scikit-learn
+scikit-fuzzy
+
+# Plotting
+matplotlib
+cmcrameri
+pyqtgraph
+
+# Image processing
+opencv-python
+Pillow
+
+# reStructuredText / documentation
+rst2pdf
+docutils
+
+# Utilities
+darkdetect
+networkx

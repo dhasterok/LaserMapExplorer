@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     )
 from lame_core.UITheme import default_font
 from lame_core.CustomWidgets import CustomPage
-from src.app.config import ICONPATH
+from lame_core.config import ICONPATH
 import resources_rc
 
 class SpotPage(CustomPage):

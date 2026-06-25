@@ -15,7 +15,7 @@ from matplotlib.figure import Figure
 import pandas as pd
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import matplotlib as mpl
-from src.app.config import ICONPATH
+from lame_core.config import ICONPATH
 
 # Matplotlib Canvas object
 # -------------------------------

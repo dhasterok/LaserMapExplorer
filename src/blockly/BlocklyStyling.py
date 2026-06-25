@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import src.common.csvdict as csvdict
 # Removed unused imports: get_hex_color, get_rgb_color
-from src.app.config import BASEDIR
+from lame_core.config import BASEDIR
 from src.app.StyleToolbox import StyleData, StyleTheme
 from src.common.ScheduleTimer import Scheduler
 from src.common.Logger import auto_log_methods, log

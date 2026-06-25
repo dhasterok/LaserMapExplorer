@@ -41,7 +41,7 @@ from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
-from src.app.config import BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet
+from lame_core.config import BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet
 from src.app.settings import prefs
 from src.app.help_mapping import create_help_mapping
 from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock

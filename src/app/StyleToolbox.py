@@ -13,7 +13,7 @@ from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color, convert_color_list
-from src.app.config import STYLE_PATH
+from lame_core.config import STYLE_PATH
 from src.app.PlotAxisSettings import axis_settings_dict
 from src.common.Logger import auto_log_methods, log
 

@@ -15,7 +15,7 @@ import src.common.csvdict as csvdict
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color
 from src.common.Logger import log, auto_log_methods
-from src.app.config import ICONPATH
+from lame_core.config import ICONPATH
 
 if TYPE_CHECKING:
     from src.app.FieldLogic import ControlDock

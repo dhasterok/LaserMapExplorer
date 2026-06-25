@@ -1,6 +1,6 @@
 import os, re
 import numexpr as ne
-from src.app.config import BASEDIR
+from lame_core.config import BASEDIR
 import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match

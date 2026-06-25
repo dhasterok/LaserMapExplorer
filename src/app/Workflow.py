@@ -6,7 +6,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtGui import QIcon, QAction, QFont, QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QTextFormat, QPainter
 from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize, QRegularExpression, QRect
-from src.app.config import BASEDIR
+from lame_core.config import BASEDIR
 from lame_core.CustomWidgets import CustomDockWidget
 import numpy as np
 from src.app.BlocklyModules import LameBlockly

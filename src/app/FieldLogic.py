@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QGridLayout, QSpinBox, QDockWidget, QSpacerItem,
 )
 from PyQt6.QtGui import ( QIcon )
-from src.app.config import BASEDIR, ICONPATH, RESOURCE_PATH
+from lame_core.config import BASEDIR, ICONPATH, RESOURCE_PATH
 from src.common.ExtendedDF import AttributeDataFrame
 from lame_core.CustomWidgets import CustomDockWidget, CustomPage, CustomComboBox, CustomToolBox
 from src.app.Preprocessing import PreprocessingUI

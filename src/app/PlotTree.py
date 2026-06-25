@@ -10,7 +10,7 @@ import src.common.CustomMplCanvas as mplc
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 from src.app.PlotRegistry import PlotRegistry
 
-from src.app.config import ICONPATH
+from lame_core.config import ICONPATH
 
 # -------------------------------
 # Plot Selector (tree) functions

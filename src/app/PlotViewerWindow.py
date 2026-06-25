@@ -7,7 +7,7 @@ from pyqtgraph import (
 )
 from pyqtgraph.GraphicsScene import exportDialog
 from src.ui.PlotViewer import Ui_widgetPlotViewer
-from src.app.config import BASEDIR
+from lame_core.config import BASEDIR
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import src.common.CustomMplCanvas as mplc
 from src.common.Logger import auto_log_methods

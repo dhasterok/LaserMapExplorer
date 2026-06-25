@@ -26,7 +26,7 @@ import pandas as pd
 from scipy.stats import percentileofscore
 
 from lame_core.UITheme import default_font
-from src.app.config import BASEDIR
+from lame_core.config import BASEDIR
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color
 

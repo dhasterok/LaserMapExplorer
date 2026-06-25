@@ -11,7 +11,8 @@ from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import QSettings, QDir, Qt
 import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
-from src.app.config import BASEDIR, get_top_parent
+from lame_core.config import BASEDIR
+from src.app.config import get_top_parent
 import src.common.CustomMplCanvas as mplc
 from src.common.DataHandling import LaserSampleObj, XRFSampleObj
 from src.common.CustomMplCanvas import MplCanvas

@@ -1,6 +1,6 @@
 import re, os
 import pandas as pd
-from src.app.config import BASEDIR
+from lame_core.config import BASEDIR
 
 def sort_analytes(method, analytes, order = 'd'):
     """Sort the analyte list

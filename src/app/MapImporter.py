@@ -12,7 +12,7 @@ from lame_core.CustomWidgets import CustomAction
 import src.common.csvdict as csvdict
 from src.ui.MapImportDialog import Ui_MapImportDialog
 from src.ui.FileSelectorDialog import Ui_FileSelectorDialog
-from src.app.config import BASEDIR, ICONPATH
+from lame_core.config import BASEDIR, ICONPATH
 
 # Import Tool Dialog
 # -------------------------------

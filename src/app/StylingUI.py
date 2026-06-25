@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
 # Removed unused imports: get_hex_color, get_rgb_color
-from src.app.config import BASEDIR, ICONPATH
+from lame_core.config import BASEDIR, ICONPATH
 from src.common.Logger import auto_log_methods, log
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

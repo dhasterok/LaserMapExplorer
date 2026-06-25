@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QPushButton, QFormLayout, QSizePolicy,
     QFrame, QToolButton, QWidget, QApplication, QStyle, QGridLayout
 )
-from src.app.config import ICONPATH, STYLE_PATH, load_stylesheet
+from lame_core.config import ICONPATH, STYLE_PATH, load_stylesheet
 
 def default_font():
     # set default font for application

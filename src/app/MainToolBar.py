@@ -3,7 +3,7 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QToolBar, QMenuBar, QMenu, QWidget, QLabel, QVBoxLayout, QComboBox, QMessageBox
 from lame_core.UITheme import default_font, PreferencesDialog
 from lame_core.CustomWidgets import CustomAction, CustomActionMenu
-from src.app.config import ICONPATH
+from lame_core.config import ICONPATH
 from src.app.settings import prefs
 from src.common.Logger import log, no_log
 

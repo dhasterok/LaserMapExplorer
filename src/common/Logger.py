@@ -119,7 +119,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QFont, QColor
 
 from lame_core.CustomWidgets import CustomDockWidget, CustomAction, ToggleSwitch
-from siesta.SearchTool import SearchWidget
+from lame_core.SearchTool import SearchWidget
 
 _global_logger = None
 

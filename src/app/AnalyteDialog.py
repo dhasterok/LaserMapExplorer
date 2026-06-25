@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import ( QImage, QColor, QFont, QPixmap, QPainter, QBrush )
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
-from src.app.config import RESOURCE_PATH
+from lame_core.config import RESOURCE_PATH
 from lame_core.CustomWidgets import RotatedHeaderView
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 

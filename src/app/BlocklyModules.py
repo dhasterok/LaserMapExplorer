@@ -41,7 +41,7 @@ from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
 from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
-from src.app.config import BASEDIR, ICONPATH, STYLE_PATH, load_stylesheet
+from lame_core.config import BASEDIR, ICONPATH, STYLE_PATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame
 import lame_core.format as fmt
 # Removed unused imports: get_hex_color, get_rgb_color

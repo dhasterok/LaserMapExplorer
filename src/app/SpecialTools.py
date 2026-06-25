@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
         QFormLayout, QComboBox, QLabel, QCheckBox, QGridLayout, QPushButton
     )
 from lame_core.CustomWidgets import CustomPage, CustomToolButton, CustomLineEdit
-from src.app.config import ICONPATH
+from lame_core.config import ICONPATH
 #from src.common.geochronology import 
 
 class SpecialPage(CustomPage):

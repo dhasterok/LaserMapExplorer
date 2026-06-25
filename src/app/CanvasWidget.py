@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QFont, QIcon, QCursor
 from lame_core.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
-from src.app.config import APPDATA_PATH, ICONPATH, get_top_parent
+from lame_core.config import APPDATA_PATH, ICONPATH
+from src.app.config import get_top_parent
 
 import gc
 import numpy as np

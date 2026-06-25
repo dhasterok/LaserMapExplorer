@@ -20,7 +20,7 @@ from PyQt6.QtGui import (
     QPen, QGuiApplication, QWheelEvent
 )
 from PyQt6.QtCore import Qt, QPoint, QRect, QSize, pyqtSignal
-from src.common.ColorManager import convert_color, convert_color_list
+from lame_core.ColorManager import convert_color, convert_color_list
 
 from PIL import Image
 from sklearn.decomposition import PCA
@@ -549,8 +549,8 @@ class ImageColorPicker(QWidget):
             return
 
         # zoom factors
-        zoom_in_factor = 1.25
-        zoom_out_factor = 0.8
+        zoom_in_factor = 1.1
+        zoom_out_factor = 1 / 1.1
 
         if event.angleDelta().y() > 0:   # scroll up
             factor = zoom_in_factor

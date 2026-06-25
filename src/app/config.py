@@ -1,5 +1,6 @@
 from pathlib import Path
 from PyQt6.QtWidgets import QMainWindow, QWidget
+import lame_core.config as lame_core_config
 
 # __file__ holds the full path to the current Python file
 BASEDIR = Path(__file__).resolve().parent.parent.parent
@@ -15,6 +16,15 @@ ICONPATH = RESOURCE_PATH / 'icons'
 
 # Path to the stylesheet directory
 STYLE_PATH = RESOURCE_PATH / 'styles'
+
+# Point lame_core at LaME's own resources so shared widgets find icons/styles
+lame_core_config.setup(
+    basedir=BASEDIR,
+    resource_path=RESOURCE_PATH,
+    iconpath=ICONPATH,
+    style_path=STYLE_PATH,
+    appdata_path=APPDATA_PATH,
+)
 
 def load_stylesheet(filename):
     replacements = {

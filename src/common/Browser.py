@@ -8,7 +8,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtGui import QIcon, QMouseEvent
-from src.common.CustomWidgets import CustomAction, CustomToolButton
+from lame_core.CustomWidgets import CustomAction, CustomToolButton
 from src.common.Logger import LoggerConfig, auto_log_methods
     
 # WebEngineView - Web engine for viewing userguide help pages

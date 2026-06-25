@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd   
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string, publish_file
-import src.common.format as fmt
+import lame_core.format as fmt
 from src.common.CodingWidgets import CodeEditor
-from src.common.CustomWidgets import CustomLineEdit, CustomAction, CustomActionMenu, CustomDockWidget
+from lame_core.CustomWidgets import CustomLineEdit, CustomAction, CustomActionMenu, CustomDockWidget
 from src.common.SearchTool import SearchWidget
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 

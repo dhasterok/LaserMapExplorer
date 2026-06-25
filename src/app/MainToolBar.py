@@ -1,8 +1,8 @@
 from PyQt6.QtCore import QSize, Qt, QRect, QObject
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QToolBar, QMenuBar, QMenu, QWidget, QLabel, QVBoxLayout, QComboBox, QMessageBox
-from src.app.UITheme import default_font, PreferencesDialog
-from src.common.CustomWidgets import CustomAction, CustomActionMenu
+from lame_core.UITheme import default_font, PreferencesDialog
+from lame_core.CustomWidgets import CustomAction, CustomActionMenu
 from src.app.config import ICONPATH
 from src.app.settings import prefs
 from src.common.Logger import log, no_log

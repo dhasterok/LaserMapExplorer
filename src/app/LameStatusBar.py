@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QStatusBar, QLabel
-from src.common.CustomWidgets import CustomToolButton
+from lame_core.CustomWidgets import CustomToolButton
 
 class MainStatusBar(QStatusBar):
     def __init__(self, ui=None):

@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import (
     QCheckBox, QSizePolicy
 )
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon, )
-from src.common.CustomWidgets import ( CustomPage, CustomLineEdit, CustomSlider, CustomToolButton )
-from src.app.UITheme import default_font
+from lame_core.CustomWidgets import ( CustomPage, CustomLineEdit, CustomSlider, CustomToolButton )
+from lame_core.UITheme import default_font
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans

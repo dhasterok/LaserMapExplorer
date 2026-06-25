@@ -7,8 +7,8 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QSizePolicy, QTreeView, QWidget
 ) # type: ignore
 from PyQt6.QtGui import ( QIcon ) 
-from src.common.CustomWidgets import CustomToolButton, CustomComboBox, CustomAction
-from src.app.UITheme import ThemeManager, PreferencesManager, apply_font_to_children
+from lame_core.CustomWidgets import CustomToolButton, CustomComboBox, CustomAction
+from lame_core.UITheme import ThemeManager, PreferencesManager, apply_font_to_children
 from src.app.AppData import AppData
 from src.app.StyleToolbox import StyleData
 from src.app.MainToolBar import MainActions, MainMenubar, MainToolbar

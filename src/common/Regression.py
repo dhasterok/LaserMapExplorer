@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import (
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView, QToolBar,
         QComboBox, QCheckBox, QDockWidget, QToolBox, QLineEdit, QLabel, QPushButton,
     )
-from src.common.CustomWidgets import CustomDockWidget
-from src.app.UITheme import default_font
+from lame_core.CustomWidgets import CustomDockWidget
+from lame_core.UITheme import default_font
 
 # Right now, this is just notes
 # Need regression codes that handle linear fitting using total Least-Squares or Deming regression or something similar.

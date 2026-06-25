@@ -118,7 +118,7 @@ from PyQt6.QtWidgets import (
     )
 from PyQt6.QtGui import QFont, QColor
 
-from src.common.CustomWidgets import CustomDockWidget, CustomAction, ToggleSwitch
+from lame_core.CustomWidgets import CustomDockWidget, CustomAction, ToggleSwitch
 from src.common.SearchTool import SearchWidget
 
 _global_logger = None

@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
         QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QAbstractItemView
     )
-from src.common.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
+from lame_core.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 from src.app.FieldLogic import FieldLogicUI
 from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas

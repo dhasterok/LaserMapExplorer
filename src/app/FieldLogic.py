@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QIcon )
 from src.app.config import BASEDIR, ICONPATH, RESOURCE_PATH
 from src.common.ExtendedDF import AttributeDataFrame
-from src.common.CustomWidgets import CustomDockWidget, CustomPage, CustomComboBox, CustomToolBox
+from lame_core.CustomWidgets import CustomDockWidget, CustomPage, CustomComboBox, CustomToolBox
 from src.app.Preprocessing import PreprocessingUI
 from src.app.LamePlotUI import HistogramUI, CorrelationUI, ScatterUI, NDimUI
 from src.app.ImageProcessing import ImageProcessingUI

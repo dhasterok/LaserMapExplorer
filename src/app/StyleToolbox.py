@@ -4,7 +4,7 @@ from typing import List
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
-import src.common.format as fmt
+import lame_core.format as fmt
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ import matplotlib.colors as colors
 from matplotlib.lines import Line2D
 import src.common.csvdict as csvdict
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
-from src.common.ColorManager import convert_color, convert_color_list
+from lame_core.ColorManager import convert_color, convert_color_list
 from src.app.config import STYLE_PATH
 from src.app.PlotAxisSettings import axis_settings_dict
 from src.common.Logger import auto_log_methods, log

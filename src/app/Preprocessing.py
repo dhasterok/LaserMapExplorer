@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import ( QIcon )
 from src.common.Logger import log, auto_log_methods
-from src.common.CustomWidgets import CustomPage, CustomLineEdit, CustomToolButton
+from lame_core.CustomWidgets import CustomPage, CustomLineEdit, CustomToolButton
 from src.app.config import ICONPATH
 
 @auto_log_methods(logger_key="Data")

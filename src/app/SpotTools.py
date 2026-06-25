@@ -4,8 +4,8 @@ from PyQt6.QtWidgets import (
         QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QScrollArea, QToolButton,
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView
     )
-from src.app.UITheme import default_font
-from src.common.CustomWidgets import CustomPage
+from lame_core.UITheme import default_font
+from lame_core.CustomWidgets import CustomPage
 from src.app.config import ICONPATH
 import resources_rc
 

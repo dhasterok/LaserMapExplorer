@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QButtonGroup, QDialogButtonBox, QMenu, QPushButton
 )
 from PyQt6.QtGui import QFont, QIcon, QCursor
-from src.common.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
+from lame_core.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
 from src.app.config import APPDATA_PATH, ICONPATH, get_top_parent
 
 import gc
@@ -23,7 +23,7 @@ import src.common.csvdict as csvdict
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.app.CustomTableWidget as TW
 from src.common.SortAnalytes import sort_analytes
-from src.app.UITheme import default_font
+from lame_core.UITheme import default_font
 from src.common.Logger import auto_log_methods, log, no_log
 
 @auto_log_methods(logger_key='Canvas')

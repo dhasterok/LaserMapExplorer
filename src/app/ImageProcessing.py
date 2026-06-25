@@ -12,7 +12,7 @@ from scipy.signal import convolve2d, wiener, decimate
 from pyqtgraph import ( ImageItem )
 import cv2
 from src.common.Logger import log, auto_log_methods
-from src.common.ColorManager import convert_color
+from lame_core.ColorManager import convert_color
 
 # -------------------------------------
 # Image processing functions

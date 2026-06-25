@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
         QTableWidget, QTableWidgetItem, QSpacerItem, QFrame, QSizePolicy, QHeaderView, QTabWidget,
         QFormLayout, QComboBox, QLabel, QCheckBox, QGridLayout, QPushButton
     )
-from src.common.CustomWidgets import CustomPage, CustomToolButton, CustomLineEdit
+from lame_core.CustomWidgets import CustomPage, CustomToolButton, CustomLineEdit
 from src.app.config import ICONPATH
 #from src.common.geochronology import 
 

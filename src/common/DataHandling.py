@@ -11,13 +11,13 @@ from scipy.stats import yeojohnson
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-import src.common.format as fmt
+import lame_core.format as fmt
 from src.common.SortAnalytes import sort_analytes
 from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
-from src.common.format import symlog, inv_logit
+from lame_core.format import symlog, inv_logit
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 

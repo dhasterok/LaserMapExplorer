@@ -7,7 +7,7 @@ from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtGui import QIcon, QAction, QFont, QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QTextFormat, QPainter
 from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize, QRegularExpression, QRect
 from src.app.config import BASEDIR
-from src.common.CustomWidgets import CustomDockWidget
+from lame_core.CustomWidgets import CustomDockWidget
 import numpy as np
 from src.app.BlocklyModules import LameBlockly
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  

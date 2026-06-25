@@ -1,3 +1,3 @@
-from src.app.UITheme import PreferencesManager
+from lame_core.UITheme import PreferencesManager
 
 prefs = PreferencesManager()

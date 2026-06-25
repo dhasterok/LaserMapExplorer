@@ -6,11 +6,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase, QIcon )
 from PyQt6.QtCore import Qt, QSize, QRect
-from src.common.CustomWidgets import (
+from lame_core.CustomWidgets import (
     CustomDockWidget, CustomToolButton, CustomSlider, CustomLineEdit, CustomPage, CustomComboBox, ColorButton, CustomToolBox 
 )
 from pyqtgraph import colormap
-import src.common.format as fmt
+import lame_core.format as fmt
 import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict

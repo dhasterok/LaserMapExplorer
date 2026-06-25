@@ -1,4 +1,4 @@
-import src.common.format as fmt
+import lame_core.format as fmt
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

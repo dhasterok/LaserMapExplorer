@@ -1,4 +1,4 @@
-import src.common.CustomWidgets as cw
+import lame_core.CustomWidgets as cw
 # Form implementation generated from reading ui file 'designer/MainWindow.ui'
 #
 # Created by: PyQt6 UI code generator 6.8.1

@@ -2,7 +2,7 @@ from src.app.config import BASEDIR
 import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
-import src.common.format as fmt
+import lame_core.format as fmt
 from PyQt6.QtCore import Qt, QSize, QUrl
 from PyQt6.QtWidgets import (
         QTextEdit, QWidget, QVBoxLayout, QMessageBox, QLabel,
@@ -12,10 +12,11 @@ from PyQt6.QtWidgets import (
     )
 from PyQt6.QtGui import QDoubleValidator
 
-from src.common.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction, ColorButton
+from lame_core.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction
+from src.common.ColorButton import ColorButton
 from src.app.FieldLogic import FieldLogicUI
 
-from src.app.UITheme import default_font
+from lame_core.UITheme import default_font
 from src.common.CustomMplCanvas import MplCanvas
 
 PRECISION = 5

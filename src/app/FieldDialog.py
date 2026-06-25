@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox, QToolButton, QMenu
 )
 from src.app.config import BASEDIR, ICONPATH, RESOURCE_PATH
-from src.common.CustomWidgets import CustomToolButton
+from lame_core.CustomWidgets import CustomToolButton
 from src.common.DualWidgetList import DualListWidget
 from src.common.SortAnalytes import sort_analytes
 

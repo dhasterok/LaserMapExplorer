@@ -35,11 +35,11 @@ from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 import cmcrameri.cm as cmr
 
-from src.common.CustomWidgets import CustomAction, ToggleSwitch
+from lame_core.CustomWidgets import CustomAction, ToggleSwitch
 from src.common.ColorSelector import select_color
 from src.app.config import RESOURCE_PATH, ICONPATH
 from src.common.ternary_plot import ternary
-from src.common.ColorManager import convert_color, convert_color_list
+from lame_core.ColorManager import convert_color, convert_color_list
 from src.common.ColorPicker import ImageColorPicker
 
 # Define transformation matrices
@@ -2998,7 +2998,7 @@ class ColormapEditorDialog(QDialog):
         new_color = QColor(new_color)
         if self.model.is_discrete:
             if self.discrete_widget.get_selected_count() > 0:
-                idx = self.discrete_widget.selected_indices
+                idx = sorted(self.discrete_widget.selected_indices)
         else:
             idx = [self.continuous_widget.get_selected_point()]
         

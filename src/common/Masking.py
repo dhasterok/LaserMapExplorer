@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget, QGridLayout,
         QSpacerItem,
     )
-from src.common.CustomWidgets import (
+from lame_core.CustomWidgets import (
     CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
 )
 from src.app.FieldLogic import FieldLogicUI
@@ -25,13 +25,13 @@ import numpy as np
 import pandas as pd
 from scipy.stats import percentileofscore
 
-from src.app.UITheme import default_font
+from lame_core.UITheme import default_font
 from src.app.config import BASEDIR
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
-from src.common.ColorManager import convert_color
+from lame_core.ColorManager import convert_color
 
 from src.common.TableFunctions import TableFcn as TableFcn
-import src.common.format as fmt
+import lame_core.format as fmt
 from src.common.PolygonMatplotlib import PolygonManager
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 

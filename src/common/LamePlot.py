@@ -16,9 +16,9 @@ from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 from src.common.CustomMplCanvas import MplCanvas, SimpleMplCanvas
-import src.common.format as fmt
+import lame_core.format as fmt
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
-from src.common.ColorManager import convert_color
+from lame_core.ColorManager import convert_color
 from src.common.plot_spider import plot_spider_norm
 from src.common.radar import Radar
 from src.common.scalebar import scalebar

@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
         QGroupBox, QGridLayout, QHBoxLayout, QFrame, QSizePolicy, QScrollArea
     )
 
-from src.common.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction, CustomToolButton
+from lame_core.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction, CustomToolButton
 from src.app.FieldLogic import FieldLogicUI
 from src.common.Logger import LoggerConfig, auto_log_methods
 

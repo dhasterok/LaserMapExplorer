@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt, QUrl
-from src.common.CustomWidgets import CustomAction
+from lame_core.CustomWidgets import CustomAction
 import src.common.csvdict as csvdict
 from src.ui.MapImportDialog import Ui_MapImportDialog
 from src.ui.FileSelectorDialog import Ui_FileSelectorDialog

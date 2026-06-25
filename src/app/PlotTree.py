@@ -3,8 +3,8 @@ import re, darkdetect
 from PyQt6.QtCore import ( Qt, QSize )
 from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
 from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar ) 
-from src.common.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomAction, CustomActionMenu
-from src.app.UITheme import default_font
+from lame_core.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomAction, CustomActionMenu
+from lame_core.UITheme import default_font
 
 import src.common.CustomMplCanvas as mplc
 from src.common.Logger import LoggerConfig, auto_log_methods, log

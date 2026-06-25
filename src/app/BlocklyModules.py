@@ -39,7 +39,7 @@ from src.app.StyleToolbox import StyleData, StyleTheme
 from src.app.Profile import Profiling
 from src.common.Polygon import PolygonManager
 from src.common.Calculator import CustomFieldCalculator as cfc
-from src.common.reSTNotes import NotesDock
+from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
 from src.app.config import BASEDIR, ICONPATH, STYLE_PATH, load_stylesheet
 from src.common.ExtendedDF import AttributeDataFrame

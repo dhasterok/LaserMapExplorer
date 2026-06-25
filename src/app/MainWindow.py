@@ -37,7 +37,7 @@ from src.app.CropImage import CropTool
 from src.app.Profile import Profiling, ProfileDock
 from src.common.Regression import RegressionDock
 from src.common.Polygon import PolygonManager
-from src.common.reSTNotes import NotesDock
+from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
 from src.app.Workflow import Workflow
 from src.app.InfoViewer import InfoDock

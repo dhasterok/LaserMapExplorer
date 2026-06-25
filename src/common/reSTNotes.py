@@ -13,9 +13,9 @@ import pandas as pd
 from rst2pdf.createpdf import RstToPdf
 from docutils.core import publish_string, publish_file
 import lame_core.format as fmt
-from src.common.CodingWidgets import CodeEditor
+from siesta.CodingWidgets import CodeEditor
 from lame_core.CustomWidgets import CustomLineEdit, CustomAction, CustomActionMenu, CustomDockWidget
-from src.common.SearchTool import SearchWidget
+from siesta.SearchTool import SearchWidget
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 BASE_PATH = Path(__file__).parents[2] 

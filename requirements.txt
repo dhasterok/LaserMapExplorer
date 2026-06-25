@@ -3,6 +3,8 @@
 #
 # Sibling packages (install these editable from their local repos):
 -e ../lame-core
+-e ../blueberry-colortools
+-e ../siesta-rest-editor
 
 # Qt
 PyQt6

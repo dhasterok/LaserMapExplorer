@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QDoubleValidator
 
 from lame_core.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction
-from src.common.ColorButton import ColorButton
+from blueberry.ColorButton import ColorButton
 from src.app.FieldLogic import FieldLogicUI
 
 from lame_core.UITheme import default_font

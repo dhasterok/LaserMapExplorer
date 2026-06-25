@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QIcon )
 from src.common.TableFunctions import TableFcn
 from lame_core.CustomWidgets import CustomPage, CustomComboBox, CustomToolButton, CustomTableWidget
-from src.common.ColorButton import ColorButton
+from blueberry.ColorButton import ColorButton
 import src.common.csvdict as csvdict
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color

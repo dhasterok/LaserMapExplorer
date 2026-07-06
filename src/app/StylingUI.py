@@ -7,8 +7,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase, QIcon )
 from PyQt6.QtCore import Qt, QSize, QRect
 from lame_core.CustomWidgets import (
-    CustomDockWidget, CustomToolButton, CustomSlider, CustomLineEdit, CustomPage, CustomComboBox, ColorButton, CustomToolBox 
+    CustomDockWidget, CustomToolButton, CustomSlider, CustomLineEdit, CustomPage, CustomComboBox, CustomToolBox 
 )
+from blueberry.ColorButton import ColorButton
 from pyqtgraph import colormap
 import lame_core.format as fmt
 import numpy as np

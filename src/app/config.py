@@ -8,8 +8,6 @@ _resource_path = _basedir / 'resources'
 lame_core_config.setup(
     basedir=_basedir,
     resource_path=_resource_path,
-    iconpath=_resource_path / 'icons',
-    style_path=_resource_path / 'styles',
     appdata_path=_resource_path / 'app_data',
 )
 

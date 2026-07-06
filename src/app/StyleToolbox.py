@@ -14,6 +14,7 @@ import src.common.csvdict as csvdict
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color, convert_color_list
 from lame_core.config import STYLE_PATH
+from blueberry import COLORMAP_PATH
 from src.app.PlotAxisSettings import axis_settings_dict
 from src.common.Logger import auto_log_methods, log
 
@@ -530,12 +531,12 @@ class StyleData(QObject, StyleTheme):
         self.mpl_colormaps = [name for name in plt.colormaps() if not name.endswith('_r')]
 
         # custom colormaps
-        self.custom_color_dict = csvdict.import_csv_to_dict(STYLE_PATH / "custom_colormaps.csv")
+        self.custom_color_dict = csvdict.import_csv_to_dict(COLORMAP_PATH / "custom_colormaps.csv")
         for key in self.custom_color_dict:
             self.custom_color_dict[key] = [h for h in self.custom_color_dict[key] if h]
 
         # create ternary colors dictionary
-        df = pd.read_csv(STYLE_PATH / "ternary_colormaps.csv")
+        df = pd.read_csv(COLORMAP_PATH / "ternary_colormaps.csv")
         self.ternary_colormaps = df.to_dict(orient='records')
 
 

@@ -8,7 +8,6 @@
 
    .. autosummary::
    
-      ColorButton
       CustomAction
       CustomActionMenu
       CustomComboBox

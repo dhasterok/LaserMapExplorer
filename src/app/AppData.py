@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
 from PyQt6.QtCore import QObject, pyqtSignal
-from lame_core.config import APPDATA_PATH, STYLE_PATH
+from lame_core.config import APPDATA_PATH
 from src.common.Logger import auto_log_methods, log
 
 from typing import TYPE_CHECKING, Union

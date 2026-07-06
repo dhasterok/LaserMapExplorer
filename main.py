@@ -3,7 +3,8 @@ from pathlib import Path
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QSplashScreen, QApplication
 from PyQt6.QtGui import QPixmap, QIcon
-from src.app.config import BASEDIR, ICONPATH, load_stylesheet
+import src.app.config  # noqa: F401 — runs lame_core.config.setup()
+from lame_core.config import ICONPATH, load_stylesheet
 from src.app.MainWindow import MainWindow
 
 # -------------------------------

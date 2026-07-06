@@ -158,7 +158,7 @@ class MainActions(QObject):
         self.FilterToggle = CustomAction(
             text="Filter",
             light_icon_unchecked="icon-filter-64.svg",
-            light_icon_checked="icon-filter2-64.png",
+            light_icon_checked="icon-filter-dark-64.png",
             parent=self.ui,
         )
         self.FilterToggle.setCheckable(True)

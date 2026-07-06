@@ -12,8 +12,9 @@ from PyQt6.QtWidgets import (
         QSpacerItem,
     )
 from lame_core.CustomWidgets import (
-    CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
+    CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch, CustomToolButton, CustomAction
 )
+from blueberry.ColorButton import ColorButton
 from src.app.FieldLogic import FieldLogicUI
 # from pyqtgraph import ( ScatterPlotItem )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -26,7 +27,7 @@ import pandas as pd
 from scipy.stats import percentileofscore
 
 from lame_core.UITheme import default_font
-from lame_core.config import BASEDIR
+from lame_core.config import BASEDIR, ICONPATH
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color
 
@@ -308,28 +309,32 @@ class FilterTab(QWidget):
         self.combo_operator.clear()
         self.combo_operator.addItems(["and","or","not"])
 
-        self.button_load_preset = QToolButton(self.filter_tools_groupbox)
-        self.button_load_preset.setText("Load")
-        self.button_load_preset.setToolTip("Load selected preset into filter table")
+        self.button_load_preset = CustomToolButton(
+            text="Add",
+            light_icon_unchecked="icon-forward-arrow-64.svg",
+            dark_icon_unchecked="icon-forward-arrow-dark-64.svg",
+            parent=self.filter_tools_groupbox)
+        self.button_load_preset.setFixedSize(QSize(18, 18))
+        self.button_load_preset.setToolTip("Add selected preset into filter table")
 
         filter_layout.addWidget(QLabel("Preset"), 0, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
-        filter_layout.addWidget(self.combo_filter_presets, 0, 1, 1, 4)
-        filter_layout.addWidget(self.button_load_preset, 0, 5, 1, 1)
+        filter_layout.addWidget(self.combo_filter_presets, 0, 1, 1, 2)
+        filter_layout.addWidget(self.button_load_preset, 0, 3, 1, 1)
 
         filter_layout.addWidget(QLabel("Field type"), 1, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
         filter_layout.addWidget(self.combo_field_type_type, 1, 1, 1, 2)
-        filter_layout.addWidget(QLabel("Field"), 1, 3, 1, 1, Qt.AlignmentFlag.AlignRight)
-        filter_layout.addWidget(self.combo_field, 1, 4, 1, 2)
+        filter_layout.addWidget(QLabel("Field"), 2, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.combo_field, 2, 1, 1, 2)
 
-        filter_layout.addWidget(QLabel("Min"), 2, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
-        filter_layout.addWidget(self.edit_filter_min, 2, 1, 1, 1)
-        filter_layout.addWidget(self.spin_filter_min, 2, 2, 1, 1)
-        filter_layout.addWidget(QLabel("Max"), 2, 3, 1, 1, Qt.AlignmentFlag.AlignRight)
-        filter_layout.addWidget(self.edit_filter_max, 2, 4, 1, 1)
-        filter_layout.addWidget(self.spin_filter_max, 2, 5, 1, 1)
+        filter_layout.addWidget(QLabel("Min"), 3, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.edit_filter_min, 3, 1, 1, 1)
+        filter_layout.addWidget(self.spin_filter_min, 3, 2, 1, 1)
+        filter_layout.addWidget(QLabel("Max"), 4, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.edit_filter_max, 4, 1, 1, 1)
+        filter_layout.addWidget(self.spin_filter_max, 4, 2, 1, 1)
 
-        filter_layout.addWidget(QLabel("Operator"), 3, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
-        filter_layout.addWidget(self.combo_operator, 3, 1, 1, 1)
+        filter_layout.addWidget(QLabel("Operator"), 5, 0, 1, 1, Qt.AlignmentFlag.AlignRight)
+        filter_layout.addWidget(self.combo_operator, 5, 1, 1, 1)
 
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         group_layout.addItem(spacer)
@@ -341,7 +346,7 @@ class FilterTab(QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.filter_table.sizePolicy().hasHeightForWidth())
         self.filter_table.setSizePolicy(sizePolicy)
-        self.filter_table.setMinimumSize(QSize(400, 0))
+        self.filter_table.setMinimumSize(QSize(500, 0))
         self.filter_table.setMaximumSize(QSize(524287, 524287))
         self.filter_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.filter_table.setObjectName("filter_table")
@@ -420,34 +425,45 @@ class FilterTab(QWidget):
 
     def create_actions(self):
         """Create toolbar actions for the filter tab"""
-        self.action_add_filter = QAction("Add filter")
-        icon_add_filter = QIcon(":/resources/icons/icon-filter-64.svg")
-        self.action_add_filter.setIcon(icon_add_filter)
+        self.action_add_filter = CustomAction(
+            text="Add filter",
+            light_icon_unchecked="icon-filter-64.svg",
+            dark_icon_unchecked="icon-filter-dark-64.svg",
+            parent=self )
         self.action_add_filter.setToolTip("Add a filter using the properties set below")
 
-        self.action_move_up = QAction("Move up")
-        icon_up = QIcon(":/resources/icons/icon-up-arrow-64.svg")
-        self.action_move_up.setIcon(icon_up)
+        self.action_move_up = CustomAction(
+            text="Move up",
+            light_icon_unchecked="icon-up-arrow-64.svg",
+            dark_icon_unchecked="icon-up-arrow-dark-64.svg",
+            parent=self )
         self.action_move_up.setToolTip("Move the selected filter line up")
 
-        self.action_move_down = QAction("Move down")
-        icon_down = QIcon(":/resources/icons/icon-down-arrow-64.svg")
-        self.action_move_down.setIcon(icon_down)
+        self.action_move_down = CustomAction(
+            text="Move down",
+            light_icon_unchecked="icon-down-arrow-64.svg",
+            dark_icon_unchecked="icon-down-arrow-dark-64.svg",
+            parent=self )
         self.action_move_down.setToolTip("Move the selected filter line down")
 
-        self.action_remove_filter = QAction("Delete filter")
-        icon_delete = QIcon(":/resources/icons/icon-delete-64.svg")
-        self.action_remove_filter.setIcon(icon_delete)
+        self.action_remove_filter = CustomAction(
+            text="Delete filter",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=self )
         self.action_remove_filter.setToolTip("Delete selected filters")
 
-        self.action_select_all_filters = QAction("Select all")
-        icon_select_all = QIcon(":/resources/icons/icon-select-all-64.svg")
-        self.action_select_all_filters.setIcon(icon_select_all)
+        self.action_select_all_filters = CustomAction(
+            text="Select all",
+            light_icon_unchecked="icon-select-all-64.svg",
+            dark_icon_unchecked="icon-select-all-dark-64.svg",
+            parent=self )
         self.action_select_all_filters.setToolTip("Select all filter lines")
 
-        self.action_save_filters = QAction("Save filter")
-        icon_save = QIcon(":/resources/icons/icon-save-file-64.svg")
-        self.action_save_filters.setIcon(icon_save)
+        self.action_save_filters = CustomAction(
+            text="Save filter",
+            light_icon_unchecked="icon-save-file-64.svg",
+            parent=self )
         self.action_save_filters.setToolTip("Save current filter table")
 
     def setup_toolbar_actions(self, toolbar):
@@ -845,11 +861,14 @@ class PolygonTab(QWidget):
         self.actionPolyToggle.setDefaultWidget(self.polygon_toggle)
         self.polygon_toggle.stateChanged.connect(lambda: self.polygon_state_changed())
 
-        self.actionEdgeDetect = QAction("Toggle edge detection")
-        icon_edge_detection = QIcon(":/resources/icons/icon-spotlight-64.svg")
+        self.actionEdgeDetect = CustomAction(
+            text="Toggle edge detection",
+            light_icon_unchecked="icon-spotlight-64.svg",
+            dark_icon_unchecked="icon-spotlight-dark-64.svg",
+            parent=self
+        )
         self.actionEdgeDetect.setCheckable(True)
         self.actionEdgeDetect.setChecked(False)
-        self.actionEdgeDetect.setIcon(icon_edge_detection)
         self.actionEdgeDetect.setToolTip("Toggle edge detection")
         self.actionEdgeDetect.triggered.connect(self.toggle_edge_detection)
 
@@ -857,49 +876,75 @@ class PolygonTab(QWidget):
         self.comboBoxEdgeDetectMethod.addItems(["Sobel","Canny","Zero cross"])
         self.comboBoxEdgeDetectMethod.activated.connect(self.ui.control_dock.noise_reduction.add_edge_detection)
 
-        self.actionPolyLoad = QAction("Load Polygon")
-        icon_load_file = QIcon(":/resources/icons/icon-open-file-64.svg")
-        self.actionPolyLoad.setIcon(icon_load_file)
+        self.actionPolyLoad = CustomAction(
+            text="Load Polygon",
+            light_icon_unchecked="icon-open-file-64.svg",
+            dark_icon_unchecked="icon-open-file-dark-64.svg",
+            parent=self
+        )
         self.actionPolyLoad.setToolTip("Load polygons")
 
-        self.actionPolyCreate = QAction("Create Polygon")
-        icon_create_polygon = QIcon(":/resources/icons/icon-polygon-new-64.svg")
-        self.actionPolyCreate.setIcon(icon_create_polygon)
+        self.actionPolyCreate = CustomAction(
+            text="Create Polygon",
+            light_icon_unchecked="icon-polygon-new-64.svg",
+            dark_icon_unchecked="icon-polygon-new-dark-64.svg",
+            parent=self
+        )
         self.actionPolyCreate.setToolTip("Create a new polygon")
 
-        self.actionPolyMovePoint = QAction("Move Point")
-        icon_move_point = QIcon(":/resources/icons/icon-move-point-64.svg")
-        self.actionPolyMovePoint.setIcon(icon_move_point)
+        self.actionPolyMovePoint = CustomAction(
+            text="Move Point",
+            light_icon_unchecked="icon-move-point-64.svg",
+            dark_icon_unchecked="icon-move-point-dark-64.svg",
+            parent=self
+        )
         self.actionPolyMovePoint.setToolTip("Move a profile point")
 
-        self.actionPolyAddPoint = QAction("Add Point")
-        icon_add_point = QIcon(":/resources/icons/icon-add-point-64.svg")
-        self.actionPolyAddPoint.setIcon(icon_add_point)
+        self.actionPolyAddPoint = CustomAction(
+            text="Add Point",
+            light_icon_unchecked="icon-add-point-64.svg",
+            dark_icon_unchecked="icon-add-point-dark-64.svg",
+            parent=self
+        )
         self.actionPolyAddPoint.setToolTip("Add a profile point")
 
-        self.actionPolyRemovePoint = QAction("Remove Point")
-        icon_remove_point = QIcon(":/resources/icons/icon-remove-point-64.svg")
-        self.actionPolyRemovePoint.setIcon(icon_remove_point)
+        self.actionPolyRemovePoint = CustomAction(
+            text="Remove Point",
+            light_icon_unchecked="icon-remove-point-64.svg",
+            dark_icon_unchecked="icon-remove-point-dark-64.svg",
+            parent=self
+        )
         self.actionPolyRemovePoint.setToolTip("Remove a profile point")
 
-        self.actionPolyLink = QAction("Link Polygons")
-        icon_link = QIcon(":/resources/icons/icon-link-64.svg")
-        self.actionPolyLink.setIcon(icon_link)
+        self.actionPolyLink = CustomAction(
+            text="Link Polygons",
+            light_icon_unchecked="icon-link-64.svg",
+            dark_icon_unchecked="icon-link-dark-64.svg",
+            parent=self
+        )
         self.actionPolyLink.setToolTip("Create a link between polygons")
 
-        self.actionPolyDelink = QAction("Remove Link")
-        icon_delink = QIcon(":/resources/icons/icon-unlink-64.svg")
-        self.actionPolyDelink.setIcon(icon_delink)
+        self.actionPolyDelink = CustomAction(
+            text="Remove Link",
+            light_icon_unchecked="icon-unlink-64.svg",
+            dark_icon_unchecked="icon-unlink-dark-64.svg",
+            parent=self
+        )
         self.actionPolyDelink.setToolTip("Remove link between polygons")
 
-        self.actionPolySave = QAction("Save Polygons")
-        icon_save = QIcon(":/resources/icons/icon-save-file-64.svg")
-        self.actionPolySave.setIcon(icon_save)
+        self.actionPolySave = CustomAction(
+            text="Save Polygons",
+            light_icon_unchecked="icon-save-file-64.svg",
+            parent=self
+        )
         self.actionPolySave.setToolTip("Save polygons to a file")
 
-        self.actionPolyDelete = QAction("Delete Polygon")
-        icon_delete = QIcon(":/resources/icons/icon-delete-64.svg")
-        self.actionPolyDelete.setIcon(icon_delete)
+        self.actionPolyDelete = CustomAction(
+            text="Delete Polygon",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=self
+        )
         self.actionPolyDelete.setToolTip("Delete selected polygons")
 
     def setup_toolbar_actions(self, toolbar):
@@ -1153,32 +1198,35 @@ class ClusterTab(QWidget):
 
         self.toolButtonClusterColor = QToolButton()
         self.toolButtonClusterColor.setMaximumSize(QSize(18, 18))
-        self.toolButtonClusterColor.setText("")
+        self.toolButtonClusterColor.setText("Color")
 
-        self.actionClusterColorReset = QAction("Cluster Color Reset")
-        icon_reset = QIcon(":/resources/icons/icon-reset-64.svg")
-        self.actionClusterColorReset.setIcon(icon_reset)
+        self.actionClusterColorReset = CustomAction(
+            text="",
+            light_icon_unchecked="icon-reset-64.svg",
+            dark_icon_unchecked="icon-reset-dark-64.svg",
+            parent=self )
         self.actionClusterColorReset.setToolTip("Reset cluster colors")
 
-        self.actionClusterLink = QAction("Link Polygons")
-        icon_link = QIcon(":/resources/icons/icon-link-64.svg")
-        self.actionClusterLink.setIcon(icon_link)
+        self.actionClusterLink = CustomAction(
+            text="Link Polygons",
+            light_icon_unchecked="icon-link-64.svg",
+            dark_icon_unchecked="icon-link-dark-64.svg",
+            parent=self )
         self.actionClusterLink.setToolTip("Create a link between clusters")
 
-        self.actionClusterDelink = QAction("Remove Link")
-        icon_delink = QIcon(":/resources/icons/icon-unlink-64.svg")
-        self.actionClusterDelink.setIcon(icon_delink)
+        self.actionClusterDelink = CustomAction(
+            text="Remove Link",
+            light_icon_unchecked="icon-unlink-64.svg",
+            dark_icon_unchecked="icon-unlink-dark-64.svg",
+            parent=self )
         self.actionClusterDelink.setToolTip("Remove link between clusters")
 
-        self.actionGroupMask = QAction("Create Cluster Mask")
-        icon_dark = QIcon(":/resources/icons/icon-mask-dark-64.svg")
-        self.actionGroupMask.setIcon(icon_dark)
+        self.actionGroupMask = CustomAction(
+            text="Create Cluster Mask",
+            light_icon_unchecked="icon-mask-light-64.svg",
+            dark_icon_unchecked="icon-mask-dark-64.svg",
+            parent=self )
         self.actionGroupMask.setToolTip("Create a mask based on the currently selected clusters")
-
-        self.actionGroupMaskInverse = QAction("Create Cluster Mask Inverse")
-        icon_light = QIcon(":/resources/icons/icon-mask-light-64.svg")
-        self.actionGroupMaskInverse.setIcon(icon_light)
-        self.actionGroupMaskInverse.setToolTip("Create a mask based on the inverse of currently selected clusters")
 
     def setup_toolbar_actions(self, toolbar):
         """Add cluster tab actions to the common toolbar"""
@@ -1191,7 +1239,6 @@ class ClusterTab(QWidget):
         toolbar.addAction(self.actionClusterDelink)
         toolbar.addSeparator()
         toolbar.addAction(self.actionGroupMask)
-        toolbar.addAction(self.actionGroupMaskInverse)
 
         if not getattr(self, '_cluster_signals_connected', False):
             self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
@@ -1199,7 +1246,6 @@ class ClusterTab(QWidget):
             self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
             self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
             self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
-            self.actionGroupMaskInverse.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=True))
             self._cluster_signals_connected = True
 
         self.toggle_cluster_actions()
@@ -1213,7 +1259,6 @@ class ClusterTab(QWidget):
             self.actionClusterLink.setEnabled(True)
             self.actionClusterDelink.setEnabled(True)
             self.actionGroupMask.setEnabled(True)
-            self.actionGroupMaskInverse.setEnabled(True)
         else:
             self.spinBoxClusterGroup.setEnabled(False)
             self.toolButtonClusterColor.setEnabled(False)
@@ -1221,7 +1266,6 @@ class ClusterTab(QWidget):
             self.actionClusterLink.setEnabled(False)
             self.actionClusterDelink.setEnabled(False)
             self.actionGroupMask.setEnabled(False)
-            self.actionGroupMaskInverse.setEnabled(False)
 
     def cluster_color_callback(self):
         """Updates color of a cluster

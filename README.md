@@ -52,11 +52,48 @@ Figures produced using LaME with garnet-chlorite schists from the Walter-Outalpa
 * Batch processing of multiple samples
 * Calculator for custom field generation
 
+## Installation
+
+LaME depends on several sibling packages that must be installed as editable installs from their local repositories before installing LaME itself.
+
+### 1. Clone sibling repositories
+
+```bash
+git clone https://github.com/dhasterok/lame-core ../lame-core
+git clone https://github.com/dhasterok/blueberry-colortools ../blueberry-colortools
+git clone https://github.com/dhasterok/siesta-rest-editor ../siesta-rest-editor
+```
+
+The repositories should sit alongside the `LaserMapExplorer` directory:
+
+```
+GitHub/
+├── LaserMapExplorer/
+├── lame-core/
+├── blueberry-colortools/
+└── siesta-rest-editor/
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs the sibling packages in editable mode (`-e`) along with all other dependencies.
+
+### Package architecture
+
+| Package | Role |
+|---------|------|
+| `lame-core` | Shared widgets, theming, icon resources, and path configuration |
+| `blueberry-colortools` | Colour picker, colormap editor, and colormap data (custom and ternary colormaps) |
+| `siesta-rest-editor` | reStructuredText note editor |
+| `LaserMapExplorer` | Main application |
+
 ## Development and Availability
 
-Currently in beta
-Expected stable version release: June 2024
-
+Currently in active development (beta).
 
 ## Contribution
 

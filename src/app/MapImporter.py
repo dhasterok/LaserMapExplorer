@@ -2,6 +2,8 @@ import os, re, darkdetect
 from collections import defaultdict
 import pandas as pd
 import numpy as np
+import matplotlib as mpl
+from matplotlib.colors import LogNorm
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox, QToolBar,
     QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout
@@ -10,6 +12,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt, QUrl
 from lame_core.CustomWidgets import CustomAction
 import src.common.csvdict as csvdict
+from src.common.CustomMplCanvas import SimpleMplCanvas
 from src.ui.MapImportDialog import Ui_MapImportDialog
 from src.ui.FileSelectorDialog import Ui_FileSelectorDialog
 from lame_core.config import BASEDIR, ICONPATH
@@ -58,6 +61,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.sample_ids = []
         self.paths = []
         self.metadata = {'directory_data': pd.DataFrame()}
+        self.preview_index = None
         
         # Set a message that will be displayed in the status bar
         self.statusBar.showMessage('Ready')
@@ -76,7 +80,16 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         # image resolution
         self.labelResolution.setText('')
-        
+
+        # sample preview
+        preview_layout = QVBoxLayout(self.framePreviewSample)
+        preview_layout.setContentsMargins(2, 2, 2, 2)
+        self.preview_canvas = SimpleMplCanvas(parent=self, width=4, height=4)
+        preview_layout.addWidget(self.preview_canvas)
+        self.checkBoxPreview.setChecked(True)
+        self.checkBoxPreview.toggled.connect(self.update_preview)
+        self.update_preview()
+
         # connect bottom buttons
         self.pushButtonImport.clicked.connect(self.import_data)
         self.pushButtonImport.setEnabled(False)
@@ -121,7 +134,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         """        
         data = self.tableWidgetMetadata.to_dataframe()
         data['Select files'] = data['Select files'].str.extract(r'(\d+)').astype(int)
-        data = data.rename(columns={'X\nreverse':'Reverse X', 'Y\nreverse': 'Reverse Y', 'Spot size\n(µm)': 'Spot size', 'Sweep\n(s)': 'Sweep', 'Speed\n(µm/s)':'Speed'})
+        data = data.rename(columns={
+            'X\nreverse':'Reverse X', 'Y\nreverse': 'Reverse Y', 'Spot size\n(µm)': 'Spot size',
+            'Sweep\n(s)': 'Sweep', 'Speed\n(µm/s)':'Speed',
+            'Length\n(µm)': 'Length', 'Width\n(µm)': 'Width',
+        })
 
         return data
 
@@ -134,6 +151,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         if not selected:
             self.labelSampleID.setText("None selected")
+            self.preview_index = None
+            self.update_preview()
             return
 
         selected = np.array(selected)
@@ -158,6 +177,149 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 self.preview_index = selected[-1]
 
         self.labelSampleID.setText(self.sample_ids[self.preview_index])
+        self.update_preview()
+
+    def update_preview(self):
+        """Renders a map preview of the currently previewed sample in ``framePreviewSample``.
+
+        Falls back to a placeholder message when preview is disabled, no sample is
+        selected for preview, or its data can't be read yet (e.g. no files chosen).
+        """
+        if not hasattr(self, 'preview_canvas'):
+            return
+
+        ax = self.preview_canvas.axes
+        ax.clear()
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        if not self.checkBoxPreview.isChecked():
+            ax.text(0.5, 0.5, 'Preview disabled', ha='center', va='center', transform=ax.transAxes, wrap=True)
+            self.labelResolution.setText('')
+            self.preview_canvas.draw_idle()
+            return
+
+        array, label = None, None
+        if self.preview_index is not None and self.sample_ids:
+            sample_id = self.sample_ids[self.preview_index]
+            array, label = self.get_preview_array(sample_id)
+
+        if array is None:
+            ax.text(0.5, 0.5, '[Preview not available]', ha='center', va='center', transform=ax.transAxes, wrap=True)
+            self.labelResolution.setText('')
+        else:
+            # Geochemical maps often span orders of magnitude, so color on a log
+            # scale; LogNorm masks non-positive/NaN values instead of erroring.
+            # Clip to the 2.5-97.5 percentile range so a few outlier pixels (e.g.
+            # inclusions, edge artifacts) don't wash out the rest of the map.
+            positive = array[np.isfinite(array) & (array > 0)]
+            if positive.size:
+                vmin, vmax = np.percentile(positive, [2.5, 97.5])
+                norm = LogNorm(vmin=vmin, vmax=vmax)
+            else:
+                norm = None
+
+            cmap = mpl.colormaps['viridis'].copy()
+            cmap.set_bad('lightgray')
+
+            ax.imshow(array, cmap=cmap, aspect='auto', origin='upper', norm=norm)
+            if label:
+                ax.set_title(f"{label} (log scale)" if norm else label, fontsize=8)
+            self.labelResolution.setText(f"Resolution: {array.shape[1]} x {array.shape[0]}")
+
+        self.preview_canvas.draw_idle()
+
+    def get_preview_array(self, sample_id):
+        """Builds a rough 2D preview array from a sample's currently selected import files.
+
+        For matrix-style exports (e.g. XMapTools) the first selected file already *is* the
+        map grid, so it's read and shown directly. For per-line exports (e.g. Iolite/LADr,
+        where the filename encodes a line number) the selected files are sorted by line
+        number and stacked into a grid, using the first data column of each file.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample to preview; a key in ``MapImporter.metadata``.
+
+        Returns
+        -------
+        tuple(numpy.ndarray or None, str or None)
+            Map values to render and a label for the previewed field, or ``(None, None)``
+            if there isn't enough data yet (e.g. no files selected for this sample).
+        """
+        df = self.metadata.get(sample_id)
+        if df is None or df.empty or 'Import' not in df.columns:
+            return None, None
+
+        selected = df[df['Import'].astype(bool)]
+        if selected.empty:
+            return None, None
+
+        standard_list = getattr(self, 'standard_list', [])
+        if standard_list:
+            selected = selected[~selected['Filename'].apply(lambda f: any(std in f for std in standard_list))]
+        if selected.empty:
+            return None, None
+
+        row_idx = self.sample_ids.index(sample_id)
+        path = self.paths[row_idx]
+
+        numeric_check = pd.to_numeric(df['Analyte 1'], errors='coerce')
+        is_numeric = numeric_check.notna().all()
+
+        try:
+            if is_numeric:
+                selected = selected.copy()
+                selected['_line_no'] = pd.to_numeric(selected['Analyte 1'], errors='coerce')
+                selected = selected.sort_values('_line_no')
+
+                # Cap the number of lines read so the preview stays responsive on large maps.
+                max_preview_lines = 200
+                if len(selected) > max_preview_lines:
+                    step = max(1, len(selected) // max_preview_lines)
+                    selected = selected.iloc[::step]
+
+                rows = []
+                label = None
+                for _, file_row in selected.iterrows():
+                    file_path = os.path.join(path, file_row['Filename'])
+                    line_df = pd.read_csv(file_path, skiprows=3)
+                    if line_df.empty:
+                        continue
+                    if label is None:
+                        label = str(line_df.columns[0])
+                    rows.append(pd.to_numeric(line_df.iloc[:, 0], errors='coerce').to_numpy())
+
+                if not rows:
+                    return None, None
+
+                max_len = max(len(r) for r in rows)
+                grid = np.full((len(rows), max_len), np.nan)
+                for i, r in enumerate(rows):
+                    grid[i, :len(r)] = r
+                return grid, label
+            else:
+                file_row = selected.iloc[0]
+                file_path = os.path.join(path, file_row['Filename'])
+
+                if file_path.endswith('.csv'):
+                    grid_df = pd.read_csv(file_path, header=None)
+                elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+                    grid_df = pd.read_excel(file_path, header=None)
+                else:
+                    return None, None
+
+                grid_df = grid_df.dropna(how='all', axis=0).dropna(how='all', axis=1)
+                grid = grid_df.apply(pd.to_numeric, errors='coerce').to_numpy()
+
+                analyte1 = file_row.get('Analyte 1')
+                analyte2 = file_row.get('Analyte 2')
+                label = f"{analyte1} / {analyte2}" if analyte2 else str(analyte1)
+                return grid, label
+        except Exception as e:
+            self.statusBar.showMessage(f"Preview unavailable: {e}")
+            return None, None
 
     def add_standard(self):
         """Adds a standard to the standard dictionary
@@ -398,12 +560,31 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             self.metadata[sample_id] = pd.DataFrame()
 
         self.pushButtonImport.setDefault(True)
+        self.update_preview()
     
+    def update_method_columns(self):
+        """Swaps the Sweep/Speed metadata columns for Length/Width when TOF is selected.
+
+        Quadrupole/SF instruments only report spot size, sweep time, and stage speed, from
+        which per-pixel spacing (dx, dy) must be derived. TOF instruments report the raster's
+        physical length (X) and width (Y) directly, so those replace Sweep/Speed instead.
+        """
+        method = self.comboBoxMethod.currentText()
+        col_sweep = self.tableWidgetMetadata.horizontalHeaderItem(9)
+        col_speed = self.tableWidgetMetadata.horizontalHeaderItem(10)
+        if method == 'TOF':
+            col_sweep.setText('Length\n(µm)')
+            col_speed.setText('Width\n(µm)')
+        else:
+            col_sweep.setText('Sweep\n(s)')
+            col_speed.setText('Speed\n(µm/s)')
+
     def populate_la_icp_ms_table(self):
         """Populates table with LA-ICP-MS sample metadata
 
         Several fields are made into checkboxes.
-        """    
+        """
+        self.update_method_columns()
         self.tableWidgetMetadata.setRowCount(len(self.sample_ids))
         for col in range(self.tableWidgetMetadata.columnCount()):
             col_name = self.tableWidgetMetadata.horizontalHeaderItem(col).text()
@@ -423,6 +604,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         self.add_combobox(row,col, ['Xc', 'Yc'], 0)
                     case 'X\nreverse' | 'Y\nreverse' | 'Swap XY':
                         self.add_checkbox(row, col, False)
+                    case 'Spot size\n(µm)' | 'Sweep\n(s)' | 'Speed\n(µm/s)' | 'Length\n(µm)' | 'Width\n(µm)':
+                        self.add_numeric_item(row, col)
                     # case _:
                     #     self.add_lineedit(row, col)
                     # case 'Filename\nformat':
@@ -488,6 +671,21 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         combo.setCurrentIndex(default_index)
         combo.currentIndexChanged.connect(lambda _, r=row, c=col: self.on_combobox_changed(r, c))
         self.tableWidgetMetadata.setCellWidget(row, col, combo)
+
+    def add_numeric_item(self, row, col):
+        """Adds an empty, editable, right-aligned numeric cell to a QTableWidget
+
+        Used for metadata fields (Spot size, Sweep, Speed, Length, Width) that the user
+        types in directly, rather than a checkbox or comboBox.
+
+        Parameters
+        ----------
+        row, col : int
+            Row and column indices
+        """
+        item = QTableWidgetItem('')
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.tableWidgetMetadata.setItem(row, col, item)
 
     def on_item_changed(self, curr_item, prev_item):
         if prev_item:
@@ -795,17 +993,30 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             reverse_x = self.metadata['directory_data']['Reverse X'][i]
             reverse_y = self.metadata['directory_data']['Reverse Y'][i]
 
-            dx = self.metadata['directory_data']['Spot size'][i]
-            if dx is None:
-                dx = 1
+            spot_size = self.metadata['directory_data']['Spot size'][i]
+            spot_size = float(spot_size) if spot_size else 1.0
+
+            # TOF instruments report the raster's physical length (X) and width (Y)
+            # directly, rather than sweep time and stage speed. dx, dy (per-pixel
+            # spacing) are derived from these once the file's raster shape is known --
+            # see read_matrix_folder/read_raw_folder below. Spot size remains relevant
+            # as metadata and as a fallback if length/width weren't provided.
+            raster_length = raster_width = None
+            if method == 'TOF':
+                length_val = self.metadata['directory_data']['Length'][i]
+                width_val = self.metadata['directory_data']['Width'][i]
+                raster_length = float(length_val) if length_val else None
+                raster_width = float(width_val) if width_val else None
+                dx = spot_size
+                dy = spot_size
             else:
-                dx = float(dx)
-            sweep_time = self.metadata['directory_data']['Sweep'][i]
-            speed = self.metadata['directory_data']['Speed'][i]
-            if speed is None or sweep_time is None:
-                dy = dx
-            else:
-                dy = float(speed)*float(sweep_time)
+                dx = spot_size
+                sweep_time = self.metadata['directory_data']['Sweep'][i]
+                speed = self.metadata['directory_data']['Speed'][i]
+                if not speed or not sweep_time:
+                    dy = dx
+                else:
+                    dy = float(speed)*float(sweep_time)
 
             if swap_axis == 'Y':
                 tmp = dx
@@ -819,6 +1030,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
             # Check if a value is numeric (True for numeric values, False for non-numeric)
             is_numeric = all(numeric_check.notna())
+
+            if method == 'TOF' and is_numeric and raster_width is not None:
+                # Per-line spacing (dy): total map width divided by the number of lines
+                # actually being imported for this sample.
+                selected_files = self.metadata[sample_id].loc[self.metadata[sample_id]['Import'], 'Filename']
+                num_lines = sum(1 for f in selected_files if not any(std in f for std in self.standard_list))
+                if num_lines:
+                    dy = raster_width / num_lines
 
             try:
                 file_name = os.path.join(save_path, sample_id+'.lmdf.csv')
@@ -840,7 +1059,10 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 analyte2 = self.metadata[sample_id]['Analyte 2'][i]
                 if is_numeric:
                     # line data
-                    df = self.read_raw_folder(analyte1, file_path, swap_xy, reverse_x, reverse_y)
+                    if method == 'TOF' and raster_length is not None:
+                        df = self.read_raw_folder(analyte1, file_path, swap_xy, dx, dy, length=raster_length)
+                    else:
+                        df = self.read_raw_folder(analyte1, file_path, swap_xy, dx, dy)
                     data_frames.append(df)
                 else:
                     # matrix data
@@ -850,11 +1072,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         analyte = f"{analyte1} / {analyte2}"
 
                     if first:
-                        df = self.read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y,dx,dy)
+                        if method == 'TOF' and raster_length is not None and raster_width is not None:
+                            df = self.read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y, length=raster_length, width=raster_width)
+                        else:
+                            df = self.read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y, dx, dy)
                         first = False
                     else:
                         df = self.read_matrix_folder(analyte, file_path, swap_xy, reverse_x, reverse_y)
-                    
+
                     data_frames.append(df)
 
                 current_progress += 1
@@ -912,7 +1137,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         self.ok = True
             
-    def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy):
+    def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy, length=None):
         """Reads laser data formatted into files with separate lines, each with all analytes.
 
         Parameters
@@ -927,22 +1152,27 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             Size of pixel in x-direction
         dy : float
             Size of pixel in y-direction
+        length : float, optional
+            Physical length of this raster line in µm (TOF instruments report this
+            directly). When given, ``dx`` is derived from it instead of being used as-is.
 
         Returns
         -------
         pd.DataFrame
             Data in the current file, ``file_path``.
-        """        
+        """
         df = pd.read_csv(file_path, skiprows=3)
+        if length is not None and len(df):
+            dx = length / len(df)
         if swap_xy:
             df.insert(1,'Yc',(int(line_no)-1)*dy)
-            df.insert(0,'Xc',range(0, len(df))*dx)
+            df.insert(0,'Xc',np.arange(len(df))*dx)
         else:
             df.insert(0,'Xc',(int(line_no)-1)*dx)
-            df.insert(1,'Yc',range(0, len(df))*dy)
+            df.insert(1,'Yc',np.arange(len(df))*dy)
         return df
    
-    def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None):
+    def read_matrix_folder(self, analyte, file_path, swap_xy, reverse_x, reverse_y, dx=None, dy=None, length=None, width=None):
         """Reads analyte data in matrix form
 
         Parameters
@@ -957,12 +1187,16 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             ``True`` indicates whether to reverse the direction of x and y dimensions
         dx, dy : float, optional
             Dimensions in x and y directions, by default None
+        length, width : float, optional
+            Physical length (X) and width (Y) of the raster in µm (TOF instruments report
+            these directly). When given, ``dx``/``dy`` are derived from them and the grid's
+            pixel counts instead of being used as-is.
 
         Returns
         -------
         pandas.DataFrame
             Results from a single analyte with X and Y values if dx and dy are not None
-        """        
+        """
         # match = re.search(r' (\w+)_ppm', file_name)
         # match2 = re.search(r'(\D+)(\d+).csv', file_name) or re.search(r'(\d+)(\D+).csv', file_name)
         # if match:
@@ -991,6 +1225,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
        
         #print(df.shape)
         # produce X and Y values
+        if dx is None and length is not None and width is not None:
+            # TOF instruments report the raster's physical length/width directly;
+            # derive per-pixel spacing from the map extent and the grid's pixel counts.
+            M, N = df.shape
+            dx = length / N
+            dy = width / M
+
         if dx is not None:
             M, N = df.shape
 
@@ -1010,7 +1251,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 df = df.iloc[::-1].reset_index(drop=True)
 
             # swap x and y
-            if dx is not None: 
+            if dx is not None:
                 Y = row_values
                 X = col_values
 
@@ -1022,8 +1263,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             # reverse y-direction
             if reverse_y:
                 df = df[df.columns[::-1]]
-            
-            if dx is not None: 
+
+            if dx is not None:
                 Y = col_values
                 X = row_values
 
@@ -1130,6 +1371,16 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         widget.setText(f"{import_count} files")
                 case _:
                     pass
+
+        # if this is the first sample with files selected, make it the preview
+        if import_count > 0 and self.preview_index is None:
+            self.preview_index = row
+            self.labelSampleID.setText(sample_id)
+            self.toolButtonPrevSample.setEnabled(True)
+            self.toolButtonNextSample.setEnabled(True)
+
+        if row == self.preview_index:
+            self.update_preview()
 
 
 class FileSelectData(QDialog, Ui_FileSelectorDialog):

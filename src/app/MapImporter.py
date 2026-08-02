@@ -695,24 +695,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     if row != prev_item.row():
                         new_item = QTableWidgetItem(prev_item.text())
                         self.tableWidgetMetadata.setItem(row, column, new_item)
-            
-            # Always check and compute intraline distance when columns 7 or 8 change
-            row = prev_item.row()
-            sweep_time_item = self.tableWidgetMetadata.item(row, 8)
-            sweep_speed_item = self.tableWidgetMetadata.item(row, 9)
-        
-            if sweep_time_item and sweep_speed_item and sweep_time_item.text().isdigit() and sweep_speed_item.text().isdigit():
-                sweep_time = float(sweep_time_item.text())
-                sweep_speed = float(sweep_speed_item.text())
-                if sweep_time > 0 and sweep_speed > 0:
-                    intraline_dist = sweep_time * sweep_speed
-                    if self.checkBoxApplyAll.isChecked():
-                        for row in range(self.tableWidgetMetadata.rowCount()):
-                                self.tableWidgetMetadata.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
-                    else:
-                        self.tableWidgetMetadata.setItem(row, 10, QTableWidgetItem(str(intraline_dist)))
-            elif sweep_time_item and sweep_speed_item:
-                self.statusBar.showMessage('Sweep time and sweep speed should be postive')
 
     def on_combobox_changed(self, row, column):
         if self.checkBoxApplyAll.isChecked():
@@ -813,6 +795,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 filetype = 'matrix'
                 filename = filename.replace('matrix', '')
 
+            # Strip a "total" qualifier (e.g. "PbTotal") so the remaining text is just
+            # the element symbol; `filename` is already lowercased (via `file` above),
+            # so this comparison is case-insensitive.
+            if 'total' in filename:
+                filename = filename.replace('total', '')
+
             # Step 1: Split the filename by the specified delimiters
             filename_lower = filename.lower()
 
@@ -873,6 +861,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                                     used_masses.add(number)
                                 if analyte1 and analyte2:
                                     break
+                elif possible_elements and not possible_masses:
+                    # No isotope mass anywhere in the filename, but exactly one recognized
+                    # element symbol (e.g. "Pb_tot", "Pb Total") -- instruments sometimes
+                    # report an element total without a specific isotope mass. Treat it as
+                    # a valid Analyte for that element rather than leaving it unrecognized.
+                    unique_elements = list(dict.fromkeys(possible_elements))
+                    if len(unique_elements) == 1 and not analyte1:
+                        analyte1 = unique_elements[0]
 
 
             # Debugging: Print analytes

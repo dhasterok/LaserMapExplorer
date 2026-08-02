@@ -201,7 +201,7 @@ class ClusterPage(CustomPage, Clustering):
         self.spinBoxNClusters.setObjectName("spinBoxNClusters")
         self.cluster_form_layout.addRow("No. clusters", self.spinBoxNClusters)
 
-        self.sliderClusterExponent = CustomSlider(parent=self.groupBoxClustering, orientation="horizontal", label_position="low")
+        self.sliderClusterExponent = CustomSlider(parent=self.groupBoxClustering, precision=1, fixed_point=True, orientation="horizontal", label_position="low")
         self.sliderClusterExponent.label.setFont(default_font())
         self.sliderClusterExponent.slider.setFont(default_font())
         self.sliderClusterExponent.slider.setTickPosition(QSlider.TickPosition.NoTicks)
@@ -277,10 +277,10 @@ class ClusterPage(CustomPage, Clustering):
         self.comboBoxClusterDistance.activated.connect(lambda _: self.update_cluster_distance())
 
         # cluster exponent
-        self.sliderClusterExponent.sliderReleased.connect(lambda _: self.update_cluster_exponent())
+        self.sliderClusterExponent.sliderReleased.connect(lambda: self.update_cluster_exponent())
 
         # starting seed
-        self.lineEditSeed.editingFinished.connect(lambda _: self.update_cluster_seed())
+        self.lineEditSeed.editingFinished.connect(lambda: self.update_cluster_seed())
         self.toolButtonRandomSeed.clicked.connect(lambda _: self.dock.ui.app_data.generate_random_seed())
 
         # cluster method
@@ -300,7 +300,7 @@ class ClusterPage(CustomPage, Clustering):
 
     def connect_observer(self):
         """Connects properties to observer functions."""
-        self.dock.ui.app_data.clusterMethodChanged.connect(lambda _: self.update_cluster_method)
+        self.dock.ui.app_data.clusterMethodChanged.connect(lambda method: self.update_cluster_method(method))
         self.dock.ui.app_data.maxClustersChanged.connect(self.update_max_clusters)
         self.dock.ui.app_data.numClustersChanged.connect(self.update_num_clusters)
         self.dock.ui.app_data.clusterSeedChanged.connect(self.update_cluster_seed)

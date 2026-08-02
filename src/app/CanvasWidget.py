@@ -421,11 +421,16 @@ class CanvasWidget(QWidget):
                             widget.figure.canvas = None
 
                     if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
-                        self.mpl_toolbar.setParent(None)  # remove from the Qt layout
+                        try:
+                            self.mpl_toolbar.setParent(None)  # remove from the Qt layout
+                            self.mpl_toolbar.canvas = None
+                        except RuntimeError:
+                            # underlying Qt object already deleted (e.g. by a prior update_canvas cleanup)
+                            pass
+                        finally:
+                            self.mpl_toolbar = None
 
-                    if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
-                        self.mpl_toolbar.canvas = None
-                    
+
                     # Clean up any observers if present
                     if hasattr(widget, 'observers'):
                         widget.observers.clear()

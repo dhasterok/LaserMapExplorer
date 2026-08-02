@@ -1,6 +1,6 @@
 import re, copy, pickle
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtWidgets import ( QColorDialog, QTableWidgetItem, QMessageBox, QInputDialog )
 from PyQt6.QtGui import ( QDoubleValidator, QFont, QFontDatabase )
@@ -24,6 +24,18 @@ if TYPE_CHECKING:
     from .BlocklyModules import LameBlockly
 
 VALID_MARKERS = {k for k in Line2D.markers if isinstance(k, str) and k.strip()}
+
+# Fixed vocabularies for simple-choice combobox widgets in the Styling toolbox
+# (Axes/Annotations pages). Single source of truth: used both to populate each
+# comboBox's items (StylingUI.py) and to validate assignments to the
+# corresponding StyleData property below, instead of each site repeating its
+# own copy of the same list.
+WIDGET_OPTIONS: Dict[str, List[str]] = {
+    'tick_dir': ['none', 'in', 'out', 'both'],
+    'cbar_dir': ['none', 'vertical', 'horizontal'],
+    'scale_dir': ['none', 'horizontal', 'vertical'],
+    'scale_location': ['northeast', 'northwest', 'southwest', 'southeast'],
+}
 
 @auto_log_methods(logger_key='Style')
 class StyleTheme():
@@ -400,6 +412,10 @@ class StyleData(QObject, StyleTheme):
         Colors for ternary diagram vertices and centroid.
     map_plot_types : list
         A list of plots that result in a map, i.e., ['field map', 'gradient map', 'ternary map', 'cluster map', 'cluster score map', 'dimension score map'].  This list is generally used as a check when setting certain styles or other plotting behavior related to maps.
+    widget_options : dict
+        Fixed vocabularies for simple-choice combobox widgets in the Styling toolbox (see module-level
+        ``WIDGET_OPTIONS``), keyed by ``'tick_dir'``, ``'cbar_dir'``, ``'scale_dir'``, and ``'scale_location'``.
+        Used both to populate each comboBox's items and to validate the corresponding property setter below.
     marker_dict : dict
         Dictionary of marker names used to translate ``comboBoxMarker`` to a subset of matplotlib makers symbol, though not all matplotlib markers
         are used.
@@ -556,8 +572,7 @@ class StyleData(QObject, StyleTheme):
 
 
 
-        self.tick_dir_options = ['none', 'in', 'out', 'both']
-        self.cbar_dir_options = ['none', 'vertical', 'horizontal']
+        self.widget_options = WIDGET_OPTIONS
 
         # create the dictionary of plot axis features depending on plot type
         self.axis_settings = axis_settings_dict
@@ -718,11 +733,11 @@ class StyleData(QObject, StyleTheme):
 
     @tick_dir.setter
     def tick_dir(self, new_dir: str):
-        if isinstance(new_dir, str):
+        if isinstance(new_dir, str) and new_dir in self.widget_options['tick_dir']:
             self.style_dict[self.plot_type]['TickDir'] = new_dir
             self.tickDirChanged.emit(new_dir)
         else:
-            raise TypeError("tickdir must be of type str.")
+            raise TypeError(f"tick_dir must be one of {self.widget_options['tick_dir']}.")
 
     @property
     def font(self):
@@ -754,11 +769,11 @@ class StyleData(QObject, StyleTheme):
 
     @scale_dir.setter
     def scale_dir(self, new_dir: str):
-        if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
+        if isinstance(new_dir, str) and new_dir in self.widget_options['scale_dir']:
             self.style_dict[self.plot_type]['ScaleDir'] = new_dir
             self.scaleDirChanged.emit(new_dir)
         else:
-            raise TypeError("new_dir must be of type str.")
+            raise TypeError(f"scale_dir must be one of {self.widget_options['scale_dir']}.")
 
     @property
     def scale_location(self):
@@ -766,11 +781,11 @@ class StyleData(QObject, StyleTheme):
 
     @scale_location.setter
     def scale_location(self, location: str):
-        if (location is not None) and isinstance(location, str) and (location in ['northeast', 'northwest', 'southwest', 'southeast']):
+        if isinstance(location, str) and location in self.widget_options['scale_location']:
             self.style_dict[self.plot_type]['ScaleLocation'] = location
             self.scaleLocationChanged.emit(location)
         else:
-            raise TypeError("location must be of type str.")
+            raise TypeError(f"scale_location must be one of {self.widget_options['scale_location']}.")
 
     @property
     def scale_length(self):
@@ -950,12 +965,11 @@ class StyleData(QObject, StyleTheme):
 
     @cbar_dir.setter
     def cbar_dir(self, new_dir):
-        if (new_dir is not None) and isinstance(new_dir, str) and (new_dir in ['none', 'horizontal', 'vertical']):
+        if isinstance(new_dir, str) and new_dir in self.widget_options['cbar_dir']:
+            self.style_dict[self.plot_type]['CbarDir'] = new_dir
             self.cbarDirChanged.emit(new_dir)
         else:
-            raise TypeError("new_dir must be of type str.")
-
-        self.style_dict[self.plot_type]['CbarDir'] = new_dir
+            raise TypeError(f"cbar_dir must be one of {self.widget_options['cbar_dir']}.")
 
     @property
     def clim(self):
@@ -1255,7 +1269,7 @@ class StyleData(QObject, StyleTheme):
             style['CLim'] = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
             style['CLabel'] = data.processed.get_attribute(field,'label')
 
-        if app_data.c_field_type == 'cluster':
+        if app_data.c_field_type.lower() == 'cluster':
             style['CScale'] = 'discrete'
         else:
             style['CScale'] = 'linear'

@@ -100,8 +100,11 @@ def radar_factory(num_vars, frame='polygon'):
                                     + self.transAxes)
                 # Set dotted line style for the hexagonal frame
                 spine.set_linestyle('--')
-                # return {'polar': spine}
-                return {} #hide frame
+                # PolarAxes._init_axis() requires a spine keyed 'polar' to exist,
+                # so it can't simply be omitted to hide the frame -- hide it via
+                # visibility instead.
+                spine.set_visible(False)
+                return {'polar': spine}
             else:
                 raise ValueError("Unknown value for 'frame': %s" % frame)
                 

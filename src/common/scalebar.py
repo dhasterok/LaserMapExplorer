@@ -67,9 +67,12 @@ class scalebar:
         xl = self.ax.get_xlim()
         yl = self.ax.get_ylim()
 
-        # axes ranges
-        dx = np.diff(xl)
-        dy = np.diff(yl)
+        # axes ranges -- np.diff on a 2-element tuple returns a 1-element array, not
+        # a true scalar; several branches below add/subtract it directly into a text
+        # position (e.g. `ybar[3] + 0.01*dy`), and under NumPy 2.x matplotlib can no
+        # longer implicitly convert a 1-element array to a Python float there.
+        dx = float(np.diff(xl)[0])
+        dy = float(np.diff(yl)[0])
 
         # buffer at edge, 5% of plot
         buff = 0.05

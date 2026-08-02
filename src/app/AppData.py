@@ -1117,7 +1117,7 @@ class AppData(QObject):
         self._num_clusters = new_value
         # update cluster dict with new number of clusters
         self.cluster_dict[self._cluster_method]['n_clusters'] = self._num_clusters
-        self.numClustersChanged.emit("num_clusters", new_value)
+        self.numClustersChanged.emit(new_value)
 
     @property
     def cluster_seed(self):

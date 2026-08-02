@@ -126,7 +126,7 @@ class PreprocessingUI(CustomPage):
         self.lineEditResolutionNy.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
         self.lineEditResolutionNy.setReadOnly(True)
         self.lineEditResolutionNy.setObjectName("lineEditResolutionNy")
-        self.lineEditResolutionNx.setToolTip("Number of pixels in Y-direction")
+        self.lineEditResolutionNy.setToolTip("Number of pixels in Y-direction")
 
         layout_resolution.addWidget(self.labelResolutionNx)
         layout_resolution.addWidget(self.lineEditResolutionNx)
@@ -336,10 +336,10 @@ class PreprocessingUI(CustomPage):
         )
 
     def connect_widgets(self):
-        self.lineEditDX.editingFinished.connect(lambda _: self.update_dimension('x'))
-        self.lineEditDY.editingFinished.connect(lambda _: self.update_dimension('y'))
-        self.lineEditResolutionNx.editingFinished.connect(lambda _: self.update_resolution('x'))
-        self.lineEditResolutionNx.editingFinished.connect(lambda _: self.update_resolution('y'))
+        self.lineEditDX.editingFinished.connect(lambda: self.update_dimension('x'))
+        self.lineEditDY.editingFinished.connect(lambda: self.update_dimension('y'))
+        self.lineEditResolutionNx.editingFinished.connect(lambda: self.update_resolution('x'))
+        self.lineEditResolutionNy.editingFinished.connect(lambda: self.update_resolution('y'))
 
         self.toolButtonSwapResolution.clicked.connect(self.update_swap_resolution)
         self.toolButtonPixelResolutionReset.clicked.connect(self.reset_pixel_resolution)

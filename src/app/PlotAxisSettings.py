@@ -61,6 +61,12 @@ class AxisControls:
         Whether to include a ``'none'`` option in the field selection dropdown.
     spinbox : bool, default=False
         Whether a spinbox control is available for this axis.
+    label : bool or None, default=None
+        Whether the axis label widget is editable. ``None`` (the default for
+        positionally-constructed instances) means "same as widgets"; pass
+        ``label=False`` explicitly to disable the label while keeping bounds
+        editable, e.g. spatial map axes where X/Y are pixel coordinates
+        (Xc/Yc) rather than a user-labelable field.
     """
     enabled: bool = False
     scale: bool = False
@@ -68,6 +74,11 @@ class AxisControls:
     lim_precision: Optional[int] = None
     add_none: bool = False
     spinbox: bool = False
+    label: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.label is None:
+            self.label = self.widgets
 
 @dataclass
 class PlotSettings:
@@ -107,16 +118,16 @@ axis_settings_dict: Dict[str, PlotSettings] = {
     ),
     "field map": PlotSettings(
         axes={
-            "x": AxisControls(False, False, True, None, False, False),
-            "y": AxisControls(False, False, True, None, False, False),
+            "x": AxisControls(False, False, True, None, False, False, label=False),
+            "y": AxisControls(False, False, True, None, False, False, label=False),
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         }
     ),
     "gradient map": PlotSettings(
         axes={
-            "x": AxisControls(False, False, True, None, False, False),
-            "y": AxisControls(False, False, True, None, False, False),
+            "x": AxisControls(False, False, True, None, False, False, label=False),
+            "y": AxisControls(False, False, True, None, False, False, label=False),
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
@@ -147,7 +158,8 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(True, True, True, 3, True,  True),
             "c": AxisControls(True, True, True, 3, True,  True),
         },
-        field_type=['Analyte','Ratio','Calculated','PCA score','Cluster score','Special']
+        field_type=['Analyte','Ratio','Calculated','PCA score','Cluster score','Special'],
+        cfield_type=['Analyte','Ratio','Calculated','PCA score','Cluster','Cluster score','Special']
     ),
     "heatmap": PlotSettings(
         axes={
@@ -184,7 +196,8 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, False, None, True, True),
         },
-        field_type=['Analyte','Ratio','Calculated','PCA score','Special']
+        field_type=['Analyte','Ratio','Calculated','PCA score','Special'],
+        cfield_type=['Cluster']
     ),
     "variance": PlotSettings(
         axes={
@@ -204,8 +217,8 @@ axis_settings_dict: Dict[str, PlotSettings] = {
     ),
     "dimension score map": PlotSettings(
         axes={
-            "x": AxisControls(False, False, True, None, False, False),
-            "y": AxisControls(False, False, True, None, False, False),
+            "x": AxisControls(False, False, True, None, False, False, label=False),
+            "y": AxisControls(False, False, True, None, False, False, label=False),
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
@@ -231,8 +244,8 @@ axis_settings_dict: Dict[str, PlotSettings] = {
     ),
     "cluster map": PlotSettings(
         axes={
-            "x": AxisControls(False, False, True, None, False, False),
-            "y": AxisControls(False, False, True, None, False, False),
+            "x": AxisControls(False, False, True, None, False, False, label=False),
+            "y": AxisControls(False, False, True, None, False, False, label=False),
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, False, 3, False, False),
         },
@@ -240,8 +253,8 @@ axis_settings_dict: Dict[str, PlotSettings] = {
     ),
     "cluster score map": PlotSettings(
         axes={
-            "x": AxisControls(False, False, True, None, False, False),
-            "y": AxisControls(False, False, True, None, False, False),
+            "x": AxisControls(False, False, True, None, False, False, label=False),
+            "y": AxisControls(False, False, True, None, False, False, label=False),
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },

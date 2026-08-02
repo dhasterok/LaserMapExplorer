@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-import src.common.radar_factory as radar_factory
+from src.common.radar_factory import radar_factory
 
 class Radar:
     def __init__(self, ax, data, fields, fieldlabels=None, group_field='', groups=None, quantiles=None, axes_interval=5):
@@ -42,11 +42,16 @@ class Radar:
         self.data = data
         self.groups = groups
         self.quantiles = quantiles
+        # radar_factory registers the 'radar' projection with matplotlib as a
+        # side effect, so it must run before any axes request that projection.
+        self.theta = radar_factory(len(self.fields), frame='polygon')
+
         if ax is None:
             self.fig = Figure(figsize=(6, 6))
             self.ax = self.fig.add_subplot(projection='radar')
         else:
             self.ax = ax
+            self.fig = ax.figure
         
         if self.quantiles is not None:
             if group_field == '':
@@ -107,7 +112,7 @@ class Radar:
         for k in range(self.vals.shape[2]):
             self.vals[:, :, k] = (self.vals[:, :, k] - self.fieldmin) * radius_adj  / field_range + self.normalized_axis_increment
     
-    def plot(self, cmap=None):
+    def plot(self, cmap=None, group_labels=None):
         """_summary_
 
         _extended_summary_
@@ -116,26 +121,28 @@ class Radar:
         ----------
         cmap : matplotlib.colormap, optional
             colormap, by default None
-        """        
+        group_labels : list, optional
+            Display label per group, indexed the same way as ``cmap``; falls back
+            to the raw group value when not given, by default None
+        """
         axes_precision = 2
-        num_vars = len(self.fields)
-        theta = radar_factory(num_vars, frame='polygon')
-        
+        theta = self.theta
+
         #fig = Figure(figsize=(6, 6))
         #ax = fig.add_subplot(projection='radar')
-        
+
         self.ax.set_theta_direction(-1)
-         
+
         if cmap is None:
             # Create a colormap object based on the provided name
             cmap = plt.cm.get_cmap('viridis')
-        
+
         group_count, field_count, q_count = self.vals.shape
 
         for idx in range(group_count):
             if group_count >1:
-                color = cmap[self.groups[idx]]
-                label = self.groups[idx]
+                color = cmap[int(self.groups[idx])]
+                label = group_labels[int(self.groups[idx])] if group_labels is not None else self.groups[idx]
             else:
                 color = cmap(0.5)
                 label = None
@@ -187,6 +194,8 @@ class Radar:
         #self.ax.set_dotted_grid_lines()
         self.ax.get_yaxis_transform(which='grid')
         self.ax.set_rgrids([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+
+        return self.fig, self.ax
     
 # Usage
 # data = pd.read_csv('/Users/a1904121/LaserMapExplorer/laser_mapping/Alex_garnet_maps/processed data/RM01.csv')

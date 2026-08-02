@@ -319,6 +319,8 @@ class MarkersPage(CustomPage):
 
         self.sliderTransparency = CustomSlider(
             initial_value = 100,
+            precision = 0,
+            fixed_point = True,
             parent=self,
         )
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -621,15 +623,15 @@ class StylingDock(CustomDockWidget):
     def connect_widgets(self):
         # axes
         # ---
-        self.axes.lineEditXLabel.editingFinished.connect(lambda _: self.update_axis_label('x'))
-        self.axes.lineEditYLabel.editingFinished.connect(lambda _: self.update_axis_label('y'))
-        self.axes.lineEditZLabel.editingFinished.connect(lambda _: self.update_axis_label('z'))
-        self.caxes.lineEditCLabel.editingFinished.connect(lambda _: self.update_axis_label('c'))
+        self.axes.lineEditXLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('x', self.axes.lineEditXLabel.text()))
+        self.axes.lineEditYLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('y', self.axes.lineEditYLabel.text()))
+        self.axes.lineEditZLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('z', self.axes.lineEditZLabel.text()))
+        self.caxes.lineEditCLabel.editingFinished.connect(lambda: self.axis_label_edit_callback('c', self.caxes.lineEditCLabel.text()))
 
-        self.axes.comboBoxXScale.activated.connect(lambda _: self.update_axis_scale('x'))
-        self.axes.comboBoxYScale.activated.connect(lambda _: self.update_axis_scale('y'))
-        self.axes.comboBoxZScale.activated.connect(lambda _: self.update_axis_scale('y'))
-        self.caxes.comboBoxCScale.activated.connect(lambda _: self.update_axis_scale('c'))
+        self.axes.comboBoxXScale.activated.connect(lambda: self.axis_scale_callback(self.axes.comboBoxXScale, 'x'))
+        self.axes.comboBoxYScale.activated.connect(lambda: self.axis_scale_callback(self.axes.comboBoxYScale, 'y'))
+        self.axes.comboBoxZScale.activated.connect(lambda: self.axis_scale_callback(self.axes.comboBoxZScale, 'z'))
+        self.caxes.comboBoxCScale.activated.connect(lambda: self.axis_scale_callback(self.caxes.comboBoxCScale, 'c'))
 
         self.axes.lineEditXLB.setValidator(QDoubleValidator())
         self.axes.lineEditXLB.precision = 3
@@ -660,24 +662,24 @@ class StylingDock(CustomDockWidget):
         self.axes.lineEditAspectRatio.toward = 1
         self.axes.lineEditAspectRatio.set_bounds(0.0,None)
 
-        self.axes.lineEditXLB.editingFinished.connect(lambda _: self.update_axis_limits('x'))
-        self.axes.lineEditXUB.editingFinished.connect(lambda _: self.update_axis_limits('x'))
-        self.axes.lineEditYLB.editingFinished.connect(lambda _: self.update_axis_limits('y'))
-        self.axes.lineEditYUB.editingFinished.connect(lambda _: self.update_axis_limits('y'))
-        self.axes.lineEditZLB.editingFinished.connect(lambda _: self.update_axis_limits('z'))
-        self.axes.lineEditZUB.editingFinished.connect(lambda _: self.update_axis_limits('z'))
-        self.caxes.lineEditCLB.editingFinished.connect(lambda _: self.update_axis_limits('c'))
-        self.caxes.lineEditCUB.editingFinished.connect(lambda _: self.update_axis_limits('c'))
+        self.axes.lineEditXLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 0, self.axes.lineEditXLB.value))
+        self.axes.lineEditXUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('x', 1, self.axes.lineEditXUB.value))
+        self.axes.lineEditYLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 0, self.axes.lineEditYLB.value))
+        self.axes.lineEditYUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('y', 1, self.axes.lineEditYUB.value))
+        self.axes.lineEditZLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 0, self.axes.lineEditZLB.value))
+        self.axes.lineEditZUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('z', 1, self.axes.lineEditZUB.value))
+        self.caxes.lineEditCLB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 0, self.caxes.lineEditCLB.value))
+        self.caxes.lineEditCUB.editingFinished.connect(lambda: self.axis_limit_edit_callback('c', 1, self.caxes.lineEditCUB.value))
 
         self.axes.toolButtonXAxisReset.clicked.connect(lambda: self.axis_reset_callback('x'))
         self.axes.toolButtonYAxisReset.clicked.connect(lambda: self.axis_reset_callback('y'))
         self.axes.toolButtonZAxisReset.clicked.connect(lambda: self.axis_reset_callback('z'))
         self.caxes.toolButtonCAxisReset.clicked.connect(lambda: self.axis_reset_callback('c'))
 
-        self.axes.lineEditAspectRatio.editingFinished.connect(lambda _:self.update_aspect_ratio)
+        self.axes.lineEditAspectRatio.editingFinished.connect(lambda: self.update_aspect_ratio())
         self.axes.comboBoxTickDirection.activated.connect(lambda _: self.update_tick_dir())
         self.axes.comboBoxTickDirection.clear()
-        self.axes.comboBoxTickDirection.addItems(self.ui.style_data.tick_dir_options)
+        self.axes.comboBoxTickDirection.addItems(self.ui.style_data.widget_options['tick_dir'])
 
         # annotations and scales
         # ---
@@ -693,9 +695,13 @@ class StylingDock(CustomDockWidget):
 
         #overlay color
         self.annotations.comboBoxScaleDirection.activated.connect(lambda _: self.update_scale_direction())
+        self.annotations.comboBoxScaleDirection.clear()
+        self.annotations.comboBoxScaleDirection.addItems(self.ui.style_data.widget_options['scale_dir'])
         self.annotations.comboBoxScaleLocation.activated.connect(lambda _: self.update_scale_location())
+        self.annotations.comboBoxScaleLocation.clear()
+        self.annotations.comboBoxScaleLocation.addItems(self.ui.style_data.widget_options['scale_location'])
         self.annotations.lineEditScaleLength.setValidator(QDoubleValidator())
-        self.annotations.lineEditScaleLength.editingFinished.connect(lambda _: self.update_scale_length())
+        self.annotations.lineEditScaleLength.editingFinished.connect(lambda: self.update_scale_length())
 
         #self.annotations.fontComboBox.setCurrentFont(QFont(self.ui.style_data.style_dict['Font'], 11))
         self.annotations.fontComboBox.activated.connect(lambda _: self.update_font_family())
@@ -725,7 +731,7 @@ class StylingDock(CustomDockWidget):
         self.elements.colorButtonMarkerColor.colorChanged.connect(self.update_marker_color)
 
         self.elements.doubleSpinBoxLineWidth.valueChanged.connect(lambda _: self.update_line_width())
-        self.elements.lineEditLengthMultiplier.editingFinished.connect(lambda _: self.update_length_multiplier())
+        self.elements.lineEditLengthMultiplier.editingFinished.connect(lambda: self.update_length_multiplier())
         self.elements.colorButtonLineColor.setStyleSheet("background-color: white;")
         self.elements.colorButtonLineColor.colorChanged.connect(self.update_line_color)
         # marker color
@@ -733,7 +739,7 @@ class StylingDock(CustomDockWidget):
         # colors
         self.caxes.comboBoxFieldColormap.activated.connect(lambda _: self.update_field_colormap())
         self.caxes.comboBoxCbarDirection.clear()
-        self.caxes.comboBoxCbarDirection.addItems(self.ui.style_data.cbar_dir_options)
+        self.caxes.comboBoxCbarDirection.addItems(self.ui.style_data.widget_options['cbar_dir'])
         self.caxes.comboBoxCbarDirection.activated.connect(lambda _: self.update_cbar_direction())
         # resolution
         self.caxes.spinBoxHeatmapResolution.valueChanged.connect(lambda _: self.update_resolution())
@@ -946,7 +952,7 @@ class StylingDock(CustomDockWidget):
 
         if new_lim is None:
             self.ui.style_data.blockSignals(True)
-            setattr(self, f"{ax}lim", ui_lim)
+            setattr(self.ui.style_data, f"{ax}lim", ui_lim)
             self.ui.style_data.blockSignals(False)
         else:
             if list(new_lim) == ui_lim:
@@ -969,7 +975,7 @@ class StylingDock(CustomDockWidget):
 
         if new_text is None:
             self.ui.style_data.blockSignals(True)
-            setattr(self, f"{ax}label", ui_label.text())
+            setattr(self.ui.style_data, f"{ax}label", ui_label.text())
             self.ui.style_data.blockSignals(False)
         else:
             if new_text == ui_label.text():
@@ -1000,7 +1006,7 @@ class StylingDock(CustomDockWidget):
 
         if  new_text is None:
             self.ui.style_data.blockSignals(True)
-            setattr(self, f"{ax}_scale", scale_combo.currentText())
+            setattr(self.ui.style_data, f"{ax}scale", scale_combo.currentText())
             self.ui.style_data.blockSignals(False)
         else:
             if new_text == scale_combo.currentText():
@@ -1512,25 +1518,36 @@ class StylingDock(CustomDockWidget):
     def _toggle_axes(self, plot_type=None):
         """Enable axis widgets based on axis_settings_dict configuration"""
         from .PlotAxisSettings import axis_settings_dict
-        
+
         if plot_type is None:
             plot_type = self.ui.style_data.plot_type.lower()
-        
-        if plot_type in axis_settings_dict:
-            plot_settings = axis_settings_dict[plot_type]
+
+        # axis_settings_dict keys are lowercase, except 'TEC' which keeps its canonical casing
+        lookup_key = 'TEC' if plot_type == 'tec' else plot_type
+
+        if lookup_key in axis_settings_dict:
+            plot_settings = axis_settings_dict[lookup_key]
             for axis, controls in plot_settings.axes.items():
-                if axis in self.axis_widget_dict and controls.enabled:
-                    widgets = self.axis_widget_dict[axis]
-                    
-                    # Enable bounds if widgets flag is set
-                    if controls.widgets:
-                        widgets['lbound'].setEnabled(True)
-                        widgets['ubound'].setEnabled(True)
-                        widgets['axis_label'].setEnabled(True)
-                    
-                    # Enable scale if scale flag is set
-                    if controls.scale:
-                        widgets['scalebox'].setEnabled(True)
+                # controls.enabled governs the field-selector widgets (see FieldLogic.py);
+                # it is independent of whether the limit/scale widgets below should show.
+                if axis not in self.axis_widget_dict:
+                    continue
+                widgets = self.axis_widget_dict[axis]
+
+                # Enable bounds if widgets flag is set
+                if controls.widgets:
+                    widgets['lbound'].setEnabled(True)
+                    widgets['ubound'].setEnabled(True)
+
+                # Enable label independently -- e.g. spatial map axes keep their
+                # bounds editable (to control the figure extent) but have no
+                # meaningful label, since X/Y are fixed to Xc/Yc pixel coordinates.
+                if controls.label:
+                    widgets['axis_label'].setEnabled(True)
+
+                # Enable scale if scale flag is set
+                if controls.scale:
+                    widgets['scalebox'].setEnabled(True)
 
     def _toggle_markers(self, basic=True, transparency=True, color=False):
         """Enable/disable marker widgets using flag values directly"""
@@ -1577,12 +1594,16 @@ class StylingDock(CustomDockWidget):
 
         self._toggle_axes(plot_type=plot_type)
 
+        # Scale direction/location/length and overlay color only apply to map-type
+        # plots (a spatial scalebar makes sense on a map; it doesn't on a scatter,
+        # histogram, TEC diagram, etc.), driven by the single map_plot_types list.
+        self._toggle_scalebar(enable=(plot_type in self.ui.style_data.map_plot_types))
+
         # Always enable basic annotation properties
         self.annotations.fontComboBox.setEnabled(True)
         self.annotations.doubleSpinBoxFontSize.setEnabled(True)
         match plot_type.lower():
             case 'field map' | 'gradient map':
-                self._toggle_scalebar()
                 self._toggle_common(show_mass=True)
                 
                 # marker properties (conditional)
@@ -1638,7 +1659,7 @@ class StylingDock(CustomDockWidget):
                 # Color properties (conditional)
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
-                elif self.ui.control_dock.comboBoxFieldTypeC.currentText() == 'cluster':
+                elif self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'cluster':
                     self._toggle_colormap()
 
             case 'heatmap' | 'dimension heatmap':
@@ -1659,19 +1680,16 @@ class StylingDock(CustomDockWidget):
                 self._toggle_colormap()
             case 'ternary map':
                 self._toggle_common(show_mass=True)
-                self._toggle_scalebar()
-                
+
                 # Conditional markers
                 if not self.ui.app_data.current_data.spotdata.empty:
                     self._toggle_markers(color=True)
 
             case 'tec' | 'radar':
                 self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
-                # Scale length only (not full scalebar)
-                self.annotations.lineEditScaleLength.setEnabled(True)
                 self._toggle_markers(basic=False, transparency=True, color=False)
                 self._toggle_lines()
-                
+
                 # Conditional color
                 if self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() == 'none':
                     self.elements.colorButtonMarkerColor.setEnabled(True)
@@ -1680,14 +1698,10 @@ class StylingDock(CustomDockWidget):
 
             case 'variance' | 'cluster performance':
                 self._toggle_common(show_mass=False, tick_dir=True, aspect=True)
-                # Partial scalebar (length and color only)
-                self.annotations.lineEditScaleLength.setEnabled(True)
-                self.annotations.colorButtonOverlayColor.setEnabled(True)
                 self._toggle_markers(transparency=False, color=True)
                 self._toggle_lines()
 
             case 'cluster score map' | 'dimension score map' | 'cluster map':
-                self._toggle_scalebar()
                 self._toggle_common(show_mass=False)
                 self._toggle_lines()
 
@@ -1696,11 +1710,9 @@ class StylingDock(CustomDockWidget):
                     self._toggle_colormap()
             case 'profile':
                 self._toggle_common(show_mass=True, tick_dir=True, aspect=True)
-                # Scale length only
-                self.annotations.lineEditScaleLength.setEnabled(True)
                 self._toggle_markers(transparency=False, color=False)
                 self._toggle_lines()
-                # Color properties  
+                # Color properties
                 self.elements.colorButtonMarkerColor.setEnabled(True)
                 self.caxes.comboBoxFieldColormap.setEnabled(True)
         
@@ -1778,8 +1790,23 @@ class StylingDock(CustomDockWidget):
             lb.value = getattr(style, f"{ax}lim")[0]
             ub.value = getattr(style, f"{ax}lim")[1]
             label.setText(getattr(style, f"{ax}label"))
-            # scale probably needs to get fixed to clear and add correct list
-            # of options each time.
+
+            # Populate the scale combobox with the options valid for this axis/plot
+            # type/field (e.g. histogram's y and 'discrete' cluster fields are
+            # linear-only). The 'c' axis has its own, more elaborate handling below.
+            if ax != 'c' and data:
+                current_scale = getattr(style, f"{ax}scale")
+                options = data.scale_options(
+                    plot_type=style.plot_type,
+                    ax=ax,
+                    field_type=getattr(self.ui.app_data, f"{ax}_field_type", None),
+                    field=getattr(self.ui.app_data, f"{ax}_field", None),
+                )
+                scale.clear()
+                scale.addItems(options)
+                if current_scale not in options:
+                    current_scale = options[0] if options else ''
+                    setattr(style, f"{ax}scale", current_scale)
             scale.setCurrentText(getattr(style, f"{ax}scale"))
 
             # Get and set field type and field in control dock
@@ -1882,9 +1909,9 @@ class StylingDock(CustomDockWidget):
         #     self.ui.style_data.clim = style.clim
         #     self.ui.style_data.clabel = style.clabel
         
-        if self.ui.app_data.c_field_type == 'cluster':
+        if self.ui.app_data.c_field_type.lower() == 'cluster':
             # set color field to active cluster method
-            self.ui.control_dock.comboBoxFieldC.setCurrentText(self.ui.cluster_dict['active method'])
+            self.ui.control_dock.comboBoxFieldC.setCurrentText(self.ui.app_data.cluster_method)
 
             # set color scale to discrete
             self.caxes.comboBoxCScale.clear()
@@ -2062,24 +2089,37 @@ class StylingDock(CustomDockWidget):
         """        
         data = self.ui.app_data.current_data
 
-        styles = self.ui.style_data.style_dict[self._plot_type]
+        plot_type = self.ui.style_data.plot_type
+        styles = self.ui.style_data.style_dict[plot_type]
+
+        lim_key = 'CLim' if ax == 'c' else ax.upper()+'Lim'
+        scale_key = 'CScale' if ax == 'c' else ax.upper()+'Scale'
 
         new_value = comboBox.currentText()
-        if ax == 'c':
-            if styles['CLim'] == new_value:
-                return
-        elif styles[ax.upper()+'norm'] == new_value:
+        if styles[scale_key] == new_value:
             return
 
         field = self.ui.control_dock.get_axis_field(ax)
 
-        if self._plot_type != 'heatmap':
+        if plot_type != 'heatmap':
             data.processed.set_attribute(field,'norm',new_value)
 
-        if ax == 'c':
-            styles['CScale'] = new_value
-        else:
-            styles[ax.upper()+'norm'] = new_value
+        styles[scale_key] = new_value
+
+        # log scale can't display non-positive limits; if the current lower bound
+        # isn't strictly positive, replace it with the smallest positive value
+        # actually present in the field's data so the plot doesn't crash.
+        if new_value == 'log' and field:
+            lower = styles[lim_key][0]
+            if lower is None or lower <= 0:
+                positive = data.processed[field][data.processed[field] > 0]
+                new_lower = positive.min() if not positive.empty else 1e-6
+
+                styles[lim_key][0] = new_lower
+                min_attr = 'p_min' if (plot_type == 'histogram' and ax == 'y') else 'plot_min'
+                data.processed.set_attribute(field, min_attr, new_lower)
+
+                self.axis_widget_dict[ax]['lbound'].value = new_lower
 
         # update plot
         self.ui.schedule_update()
@@ -2122,26 +2162,28 @@ class StylingDock(CustomDockWidget):
         if ax == 'c':
             if self.ui.control_dock.comboBoxPlotType.currentText() == 'basis vectors':
                 self.ui.style_data.style_dict['basis vectors']['CLim'] = [np.amin(self.ui.pca_results.components_), np.amax(self.ui.pca_results.components_)]
-            elif not (self.ui.control_dock.comboBoxFieldTypeC.currentText() in ['none','cluster']):
+            elif not (self.ui.control_dock.comboBoxFieldTypeC.currentText().lower() in ['none','cluster']):
                 field_type = self.ui.control_dock.comboBoxFieldTypeC.currentText()
                 field = self.ui.control_dock.comboBoxFieldC.currentText()
                 if field == '':
                     return
-                data.processed.prep_data(field)
+                data.prep_data(field)
 
             self.set_color_axis_widgets()
         else:
             match self.ui.control_dock.comboBoxPlotType.currentText().lower():
                 case 'field map' | 'gradient map' | 'cluster map' | 'cluster score map' | 'dimension score map':
-                    field = ax.upper()
-                    data.processed.prep_data(field)
-                    self.set_axis_widgets(ax, field)
+                    field = self.ui.control_dock.get_axis_field(ax)
+                    data.prep_data(field)
+                    self.ui.style_data.set_axis_attributes(ax, field)
                 case 'histogram':
-                    field = self.ui.control_dock.comboBoxFieldC.currentText()
+                    # the histogrammed field comes from comboBoxFieldX; comboBoxFieldC
+                    # is the separate, optional cluster-coloring overlay.
+                    field = self.ui.control_dock.comboBoxFieldX.currentText()
                     if ax == 'x':
-                        field_type = self.ui.control_dock.comboBoxFieldTypeC.currentText()
-                        data.processed.prep_data(field)
-                        self.set_axis_widgets(ax, field)
+                        field_type = self.ui.control_dock.comboBoxFieldTypeX.currentText()
+                        data.prep_data(field)
+                        self.ui.style_data.set_axis_attributes(ax, field)
                     else:
                         data.processed.set_attribute(field, 'p_min', None)
                         data.processed.set_attribute(field, 'p_max', None)
@@ -2159,8 +2201,8 @@ class StylingDock(CustomDockWidget):
                             field = self.ui.control_dock.comboBoxFieldZ.currentText()
                     if (field_type == '') | (field == ''):
                         return
-                    data.processed.prep_data(field)
-                    self.set_axis_widgets(ax, field)
+                    data.prep_data(field)
+                    self.ui.style_data.set_axis_attributes(ax, field)
 
                 case 'dimension scatter' | 'dimension heatmap':
                     field_type = 'PCA score'
@@ -2173,8 +2215,8 @@ class StylingDock(CustomDockWidget):
                             field = self.ui.control_dock.comboBoxFieldZ.currentText()
                     if not field:
                         return
-                    data.processed.prep_data(field)
-                    self.set_axis_widgets(ax, field)
+                    data.prep_data(field)
+                    self.ui.style_data.set_axis_attributes(ax, field)
 
                 case _:
                     return

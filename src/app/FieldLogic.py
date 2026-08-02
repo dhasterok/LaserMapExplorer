@@ -497,7 +497,7 @@ class ControlDock(CustomDockWidget):
                     self.field_control_settings[tid] = ControlSettings(
                         page_name=tab_name,
                         saved_index=0,
-                        plot_list=['TEC', 'Radar'],
+                        plot_list=['TEC', 'radar'],
                         axes={
                             'x': AxisSettings(),
                             'y': AxisSettings(),
@@ -653,9 +653,9 @@ class ControlDock(CustomDockWidget):
             self.ui.app_data.set_field('y', 'Yc')
             
             # Manually trigger axis_variable_changed to update styling widgets
-            if hasattr(self.ui, 'styling_dock'):
-                self.ui.styling_dock.axis_variable_changed('Xc', 'x')
-                self.ui.styling_dock.axis_variable_changed('Yc', 'y')
+            if hasattr(self.ui, 'style_dock'):
+                self.ui.style_dock.axis_variable_changed('Xc', 'x')
+                self.ui.style_dock.axis_variable_changed('Yc', 'y')
 
         self.ui.plot_flag = False
         # update all plot widgets
@@ -1157,8 +1157,12 @@ class ControlDock(CustomDockWidget):
 
         match plot_type:
             case 'histogram':
+                # the histogram plots the distribution of the field chosen in the X
+                # combobox; comboBoxFieldC is the optional cluster-coloring overlay,
+                # a separate field. Y (the density/probability axis) has no field of
+                # its own -- its p_min/p_max are keyed by the same X field.
                 if ax in ['x', 'y']:
-                    return self.comboBoxFieldC.currentText()
+                    return self.comboBoxFieldX.currentText()
             case 'scatter' | 'heatmap':
                 match ax:
                     case 'x':
@@ -1175,8 +1179,28 @@ class ControlDock(CustomDockWidget):
                         return self.comboBoxFieldY.currentText()
                     case 'z':
                         return self.comboBoxFieldZ.currentText()
-            case 'field map' | 'gradient map' | 'ternary map' | 'cluster map' | 'cluster score map' | 'dimension score map':
-                return ax.upper()
+            case 'field map' | 'gradient map' | 'cluster map' | 'cluster score map' | 'dimension score map':
+                # X/Y are always the coordinate columns Xc/Yc for these spatial maps --
+                # return them directly rather than reading comboBoxFieldX/Y. AppData's
+                # field_dict deliberately excludes 'coordinate' fields (they aren't
+                # meant to be user-selectable), so those comboboxes can never actually
+                # hold 'Xc'/'Yc' as populated options; reading them here would silently
+                # return whatever unrelated field happens to be selected instead.
+                match ax:
+                    case 'x':
+                        return 'Xc'
+                    case 'y':
+                        return 'Yc'
+            case 'ternary map':
+                # Ternary components ARE real, user-selectable fields (unlike Xc/Yc),
+                # so comboBoxFieldX/Y/Z are correctly populated for this plot type.
+                match ax:
+                    case 'x':
+                        return self.comboBoxFieldX.currentText()
+                    case 'y':
+                        return self.comboBoxFieldY.currentText()
+                    case 'z':
+                        return self.comboBoxFieldZ.currentText()
 
 class FieldLogicUI():
     """Methods associated with fields and field type, specifically comboboxes

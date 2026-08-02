@@ -578,8 +578,12 @@ class MainWindow(QMainWindow):
         self.update_ui_on_sample_change()
         self.update_widget_data_on_sample_change()
 
-        if self.style_data.plot_type != 'field map':
-            self.style_data.plot_type = 'field map'
+        # Force a full refresh (not just an assignment guarded on "did the value
+        # change") so the coordinate axes (Xc/Yc extents, fields, widgets) are
+        # re-initialized for the newly-loaded sample even when the plot type is
+        # already 'field map' -- the common case when switching between samples.
+        self.control_dock.update_plot_type('field map', force=True)
+        self.style_dock.update_plot_type(force=True)
 
         if 'Analyte' in self.app_data.field_dict:
             self.app_data.c_field_type = 'Analyte'

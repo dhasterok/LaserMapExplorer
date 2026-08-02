@@ -21,6 +21,7 @@ import lame_core.format as fmt
 from lame_core.ColorManager import convert_color
 from src.common.plot_spider import plot_spider_norm
 from src.common.radar import Radar
+from src.common.radar_factory import radar_factory
 from src.common.scalebar import scalebar
 from src.common.ternary_plot import ternary
 from src.common.Logger import LoggerConfig, log_call, log
@@ -71,7 +72,7 @@ def create_plot(parent, data, app_data, style_data):
                     return None, None
                 canvas, plot_info = plot_correlation(parent, data, app_data, style_data)
 
-            case 'TEC' | 'Radar':
+            case 'TEC' | 'radar':
                 canvas, plot_info = plot_ndim(parent, data, app_data, style_data)
 
             case 'histogram':
@@ -219,15 +220,25 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
         bottom=False, top=False, left=False, right=False)
 
     canvas.set_initial_extent()
-    
-    # axes
-    #xmin, xmax, xscale, xlbl = style_data.get_axis_values(None,field= 'X')
-    #ymin, ymax, yscale, ylbl = style_data.get_axis_values(None,field= 'Y')
 
+    # axes limits -- style_data.xlim/ylim are in physical Xc/Yc units, but imshow's
+    # default axes are in pixel-index space (0..nx, 0..ny), so convert by subtracting
+    # the sample's own minimum before dividing by pixel spacing. Anchoring on the
+    # sample's actual minimum (rather than assuming it's 0) keeps this correct
+    # regardless of indexing convention -- matrix-form imports store Xc/Yc as
+    # 1-indexed multiples of dx/dy (first pixel's Xc == dx, not 0), while raw
+    # per-line imports store them 0-indexed. Preserve whichever direction
+    # (ascending/descending) imshow already established as correct for this
+    # array, rather than assuming one.
+    def _apply_map_lim(get_lim, set_lim, style_lim, spacing, origin):
+        if not style_lim or None in style_lim or not spacing:
+            return
+        lo, hi = sorted([(style_lim[0] - origin) / spacing, (style_lim[1] - origin) / spacing])
+        cur_lo, cur_hi = get_lim()
+        set_lim(lo, hi) if cur_lo <= cur_hi else set_lim(hi, lo)
 
-    # axes limits
-    #canvas.axes.set_xlim(xmin,xmax)
-    #canvas.axes.set_ylim(ymin,ymax)
+    _apply_map_lim(canvas.axes.get_xlim, canvas.axes.set_xlim, style_data.xlim, data.dx, data.xlim[0])
+    _apply_map_lim(canvas.axes.get_ylim, canvas.axes.set_ylim, style_data.ylim, data.dy, data.ylim[0])
 
     # add scalebar
     add_scalebar(data, app_data, style_data, canvas.axes)
@@ -620,7 +631,7 @@ def plot_histogram(parent, data, app_data, style_data):
             cumflag = False
 
     # Check if the algorithm is in the current group and if results are available
-    if app_data.c_field_type == 'cluster' and app_data.c_field != '':
+    if app_data.c_field_type.lower() == 'cluster' and app_data.c_field != '':
         method = app_data.c_field
 
         # Get the cluster labels for the data
@@ -1344,8 +1355,8 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
         cb = None
         
         plot_data = pd.DataFrame(np.vstack((x['array'], y['array'])).T, columns = ['x','y'])
-        
-    elif app_data.c_field_type == 'cluster':
+
+    elif app_data.c_field_type.lower() == 'cluster':
         # color by cluster
         method = app_data.c_field
         if method not in app_data.cluster_dict:
@@ -1485,8 +1496,8 @@ def ternary_scatter(canvas, data, app_data, style_data, x, y, z, c):
             )
         cb = None
         plot_data = pd.DataFrame(np.vstack((x['array'],y['array'], z['array'])).T, columns = ['x','y','z'])
-        
-    elif app_data.c_field_type == 'cluster':
+
+    elif app_data.c_field_type.lower() == 'cluster':
         # color by cluster
         method = app_data.c_field
         if method not in app_data.cluster_dict:
@@ -1905,7 +1916,7 @@ def plot_ndim(parent, data, app_data, style_data):
     clusters = []
     cluster_color = []
     cluster_label = []
-    if app_data.c_field_type == 'cluster' and app_data.c_field != '':
+    if app_data.c_field_type.lower() == 'cluster' and app_data.c_field != '':
         method = app_data.c_field
         cluster_dict = app_data.cluster_dict[method]
         cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(cluster_dict, alpha=style_data.marker_alpha)
@@ -1925,15 +1936,25 @@ def plot_ndim(parent, data, app_data, style_data):
     canvas = MplCanvas(parent=parent)
 
     match plot_type:
-        case 'Radar':
+        case 'radar':
             axes_interval = 5
+
+            # radar_factory registers the 'radar' projection as a side effect, and
+            # must run before requesting a radar-projected subplot. The canvas's
+            # figure is already Qt-bound, so the radar axes must be built on
+            # canvas.fig directly (swapping canvas.axes for a standalone figure's
+            # axes afterward does not update what the widget actually renders).
+            radar_factory(len(app_data.ndim_list), frame='polygon')
+            canvas.fig.delaxes(canvas.axes)
+            canvas.axes = canvas.fig.add_subplot(111, projection='radar')
+
             if cluster_flag and method in data.processed.columns:
                 # Get the cluster labels for the data
                 cluster_group = data.processed[method][data.mask]
 
                 df_filtered['clusters'] = cluster_group
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
-                radar = Radar( 
+                radar = Radar(
                     canvas.axes,
                     df_filtered,
                     fields=app_data.ndim_list,
@@ -1943,13 +1964,13 @@ def plot_ndim(parent, data, app_data, style_data):
                     group_field='clusters',
                     groups=clusters)
 
-                canvas.fig, canvas.axes = radar.plot(cmap = cmap)
+                radar.plot(cmap = cluster_color, group_labels = cluster_label)
                 canvas.axes.legend(loc='upper right', frameon='False')
             else:
                 radar = Radar(canvas.axes, df_filtered, fields=app_data.ndim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
-                    
+
                 radar.plot()
-                
+
                 plot_data = radar.vals
                 
         case 'TEC':
@@ -1968,7 +1989,7 @@ def plot_ndim(parent, data, app_data, style_data):
                             data=df_filtered.loc[df_filtered['clusters']==i,:],
                             ref_data=app_data.ref_data, norm_ref_data=app_data.ref_data['model'][ref_i],
                             layer=app_data.ref_data['layer'][ref_i], el_list=app_data.ndim_list ,
-                            style='Quanta', quantiles=quantiles, ax=canvas.axes, c=cluster_color[i], label=cluster_label[i]
+                            style='Quanta', quantiles=quantiles, ax=canvas.axes, c=cluster_color[int(i)], label=cluster_label[int(i)]
                         )
                     #store max y limit to convert the set y limit of axis
                     yl = [np.floor(np.nanmin([yl[0] , yl_tmp[0]])), np.ceil(np.nanmax([yl[1] , yl_tmp[1]]))]

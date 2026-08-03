@@ -1,13 +1,13 @@
 import sys, os, json
-from PyQt6.QtWidgets import ( 
-    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar, QLabel, QFileDialog, QPlainTextEdit
+from PyQt6.QtWidgets import (
+    QMainWindow, QVBoxLayout, QWidget, QTextEdit, QSizePolicy, QDockWidget, QToolBar , QStatusBar, QLabel, QFileDialog, QPlainTextEdit, QSplitter
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtGui import QIcon, QAction, QFont, QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QTextFormat, QPainter
 from PyQt6.QtCore import pyqtSlot, Qt, QObject, QUrl, QFile, QIODevice, QSize, QRegularExpression, QRect
 from lame_core.config import BASEDIR
-from lame_core.CustomWidgets import CustomDockWidget
+from lame_core.CustomWidgets import CustomDockWidget, CustomAction
 import numpy as np
 from src.app.BlocklyModules import LameBlockly
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
@@ -523,15 +523,14 @@ class Workflow(CustomDockWidget):
         container = QWidget()
 
         # Create the layout within main_window.tabWorkflow
-        dock_layout = QVBoxLayout()   
+        dock_layout = QVBoxLayout()
 
         self.output_text_edit = CodeEditor(main_window)
         self.output_text_edit.setReadOnly(True)
-        dock_layout.addWidget(self.output_text_edit)
 
         # attach the Python syntax highlighter
         self.highlighter = PythonHighlighter(self.output_text_edit.document())
-        
+
         #### toolbar setup ####
         toolbar = QToolBar("Blockly Toolbar", self)
         toolbar.setIconSize(QSize(24, 24))
@@ -572,14 +571,25 @@ class Workflow(CustomDockWidget):
         toolbar.addAction(self.save_action)
         toolbar.addSeparator()
         toolbar.addAction(self.clear_action)
-                # Add a stretch (spacer) so label is at the right, optional
+        toolbar.addSeparator()
+
+        # Show/hide the generated-code panel
+        self.action_show_hide_code = CustomAction(
+            text="Show/Hide Code",
+            light_icon_unchecked="icon-show-hide-64.svg",
+            light_icon_checked="icon-show-64.svg",
+            parent=toolbar,
+        )
+        self.action_show_hide_code.setToolTip("Show/hide the generated code panel")
+        self.action_show_hide_code.toggled.connect(self.toggle_code_panel)
+        toolbar.addAction(self.action_show_hide_code)
         toolbar.addSeparator()  # Optional: visual separator
-        
+
         # Add status label
         self.statusLabel = QLabel("Ready")
         toolbar.addWidget(self.statusLabel)
         dock_layout.addWidget(toolbar)
-        
+
         #### Blockly Setup ####
         #self.save_action.triggered.connect(self.save_workflow)
         #self.clear_action.triggered.connect(self.clear_workflow)
@@ -606,8 +616,16 @@ class Workflow(CustomDockWidget):
         self.web_view.page().runJavaScript(api_script)
         #Load the Blockly HTML page
         self.web_view.setUrl(QUrl.fromLocalFile(str(BASEDIR / 'blockly/index.html')))
-        # Add the web view to the layout
-        dock_layout.addWidget(self.web_view)
+
+        # Blockly workspace above, generated-code log below, with a splitter so the
+        # user can resize either panel's share of the window without resizing the
+        # window itself.
+        self.splitter = QSplitter(Qt.Orientation.Vertical)
+        self.splitter.addWidget(self.web_view)
+        self.splitter.addWidget(self.output_text_edit)
+        self.splitter.setStretchFactor(0, 3)
+        self.splitter.setStretchFactor(1, 1)
+        dock_layout.addWidget(self.splitter)
 
         # Connect resize event
         main_window.resizeEvent = self.handleResizeEvent
@@ -616,13 +634,28 @@ class Workflow(CustomDockWidget):
         container.setLayout(dock_layout)
         self.setWidget(container)
 
-        self.setFloating(True)
         self.setWindowTitle("Workflow Method Design")
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinMaxButtonsHint | Qt.WindowType.WindowCloseButtonHint)
 
-        main_window.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self)
+        # Deliberately never registered with main_window.addDockWidget(): the embedded
+        # QWebEngineView cannot survive being reparented between docked/floating states
+        # on macOS (Chromium corrupts its native view on reparent, crashing later
+        # elsewhere in the app). Keeping this as a true standalone top-level window
+        # avoids that reparenting entirely.
 
-        
+        # sync the toggle button's icon/state now that the code panel exists
+        self.action_show_hide_code.setChecked(True)
+
+    def toggle_code_panel(self, visible):
+        """Show or hide the generated-code panel beneath the Blockly workspace.
+
+        Parameters
+        ----------
+        visible : bool
+            Whether the code panel should be shown.
+        """
+        self.output_text_edit.setVisible(visible)
+        self.action_show_hide_code.update_icon()
 
     def handleResizeEvent(self, event):
         """Forward main window resize to the Blockly page for responsive layout.

@@ -940,6 +940,14 @@ class ControlDock(CustomDockWidget):
             # set combobox to field
             parentbox.setCurrentText(field_type)
 
+        # Switching the color-by field type to/from Cluster changes whether the
+        # discrete cluster colormap/cscale should be used. set_style_widgets is
+        # otherwise only invoked on a plot-type change, so without this, cscale
+        # can be left stale (e.g. still 'linear') after just changing the C
+        # field type while staying on the same plot type.
+        if ax == 'c' and hasattr(self.ui, 'style_dock'):
+            self.ui.style_dock.set_style_widgets()
+
         # update plot
         self.ui.schedule_update()
 

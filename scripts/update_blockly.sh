@@ -14,6 +14,9 @@
 # Author: D. Hasterok (derrick.hasterok@adelaide.edu.au)
 # -----------------------------------------------------------------------------
 
+# Always run from the repo root, regardless of the caller's cwd
+cd "$(dirname "$0")/.." || exit 1
+
 # Auto document JS files for sphinx
 npx jsdoc blockly/src -r -d docs/_build/jsdoc
 cp -r docs/_build/jsdoc docs/source/_static

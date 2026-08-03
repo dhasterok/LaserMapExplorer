@@ -212,6 +212,7 @@ class LameIO():
         for sample_id in ui.data.keys():
             if hasattr(ui, 'profile_dock'):
                 ui.profile_dock.profiling.save_profiles(project_dir, sample_id)
+                ui.profile_dock.profiling.project_dir = project_dir
             if hasattr(ui, 'mask_dock'):
                 ui.mask_dock.polygon_tab.polygon_manager.save_polygons(project_dir, sample_id)
 
@@ -272,6 +273,7 @@ class LameIO():
         ui.open_profile()
         ui.open_mask_dock()
         ui.profile_dock.profiling.add_samples()
+        ui.profile_dock.profiling.project_dir = project_dir
         ui.mask_dock.polygon_tab.polygon_manager.add_samples()
 
         # setting sample_id triggers the normal change_sample() cascade: it loads

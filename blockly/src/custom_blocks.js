@@ -3270,9 +3270,6 @@ Blockly.Blocks['profiling'] = profiling;
   ['select_outlier_method',       { category:'SAMPLES', role:'OPTIONS',tooltip:'Outlier handling method and bounds.' }],
   ['neg_handling_method',         { category:'SAMPLES', role:'OPTIONS',tooltip:'Negative value handling strategy.' }],
 
-  // Analysis
-  {},
-
   // Plot
   ['plot_map',                    { category:'PLOT', role:'ENTRY',     tooltip:'Render a 2D field map.' }],
   ['plot_correlation',            { category:'PLOT', role:'ENTRY',     tooltip:'Correlation analysis and plot.' }],

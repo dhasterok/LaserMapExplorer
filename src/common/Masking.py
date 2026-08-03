@@ -1196,9 +1196,8 @@ class ClusterTab(QWidget):
 
         self.spinBoxClusterGroup = QDoubleSpinBox()
 
-        self.toolButtonClusterColor = QToolButton()
+        self.toolButtonClusterColor = ColorButton(ui=self.ui, parent=self)
         self.toolButtonClusterColor.setMaximumSize(QSize(18, 18))
-        self.toolButtonClusterColor.setText("Color")
 
         self.actionClusterColorReset = CustomAction(
             text="",
@@ -1242,8 +1241,8 @@ class ClusterTab(QWidget):
 
         if not getattr(self, '_cluster_signals_connected', False):
             self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
-            self.toolButtonClusterColor.clicked.connect(self.cluster_color_callback)
-            self.actionClusterColorReset.triggered.connect(self.ui.style_data.set_default_cluster_colors)
+            self.toolButtonClusterColor.colorChanged.connect(self.cluster_color_callback)
+            self.actionClusterColorReset.triggered.connect(lambda: self.reset_cluster_colors())
             self.tableWidgetViewGroups.itemChanged.connect(self.cluster_label_changed)
             self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
             self._cluster_signals_connected = True
@@ -1267,42 +1266,48 @@ class ClusterTab(QWidget):
             self.actionClusterDelink.setEnabled(False)
             self.actionGroupMask.setEnabled(False)
 
-    def cluster_color_callback(self):
+    def cluster_color_callback(self, hexcolor=None):
         """Updates color of a cluster
 
-        Uses ``QColorDialog`` to select new cluster color and then updates plot on change of
-        backround ``self.toolButtonClusterColor`` color.  Also updates ``self.tableWidgetViewGroups``
-        color associated with selected cluster.  The selected cluster is determined by ``self.spinBoxClusterGroup.value()``
+        Called when ``self.toolButtonClusterColor`` (a ``ColorButton``, which opens its own
+        color picker) changes color. Updates ``app_data.cluster_dict`` and the color cell in
+        ``self.tableWidgetViewGroups`` for the cluster selected by ``self.spinBoxClusterGroup``.
         """
-        #print('cluster_color_callback')
         if self.tableWidgetViewGroups.rowCount() == 0:
             return
 
-        selected_cluster = int(self.spinBoxClusterGroup.value()-1)
+        selected_cluster = int(self.spinBoxClusterGroup.value() - 1)
 
-        # change color
-        self.ui.button_color_select(self.toolButtonClusterColor)
-        color = convert_color(self.toolButtonClusterColor.palette().button().color(), 'qcolor', 'hex')
-        color = color if color is not None else '#000000'
-        self.ui.cluster_dict[self.ui.cluster_dict['active method']][selected_cluster]['color'] = color
-        if self.tableWidgetViewGroups.item(selected_cluster,2).text() == color:
+        color = hexcolor if hexcolor else self.toolButtonClusterColor.color.name()
+
+        app_data = self.ui.app_data
+        method = app_data.cluster_method
+        app_data.cluster_dict[method][selected_cluster]['color'] = color
+
+        # Color is column 3 (['', 'Name', 'Link', 'Color']), not column 2 (Link).
+        item = self.tableWidgetViewGroups.item(selected_cluster, 3)
+        if item is not None and item.text() == color:
             return
+        self.tableWidgetViewGroups.setItem(selected_cluster, 3, QTableWidgetItem(color))
 
-        # update_table
-        self.tableWidgetViewGroups.setItem(selected_cluster,2,QTableWidgetItem(color))
-
-        # update plot
-        if self.ui.comboBoxColorByField.currentText() == 'cluster':
+        # update plot if currently coloring by cluster
+        if app_data.c_field_type.lower() == 'cluster':
             self.ui.schedule_update()
 
     def select_cluster_group_callback(self):
         """Set cluster color button background after change of selected cluster group
 
-        Sets ``MainWindow.toolButtonClusterColor`` background on change of ``MainWindow.spinBoxClusterGroup``
+        Sets ``self.toolButtonClusterColor``'s displayed color on change of
+        ``self.spinBoxClusterGroup``, without re-triggering ``cluster_color_callback``.
         """
         if self.tableWidgetViewGroups.rowCount() == 0:
             return
-        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.tableWidgetViewGroups.item(int(self.spinBoxClusterGroup.value()-1),2).text())
+        item = self.tableWidgetViewGroups.item(int(self.spinBoxClusterGroup.value() - 1), 3)
+        if item is None:
+            return
+        self.toolButtonClusterColor.blockSignals(True)
+        self.toolButtonClusterColor.color = item.text()
+        self.toolButtonClusterColor.blockSignals(False)
 
     def update_table_widget(self):
         
@@ -1356,6 +1361,11 @@ class ClusterTab(QWidget):
         self.tableWidgetViewGroups.blockSignals(False)
         self.spinBoxClusterGroup.blockSignals(False)
         self.updating_cluster_table_flag = False
+
+        # sync the color button to the now-selected cluster explicitly -- the
+        # spinbox's valueChanged signal won't fire on its own if the value
+        # happens to already match (e.g. it's still at its default of 1)
+        self.select_cluster_group_callback()
 
     def cluster_label_changed(self, item):
         # Initialize the flag
@@ -1422,7 +1432,34 @@ class ClusterTab(QWidget):
             # apply cluster mask and update plot
             self.ui.apply_cluster_mask()
 
-    
+    def reset_cluster_colors(self):
+        """Resets all cluster colors to the default colormap.
+
+        Updates ``app_data.cluster_dict``, the Color column in
+        ``self.tableWidgetViewGroups``, and the color button, then updates the
+        plot if currently coloring by cluster.
+        """
+        n = self.tableWidgetViewGroups.rowCount()
+        if n == 0:
+            return
+
+        hexcolor = self.ui.style_data.set_default_cluster_colors(n)
+
+        app_data = self.ui.app_data
+        method = app_data.cluster_method
+
+        self.tableWidgetViewGroups.blockSignals(True)
+        for i, color in enumerate(hexcolor):
+            app_data.cluster_dict[method][i]['color'] = color
+            self.tableWidgetViewGroups.setItem(i, 3, QTableWidgetItem(color))
+        self.tableWidgetViewGroups.blockSignals(False)
+
+        self.select_cluster_group_callback()
+
+        if app_data.c_field_type.lower() == 'cluster':
+            self.ui.schedule_update()
+
+
         # cluster styles
     # -------------------------------------
 

@@ -95,3 +95,6 @@ saved
 
 # Claude Code config
 CLAUDE.md
+
+# LaME files
+*.pkl

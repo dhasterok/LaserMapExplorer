@@ -5,11 +5,12 @@ from PyQt6.QtGui import (
     QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
 )
 from PyQt6.QtWidgets import (
-        QMessageBox, QInputDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
+        QMessageBox, QInputDialog, QFileDialog, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox,
         QToolButton, QComboBox, QSpinBox, QSizePolicy, QFormLayout, QListView, QToolBar,
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QAbstractItemView
     )
 from lame_core.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
+from lame_core.config import BASEDIR
 from src.app.FieldLogic import FieldLogicUI
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -69,6 +70,7 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
         # create new profile and set control points
         self.actionControlPoints = QAction()
         self.actionControlPoints.setIcon(QIcon(":resources/icons/icon-profile-64.svg"))
+        self.actionControlPoints.setShortcut("Ctrl+N")
         self.actionControlPoints.setToolTip("Create new profile and set control points")
         self.actionControlPoints.setCheckable(True)
         self.actionControlPoints.setChecked(False)
@@ -118,7 +120,7 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
         # export profile figure button
         self.actionExport = QAction()
         self.actionExport.setIcon(QIcon(":resources/icons/icon-save-file-64.svg"))
-        self.actionExport.setToolTip("Export profile image or data")
+        self.actionExport.setToolTip("Save profile to disk")
 
         toolbar.addAction(self.actionProfileToggle)
         toolbar.addSeparator()
@@ -344,6 +346,8 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
 
         self.profile_combobox.activated.connect(lambda: self.profiling.on_profile_selected(self.profile_combobox.currentText()))
         self.actionDeleteProfile.triggered.connect(lambda: self.profiling.delete_current_profile())
+        self.actionExport.triggered.connect(lambda: self.profiling.save_current_profile())
+        self.actionOpenProfile.triggered.connect(lambda: self.profiling.load_profiles_dialog())
 
         # Redraw the active profile's map overlay immediately if the user changes
         # the shared overlay color (Styling toolbox), rather than waiting for the
@@ -468,12 +472,12 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
                 self.actionEdit.setEnabled(False)
                 self.actionTogglePoint.setEnabled(False)
 
-        if self.tableWidgetControlPoints.rowCount() > 1:
-            self.actionExport.setEnabled(True)
-            self.actionDeleteProfile.setEnabled(True)
-        else:
-            self.actionExport.setEnabled(False)
-            self.actionDeleteProfile.setEnabled(False)
+        # Save/delete apply to the profile as a whole (metadata + whatever
+        # points it has so far), so they only depend on a profile being
+        # actively viewed -- not on how many control points it has yet.
+        has_profile = self.profiling.profile_name is not None
+        self.actionExport.setEnabled(has_profile)
+        self.actionDeleteProfile.setEnabled(has_profile)
 
 
     def update_profile_spinbox(self, *args, **kwargs):
@@ -555,6 +559,10 @@ class Profiling:
 
         self.profiles = {}  # {sample_id: {profile_name: Profile}}
         self.profile_name = None
+        # Directory profiles were last saved to/loaded from (set by save/load,
+        # including via LameIO's whole-project save/open) -- used to know
+        # whether/where a profile has a corresponding *.prfl file on disk.
+        self.project_dir = None
 
         # click-mode state
         self.active_mode = None  # 'create' | 'move' | 'add' | 'remove' | None
@@ -941,16 +949,44 @@ class Profiling:
         self.profile_dock.toggle_profile_actions()
 
     def delete_current_profile(self):
+        """Delete the currently-viewed profile, after confirmation.
+
+        Removes the profile's ``*.prfl`` file too, if it was ever saved to
+        disk (``self.project_dir`` is known and the file exists there);
+        otherwise the profile only ever existed in memory and is just cleared.
+        """
         sample_id = self.main_window.app_data.sample_id
-        if sample_id == '' or self.profile_name not in self.profiles.get(sample_id, {}):
+        profile_name = self.profile_name
+        if sample_id == '' or profile_name not in self.profiles.get(sample_id, {}):
             return
+
+        response = QMessageBox.question(
+            self.profile_dock,
+            'Delete Profile',
+            f"Delete profile '{profile_name}'? This cannot be undone.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel
+        )
+        if response != QMessageBox.StandardButton.Yes:
+            return
+
+        if self.project_dir is not None:
+            file_path = os.path.join(self.project_dir, sample_id, f'{profile_name}.prfl')
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except OSError as e:
+                    QMessageBox.warning(self.profile_dock, 'Error', f"Could not remove saved profile file: {e}")
+
+        # clear_profiles() resets self.profile_name -- read/delete from the
+        # dict using the name captured above, not self.profile_name.
         self.clear_profiles()
-        del self.profiles[sample_id][self.profile_name]
-        idx = self.profile_dock.profile_combobox.findText(self.profile_name)
+        del self.profiles[sample_id][profile_name]
+        idx = self.profile_dock.profile_combobox.findText(profile_name)
         if idx >= 0:
             self.profile_dock.profile_combobox.removeItem(idx)
-        self.profile_name = None
         self.profile_dock.profile_combobox.setCurrentIndex(0)
+        self.profile_dock.toggle_profile_actions()
 
     def clear_profiles(self):
         """Clear profile plots/table/listview for the active profile (data in
@@ -1308,6 +1344,46 @@ class Profiling:
                 self.profiles[sample_id][data['name']] = profile
         self.populate_combobox()
         print("All profiles loaded successfully.")
+
+    def save_current_profile(self):
+        """UI-facing save: writes all of the current sample's profiles to
+        ``self.project_dir`` (prompting for a directory the first time)."""
+        sample_id = self.main_window.app_data.sample_id
+        if sample_id == '' or self.profile_name is None:
+            return
+
+        if self.project_dir is None:
+            projects_dir = BASEDIR / "projects"
+            projects_dir.mkdir(parents=True, exist_ok=True)
+            selected = QFileDialog.getExistingDirectory(
+                self.profile_dock, "Save Profile To", str(projects_dir)
+            )
+            if not selected:
+                return
+            self.project_dir = selected
+
+        self.save_profiles(self.project_dir, sample_id)
+        self.main_window.io.status_manager.show_message(f"Profile '{self.profile_name}' saved.")
+
+    def load_profiles_dialog(self):
+        """UI-facing load: prompts for a project directory and loads profiles
+        for the current sample from it."""
+        sample_id = self.main_window.app_data.sample_id
+        if sample_id == '':
+            return
+
+        projects_dir = BASEDIR / "projects"
+        projects_dir.mkdir(parents=True, exist_ok=True)
+        selected = QFileDialog.getExistingDirectory(
+            self.profile_dock, "Load Profiles From", str(projects_dir)
+        )
+        if not selected:
+            return
+
+        self.project_dir = selected
+        self.add_samples()
+        self.load_profiles(self.project_dir, sample_id)
+        self.profile_dock.toggle_profile_actions()
 
     # -------------------------------------------------------------------------
     # Point selection / visibility (operates on artists created by plot_profiles)

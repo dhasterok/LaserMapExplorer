@@ -636,7 +636,9 @@ def plot_histogram(parent, data, app_data, style_data):
 
         # Get the cluster labels for the data
         cluster_color, cluster_label, _ = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        cluster_group = data.processed.loc[:,method]
+        # x['array']/etc. are already reduced to data.mask (see DataHandling.get_vector),
+        # so cluster_group must be masked the same way or np.isin(...) below will size-mismatch.
+        cluster_group = data.processed.loc[data.mask, method]
         clusters = app_data.cluster_dict[method]['selected_clusters']
 
         # fall back to all clusters when none are explicitly selected
@@ -1366,7 +1368,9 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
                 return
 
         cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        cluster_group = data.processed.loc[:,method]
+        # x['array']/etc. are already reduced to data.mask (see DataHandling.get_vector),
+        # so cluster_group must be masked the same way or np.isin(...) below will size-mismatch.
+        cluster_group = data.processed.loc[data.mask, method]
         selected_clusters = app_data.cluster_dict[method]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)
@@ -1507,7 +1511,9 @@ def ternary_scatter(canvas, data, app_data, style_data, x, y, z, c):
                 return
 
         cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        cluster_group = data.processed.loc[:,method]
+        # x['array']/etc. are already reduced to data.mask (see DataHandling.get_vector),
+        # so cluster_group must be masked the same way or np.isin(...) below will size-mismatch.
+        cluster_group = data.processed.loc[data.mask, method]
         selected_clusters = app_data.cluster_dict[method]['selected_clusters']
 
         ind = np.isin(cluster_group, selected_clusters)

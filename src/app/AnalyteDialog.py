@@ -56,6 +56,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         if sample_id is None or sample_id == '':
             return
 
+        self.sample_obj = data
         self.data = data.processed
 
         self.norm_dict = {}
@@ -283,8 +284,8 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         in `tableWidgetAnalytes` as a visual aid to help selection of potentially relevant ratios.
         """        
         selected_method = self.comboBoxCorrelation.currentText().lower()
-        # Compute the correlation matrix
-        self.correlation_matrix = self.data.corr(method=selected_method)
+        # Compute (or reuse the cached) correlation matrix
+        self.correlation_matrix = self.sample_obj.get_correlation_matrix(method=selected_method)
         for i, row_analyte in enumerate(self.analytes):
             for j, col_analyte in enumerate(self.analytes):
 

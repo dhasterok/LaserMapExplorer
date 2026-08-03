@@ -13,7 +13,6 @@ import src.app.SpotImporter as SpotImporter
 import src.app.MapImporter as MapImporter
 from lame_core.config import BASEDIR
 from src.app.config import get_top_parent
-import src.common.CustomMplCanvas as mplc
 from src.common.DataHandling import LaserSampleObj, XRFSampleObj
 from src.common.CustomMplCanvas import MplCanvas
 from src.common.Status import StatusMessageManager
@@ -166,156 +165,130 @@ class LameIO():
     def save_project(self):
         """Save a project session
 
-        Saves (mostly) everything for recalling later.
+        Saves the active sample/style/color-field state plus per-sample profiles
+        and polygons, so it can be restored later. Raw sample data is *not*
+        duplicated -- it's re-read from the original data directory on open,
+        the same way the app already reloads samples from disk on every
+        selection (see ``initialize_sample_object``).
         """
         ui = self.ui
         projects_dir = BASEDIR / "projects"
-        
+
         # Ensure the projects directory exists
         projects_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Open QFileDialog to enter a new project name
-        file_dialog = QFileDialog(parent, "Save Project", str(projects_dir))
+        file_dialog = QFileDialog(ui, "Save Project", str(projects_dir))
         file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
         file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
         file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
-        
-        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
-            selected_dir = Path(file_dialog.selectedFiles()[0])
-            
-            if selected_dir:
-                project_name = selected_dir.name
-                project_dir = projects_dir / project_name
-                
-                # Create the required directory structure and store raw data
-                if not project_dir.exists():
-                    for sample_id in ui.data.keys():
-                        sample_dir = project_dir / sample_id
-                        sample_dir.mkdir(parents=True, exist_ok=True)
-                        # store raw data
-                        ui.data[sample_id].raw.to_csv(sample_dir / 'lame.csv', index=False)
-                        # create rest of directories
-                        (sample_dir / 'figure_data').mkdir()
-                        (sample_dir / 'figures').mkdir()
-                        (sample_dir / 'tables').mkdir()
-                
-                # Saving data to the directory structure
-                data_dict = {
-                    'data': ui.data,
-                    'styles': ui.style_data,
-                    'plot_infos': ui.plot_tree.get_plot_info_from_tree(ui.treeModel),
-                    'sample_id': ui.sample_id,
-                    'sample_list': ui.app_data.sample_list
-                }
-                
-                # Save the main data dictionary as a pickle file
-                pickle_path = project_dir / f'{project_name}.pkl'
-                with open(pickle_path, 'wb') as file:
-                    pickle.dump(data_dict, file)
-                
-                for sample_id in ui.data.keys():
-                    ui.profiling.save_profiles(project_dir, sample_id)
-                    ui.polygon.save_polygons(project_dir, sample_id)
-                
-                self.status_manager.show_message("Analysis saved successfully")
+
+        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
+            return
+
+        selected_dir = Path(file_dialog.selectedFiles()[0])
+        if not selected_dir:
+            return
+
+        project_name = selected_dir.name
+        project_dir = projects_dir / project_name
+        project_dir.mkdir(parents=True, exist_ok=True)
+
+        session_dict = {
+            'selected_directory': str(ui.app_data.selected_directory),
+            'csv_files': ui.app_data.csv_files,
+            'sample_list': ui.app_data.sample_list,
+            'sample_id': ui.app_data.sample_id,
+            'style_dict': ui.style_data.style_dict,
+            'c_field_type': ui.app_data.c_field_type if ui.app_data.sample_id else None,
+            'c_field': ui.app_data.c_field if ui.app_data.sample_id else None,
+        }
+
+        # Save the main session dictionary as a pickle file
+        pickle_path = project_dir / f'{project_name}.pkl'
+        with open(pickle_path, 'wb') as file:
+            pickle.dump(session_dict, file)
+
+        for sample_id in ui.data.keys():
+            if hasattr(ui, 'profile_dock'):
+                ui.profile_dock.profiling.save_profiles(project_dir, sample_id)
+            if hasattr(ui, 'mask_dock'):
+                ui.mask_dock.polygon_tab.polygon_manager.save_polygons(project_dir, sample_id)
+
+        self.status_manager.show_message("Project saved successfully")
 
     def open_project(self):
         """Open a project session.
 
-        Restores a project session: data, analysis, and plots.
-        """        
+        Restores a project session: sample list/selection, style settings,
+        color-by field, profiles, and polygons. Sample data is re-read fresh
+        from the original data directory, not from the saved session.
+        """
         ui = self.ui
 
         if ui.data:
-            # Prompt to save current analysis
-            response = QMessageBox.warning(
-                parent,
-                "Save analysis",
-                "Do you want to save the current analysis?",
-                QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save
+            QMessageBox.information(
+                ui,
+                "Restart required",
+                "A session is already loaded. Please restart LaME before opening a different project."
             )
-
-            if response == QMessageBox.StandardButton.Save:
-                self.save_project()
-                ui.reset_analysis('full')
-            elif response == QMessageBox.StandardButton.Discard:
-                ui.reset_analysis('full')
-            else:  # Cancel
-                ui.comboBoxSampleId.setCurrentText(ui.sample_id)
-                return
+            return
 
         projects_dir = BASEDIR / "projects"
 
         # QFileDialog to select project folder
-        file_dialog = QFileDialog(parent, "Open Project", str(projects_dir))
+        file_dialog = QFileDialog(ui, "Open Project", str(projects_dir))
         file_dialog.setFileMode(QFileDialog.FileMode.Directory)
         file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
 
-        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
-            selected_dir = Path(file_dialog.selectedFiles()[0])
+        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
+            return
 
-            if selected_dir:
-                project_name = selected_dir.name
-                project_dir = projects_dir / project_name
+        selected_dir = Path(file_dialog.selectedFiles()[0])
+        if not selected_dir:
+            return
 
-                pickle_path = project_dir / f'{project_name}.pkl'
-                if pickle_path.exists():
-                    with open(pickle_path, 'rb') as file:
-                        data_dict = pickle.load(file)
-                    if data_dict:
-                        ui.data = data_dict['data']
-                        ui.style_data = data_dict['styles']
-                        ui.app_data.sample_list = data_dict['sample_ids']
-                        ui.sample_id = data_dict['sample_id']
+        project_name = selected_dir.name
+        project_dir = projects_dir / project_name
 
-                        ui.plot_tree.create_tree(ui.sample_id)
-                        
-                        # NOTE: Adjust this line according to actual data structure
-                        ui.plot_tree.update_tree(ui.data[ui.sample_id]['norm'], norm_update=False)
+        pickle_path = project_dir / f'{project_name}.pkl'
+        if not pickle_path.exists():
+            self.status_manager.show_message(f"No saved project found in {project_dir}")
+            return
 
-                        for plot_info in data_dict['plot_infos']:
-                            if plot_info:
-                                canvas = mplc.MplCanvas(fig=plot_info['figure'])
-                                plot_info['figure'] = canvas
-                                ui.plot_tree.add_tree_item(plot_info)
+        with open(pickle_path, 'rb') as file:
+            session_dict = pickle.load(file)
+        if not session_dict:
+            return
 
-                        ui.comboBoxSampleId.clear()
-                        ui.comboBoxSampleId.addItems(ui.data.keys())
-                        ui.comboBoxSampleId.setCurrentIndex(0)
-                        ui.sample_id = data_dict['sample_id']
+        ui.app_data.selected_directory = Path(session_dict['selected_directory'])
+        ui.app_data.csv_files = session_dict['csv_files']
+        ui.app_data.sample_list = session_dict['sample_list']
 
-                        ui.init_tabs()
+        if session_dict.get('style_dict'):
+            ui.style_data.style_dict.update(session_dict['style_dict'])
 
-                        ui.update_cluster_flag = True
-                        ui.update_pca_flag = True
-                        ui.plot_flag = False
+        # ensure the profile/mask docks exist before seeding per-sample state
+        ui.open_profile()
+        ui.open_mask_dock()
+        ui.profile_dock.profiling.add_samples()
+        ui.mask_dock.polygon_tab.polygon_manager.add_samples()
 
-                        ui.update_all_field_comboboxes()
-                        if hasattr(parent, "mask_dock"):
-                            ui.update_filter_values()
+        # setting sample_id triggers the normal change_sample() cascade: it loads
+        # the sample fresh from selected_directory and refreshes tabs, field
+        # comboboxes, the mask dock, and cluster/PCA flags.
+        ui.app_data.sample_id = session_dict['sample_id']
 
-                        ui.histogram_update_bin_width()
+        for sample_id in ui.data.keys():
+            ui.profile_dock.profiling.load_profiles(project_dir, sample_id)
+            ui.mask_dock.polygon_tab.polygon_manager.load_polygons(project_dir, sample_id)
 
-                        for sample_id in ui.data.keys():
-                            ui.profiling.add_profiles(project_dir, sample_id)
-                            ui.profiling.load_profiles(project_dir, sample_id)
+        if session_dict.get('c_field_type'):
+            ui.app_data.c_field_type = session_dict['c_field_type']
+        if session_dict.get('c_field'):
+            ui.app_data.c_field = session_dict['c_field']
 
-                            ui.polygon.add_samples()
-                            ui.polygon.load_polygons(project_dir, sample_id)
-
-                        ui.style_data.color_field_type = 'Analyte'
-                        ui.comboBoxColorByField.setCurrentText(ui.style_data.color_field_type)
-                        ui.color_by_field_callback()
-
-                        fields = ui.get_field_list('Analyte')
-                        ui.style_data.color_field = fields[0]
-                        ui.comboBoxColorField.setCurrentText(fields[0])
-                        ui.color_field_callback()
-
-                        ui.plot_flag = True
-                        ui.update_SV()
-
-                        self.status_manager.show_message("Project loaded successfully")
+        self.status_manager.show_message("Project loaded successfully")
 
     def import_files(self):
         """Opens an import dialog from ``MapImporter`` to open selected data directories."""

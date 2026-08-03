@@ -129,7 +129,7 @@ class PolygonManager:
     def add_samples(self):
         if self.main_window is None:
             return
-        for sample_id in self.main_window.sample_ids:
+        for sample_id in self.main_window.app_data.sample_list:
             if sample_id not in self.polygons:
                 self.polygons[sample_id] = {}
 
@@ -187,18 +187,27 @@ class PolygonManager:
     def load_polygons(self, project_dir, sample_id):
         directory = os.path.join(project_dir, sample_id)
         self.polygons.setdefault(sample_id, {})
+        if not os.path.isdir(directory):
+            # sample had no saved polygons -- nothing to load
+            return
         for file_name in os.listdir(directory):
             if file_name.endswith(".poly"):
                 file_path = os.path.join(directory, file_name)
                 with open(file_path, 'rb') as file:
                     polygon = pickle.load(file)
                     self.polygons[sample_id][polygon.p_id] = polygon
-                    # Draw on axes
-                    poly_patch = MplPolygon(polygon.verts, closed=True, edgecolor=polygon.color,  # type: ignore[arg-type]
-                                            fill=True, alpha=polygon.alpha)
-                    self.ax.add_patch(poly_patch)
-        self.canvas.draw_idle()
-        self.parent.update_table_widget()  # Update the table in the main window
+                    # Draw on axes, if a canvas is currently attached (e.g. the
+                    # polygon tool is active). If not, the polygon is still
+                    # loaded into self.polygons and will be drawn later by
+                    # plot_existing_polygon once a canvas is available.
+                    if hasattr(self, 'ax') and hasattr(self, 'canvas'):
+                        poly_patch = MplPolygon(polygon.verts, closed=True, edgecolor=polygon.color,  # type: ignore[arg-type]
+                                                fill=True, alpha=polygon.alpha)
+                        self.ax.add_patch(poly_patch)
+        if hasattr(self, 'canvas'):
+            self.canvas.draw_idle()
+        if self.parent is not None and hasattr(self.parent, 'update_table_widget'):
+            self.parent.update_table_widget()  # Update the table in the main window
         print("Polygons loaded successfully.")
 
     # --- Helpers (Matplotlib) ---

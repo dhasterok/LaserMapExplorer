@@ -237,6 +237,10 @@ class SampleObj(QObject):
         # Default ref_chem for base class - empty Series, subclasses can override
         self._ref_chem = pd.Series(dtype=float)
 
+        # cache of analyte correlation matrices, keyed by method ('pearson', 'spearman');
+        # cleared whenever prep_data() runs since that's the only place analyte values change
+        self._correlation_cache = {}
+
         self._default_lower_bound = 0.005
         self._default_upper_bound = 0.995
 
@@ -279,7 +283,7 @@ class SampleObj(QObject):
         self._default_data_types = [
             'Analyte',
             'Ratio',
-            'Computed',
+            'Calculated',
             'Special',
             'PCA score',
             'Cluster',
@@ -939,6 +943,29 @@ class SampleObj(QObject):
         self.add_columns('Ratio',ratio_name,ratio_array)
         self.processed.set_attribute(ratio_name, 'use', True)
 
+    def get_correlation_matrix(self, method='pearson'):
+        """Correlation matrix between analyte columns, cached per method.
+
+        Computing the correlation matrix (especially with ``'spearman'``, which ranks
+        every column) is expensive, so the result is cached and reused until ``prep_data``
+        next runs and invalidates the cache.
+
+        Parameters
+        ----------
+        method : str
+            Correlation method, ``'pearson'`` or ``'spearman'``. Defaults to ``'pearson'``.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Correlation matrix indexed and labeled by analyte name.
+        """
+        method = method.lower()
+        if method not in self._correlation_cache:
+            analyte_columns = self.processed.match_attribute('data_type', 'Analyte')
+            self._correlation_cache[method] = self.processed[analyte_columns].corr(method=method)
+        return self._correlation_cache[method]
+
     # ------------------------------------------
     # Dialogs
     # ------------------------------------------
@@ -1444,26 +1471,27 @@ class SampleObj(QObject):
         AssertionError
             processed data has not yet been initialized.  processed data should be created when the sample is initialized and prep_data is
             run for the first time.
-        """ 
-        attribute_df = None
+        """
+        # processed is about to change, so any cached correlation matrix is now stale
+        self._correlation_cache = {}
+
         analyte_columns = []
         ratio_columns = []
+        computed_ratios = {}
         if field == 'all':
+            # Capture ratios that were computed (e.g. via compute_ratio) and live only in
+            # self.processed, along with their attributes, before self.processed gets
+            # rebuilt from self.raw below. self.raw never receives computed ratio columns,
+            # so without this they would silently disappear from processed.
+            for col in self.processed.match_attribute('data_type', 'Ratio'):
+                if col not in self.raw.columns:
+                    computed_ratios[col] = dict(self.processed.column_attributes.get(col, {}))
+
             # Select columns where 'data_type' attribute is 'Analyte'
             analyte_columns = self.raw.match_attributes({'data_type': 'Analyte', 'use': True})
-            # analyte_columns = self.raw.match_attribute('data_type', 'Analyte')
-            # analyte_columns = [col for col in analyte_columns if self.raw.get_attribute(col, 'use') is True]
-            # analyte_columns = [col for col in self.raw.columns if (self.raw.get_attribute(col, 'data_type') == 'Analyte') 
-                # and (self.raw.get_attribute(col, 'use') is not None
-                # and self.raw.get_attribute(col, 'use')) ]
 
             # Select columns where 'data_type' attribute is 'Ratio'
             ratio_columns = self.raw.match_attributes({'data_type': 'Ratio', 'use': True})
-            # ratio_columns = self.raw.match_attribute('data_type', 'Ratio')
-            # ratio_columns = [col for col in ratio_columns if self.raw.get_attribute(col, 'use') is True]
-            # ratio_columns = [col for col in self.raw.columns if (self.raw.get_attribute(col, 'data_type') == 'Ratio') 
-            #     and (self.raw.get_attribute(col, 'use') is not None
-            #     and self.raw.get_attribute(col, 'use')) ]
 
             columns = analyte_columns + ratio_columns
 
@@ -1493,28 +1521,21 @@ class SampleObj(QObject):
         #         self.processed.loc[cluster_mask, col] = transformed_data
         #         print(f"{(col, idx)} after : {sum(self.processed[col] < 0)}, {sum(self.processed[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
 
-        # Compute ratios not included in raw_data
-        # ---------------------------------------
-        if (field == 'all') and (attribute_df is not None):
-            ratio_columns = self.raw.match_attributes({'data_type': 'Ratio', 'use': True})
-            ratios = attribute_df.columns[(ratio_columns == 'Ratio')]
+        # Recompute ratios not included in raw_data
+        # ------------------------------------------
+        if field == 'all' and computed_ratios:
+            for ratio_name, attrs in computed_ratios.items():
+                analyte_1, analyte_2 = ratio_name.split(' / ')
+                if analyte_1 not in self.processed.columns or analyte_2 not in self.processed.columns:
+                    continue
 
-            if ratios is None:
-                return
-
-            ratios_not_in_raw_data = [col for col in ratios if col not in ratio_columns]
-
-            for col in ratios_not_in_raw_data:
-                analyte_1, analyte_2 = ratios_not_in_raw_data[col].split(' / ').str
-                columns = columns + col
                 self.compute_ratio(analyte_1, analyte_2)
+                columns.append(ratio_name)
 
-            self.processed.set_attribute(ratios_not_in_raw_data, 'lower_bound', attribute_df.loc['lower_bound', ratios_not_in_raw_data].tolist())
-            self.processed.set_attribute(ratios_not_in_raw_data, 'upper_bound', attribute_df.loc['upper_bound', ratios_not_in_raw_data].tolist())
-            self.processed.set_attribute(ratios_not_in_raw_data, 'diff_upper_bound', attribute_df.loc['diff_upper_bound', ratios_not_in_raw_data].tolist())
-            self.processed.set_attribute(ratios_not_in_raw_data, 'diff_lower_bound', attribute_df.loc['diff_lower_bound', ratios_not_in_raw_data].tolist())
-            self.processed.set_attribute(ratios_not_in_raw_data, 'norm', attribute_df.loc['norm', ratios_not_in_raw_data].tolist())
-            self.processed.set_attribute(ratios_not_in_raw_data, 'auto_scale', attribute_df.loc['auto_scale', ratios_not_in_raw_data].tolist())
+                # restore the attributes (use, norm/scale, bounds, etc.) that were set
+                # before the reset, since compute_ratio/add_columns only fill in defaults
+                for attr_name, attr_value in attrs.items():
+                    self.processed.set_attribute(ratio_name, attr_name, attr_value)
 
 
         # Clip outliers / autoscale the data
@@ -1791,7 +1812,7 @@ class SampleObj(QObject):
             Name of field to plot. By default `None`.
         field_type : str, optional
             Type of field to plot. Types include 'Analyte', 'Ratio', 'PCA', 'Cluster', 'Cluster score',
-            'Special', 'Computed'. By default `'Analyte'`
+            'Special', 'Calculated'. By default `'Analyte'`
         norm : str
             Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
             data are returned with a linear scale.  By default `False`.
@@ -1867,7 +1888,7 @@ class SampleObj(QObject):
                     with np.errstate(divide='ignore', invalid='ignore'):
                         df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
 
-            case _:#'PCA score' | 'Cluster' | 'Cluster score' | 'Special' | 'Computed':
+            case _:#'PCA score' | 'Cluster' | 'Cluster score' | 'Special' | 'Calculated':
                 df['array'] = self.processed[field].values
             
         # ----begin debugging----
@@ -1928,7 +1949,7 @@ class SampleObj(QObject):
         ----------
         field_type : str
             Type of field to plot. Types include 'Analyte', 'Ratio', 'PCA', 'Cluster', 'Cluster score',
-            'Special', 'Computed'. By default `'Analyte'`
+            'Special', 'Calculated'. By default `'Analyte'`
         field : str
             Name of field to plot. By default `None`.
         norm : str, optional

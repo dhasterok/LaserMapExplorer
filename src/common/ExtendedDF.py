@@ -84,11 +84,24 @@ class AttributeDataFrame(pd.DataFrame):
     #print(df.get_attribute('Temperature', 'range'))         # Output: (20, 25)
     """    
     _metadata = ['column_attributes']
-    
+
     @property
     def _constructor(self):
         return AttributeDataFrame
-    
+
+    def __finalize__(self, other, method=None, **kwargs):
+        """Ensure ``column_attributes`` is deep-copied rather than shared by reference.
+
+        Pandas propagates ``_metadata`` attributes by reference during ``.copy()``,
+        ``copy.deepcopy()``, and other operations. Without this override, ``raw`` and
+        ``processed`` frames created from one another end up sharing the same
+        ``column_attributes`` dict, so mutating one silently mutates the other.
+        """
+        super().__finalize__(other, method=method, **kwargs)
+        if isinstance(other, AttributeDataFrame):
+            self.column_attributes = copy.deepcopy(other.column_attributes)
+        return self
+
     def __init__(self, data=None, *args, **kwargs):
         super().__init__()
 

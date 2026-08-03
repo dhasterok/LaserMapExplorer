@@ -1289,6 +1289,9 @@ class FieldLogicUI():
                 if 'Cluster score' in data_type_dict:
                     field_list.append('Cluster score')
 
+                if 'Calculated' in data_type_dict:
+                    field_list.append('Calculated')
+
         # add None to list?
         if addNone:
             field_list.insert(0, 'None')

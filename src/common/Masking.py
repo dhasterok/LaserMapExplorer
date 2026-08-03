@@ -490,7 +490,7 @@ class FilterTab(QWidget):
         self.action_select_all_filters.triggered.connect(self.filter_table.selectAll)
 
         # filter widget connections
-        self.button_load_preset.clicked.connect(self.read_filter_table)
+        self.button_load_preset.clicked.connect(lambda: self.read_filter_table())
         self.combo_field.currentTextChanged.connect(self.update_filter_values)
         self.edit_filter_min.editingFinished.connect(self.callback_edit_filter_min)
         self.spin_filter_min.valueChanged.connect(self.callback_spin_filter_min)

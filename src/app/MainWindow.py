@@ -737,26 +737,28 @@ class MainWindow(QMainWindow):
             case 'crop':
                 if hasattr(self, "profile_dock"):
                     self.profile_dock.actionControlPoints.setChecked(False)
+                    self.profile_dock.actionPointMove.setChecked(False)
                 if hasattr(self, "mask_dock"):
                     if hasattr(self.mask_dock, "polygon_tab"):
-                        self.actionPointMove.setChecked(False)
-                        self.actionPolyCreate.setChecked(False)
-                        self.actionPolyMovePoint.setChecked(False)
-                        self.actionPolyAddPoint.setChecked(False)
-                        self.actionPolyRemovePoint.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyCreate.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyMovePoint.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyAddPoint.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyRemovePoint.setChecked(False)
             case 'profiling':
                 self.lame_action.Crop.setChecked(False)
                 if hasattr(self, "mask_dock"):
                     if hasattr(self.mask_dock, "polygon_tab"):
-                        self.actionPolyCreate.setChecked(False)
-                        self.actionPolyMovePoint.setChecked(False)
-                        self.actionPolyAddPoint.setChecked(False)
-                        self.actionPolyRemovePoint.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyCreate.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyMovePoint.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyAddPoint.setChecked(False)
+                        self.mask_dock.polygon_tab.actionPolyRemovePoint.setChecked(False)
             case 'polygon':
                 self.lame_action.Crop.setChecked(False)
                 if hasattr(self, "profile_dock"):
                     self.profile_dock.actionControlPoints.setChecked(False)
-                    self.profile_dock.actionMovePoint.setChecked(False)
+                    self.profile_dock.actionPointMove.setChecked(False)
+                    self.profile_dock.actionPointAdd.setChecked(False)
+                    self.profile_dock.actionPointRemove.setChecked(False)
 
     def update_autoscale_widgets(self, field, field_type='Analyte'):
         """
@@ -770,7 +772,7 @@ class MainWindow(QMainWindow):
             Name of field to plot, Defaults to None
         analysis_type : str, optional
             Field type for plotting, options include: 'Analyte', 'Ratio', 'pca', 'cluster', 'cluster score',
-            'Special', 'Computed'. Some options require a field. Defaults to 'Analyte'
+            'Special', 'Calculated'. Some options require a field. Defaults to 'Analyte'
         """
         if field == '' or field_type == '':
             return
@@ -918,7 +920,7 @@ class MainWindow(QMainWindow):
                         # Handle profile/mask specific UI updates
                         if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                             self.profile_dock.profiling.clear_plot()
-                            self.profile_dock.profiling.plot_existing_profile(self.plot)
+                            self.profile_dock.profiling.plot_existing_profile(canvas)
                         elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.mask_dock.polygon_tab.polygon_manager.polygons):  
                             self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
                             self.mask_dock.polygon_tab.polygon_manager.plot_existing_polygon(canvas)
@@ -1190,12 +1192,13 @@ class MainWindow(QMainWindow):
         :see also:
             Profile
         """
-        if not hasattr(self, 'profile'):
+        if not hasattr(self, 'profile_dock'):
             self.profile_dock = ProfileDock(self)
 
             if self.profile_dock not in self.help_mapping:
                 self.help_mapping[self.profile_dock] = 'profiles'
 
+        self.profile_dock.sync_field_combobox_to_map()
         self.profile_dock.show()
 
     def open_regression(self, *args, **kwargs):
@@ -1432,7 +1435,7 @@ class MainWindow(QMainWindow):
                 value: scale used (linear/log/logit)
         """
         #update self.data['norm'] with selection
-        self.app_data.update_field_selection(fields=analyte_dict.keys(), norm=analyte_dict.values())
+        self.app_data.update_field_selection(fields=analyte_dict.keys(), norms=analyte_dict.values())
 
         self.plot_tree.update_tree(norm_update=True)
 

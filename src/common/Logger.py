@@ -201,11 +201,16 @@ def log_call(logger_key=None):
 
     """    
     def decorator(func):
-        @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            # skip logging if the caller is another wrapper
+            # skip logging if the caller is another wrapper (nested decorated call).
+            # Every call now passes through a signature-preserving shim first (see
+            # _make_signature_preserving_shim below), so the direct caller here is
+            # always that shim -- look one frame further to find the real caller.
             stack = inspect.stack()
-            if len(stack) > 1 and stack[1].function == 'wrapper':
+            caller_idx = 1
+            if len(stack) > 1 and stack[1].function == '__log_call_shim__':
+                caller_idx = 2
+            if len(stack) > caller_idx and stack[caller_idx].function == 'wrapper':
                 return func(*args, **kwargs)
 
             # Determine if 'self' exists (bound method)
@@ -221,7 +226,7 @@ def log_call(logger_key=None):
 
             # Build message
             func_name = func.__qualname__
-            caller = inspect.stack()[1].function
+            caller = stack[caller_idx].function if len(stack) > caller_idx else ""
             parts = [f"{prefix}: [{caller} → {func_name}]"]
 
             if LoggerConfig.get_show_args():
@@ -230,13 +235,65 @@ def log_call(logger_key=None):
                 parts.append("args=[" + ", ".join(arg_list + kwarg_list) + "]")
 
             if LoggerConfig.get_show_call_chain():
-                chain = " → ".join(f.function for f in reversed(inspect.stack()[1:4]))
+                # skip shim frames so the displayed chain shows real callers only
+                frames = [f for f in stack[caller_idx:caller_idx + 4] if f.function != '__log_call_shim__']
+                chain = " → ".join(f.function for f in reversed(frames))
                 parts.append(f"chain:/ {chain}")
 
             log(" | ".join(parts))
             return func(*args, **kwargs)
-        return wrapper
+        return _make_signature_preserving_shim(func, wrapper)
     return decorator
+
+
+def _make_signature_preserving_shim(func, impl):
+    """Build a wrapper that calls ``impl(*args, **kwargs)`` but exposes the exact
+    same call signature as ``func``.
+
+    Qt's signal/slot connection mechanism decides how much of a signal's payload
+    to hand to a slot by inspecting the callable's *raw* argument count -- it does
+    not use ``inspect.signature`` and does not follow ``functools.wraps``'s
+    ``__wrapped__`` chain. A generic ``(*args, **kwargs)`` wrapper therefore always
+    looks like "accepts anything", so Qt passes the signal's full payload straight
+    through -- which then blows up inside a slot that doesn't actually take those
+    extra arguments (e.g. connecting a checkable QAction's ``triggered(bool)``
+    directly to a no-argument method). Regenerating a real function with ``func``'s
+    exact parameter list restores Qt's normal arg-trimming behavior, without
+    requiring every call site to remember to wrap decorated slots in a lambda.
+    """
+    try:
+        sig = inspect.signature(func)
+    except (TypeError, ValueError):
+        # No inspectable signature (e.g. some builtins) -- fall back to a plain
+        # pass-through wrapper; direct-connect trimming won't work for these,
+        # but they're not the case this exists to fix.
+        return functools.wraps(func)(lambda *args, **kwargs: impl(*args, **kwargs))
+
+    def_parts = []
+    call_parts = []
+    namespace = {'__impl__': impl}
+    for i, p in enumerate(sig.parameters.values()):
+        default_name = f'__default_{i}__'
+        if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD):
+            def_parts.append(p.name if p.default is p.empty else f'{p.name}={default_name}')
+            call_parts.append(p.name)
+        elif p.kind is p.VAR_POSITIONAL:
+            def_parts.append(f'*{p.name}')
+            call_parts.append(f'*{p.name}')
+        elif p.kind is p.KEYWORD_ONLY:
+            def_parts.append(p.name if p.default is p.empty else f'{p.name}={default_name}')
+            call_parts.append(f'{p.name}={p.name}')
+        elif p.kind is p.VAR_KEYWORD:
+            def_parts.append(f'**{p.name}')
+            call_parts.append(f'**{p.name}')
+
+        if p.default is not p.empty:
+            namespace[default_name] = p.default
+
+    src = f"def __log_call_shim__({', '.join(def_parts)}):\n    return __impl__({', '.join(call_parts)})\n"
+    exec(src, namespace)
+    shim = namespace['__log_call_shim__']
+    return functools.wraps(func)(shim)
 
 def describe_arg(arg):
     """Return a string description of the argument."""

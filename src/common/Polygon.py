@@ -369,7 +369,7 @@ class PolygonManager():
         self.active_points = []   # points for a polygon under construction
 
     def add_samples(self):
-        for sample_id in self.main_window.sample_ids:
+        for sample_id in self.main_window.app_data.sample_list:
             if sample_id not in self.polygons:
                 self.polygons[sample_id] = {}
 

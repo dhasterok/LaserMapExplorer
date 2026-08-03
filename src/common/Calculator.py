@@ -67,16 +67,9 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         super().__init__(ui)
 
         self.ui = ui
-        if self.ui.app_data.sample_id == '':
-            self.data = None
-        else:
-            self.data = self.ui.data[self.ui.app_data.sample_id].processed
-
-        FieldLogicUI.__init__(self, self.data)
 
         # create an instance of CustomFieldCalculator for the heavy lifting
-        if self.ui.app_data.sample_id != '':
-            self.cfc = CustomFieldCalculator()
+        self.cfc = CustomFieldCalculator(parent=self)
 
         if filename is None:
             self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
@@ -92,6 +85,25 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         self.calc_load_dict()
         self.add_formula = True
         self.precalculate_custom_fields = False
+
+    @property
+    def app_data(self):
+        """Delegate to ui.app_data so FieldLogicUI methods work correctly."""
+        return self.ui.app_data
+
+    @property
+    def data(self):
+        """Access current sample data without caching a reference -- the dock is
+        created once at app startup (before any sample is loaded), so a snapshot
+        taken in __init__ would stay None/stale forever."""
+        if hasattr(self.ui, 'app_data') and self.ui.app_data.current_data:
+            return self.ui.app_data.current_data.processed
+        return None
+
+    @data.setter
+    def data(self, value):
+        """Ignored -- data is always derived from ui.app_data.current_data."""
+        pass
 
     def setupUI(self):
         # Create container
@@ -276,6 +288,11 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         self.setWindowTitle("LaME Calculator")
 
         self.ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)
+
+        # Qt's default floating-dock size doesn't account for the keypad grid and
+        # other content, so it opens far smaller than needed -- size it to fit.
+        hint = container.sizeHint()
+        self.resize(hint.width() + 40, hint.height() + 40)
 
     def connect_widgets(self):
         # connect actions to methods
@@ -478,16 +495,21 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
                 # check for valid field name
                 if partial_match(['_N',':'],new_field)[0]:
                     err = "new field name cannot have an '_N' or ':' in the name"
-                    (func, err, '')
+                    calc_error(self, func, err, '')
                     ok = False
-                    
+
             if not ok:
                 return
         else:
             new_field = self.comboBoxFormula.currentText()
 
+        # get the formula to compute
+        formula = self.calc_text_edit.toPlainText()
+
         # Use CustomFieldCalculator to compute new field
-        self.cfc.calculate_new_field(self.ui.app_data.data[self.ui.app_data.sample_id].processed, self.ui.ref_chem, new_field)
+        success = self.cfc.calculate_new_field(self.ui.app_data.data[self.ui.app_data.sample_id], self.ui.app_data.ref_chem, new_field, formula)
+        if not success:
+            return
 
         # update formula_combobox
         self.comboBoxFormula.addItem(new_field)
@@ -496,11 +518,10 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         # add new calculated field to self.treeView
         self.ui.plot_tree.add_calculated_leaf(new_field)
 
-        if self.ui.field_type_combobox.currentText == 'Calculated':
+        if self.comboBoxFieldType.currentText() == 'Calculated':
             self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField)
 
-        # get the formula and add to custom field dictionary
-        formula = self.calc_text_edit.toPlainText()
+        # add to custom field dictionary
         self.calc_dict.update({'field':new_field, 'expr':formula})
 
         # append calculator file
@@ -517,9 +538,10 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
 
 @auto_log_methods(logger_key='Calculator')
 class CustomFieldCalculator():
-    def __init__(self):
+    def __init__(self, parent=None):
         self.logger_key = 'Calculator'
-        
+        self.parent = parent
+
     def calc_parse(self, data, ref_chem, txt=None):
         """Prepares expression for calculating a custom field 
 
@@ -551,6 +573,7 @@ class CustomFieldCalculator():
         txt = txt.replace('ln(','log(')
         txt = txt.replace('grad(','gradient(')
 
+        cond = None
         if ('case' in txt) or ('otherwise' in txt):
             cases = txt.split(';')
             # if last case includes a ';', there will be an extra blank in cases list, remove it
@@ -571,7 +594,7 @@ class CustomFieldCalculator():
                         cond.append('any')  # or None, depending on how you use it
                         expr.append(expr_temp)
                     except Exception as e:
-                        calc_error(self, func, "Error parsing otherwise expression", e)
+                        calc_error(self.parent, func, "Error parsing otherwise expression", e)
                         return None, None
                     cases.pop(i)
                     break  # only handle one 'otherwise'
@@ -587,22 +610,18 @@ class CustomFieldCalculator():
                     expr.append(expr_temp)
                 except Exception as e:
                     err = "Each 'case' must be formatted as 'case condition, expression;'"
-                    calc_error(self, func, err, e)
+                    calc_error(self.parent, func, err, e)
                     return None, None
-
-                    return cond, expr
-                else:
-                    cond = None
 
         if txt.count('(') != txt.count(')'):
             err = 'mismatched parentheses in expr'
-            calc_error(self, func, err, '')
-            return None
+            calc_error(self.parent, func, err, '')
+            return None, None
 
         if txt.count('{') != txt.count('}'):
             err = 'mismatched braces in expr'
-            calc_error(self, func, err, '')
-            return None
+            calc_error(self.parent, func, err, '')
+            return None, None
         
         field_list = re.findall(r'\{.*?\}', txt)
         print(field_list)
@@ -614,7 +633,8 @@ class CustomFieldCalculator():
                 field_type, field = field_str.split('.')
             except Exception as e:
                 err = "field type and field must be separated by a '.'"
-                calc_error(self, func, err, e)
+                calc_error(self.parent, func, err, e)
+                return None, None
             if field[-2:] == '_N':
                 field = field[:-2]
                 if field_type in ['Analyte', 'Ratio']:
@@ -623,7 +643,7 @@ class CustomFieldCalculator():
             if field in list(var.keys()):
                 continue
 
-            df = data.get_map_data(field, field_type, ref_chem=ref_chem)
+            df = data.get_map_data(field, field_type)
             var.update({field: df['array']})
 
             txt = txt.replace(f"{{{field_str}}}", f"{field}")
@@ -636,7 +656,7 @@ class CustomFieldCalculator():
 
         return cond, expr
 
-    def calculate_new_field(self, data, ref_chem, new_field):
+    def calculate_new_field(self, data, ref_chem, new_field, txt):
         """Calculates a new field from ``MainWindow.calc_text_edit``
 
         When ``MainWindow.toolButtonCalculate`` is clicked, ...
@@ -647,24 +667,33 @@ class CustomFieldCalculator():
 
         Parameters
         ----------
-        data : AttributeDataFrame
-            Data used to compute custom field
+        data : SampleObj
+            Sample data used to compute custom field
+        ref_chem : pandas.Series
+            Reference chemistry used when normalization is required
         new_field : str
             Name of new field to be computed
+        txt : str
+            Formula entered in the calculator
+
+        Returns
+        -------
+        bool
+            ``True`` if the field was computed and added successfully, ``False`` otherwise.
         """
         func = 'calculate_new_field'
 
         # parse the expression
-        cond, expr = self.calc_parse(data, ref_chem)
-        if cond is None:    # no conditionals
+        cond, expr = self.calc_parse(data, ref_chem, txt=txt)
+        if expr is None:
+            err = "expr returned 'None' could not evaluate formula. Check syntax."
+            calc_error(self.parent, func, err, '')
+            return False
+        elif cond is None:    # no conditionals
             result = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
             if result is None:
-                return
-            data.add_columns('computed', new_field, result)
-        elif expr is None:
-            err = "expr returned 'None' could not evaluate formula. Check syntax."
-            calc_error(self, func, err, '')
-            return
+                return False
+            data.add_columns('Calculated', new_field, result)
         else:   # conditionals
             # start with empty dataFrame
             result = pd.DataFrame({new_field: np.nan*np.zeros_like(data.processed.iloc[:,0])})
@@ -676,9 +705,9 @@ class CustomFieldCalculator():
                         res = self.calc_evaluate_expr(expr[0], val_dict=expr[1])
                     except Exception as e:
                         err = "could not evaluate otherwise expression. Check syntax."
-                        calc_error(self, func, err, e)
-                        return
-                    data.add_columns('computed', new_field, result)
+                        calc_error(self.parent, func, err, e)
+                        return False
+                    result[new_field] = res
                     continue
 
                 # conditional yields boolean numpy.ndarray keep
@@ -686,42 +715,44 @@ class CustomFieldCalculator():
                     keep = self.calc_evaluate_expr(cond[i], val_dict=cond[i+1])
                 except Exception as e:
                     err = "could not evaluate conditional statement. Check syntax."
-                    calc_error(self, func, err, e)
-                    return
+                    calc_error(self.parent, func, err, e)
+                    return False
 
                 # check for missing or incorrectly type for conditional
                 if keep is None:
                     err = 'conditional did not return boolean result.'
-                    calc_error(self, func, err, '')
-                    return
+                    calc_error(self.parent, func, err, '')
+                    return False
                 elif not isinstance(keep, np.ndarray):
                     if not np.issubdtype(keep.dtype, np.bool_):
                         err = 'conditional did not return boolean result.\n  Did you swap the conditional and expression?'
-                        calc_error(self, func, err, '')
-                        return
+                        calc_error(self.parent, func, err, '')
+                        return False
 
                 # check for size error
                 if keep.shape[0] != result.shape[0]:
                     err = 'the conditional size does not match the size of expected computed array.'
-                    calc_error(self, func, err, '')
-                    return
+                    calc_error(self.parent, func, err, '')
+                    return False
 
                 # compute expression for indexes where keep==`True`
                 try:
                     res = self.calc_evaluate_expr(expr[i], val_dict=expr[i+1], keep=keep)
                 except Exception as e:
                     err = "could not evaluate expression. Check syntax."
-                    calc_error(self, func, err, e)
-                    return
+                    calc_error(self.parent, func, err, e)
+                    return False
 
                 if res is None:
                     err = 'the expression failed to return an array of values.'
-                    calc_error(self, func, err, '')
-                    return
+                    calc_error(self.parent, func, err, '')
+                    return False
 
                 result.loc[keep,new_field] = res
 
-            data.add_columns('computed', new_field, result)
+            data.add_columns('Calculated', new_field, result[new_field].values)
+
+        return True
 
 
     def calc_evaluate_expr(self, expr, val_dict=None, keep=None):
@@ -749,12 +780,12 @@ class CustomFieldCalculator():
                 result = ne.evaluate(expr)
             else:
                 result = ne.evaluate(expr, local_dict=val_dict)
-            self.message_label.setText("Success")
+            self.parent.message_label.setText("Success")
             if keep is None or result.ndim == 0:
                 return result
             else:
                 return result[keep]
         except Exception as e:
             err = 'unable to evaluate expression.'
-            calc_error(self, func, err, e)
+            calc_error(self.parent, func, err, e)
             return None

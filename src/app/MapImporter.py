@@ -2,6 +2,7 @@ import os, re, json, darkdetect
 from collections import defaultdict
 import pandas as pd
 import numpy as np
+from PIL import Image
 import matplotlib as mpl
 from matplotlib.colors import LogNorm
 from PyQt6.QtWidgets import (
@@ -390,7 +391,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         
         # add new standard to list
         self.standards_dict[data_type].append(standard_name)
-        self.standard_list = self.standards_dict[data_type]
+        # standards_list.csv pads every row to the widest data type's column count
+        # with empty strings (e.g. XRF's row has none yet, just trailing commas) --
+        # drop those here so an empty '' entry doesn't match every filename as a
+        # substring in the "is this a standard file" checks below.
+        self.standard_list = [s for s in self.standards_dict[data_type] if s]
 
         # save updated standards dictionary
         lameio.export_dict_to_csv(self.standards_dict,os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
@@ -422,24 +427,25 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         match data_type:
             case 'LA-ICP-MS':
                 methods = ['quadrupole','TOF','SF']
+            case 'XRF':
+                # 'image' reuses the same matrix-file import as LA-ICP-MS (a folder
+                # of per-element image files); 'spectra' isn't implemented yet.
+                methods = ['image','spectra']
             case 'MLA':
                 methods = ['']
-                pass
-            case 'XRF':
-                methods = ['']
-                pass
             case 'SEM':
                 methods = ['']
-                pass
             case 'CL':
                 methods = ['']
-                pass
             case 'petrography':
                 methods = ['']
-                pass
 
         # used to populate table
-        self.standard_list = self.standards_dict[data_type]
+        # standards_list.csv pads every row to the widest data type's column count
+        # with empty strings (e.g. XRF's row has none yet, just trailing commas) --
+        # drop those here so an empty '' entry doesn't match every filename as a
+        # substring in the "is this a standard file" checks below.
+        self.standard_list = [s for s in self.standards_dict[data_type] if s]
 
         self.comboBoxMethod.clear()
         self.comboBoxMethod.addItems(methods)
@@ -577,14 +583,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         match data_type:
             case 'LA-ICP-MS':
                 self.populate_la_icp_ms_table()
-            case 'MLA':
-                pass
             case 'XRF':
-                pass
-            case 'petrography':
-                pass
-            case 'SEM':
-                pass
+                # 'image' is a folder of per-element matrix files -- same table
+                # layout as LA-ICP-MS matrix data. 'spectra' isn't implemented yet,
+                # but still needs a populated, well-formed table (checkboxes etc.)
+                # so the rest of this dialog doesn't break on missing cell widgets,
+                # so it reuses the same layout for now regardless of method.
+                self.populate_la_icp_ms_table()
+            case 'MLA' | 'petrography' | 'SEM':
+                # not implemented yet -- see 'XRF' comment above for why this
+                # still populates the full table layout rather than leaving it empty
+                self.populate_la_icp_ms_table()
 
         # resize the table
         header = self.tableWidgetMetadata.horizontalHeader()
@@ -596,7 +605,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             
         self.table_update = True
         for i in range(len(self.sample_ids)):
-            if self.tableWidgetMetadata.cellWidget(i,0).isChecked():
+            checkbox = self.tableWidgetMetadata.cellWidget(i,0)
+            if checkbox is not None and checkbox.isChecked():
                 self.preview_index = i
                 break
             self.preview_index = None
@@ -826,7 +836,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         row_index : int
             Row into ``self.metadata['directory_data']`` for this sample.
         method : str
-            ``'quadrupole'``, ``'TOF'``, or ``'SF'``.
+            ``'quadrupole'``, ``'TOF'``, or ``'SF'`` (LA-ICP-MS), or ``'image'`` (XRF).
         dx, dy : float
             Final (post scan-axis-swap) per-pixel spacing, µm.
         n_files : int
@@ -1019,7 +1029,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         delimiters = r' |-|_|,|\.'
         units = ['CPS', 'cps', 'PPM', 'ppm', 'PPB', 'ppb']
-        valid_extensions = ['csv', 'xlsx', 'xls']
+        # png/tif/tiff/bmp/jpg cover XRF core-scanner image exports (one
+        # false-colour or grayscale raster per element), matrix data same as
+        # csv/xlsx just not yet numeric -- see read_matrix_folder for the
+        # actual per-format read logic.
+        image_extensions = ['png', 'tif', 'tiff', 'bmp', 'jpg', 'jpeg']
+        valid_extensions = ['csv', 'xlsx', 'xls'] + image_extensions
 
         results = []
 
@@ -1051,10 +1066,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     unit = u
                     filename = filename.replace(u, '')
 
-            # Check if matrix file type
+            # Check if matrix file type -- image formats (one raster per element,
+            # no per-line text data) are always matrix data, whether or not the
+            # filename spells out "matrix" the way LA-ICP-MS exports do
             if 'matrix' in filename:
                 filetype = 'matrix'
                 filename = filename.replace('matrix', '')
+            elif extension in image_extensions:
+                filetype = 'matrix'
 
             # Strip a "total" qualifier (e.g. "PbTotal") so the remaining text is just
             # the element symbol; `filename` is already lowercased (via `file` above),
@@ -1218,6 +1237,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.ok = False
 
         data_type = self.comboBoxDataType.currentText()
+        method = self.comboBoxMethod.currentText()
+
+        # everything except LA-ICP-MS and XRF 'image' is not implemented yet --
+        # bail out before touching the table (get_metadata() below assumes a
+        # fully-populated, importable table) with a clear message instead of
+        # either silently doing nothing or crashing.
+        if data_type != 'LA-ICP-MS' and not (data_type == 'XRF' and method == 'image'):
+            label = f"{data_type} ({method})" if method else data_type
+            QMessageBox.information(self, 'Not implemented', f"Import for {label} is not yet implemented.")
+            return
+
         #self.metadata['directory_data'] = self.qtablewidget_to_dataframe(self.tableWidgetMetadata)
         self.metadata['directory_data'] = self.get_metadata()
 
@@ -1230,25 +1260,21 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         match data_type:
             case 'LA-ICP-MS':
-                method = self.comboBoxMethod.currentText()
                 match method:
                     case 'quadrupole':
                         self.import_la_icp_ms_data(save_path)
                     case 'TOF':
-                        # for now, require iolite or xmaptools output.  In future, allow for 
+                        # for now, require iolite or xmaptools output.  In future, allow for
                         # TOF raw format.
                         self.import_la_icp_ms_data(save_path)
                         #df = pd.read_hdf(file_path, key='dataset_1')
                     case 'SF':
                         self.import_la_icp_ms_data(save_path)
-            case 'MLA':
-                pass
             case 'XRF':
-                pass
-            case 'petrography':
-                pass
-            case 'SEM':
-                pass
+                # method == 'image' guaranteed by the guard above. XRF image data is
+                # a folder of per-element matrix files -- same layout as LA-ICP-MS
+                # matrix data -- so the same importer applies unchanged.
+                self.import_la_icp_ms_data(save_path)
 
         if self.ok:
             # Reimporting a sample that's already loaded overwrites its
@@ -1270,7 +1296,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 self.parent.change_sample()
 
     def import_la_icp_ms_data(self, save_path):
-        """Reads LA-ICP-MS data into a DataFrame
+        """Reads LA-ICP-MS (or XRF 'image') data into a DataFrame
+
+        Also used for XRF's 'image' method: XRF image data is a folder of
+        per-element matrix files, the same layout as LA-ICP-MS matrix data, so
+        this importer applies unchanged (``method`` just reads as ``'image'``
+        instead of ``'quadrupole'``/``'TOF'``/``'SF'`` from the combobox).
 
         Parameters
         ----------
@@ -1360,7 +1391,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             try:
                 file_name = os.path.join(save_path, sample_id+'.lmdf.json')
                 sample_meta = {
-                    'data_type': 'LA-ICP-MS',
+                    'data_type': self.comboBoxDataType.currentText(),
                     'method': method,
                     'metadata': self.build_sample_metadata(i, method, dx, dy, n_files),
                     'analytes': self.metadata[sample_id].to_dict(orient='records'),
@@ -1540,13 +1571,20 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         # if test:
         #     analyte = f"{test.group(2)}{test.group(1)}"
         
-        # drop rows and columns with all nans 
+        # drop rows and columns with all nans
         if file_path.endswith('.csv'):
             df = pd.read_csv(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
         elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
             df = pd.read_excel(file_path, header=None).dropna(how='all', axis=0).dropna(how='all', axis=1)
+        elif file_path.lower().endswith(('.png', '.tif', '.tiff', '.bmp', '.jpg', '.jpeg')):
+            # XRF core-scanner image export: one raster per element, pixel
+            # brightness as a *relative* intensity proxy only (not calibrated to
+            # real concentration units) -- grayscale-average the image, then
+            # rescale 0-255 -> 0-100 to match this app's existing value range.
+            gray = np.array(Image.open(file_path).convert('L'), dtype=float)
+            df = pd.DataFrame(gray / 255 * 100)
         else:
-            QMessageBox.warning(self,'Error','Could not load file, must be a *.csv, *.xls, or *.xlsx file type.')
+            QMessageBox.warning(self,'Error','Could not load file, must be a *.csv, *.xls, *.xlsx, or common image (*.png, *.tif, *.bmp, *.jpg) file type.')
        
         #print(df.shape)
         # produce X and Y values

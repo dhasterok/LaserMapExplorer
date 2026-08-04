@@ -299,7 +299,11 @@ class LameBlockly(QObject):
 
         result = self.analyte_dialog.exec()  # Store the result here
         if result == QDialog.DialogCode.Accepted:
-            self.app_data.update_field_selection(fields= self.analyte_dialog.norm_dict.keys(), norms=self.analyte_dialog.norm_dict.values())
+            fields = self.analyte_dialog.norm_dict.keys()
+            use_normalized = [self.analyte_dialog.use_normalized_dict.get(field, False) for field in fields]
+            self.app_data.update_field_selection(
+                fields=fields, norms=self.analyte_dialog.norm_dict.values(), use_normalized=use_normalized
+            )
 
         if result == QDialog.DialogCode.Rejected:
             pass

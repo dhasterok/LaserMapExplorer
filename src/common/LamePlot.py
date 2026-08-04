@@ -167,7 +167,11 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     map_df = data.get_map_data(field, field_type)
 
     array_size = data.array_size
-    aspect_ratio = data.aspect_ratio
+    # style_data.aspect_ratio is None until first synced (see
+    # StylingUI.set_style_widgets) or once a user has overridden it via the
+    # Axes page; data.aspect_ratio (the map's true pixel aspect ratio) is
+    # only a fallback for callers that bypass that sync (e.g. Blockly).
+    aspect_ratio = style_data.aspect_ratio if style_data.aspect_ratio is not None else data.aspect_ratio
 
     # store map_df to save_data if data needs to be exported
     canvas.data = map_df.copy()
@@ -1947,7 +1951,8 @@ def plot_ternary_map(parent, data, app_data, style_data):
     map_data = np.zeros((M, N, 3), dtype=np.uint8)
     map_data[:len(cval), :, :] = cval.reshape(M, N, 3, order=data.order)
 
-    canvas.axes.imshow(map_data, aspect=data.aspect_ratio)
+    aspect_ratio = style_data.aspect_ratio if style_data.aspect_ratio is not None else data.aspect_ratio
+    canvas.axes.imshow(map_data, aspect=aspect_ratio)
     canvas.data = pd.DataFrame(map_data.reshape(M*N,3), columns = ['x','y','z'])
 
     # add scalebar
@@ -2034,16 +2039,19 @@ def plot_ndim(parent, data, app_data, style_data):
     if not app_data.ndim_list:
         return None, None
 
-    df_filtered, _  = data.get_processed_data()
-
-    # match self.comboBoxNorm.currentText():
-    #     case 'log':
-    #         df_filtered.loc[:,:] = 10**df_filtered.values
-    #     case 'mixed':
-    #         pass
-    #     case 'linear':
-    #         # do nothing
-    #         pass
+    # Deliberately not data.get_processed_data(): that pulls each field's own
+    # display-scale setting ('norm', e.g. 'log' for a field the user set to log
+    # scale on the Field Map view), so a sample with mixed per-field scales would
+    # come back with some elements already log10-transformed and others not.
+    # TEC/radar need physically consistent raw concentrations across every
+    # element -- plot_spider_norm applies its own log10 transform uniformly as
+    # part of the reference normalization -- so fetch every ndim_list field at a
+    # fixed, explicit linear scale here instead.
+    df_filtered = pd.DataFrame(
+        {field: data.get_map_data(field, field_type='Analyte', norm='linear')['array'].values
+         for field in app_data.ndim_list},
+        index=data.processed.index,
+    )
     df_filtered = df_filtered[data.mask]
 
     ref_i = app_data.ref_index
@@ -2261,7 +2269,8 @@ def plot_score_map(parent,data, app_data, style_data):
 
     reshaped_array = np.reshape(data.processed[field].values, data.array_size, order=data.order)
 
-    cax = canvas.axes.imshow(reshaped_array, cmap=style_data.cmap, aspect=data.aspect_ratio, interpolation='none')
+    aspect_ratio = style_data.aspect_ratio if style_data.aspect_ratio is not None else data.aspect_ratio
+    cax = canvas.axes.imshow(reshaped_array, cmap=style_data.cmap, aspect=aspect_ratio, interpolation='none')
     canvas.array = reshaped_array
 
         # Add a colorbar
@@ -2857,7 +2866,8 @@ def plot_cluster_map(parent, data, app_data, style_data):
 
     norm = style_data.color_norm(n_clusters)
 
-    cax = canvas.axes.imshow(reshaped_array, cmap=cmap, norm=norm, aspect=data.aspect_ratio)
+    aspect_ratio = style_data.aspect_ratio if style_data.aspect_ratio is not None else data.aspect_ratio
+    cax = canvas.axes.imshow(reshaped_array, cmap=cmap, norm=norm, aspect=aspect_ratio)
     #cax.cmap.set_under(style['Scale']['OverlayColor'])
 
     add_colorbar(style_data, canvas, cax, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
@@ -2893,8 +2903,8 @@ def update_figure_font(canvas, font_name):
     try:
         for text_obj in canvas.fig.findobj(match=plt.Text):
             text_obj.set_fontname(font_name)
-    except:
-        print('Unable to update figure font.')
+    except Exception as e:
+        print(f'Unable to update figure font: {e}')
 
 # def plot_colormap_annulus(cmap_name, r_inner=0.5, r_outer=1.0, n_points=512):
 #     """

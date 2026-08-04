@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt6.QtCore import ( pyqtSignal)
 from PyQt6.QtWidgets import (
     QMessageBox, QDialog, QTableWidgetItem, QLabel, QComboBox,
-    QHeaderView, QFileDialog,
+    QHeaderView, QFileDialog, QCheckBox,
 )
 from PyQt6.QtGui import ( QImage, QColor, QFont, QPixmap, QPainter, QBrush )
 from src.ui.AnalyteSelectionDialog import Ui_Dialog
@@ -60,11 +60,13 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.data = data.processed
 
         self.norm_dict = {}
+        self.use_normalized_dict = {}
 
         self.analytes = self.data.match_attribute('data_type','Analyte')
         self.ratio = self.data.match_attribute('data_type','Ratio')
         for analyte in self.analytes+self.ratio:
             self.norm_dict[analyte] = self.data.get_attribute(analyte,'norm')
+            self.use_normalized_dict[analyte] = bool(self.data.get_attribute(analyte,'use_normalized'))
 
         # Initialize filename and unsaved changes flag
         self.base_title ='LaME: Select Analytes and Ratios'
@@ -75,7 +77,15 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         # setup scale (norm) combobox
         self.comboBoxScale.clear()
 
-        self.scale_methods = data.scale_options()
+        # per-row scaling combo boxes use this list -- no 'mixed', since that's
+        # only a valid state for the bulk comboBoxScale below, never a single
+        # field's own norm. This is also the single source of truth for the
+        # valid norm strings, so a row's stored 'norm' attribute always matches
+        # what DataHandling.py's transform code checks for (e.g. 'inv_logit',
+        # not 'logit').
+        self.row_scale_options = data.scale_options()
+
+        self.scale_methods = list(self.row_scale_options)
         self.scale_methods.append('mixed')
 
         for scale in self.scale_methods:
@@ -94,8 +104,8 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
 
         # setup selected analyte table
-        self.tableWidgetSelected.setColumnCount(2)
-        self.tableWidgetSelected.setHorizontalHeaderLabels(['Field', 'Scaling'])
+        self.tableWidgetSelected.setColumnCount(3)
+        self.tableWidgetSelected.setHorizontalHeaderLabels(['Field', 'Scaling', 'Normalized'])
 
 
         # setup analyte table
@@ -137,7 +147,7 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.tableWidgetAnalytes.setStyleSheet("QTableWidget::item:selected {background-color: yellow;}")
         if len(self.norm_dict.keys()) > 0:
             for analyte,norm in self.norm_dict.items():
-                self.populate_analyte_list(analyte,norm)
+                self.populate_analyte_list(analyte, norm, self.use_normalized_dict.get(analyte, False))
         else:
             # Select diagonal pairs by default
             for i in range(len(self.analytes)):
@@ -422,8 +432,15 @@ class AnalyteDialog(QDialog, Ui_Dialog):
 
         # Add dropdown to the second column
         combo = QComboBox()
-        combo.addItems(['linear', 'log'])
+        combo.addItems(self.row_scale_options)
+        combo.currentIndexChanged.connect(self.update_scale)
         self.tableWidgetSelected.setCellWidget(newRow, 1, combo)
+
+        # Add "use normalized" checkbox to the third column
+        normalized_checkbox = QCheckBox()
+        normalized_checkbox.stateChanged.connect(self.update_list)
+        self.tableWidgetSelected.setCellWidget(newRow, 2, normalized_checkbox)
+
         self.update_list()
 
         # Mark as unsaved changes
@@ -486,7 +503,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
                     analyte_pair = self.tableWidgetSelected.item(i, 0).text()
                     combo = self.tableWidgetSelected.cellWidget(i, 1)
                     selection = combo.currentText()
-                    f.write(f"{analyte_pair},{selection}\n")
+                    checkbox = self.tableWidgetSelected.cellWidget(i, 2)
+                    use_normalized = isinstance(checkbox, QCheckBox) and checkbox.isChecked()
+                    f.write(f"{analyte_pair},{selection},{use_normalized}\n")
 
             self.filename = file_path.name
             self.unsaved_changes = False
@@ -505,8 +524,12 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.clear_selections()
             with file_path.open('r') as f:
                 for line in f.readlines():
-                    field, norm = line.replace('\n','').split(',')
-                    self.populate_analyte_list(field, norm)
+                    # older saved lists have 2 columns (no 'use_normalized');
+                    # default that column to False when reading one of those.
+                    parts = line.replace('\n','').split(',')
+                    field, norm = parts[0], parts[1]
+                    use_normalized = parts[2] == 'True' if len(parts) > 2 else False
+                    self.populate_analyte_list(field, norm, use_normalized)
             self.filename = file_path.name
             self.unsaved_changes = False
             self.update_window_title()
@@ -535,8 +558,9 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         self.comboBoxCorrelation.setCurrentIndex(0)
 
     def update_list(self):
-        """Update the list of selected analytes""" 
+        """Update the list of selected analytes"""
         self.norm_dict={}
+        self.use_normalized_dict = {}
         for i in range(self.tableWidgetSelected.rowCount()):
             analyte_pair = self.tableWidgetSelected.item(i, 0).text()
             comboBox = self.tableWidgetSelected.cellWidget(i, 1)
@@ -547,7 +571,12 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             # update norm in data
             self.data.set_attribute(analyte_pair,'norm',comboBox.currentText())
 
-    def populate_analyte_list(self, analyte_pair, norm='linear'):
+            checkbox = self.tableWidgetSelected.cellWidget(i, 2)
+            use_normalized = isinstance(checkbox, QCheckBox) and checkbox.isChecked()
+            self.use_normalized_dict[analyte_pair] = use_normalized
+            self.data.set_attribute(analyte_pair, 'use_normalized', use_normalized)
+
+    def populate_analyte_list(self, analyte_pair, norm='linear', use_normalized=False):
         """Populates the list of selected analytes
 
         Parameters
@@ -555,8 +584,11 @@ class AnalyteDialog(QDialog, Ui_Dialog):
         analyte_pair : str
             Analyte or ratio, ratios are entered as analyte1 / analyte2.
         norm : str
-            Normization method for vector, ``linear``, ``log``, ``logit``, and ``symlog``, Defaults to ``linear``
-        """        
+            Normization method for vector, ``linear``, ``log``, ``inv_logit``, and ``symlog``, Defaults to ``linear``
+        use_normalized : bool
+            Whether the reference-chemistry-normalized variant should also be
+            included in analysis, Defaults to ``False``
+        """
         if '/' in analyte_pair:
             row_header, col_header = analyte_pair.split(' / ')
         else:
@@ -577,10 +609,15 @@ class AnalyteDialog(QDialog, Ui_Dialog):
             self.tableWidgetSelected.insertRow(new_row)
             self.tableWidgetSelected.setItem(new_row, 0, QTableWidgetItem(analyte_pair))
             combo = QComboBox()
-            combo.addItems(['linear', 'log', 'logit', 'symlog'])
-            combo.setCurrentText(norm)
+            combo.addItems(self.row_scale_options)
+            combo.setCurrentText(norm if norm in self.row_scale_options else 'linear')
             self.tableWidgetSelected.setCellWidget(new_row, 1, combo)
             combo.currentIndexChanged.connect(self.update_scale)
+
+            normalized_checkbox = QCheckBox()
+            normalized_checkbox.setChecked(bool(use_normalized))
+            normalized_checkbox.stateChanged.connect(self.update_list)
+            self.tableWidgetSelected.setCellWidget(new_row, 2, normalized_checkbox)
 
     def event_filter(self, obj, event):
         """Highlights row and column header of tableWidgetAnalytes as mouse moves over cells.

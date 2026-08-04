@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QIntValidator, QDoubleValidator, QPixmap, QFont, QIcon, )
 from lame_core.CustomWidgets import ( CustomPage, CustomLineEdit, CustomSlider, CustomToolButton )
 from lame_core.UITheme import default_font
+import math
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
@@ -36,8 +37,24 @@ class Clustering():
             return
 
         df_filtered, isotopes = data.get_processed_data()
-        filtered_array = df_filtered.values
-        array = filtered_array[data.mask]
+
+        if app_data.dim_red_precondition:
+            # Cluster on the first N PCA score columns instead of the raw
+            # analyte/ratio matrix. Sort numerically ('PC1', 'PC2', ..., 'PC10')
+            # since a lexicographic sort would put 'PC10' before 'PC2'.
+            pca_cols = sorted(
+                data.processed.match_attribute('data_type', 'PCA score'),
+                key=lambda c: int(c[2:])
+            )
+            if pca_cols:
+                n_basis = max(1, min(app_data.num_basis_for_precondition, len(pca_cols)))
+                array = data.processed[pca_cols[:n_basis]].values[data.mask]
+            else:
+                # Precondition requested but PCA hasn't been run yet -- fall
+                # back to the raw matrix rather than clustering on nothing.
+                array = df_filtered.values[data.mask]
+        else:
+            array = df_filtered.values[data.mask]
 
 
         seed = app_data.cluster_seed
@@ -371,7 +388,9 @@ class ClusterPage(CustomPage, Clustering):
 
         # if PCA is not used for clustering, disable the PCA widgets
         if self.checkBoxWithPCA.isChecked() and self.checkBoxWithPCA.isEnabled():
-            self.spinBoxPCANumBasis.setMaximum(self.dock.ui.app_data.current_data.processed.get_attribute('PCA score').shape[1])
+            n_components = len(self.dock.ui.app_data.current_data.processed.match_attribute('data_type', 'PCA score'))
+            if n_components > 0:
+                self.spinBoxPCANumBasis.setMaximum(n_components)
             self.spinBoxPCANumBasis.setEnabled(True)
             #self.labelPCANumBasis.setEnabled(True)
         else:
@@ -522,6 +541,11 @@ class ClusterPage(CustomPage, Clustering):
         else:
             self.checkBoxWithPCA.setChecked(new_value)
 
+        # refresh spinBoxPCANumBasis's enabled/max state immediately, rather
+        # than waiting for some other trigger (e.g. changing cluster method)
+        # to next call toggle_cluster_widgets()
+        self.toggle_cluster_widgets()
+
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.dock.ui.schedule_update()
 
@@ -538,6 +562,13 @@ class ClusterPage(CustomPage, Clustering):
             The number of basis vectors for PCA preconditioning. If not provided, the current value of the spin box is used.
             If provided, the spin box is updated with the new value.
         """
+        # keep max in sync with the number of PCA components actually
+        # available -- must happen before setValue() below, else a value set
+        # right after a fresh PCA run could be silently clamped to a stale max
+        n_components = len(self.dock.ui.app_data.current_data.processed.match_attribute('data_type', 'PCA score'))
+        if n_components > 0:
+            self.spinBoxPCANumBasis.setMaximum(n_components)
+
         if not new_value:
             self.dock.ui.app_data.num_basis_for_precondition = self.spinBoxPCANumBasis.value()
         else:
@@ -613,8 +644,21 @@ class DimensionalReduction():
         if pca_results.n_components_ > 0:
             app_data.dim_red_x_max = pca_results.n_components_+1
             app_data.dim_red_y_max = pca_results.n_components_+1
-            if app_data.dim_red_y == 1:
-                app_data.dim_red_y = int(2)
+
+            # dim_red_x/dim_red_y both default to 0 until the user touches the
+            # PC-axis spinboxes, and plot_pca() refuses to plot when they're
+            # equal -- give them distinct, valid defaults (PC1 vs PC2) the
+            # first time PCA runs, without clobbering a selection the user
+            # already made (e.g. re-running PCA after changing the analyte
+            # selection).
+            if app_data.dim_red_x < 1:
+                app_data.dim_red_x = 1
+            if app_data.dim_red_y < 1 or app_data.dim_red_y == app_data.dim_red_x:
+                app_data.dim_red_y = 2 if pca_results.n_components_ >= 2 else 1
+
+            # Default reduced-basis size for PCA-preconditioned clustering to
+            # 1/4 of the available components (rounded up).
+            app_data.num_basis_for_precondition = math.ceil(pca_results.n_components_ / 4)
 
 
 @auto_log_methods(logger_key="Analysis")

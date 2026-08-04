@@ -1,4 +1,4 @@
-import os, re, darkdetect
+import os, re, json, darkdetect
 from collections import defaultdict
 import pandas as pd
 import numpy as np
@@ -100,6 +100,15 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.pushButtonCancel.setEnabled(True)
 
         self.tableWidgetMetadata.currentItemChanged.connect(self.on_item_changed)
+
+        # Computed dX/dY preview columns, added at runtime (rather than in
+        # the Designer .ui file) so they survive regeneration of
+        # MapImportDialog.py from designer/MapImportDialog.ui.
+        self.tableWidgetMetadata.insertColumn(11)
+        self.tableWidgetMetadata.setHorizontalHeaderItem(11, QTableWidgetItem('dX\n(µm)'))
+        self.tableWidgetMetadata.insertColumn(12)
+        self.tableWidgetMetadata.setHorizontalHeaderItem(12, QTableWidgetItem('dY\n(µm)'))
+        self.tableWidgetMetadata.itemChanged.connect(self.on_item_content_changed)
 
         # size columns
         header = self.tableWidgetMetadata.horizontalHeader()
@@ -229,6 +238,51 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         self.preview_canvas.draw_idle()
 
+    def apply_row_orientation(self, array, row_idx):
+        """Applies a row's Swap XY / Reverse X / Reverse Y settings to a 2D array.
+
+        Mirrors the transform ``read_matrix_folder``/``read_raw_folder`` apply
+        to the real imported data, so the preview (including the reported
+        "Resolution: W x H") reflects what will actually be imported instead
+        of always showing the raw file's untransformed shape.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            2D preview array, rows=Y, columns=X, in the file's native orientation.
+        row_idx : int
+            Row index into ``tableWidgetMetadata`` for the owning sample.
+
+        Returns
+        -------
+        numpy.ndarray
+            ``array``, transposed/flipped to match the row's settings.
+        """
+        cols = {self.tableWidgetMetadata.horizontalHeaderItem(c).text(): c
+                for c in range(self.tableWidgetMetadata.columnCount())}
+
+        def checked(col_name):
+            col = cols.get(col_name)
+            if col is None:
+                return False
+            widget = self.tableWidgetMetadata.cellWidget(row_idx, col)
+            return widget.isChecked() if widget else False
+
+        swap_xy = checked('Swap XY')
+        reverse_x = checked('X\nreverse')
+        reverse_y = checked('Y\nreverse')
+
+        # Match read_matrix_folder's ordering: reverses are applied in the
+        # file's native orientation, before the swap (transpose).
+        if reverse_x:
+            array = array[:, ::-1]
+        if reverse_y:
+            array = array[::-1, :]
+        if swap_xy:
+            array = array.T
+
+        return array
+
     def get_preview_array(self, sample_id):
         """Builds a rough 2D preview array from a sample's currently selected import files.
 
@@ -298,7 +352,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 grid = np.full((len(rows), max_len), np.nan)
                 for i, r in enumerate(rows):
                     grid[i, :len(r)] = r
-                return grid, label
+                return self.apply_row_orientation(grid, row_idx), label
             else:
                 file_row = selected.iloc[0]
                 file_path = os.path.join(path, file_row['Filename'])
@@ -316,7 +370,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 analyte1 = file_row.get('Analyte 1')
                 analyte2 = file_row.get('Analyte 2')
                 label = f"{analyte1} / {analyte2}" if analyte2 else str(analyte1)
-                return grid, label
+                return self.apply_row_orientation(grid, row_idx), label
         except Exception as e:
             self.statusBar.showMessage(f"Preview unavailable: {e}")
             return None, None
@@ -606,10 +660,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         self.add_checkbox(row, col, False)
                     case 'Spot size\n(µm)' | 'Sweep\n(s)' | 'Speed\n(µm/s)' | 'Length\n(µm)' | 'Width\n(µm)':
                         self.add_numeric_item(row, col)
+                    case 'dX\n(µm)' | 'dY\n(µm)':
+                        self.add_computed_item(row, col)
                     # case _:
                     #     self.add_lineedit(row, col)
                     # case 'Filename\nformat':
                     #     self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
+
+        self.update_all_computed_spacing()
 
     # def add_lineedit(self, row, col):
     #     """Adds a line edit to a QTableWidget
@@ -648,7 +706,19 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         cb = QCheckBox()
         cb.setChecked(state)
         cb.setStyleSheet("text-align: center; margin-left:25%; margin-right:25%;")
+        cb.toggled.connect(lambda _, r=row, c=col: self.on_checkbox_changed(r, c))
         self.tableWidgetMetadata.setCellWidget(row, col, cb)
+
+    def on_checkbox_changed(self, row, column):
+        """Refreshes the sample preview when a checkbox affecting its
+        orientation (Swap XY / X reverse / Y reverse) is toggled for the
+        currently-previewed row -- otherwise the preview (and its reported
+        "Resolution: W x H") keeps showing the file's raw, untransformed
+        shape until something else happens to trigger a redraw.
+        """
+        col_name = self.tableWidgetMetadata.horizontalHeaderItem(column).text()
+        if col_name in ('Swap XY', 'X\nreverse', 'Y\nreverse') and row == self.preview_index:
+            self.update_preview()
 
     def add_combobox(self, row, col, items, default_index=0):
         """Adds a combo box to QTableWidget
@@ -687,6 +757,192 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.tableWidgetMetadata.setItem(row, col, item)
 
+    def add_computed_item(self, row, col):
+        """Adds a read-only, right-aligned display cell to a QTableWidget
+
+        Used for the computed dX/dY preview columns -- not editable, since
+        they're derived from Spot size/Sweep/Speed (or Length/Width for TOF)
+        and Scan axis rather than typed in directly.
+
+        Parameters
+        ----------
+        row, col : int
+            Row and column indices
+        """
+        item = QTableWidgetItem('')
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+        self.tableWidgetMetadata.setItem(row, col, item)
+
+    def compute_pixel_spacing(self, spot_size, sweep_time, speed, scan_axis=None):
+        """Computes per-pixel spacing (dx, dy) for quadrupole/SF instruments.
+
+        Shared by the live dX/dY preview columns and the actual import step
+        (``import_la_icp_ms_data``), so they can never diverge.
+
+        Not applicable to TOF: TOF's true per-pixel spacing is derived from
+        the raster's physical Length/Width divided by the file's actual pixel
+        grid dimensions, which aren't known until a file is read (see
+        ``read_matrix_folder``) -- there's no table-only preview to compute here.
+
+        Parameters
+        ----------
+        spot_size : float
+            Laser spot diameter (µm).
+        sweep_time : float or None
+            Detector sweep/cycle time (s).
+        speed : float or None
+            Stage scan speed (µm/s).
+        scan_axis : str, optional
+            ``'Xc'`` or ``'Yc'`` -- which axis is the fast, continuous-motion
+            scan direction; swaps dx/dy when not ``'Xc'``. Pass ``None``
+            (default) to skip the swap, e.g. when the caller applies its own
+            swap separately (``import_la_icp_ms_data``'s ``swap_axis`` step).
+
+        Returns
+        -------
+        dx, dy : float
+            Per-pixel spacing along X and Y (µm).
+        """
+        dx = spot_size
+        if not speed or not sweep_time:
+            dy = dx
+        else:
+            dy = float(speed) * float(sweep_time)
+
+        if scan_axis and scan_axis != 'Xc':
+            dx, dy = dy, dx
+
+        return dx, dy
+
+    def build_sample_metadata(self, row_index, method, dx, dy, n_files):
+        """Assembles the sample-level acquisition metadata dict for one imported sample.
+
+        Only includes keys that are actually available for ``method`` -- no filenames
+        or paths, those live in the separate per-analyte ``analytes`` list.
+
+        Parameters
+        ----------
+        row_index : int
+            Row into ``self.metadata['directory_data']`` for this sample.
+        method : str
+            ``'quadrupole'``, ``'TOF'``, or ``'SF'``.
+        dx, dy : float
+            Final (post scan-axis-swap) per-pixel spacing, µm.
+        n_files : int
+            Number of non-standard files actually imported for this sample.
+
+        Returns
+        -------
+        dict
+            Flat key/value acquisition metadata, suitable for ``json.dump``.
+        """
+        directory_data = self.metadata['directory_data']
+
+        meta = {
+            'Number of files': n_files,
+            'Standard': directory_data['Standard'][row_index],
+        }
+
+        spot_size = directory_data['Spot size'][row_index]
+        meta['Spot size (um)'] = float(spot_size) if spot_size else None
+
+        if method == 'TOF':
+            length = directory_data['Length'][row_index]
+            width = directory_data['Width'][row_index]
+            meta['Length (um)'] = float(length) if length else None
+            meta['Width (um)'] = float(width) if width else None
+        else:
+            sweep = directory_data['Sweep'][row_index]
+            speed = directory_data['Speed'][row_index]
+            meta['Sweep (s)'] = float(sweep) if sweep else None
+            meta['Speed (um/s)'] = float(speed) if speed else None
+
+        meta['dX (um)'] = dx
+        meta['dY (um)'] = dy
+        meta['Scan axis'] = directory_data['Scan axis'][row_index]
+        meta['Swap XY'] = bool(directory_data['Swap XY'][row_index])
+        meta['Reverse X'] = bool(directory_data['Reverse X'][row_index])
+        meta['Reverse Y'] = bool(directory_data['Reverse Y'][row_index])
+
+        return meta
+
+    def update_computed_spacing(self, row):
+        """Recomputes and redisplays the dX/dY preview cells for one row."""
+        cols = {self.tableWidgetMetadata.horizontalHeaderItem(c).text(): c
+                for c in range(self.tableWidgetMetadata.columnCount())}
+        if 'dX\n(µm)' not in cols or 'dY\n(µm)' not in cols:
+            return
+
+        def cell_text(col_name):
+            col = cols.get(col_name)
+            if col is None:
+                return ''
+            item = self.tableWidgetMetadata.item(row, col)
+            return item.text() if item else ''
+
+        def cell_float(col_name):
+            text = cell_text(col_name)
+            try:
+                return float(text) if text else None
+            except ValueError:
+                return None
+
+        dx_item = self.tableWidgetMetadata.item(row, cols['dX\n(µm)'])
+        dy_item = self.tableWidgetMetadata.item(row, cols['dY\n(µm)'])
+        if dx_item is None or dy_item is None:
+            # Cells not created yet -- e.g. mid-population, before
+            # add_computed_item() has reached these columns for this row.
+            # update_all_computed_spacing() re-runs once population finishes.
+            return
+
+        method = self.comboBoxMethod.currentText()
+
+        # blockSignals: writing these cells must not re-trigger
+        # on_item_content_changed (which would recompute this same row again).
+        self.tableWidgetMetadata.blockSignals(True)
+        if method == 'TOF':
+            # TOF's true per-pixel spacing = Length/Width divided by the
+            # file's actual pixel grid, unknown until a file is read -- no
+            # honest table-only preview to show here.
+            dx_item.setText('—')
+            dy_item.setText('—')
+            tooltip = 'Computed from Length/Width and the file\'s actual pixel grid once files are selected.'
+            dx_item.setToolTip(tooltip)
+            dy_item.setToolTip(tooltip)
+        else:
+            spot_size = cell_float('Spot size\n(µm)')
+            if spot_size is None:
+                spot_size = 1.0
+
+            scan_axis_combo = self.tableWidgetMetadata.cellWidget(row, cols['Scan axis'])
+            scan_axis = scan_axis_combo.currentText() if scan_axis_combo else 'Xc'
+
+            dx, dy = self.compute_pixel_spacing(
+                spot_size, cell_float('Sweep\n(s)'), cell_float('Speed\n(µm/s)'), scan_axis)
+            dx_item.setText(f'{dx:.3g}')
+            dy_item.setText(f'{dy:.3g}')
+            dx_item.setToolTip('')
+            dy_item.setToolTip('')
+        self.tableWidgetMetadata.blockSignals(False)
+
+    def update_all_computed_spacing(self):
+        """Recomputes the dX/dY preview cells for every row in the table."""
+        for row in range(self.tableWidgetMetadata.rowCount()):
+            self.update_computed_spacing(row)
+
+    def on_item_content_changed(self, item):
+        """Recomputes the dX/dY preview for a row when a relevant cell is edited.
+
+        Connected to ``tableWidgetMetadata.itemChanged``, which fires on any
+        cell content change -- including the dX/dY cells' own updates, so
+        ``update_computed_spacing`` blocks signals while writing them to
+        avoid recursing back into this handler.
+        """
+        col_name = self.tableWidgetMetadata.horizontalHeaderItem(item.column()).text()
+        if col_name in ('Spot size\n(µm)', 'Sweep\n(s)', 'Speed\n(µm/s)', 'Length\n(µm)', 'Width\n(µm)'):
+            self.update_computed_spacing(item.row())
+
     def on_item_changed(self, curr_item, prev_item):
         if prev_item:
             if self.checkBoxApplyAll.isChecked() and prev_item.column() != 0:
@@ -703,7 +959,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             for r in range(self.tableWidgetMetadata.rowCount()):
                 if r != row:
                     self.tableWidgetMetadata.cellWidget(r, column).setCurrentText(selected_text)
-            
+
+        col_name = self.tableWidgetMetadata.horizontalHeaderItem(column).text()
+        if col_name == 'Scan axis':
+            self.update_computed_spacing(row)
+
+
     def read_metadata_table(self):
         ### READ TABLE DATA ###
 
@@ -902,6 +1163,53 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         return results
 
+    def prefer_std_corrected(self, files, results):
+        """Prefers standard-corrected files over uncorrected duplicates.
+
+        Some export pipelines produce both a raw file and a "StdCorr"
+        (standard-corrected) file for the same analyte/ratio, e.g.
+        ``Hf178.csv`` and ``Hf178_StdCorr.csv``. Both parse to the same
+        (fieldtype, analyte1, analyte2) key in `results` and, left alone,
+        both default to selected -- producing duplicate columns downstream.
+        When a "StdCorr" file (matched case-insensitively) is present
+        alongside an uncorrected one for the same key, only the StdCorr
+        file is left checked by default; the user can still re-check the
+        uncorrected file by hand in the file-selection dialog.
+
+        Parameters
+        ----------
+        files : list of str
+            Filenames parallel to `results` (as passed to `parse_filenames`).
+        results : list of tuple
+            Output of `parse_filenames`.
+
+        Returns
+        -------
+        list of tuple
+            `results` with the leading "valid"/import-default flag cleared
+            on non-StdCorr files that lose to a StdCorr duplicate.
+        """
+        groups = defaultdict(list)
+        for i, result in enumerate(results):
+            valid, _extension, _filetype, fieldtype, analyte1, analyte2, _unit = result
+            if not valid or fieldtype not in ('Analyte', 'Ratio'):
+                continue
+            groups[(fieldtype, analyte1, analyte2)].append(i)
+
+        for idxs in groups.values():
+            if len(idxs) < 2:
+                continue
+            std_corr_idxs = {i for i in idxs if 'stdcorr' in files[i].lower()}
+            if not std_corr_idxs or len(std_corr_idxs) == len(idxs):
+                # No StdCorr variant present, or every copy is StdCorr --
+                # nothing to prefer between.
+                continue
+            for i in idxs:
+                if i not in std_corr_idxs:
+                    results[i] = (False,) + results[i][1:]
+
+        return results
+
     def import_data(self): 
         """Import data associated with each *Sample Id* using metadata to define important structural parameters
 
@@ -943,8 +1251,24 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 pass
 
         if self.ok:
+            # Reimporting a sample that's already loaded overwrites its
+            # .lame.csv file on disk, but if the set of sample IDs in the
+            # directory is unchanged (the common case), neither
+            # AppData.sample_list's nor .sample_id's setter fires a change
+            # notification -- both explicitly no-op when the *identifiers*
+            # haven't changed, even though the underlying file content has.
+            # The stale in-memory SampleObj cached from the previous load
+            # would otherwise never get refreshed. Evict any reimported
+            # sample from the cache so change_sample() (which only reloads
+            # a sample when it isn't already in self.data) re-reads it.
+            for sample_id in self.sample_ids:
+                self.parent.data.pop(sample_id, None)
+
             self.parent.io.open_directory(path=self.root_path)
-        
+
+            if self.parent.app_data.sample_id in self.sample_ids:
+                self.parent.change_sample()
+
     def import_la_icp_ms_data(self, save_path):
         """Reads LA-ICP-MS data into a DataFrame
 
@@ -1006,15 +1330,11 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 dx = spot_size
                 dy = spot_size
             else:
-                dx = spot_size
                 sweep_time = self.metadata['directory_data']['Sweep'][i]
                 speed = self.metadata['directory_data']['Speed'][i]
-                if not speed or not sweep_time:
-                    dy = dx
-                else:
-                    dy = float(speed)*float(sweep_time)
+                dx, dy = self.compute_pixel_spacing(spot_size, sweep_time, speed)
 
-            if swap_axis == 'Y':
+            if swap_axis:
                 tmp = dx
                 dx = dy
                 dy = tmp
@@ -1027,17 +1347,26 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             # Check if a value is numeric (True for numeric values, False for non-numeric)
             is_numeric = all(numeric_check.notna())
 
-            if method == 'TOF' and is_numeric and raster_width is not None:
+            # non-standard, Import=True files for this sample -- used both to refine
+            # TOF's per-line dy spacing below and as the 'Number of files' metadata field
+            selected_files = self.metadata[sample_id].loc[self.metadata[sample_id]['Import'], 'Filename']
+            n_files = sum(1 for f in selected_files if not any(std in f for std in self.standard_list))
+
+            if method == 'TOF' and is_numeric and raster_width is not None and n_files:
                 # Per-line spacing (dy): total map width divided by the number of lines
                 # actually being imported for this sample.
-                selected_files = self.metadata[sample_id].loc[self.metadata[sample_id]['Import'], 'Filename']
-                num_lines = sum(1 for f in selected_files if not any(std in f for std in self.standard_list))
-                if num_lines:
-                    dy = raster_width / num_lines
+                dy = raster_width / n_files
 
             try:
-                file_name = os.path.join(save_path, sample_id+'.lmdf.csv')
-                self.metadata[sample_id].to_csv(file_name,index=False)
+                file_name = os.path.join(save_path, sample_id+'.lmdf.json')
+                sample_meta = {
+                    'data_type': 'LA-ICP-MS',
+                    'method': method,
+                    'metadata': self.build_sample_metadata(i, method, dx, dy, n_files),
+                    'analytes': self.metadata[sample_id].to_dict(orient='records'),
+                }
+                with open(file_name, 'w') as f:
+                    json.dump(sample_meta, f, indent=2, default=str)
             except Exception as e:
                 QMessageBox.warning(self,'Error',f"Could not save LaME metadata file associated with sample {sample_id}.\n{e}")
 
@@ -1335,6 +1664,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         # Guess the analytes from filenames and allow user to change them and select files
         parsed_results = self.parse_filenames(sample_id, file_list)
+        parsed_results = self.prefer_std_corrected(file_list, parsed_results)
 
         # Show the dialog to confirm or edit the file import details
         dialog = FileSelectData(sample_id, file_list, parsed_results, parent=self)

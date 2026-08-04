@@ -269,6 +269,14 @@ class StyleTheme():
         styles['field map']['XField'] = 'Xc'
         styles['field map']['YField'] = 'Yc'
 
+        # AspectRatio = None means "not yet customized" for map-type plots --
+        # set_style_widgets() auto-fills it from the data's true pixel aspect
+        # ratio only while it's None, so a user override survives later field/
+        # plot-type refreshes instead of being silently reset back to the
+        # data's native aspect ratio every time.
+        for map_plot_type in self.map_plot_types:
+            styles[map_plot_type]['AspectRatio'] = None
+
         styles['correlation']['AspectRatio'] = 1.0
         styles['correlation']['FontSize'] = 8
         styles['correlation']['Colormap'] = 'RdBu'

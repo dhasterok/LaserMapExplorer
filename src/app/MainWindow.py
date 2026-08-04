@@ -621,7 +621,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, "mask_dock"):
             self.update_mask_dock()
 
-        if hasattr(self,'notes'):
+        if hasattr(self, 'notes_dock'):
             # change notes file to new sample.  This will initiate the new file and autosave timer.
             self.notes_dock.notes.notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
 
@@ -1226,7 +1226,7 @@ class MainWindow(QMainWindow):
         :see also:
             NoteTaking
         """            
-        if not hasattr(self, 'notes'):
+        if not hasattr(self, 'notes_dock'):
             if hasattr(self.app_data,'selected_directory') and self.app_data.sample_id != '':
                 notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
             else:
@@ -1259,7 +1259,12 @@ class MainWindow(QMainWindow):
                 text = f'**Sample ID: {self.app_data.sample_id}**\n'
                 text += '*' * (len(self.app_data.sample_id) + 15) + '\n'
                 text += f'\n:Date: {datetime.today().strftime("%Y-%m-%d")}\n'
-                text += ':User: Your name here\n\n'
+                text += ':User: Your name here\n'
+                if data is not None and getattr(data, 'metadata', None):
+                    for key, value in data.metadata.items():
+                        if value is not None:
+                            text += f':{key}: {value}\n'
+                text += '\n'
                 self.notes_dock.notes.print_info(text)
             case 'analytes':
                 analytes = data.processed.match_attribute('data_type', 'Analyte')
@@ -1417,25 +1422,38 @@ class MainWindow(QMainWindow):
 
         result = self.analyte_dialog.exec()  # Store the result here
         if result == QDialog.DialogCode.Accepted:
-            self.update_analyte_ratio_selection(analyte_dict=self.analyte_dialog.norm_dict)   
+            self.update_analyte_ratio_selection(
+                analyte_dict=self.analyte_dialog.norm_dict,
+                use_normalized_dict=self.analyte_dialog.use_normalized_dict,
+            )
         if result == QDialog.DialogCode.Rejected:
             pass
 
-    def update_analyte_ratio_selection(self,analyte_dict):
+    def update_analyte_ratio_selection(self, analyte_dict, use_normalized_dict=None):
         """Updates analytes/ratios in mainwindow and its corresponding scale used for each field
 
         Updates analytes/ratios and its corresponding scale used for each field based
         on selection made by user in Analyteselection window or if user choses analyte
         list in blockly.
-        
+
         Parameters
             ----------
             analyte_dict: dict
                 key: Analyte/Ratio name
-                value: scale used (linear/log/logit)
+                value: scale used (linear/log/inv_logit)
+            use_normalized_dict: dict, optional
+                key: Analyte/Ratio name
+                value: whether its reference-chemistry-normalized variant is
+                also included in analysis
         """
         #update self.data['norm'] with selection
-        self.app_data.update_field_selection(fields=analyte_dict.keys(), norms=analyte_dict.values())
+        use_normalized = (
+            [use_normalized_dict.get(field, False) for field in analyte_dict.keys()]
+            if use_normalized_dict is not None else None
+        )
+        self.app_data.update_field_selection(
+            fields=analyte_dict.keys(), norms=analyte_dict.values(), use_normalized=use_normalized
+        )
 
         self.plot_tree.update_tree(norm_update=True)
 

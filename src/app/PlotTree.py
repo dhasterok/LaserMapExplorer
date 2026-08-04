@@ -1,8 +1,8 @@
 import re, darkdetect
 
 from PyQt6.QtCore import ( Qt, QSize )
-from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem )
-from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar ) 
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem, QAction )
+from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar, QMenu )
 from lame_core.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomAction, CustomActionMenu
 from lame_core.UITheme import default_font
 
@@ -140,11 +140,109 @@ class PlotTree(CustomDockWidget):
 
         # Set the model to the view and expand the tree
         treeView.expandAll()
-        
+
         # Connect double-click event
         #self.treeView.doubleClicked.connect(treeView.on_double_click)
         treeView.doubleClicked.connect(self.tree_double_click)
-        
+
+        # Write checkbox toggles (Analyte/Analyte (normalized)/Ratio/Ratio
+        # (normalized) leaves only -- see add_sample()/update_tree()) back to
+        # the underlying column attributes.
+        treeView.treeModel.itemChanged.connect(self.on_tree_item_changed)
+
+        # Right-click "Select All"/"Select None" on a data branch (or one of
+        # its sample sub-branches) for quick bulk selection.
+        treeView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        treeView.customContextMenuRequested.connect(self.show_tree_context_menu)
+
+    _CHECKABLE_BRANCH_ATTR = {
+        'Analyte': 'use',
+        'Ratio': 'use',
+        'Analyte (normalized)': 'use_normalized',
+        'Ratio (normalized)': 'use_normalized',
+    }
+
+    def on_tree_item_changed(self, item):
+        """Writes a leaf's checkbox toggle back to its column attribute.
+
+        Only leaves under the four data branches (`_CHECKABLE_BRANCH_ATTR`)
+        are ever made checkable (see `add_sample()`/`update_tree()`), so this
+        only fires for user-driven toggles there.
+        """
+        if not item.isCheckable():
+            return
+
+        path = self.treeView.get_item_path(item)
+        if len(path) != 3:
+            return
+
+        branch_name, sample_id, field = path
+        attr = self._CHECKABLE_BRANCH_ATTR.get(branch_name)
+        if attr is None:
+            return
+
+        data = self.ui.app_data.data.get(sample_id)
+        if data is None:
+            return
+
+        data.processed.set_attribute(field, attr, item.checkState() == Qt.CheckState.Checked)
+
+    def show_tree_context_menu(self, pos):
+        """Right-click "Select All"/"Select None" for a data branch or one sample within it."""
+        index = self.treeView.indexAt(pos)
+        if not index.isValid():
+            return
+
+        item = self.treeView.treeModel.itemFromIndex(index)
+        if item is None:
+            return
+
+        path = self.treeView.get_item_path(item)
+        # path == [branch] for a top-level data branch, [branch, sample_id] for
+        # one of its sample sub-branches -- anything deeper is a leaf, ignore.
+        if len(path) not in (1, 2) or path[0] not in self._CHECKABLE_BRANCH_ATTR:
+            return
+
+        label_suffix = f' ({item.text()})' if len(path) == 2 else ''
+        menu = QMenu(self.treeView)
+        action_all = QAction(f'Select All{label_suffix}', self.treeView)
+        action_none = QAction(f'Select None{label_suffix}', self.treeView)
+        action_all.triggered.connect(lambda: self._set_branch_check_state(item, Qt.CheckState.Checked))
+        action_none.triggered.connect(lambda: self._set_branch_check_state(item, Qt.CheckState.Unchecked))
+        menu.addAction(action_all)
+        menu.addAction(action_none)
+        menu.exec(self.treeView.viewport().mapToGlobal(pos))
+
+    def _set_branch_check_state(self, item, check_state):
+        """Bulk-sets check state (and the underlying attribute) for every
+        checkable leaf under `item`.
+
+        `item` may be a top-level data branch (applies across all its sample
+        sub-branches) or a single sample's sub-branch (applies to that sample
+        only).
+        """
+        branch_name = self.treeView.get_item_path(item)[0]
+        attr = self._CHECKABLE_BRANCH_ATTR.get(branch_name)
+        if attr is None:
+            return
+
+        top_level = item.parent() is None
+        sample_branches = [item.child(r) for r in range(item.rowCount())] if top_level else [item]
+
+        self.treeView.treeModel.blockSignals(True)
+        try:
+            for sample_branch in sample_branches:
+                data = self.ui.app_data.data.get(sample_branch.text())
+                for leaf_row in range(sample_branch.rowCount()):
+                    leaf = sample_branch.child(leaf_row)
+                    if not leaf.isCheckable() or not leaf.isEnabled():
+                        continue
+                    leaf.setCheckState(check_state)
+                    if data is not None:
+                        data.processed.set_attribute(leaf.text(), attr, check_state == Qt.CheckState.Checked)
+        finally:
+            self.treeView.treeModel.blockSignals(False)
+
     def add_sample(self, sample_id):
         """Create plot selector tree
 
@@ -178,42 +276,48 @@ class PlotTree(CustomDockWidget):
         else:
             return
 
-        # add leaves for analytes
-        for analyte in data.match_attribute('data_type','Analyte'):
-            leaf = treeView.find_leaf(analyte_branch, analyte)
-            if not leaf:
-                treeView.add_leaf(analyte_branch, analyte)
+        # block itemChanged while bulk-creating leaves so initial check-state
+        # doesn't get written back into column_attributes as a user toggle
+        treeView.treeModel.blockSignals(True)
+        try:
+            # add leaves for analytes
+            for analyte in data.match_attribute('data_type','Analyte'):
+                leaf = treeView.find_leaf(analyte_branch, analyte)
+                if not leaf:
+                    treeView.add_leaf(analyte_branch, analyte, checkable=True, checked=bool(data.get_attribute(analyte, 'use')))
 
-            leaf = treeView.find_leaf(norm_analyte_branch, analyte)
-            if not leaf:
-                treeView.add_leaf(norm_analyte_branch, analyte)
+                leaf = treeView.find_leaf(norm_analyte_branch, analyte)
+                if not leaf:
+                    treeView.add_leaf(norm_analyte_branch, analyte, checkable=True, checked=bool(data.get_attribute(analyte, 'use_normalized')))
 
-        if not data.match_attribute('data_type','Ratio'):
-            return
+            if not data.match_attribute('data_type','Ratio'):
+                return
 
-        # add sample_id to ratio branch
-        ratio_branch = treeView.branch_exists(self.tree['Ratio'], sample_id)
-        if not ratio_branch:
-            ratio_branch = treeView.add_branch(self.tree['Ratio'], sample_id)
-        else:
-            return
+            # add sample_id to ratio branch
+            ratio_branch = treeView.branch_exists(self.tree['Ratio'], sample_id)
+            if not ratio_branch:
+                ratio_branch = treeView.add_branch(self.tree['Ratio'], sample_id)
+            else:
+                return
 
-        # add sample_id to ratio (normalized) branch
-        norm_ratio_branch = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
-        if not norm_ratio_branch:
-            norm_ratio_branch = treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
-        else:
-            return
+            # add sample_id to ratio (normalized) branch
+            norm_ratio_branch = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
+            if not norm_ratio_branch:
+                norm_ratio_branch = treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
+            else:
+                return
 
-        # add leaves for ratios
-        for ratio in data.match_attribute('data_type','Ratio'):
-            leaf = treeView.find_leaf(ratio_branch, ratio)
-            if not leaf:
-                treeView.add_leaf(ratio_branch, ratio)
+            # add leaves for ratios
+            for ratio in data.match_attribute('data_type','Ratio'):
+                leaf = treeView.find_leaf(ratio_branch, ratio)
+                if not leaf:
+                    treeView.add_leaf(ratio_branch, ratio, checkable=True, checked=bool(data.get_attribute(ratio, 'use')))
 
-            leaf = treeView.find_leaf(norm_ratio_branch, ratio)
-            if not leaf:
-                treeView.add_leaf(norm_ratio_branch, ratio)
+                leaf = treeView.find_leaf(norm_ratio_branch, ratio)
+                if not leaf:
+                    treeView.add_leaf(norm_ratio_branch, ratio, checkable=True, checked=bool(data.get_attribute(ratio, 'use_normalized')))
+        finally:
+            treeView.treeModel.blockSignals(False)
 
     def add_calculated_leaf(self, new_field):
 
@@ -514,73 +618,98 @@ class PlotTree(CustomDockWidget):
 
         data = self.ui.app_data.data[sample_id]
         ref_chem = self.ui.app_data.ref_chem
-
-        # Un-highlight all leaf in the trees
-        self.unhighlight_tree(self.tree['Ratio'])
-        self.unhighlight_tree(self.tree['Analyte'])
-
         analytes = data.processed.match_attribute('data_type','Analyte')
         ratios = data.processed.match_attribute('data_type','Ratio')
 
-        data.processed.set_attribute(analytes,'use',False)
         treeView = self.treeView
 
-        for analyte in analytes + ratios:
-            norm = data.processed.get_attribute(analyte,'norm')
-            if '/' in analyte:
-                analyte_1, analyte_2 = analyte.split(' / ')
+        # 'use'/'use_normalized' are set authoritatively by AnalyteDialog, the
+        # PlotTree checkboxes below, and their bulk select/none actions -- this
+        # method only reflects that state (highlighting + checkbox sync), it
+        # must not reset or overwrite it on every tree rebuild. Block signals
+        # for the *whole* method, including unhighlight_tree() below: setting
+        # an item's background also fires itemChanged (it's not exclusive to
+        # checkState changes), which would otherwise write a leaf's current
+        # (possibly stale) checkbox state back over a real 'use' value that
+        # was just set elsewhere but not yet reflected in the checkbox.
+        treeView.treeModel.blockSignals(True)
+        try:
+            # Un-highlight all leaf in the trees
+            self.unhighlight_tree(self.tree['Ratio'])
+            self.unhighlight_tree(self.tree['Analyte'])
 
-                # find sample_id (branch) in ratio (tree), if it does not exist, create it
-                sample_branch = treeView.branch_exists(self.tree['Ratio'],sample_id)
-                if not sample_branch:
-                    sample_branch = self.treeView.add_branch(self.tree['Ratio'], sample_id)
+            for analyte in analytes + ratios:
+                norm = data.processed.get_attribute(analyte,'norm')
+                if '/' in analyte:
+                    analyte_1, analyte_2 = analyte.split(' / ')
 
-                # find sample_id (branch) in ratio normalized (tree), if it does not exist, create it
-                sample_branch_norm = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
-                if not sample_branch_norm:
-                    sample_branch_norm = self.treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
+                    # find sample_id (branch) in ratio (tree), if it does not exist, create it
+                    sample_branch = treeView.branch_exists(self.tree['Ratio'],sample_id)
+                    if not sample_branch:
+                        sample_branch = self.treeView.add_branch(self.tree['Ratio'], sample_id)
 
-                # check if ratio (leaf) exists in sample_id (branch) and create if necessesary
-                leaf_item_norm = None
-                if not treeView.find_leaf(sample_branch, analyte):
-                    # add ratio (leaf) item to sample_id (branch)
-                    treeView.add_leaf(sample_branch, analyte)
+                    # find sample_id (branch) in ratio normalized (tree), if it does not exist, create it
+                    sample_branch_norm = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
+                    if not sample_branch_norm:
+                        sample_branch_norm = self.treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
 
-                    # add ratio normalized (leaf) item to sample_id (branch)
-                    leaf_item_norm = treeView.add_leaf(sample_branch_norm, analyte)
-                else:
-                    leaf_item_norm = treeView.find_leaf(sample_branch_norm, analyte)
+                    # check if ratio (leaf) exists in sample_id (branch) and create if necessesary
+                    leaf_item = treeView.find_leaf(sample_branch, analyte)
+                    if not leaf_item:
+                        # add ratio (leaf) item to sample_id (branch)
+                        leaf_item = treeView.add_leaf(sample_branch, analyte, checkable=True,
+                            checked=bool(data.processed.get_attribute(analyte, 'use')))
 
-                # check if ratio can be normalized (note: normalization is not handled here)
-                refval_1 = ref_chem[re.sub(r'\d', '', analyte_1).lower()]
-                refval_2 = ref_chem[re.sub(r'\d', '', analyte_2).lower()]
-                ratio_flag = False
-                if (refval_1 > 0) and (refval_2 > 0):
-                    ratio_flag = True
-                #print([analyte, refval_1, refval_2, ratio_flag])
+                        # add ratio normalized (leaf) item to sample_id (branch)
+                        leaf_item_norm = treeView.add_leaf(sample_branch_norm, analyte, checkable=True,
+                            checked=bool(data.processed.get_attribute(analyte, 'use_normalized')))
+                    else:
+                        leaf_item_norm = treeView.find_leaf(sample_branch_norm, analyte)
+                        # keep checkbox state in sync in case 'use'/'use_normalized'
+                        # changed elsewhere (e.g. InfoViewer) since the tree was built
+                        leaf_item.setCheckState(Qt.CheckState.Checked if data.processed.get_attribute(analyte, 'use') else Qt.CheckState.Unchecked)
+                        leaf_item_norm.setCheckState(Qt.CheckState.Checked if data.processed.get_attribute(analyte, 'use_normalized') else Qt.CheckState.Unchecked)
 
-                # if normalization cannot be done, make text italic and disable item
-                if not ratio_flag:
+                    # check if ratio can be normalized (note: normalization is not handled here)
+                    # .get(..., 0) treats an element missing from the reference table the same
+                    # as a non-positive reference value below -- both mean "can't normalize",
+                    # rather than crashing the whole tree update on one unnormalizable ratio.
+                    refval_1 = ref_chem.get(re.sub(r'\d', '', analyte_1).lower(), 0)
+                    refval_2 = ref_chem.get(re.sub(r'\d', '', analyte_2).lower(), 0)
+                    ratio_flag = False
+                    if (refval_1 > 0) and (refval_2 > 0):
+                        ratio_flag = True
+                    #print([analyte, refval_1, refval_2, ratio_flag])
+
+                    # if normalization cannot be done, make text italic and disable item
+                    leaf_item_norm.setEnabled(ratio_flag)
                     font = leaf_item_norm.font()
-                    font.setItalic(True)
+                    font.setItalic(not ratio_flag)
                     leaf_item_norm.setFont(font)
-                    leaf_item_norm.setEnabled(False)
-                    data.processed.set_attribute(analyte, 'use', False)
+                    if not ratio_flag:
+                        leaf_item_norm.setCheckState(Qt.CheckState.Unchecked)
+                        data.processed.set_attribute(analyte, 'use_normalized', False)
 
-            else: #single analyte
+                else: #single analyte
 
-                leaf_item = treeView.find_leaf(treeView.find_leaf(self.tree['Analyte'], sample_id), analyte)
-                # if norm_update:
-                #     item,check = self.find_leaf('Analyte (normalized)', branch = sample_id, leaf = analyte)
-                # else:
-                #     item,check = self.find_leaf('Analyte', branch = sample_id, leaf = analyte)
+                    analyte_branch = treeView.find_leaf(self.tree['Analyte'], sample_id)
+                    norm_analyte_branch = treeView.find_leaf(self.tree['Analyte (normalized)'], sample_id)
+                    leaf_item = treeView.find_leaf(analyte_branch, analyte)
+                    leaf_item_norm = treeView.find_leaf(norm_analyte_branch, analyte)
 
-                leaf_item.setBackground(QBrush(QColor(hexcolor)))
+                    leaf_item.setBackground(QBrush(QColor(hexcolor)))
 
-                data.processed.set_attribute(analytes,'use',True)
+                    # keep checkbox state in sync in case 'use'/'use_normalized'
+                    # changed elsewhere (e.g. InfoViewer) since the tree was built
+                    if leaf_item.isCheckable():
+                        leaf_item.setCheckState(Qt.CheckState.Checked if data.processed.get_attribute(analyte, 'use') else Qt.CheckState.Unchecked)
+                    if leaf_item_norm is not None and leaf_item_norm.isCheckable():
+                        leaf_item_norm.setCheckState(Qt.CheckState.Checked if data.processed.get_attribute(analyte, 'use_normalized') else Qt.CheckState.Unchecked)
 
-            if norm_update: #update if analytes are returned from analyte selection window
-                data.update_norm(norm, analyte)
+                if norm_update: #update if analytes are returned from analyte selection window
+                    data.update_norm(norm, analyte)
+        finally:
+            treeView.treeModel.blockSignals(False)
 
     def add_tree_item(self, plot_info=None):
         """Updates plot selector list and adds plot information data to tree item

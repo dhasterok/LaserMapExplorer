@@ -617,6 +617,28 @@ class LameIO():
         except Exception as e:
             self.status_manager.show_message(f"Figure save failed: {e}")
 
+    def add_figure_to_notes(self, fig_path, caption=None):
+        """Inserts a just-saved figure into the Notes dock as a reST figure.
+
+        Opens the Notes dock first if it isn't already (creating it on first
+        use, per ``open_notes()``), then reuses ``NotesWidget.insert_image``
+        directly with a known path -- passing a path (rather than ``None``)
+        skips its file-picker dialog, and it already handles cross-platform
+        path formatting/space-escaping.
+
+        Parameters
+        ----------
+        fig_path : str or Path
+            Path to the already-saved figure image.
+        caption : str, optional
+            Caption/alt text for the figure, by default the file's basename.
+        """
+        self.ui.open_notes()
+        if caption is None:
+            caption = Path(fig_path).stem
+        self.ui.notes_dock.notes.insert_image(filename=fig_path, alt_text=caption, caption=caption)
+        self.status_manager.show_message("Figure added to Notes")
+
     def save_plot(self, canvas: MplCanvas, save_figure_flag=True, save_data_flag=True, parent=None, settings=None):
         """
         Open SaveDialog and save figure, data, or both from the given canvas.
@@ -663,6 +685,9 @@ class LameIO():
                 fig_path = fig_folder / f"{settings['basename']}.{settings['fig_type']}"
                 self.save_figure(canvas.figure, fig_path)
 
+                if settings.get('add_to_notes'):
+                    self.add_figure_to_notes(fig_path, settings['basename'])
+
             if save_data_flag:
                 data_folder = save_dir / "data"
                 data_folder.mkdir(parents=True, exist_ok=True)  # ensure folder exists
@@ -692,6 +717,7 @@ class SavePlotDialog(QDialog):
         last_data_type = self.settings.value("save_data_type", "csv")
         last_fig_checked = self.settings.value("save_fig_checked", True, type=bool)
         last_data_checked = self.settings.value("save_data_checked", True, type=bool)
+        last_notes_checked = self.settings.value("save_notes_checked", False, type=bool)
 
         dialog_layout = QVBoxLayout(self)
 
@@ -754,6 +780,16 @@ class SavePlotDialog(QDialog):
         data_layout.addWidget(self.data_combobox)
         data_layout.addWidget(self.data_checkbox)
 
+        # Add to Notes -- requires a saved figure to reference, so it's
+        # enabled/disabled in lockstep with the figure checkbox.
+        self.notes_checkbox = QCheckBox("Add to Notes")
+        self.notes_checkbox.setChecked(last_notes_checked and self.figure_checkbox.isChecked())
+        self.notes_checkbox.setEnabled(self.figure_checkbox.isChecked())
+        self.figure_checkbox.toggled.connect(self.notes_checkbox.setEnabled)
+
+        notes_layout = QHBoxLayout()
+        notes_layout.addWidget(self.notes_checkbox)
+
         # OK / Cancel
         btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         btns.accepted.connect(self.accept)
@@ -764,6 +800,7 @@ class SavePlotDialog(QDialog):
         dialog_layout.addLayout(filename_layout)
         dialog_layout.addLayout(figure_layout)
         dialog_layout.addLayout(data_layout)
+        dialog_layout.addLayout(notes_layout)
         dialog_layout.addWidget(btns)
 
         self.filename_line_edit.editingFinished.connect(self.update_path_preview)
@@ -788,10 +825,12 @@ class SavePlotDialog(QDialog):
         self.settings.setValue("save_data_type", self.data_combobox.currentText())
         self.settings.setValue("save_fig_checked", self.figure_checkbox.isChecked())
         self.settings.setValue("save_data_checked", self.data_checkbox.isChecked())
+        self.settings.setValue("save_notes_checked", self.notes_checkbox.isChecked())
 
         return {
             "save_figure": self.figure_checkbox.isChecked(),
             "save_data": self.data_checkbox.isChecked(),
+            "add_to_notes": self.notes_checkbox.isChecked(),
             "directory": self.path_label.text(),
             "basename": self.filename_line_edit.text(),
             "fig_type": self.figure_combobox.currentText(),

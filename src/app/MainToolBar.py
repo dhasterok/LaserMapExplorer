@@ -451,8 +451,8 @@ class MainActions(QObject):
 
         self.UpdatePlot = CustomAction(
             text="Update\nPlot",
-            light_icon_unchecked="icon-launch-64.svg",
-            dark_icon_unchecked="",
+            light_icon_unchecked="icon-reset-64.svg",
+            dark_icon_unchecked="icon-reset-dark-64.svg",
             parent=self.ui,
         )
         self.UpdatePlot.setMenuRole(QAction.MenuRole.TextHeuristicRole)

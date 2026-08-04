@@ -99,21 +99,35 @@ class CanvasWidget(QWidget):
         self.toolbar.mv.toolButtonRemovePlot.clicked.connect(lambda: self.remove_multi_plot(self.toolbar.mv.comboBoxMVPlots.currentText()))
         self.toolbar.mv.toolButtonRemoveAllPlots.clicked.connect(lambda: self.clear_layout(self.multi_view.layout()))
 
+    def _first_canvas_in_layout(self, layout):
+        """Returns the first ``MplCanvas`` widget found in `layout`, or ``None``.
+
+        Not a ``@staticmethod`` -- this class is wrapped by `auto_log_methods`,
+        which assumes every method is instance-bound and always passes `self`.
+        """
+        if layout is None:
+            return None
+        for i in range(layout.count()):
+            widget = layout.itemAt(i).widget()
+            if isinstance(widget, MplCanvas):
+                return widget
+        return None
+
     @property
     def current_canvas(self):
-        """MplCanvas : Returns the current canvas based on the selected tab."""
+        """MplCanvas : Returns the current canvas based on the selected tab.
+
+        Multi View/Quick View can hold several canvases at once; there's no
+        single well-defined "current" one, so the first canvas found in that
+        tab's layout is returned (never the raw layout itself -- callers like
+        ``LameIO.save_plot`` expect an ``MplCanvas``, not a ``QLayout``).
+        """
         if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
-            layout = self.single_view.layout()
-            if layout is not None:
-                for i in range(layout.count()):
-                    widget = layout.itemAt(i).widget()
-                    if isinstance(widget, MplCanvas):
-                        return widget
-            return None
+            return self._first_canvas_in_layout(self.single_view.layout())
         elif self.canvasWindow.currentIndex() == self.tab_dict['mv']:
-            return self.multi_view.layout()
+            return self._first_canvas_in_layout(self.multi_view.layout())
         elif self.canvasWindow.currentIndex() == self.tab_dict['qv']:
-            return self.quick_view.layout()
+            return self._first_canvas_in_layout(self.quick_view.layout())
         else:
             return None
 
@@ -281,30 +295,63 @@ class CanvasWidget(QWidget):
 
         self.single_view.show()
 
+    def sorted_qv_list(self, key):
+        """Returns the Quick View field list for ``key``, ready to plot.
+
+        Filters the configured list down to fields that actually exist in
+        the current sample (rather than silently leaving gaps in the grid
+        for missing ones), sorts the element/analyte fields by geochemical
+        compatibility (matching ``PlotTree``'s 'compatibility' sort -- see
+        ``SortAnalytes.sort_analytes``), and appends any ratio fields
+        (which have no compatibility ordering of their own) at the end, in
+        their configured order.
+
+        Parameters
+        ----------
+        key : str
+            Name of the list in ``self.QV_analyte_list`` to use.
+
+        Returns
+        -------
+        list of str
+            Ordered field names, each guaranteed present in the current sample.
+        """
+        field_dict = self.ui.app_data.field_dict
+        available_analytes = field_dict.get('Analyte', [])
+        available_ratios = field_dict.get('Ratio', [])
+
+        requested = self.QV_analyte_list.get(key, [])
+        elements = [f for f in requested if f in available_analytes]
+        ratios = [f for f in requested if f in available_ratios]
+
+        return sort_analytes('compatibility', elements) + ratios
+
     def display_QV(self):
         """Plots selected maps to the Quick View tab
 
-        Adds plots of predefined analytes to the Quick View tab in a grid layout."""
+        Adds plots of predefined analytes to the Quick View tab in a grid layout.
+        Fields not present in the current sample are skipped, elements are
+        ordered by compatibility, and any ratio fields are appended at the end
+        -- see ``sorted_qv_list``."""
         self.canvasWindow.setCurrentIndex(self.tab_dict['qv'])
         if self.ui.app_data.sample_id == '':
             return
 
         key = self.toolbar.qv.comboBoxQVList.currentText()
 
-        # establish number of rows and columns
+        qv_fields = self.sorted_qv_list(key)
+        analyte_fields = set(self.ui.app_data.field_dict.get('Analyte', []))
+
+        # establish number of rows and columns, based on the fields actually
+        # being plotted (not the raw, possibly only-partly-available list)
         ratio = 1.8 # aspect ratio of gridlayout
         # ratio = ncol / nrow, nplots = ncol * nrow
-        ncol = int(np.sqrt(len(self.QV_analyte_list[key])*ratio))
-
-        # fields in current sample
-        fields = self.ui.app_data.field_dict['Analyte']
+        ncol = max(1, int(np.sqrt(len(qv_fields)*ratio)))
 
         # clear the quickView layout
         self.clear_layout(self.quick_view.layout())
-        for i, analyte in enumerate(self.QV_analyte_list[key]):
-            # if analyte is in list of measured fields
-            if analyte not in fields:
-                continue
+        for i, field in enumerate(qv_fields):
+            field_type = 'Analyte' if field in analyte_fields else 'Ratio'
 
             # create plot canvas
             canvas = MplCanvas(parent=self.ui)
@@ -313,8 +360,8 @@ class CanvasWidget(QWidget):
             col = i % ncol
             row = i // ncol
 
-            # get data for current analyte
-            current_plot_df = self.ui.data[self.ui.app_data.sample_id].get_map_data(analyte, 'Analyte')
+            # get data for current field
+            current_plot_df = self.ui.data[self.ui.app_data.sample_id].get_map_data(field, field_type)
             reshaped_array = np.reshape(current_plot_df['array'].values, self.ui.data[self.ui.app_data.sample_id].array_size, order=self.ui.data[self.ui.app_data.sample_id].order)
 
             # add image to canvas
@@ -323,7 +370,7 @@ class CanvasWidget(QWidget):
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
             canvas.axes.text( 0.025*self.ui.data[self.ui.app_data.sample_id].array_size[0],
                     0.1*self.ui.data[self.ui.app_data.sample_id].array_size[1],
-                    analyte,
+                    field,
                     fontdict=font,
                     color=self.ui.style_data.overlay_color,
                     ha='left', va='top' )
@@ -410,9 +457,19 @@ class CanvasWidget(QWidget):
             else:
                 # Proper cleanup before deletion
                 try:
+                    # Hide first, before anything else: a visible widget can still
+                    # receive a Qt-dispatched paintEvent (e.g. one already queued
+                    # before this cleanup ran) at any point until its C++ object is
+                    # actually destroyed, which deleteLater() below only schedules
+                    # for later. If that paint fires after figure.clear() below (or
+                    # after the underlying object starts going away), matplotlib's
+                    # Qt backend can segfault trying to draw/set the cursor on it.
+                    # Hiding stops Qt from dispatching any further paint events.
+                    widget.hide()
+
                     # Disconnect all signals to prevent callbacks on deleted widget
                     widget.blockSignals(True)
-                    
+
                     # If it's a matplotlib canvas, clean it up properly
                     if hasattr(widget, 'figure'):
                         if hasattr(widget.figure, 'clear'):

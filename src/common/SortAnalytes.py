@@ -71,3 +71,45 @@ def sort_analytes(method, analytes, order = 'd'):
         return row['analyte']
 
     return df_analytes.apply(_reconstruct, axis=1).to_list()
+
+
+def resolve_element_tokens(tokens, analytes_list):
+    """Resolves element/analyte tokens (bare symbols like ``'Sr'`` or full isotope
+    names like ``'Sr88'``) to real analyte columns in ``analytes_list``.
+
+    An exact (case-insensitive) match against a real column name is used when
+    available -- this preserves specificity for a token that's already a full
+    isotope name, e.g. resolving exactly ``'Sr88'`` rather than any isotope of Sr.
+    Otherwise, falls back to matching by element symbol alone (stripping mass
+    numbers from both sides), taking only the *first* matching isotope column --
+    multi-isotope elements (e.g. Sr86/Sr87/Sr88, common in isotope geochemistry
+    datasets) would otherwise all be resolved for a single bare-symbol token like
+    ``'Sr'``, inflating one element into several duplicate entries wherever this
+    list is used (e.g. TEC/spider plots), and shifting the position of every
+    element that follows.
+
+    Parameters
+    ----------
+    tokens : list of str
+        Element symbols or analyte names to resolve (e.g. from a TEC preset or a
+        user-picked field).
+    analytes_list : list of str
+        Real analyte column names available in the current sample.
+
+    Returns
+    -------
+    list
+        Resolved analyte column names, one per token that found a match, in
+        token order, with duplicates removed.
+    """
+    resolved = []
+    for token in tokens:
+        token_lower = token.lower()
+        match = next((col for col in analytes_list if col.lower() == token_lower), None)
+        if match is None:
+            stripped_token = re.sub(r'\d', '', token_lower)
+            match = next((col for col in analytes_list if re.sub(r'\d', '', col).lower() == stripped_token), None)
+        if match is not None:
+            resolved.append(match)
+
+    return list(dict.fromkeys(resolved))

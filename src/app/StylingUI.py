@@ -1429,6 +1429,11 @@ class StylingDock(CustomDockWidget):
 
         self.ui.schedule_update()
 
+        # Quick View tiles are drawn once and cached, not by schedule_update()/update_SV(),
+        # so they need an explicit repaint to pick up the new colormap while that tab is active.
+        if self.ui.canvas_widget.canvasWindow.currentIndex() == self.ui.canvas_widget.tab_dict['qv']:
+            self.ui.canvas_widget.display_QV()
+
     def update_cbar_reverse(self, new_value):
         if new_value is None:
             self.ui.style_data.blockSignals(True)
@@ -1604,8 +1609,8 @@ class StylingDock(CustomDockWidget):
         self.annotations.doubleSpinBoxFontSize.setEnabled(True)
         match plot_type.lower():
             case 'field map' | 'gradient map':
-                self._toggle_common(show_mass=True)
-                
+                self._toggle_common(show_mass=True, aspect=True)
+
                 # marker properties (conditional)
                 if ui.app_data.sample_id != '' and len(ui.data[ui.app_data.sample_id].spotdata) != 0:
                     self._toggle_markers(color=True)
@@ -1679,7 +1684,7 @@ class StylingDock(CustomDockWidget):
 
                 self._toggle_colormap()
             case 'ternary map':
-                self._toggle_common(show_mass=True)
+                self._toggle_common(show_mass=True, aspect=True)
 
                 # Conditional markers
                 if not self.ui.app_data.current_data.spotdata.empty:
@@ -1702,7 +1707,7 @@ class StylingDock(CustomDockWidget):
                 self._toggle_lines()
 
             case 'cluster score map' | 'dimension score map' | 'cluster map':
-                self._toggle_common(show_mass=False)
+                self._toggle_common(show_mass=False, aspect=True)
                 self._toggle_lines()
 
                 # Conditional colormap (not for clusters)
@@ -1863,8 +1868,14 @@ class StylingDock(CustomDockWidget):
 
         # for map plots
         if style.plot_type.lower() in style.map_plot_types:
-            style.aspect_ratio = data.aspect_ratio
-            
+            # None means "not yet customized" -- only auto-fill from the
+            # data's true pixel aspect ratio the first time, so a user
+            # override (now editable, see toggle_style_widgets) survives
+            # later field/plot-type refreshes instead of being silently
+            # reset back to the data's native aspect ratio every time.
+            if style.aspect_ratio is None:
+                style.aspect_ratio = data.aspect_ratio
+
             if style.scale_length is None:
                 style.scale_length = style.default_scale_length()
         else:

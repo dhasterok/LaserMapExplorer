@@ -1,4 +1,4 @@
-import re, os, copy
+import re, os, copy, json
 import uuid
 from datetime import datetime
 from typing import Optional, Union, Any, Dict, List
@@ -17,7 +17,6 @@ from src.common.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 from src.common.Status import StatusMessageManager
-from lame_core.format import symlog, inv_logit
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 
 
@@ -228,6 +227,12 @@ class SampleObj(QObject):
         self.sample_id = sample_id
         self.file_path = file_path
 
+        # sample-level acquisition metadata (spot size, sweep time, etc.), loaded
+        # from the sibling <sample_id>.lmdf.json file in reset_data(), if present
+        self.metadata = {}
+        # per-file/analyte records from the same file, for the future per-analyte-units feature
+        self.analyte_metadata = []
+
         self._outlier_method = outlier_method
         
         self._negative_method = negative_method
@@ -370,23 +375,23 @@ class SampleObj(QObject):
     def dy(self, new_dy):
         if not self._updating:
             self._updating = True
-            
-            if new_dy == self._dx:
+
+            if new_dy == self._dy:
                 return
 
             # Recalculates Y for self.raw
             # (does not use self.processed because the y limits will otherwise be incorrect)
-            Y = self.raw['Y']/self._dy
+            Y = self.raw['Yc']/self._dy
             self._dy = new_dy
             Y_new = new_dy*Y
 
             # Extract cropped region and update self.processed
             self._y = Y_new[self.crop_mask]
-            self.processed['Y'] = self._y
-            
+            self.processed['Yc'] = self._y
+
             self._updating = False
 
-            self.pixelDimensionChanged.emit("y", self._dx)
+            self.pixelDimensionChanged.emit("y", self._dy)
         
     @property
     def nx(self):
@@ -704,14 +709,37 @@ class SampleObj(QObject):
 
         What is not reset?
         """        
-        # load data
-        metadata_path = self.file_path.replace('.lame.','.lmdf.')
-        metadata_df = None
+        # load sibling acquisition-metadata file, if present -- older samples (or data
+        # types that don't populate it yet) simply leave self.metadata/analyte_metadata
+        # at their __init__ defaults ({} / [])
+        metadata_path = self.file_path.replace('.lame.', '.lmdf.').replace('.csv', '.json')
         if os.path.exists(metadata_path):
-            metadata_df = pd.read_csv(self.file_path, engine='c')
+            try:
+                with open(metadata_path, 'r') as f:
+                    lmdf = json.load(f)
+                self.metadata = {
+                    'Data type': lmdf.get('data_type'),
+                    'Method': lmdf.get('method'),
+                    **lmdf.get('metadata', {}),
+                }
+                self.analyte_metadata = lmdf.get('analytes', [])
+            except Exception as e:
+                log(f"Could not load metadata file '{os.path.basename(metadata_path)}': {e}", prefix="Data")
 
         sample_df = pd.read_csv(self.file_path, engine='c')
         sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
+
+        # pandas mangles duplicate CSV header names by appending '.1', '.2', etc.
+        # (the source file had the same column title twice, e.g. an export bug
+        # upstream). Downstream analyte/ratio-name parsing assumes clean names
+        # and breaks on the mangled suffix, so drop those duplicates here.
+        dupe_pattern = re.compile(r'^(.*)\.\d+$')
+        mangled = [col for col in sample_df.columns
+                   if (m := dupe_pattern.match(col)) and m.group(1) in sample_df.columns]
+        if mangled:
+            log(f"'{os.path.basename(self.file_path)}' has duplicate column(s), dropping: {mangled}",
+                prefix="Data")
+            sample_df = sample_df.drop(columns=mangled)
 
         # Older .lame files use 'X'/'Y'; current schema uses 'Xc'/'Yc' — normalise on load
         if 'Xc' not in sample_df.columns and 'X' in sample_df.columns:
@@ -787,6 +815,7 @@ class SampleObj(QObject):
         analyte_columns = self.raw.match_attribute(attribute='data_type',value='Analyte')
         self.raw.set_attribute(analyte_columns, 'units', None)
         self.raw.set_attribute(analyte_columns, 'use', True)
+        self.raw.set_attribute(analyte_columns, 'use_normalized', False)
         # quantile bounds
         self.raw.set_attribute(analyte_columns, 'lower_bound', 0.05)
         self.raw.set_attribute(analyte_columns, 'upper_bound', 99.5)
@@ -800,6 +829,7 @@ class SampleObj(QObject):
         analyte_columns = self.raw.match_attribute(attribute='data_type',value='Ratio')
         self.raw.set_attribute(analyte_columns, 'units', None)
         self.raw.set_attribute(analyte_columns, 'use', True)
+        self.raw.set_attribute(analyte_columns, 'use_normalized', False)
         # quantile bounds
         self.raw.set_attribute(analyte_columns, 'lower_bound', self._default_lower_bound)
         self.raw.set_attribute(analyte_columns, 'upper_bound', self._default_upper_bound)
@@ -942,6 +972,7 @@ class SampleObj(QObject):
 
         self.add_columns('Ratio',ratio_name,ratio_array)
         self.processed.set_attribute(ratio_name, 'use', True)
+        self.processed.set_attribute(ratio_name, 'use_normalized', False)
 
     def get_correlation_matrix(self, method='pearson'):
         """Correlation matrix between analyte columns, cached per method.
@@ -1862,9 +1893,12 @@ class SampleObj(QObject):
                         df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.symlog(df['array']), np.nan)
                 
                 # normalize
+                # .get(..., 0) treats an element missing from the reference table the
+                # same as a non-positive reference value below -- both mean "can't
+                # normalize" (NaN), rather than raising a KeyError.
                 if not self.ref_chem.empty and 'normalized' in field_type:
-                    refval = self.ref_chem[re.sub(r'\d', '', field).lower()]
-                    df['array'] = df['array'] / refval
+                    refval = self.ref_chem.get(re.sub(r'\d', '', field).lower(), 0)
+                    df['array'] = df['array'] / refval if refval > 0 else np.nan
 
             case 'Ratio' | 'Ratio (normalized)':
                 field_1 = field.split(' / ')[0]
@@ -1872,12 +1906,12 @@ class SampleObj(QObject):
 
                 # unnormalized
                 df['array'] = self.processed[field].values
-                
+
                 # normalize
                 if not self.ref_chem.empty and 'normalized' in field_type:
-                    refval_1 = self.ref_chem[re.sub(r'\d', '', field_1).lower()]
-                    refval_2 = self.ref_chem[re.sub(r'\d', '', field_2).lower()]
-                    df['array'] = df['array'] * (refval_2 / refval_1)
+                    refval_1 = self.ref_chem.get(re.sub(r'\d', '', field_1).lower(), 0)
+                    refval_2 = self.ref_chem.get(re.sub(r'\d', '', field_2).lower(), 0)
+                    df['array'] = df['array'] * (refval_2 / refval_1) if (refval_1 > 0 and refval_2 > 0) else np.nan
 
                 #get norm value
                 if norm == 'log':
@@ -1896,50 +1930,62 @@ class SampleObj(QObject):
         # ----end debugging----
         return df
 
-    def get_processed_data(self):
+    def get_processed_data(self, field_types=('Analyte', 'Ratio')):
         """Gets the processed data for analysis
+
+        Builds a matrix from columns flagged for inclusion via the ``use``
+        and ``use_normalized`` column attributes, across `field_types`. Each
+        included column is built via ``get_map_data()`` -- the same function
+        plots use -- so analysis values (norm scaling, reference-chemistry
+        normalization) always match what's shown on screen. A column flagged
+        both ``use`` and ``use_normalized`` is included as two separate
+        columns (the normalized one suffixed ``' (normalized)'``) so they
+        don't collide as separate analysis inputs.
+
+        Parameters
+        ----------
+        field_types : tuple of str, optional
+            ``data_type`` values to include, by default ``('Analyte', 'Ratio')``
 
         Returns
         -------
         pandas.DataFrame
-            Filtered data frame 
-        bool
-            Analytes included from processed data
+            Filtered/normalized data used for analysis
+        list
+            Column names included (matches the DataFrame's columns)
         """
         if self.sample_id == '':
             return
 
-        # return normalised, filtered data with that will be used for analysis
-        #use_analytes = self.data[self.sample_id]['Analyte_info'].loc[(self.data[self.sample_id]['Analyte_info']['use']==True), 'Analytes'].values
-        use_analytes = self.processed.match_attributes({'data_type': 'Analyte', 'use': True})
+        columns = {}
+        for field_type in field_types:
+            for field in self.processed.match_attributes({'data_type': field_type, 'use': True}):
+                norm = self.processed.get_attribute(field, 'norm')
+                columns[field] = self.get_map_data(field, field_type=field_type, norm=norm)['array'].values
 
-        df = self.processed[use_analytes]
+            normalized_field_type = f'{field_type} (normalized)'
+            for field in self.processed.match_attributes({'data_type': field_type, 'use_normalized': True}):
+                norm = self.processed.get_attribute(field, 'norm')
+                array = self.get_map_data(field, field_type=normalized_field_type, norm=norm)['array'].values
+                if np.isnan(array).all():
+                    # can't normalize (e.g. no matching reference-chemistry value) --
+                    # drop the column rather than let one all-NaN column zero out
+                    # every row of every other selected column via nan_mask below.
+                    continue
+                # avoid name collision when both the raw and normalized variant are selected
+                col_name = f'{field} (normalized)' if field in columns else field
+                columns[col_name] = array
 
-        #perform scaling for groups of analytes with same norm parameter
-        for norm in ['log', 'symlog', 'inv_logit']:
-            analyte_set = self.processed.match_attributes({'data_type': 'Analyte', 'use': True, 'norm': norm})
-            if not analyte_set:
-                continue
-
-            tmp_array = df[analyte_set].values
-            if norm == 'log':
-                # np.nanlog handles NaN value
-                df[analyte_set] = np.where(~np.isnan(tmp_array), np.log10(tmp_array))
-            elif norm == 'symlog':
-                df[analyte_set] = np.where(~np.isnan(tmp_array), symlog(tmp_array))
-            elif norm == 'inv_logit':
-                # Handle division by zero and NaN values
-                with np.errstate(divide='ignore', invalid='ignore'):
-                    df[analyte_set] = np.where(~np.isnan(tmp_array), inv_logit(tmp_array))
+        use_fields = list(columns.keys())
+        df = pd.DataFrame(columns, index=self.processed.index)
 
         # Combine the two masks to create a final mask
-        nan_mask = df.notna().all(axis=1)
-        
-        
+        nan_mask = df.notna().all(axis=1) if use_fields else pd.Series(True, index=self.processed.index)
+
         # mask nan values and add to self.mask
         self.mask = self.mask & nan_mask.values
 
-        return df, use_analytes
+        return df, use_fields
     
     # extracts data for scatter plot
     def get_vector(self, field_type: str, field: str, norm: str='linear', processed: bool=True):

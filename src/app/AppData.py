@@ -7,6 +7,7 @@ import src.common.csvdict as csvdict
 from PyQt6.QtCore import QObject, pyqtSignal
 from lame_core.config import APPDATA_PATH
 from src.common.Logger import auto_log_methods, log
+from src.common.SortAnalytes import resolve_element_tokens
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
@@ -1075,13 +1076,13 @@ class AppData(QObject):
     @property
     def dim_red_y_max(self):
         """int : The maximum y-axis index for dimensionality reduction."""
-        return self._dim_red_x_max
+        return self._dim_red_y_max
 
     @dim_red_y_max.setter
     def dim_red_y_max(self, new_max):
-        if new_max == self._dim_red_x_max:
+        if new_max == self._dim_red_y_max:
             return
-        self._dim_red_x_max = new_max
+        self._dim_red_y_max = new_max
         self.dimRedMaxValueChanged.emit('y', new_max)
 
     ### Cluster Properties ###
@@ -1104,6 +1105,7 @@ class AppData(QObject):
 
         self._cluster_method = method
         self._set_clustering_parameters()
+        self.update_cluster_flag = True
         self.clusterMethodChanged.emit(method)
 
     @property
@@ -1132,6 +1134,12 @@ class AppData(QObject):
         self._num_clusters = new_value
         # update cluster dict with new number of clusters
         self.cluster_dict[self._cluster_method]['n_clusters'] = self._num_clusters
+        # a different cluster count invalidates the previously-computed
+        # clustering/cluster_dict[method][i] color-and-name entries -- without
+        # this, re-plotting after only changing the count reuses stale results
+        # sized for the old count, e.g. KeyError in get_cluster_colormap when
+        # the new count is larger than what was previously computed.
+        self.update_cluster_flag = True
         self.numClustersChanged.emit(new_value)
 
     @property
@@ -1147,6 +1155,7 @@ class AppData(QObject):
         self._cluster_seed = new_value
         # update cluster dict with new seed
         self.cluster_dict[self._cluster_method]['seed'] = self._cluster_seed
+        self.update_cluster_flag = True
         self.clusterSeedChanged.emit( new_value)
 
     @property
@@ -1162,6 +1171,7 @@ class AppData(QObject):
         self._cluster_exponent = new_value
         # update cluster dict with new cluster exponent value
         self.cluster_dict[self._cluster_method]['exponent'] = self._cluster_exponent
+        self.update_cluster_flag = True
         self.clusterExponentChanged.emit(new_value)
 
     @property
@@ -1177,6 +1187,7 @@ class AppData(QObject):
         self._cluster_distance = new_value
         # update cluster dict with new cluster distance method
         self.cluster_dict[self._cluster_method]['distance'] = self._cluster_distance
+        self.update_cluster_flag = True
         self.clusterDistanceChanged.emit(new_value)
 
     @property
@@ -1203,6 +1214,9 @@ class AppData(QObject):
             return
     
         self._dim_red_precondition = flag
+        # switching whether clustering runs on the raw matrix or a PCA basis
+        # invalidates the previously-computed clustering results
+        self.update_cluster_flag = True
         self.clusterPreconditionChanged.emit(flag)
 
     @property
@@ -1217,6 +1231,11 @@ class AppData(QObject):
             return
     
         self._num_basis_for_precondition = new_value
+        # only matters while dim_red_precondition is on, but cheap/harmless
+        # to set unconditionally -- matches the other clustering-parameter
+        # setters, and avoids stale results if precondition is toggled on
+        # after this value was already changed
+        self.update_cluster_flag = True
         self.numBasisChanged.emit(new_value)
 
     @property
@@ -1331,7 +1350,7 @@ class AppData(QObject):
         
         return new_list
 
-    def update_field_selection(self, fields=None, norms=None):
+    def update_field_selection(self, fields=None, norms=None, use_normalized=None):
         """Updates fields in mainwindow and its corresponding scale used for each field.
 
         Updates fields and its corresponding scale used for each field based
@@ -1343,7 +1362,12 @@ class AppData(QObject):
         fields : list of str
             List of field or ratio names.
         norms : list of str
-            List of normalization scales ('linear', 'log', 'logit'), one per field.
+            List of normalization scales ('linear', 'log', 'inv_logit'), one per field.
+        use_normalized : list of bool, optional
+            Whether each field's reference-chemistry-normalized variant should
+            also be included in analysis (PCA/clustering), one per field. If
+            omitted, `use_normalized` is left at its current value for every
+            field (unlike `use`, which is always reset).
         """
         if not fields:
             return
@@ -1354,6 +1378,8 @@ class AppData(QObject):
         # Reset all selected fields to not used
         for field in all_fields:
             self.current_data.processed.set_attribute(field, 'use', False)
+            if use_normalized is not None:
+                self.current_data.processed.set_attribute(field, 'use_normalized', False)
 
         # If norms provided and length matches fields
         if norms and len(norms) == len(fields):
@@ -1366,12 +1392,17 @@ class AppData(QObject):
                 # Mark as used and set scale
                 if field in self.current_data.processed.columns:
                     self.current_data.processed.set_attribute(field, 'use', True)
-                    self.current_data.processed.set_attribute(field, 'scale', norm)
+                    self.current_data.processed.set_attribute(field, 'norm', norm)
         else:
             # No norms or mismatch → just mark as used with default scale
             for field in fields:
                 if field in self.current_data.processed.columns:
                     self.current_data.processed.set_attribute(field, 'use', True)
+
+        if use_normalized is not None and len(use_normalized) == len(fields):
+            for field, normalized in zip(fields, use_normalized):
+                if field in self.current_data.processed.columns:
+                    self.current_data.processed.set_attribute(field, 'use_normalized', bool(normalized))
 
     def update_hist_bin_width(self):
         """Updates the bin width for histograms
@@ -1452,12 +1483,14 @@ class AppData(QObject):
         Extend the active N-dimensional analyte list (``self.ndim_list``) by resolving
         input analyte tokens against available analyte columns in the current dataset.
 
-        Resolution is performed by:
-        1) collecting columns from ``self.current_data.processed`` where
-            ``data_type == 'Analyte'``; and
-        2) matching each input token in ``el_list`` to those column names with a
-            case-insensitive comparison after removing digits from both sides
-            (e.g., ``'Ce'`` matches ``'Ce140'``, ``'Ce142'``).
+        Resolution is performed by ``resolve_element_tokens`` (see
+        ``src.common.SortAnalytes``): each input token in ``el_list`` is matched to a
+        column from ``self.current_data.processed`` where ``data_type == 'Analyte'``,
+        preferring an exact name match and otherwise falling back to a case-insensitive
+        match after removing digits from both sides (e.g., ``'Ce'`` matches ``'Ce140'``).
+        At most one column is resolved per token, so a bare element symbol never expands
+        into multiple isotopes -- important for plots like the TEC/spider diagram, where
+        every element should contribute exactly one point.
 
         Parameters
         ----------
@@ -1467,25 +1500,20 @@ class AppData(QObject):
         Returns
         -------
         None
-        
+
         Examples
         --------
         >>> self.ndim_list = []
         >>> # Suppose analyte columns are: ['La', 'Ce140', 'Ce142', 'Nd146', 'Mg']
         >>> self.update_ndim_list(['Ce', 'Nd'])
         >>> self.ndim_list
-        ['Ce140', 'Ce142', 'Nd146']
+        ['Ce140', 'Nd146']
         """
         if not self.current_data:
             return
 
         analytes_list = self.current_data.processed.match_attribute('data_type', 'Analyte')
-        analytes = [
-            col
-            for iso in el_list
-            for col in analytes_list
-            if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '', iso).lower()
-        ]
+        analytes = resolve_element_tokens(el_list, analytes_list)
         self.ndim_list.extend(analytes)
         self.ndim_list = list(dict.fromkeys(self.ndim_list))  # Remove duplicates while preserving order
 

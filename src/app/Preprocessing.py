@@ -368,7 +368,7 @@ class PreprocessingUI(CustomPage):
         self.toolButtonPixelResolutionReset.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
         self.lineEditDX.editingFinished.connect(lambda: log(f"lineEditDX, value=[{self.lineEditDX.value}]",prefix="UI"))
         self.lineEditDY.editingFinished.connect(lambda: log(f"lineEditDY, value=[{self.lineEditDY.value}]",prefix="UI"))
-        self.toolButtonResolutionReset.clicked.connect(lambda: log("toolButtonsRolutionReset",prefix="UI"))
+        self.toolButtonResolutionReset.clicked.connect(lambda: log("toolButtonResolutionReset",prefix="UI"))
         self.toolButtonSwapResolution.clicked.connect(lambda: log("toolButtonSwapResolution",prefix="UI"))
         self.toolButtonAutoScale.clicked.connect(lambda: log(f"toolButtonAutoScale value=[{self.toolButtonAutoScale.isChecked()}]", prefix="UI"))
         self.toolButtonScaleEqualize.clicked.connect(lambda: log(f"toolButtonScaleEqualize value=[{self.toolButtonScaleEqualize.isChecked()}]", prefix="UI"))
@@ -604,7 +604,7 @@ class PreprocessingUI(CustomPage):
         data = self.dock.ui.data[self.dock.ui.app_data.sample_id]
 
         if self.checkBoxApplyAll.isChecked():
-            # Apply to all iolties
+            # Apply to all analytes
             analyte_list = data.processed.match_attribute('data_type', 'Analyte') + data.processed.match_attribute('data_type', 'Ratio')
             data.negative_method = method
             # clear existing plot info from tree to ensure saved plots using most recent data
@@ -754,22 +754,28 @@ class PreprocessingUI(CustomPage):
 
     def reset_crop(self):
         """Resets the cropping of the current sample and triggers a plot update."""
-        self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_crop
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_crop()
         self.dock.ui.schedule_update()
 
     def update_swap_resolution(self):
-        """Resets the pixel resolution of the current sample to original values and triggers a plot update."""
-        if not self.dock.ui.data or self.dock.ui.app_data.sample_id != '':
+        """Swaps dx and dy of the current sample and triggers a plot update.
+
+        Does nothing if no data is loaded or the sample ID is empty.
+        """
+        if not self.dock.ui.data or self.dock.ui.app_data.sample_id == '':
             return
 
-        self.dock.ui.data[self.dock.ui.app_data.sample_id].swap_resolution 
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].swap_resolution()
         self.dock.ui.schedule_update()
 
     def reset_pixel_resolution(self):
         """
-        Swaps the x and y resolutions in the current dataset and schedules a plot update.
+        Resets dx and dy of the current dataset to their original values and schedules a plot update.
 
         Does nothing if no data is loaded or the sample ID is empty.
         """
-        self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_resolution
+        if not self.dock.ui.data or self.dock.ui.app_data.sample_id == '':
+            return
+
+        self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_resolution()
         self.dock.ui.schedule_update()

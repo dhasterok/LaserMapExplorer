@@ -12,6 +12,7 @@ from src.common.TableFunctions import TableFcn
 from lame_core.CustomWidgets import CustomPage, CustomComboBox, CustomToolButton, CustomTableWidget
 from blueberry.ColorButton import ColorButton
 import src.common.csvdict as csvdict
+from src.common.SortAnalytes import resolve_element_tokens
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color
 from src.common.Logger import log, auto_log_methods
@@ -1093,7 +1094,10 @@ class NDimUI(CustomPage):
 
         analytes_list = self.dock.ui.app_data.current_data.processed.match_attribute('data_type','Analyte')
 
-        analytes = [col for iso in el_list for col in analytes_list if re.sub(r'\d', '', col).lower() == re.sub(r'\d', '',iso).lower()]
+        # resolves each token to at most one analyte column, so a bare element
+        # symbol (e.g. from a TEC preset) never expands into every isotope of
+        # that element measured in the sample -- see resolve_element_tokens
+        analytes = resolve_element_tokens(el_list, analytes_list)
 
         self.dock.ui.app_data.ndim_list.extend(analytes)
 

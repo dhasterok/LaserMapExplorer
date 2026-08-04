@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import traceback
+from scipy.stats import gaussian_kde
 
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel, QVBoxLayout
@@ -20,10 +21,10 @@ import lame_core.format as fmt
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color
 from src.common.plot_spider import plot_spider_norm
-from src.common.radar import Radar
-from src.common.radar_factory import radar_factory
+from global_geochemistry.plotting.radar import radar_prep, radarplot
 from src.common.scalebar import scalebar
 from src.common.ternary_plot import ternary
+from src.common.geochronology import LU_HF, plot_isochron_lines
 from src.common.Logger import LoggerConfig, log_call, log
 
 def create_plot(parent, data, app_data, style_data):
@@ -108,6 +109,9 @@ def create_plot(parent, data, app_data, style_data):
             case 'cluster performance':
                 # Note: cluster performance computation should be done by caller before calling create_plot
                 canvas, plot_info = cluster_performance_plot(parent, data, app_data, style_data)
+
+            case 'isochron':
+                canvas, plot_info = plot_isochron(parent, data, app_data, style_data)
 
     except Exception as e:
         print(f"Error in create_plot: {e}")
@@ -546,6 +550,32 @@ def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
 
     return canvas
 
+def _plot_kde_overlay(ax, values, color, peak_label=True):
+    """Overlays a Gaussian KDE curve on a density-normalized histogram axes.
+
+    Matches MATLAB's ``grouphistogram.m`` KDE-plus-peak-marker behavior
+    (``ksdensity`` there, ``scipy.stats.gaussian_kde`` here).
+    """
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    if len(values) < 2 or np.std(values) == 0:
+        return
+    try:
+        kde = gaussian_kde(values)
+    except Exception:
+        return
+
+    xs = np.linspace(values.min(), values.max(), 500)
+    density = kde(xs)
+    ax.plot(xs, density, color=color, linewidth=1.5, zorder=5)
+
+    if peak_label:
+        peak_idx = np.argmax(density)
+        ax.scatter([xs[peak_idx]], [density[peak_idx]], color=color, zorder=6, s=20)
+        ax.annotate(f'{xs[peak_idx]:.3g}', (xs[peak_idx], density[peak_idx]),
+                     textcoords='offset points', xytext=(0, 6), fontsize=7,
+                     color=color, ha='center')
+
 @log_call(logger_key='Plot')
 def plot_histogram(parent, data, app_data, style_data):
     """Plots a histogramn in the canvas window.
@@ -669,6 +699,8 @@ def plot_histogram(parent, data, app_data, style_data):
                     )
                 # plot_data: (n, bins, patches)
                 counts, bin_edges, _ = plot_data
+                if app_data.hist_show_kde and not cumflag:
+                    _plot_kde_overlay(canvas.axes, cluster_data, bar_color)
                 # Store histogram data for each cluster
                 df = pd.DataFrame({
                     'bin_left': bin_edges[:-1],
@@ -736,6 +768,8 @@ def plot_histogram(parent, data, app_data, style_data):
                     density=True
                 )
             counts, bin_edges, _ = plot_data
+            if app_data.hist_show_kde and not cumflag:
+                _plot_kde_overlay(canvas.axes, x['array'], style_data.line_color or bar_color)
             canvas.data = pd.DataFrame({
                 'bin_left': bin_edges[:-1],
                 'bin_right': bin_edges[1:],
@@ -1457,6 +1491,123 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
     return plot_info
 
 @log_call(logger_key='Plot')
+def plot_isochron(parent, data, app_data, style_data):
+    """Plots multi-cluster Lu-Hf isochrons: a normal-space panel and an
+    inverse-space panel, each showing cluster-colored pixel data, isochron
+    reference lines (``geochronology.plot_isochron_lines``), and per-cluster
+    Monte Carlo isochron fits.
+
+    Reads fit results cached by
+    ``Geochronology.compute_multipixel_isochron()`` (the Dating tab, in the
+    P-T-t Functions toolbox page) rather than recomputing the Monte Carlo
+    simulation on every redraw -- click "Multi-pixel isochron" there first.
+
+    Parameters
+    ----------
+    parent : MainWindow
+        Needed (unlike most plot functions) to reach the Dating tab's cached
+        fit results via ``parent.control_dock.special_tools``.
+    """
+    special_tools = getattr(parent.control_dock, 'special_tools', None)
+    geochron = getattr(special_tools, 'geochron', None) if special_tools else None
+    results = getattr(geochron, '_last_results', None) if geochron else None
+
+    canvas = MplCanvas(parent=parent, sub=121, width=9, height=4.5)
+
+    if not results or not results.get('clusters'):
+        canvas.axes.text(0.5, 0.5,
+            "Use the Dating tab's 'Multi-pixel isochron'\nbutton to compute a fit first.",
+            ha='center', va='center', transform=canvas.axes.transAxes)
+        canvas.axes.set_axis_off()
+        canvas.plot_name = 'isochron'
+        canvas.data = None
+        plot_info = {
+            'tree': 'Geochemistry', 'sample_id': app_data.sample_id, 'plot_name': 'isochron',
+            'plot_type': 'isochron', 'field_type': ['', '', '', ''], 'field': ['', '', '', ''],
+            'figure': canvas, 'style': style_data.style_dict.get('isochron', {}),
+            'cluster_groups': [], 'view': [True, False], 'position': [], 'data': None,
+        }
+        return canvas, plot_info
+
+    ax_normal = canvas.axes
+    ax_inv = canvas.fig.add_subplot(122)
+
+    cluster_method = results['cluster_method']
+    cluster_color, cluster_label, _ = style_data.get_cluster_colormap(
+        app_data.cluster_dict[cluster_method], alpha=style_data.marker_alpha)
+
+    def _plot_cluster(ax, res, color, label, xs_all, ys_all):
+        if 'error' in res or len(res.get('x', [])) == 0:
+            return
+        ax.scatter(res['x'], res['y'], s=style_data.marker_size, color=color,
+                   alpha=style_data.marker_alpha / 100, edgecolors='none', label=label)
+        xs_all.extend(res['x'])
+        ys_all.extend(res['y'])
+        if np.isfinite(res.get('age_mean', np.nan)):
+            xs = np.array([np.min(res['x']), np.max(res['x'])])
+            ys = res['intercept'] + xs * res['slope']
+            ax.plot(xs, ys, color=color, linewidth=1.8)
+            ax.annotate(f"{label}: {res['age_mean']:.0f}±{res['age_std']:.0f} Ma",
+                        (xs[-1], ys[-1]), textcoords='offset points', xytext=(-4, 4),
+                        fontsize=7, color=color, ha='right')
+
+    all_x_normal, all_y_normal, all_x_inv, all_y_inv = [], [], [], []
+    for c, r in results['clusters'].items():
+        color = cluster_color[int(c)] if int(c) < len(cluster_color) else style_data.marker_color
+        label = cluster_label[int(c)] if int(c) < len(cluster_label) else str(c)
+        _plot_cluster(ax_normal, r['normal'], color, label, all_x_normal, all_y_normal)
+        _plot_cluster(ax_inv, r['inverse'], color, label, all_x_inv, all_y_inv)
+
+    decay_const = None
+    dt = getattr(special_tools, 'dating', None)
+    if dt is not None:
+        try:
+            decay_const = dt.lineEditDecayConstant.value
+        except Exception:
+            decay_const = None
+
+    if all_x_normal:
+        ax_normal.set_xlim(0, np.quantile(all_x_normal, 0.995))
+        ax_normal.set_ylim(0, np.quantile(all_y_normal, 0.995))
+    plot_isochron_lines(ax_normal, 'normal', intercept=LU_HF['Hf176_Hf177_i'], decay_const=decay_const)
+    ax_normal.set_xlabel('$^{176}$Lu/$^{177}$Hf')
+    ax_normal.set_ylabel('$^{176}$Hf/$^{177}$Hf')
+    ax_normal.set_title('Normal isochron', fontsize=style_data.font_size)
+    ax_normal.tick_params(direction=style_data.tick_dir)
+
+    if all_x_inv:
+        ax_inv.set_xlim(0, np.quantile(all_x_inv, 0.995))
+        ax_inv.set_ylim(0, 4)
+    plot_isochron_lines(ax_inv, 'inverse', intercept=1.0 / LU_HF['Hf176_Hf177_i'], decay_const=decay_const)
+    ax_inv.set_xlabel('$^{176}$Lu/$^{176}$Hf')
+    ax_inv.set_ylabel('$^{177}$Hf/$^{176}$Hf')
+    ax_inv.set_title('Inverse isochron', fontsize=style_data.font_size)
+    ax_inv.tick_params(direction=style_data.tick_dir)
+
+    canvas.fig.tight_layout()
+
+    plot_name = f"isochron_{cluster_method}"
+    plot_data = pd.DataFrame({'x_normal': all_x_normal, 'y_normal': all_y_normal}) if all_x_normal else None
+    canvas.data = plot_data
+    canvas.plot_name = plot_name
+
+    plot_info = {
+        'tree': 'Geochemistry',
+        'sample_id': app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': 'isochron',
+        'field_type': ['Ratio', 'Ratio', '', 'Cluster'],
+        'field': ['isochron', 'isochron', '', cluster_method],
+        'figure': canvas,
+        'style': style_data.style_dict.get('isochron', {}),
+        'cluster_groups': list(results['clusters'].keys()),
+        'view': [True, False],
+        'position': [],
+        'data': plot_data,
+    }
+    return canvas, plot_info
+
+@log_call(logger_key='Plot')
 def ternary_scatter(canvas, data, app_data, style_data, x, y, z, c):
     """Creates ternary scatter plots
 
@@ -1943,16 +2094,7 @@ def plot_ndim(parent, data, app_data, style_data):
 
     match plot_type:
         case 'radar':
-            axes_interval = 5
-
-            # radar_factory registers the 'radar' projection as a side effect, and
-            # must run before requesting a radar-projected subplot. The canvas's
-            # figure is already Qt-bound, so the radar axes must be built on
-            # canvas.fig directly (swapping canvas.axes for a standalone figure's
-            # axes afterward does not update what the widget actually renders).
-            radar_factory(len(app_data.ndim_list), frame='polygon')
-            canvas.fig.delaxes(canvas.axes)
-            canvas.axes = canvas.fig.add_subplot(111, projection='radar')
+            n_ticks = 5
 
             if cluster_flag and method in data.processed.columns:
                 # Get the cluster labels for the data
@@ -1960,25 +2102,51 @@ def plot_ndim(parent, data, app_data, style_data):
 
                 df_filtered['clusters'] = cluster_group
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
-                radar = Radar(
-                    canvas.axes,
-                    df_filtered,
-                    fields=app_data.ndim_list,
-                    fieldlabels=labels,
-                    quantiles=quantiles,
-                    axes_interval=axes_interval,
-                    group_field='clusters',
-                    groups=clusters)
 
-                radar.plot(cmap = cluster_color, group_labels = cluster_label)
-                canvas.axes.legend(loc='upper right', frameon='False')
+                prep = radar_prep(df_filtered, fields=app_data.ndim_list,
+                                   group_field='clusters', groups=clusters,
+                                   quantiles=quantiles)
+
+                # cluster_color/cluster_label are indexed by cluster id
+                # (0..n_clusters-1, plus a trailing entry for id 99, the
+                # "mask"/other cluster) -- not by position in `clusters`,
+                # which may be a non-contiguous subset of selected ids.
+                def _cluster_style(g):
+                    idx = int(g)
+                    if idx == 99 or idx >= len(cluster_color):
+                        return cluster_color[-1], cluster_label[-1]
+                    return cluster_color[idx], cluster_label[idx]
+
+                styles = [_cluster_style(g) for g in clusters]
+                # Swap in display names for the legend; radar_prep's `groups`
+                # (raw cluster ids) already did their job selecting rows above.
+                prep['groups'] = [lbl for _, lbl in styles]
+
+                radarplot(**prep, ax=canvas.axes, axis_labels=labels,
+                          n_ticks=n_ticks, colors=[c for c, _ in styles])
             else:
-                radar = Radar(canvas.axes, df_filtered, fields=app_data.ndim_list, fieldlabels=labels, quantiles=quantiles, axes_interval=axes_interval, group_field='', groups=None)
+                prep = radar_prep(df_filtered, fields=app_data.ndim_list,
+                                   group_field=None, quantiles=quantiles)
+                radarplot(**prep, ax=canvas.axes, axis_labels=labels, n_ticks=n_ticks)
 
-                radar.plot()
+            canvas.fig.tight_layout()
 
-                plot_data = radar.vals
-                
+            # Long-form table (group/field/quantile/value) -- robust to any
+            # group/quantile count and always 2-D, unlike the raw (n_groups,
+            # n_fields[, n_quantiles]) array in prep['vals'].
+            p_vals, p_fields, p_groups, p_quantiles = (
+                prep['vals'], prep['fields'], prep['groups'], prep['quantiles']
+            )
+            if p_vals.ndim == 2:
+                p_vals = p_vals[:, :, np.newaxis]
+                p_quantiles = [None]
+            plot_data = pd.DataFrame([
+                {'group': g, 'field': f, 'quantile': q, 'value': p_vals[gi, fi, qi]}
+                for gi, g in enumerate(p_groups)
+                for fi, f in enumerate(p_fields)
+                for qi, q in enumerate(p_quantiles)
+            ])
+
         case 'TEC':
             yl = [np.inf, -np.inf]
             if cluster_flag and method in data.processed.columns:

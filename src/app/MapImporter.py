@@ -1436,7 +1436,7 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
             dark_icon_unchecked="icon-select-none-dark-64.svg",
             parent=toolbar,
         )
-        self.actionSelectNone.setToolTip("Select all files")
+        self.actionSelectNone.setToolTip("Deselect all files")
 
         toolbar.addAction(self.actionSelectAll)
         toolbar.addAction(self.actionSelectNone)
@@ -1444,7 +1444,7 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         layout.insertWidget(0, toolbar)
 
         self.actionSelectAll.triggered.connect(self.select_all)
-        self.actionSelectNone.triggered.connect(self.select_all)
+        self.actionSelectNone.triggered.connect(self.select_none)
 
         self.lineEditDirectory.setText(self.parent.root_path+"/"+sample_id)
 

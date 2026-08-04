@@ -107,6 +107,11 @@ class HistogramUI(QGroupBox):
         self.comboBoxHistType.setObjectName("comboBoxHistType")
         form_layout.addRow("Histogram type", self.comboBoxHistType)
 
+        self.checkBoxHistogramKDE = QCheckBox("Show KDE", parent=self)
+        self.checkBoxHistogramKDE.setObjectName("checkBoxHistogramKDE")
+        self.checkBoxHistogramKDE.setToolTip("Overlay a kernel density estimate on the histogram.")
+        form_layout.addRow(self.checkBoxHistogramKDE)
+
     def connect_widgets(self):
         """Connects histogram widgets to methods."""
         self.doubleSpinBoxBinWidth.valueChanged.connect(lambda value: self.update_hist_bin_width(value, user_action=True))
@@ -120,17 +125,21 @@ class HistogramUI(QGroupBox):
 
         self.toolButtonHistogramReset.clicked.connect(lambda _: self.dock.ui.app_data.histogram_reset_bins())
 
+        self.checkBoxHistogramKDE.toggled.connect(lambda checked: self.update_hist_show_kde(checked, user_action=True))
+
     def connect_observer(self):
         """Connects properties to observer functions."""
         self.dock.ui.app_data.histBinWidthChanged.connect(lambda value: self.update_hist_bin_width(value))
         self.dock.ui.app_data.histNumBinsChanged.connect(lambda value: self.update_hist_num_bins(value))
         self.dock.ui.app_data.histPlotStyleChanged.connect(lambda method: self.update_hist_plot_style(method))
+        self.dock.ui.app_data.histShowKdeChanged.connect(lambda checked: self.update_hist_show_kde(checked))
 
     def connect_logger(self):
         """Connects widgets to logger."""
         self.doubleSpinBoxBinWidth.valueChanged.connect(lambda: log(f"doubleSpinBoxBinWidth value=[{self.doubleSpinBoxBinWidth.value()}]", prefix="UI"))
         self.spinBoxNBins.valueChanged.connect(lambda: log(f"spinBoxNBins value=[{self.spinBoxNBins.value()}]", prefix="UI"))
         self.toolButtonHistogramReset.clicked.connect(lambda: log("toolButtonHistogramReset", prefix="UI"))
+        self.checkBoxHistogramKDE.toggled.connect(lambda: log(f"checkBoxHistogramKDE value=[{self.checkBoxHistogramKDE.isChecked()}]", prefix="UI"))
 
     def update_hist_bin_width(self, value, user_action=False):
         """ Updates histogram bin width.
@@ -220,6 +229,30 @@ class HistogramUI(QGroupBox):
             self.comboBoxHistType.blockSignals(True)
             self.comboBoxHistType.setCurrentText(new_plot_style)
             self.comboBoxHistType.blockSignals(False)
+
+        if self.dock.toolbox.currentIndex() == self.dock.tab_dict['sample'] and self.dock.ui.style_data.plot_type == "histogram":
+            self.dock.ui.schedule_update()
+
+    def update_hist_show_kde(self, checked=None, user_action=False):
+        """Updates the KDE-overlay checkbox and triggers a plot update.
+
+        Parameters
+        ----------
+        checked : bool, optional
+            New checkbox state, by default None
+        user_action : bool, optional
+            Whether the update was triggered by user interaction with the checkbox, by default False
+        """
+        if checked is None or user_action:
+            self.dock.ui.app_data.blockSignals(True)
+            self.dock.ui.app_data.hist_show_kde = self.checkBoxHistogramKDE.isChecked()
+            self.dock.ui.app_data.blockSignals(False)
+        else:
+            if self.checkBoxHistogramKDE.isChecked() == checked:
+                return
+            self.checkBoxHistogramKDE.blockSignals(True)
+            self.checkBoxHistogramKDE.setChecked(checked)
+            self.checkBoxHistogramKDE.blockSignals(False)
 
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['sample'] and self.dock.ui.style_data.plot_type == "histogram":
             self.dock.ui.schedule_update()
@@ -590,6 +623,15 @@ class ScatterUI(CustomPage):
 
         self.toolButtonTernaryMap.clicked.connect(lambda _: self.ternary_map_button_clicked())
 
+        # Manually picking a swatch color should update the actual ternary
+        # color used for plotting (style_data), not just the button's own
+        # appearance, and should mark the colormap as no longer matching a
+        # preset.
+        self.colorButtonTCmapXColor.colorChanged.connect(lambda color: self.ternary_swatch_color_changed('x', color))
+        self.colorButtonTCmapYColor.colorChanged.connect(lambda color: self.ternary_swatch_color_changed('y', color))
+        self.colorButtonTCmapZColor.colorChanged.connect(lambda color: self.ternary_swatch_color_changed('z', color))
+        self.colorButtonTCmapMColor.colorChanged.connect(lambda color: self.ternary_swatch_color_changed('m', color))
+
     def connect_observer(self):
         """Connects properties to observer functions."""
         self.dock.ui.app_data.scatterPresetChanged.connect(self.update_scatter_preset_combobox)
@@ -685,17 +727,68 @@ class ScatterUI(CustomPage):
 
 
     def ternary_colormap_changed(self):
-        """Changes toolButton backgrounds associated with ternary colormap
+        """Applies the selected ternary colormap preset.
 
-        Updates ternary colormap when swatch colors are changed in the Scatter and Heatmaps >
-        Map from Ternary groupbox.  The ternary colored chemical map is updated.
+        Updates ``style_data.ternary_color_x/y/z/m`` (which is what the
+        ternary map plot actually reads) and syncs the swatch button colors
+        to match, whenever a predefined scheme is selected in
+        ``comboBoxTernaryColormap``. Selecting "user defined" leaves the
+        current (possibly hand-picked) colors untouched. Written to update
+        ``style_data`` directly rather than the buttons alone -- setting
+        colors via the buttons' ``colorChanged`` signal instead relies on
+        ``connect_observer()``, which isn't wired yet the first time this
+        runs (during ``connect_widgets()``, at construction).
         """
-        for cmap in self.dock.ui.style_data.ternary_colormaps:
-            if cmap['scheme'] == self.comboBoxTernaryColormap.currentText():
-                self.colorButtonTCmapXColor.color = cmap['top']
-                self.colorButtonTCmapYColor.color = cmap['left']
-                self.colorButtonTCmapZColor.color = cmap['right']
-                self.colorButtonTCmapMColor.color = cmap['center']
+        scheme = self.comboBoxTernaryColormap.currentText()
+        if scheme == 'user defined':
+            return
+
+        self.dock.ui.style_data.ternary_colormap = scheme
+
+        # blockSignals: ColorButton.color always emits colorChanged, even
+        # when set to its current value -- without this, syncing the swatch
+        # here would re-trigger ternary_swatch_color_changed() and flip the
+        # combobox right back to 'user defined'.
+        for button, color in (
+            (self.colorButtonTCmapXColor, self.dock.ui.style_data.ternary_color_x),
+            (self.colorButtonTCmapYColor, self.dock.ui.style_data.ternary_color_y),
+            (self.colorButtonTCmapZColor, self.dock.ui.style_data.ternary_color_z),
+            (self.colorButtonTCmapMColor, self.dock.ui.style_data.ternary_color_m),
+        ):
+            button.blockSignals(True)
+            button.color = color
+            button.blockSignals(False)
+
+        # tab_dict isn't populated yet the first time this runs (called from
+        # connect_widgets() during ScatterUI construction, before ControlDock
+        # has finished building its toolbox pages).
+        if hasattr(self.dock, 'tab_dict') and self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter'] and self.dock.ui.style_data.plot_type == 'ternary map':
+            self.dock.ui.schedule_update()
+
+    def ternary_swatch_color_changed(self, ax, new_color):
+        """Applies a manually picked swatch color to the ternary map.
+
+        Parameters
+        ----------
+        ax : str
+            Which vertex/centroid was changed: ``x``, ``y``, ``z``, or ``m``.
+        new_color : str
+            New hex color from the swatch's ``colorChanged`` signal.
+        """
+        setattr(self.dock.ui.style_data, f'ternary_color_{ax}', new_color)
+
+        # Colors no longer necessarily match a named preset. Also update the
+        # internal tracking name (bypassing the public setter, which would
+        # try to look 'user defined' up as a preset and no-op) so that
+        # re-selecting the *same* preset later doesn't silently no-op via
+        # ternary_colormap's "unchanged" short-circuit.
+        self.dock.ui.style_data._ternary_colormap = 'user defined'
+        self.comboBoxTernaryColormap.blockSignals(True)
+        self.comboBoxTernaryColormap.setCurrentText('user defined')
+        self.comboBoxTernaryColormap.blockSignals(False)
+
+        if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter'] and self.dock.ui.style_data.plot_type == 'ternary map':
+            self.dock.ui.schedule_update()
 
     def update_ternary_colormap(self, new_colormap=None):
         """Updates ternary colormap used to make ternary maps.
@@ -711,7 +804,7 @@ class ScatterUI(CustomPage):
         """
         if new_colormap is None:
              # use current value of widget
-             self.ternary_colormap = self.comboBoxTernaryColormap.currentText()
+             self.dock.ui.style_data.ternary_colormap = self.comboBoxTernaryColormap.currentText()
         else:
              # update combobox with new value
              if self.comboBoxTernaryColormap.currentText() == new_colormap:
@@ -727,7 +820,14 @@ class ScatterUI(CustomPage):
 
     def update_ternary_color(self, ax, new_color):
         button = getattr(self, f"colorButtonTCmap{ax.upper()}Color")
+        # blockSignals: ColorButton.color always emits colorChanged, even
+        # when set to its current value -- without this, this style_data ->
+        # button sync would re-trigger ternary_swatch_color_changed() and
+        # flip the colormap combobox to 'user defined' every time any preset
+        # (or this method itself) is applied.
+        button.blockSignals(True)
         button.color = new_color
+        button.blockSignals(False)
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['scatter']:
             self.dock.ui.schedule_update()
 

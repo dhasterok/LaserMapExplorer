@@ -298,8 +298,7 @@ class ternary:
             Scatter plot object, legend (if applicable)
         """
         if cmap is None:
-            cmap = plt.cm.get_cmap('plasma')
-            # cmap = cm.get_cmap(cmap)
+            cmap = plt.get_cmap('plasma')
             
         # if self.ax is None:
         #     self.ax = plt.gca()
@@ -536,9 +535,9 @@ class ternary:
 
         # Prepare the colormap
         if cmap is None:
-            cmap = cm.get_cmap('virdis')
+            cmap = plt.get_cmap('viridis')
         else:
-            cmap = cm.get_cmap(cmap)
+            cmap = plt.get_cmap(cmap)
         
         if not norm:
             norm = colors.Normalize(vmin=hexbin_df[plotfield].min(), vmax=hexbin_df[plotfield].max())

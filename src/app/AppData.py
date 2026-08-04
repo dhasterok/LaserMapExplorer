@@ -211,6 +211,7 @@ class AppData(QObject):
     histBinWidthChanged = pyqtSignal(float)
     histNumBinsChanged = pyqtSignal(int)
     histPlotStyleChanged = pyqtSignal(str)
+    histShowKdeChanged = pyqtSignal(bool)
 
     corrMethodChanged = pyqtSignal(str)
     corrSquaredChanged = pyqtSignal(bool)
@@ -298,6 +299,7 @@ class AppData(QObject):
         self._hist_bin_width = 0
         self._hist_num_bins = 0
         self._hist_plot_style = None
+        self._hist_show_kde = False
         self.update_bin_width = True
         self.update_num_bins = True
         self._corr_method = None
@@ -694,6 +696,19 @@ class AppData(QObject):
 
         self._hist_plot_style = hist_style
         self.histPlotStyleChanged.emit(hist_style)
+
+    @property
+    def hist_show_kde(self):
+        """bool : Whether to overlay a kernel density estimate on histogram plots."""
+        return self._hist_show_kde
+
+    @hist_show_kde.setter
+    def hist_show_kde(self, flag):
+        if flag == self._hist_show_kde:
+            return
+
+        self._hist_show_kde = flag
+        self.histShowKdeChanged.emit(flag)
 
     @property
     def corr_method(self):

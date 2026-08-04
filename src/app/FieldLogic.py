@@ -14,7 +14,9 @@ from src.app.LamePlotUI import HistogramUI, CorrelationUI, ScatterUI, NDimUI
 from src.app.ImageProcessing import ImageProcessingUI
 from src.app.DataAnalysis import ClusterPage, DimensionalReductionPage
 from src.app.SpotTools import SpotPage
-from src.app.SpecialTools import SpecialPage
+# SpecialTools imported lazily in toggle_special_tab() -- it imports
+# FieldLogicUI from this module, and FieldLogicUI is defined below (after
+# ControlDock), so a module-level import here would be circular.
 from src.common.Logger import LoggerConfig, auto_log_methods, log
 from src.common.LamePlot import plot_clusters
 
@@ -421,6 +423,7 @@ class ControlDock(CustomDockWidget):
         self.reindex_tab_dict()
 
     def toggle_special_tab(self):
+        from src.app.SpecialTools import SpecialPage
         if self.ui.lame_action.SpecialTools.isChecked():
             self.special_tools = SpecialPage(self.tab_dict['cluster'], self)
         elif self.tab_dict['special'] is not None:
@@ -531,7 +534,7 @@ class ControlDock(CustomDockWidget):
                     self.field_control_settings[tid] = ControlSettings(
                         page_name=tab_name,
                         saved_index=0,
-                        plot_list=['field map', 'gradient map', 'cluster score map', 'dimension score map', 'profile'],
+                        plot_list=['field map', 'gradient map', 'cluster score map', 'dimension score map', 'profile', 'isochron'],
                         axes={
                             'x': AxisSettings(),
                             'y': AxisSettings(),
@@ -710,9 +713,15 @@ class ControlDock(CustomDockWidget):
 
     def update_field_widgets(self):
         """Updates field widgets with saved settings
-         
-        Updates the label text, field type combobox, and field combobox with saved values associated with a
-        control toolbox tab.
+
+        Updates the label text, field type combobox, and field combobox with the
+        field/field-type last selected for the current plot type. Per-plot-type
+        persistence lives in ``style_data.style_dict[plot_type]`` (already kept
+        up to date by the ``app_data.x_field``/etc. setters) rather than
+        ``field_control_settings`` -- that dict is keyed by toolbox *tab*, which
+        is too coarse when a tab hosts more than one selectable plot type (e.g.
+        Scatter and Heatmap share one tab), and its ``.axes[ax].field_type``/
+        ``.field`` attributes were never actually written anywhere.
         """
         idx = None
         if (hasattr(self, 'profile_dock') and self.ui.profile_dock.actionProfileToggle.isChecked()) or (hasattr(self, 'mask_dock') and self.ui.mask_dock.polygon_tab.actionPolyToggle.isChecked()):
@@ -727,6 +736,8 @@ class ControlDock(CustomDockWidget):
             self.ui.plot_flag = False
 
         control_setting = self.field_control_settings[idx]
+        plot_type = self.ui.style_data.plot_type
+        saved_style = self.ui.style_data.style_dict.get(plot_type, {})
         for ax, widget_dict in self.axis_widget_dict.items():
             setting = control_setting.axes[ax]
 
@@ -735,21 +746,39 @@ class ControlDock(CustomDockWidget):
             )
             label.setText(setting.label)
 
-            if setting.field_type is not None:
-                self.ui.app_data.set_field_type(ax, setting.field_type)
-            else:
-                self.update_field_type_combobox_options(parentbox, childbox, ax=ax)
-                # If no saved field type and 'none' is available, select it
-                if 'none' in parentbox.allItems():
-                    parentbox.setCurrentText('none')
+            # Refresh the field-type options for this axis before selecting,
+            # since the combobox may still list options for a different axis/tab.
+            self.update_field_type_combobox_options(parentbox, childbox, ax=ax)
 
-            if setting.field is not None:
-                self.ui.app_data.set_field(ax, setting.field)
-            else:
-                self.update_field_combobox_options(childbox, parentbox, spinbox, ax=ax)
-                # If no saved field and 'none' is available, select it  
-                if 'none' in childbox.allItems():
-                    childbox.setCurrentText('none')
+            saved_field_type = saved_style.get(f'{ax.upper()}FieldType')
+            if saved_field_type and saved_field_type.lower() != 'none' and saved_field_type in parentbox.allItems():
+                self.ui.app_data.set_field_type(ax, saved_field_type)
+                # app_data.set_field_type() is a no-op (and so never fires
+                # fieldTypeChanged, which is what normally syncs the widget)
+                # when the stored value already matches -- force the widget
+                # text to match explicitly so a later plot-type switch can't
+                # read a stale displayed value back into app_data.
+                if parentbox.currentText() != saved_field_type:
+                    parentbox.blockSignals(True)
+                    parentbox.setCurrentText(saved_field_type)
+                    parentbox.blockSignals(False)
+            elif 'none' in parentbox.allItems():
+                parentbox.setCurrentText('none')
+
+            # Refresh the field options to match the (possibly just-changed) field type.
+            self.update_field_combobox_options(childbox, parentbox, spinbox, ax=ax)
+
+            saved_field = saved_style.get(f'{ax.upper()}Field')
+            if saved_field and saved_field.lower() != 'none' and saved_field in childbox.allItems():
+                self.ui.app_data.set_field(ax, saved_field)
+                # Same reasoning as above: force the widget to match since
+                # app_data.set_field() may have no-op'd.
+                if childbox.currentText() != saved_field:
+                    childbox.blockSignals(True)
+                    childbox.setCurrentText(saved_field)
+                    childbox.blockSignals(False)
+            elif 'none' in childbox.allItems():
+                childbox.setCurrentText('none')
 
         if flag:
             self.ui.plot_flag = True

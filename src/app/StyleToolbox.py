@@ -250,6 +250,7 @@ class StyleTheme():
             'scatter': copy.deepcopy(self.default_style_data),
             'heatmap': copy.deepcopy(self.default_style_data),
             'ternary map': copy.deepcopy(self.default_style_data),
+            'isochron': copy.deepcopy(self.default_style_data),
             'TEC': copy.deepcopy(self.default_style_data),
             'radar': copy.deepcopy(self.default_style_data),
             'variance': copy.deepcopy(self.default_style_data),
@@ -561,8 +562,8 @@ class StyleData(QObject, StyleTheme):
             self.color_schemes.append(cmap['scheme'])
 
         # Initialize ternary color properties with first colormap
-        self._ternary_colormap = 0
         first_cmap = self.ternary_colormaps[0] if self.ternary_colormaps else {}
+        self._ternary_colormap = first_cmap.get('scheme', '')
         self._ternary_color_x = first_cmap.get('top', '#FF0000')
         self._ternary_color_y = first_cmap.get('left', '#00FF00') 
         self._ternary_color_z = first_cmap.get('right', '#0000FF')
@@ -1038,13 +1039,19 @@ class StyleData(QObject, StyleTheme):
     def ternary_colormap(self, new_cmap):
         if new_cmap == self._ternary_colormap:
             return
-    
+
+        # ternary_colormaps is a list of preset dicts (loaded from
+        # ternary_colormaps.csv), keyed by 'scheme' name, not by index.
+        match = next((c for c in self.ternary_colormaps if c['scheme'] == new_cmap), None)
+        if match is None:
+            return
+
         self._ternary_colormap = new_cmap
 
-        self.ternary_color_x = self.ternary_colormaps[self._ternary_colormap]['top']
-        self.ternary_color_y = self.ternary_colormaps[self._ternary_colormap]['left']
-        self.ternary_color_z = self.ternary_colormaps[self._ternary_colormap]['right']
-        self.ternary_color_m = self.ternary_colormaps[self._ternary_colormap]['center']
+        self.ternary_color_x = match['top']
+        self.ternary_color_y = match['left']
+        self.ternary_color_z = match['right']
+        self.ternary_color_m = match['center']
         self.ternaryColormapChanged.emit(new_cmap)
 
     @property

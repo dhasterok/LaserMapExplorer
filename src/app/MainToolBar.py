@@ -658,6 +658,7 @@ class MainMenubar(QMenuBar):
         self.menuAnalyze.addSeparator()
         self.menuAnalyze.addAction(lame_action.Compare_Spot_Map)
         self.menuAnalyze.addAction(lame_action.Profiles)
+        self.menuAnalyze.addAction(lame_action.Regression)
 
         # Tools Menu
         self.menuTools = QMenu(parent=self)

@@ -179,6 +179,20 @@ axis_settings_dict: Dict[str, PlotSettings] = {
         },
         field_type=['Analyte','Ratio','Calculated','PCA score','Special']
     ),
+    "isochron": PlotSettings(
+        # x/y are the two ratio fields chosen in the Dating tab (P-T-t
+        # Functions), not the ordinary field comboboxes -- enabled=False
+        # hides those comboboxes (same convention 'field map' uses for its
+        # Xc/Yc axes) while keeping axis scale/limit widgets available.
+        axes={
+            "x": AxisControls(False, True, True, 3, False, False, label=False),
+            "y": AxisControls(False, True, True, 3, False, False, label=False),
+            "z": AxisControls(False, False, False, None, False, False),
+            "c": AxisControls(True, True, True, 3, True, True),
+        },
+        field_type=['Ratio'],
+        cfield_type=['Cluster']
+    ),
     "TEC": PlotSettings(
         axes={
             "x": AxisControls(False, False, False, None, False, False),

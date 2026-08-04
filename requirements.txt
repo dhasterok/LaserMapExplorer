@@ -5,6 +5,7 @@
 -e ../lame-core
 -e ../blueberry-colortools
 -e ../siesta-rest-editor
+-e ../global_geochemistry
 
 # Qt
 PyQt6
